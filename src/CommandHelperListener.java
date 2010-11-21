@@ -260,21 +260,19 @@ public class CommandHelperListener extends PluginListener {
         } else {
             session.setLastCommand(joinString(split, " "));
 
-            if (player.canUseCommand(split[0])) {
-                String[] commands = getSession(player).findAlias(split[0]);
-                String[] arguments = new String[split.length - 1];
-                System.arraycopy(split, 1, arguments, 0, split.length - 1);
+            String[] commands = getSession(player).findAlias(split[0]);
+            String[] arguments = new String[split.length - 1];
+            System.arraycopy(split, 1, arguments, 0, split.length - 1);
+
+            if (commands != null) {
+                execCommands(player, commands, arguments, false);
+                return true;
+            } else if (player.canUseCommand(split[0])) {
+                commands = findGlobalAlias(split[0]);
 
                 if (commands != null) {
-                    execCommands(player, commands, arguments, false);
+                    execCommands(player, commands, arguments, true);
                     return true;
-                } else {
-                    commands = findGlobalAlias(split[0]);
-
-                    if (commands != null) {
-                        execCommands(player, commands, arguments, true);
-                        return true;
-                    }
                 }
             }
         }
