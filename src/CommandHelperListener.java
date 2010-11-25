@@ -295,7 +295,7 @@ public class CommandHelperListener extends PluginListener {
      * @param cmd
      */
     private void execCommand(Player player, String cmd) {
-        player.getUser().a.a(new bg(cmd));
+        player.chat(cmd);
     }
 
     /**
