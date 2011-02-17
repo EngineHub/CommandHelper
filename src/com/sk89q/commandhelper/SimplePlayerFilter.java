@@ -17,8 +17,12 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+package com.sk89q.commandhelper;
+
 import java.util.Set;
 import java.util.HashSet;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -28,10 +32,12 @@ public class SimplePlayerFilter extends PlayerFilter {
     /**
      * Store a list of groups to implicitly match a player against.
      */
+    @SuppressWarnings("unused")
     private Set<String> groups;
     /**
      * Store a list of groups to explicitly match a player against.
      */
+    @SuppressWarnings("unused")
     private Set<String> exclusiveGroups;
     /**
      * Store a list of player names to match against.
@@ -45,8 +51,9 @@ public class SimplePlayerFilter extends PlayerFilter {
      * @param exclusiveGroups
      * @param players
      */
-    private SimplePlayerFilter(Set<String> groups, Set<String> exclusiveGroups,
-            Set<String> players) {
+    private SimplePlayerFilter(Server server, Set<String> groups,
+            Set<String> exclusiveGroups, Set<String> players) {
+        super(server);
         this.groups = groups;
         this.exclusiveGroups = exclusiveGroups;
         this.players = players;
@@ -65,7 +72,7 @@ public class SimplePlayerFilter extends PlayerFilter {
             return true;
         }
 
-        String[] playerGroups = player.getGroups();
+        /*String[] playerGroups = player.getGroups();
         int numGroups = playerGroups.length;
 
         if (numGroups == 1) {
@@ -78,7 +85,7 @@ public class SimplePlayerFilter extends PlayerFilter {
             if (groups.contains(group)) {
                 return true;
             }
-        }
+        }*/
 
         return false;
     }
@@ -89,9 +96,9 @@ public class SimplePlayerFilter extends PlayerFilter {
      * @param query
      * @return
      */
-    public static PlayerFilter parse(String query) {
+    public static PlayerFilter parse(Server server, String query) {
         if (query.equals("*")) {
-            return new FriendlyFilter();
+            return new FriendlyFilter(server);
         }
 
         String[] parts = query.split(",");
@@ -114,6 +121,6 @@ public class SimplePlayerFilter extends PlayerFilter {
             }
         }
 
-        return new SimplePlayerFilter(groups, exclusiveGroups, players);
+        return new SimplePlayerFilter(server, groups, exclusiveGroups, players);
     }
 }

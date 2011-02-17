@@ -17,15 +17,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+package com.sk89q.commandhelper;
+
 import java.util.List;
 import java.util.ArrayList;
 import java.util.Iterator;
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 
 /**
  *
  * @author sk89q
  */
 public abstract class PlayerFilter implements Iterable<Player> {
+    protected Server server;
+    
+    public PlayerFilter(Server server) {
+        this.server = server;
+    }
+    
     /**
      * Evaluate the query, getting a list of players.
      *
@@ -34,7 +44,7 @@ public abstract class PlayerFilter implements Iterable<Player> {
     public List<Player> evaluate() {
         List<Player> players = new ArrayList<Player>();
 
-        for (Player player : etc.getServer().getPlayerList()) {
+        for (Player player : server.getOnlinePlayers()) {
             if (matches(player)) {
                 players.add(player);
             }

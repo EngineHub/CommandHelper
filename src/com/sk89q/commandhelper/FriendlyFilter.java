@@ -17,14 +17,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-import java.util.Set;
-import java.util.HashSet;
+package com.sk89q.commandhelper;
+
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 
 /**
  *
  * @author sk89q
  */
 public class FriendlyFilter extends PlayerFilter {
+    public FriendlyFilter(Server server) {
+        super(server);
+    }
+
     /**
      * Checks to see if a player matches this query.
      *

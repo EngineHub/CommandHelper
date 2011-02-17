@@ -24,6 +24,8 @@ package com.sk89q.commandhelper;
  * @author sk89q
  */
 public class InsufficientArgumentsException extends Exception {
+    private static final long serialVersionUID = -5763923235465001636L;
+
     public InsufficientArgumentsException(String error) {
         super(error);
     }
