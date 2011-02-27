@@ -65,6 +65,7 @@ public class SimplePlayerFilter extends PlayerFilter {
      * @param player
      * @return
      */
+    @Override
     public boolean matches(Player player) {
         String name = player.getName();
         
@@ -92,6 +93,7 @@ public class SimplePlayerFilter extends PlayerFilter {
 
     /**
      * Parse a string.
+     * @param server 
      * 
      * @param query
      * @return

@@ -37,6 +37,7 @@ public class FriendlyFilter extends PlayerFilter {
      * @param player
      * @return
      */
+    @Override
     public boolean matches(Player player) {
         return true;
     }

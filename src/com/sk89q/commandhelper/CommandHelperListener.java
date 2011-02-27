@@ -94,7 +94,7 @@ public class CommandHelperListener extends PlayerListener {
      * @param event Relevant event details
      */
     @Override
-    public void onPlayerCommand(PlayerChatEvent event) {
+    public void onPlayerCommandPreprocess(PlayerChatEvent event) {
         Player player = event.getPlayer();
         
         try {

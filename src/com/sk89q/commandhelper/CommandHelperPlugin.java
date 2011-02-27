@@ -19,22 +19,18 @@
 
 package com.sk89q.commandhelper;
 
-import java.io.File;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
-import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.event.Event.Priority;
-import org.bukkit.plugin.PluginDescriptionFile;
-import org.bukkit.plugin.PluginLoader;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
- * Entry point for the plugin for hey0's mod.
+ * Entry point for the plugin.
  *
  * @author sk89q
  */
@@ -46,20 +42,13 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     private final CommandHelperListener playerListener =
             new CommandHelperListener(this);
-    
-    public CommandHelperPlugin(PluginLoader pluginLoader, Server instance,
-            PluginDescriptionFile desc, File folder, File plugin,
-            ClassLoader cLoader) {
-        super(pluginLoader, instance, desc, folder, plugin, cLoader);
-        
-        logger.info("CommandHelper " + desc.getVersion() + " loaded.");
-    }
-
     /**
      * Called on plugin enable.
      */
-    public void onEnable() {        
-        registerEvent(Event.Type.PLAYER_COMMAND, playerListener, Priority.High);
+    public void onEnable() {       
+        logger.info("CommandHelper " + getDescription().getVersion() + " enabled");
+        
+        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
         
         playerListener.loadGlobalAliases();
@@ -86,6 +75,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     /**
      * Called when a command registered by this plugin is received.
      */
+    @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (sender instanceof Player) {
             try {
@@ -277,8 +267,10 @@ public class CommandHelperPlugin extends JavaPlugin {
         }
         return buffer.toString();
     }
+    
     /**
      * Execute a command.
+     * @param player 
      *
      * @param cmd
      */

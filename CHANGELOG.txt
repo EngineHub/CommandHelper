@@ -1,2 +1,5 @@
+2.0.1:
+- Updated to work again.
+
 2.0:
 - Updated for Bukkit.

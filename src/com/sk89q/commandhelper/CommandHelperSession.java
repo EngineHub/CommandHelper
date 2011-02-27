@@ -90,8 +90,7 @@ public class CommandHelperSession {
      * Set an alias.
      * 
      * @param command
-     * @param split
-     * @return
+     * @param commands 
      */
     public void setAlias(String command, String[] commands) {
         aliases.put(command.toLowerCase(), commands);
@@ -140,9 +139,8 @@ public class CommandHelperSession {
     /**
      * Read a file containing cauldron recipes.
      *
-     * @param file
+     * @param path
      * @return
-     * @throws IOException
      */
     public static Map<String,String[]> readAliases(String path) {
         File file = new File(path);
