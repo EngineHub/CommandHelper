@@ -1,0 +1,27 @@
+name: CommandHelper
+main: com.sk89q.commandhelper.CommandHelperPlugin
+version: CHVERSIONMACRO
+commands:
+    cmd:
+        description: Command helper
+        usage: /<command>
+        aliases: ch, commandhelper
+    repeat:
+        description: Repeat the last command
+        usage: /<command>
+        aliases: .
+    each:
+        description: Performs a command on other players
+        usage: /<command> <targets> <cmd>
+    perform:
+        description: Perform a command as another player
+        usage: /<command> <targets> <cmd>
+    alias:
+        description: Create an alias
+        usage: /<command> <name> <cmd>
+    delalias:
+        description: Remove an alias
+        usage: /<command> <name>
+    reloadaliases:
+        description: Reloads aliases
+        usage: /<command>
