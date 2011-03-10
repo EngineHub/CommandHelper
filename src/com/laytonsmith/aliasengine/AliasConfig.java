@@ -418,37 +418,102 @@ public class AliasConfig {
             }
         }
         //Compile the (now syntactically correct) left side into a ArrayList<Construct>
-//        for(int i = 0; i < a.alias.size(); i++){
-//            Command c = a.alias.get(i);
-//            for(int j = 0; j < c.tokens.size(); j++){
-//                Token t = c.tokens.get(j);
-//                ArrayList<Construct> ac = a.aliasConstructs.get(i);
-//                if(t.type.equals("command")){
-//                    ac.add(t);
-//                } else if(t.type.equals("variable")){
-//                    ac.add(new Variable(t.value, null, t.line_num));
-//                } else if(t.type.equals("final_var")){
-//                    ac.add(new Variable(t.value, null, t.line_num));
-//                } else if(t.type.equals("lit")){
-//                    ac.add(t);
-//                } else if(t.type.equals("opt_var_start")){
-//                    if(j + 2 < c.tokens.size() && c.tokens.get(j + 2).type.equals("opt_var_assign")){
-//                        Variable v = new Variable(c.tokens.get(j + 1).value,
-//                                c.tokens.get(j + 3).value, t.line_num);
-//                        v.optional = true;
-//                        ac.add(v);
-//                        j += 4;
-//                    } else{
-//                        t = c.tokens.get(j + 1);
-//                        Variable v = new Variable(t.value, null, t.line_num);
-//                        v.optional = true;
-//                        ac.add(v);
-//                        j += 2;
-//                    }
-//                }
-//
-//            }
-//        }
+        for(int i = 0; i < a.alias.size(); i++){
+            Command c = a.alias.get(i);
+            ArrayList<Construct> ac = new ArrayList<Construct>();
+            for(int j = 0; j < c.tokens.size(); j++){
+                Token t = c.tokens.get(j);
+                if(t.type.equals("variable")){
+                    ac.add(new Variable(t.value, null, t.line_num));
+                } else if(t.type.equals("final_var")){
+                    ac.add(new Variable(t.value, null, t.line_num));
+                }else if(t.type.equals("opt_var_start")){
+                    if(j + 2 < c.tokens.size() && c.tokens.get(j + 2).type.equals("opt_var_assign")){
+                        Variable v = new Variable(c.tokens.get(j + 1).value,
+                                c.tokens.get(j + 3).value, t.line_num);
+                        v.optional = true;
+                        ac.add(v);
+                        j += 4;
+                    } else{
+                        t = c.tokens.get(j + 1);
+                        Variable v = new Variable(t.value, null, t.line_num);
+                        v.optional = true;
+                        ac.add(v);
+                        j += 2;
+                    }
+                } else{
+                    //Don't care what it is now. Just add it.
+                    ac.add(t);
+                }
+
+            }
+            a.aliasConstructs.add(ac);
+        }
+
+        //Check for commands with ambiguous signatures.
+
+        for(int i = 0; i < a.aliasConstructs.size(); i++){
+            ArrayList<Construct> thisCommand = a.aliasConstructs.get(i);
+            for(int j = 0; j < a.aliasConstructs.size(); j++){
+                if(i == j){
+                    //Of course this command is going to match it's own signature
+                    continue;
+                }
+                ArrayList<Construct> thatCommand = a.aliasConstructs.get(j);
+                boolean soFarAMatch = true;
+                for(int k = 0; k < thisCommand.size(); k++){
+                    try{
+                        Construct c1 = thisCommand.get(k);
+                        Construct c2 = thatCommand.get(k);
+                        if(c1.ctype != c2.ctype){// && c1 instanceof Variable && !((Variable)c1).optional){
+                            soFarAMatch = false;
+                        }
+                    } catch(IndexOutOfBoundsException e){
+                            /**
+                             * The two commands:
+                             * /cmd $var1 [$var2]
+                             * /cmd $var1
+                             * would cause this exception to be thrown, but the signatures
+                             * are the same, so the fact that they've matched this far means
+                             * they are ambiguous. However,
+                             * /cmd $var1 $var2
+                             * /cmd $var1
+                             * is not ambiguous
+                             */
+                        if(thatCommand.size() == k){
+                            //thatCommand is the short one
+                            if(!(thisCommand.get(k) instanceof Variable) ||
+                                    (thisCommand.get(k) instanceof Variable &&
+                                    !((Variable)thisCommand.get(k)).optional)){
+                                soFarAMatch = false;
+                            }
+                        }
+                    }
+                }
+                int k = thisCommand.size();
+                if(thisCommand.size() == k){
+                    //thisCommand is the short one
+                    if(!(thatCommand.get(k) instanceof Variable) ||
+                            (thatCommand.get(k) instanceof Variable &&
+                            !((Variable)thatCommand.get(k)).optional)){
+                        soFarAMatch = false;
+                    }
+                }
+                else 
+                if(soFarAMatch) {
+                    String commandThis = "";
+                    for (Construct c : thisCommand) {
+                        commandThis += c.value + " ";
+                    }
+                    String commandThat = "";
+                    for (Construct c : thatCommand) {
+                        commandThat += c.value + " ";
+                    }
+                    throw new ConfigCompileException("The command " + commandThis + "is ambiguous because it "
+                            + "matches the signature of " + commandThat, thisCommand.get(0).line_num);
+                }
+            }
+        }
 
         //Copy this working config file to another file so that if a bad config file is read in, at least the old
         //on can be recovered
@@ -468,17 +533,14 @@ public class AliasConfig {
      * @return
      */
     public ArrayList<RunnableAlias> getRunnableAliases(String command, String playerName){
-//        String[] cmds = command.split(" ");
-//        ArrayList<String> args = new ArrayList(Arrays.asList(cmds));
-//        for(int i = 0; i < this.aliasFile.alias.size(); i++){
-//            ArrayList<Construct> tokens = this.aliasFile.aliasConstructs.get(i);
-//            System.out.println(tokens);
-//            for(int j = 0; j < tokens.size(); j++){
-//                Construct t = tokens.get(j);
-//                String arg = args.get(j);
-//            }
-//        }
-//
+        String[] cmds = command.split(" ");
+        ArrayList<String> args = new ArrayList(Arrays.asList(cmds));
+        for(int i = 0; i < this.aliasFile.alias.size(); i++){
+            ArrayList<Construct> tokens = this.aliasFile.aliasConstructs.get(i);
+            System.out.println(tokens);
+
+        }
+
         return null;
     }
 
@@ -509,11 +571,11 @@ public class AliasConfig {
         Name name;
         int line_num = 0;
         Function(String name, int line_num) throws Exception{
-            ctype = ConstructType.FUNCTION;
-            this.name = this.getName(name);
-            if(this.name == Name.INVALID){
+            super("func_name", name, ConstructType.FUNCTION, line_num);
+            if(getName(this.value) == Name.INVALID){
                 throw new Exception();
             }
+            this.name = getName(this.value);
             this.line_num = line_num;
         }
         void addArg(Construct function){
@@ -559,7 +621,8 @@ public class AliasConfig {
             return "function:" + name.toString().toLowerCase();
         }
     }
-    public class Command extends Construct{
+    public class Command{
+        ConstructType ctype;
         ArrayList<Token> tokens = new ArrayList<Token>();
         public Command(ArrayList<Token> a){
             tokens = (ArrayList<Token>) a.clone();
@@ -576,14 +639,10 @@ public class AliasConfig {
 
     public class Token extends Construct{
         public Token(String type, String value, int line_num){
+            super(type, value, ConstructType.TOKEN, line_num);
             this.type = type;
             this.value = value;
             this.line_num = line_num;
-            if(type.equals("string") || type.equals("lit")){
-                ctype = ConstructType.ATOMIC;
-            } else{
-                ctype = ConstructType.TOKEN;
-            }
         }
         public String toString(){
             if(type.equals("newline")){
@@ -615,13 +674,11 @@ public class AliasConfig {
     public class Variable extends Construct{
         String name;
         String def;
-        int line_num;
         boolean optional;
         public Variable(String name, String def, int line_num){
+            super("variable", name, ConstructType.VARIABLE, line_num);
             this.name = name;
             this.def = def;
-            this.line_num = line_num;
-            ctype = ConstructType.ATOMIC;
         }
 
         public String toString(){
@@ -630,9 +687,19 @@ public class AliasConfig {
     }
 
     enum ConstructType{
-        TOKEN, COMMAND, FUNCTION, ATOMIC
+        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL
     }
     public class Construct{
         ConstructType ctype;
+        String value;
+        String type;
+        int line_num;
+
+        Construct(String type, String value, ConstructType ctype, int line_num){
+            this.type = type;
+            this.value = value;
+            this.ctype = ctype;
+            this.line_num = line_num;
+        }
     }
 }
