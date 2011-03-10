@@ -9,6 +9,7 @@ import com.laytonsmith.Alias.Tree.GenericTree;
 import com.laytonsmith.Alias.Tree.GenericTreeNode;
 import com.laytonsmith.Alias.Tree.GenericTreeTraversalOrderEnum;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
@@ -416,6 +417,39 @@ public class AliasConfig {
 
             }
         }
+        //Compile the (now syntactically correct) left side into a ArrayList<Construct>
+//        for(int i = 0; i < a.alias.size(); i++){
+//            Command c = a.alias.get(i);
+//            for(int j = 0; j < c.tokens.size(); j++){
+//                Token t = c.tokens.get(j);
+//                ArrayList<Construct> ac = a.aliasConstructs.get(i);
+//                if(t.type.equals("command")){
+//                    ac.add(t);
+//                } else if(t.type.equals("variable")){
+//                    ac.add(new Variable(t.value, null, t.line_num));
+//                } else if(t.type.equals("final_var")){
+//                    ac.add(new Variable(t.value, null, t.line_num));
+//                } else if(t.type.equals("lit")){
+//                    ac.add(t);
+//                } else if(t.type.equals("opt_var_start")){
+//                    if(j + 2 < c.tokens.size() && c.tokens.get(j + 2).type.equals("opt_var_assign")){
+//                        Variable v = new Variable(c.tokens.get(j + 1).value,
+//                                c.tokens.get(j + 3).value, t.line_num);
+//                        v.optional = true;
+//                        ac.add(v);
+//                        j += 4;
+//                    } else{
+//                        t = c.tokens.get(j + 1);
+//                        Variable v = new Variable(t.value, null, t.line_num);
+//                        v.optional = true;
+//                        ac.add(v);
+//                        j += 2;
+//                    }
+//                }
+//
+//            }
+//        }
+
         //Copy this working config file to another file so that if a bad config file is read in, at least the old
         //on can be recovered
         //TODO
@@ -434,13 +468,23 @@ public class AliasConfig {
      * @return
      */
     public ArrayList<RunnableAlias> getRunnableAliases(String command, String playerName){
-
-
+//        String[] cmds = command.split(" ");
+//        ArrayList<String> args = new ArrayList(Arrays.asList(cmds));
+//        for(int i = 0; i < this.aliasFile.alias.size(); i++){
+//            ArrayList<Construct> tokens = this.aliasFile.aliasConstructs.get(i);
+//            System.out.println(tokens);
+//            for(int j = 0; j < tokens.size(); j++){
+//                Construct t = tokens.get(j);
+//                String arg = args.get(j);
+//            }
+//        }
+//
         return null;
     }
 
     public class Alias{
         ArrayList<Command> alias = new ArrayList<Command>();
+        ArrayList<ArrayList<Construct>> aliasConstructs = new ArrayList<ArrayList<Construct>>();
         ArrayList<ArrayList<Command>> real = new ArrayList<ArrayList<Command>>();
         HashMap<Command, ArrayList<Command>> map = new HashMap<Command, ArrayList<Command>>();
         public String toString(){
@@ -572,6 +616,7 @@ public class AliasConfig {
         String name;
         String def;
         int line_num;
+        boolean optional;
         public Variable(String name, String def, int line_num){
             this.name = name;
             this.def = def;

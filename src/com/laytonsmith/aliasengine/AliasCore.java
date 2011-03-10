@@ -28,6 +28,7 @@ public class AliasCore {
     private File aliasConfig;
     AliasConfig config;
     static final Logger logger = Logger.getLogger("Minecraft");
+    private ArrayList<String> echoCommand = new ArrayList<String>();
     /**
      * This constructor accepts the configuration settings for the plugin, and ensures
      * that the manager uses these settings.
@@ -53,19 +54,34 @@ public class AliasCore {
      * @param command
      * @return
      */
-    public ArrayList<String> alias(String command, String playerName){
-        String[] cmds = command.split(" ");
-        ArrayList<String> args = new ArrayList(Arrays.asList(cmds));
-        args.remove(0);
-        command = cmds[0].substring(1);
+    public boolean alias(String command, String playerName){
+        if(echoCommand.contains(playerName)){
+            //we are running one of the expanded commands, so exit with false
+            return false;
+        }
+
         //Global aliases override personal ones, so check the list first
-        config.getRunnableAliases(command, playerName);
+        ArrayList<RunnableAlias> a = config.getRunnableAliases(command, playerName);
+        if(a == null){
+            //if we are still looking, look in the aliases for this player
 
-        //if we are still looking, look in the aliases for this player
+            //TODO: For now, return false;
+            return false;
 
+        }
 
-        //apparently we couldn't find the command, so return null
-        return null;
+        if(a != null){
+            //apparently we couldn't find the command, so return false
+            return false;
+        } else{
+            //Run all the aliases
+            echoCommand.add(playerName);
+            for(RunnableAlias r : a){
+                r.run();
+            }
+            echoCommand.remove(playerName);
+            return true;
+        }
     }
 
 
@@ -114,19 +130,4 @@ public class AliasCore {
         in.close();
         return ret;
     }
-
-    public class builtin{
-        public String player(){
-            return "";
-        }
-
-        public String data_values(String name){
-            return name;
-        }
-
-        public String die(String message) throws CancelCommandException{
-            throw new CancelCommandException();
-        }
-    }
-
 }

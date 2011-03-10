@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import org.bukkit.entity.Player;
 
 /**
- *
+ * This class is the bridge between the Bukkit API and the generic Alias Engine
  * @author Layton
  */
 public class RunnableAlias {
