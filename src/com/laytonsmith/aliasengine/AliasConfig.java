@@ -208,11 +208,11 @@ public class AliasConfig {
                     }
                     if(commandBuffer.size() > 0 || tinyCmdBuffer.size() > 0){
                         commandBuffer.add((ArrayList<Token>)tinyCmdBuffer.clone());
-                        a.alias.add(new Command(aliasBuffer));
-                        ArrayList<Command> tempBuf = new ArrayList<Command>();
+                        a.alias.add(new AliasString(aliasBuffer));
+                        ArrayList<AliasString> tempBuf = new ArrayList<AliasString>();
                         for(int i = 0; i < commandBuffer.size(); i++){
                             ArrayList<Token> tlist = commandBuffer.get(i);
-                            tempBuf.add(new Command(tlist));
+                            tempBuf.add(new AliasString(tlist));
                         }
                         a.real.add(tempBuf);
                         aliasBuffer.clear();
@@ -247,8 +247,8 @@ public class AliasConfig {
          * string (only directly after opt_var_assign)
          */
         for(int i = 0; i < a.alias.size(); i++){
-            Command c = a.alias.get(i);
-            ArrayList<Command> real = a.real.get(i);
+            AliasString c = a.alias.get(i);
+            ArrayList<AliasString> real = a.real.get(i);
             ArrayList<Variable> left_vars = new ArrayList<Variable>();
             ArrayList<Variable> right_vars = new ArrayList<Variable>();
             boolean inside_opt_var = false;
@@ -319,8 +319,9 @@ public class AliasConfig {
                    }
                }
             }
+            ArrayList<GenericTree<Construct>> rightTreeOne = new ArrayList<GenericTree<Construct>>();
             for(int j = 0; j < real.size(); j++){
-                Command r = real.get(j);
+                AliasString r = real.get(j);
                 int paren_stack = 0;
                 GenericTree<Construct> root = new GenericTree<Construct>();
                 root.setRoot(new GenericTreeNode<Construct>(new Token("root", "root", 0)));
@@ -369,13 +370,14 @@ public class AliasConfig {
                         parents.pop();
                         node = parents.peek();
                     } else if(t.type.equals("command")){
-                        node.addChild(new GenericTreeNode<Construct>(t));
+                        node.addChild(new GenericTreeNode<Construct>(new Command(t.value, t.line_num)));
                     } else if(t.type.equals("comma")){
                         continue;
                     } else{
                         throw new ConfigCompileException("Unexpected " + t.type + " (" + t.value + ")", t.line_num);
                     }
                 }
+                rightTreeOne.add(root);
                 List<GenericTreeNode<Construct>> l = root.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
                 for(GenericTreeNode<Construct> n : l){
                     if(n.getData() instanceof Function){
@@ -416,31 +418,40 @@ public class AliasConfig {
 
 
             }
+            a.rightTrees.add(rightTreeOne);
         }
         //Compile the (now syntactically correct) left side into a ArrayList<Construct>
         for(int i = 0; i < a.alias.size(); i++){
-            Command c = a.alias.get(i);
+            AliasString c = a.alias.get(i);
             ArrayList<Construct> ac = new ArrayList<Construct>();
             for(int j = 0; j < c.tokens.size(); j++){
                 Token t = c.tokens.get(j);
                 if(t.type.equals("variable")){
                     ac.add(new Variable(t.value, null, t.line_num));
                 } else if(t.type.equals("final_var")){
-                    ac.add(new Variable(t.value, null, t.line_num));
+                    Variable v = new Variable(t.value, null, t.line_num);
+                    v.final_var = true;
+                    ac.add(v);
                 }else if(t.type.equals("opt_var_start")){
                     if(j + 2 < c.tokens.size() && c.tokens.get(j + 2).type.equals("opt_var_assign")){
                         Variable v = new Variable(c.tokens.get(j + 1).value,
                                 c.tokens.get(j + 3).value, t.line_num);
                         v.optional = true;
+                        if(c.tokens.get(j + 1).equals("$"))
+                            v.final_var = true;
                         ac.add(v);
                         j += 4;
                     } else{
                         t = c.tokens.get(j + 1);
                         Variable v = new Variable(t.value, null, t.line_num);
                         v.optional = true;
+                        if(t.value.equals("$"))
+                            v.final_var = true;
                         ac.add(v);
                         j += 2;
                     }
+                } else if(t.type.equals("command")){
+                    ac.add(new Command(t.value, t.line_num));
                 } else{
                     //Don't care what it is now. Just add it.
                     ac.add(t);
@@ -467,31 +478,34 @@ public class AliasConfig {
                         Construct c2 = thatCommand.get(k);
                         if(c1.ctype != c2.ctype){// && c1 instanceof Variable && !((Variable)c1).optional){
                             soFarAMatch = false;
-                        }
-                    } catch(IndexOutOfBoundsException e){
-                            /**
-                             * The two commands:
-                             * /cmd $var1 [$var2]
-                             * /cmd $var1
-                             * would cause this exception to be thrown, but the signatures
-                             * are the same, so the fact that they've matched this far means
-                             * they are ambiguous. However,
-                             * /cmd $var1 $var2
-                             * /cmd $var1
-                             * is not ambiguous
-                             */
-                        if(thatCommand.size() == k){
-                            //thatCommand is the short one
-                            if(!(thisCommand.get(k) instanceof Variable) ||
-                                    (thisCommand.get(k) instanceof Variable &&
-                                    !((Variable)thisCommand.get(k)).optional)){
+                        } else {
+                            //It's a literal, check to see if it's the same literal
+                            if(!c1.value.equals(c2.value)){
                                 soFarAMatch = false;
                             }
                         }
+                    } catch(IndexOutOfBoundsException e){
+                        /**
+                         * The two commands:
+                         * /cmd $var1 [$var2]
+                         * /cmd $var1
+                         * would cause this exception to be thrown, but the signatures
+                         * are the same, so the fact that they've matched this far means
+                         * they are ambiguous. However,
+                         * /cmd $var1 $var2
+                         * /cmd $var1
+                         * is not ambiguous
+                         */
+                        //thatCommand is the short one
+                        if(!(thisCommand.get(k) instanceof Variable) ||
+                                (thisCommand.get(k) instanceof Variable &&
+                                !((Variable)thisCommand.get(k)).optional)){
+                            soFarAMatch = false;
+                        }
                     }
                 }
-                int k = thisCommand.size();
-                if(thisCommand.size() == k){
+                if(thatCommand.size() > thisCommand.size()){
+                    int k = thisCommand.size();
                     //thisCommand is the short one
                     if(!(thatCommand.get(k) instanceof Variable) ||
                             (thatCommand.get(k) instanceof Variable &&
@@ -499,7 +513,7 @@ public class AliasConfig {
                         soFarAMatch = false;
                     }
                 }
-                else 
+
                 if(soFarAMatch) {
                     String commandThis = "";
                     for (Construct c : thisCommand) {
@@ -528,27 +542,91 @@ public class AliasConfig {
      * It takes a real command from the user and sees if it fits with any of the aliases. If it
      * does, it actually returns the commands to run. Since it's a bit more complicated than just
      * returning a string, it returns a "RunnableAlias" that has implementation specific functions
-     * in it.
+     * in it. Mostly what this function does is, selects the proper command from the command
+     * list, fills in the variables, then returns the ArrayList.
      * @param command
      * @return
      */
-    public ArrayList<RunnableAlias> getRunnableAliases(String command, String playerName){
+    public RunnableAlias getRunnableAliases(String command){
         String[] cmds = command.split(" ");
         ArrayList<String> args = new ArrayList(Arrays.asList(cmds));
         for(int i = 0; i < this.aliasFile.alias.size(); i++){
             ArrayList<Construct> tokens = this.aliasFile.aliasConstructs.get(i);
             System.out.println(tokens);
-
+            boolean isAMatch = true;
+            int lastJ = 0;
+            try{
+                for(int j = 0; j < tokens.size(); j++){
+                    lastJ = j;
+                    Construct c = tokens.get(j);
+                    String arg = args.get(j);
+                    if(c.ctype == ConstructType.COMMAND || c.ctype == ConstructType.LITERAL){
+                        if(!c.value.equals(arg)){
+                            isAMatch = false;
+                        }
+                    }
+                }
+            } catch(IndexOutOfBoundsException e){
+                if(tokens.get(lastJ).ctype == ConstructType.VARIABLE &&
+                        !((Variable)tokens.get(lastJ)).optional){
+                    isAMatch = false;
+                }
+            }
+            if(isAMatch){
+                System.out.println("Match!");
+                //Now, pull out the variables. That's all we care about in the left
+                //side now
+                ArrayList<Variable> vars = new ArrayList<Variable>();
+                Variable v = null;
+                for(int j = 0; j < tokens.size(); j++){
+                    try{
+                        if(tokens.get(j).ctype == ConstructType.VARIABLE){
+                            v = new Variable(((Variable)tokens.get(j)).name,
+                                    args.get(j), 0);
+                        }
+                    } catch(IndexOutOfBoundsException e){
+                        v = new Variable(((Variable)tokens.get(j)).name,
+                                ((Variable)tokens.get(j)).def, 0);
+                    }
+                    if(v != null)
+                        vars.add(v);
+                }
+                for(Variable vm : vars){
+                    System.out.print(vm.name + ":" + vm.def + " ");
+                }
+                System.out.println();
+                ArrayList<GenericTree<Construct>> tree = aliasFile.rightTrees.get(i);
+                for(GenericTree<Construct> t : tree){
+                    for(GenericTreeNode g : t.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
+                        Construct c = (Construct)g.data;
+                        if(c instanceof Variable){
+                            Variable var = (Variable)c;
+                            String def = "";
+                            for(Variable vv : vars){
+                                if(vv.name.equals(var.name)){
+                                    def = vv.def;
+                                    break;
+                                }
+                            }
+                            var.def = def;
+                        }
+                    }
+                }
+                return new RunnableAlias(command, tree);
+            }
         }
 
         return null;
     }
 
+
+
     public class Alias{
-        ArrayList<Command> alias = new ArrayList<Command>();
+        ArrayList<AliasString> alias = new ArrayList<AliasString>();
         ArrayList<ArrayList<Construct>> aliasConstructs = new ArrayList<ArrayList<Construct>>();
-        ArrayList<ArrayList<Command>> real = new ArrayList<ArrayList<Command>>();
-        HashMap<Command, ArrayList<Command>> map = new HashMap<Command, ArrayList<Command>>();
+        ArrayList<ArrayList<AliasString>> real = new ArrayList<ArrayList<AliasString>>();
+        ArrayList<ArrayList<GenericTree<Construct>>> rightTrees = new ArrayList<ArrayList<GenericTree<Construct>>>();
+        HashMap<AliasString, ArrayList<AliasString>> map = new HashMap<AliasString, ArrayList<AliasString>>();
         public String toString(){
             StringBuffer b = new StringBuffer();
             for(int i = 0; i < alias.size(); i++){
@@ -570,6 +648,7 @@ public class AliasConfig {
         ArrayList<Construct> args = new ArrayList<Construct>();
         Name name;
         int line_num = 0;
+
         Function(String name, int line_num) throws Exception{
             super("func_name", name, ConstructType.FUNCTION, line_num);
             if(getName(this.value) == Name.INVALID){
@@ -621,17 +700,16 @@ public class AliasConfig {
             return "function:" + name.toString().toLowerCase();
         }
     }
-    public class Command{
-        ConstructType ctype;
+    public class AliasString{
         ArrayList<Token> tokens = new ArrayList<Token>();
-        public Command(ArrayList<Token> a){
+        public AliasString(ArrayList<Token> a){
             tokens = (ArrayList<Token>) a.clone();
-            this.ctype = ConstructType.COMMAND;
         }
+        @Override
         public String toString(){
-            StringBuffer b = new StringBuffer();
+            StringBuilder b = new StringBuilder();
             for(Token t : tokens){
-                b.append(t.toSimpleString() + " ");
+                b.append(t.toSimpleString()).append(" ");
             }
             return b.toString();
         }
@@ -675,6 +753,7 @@ public class AliasConfig {
         String name;
         String def;
         boolean optional;
+        boolean final_var = false;
         public Variable(String name, String def, int line_num){
             super("variable", name, ConstructType.VARIABLE, line_num);
             this.name = name;
@@ -683,6 +762,16 @@ public class AliasConfig {
 
         public String toString(){
             return "var:" + name;
+        }
+    }
+
+    public class Command extends Construct{
+        public Command(String name, int line_num){
+            super("command", name, ConstructType.COMMAND, line_num);
+        }
+
+        public String toString(){
+            return "command:" + value;
         }
     }
 

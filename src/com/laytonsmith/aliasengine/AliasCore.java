@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.entity.Player;
 
 /**
  * This class contains all the handling code. It only deals with built-in Java Objects,
@@ -54,14 +55,17 @@ public class AliasCore {
      * @param command
      * @return
      */
-    public boolean alias(String command, String playerName){
-        if(echoCommand.contains(playerName)){
+    public boolean alias(String command, Player player){
+        //If player is null, we are running the test harness, so don't
+        //actually add the player to the array.
+        if(player != null && echoCommand.contains(player.getName())){
             //we are running one of the expanded commands, so exit with false
             return false;
         }
 
         //Global aliases override personal ones, so check the list first
-        ArrayList<RunnableAlias> a = config.getRunnableAliases(command, playerName);
+        RunnableAlias a = config.getRunnableAliases(command);
+
         if(a == null){
             //if we are still looking, look in the aliases for this player
 
@@ -70,16 +74,15 @@ public class AliasCore {
 
         }
 
-        if(a != null){
+        if(a == null){
             //apparently we couldn't find the command, so return false
             return false;
         } else{
             //Run all the aliases
-            echoCommand.add(playerName);
-            for(RunnableAlias r : a){
-                r.run();
-            }
-            echoCommand.remove(playerName);
+            a.player = player;
+            if(player != null) echoCommand.add(player.getName());
+            a.run();
+            if(player != null) echoCommand.remove(player.getName());
             return true;
         }
     }

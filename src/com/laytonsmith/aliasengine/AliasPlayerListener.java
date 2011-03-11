@@ -26,7 +26,6 @@ public class AliasPlayerListener extends PlayerListener {
     public void onPlayerCommandPreprocess(PlayerChatEvent event) {
         super.onPlayerCommandPreprocess(event);
         Player player = event.getPlayer();
-        RunnableAlias.player = player;
         String command = event.getMessage();
         player.sendMessage("Cancelling command: " + command);
         event.setCancelled(true);
