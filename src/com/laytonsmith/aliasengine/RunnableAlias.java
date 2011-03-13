@@ -7,7 +7,9 @@ import com.laytonsmith.Alias.Tree.GenericTreeNode;
 import com.laytonsmith.Alias.Tree.GenericTreeTraversalOrderEnum;
 import com.laytonsmith.aliasengine.AliasConfig.Construct;
 import com.laytonsmith.aliasengine.AliasConfig.ConstructType;
+import com.laytonsmith.aliasengine.AliasConfig.Function;
 import com.laytonsmith.aliasengine.AliasConfig.Variable;
+import com.laytonsmith.aliasengine.AliasConfig.Name;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
@@ -33,25 +35,64 @@ public class RunnableAlias {
         for(GenericTree t : actions){
             StringBuilder b = new StringBuilder();
             List<GenericTreeNode<Construct>> l = t.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
-            for(GenericTreeNode<Construct> g : l){
-                if(g.data.type.equals("root")){
-                    continue;
+            try{
+                for(GenericTreeNode<Construct> g : l){
+                    if(g.data.type.equals("root")){
+                        for(GenericTreeNode<Construct> gg : g.getChildren()){
+                            b.append(eval(gg)).append(" ");
+                        }
+                    }
                 }
-                Construct c = g.getData();
-                if(c.ctype == ConstructType.FUNCTION){
-                    b.append(eval(c));
-                } else if(c.ctype == ConstructType.VARIABLE){
-                    b.append(((Variable)c).def);
-                } else {
-                    b.append(c.value);
-                }
-                b.append(" ");
+                System.out.println("Running command: " + b.toString().trim());
+            } catch(CancelCommandException e){
+                System.out.println("Command Cancelled with message: " + e.message);
             }
-            System.out.println("Running command: " + b.toString().trim());
         }
     }
 
-    private String eval(Construct c){
-        return "";
+    private String eval(GenericTreeNode<Construct> c) throws CancelCommandException{
+        Construct m = c.getData();
+        if(m.ctype == ConstructType.FUNCTION){
+            Function f = (Function)m;
+            ArrayList<String> args = new ArrayList<String>();
+            for(GenericTreeNode<Construct> c2 : c.getChildren()){
+                args.add(eval(c2));
+            }
+            if(f.name == Name.DIE){
+                throw new CancelCommandException(args.get(0));
+            } else if(f.name == Name.DATA_VALUES){
+                return Data_Values.val(eval(c.getChildren().get(0)));
+            } else if(f.name == Name.PLAYER){
+                if(player != null){
+                    return player.getName();
+                } else {
+                    return "Player";
+                }
+            } else if(f.name == Name.MSG){
+                if(player != null){
+                    player.sendMessage(eval(c.getChildren().get(0)));
+                } else {
+                    System.out.println("Sending message to player: " + eval(c.getChildren().get(0)));
+                }
+            } else if(f.name == Name.EQUALS){
+                if(eval(c.getChildren().get(0)).equals(eval(c.getChildren().get(1)))){
+                    return "1";
+                } else {
+                    return "0";
+                }
+            } else if(f.name == Name.IF){
+                if(eval(c.getChildren().get(0)).equals("0")){
+                    return eval(c.getChildren().get(2));
+                } else{
+                    return eval(c.getChildren().get(1));
+                }
+            }
+            //It's feasible we don't return anything, so return a blank screen
+            return "";
+        } else if(m.ctype == ConstructType.VARIABLE){
+            return ((Variable)m).def;
+        } else{
+            return m.value;
+        }
     }
 }

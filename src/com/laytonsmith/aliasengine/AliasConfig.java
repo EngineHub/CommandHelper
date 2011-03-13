@@ -554,6 +554,7 @@ public class AliasConfig {
             ArrayList<Construct> tokens = this.aliasFile.aliasConstructs.get(i);
             System.out.println(tokens);
             boolean isAMatch = true;
+            StringBuilder lastVar = new StringBuilder();
             int lastJ = 0;
             try{
                 for(int j = 0; j < tokens.size(); j++){
@@ -565,6 +566,21 @@ public class AliasConfig {
                             isAMatch = false;
                         }
                     }
+                    if(j == tokens.size() - 1){
+                        if(tokens.get(j).ctype == ConstructType.VARIABLE){
+                            Variable lv = (Variable)tokens.get(j);
+                            if(lv.final_var){
+                                for(int a = j; a < args.size(); a++){
+                                    if(lastVar.length() == 0){
+                                        lastVar.append(args.get(a));
+                                    }
+                                    else {
+                                        lastVar.append(" ").append(args.get(a));
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
             } catch(IndexOutOfBoundsException e){
                 if(tokens.get(lastJ).ctype == ConstructType.VARIABLE &&
@@ -573,7 +589,6 @@ public class AliasConfig {
                 }
             }
             if(isAMatch){
-                System.out.println("Match!");
                 //Now, pull out the variables. That's all we care about in the left
                 //side now
                 ArrayList<Variable> vars = new ArrayList<Variable>();
@@ -581,8 +596,13 @@ public class AliasConfig {
                 for(int j = 0; j < tokens.size(); j++){
                     try{
                         if(tokens.get(j).ctype == ConstructType.VARIABLE){
-                            v = new Variable(((Variable)tokens.get(j)).name,
-                                    args.get(j), 0);
+                            if(((Variable)tokens.get(j)).name.equals("$")){
+                                v = new Variable(((Variable)tokens.get(j)).name,
+                                        lastVar.toString(), 0);
+                            } else {
+                                v = new Variable(((Variable)tokens.get(j)).name,
+                                        args.get(j), 0);
+                            }
                         }
                     } catch(IndexOutOfBoundsException e){
                         v = new Variable(((Variable)tokens.get(j)).name,
@@ -591,10 +611,7 @@ public class AliasConfig {
                     if(v != null)
                         vars.add(v);
                 }
-                for(Variable vm : vars){
-                    System.out.print(vm.name + ":" + vm.def + " ");
-                }
-                System.out.println();
+
                 ArrayList<GenericTree<Construct>> tree = aliasFile.rightTrees.get(i);
                 for(GenericTree<Construct> t : tree){
                     for(GenericTreeNode g : t.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
