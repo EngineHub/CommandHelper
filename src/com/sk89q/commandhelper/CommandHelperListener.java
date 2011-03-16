@@ -19,6 +19,9 @@
 
 package com.sk89q.commandhelper;
 
+import com.laytonsmith.aliasengine.AliasConfig;
+import com.laytonsmith.aliasengine.AliasCore;
+import com.laytonsmith.aliasengine.ConfigCompileException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Map;
@@ -49,8 +52,7 @@ public class CommandHelperListener extends PlayerListener {
     /**
      * List of global aliases.
      */
-    private Map<String,String[]> globalAliases =
-            new HashMap<String,String[]>();
+    private AliasCore ac;
 
     public CommandHelperListener(CommandHelperPlugin plugin) {
     }
@@ -59,7 +61,7 @@ public class CommandHelperListener extends PlayerListener {
      * Load global aliases.
      */
     public void loadGlobalAliases() {
-        globalAliases = CommandHelperSession.readAliases("global-aliases.txt");
+        ac = CommandHelperPlugin.getCore();
     }
 
     /**
@@ -68,8 +70,22 @@ public class CommandHelperListener extends PlayerListener {
      * @param command
      * @return
      */
-    public String[] findGlobalAlias(String command) {
-        return globalAliases.get(command.toLowerCase());
+    public String[] findGlobalAlias(String command, Player player) {
+        try {
+            CommandHelperSession p = getSession(player);
+            StringBuilder userAliases = new StringBuilder();
+            Map<Player, String[]> map = p.getAliases();
+            java.util.Iterator it = map.entrySet().iterator();
+            while(it.hasNext()){
+
+            }
+            CommandHelperPlugin.getCore().alias(command, player, CommandHelperPlugin.getCore().parse_user_config(null));
+            //return globalAliases.get(command.toLowerCase());
+            return null;
+        } catch (ConfigCompileException ex) {
+            logger.log(Level.SEVERE, null, ex);
+            return null;
+        }
     }
 
     /**
@@ -126,6 +142,8 @@ public class CommandHelperListener extends PlayerListener {
         // Catch aliases
         session.setLastCommand(CommandHelperPlugin.joinString(split, " "));
 
+
+
         String[] commands = getSession(player).findAlias(split[0]);
         String[] arguments = new String[split.length - 1];
         System.arraycopy(split, 1, arguments, 0, split.length - 1);
@@ -134,7 +152,8 @@ public class CommandHelperListener extends PlayerListener {
             execCommands(player, commands, arguments, false);
             return true;
         } else if (true /*player.canUseCommand(split[0])*/) {
-            commands = findGlobalAlias(split[0]);
+
+            commands = findGlobalAlias(CommandHelperPlugin.joinString(split, " "), player);
 
             if (commands != null) {
                 execCommands(player, commands, arguments, true);

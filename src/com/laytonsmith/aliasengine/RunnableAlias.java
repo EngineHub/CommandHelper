@@ -2,9 +2,6 @@
 
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.Alias.Tree.GenericTree;
-import com.laytonsmith.Alias.Tree.GenericTreeNode;
-import com.laytonsmith.Alias.Tree.GenericTreeTraversalOrderEnum;
 import com.laytonsmith.aliasengine.AliasConfig.Construct;
 import com.laytonsmith.aliasengine.AliasConfig.ConstructType;
 import com.laytonsmith.aliasengine.AliasConfig.Function;

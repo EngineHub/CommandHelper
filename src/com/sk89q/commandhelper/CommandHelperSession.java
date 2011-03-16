@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.*;
+import org.bukkit.entity.Player;
 
 /**
  * Command history, etc.
@@ -49,8 +50,12 @@ public class CommandHelperSession {
     /**
      * List of aliases.
      */
-    private Map<String,String[]> aliases =
-            new HashMap<String,String[]>();
+    private Map<Player,String[]> aliases =
+            new HashMap<Player,String[]>();
+
+    Map<Player, String[]> getAliases(){
+        return aliases;
+    }
 
     /**
      * Construct the instance.
@@ -92,8 +97,8 @@ public class CommandHelperSession {
      * @param command
      * @param commands 
      */
-    public void setAlias(String command, String[] commands) {
-        aliases.put(command.toLowerCase(), commands);
+    public void setAlias(Player player, String[] commands) {
+        aliases.put(player, commands);
     }
 
     /**
@@ -142,7 +147,7 @@ public class CommandHelperSession {
      * @param path
      * @return
      */
-    public static Map<String,String[]> readAliases(String path) {
+    public static Map<Player,String[]> readAliases(String path) {
         File file = new File(path);
         FileReader input = null;
         Map<String,List<String>> aliases = new HashMap<String,List<String>>();
@@ -186,19 +191,19 @@ public class CommandHelperSession {
                 }
             }
 
-            Map<String,String[]> outAliases = new HashMap<String,String[]>();
+            Map<Player,String[]> outAliases = new HashMap<Player,String[]>();
 
             for (Map.Entry<String,List<String>> entry : aliases.entrySet()) {
-                outAliases.put(entry.getKey(), entry.getValue().toArray(new String[]{}));
+                outAliases.put(CommandHelperPlugin.myServer.getPlayer(entry.getKey()), entry.getValue().toArray(new String[]{}));
             }
 
             return outAliases;
         } catch (FileNotFoundException e) {
-            return new HashMap<String,String[]>();
+            return new HashMap<Player, String[]>();
         } catch (IOException e) {
             logger.log(Level.WARNING, "Failed to load aliases: "
                     + e.getMessage());
-            return new HashMap<String,String[]>();
+            return new HashMap<Player, String[]>();
         } finally {
             try {
                 if (input != null) {
@@ -215,7 +220,7 @@ public class CommandHelperSession {
      * @param path
      * @param aliases
      */
-    public static void writeAliases(String path, Map<String,String[]> aliases) {
+    public static void writeAliases(String path, Map<Player,String[]> aliases) {
         File file = new File(path);
         FileWriter output = null;
 
@@ -231,7 +236,7 @@ public class CommandHelperSession {
             buff.write("# Generated automatically\r\n");
             buff.write("# Manual changes will likely be overwritten\r\n");
 
-            for (Map.Entry<String,String[]> entry : aliases.entrySet()) {
+            for (Map.Entry<Player,String[]> entry : aliases.entrySet()) {
                 buff.write(":" + entry.getKey() + "\r\n");
 
                 for (String command : entry.getValue()) {

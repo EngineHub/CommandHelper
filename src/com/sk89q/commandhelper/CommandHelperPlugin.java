@@ -19,8 +19,12 @@
 
 package com.sk89q.commandhelper;
 
+import com.laytonsmith.aliasengine.AliasCore;
+import com.laytonsmith.aliasengine.ConfigCompileException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -36,6 +40,8 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class CommandHelperPlugin extends JavaPlugin {
     private static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
+    private static AliasCore ac;
+    public static Server myServer;
     
     /**
      * Listener for the plugin system.
@@ -45,8 +51,14 @@ public class CommandHelperPlugin extends JavaPlugin {
     /**
      * Called on plugin enable.
      */
-    public void onEnable() {       
+    public void onEnable() {
+        myServer = getServer();
         logger.info("CommandHelper " + getDescription().getVersion() + " enabled");
+        try {
+            ac = new AliasCore(true, 50, 5, new java.io.File("./config.txt"));
+        } catch (ConfigCompileException ex) {
+            logger.log(Level.SEVERE, null, ex);
+        }
         
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.High);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
@@ -54,11 +66,17 @@ public class CommandHelperPlugin extends JavaPlugin {
         playerListener.loadGlobalAliases();
     }
 
+    public static AliasCore getCore(){
+        return ac;
+    }
+
     /**
      * Disables the plugin.
      */
     @Override
     public void onDisable() {
+        //free up some memory
+        ac = null;
     }
     
     /**
@@ -191,7 +209,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     
             // Set alias
             String[] commands = new String[]{ joinString(newSplit, " ") };
-            playerListener.getSession(player).setAlias(aliasName, commands);
+            playerListener.getSession(player).setAlias(player, commands);
     
             player.sendMessage(ChatColor.YELLOW + "Alias " + aliasName + " set.");
             session.saveAliases();

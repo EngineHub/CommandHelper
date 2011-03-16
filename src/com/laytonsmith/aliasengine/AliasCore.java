@@ -24,7 +24,7 @@ import org.bukkit.entity.Player;
  */
 public class AliasCore {
     private boolean allowCustomAliases = true;
-    private int maxCustomAliases = 10;
+    private int maxCustomAliases = 50;
     private int maxCommands = 5;
     private File aliasConfig;
     AliasConfig config;
@@ -55,7 +55,7 @@ public class AliasCore {
      * @param command
      * @return
      */
-    public boolean alias(String command, Player player){
+    public boolean alias(String command, Player player, ArrayList<AliasConfig> playerCommands){
         //If player is null, we are running the test harness, so don't
         //actually add the player to the array.
         if(player != null && echoCommand.contains(player.getName())){
@@ -68,9 +68,12 @@ public class AliasCore {
 
         if(a == null){
             //if we are still looking, look in the aliases for this player
-
-            //TODO: For now, return false;
-            return false;
+            for(AliasConfig ac : playerCommands){
+                RunnableAlias b = ac.getRunnableAliases(command);
+                if(b != null){
+                    a = b;
+                }
+            }
 
         }
 
@@ -102,6 +105,8 @@ public class AliasCore {
         } catch(IOException ex){
             logger.log(Level.SEVERE, null, "Path to config file is not correct/accessable. Please"
                     + " check the location and try loading the plugin again.");
+        } catch(Throwable t){
+            t.printStackTrace();
         } finally {
             if(!is_loaded){
                 //Try and pull the old config file, if it exists
@@ -114,6 +119,14 @@ public class AliasCore {
             }
         }
         return is_loaded;
+    }
+
+    public ArrayList<AliasConfig> parse_user_config(String[] config) throws ConfigCompileException{
+        ArrayList<AliasConfig> alac = new ArrayList<AliasConfig>();
+        for(int i = 0; i < config.length; i++){
+            alac.add( new AliasConfig(config[i]) );
+        }
+        return alac;
     }
 
     /**

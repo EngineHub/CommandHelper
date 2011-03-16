@@ -5,6 +5,9 @@
 
 package com.laytonsmith.aliasengine;
 
+import java.util.List;
+import org.bukkit.Material;
+
 /**
  *
  * @author layton
@@ -14,12 +17,16 @@ public class Data_Values {
         try{
             return Integer.toString(Integer.parseInt(val));
         } catch(NumberFormatException e){
-            val = val.toLowerCase();
-            if(val.equals("stone")){
-                return "1";
+            List<Material> l = MaterialUtils.getList(val);
+            if(l.size() > 1){
+              StringBuilder b = new StringBuilder();
+              for(Material m : l){
+                    b.append(m.name()).append(" ");
+              }
+              throw new CancelCommandException("Multiple matches. Did you mean: " + b.toString());
+            } else if(l.size() == 1){
+                return Integer.toString(MaterialUtils.getMaterial(val).getId());
             }
-
-
             else{
                 //Couldn't find the data value
                 throw new CancelCommandException("Could not find data value for \"" + val + "\"");
