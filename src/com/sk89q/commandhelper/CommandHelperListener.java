@@ -70,7 +70,7 @@ public class CommandHelperListener extends PlayerListener {
      * @param command
      * @return
      */
-    public String[] findGlobalAlias(String command, Player player) {
+    public boolean runAlias(String command, Player player) {
         try {
             CommandHelperSession p = getSession(player);
             StringBuilder userAliases = new StringBuilder();
@@ -79,12 +79,12 @@ public class CommandHelperListener extends PlayerListener {
             while(it.hasNext()){
 
             }
-            CommandHelperPlugin.getCore().alias(command, player, CommandHelperPlugin.getCore().parse_user_config(null));
+            return CommandHelperPlugin.getCore().alias(command, player, CommandHelperPlugin.getCore().parse_user_config(null));
             //return globalAliases.get(command.toLowerCase());
-            return null;
+            
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
-            return null;
+            return false;
         }
     }
 
@@ -112,13 +112,14 @@ public class CommandHelperListener extends PlayerListener {
     @Override
     public void onPlayerCommandPreprocess(PlayerChatEvent event) {
         Player player = event.getPlayer();
-        
+        player.performCommand("i 10 1");
         try {
-            if (runCommand(player, event.getMessage().split(" "))) {
+            if (runAlias(event.getMessage(), player)) {
                 event.setCancelled(true);
+                System.out.println("Command Cancelled: " + event.getMessage());
                 return;
             }
-        } catch (InsufficientArgumentsException e) {
+        } catch (/*InsufficientArguments*/Exception e) {
             player.sendMessage(ChatColor.RED + e.getMessage());
             event.setCancelled(true);
             return;
@@ -132,37 +133,31 @@ public class CommandHelperListener extends PlayerListener {
      * @param split
      * @return
      */
-    private boolean runCommand(Player player, String[] split) throws InsufficientArgumentsException {
-        CommandHelperSession session = getSession(player);
-        
-        if (split[0].equals("/repeat") || split[0].equals("/.")) {
-            return false;
-        }
-
-        // Catch aliases
-        session.setLastCommand(CommandHelperPlugin.joinString(split, " "));
-
-
-
-        String[] commands = getSession(player).findAlias(split[0]);
-        String[] arguments = new String[split.length - 1];
-        System.arraycopy(split, 1, arguments, 0, split.length - 1);
-
-        if (commands != null) {
-            execCommands(player, commands, arguments, false);
-            return true;
-        } else if (true /*player.canUseCommand(split[0])*/) {
-
-            commands = findGlobalAlias(CommandHelperPlugin.joinString(split, " "), player);
-
-            if (commands != null) {
-                execCommands(player, commands, arguments, true);
-                return true;
-            }
-        }
-        
-        return false;
-    }
+//    private boolean runCommand(Player player, String split) throws InsufficientArgumentsException {
+//        CommandHelperSession session = getSession(player);
+//
+//        if (split[0].equals("/repeat") || split[0].equals("/.")) {
+//            return false;
+//        }
+//
+//        // Catch aliases
+//        session.setLastCommand(CommandHelperPlugin.joinString(split, " "));
+//
+//
+//
+////        String[] commands = getSession(player).findAlias(split[0]);
+////        String[] arguments = new String[split.length - 1];
+////        System.arraycopy(split, 1, arguments, 0, split.length - 1);
+//
+//        if (commands != null) {
+//            execCommands(player, commands, arguments, false);
+//            return true;
+//        } else if (true /*player.canUseCommand(split[0])*/) {
+//            return runAlias(CommandHelperPlugin.joinString(split, " "), player);
+//        }
+//
+//        return false;
+//    }
 
     /**
      * Called when a player leaves a server

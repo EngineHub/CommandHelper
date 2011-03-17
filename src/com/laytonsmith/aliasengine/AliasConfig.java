@@ -10,10 +10,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Stack;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -544,7 +541,7 @@ public class AliasConfig {
      * @param command
      * @return
      */
-    public RunnableAlias getRunnableAliases(String command){
+    public RunnableAlias getRunnableAliases(String command, Player player){
         String[] cmds = command.split(" ");
         ArrayList<String> args = new ArrayList(Arrays.asList(cmds));
         for(int i = 0; i < this.aliasFile.alias.size(); i++){
@@ -555,10 +552,15 @@ public class AliasConfig {
             int lastJ = 0;
             try{
                 for(int j = 0; j < tokens.size(); j++){
+                    if(!isAMatch){
+                        break;
+                    }
                     lastJ = j;
                     Construct c = tokens.get(j);
                     String arg = args.get(j);
-                    if(c.ctype == ConstructType.COMMAND || c.ctype == ConstructType.LITERAL){
+                    if(c.ctype == ConstructType.COMMAND || 
+                            c.ctype == ConstructType.TOKEN ||
+                            c.ctype == ConstructType.LITERAL){
                         if(!c.value.equals(arg)){
                             isAMatch = false;
                         }
@@ -626,7 +628,7 @@ public class AliasConfig {
                         }
                     }
                 }
-                return new RunnableAlias(command, tree);
+                return new RunnableAlias(command, tree, player);
             }
         }
 

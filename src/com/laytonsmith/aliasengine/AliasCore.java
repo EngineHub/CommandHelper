@@ -64,12 +64,12 @@ public class AliasCore {
         }
 
         //Global aliases override personal ones, so check the list first
-        RunnableAlias a = config.getRunnableAliases(command);
+        RunnableAlias a = config.getRunnableAliases(command, player);
 
-        if(a == null){
+        if(a == null && playerCommands != null){
             //if we are still looking, look in the aliases for this player
             for(AliasConfig ac : playerCommands){
-                RunnableAlias b = ac.getRunnableAliases(command);
+                RunnableAlias b = ac.getRunnableAliases(command, player);
                 if(b != null){
                     a = b;
                 }
@@ -83,11 +83,11 @@ public class AliasCore {
         } else{
             //Run all the aliases
             a.player = player;
-            if(player != null) echoCommand.add(player.getName());
+            if(a.player != null) echoCommand.add(player.getName());
             a.run();
-            if(player != null) echoCommand.remove(player.getName());
-            return true;
+            if(a.player != null) echoCommand.remove(player.getName());
         }
+        return true;
     }
 
 
@@ -122,6 +122,9 @@ public class AliasCore {
     }
 
     public ArrayList<AliasConfig> parse_user_config(String[] config) throws ConfigCompileException{
+        if(config == null){
+            return null;
+        }
         ArrayList<AliasConfig> alac = new ArrayList<AliasConfig>();
         for(int i = 0; i < config.length; i++){
             alac.add( new AliasConfig(config[i]) );

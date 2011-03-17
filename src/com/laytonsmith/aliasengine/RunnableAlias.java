@@ -23,12 +23,14 @@ public class RunnableAlias {
     String command;
     ArrayList<GenericTree<Construct>> actions;
 
-    public RunnableAlias(String command, ArrayList<GenericTree<Construct>> actions){
+    public RunnableAlias(String command, ArrayList<GenericTree<Construct>> actions, Player player){
         this.command = command;
         this.actions = actions;
+        this.player = player;
     }
 
-    public void run(){
+    public boolean run(){
+        boolean ret = true;
         for(GenericTree t : actions){
             StringBuilder b = new StringBuilder();
             List<GenericTreeNode<Construct>> l = t.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
@@ -40,11 +42,25 @@ public class RunnableAlias {
                         }
                     }
                 }
-                System.out.println("Running command: " + b.toString().trim());
+                String cmd = b.toString().trim();
+                System.out.println("Running command ----> " + cmd);
+                System.out.println("on player " + player);
+                if(player != null){
+                    player.chat(cmd);
+                } else{
+                    System.out.println("Player is null, assuming test harness is running");
+                }
             } catch(CancelCommandException e){
-                System.out.println("Command Cancelled with message: " + e.message);
+                if(player == null){
+                    System.out.println("Command Cancelled with message: " + e.message);
+                } else{
+                    player.sendMessage(e.message);
+                }
+            } finally {
+                ret = false;
             }
         }
+        return ret;
     }
 
     private String eval(GenericTreeNode<Construct> c) throws CancelCommandException{
@@ -52,11 +68,11 @@ public class RunnableAlias {
         if(m.ctype == ConstructType.FUNCTION){
             Function f = (Function)m;
             ArrayList<String> args = new ArrayList<String>();
-            for(GenericTreeNode<Construct> c2 : c.getChildren()){
-                args.add(eval(c2));
-            }
+//            for(GenericTreeNode<Construct> c2 : c.getChildren()){
+//                args.add(eval(c2));
+//            }
             if(f.name == Name.DIE){
-                throw new CancelCommandException(args.get(0));
+                throw new CancelCommandException(eval(c.getChildren().get(0)));
             } else if(f.name == Name.DATA_VALUES){
                 return Data_Values.val(eval(c.getChildren().get(0)));
             } else if(f.name == Name.PLAYER){

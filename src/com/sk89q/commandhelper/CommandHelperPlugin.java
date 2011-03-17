@@ -127,37 +127,37 @@ public class CommandHelperPlugin extends JavaPlugin {
             return true;
         
         // Each group
-        } else if (cmd.equalsIgnoreCase("each")
-                && player.isOp()) {
-            checkArgs(args, 2, -1, cmd);
-    
-            PlayerFilter filter = SimplePlayerFilter.parse(getServer(), args[0]);
-    
-            // Get arguments
-            String[] newSplit = new String[args.length - 1];
-            System.arraycopy(args, 1, newSplit, 0, args.length - 1);
-    
-            // Perform command
-            int affected = 0;
-            for (Player pl : filter) {
-                affected++;
-    
-                // Substitute
-                for (int i = 1; i < args.length; i++) {
-                    if (args[i].equals("^")) {
-                        newSplit[i - 1] = pl.getName();
-                    }
-                }
-    
-                execCommand(player, joinString(newSplit, " "));
-            }
-    
-            // Tell the user if no users were matched
-            if (affected == 0) {
-                player.sendMessage(ChatColor.RED + "No users were matched.");
-            }
-    
-            return true;
+//        } else if (cmd.equalsIgnoreCase("each")
+//                && player.isOp()) {
+//            checkArgs(args, 2, -1, cmd);
+//
+//            PlayerFilter filter = SimplePlayerFilter.parse(getServer(), args[0]);
+//
+//            // Get arguments
+//            String[] newSplit = new String[args.length - 1];
+//            System.arraycopy(args, 1, newSplit, 0, args.length - 1);
+//
+//            // Perform command
+//            int affected = 0;
+//            for (Player pl : filter) {
+//                affected++;
+//
+//                // Substitute
+//                for (int i = 1; i < args.length; i++) {
+//                    if (args[i].equals("^")) {
+//                        newSplit[i - 1] = pl.getName();
+//                    }
+//                }
+//
+//                execCommand(player, joinString(newSplit, " "));
+//            }
+//
+//            // Tell the user if no users were matched
+//            if (affected == 0) {
+//                player.sendMessage(ChatColor.RED + "No users were matched.");
+//            }
+//
+//            return true;
     
         // Perform
         } else if (cmd.equalsIgnoreCase("perform")
