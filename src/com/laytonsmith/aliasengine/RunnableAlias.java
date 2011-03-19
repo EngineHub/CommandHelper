@@ -94,11 +94,18 @@ public class RunnableAlias {
                     return "0";
                 }
             } else if(f.name == Name.IF){
-                if(eval(c.getChildren().get(0)).equals("0")){
+                if(eval(c.getChildren().get(0)).equals("0") ||
+                        eval(c.getChildren().get(0)).equals("false")){
                     return eval(c.getChildren().get(2));
                 } else{
                     return eval(c.getChildren().get(1));
                 }
+            } else if(f.name == Name.CONCAT){
+                StringBuilder b = new StringBuilder();
+                for(int i = 0; i < c.getChildren().size(); i++){
+                    b.append(eval(c.getChildren().get(i)));
+                }
+                return b.toString();
             }
             //It's feasible we don't return anything, so return a blank screen
             return "";

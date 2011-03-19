@@ -25,6 +25,8 @@ public class AliasConfig {
 
     public AliasConfig(String config) throws ConfigCompileException{
         config = config.replaceAll("\r\n", "\n");
+        config = config + "\n"; //add a newline at the end so that parser will work. If it's extra,
+        //nothing bad will happen, it'll just be ignored.
         ArrayList<Token> token_list = new ArrayList<Token>();
         boolean state_in_quote = false;
         boolean in_comment = false;
@@ -231,6 +233,7 @@ public class AliasConfig {
                     }
                 }
             }
+
         }
         //Check the syntax. Look for mismatched variables, mismatched parenthesis and square brackets,
         //missing commands, bad function names, strings on the left side (except directly after a
@@ -376,7 +379,8 @@ public class AliasConfig {
                 for(GenericTreeNode<Construct> n : l){
                     if(n.getData() instanceof Function){
                         int args = n.getChildren().size();
-                        if(((Function)n.getData()).argTotal() != args){
+                        if(((Function)n.getData()).argTotal() != args &&
+                                ((Function)n.getData()).argTotal() != Integer.MAX_VALUE){
                             throw new ConfigCompileException("Incorrect number of args for " +
                                     ((Function)n.getData()).toString(), ((Function)n.getData()).line_num);
                         }
@@ -523,6 +527,10 @@ public class AliasConfig {
             }
         }
 
+        if(a.real.isEmpty()){
+            throw new ConfigCompileException("No aliases were defined");
+        }
+
         //Copy this working config file to another file so that if a bad config file is read in, at least the old
         //on can be recovered
         //TODO
@@ -546,7 +554,6 @@ public class AliasConfig {
         ArrayList<String> args = new ArrayList(Arrays.asList(cmds));
         for(int i = 0; i < this.aliasFile.alias.size(); i++){
             ArrayList<Construct> tokens = this.aliasFile.aliasConstructs.get(i);
-            System.out.println(tokens);
             boolean isAMatch = true;
             StringBuilder lastVar = new StringBuilder();
             int lastJ = 0;
@@ -635,6 +642,9 @@ public class AliasConfig {
         return null;
     }
 
+    public int totalAliases(){
+        return aliasFile.alias.size();
+    }
 
 
     public class Alias{
@@ -657,7 +667,7 @@ public class AliasConfig {
     }
 
     enum Name{
-        DIE, MSG, IF, EQUALS, DATA_VALUES, PLAYER, INVALID
+        DIE, MSG, IF, EQUALS, DATA_VALUES, PLAYER, CONCAT, INVALID
     }
 
     public class Function extends Construct{
@@ -691,6 +701,8 @@ public class AliasConfig {
                     return 1;
                 case PLAYER:
                     return 0;
+                case CONCAT:
+                    return Integer.MAX_VALUE;
                 default:
                     return 0;
             }
@@ -709,6 +721,8 @@ public class AliasConfig {
                 return Name.DATA_VALUES;
             if(name.equals("player"))
                 return Name.PLAYER;
+            if(name.equals("concat"))
+                return Name.CONCAT;
             return Name.INVALID;
         }
 

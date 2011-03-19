@@ -15,11 +15,13 @@ import java.util.ArrayList;
 public class CoreTestHarness {
     public static void main(String[] args){
         try {
-            AliasCore core = new AliasCore(true, 10, 5, new File("./config.txt"));
-            boolean cmds = core.alias("/help commandhelper", null, null);
-            if (!cmds) {
-                System.out.println("No alias(es) found for that command");
-            }
+//            AliasCore core = new AliasCore(true, 10, 5, new File("./config.txt"));
+//            boolean cmds = core.alias("/ping a message", null, null);
+//            if (!cmds) {
+//                System.out.println("No alias(es) found for that command");
+//            }
+            AliasConfig ac = new AliasConfig("/hey = msg('message')");
+            System.out.println("yay!");
         } catch (ConfigCompileException ex) {
             System.err.println(ex);
         }

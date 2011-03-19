@@ -112,11 +112,15 @@ public class CommandHelperListener extends PlayerListener {
     @Override
     public void onPlayerCommandPreprocess(PlayerChatEvent event) {
         Player player = event.getPlayer();
-        player.performCommand("i 10 1");
+        String cmd = event.getMessage();
+        if(cmd.equals("/.") || cmd.equals("/repeat")){
+            return;
+        }
+        this.getSession(player).setLastCommand(cmd);
         try {
             if (runAlias(event.getMessage(), player)) {
                 event.setCancelled(true);
-                System.out.println("Command Cancelled: " + event.getMessage());
+                //System.out.println("Command Cancelled: " + cmd);
                 return;
             }
         } catch (/*InsufficientArguments*/Exception e) {

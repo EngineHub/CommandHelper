@@ -19,6 +19,22 @@ public class ConfigCompileException extends Exception{
         this.line_num = line_num;
     }
 
+    public ConfigCompileException(String string) {
+        message = string;
+        line_num = 0;
+    }
+
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    public String getLineNum(){
+        return Integer.toString(line_num);
+    }
+
+
     @Override
     public String toString(){
         if(line_num != 0){

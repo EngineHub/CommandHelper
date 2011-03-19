@@ -19,8 +19,11 @@
 
 package com.sk89q.commandhelper;
 
+import com.laytonsmith.aliasengine.AliasConfig;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
+import com.laytonsmith.aliasengine.User;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -46,8 +49,10 @@ public class CommandHelperPlugin extends JavaPlugin {
     /**
      * Listener for the plugin system.
      */
-    private final CommandHelperListener playerListener =
+    final CommandHelperListener playerListener =
             new CommandHelperListener(this);
+
+    final ArrayList<Player> commandRunning = new ArrayList<Player>();
     /**
      * Called on plugin enable.
      */
@@ -115,6 +120,11 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     private boolean runCommand(Player player, String cmd, String[] args) throws InsufficientArgumentsException {
         CommandHelperSession session = playerListener.getSession(player);
+        if(commandRunning.contains(player)){
+            return true;
+        }
+
+        commandRunning.add(player);
         
         // Repeat command
         if (cmd.equals("repeat")) {
@@ -124,6 +134,7 @@ public class CommandHelperPlugin extends JavaPlugin {
             } else {
                 player.sendMessage(ChatColor.RED + "No previous command.");
             }
+            commandRunning.remove(player);
             return true;
         
         // Each group
@@ -160,62 +171,87 @@ public class CommandHelperPlugin extends JavaPlugin {
 //            return true;
     
         // Perform
-        } else if (cmd.equalsIgnoreCase("perform")
-                && player.isOp()) {
-            checkArgs(args, 2, -1, cmd);
-    
-            PlayerFilter filter = SimplePlayerFilter.parse(getServer(), args[0]);
-    
-            // Get arguments
-            String[] newSplit = new String[args.length - 1];
-            System.arraycopy(args, 1, newSplit, 0, args.length - 1);
-    
-            // Perform command
-            int affected = 0;
-            for (Player pl : filter) {
-                affected++;
-    
-                // Substitute
-                for (int i = 1; i < args.length; i++) {
-                    if (args[i].equals("^")) {
-                        newSplit[i - 1] = pl.getName();
-                    }
-                }
-    
-                execCommand(pl, joinString(newSplit, " "));
-            }
-    
-            // Tell the user if no users were matched
-            if (affected == 0) {
-                player.sendMessage(ChatColor.RED + "No users were matched.");
-            }
-    
-            return true;
+//        } else if (cmd.equalsIgnoreCase("perform")
+//                && player.isOp()) {
+//            checkArgs(args, 2, -1, cmd);
+//
+//            PlayerFilter filter = SimplePlayerFilter.parse(getServer(), args[0]);
+//
+//            // Get arguments
+//            String[] newSplit = new String[args.length - 1];
+//            System.arraycopy(args, 1, newSplit, 0, args.length - 1);
+//
+//            // Perform command
+//            int affected = 0;
+//            for (Player pl : filter) {
+//                affected++;
+//
+//                // Substitute
+//                for (int i = 1; i < args.length; i++) {
+//                    if (args[i].equals("^")) {
+//                        newSplit[i - 1] = pl.getName();
+//                    }
+//                }
+//
+//                execCommand(pl, joinString(newSplit, " "));
+//            }
+//
+//            // Tell the user if no users were matched
+//            if (affected == 0) {
+//                player.sendMessage(ChatColor.RED + "No users were matched.");
+//            }
+//            commandRunning.remove(player);
+//            return true;
     
         // Save alias
-        } else if (cmd.equalsIgnoreCase("alias")
+        } else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper")
                 /*&& player.canUseCommand("/alias")*/) {
-            checkArgs(args, 2, -1, cmd);
-    
-            // Get alias name
-            String aliasName = args[0];
-            if (aliasName.charAt(0) != '/') {
-                aliasName = "/" + aliasName;
+            if(args.length > 0){
+                System.out.println("Hello!");
+                String alias = CommandHelperPlugin.joinString(args, " ");
+                try {
+                    AliasConfig uac = new AliasConfig(alias);
+                    User u = new User(player, this);
+                    int id = u.addAlias(alias);
+                    if(id > -1){
+                        player.sendMessage(ChatColor.YELLOW + "Alias added with id '" + id + "'");
+                    }
+                } catch (ConfigCompileException ex) {
+                    player.sendMessage(ChatColor.RED + ex.getMessage());
+                }
+            } else{
+                //Display a help message
+                player.sendMessage(ChatColor.GREEN + "Command usage: \n"
+                        + ChatColor.GREEN + "/alias <alias> - adds an alias to your user defined list\n"
+                        + ChatColor.GREEN + "/delalias <id> - deletes alias with id <id> from your user defined list\n"
+                        + ChatColor.GREEN + "/viewalias - shows you all of your aliases");
             }
-    
-            // Get arguments
-            String[] newSplit = new String[args.length - 1];
-            System.arraycopy(args, 1, newSplit, 0, args.length - 1);
-    
-            // Set alias
-            String[] commands = new String[]{ joinString(newSplit, " ") };
-            playerListener.getSession(player).setAlias(player, commands);
-    
-            player.sendMessage(ChatColor.YELLOW + "Alias " + aliasName + " set.");
-            session.saveAliases();
-            
+//            checkArgs(args, 2, -1, cmd);
+//
+//            // Get alias name
+//            String aliasName = args[0];
+//            if (aliasName.charAt(0) != '/') {
+//                aliasName = "/" + aliasName;
+//            }
+//
+//            // Get arguments
+//            String[] newSplit = new String[args.length - 1];
+//            System.arraycopy(args, 1, newSplit, 0, args.length - 1);
+//
+//            // Set alias
+//            String[] commands = new String[]{ joinString(newSplit, " ") };
+//            playerListener.getSession(player).setAlias(player, commands);
+//
+//            player.sendMessage(ChatColor.YELLOW + "Alias " + aliasName + " set.");
+//            session.saveAliases();
+//            commandRunning.remove(player);
             return true;
-    
+        //View all aliases for this user
+        } else if(cmd.equalsIgnoreCase("viewalias")){
+            System.out.println("Trying to view aliases");
+            User u = new User(player, this);
+            player.sendMessage(u.getAllAliases());
+            return true;
         // Delete alias
         } else if (cmd.equalsIgnoreCase("delalias")
                 /*&& player.canUseCommand("/alias")*/) {
@@ -231,22 +267,27 @@ public class CommandHelperPlugin extends JavaPlugin {
     
             player.sendMessage(ChatColor.YELLOW + "Alias " + aliasName + " removed.");
             session.saveAliases();
-    
+            commandRunning.remove(player);
             return true;
     
         // Reload global aliases
         } else if (cmd.equalsIgnoreCase("reloadaliases")
                 && player.isOp()) {
-            checkArgs(args, 0, 0, cmd);
-    
-            playerListener.loadGlobalAliases();
-    
-            player.sendMessage(ChatColor.YELLOW + "Aliases reloaded.");
-            session.saveAliases();
-    
-            return true;
+            try {
+                //            checkArgs(args, 0, 0, cmd);
+                //
+                //            playerListener.loadGlobalAliases();
+                //
+                //            player.sendMessage(ChatColor.YELLOW + "Aliases reloaded.");
+                //            session.saveAliases();
+                //            commandRunning.remove(player);
+                ac.reload();
+                return true;
+            } catch (ConfigCompileException ex) {
+                logger.log(Level.SEVERE, null, ex);
+            }
         }
-        
+        commandRunning.remove(player);
         return false;
     }
 
