@@ -19,10 +19,12 @@
 
 package com.sk89q.commandhelper;
 
+import com.laytonsmith.Persistance.Persistance;
 import com.laytonsmith.aliasengine.AliasConfig;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.aliasengine.User;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,6 +47,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     private static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
     private static AliasCore ac;
     public static Server myServer;
+    public Persistance persist;
     
     /**
      * Listener for the plugin system.
@@ -58,6 +61,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     public void onEnable() {
         myServer = getServer();
+        persist = new Persistance(new File("plugins/CommandHelper/persistance.ser"), this);
         logger.info("CommandHelper " + getDescription().getVersion() + " enabled");
         try {
             ac = new AliasCore(true, 50, 5, new java.io.File("./config.txt"));
@@ -207,11 +211,11 @@ public class CommandHelperPlugin extends JavaPlugin {
         } else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper")
                 /*&& player.canUseCommand("/alias")*/) {
             if(args.length > 0){
-                System.out.println("Hello!");
+
                 String alias = CommandHelperPlugin.joinString(args, " ");
                 try {
                     AliasConfig uac = new AliasConfig(alias);
-                    User u = new User(player, this);
+                    User u = new User(player, persist);
                     int id = u.addAlias(alias);
                     if(id > -1){
                         player.sendMessage(ChatColor.YELLOW + "Alias added with id '" + id + "'");
@@ -244,29 +248,49 @@ public class CommandHelperPlugin extends JavaPlugin {
 //
 //            player.sendMessage(ChatColor.YELLOW + "Alias " + aliasName + " set.");
 //            session.saveAliases();
-//            commandRunning.remove(player);
+            commandRunning.remove(player);
             return true;
         //View all aliases for this user
         } else if(cmd.equalsIgnoreCase("viewalias")){
             System.out.println("Trying to view aliases");
-            User u = new User(player, this);
+            User u = new User(player, persist);
             player.sendMessage(u.getAllAliases());
+            commandRunning.remove(player);
             return true;
         // Delete alias
         } else if (cmd.equalsIgnoreCase("delalias")
                 /*&& player.canUseCommand("/alias")*/) {
-            checkArgs(args, 1, 1, cmd);
-    
-            // Get alias name
-            String aliasName = args[0];
-            if (aliasName.charAt(0) != '/') {
-                aliasName = "/" + aliasName;
+//            checkArgs(args, 1, 1, cmd);
+//
+//            // Get alias name
+//            String aliasName = args[0];
+//            if (aliasName.charAt(0) != '/') {
+//                aliasName = "/" + aliasName;
+//            }
+//
+//            playerListener.getSession(player).removeAlias(aliasName);
+//
+//            player.sendMessage(ChatColor.YELLOW + "Alias " + aliasName + " removed.");
+//            session.saveAliases();
+            User u = new User(player, persist);
+            try{
+                ArrayList<String> deleted = new ArrayList<String>();
+                for(int i = 0; i < args.length; i++){
+                    u.removeAlias(Integer.parseInt(args[i]));
+                    deleted.add("#" + args[i]);
+                }
+                if(args.length > 1){
+                    String s = ChatColor.YELLOW + "Aliases " + deleted.toString() + " were deleted";
+                    player.sendMessage(s);
+
+                } else{
+                    player.sendMessage(ChatColor.YELLOW + "Alias #" + args[0] + "was deleted");
+                }
+            } catch(NumberFormatException e){
+                player.sendMessage(ChatColor.RED + "The id must be a number");
+            } catch(ArrayIndexOutOfBoundsException e){
+                player.sendMessage(ChatColor.RED + "Usage: /delalias <id> <id> ...");
             }
-    
-            playerListener.getSession(player).removeAlias(aliasName);
-    
-            player.sendMessage(ChatColor.YELLOW + "Alias " + aliasName + " removed.");
-            session.saveAliases();
             commandRunning.remove(player);
             return true;
     

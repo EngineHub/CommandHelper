@@ -121,13 +121,13 @@ public class AliasCore {
         return is_loaded;
     }
 
-    public ArrayList<AliasConfig> parse_user_config(String[] config) throws ConfigCompileException{
+    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config) throws ConfigCompileException{
         if(config == null){
             return null;
         }
         ArrayList<AliasConfig> alac = new ArrayList<AliasConfig>();
-        for(int i = 0; i < config.length; i++){
-            alac.add( new AliasConfig(config[i]) );
+        for(int i = 0; i < config.size(); i++){
+            alac.add( new AliasConfig(config.get(i)) );
         }
         return alac;
     }

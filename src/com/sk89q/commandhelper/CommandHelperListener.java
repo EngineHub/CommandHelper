@@ -22,6 +22,7 @@ package com.sk89q.commandhelper;
 import com.laytonsmith.aliasengine.AliasConfig;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
+import com.laytonsmith.aliasengine.User;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Map;
@@ -53,8 +54,10 @@ public class CommandHelperListener extends PlayerListener {
      * List of global aliases.
      */
     private AliasCore ac;
+    private CommandHelperPlugin plugin;
 
     public CommandHelperListener(CommandHelperPlugin plugin) {
+        this.plugin = plugin;
     }
 
     /**
@@ -65,21 +68,16 @@ public class CommandHelperListener extends PlayerListener {
     }
 
     /**
-     * Find a global alias. May return null.
+     * Find and run aliases for a player for a given command.
      *
      * @param command
      * @return
      */
     public boolean runAlias(String command, Player player) {
         try {
-            CommandHelperSession p = getSession(player);
-            StringBuilder userAliases = new StringBuilder();
-            Map<Player, String[]> map = p.getAliases();
-            java.util.Iterator it = map.entrySet().iterator();
-            while(it.hasNext()){
-
-            }
-            return CommandHelperPlugin.getCore().alias(command, player, CommandHelperPlugin.getCore().parse_user_config(null));
+            User u = new User(player, plugin.persist);
+            return CommandHelperPlugin.getCore().alias(command, player,
+                    CommandHelperPlugin.getCore().parse_user_config(u.getAliasesAsArray()));
             //return globalAliases.get(command.toLowerCase());
             
         } catch (ConfigCompileException ex) {

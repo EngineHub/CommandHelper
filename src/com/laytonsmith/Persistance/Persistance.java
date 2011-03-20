@@ -108,17 +108,23 @@ public class Persistance {
             Iterator i = data.entrySet().iterator();
             while (i.hasNext()) {
                 String key = ((Map.Entry)i.next()).getKey().toString();
-                tempData.put(key, data.get(key));
+                if(data.get(key) == null){
+                    tempData.remove(key);
+                    data.remove(key);
+                } else{
+                    tempData.put(key, data.get(key));
+                }
             }
             FileOutputStream fos = null;
             ObjectOutputStream out = null;
             storageLocation.getParentFile().mkdirs();
-            storageLocation.createNewFile();
+            if(!storageLocation.exists())
+                storageLocation.createNewFile();
             fos = new FileOutputStream(storageLocation);
             out = new ObjectOutputStream(fos);
             out.writeObject(tempData);
             out.close();
-            System.out.println("Persistance saved");
+            System.out.println("Persistance saved into " + this.hashCode());
         } catch (Exception ex) {
             throw ex;
         }
@@ -131,10 +137,11 @@ public class Persistance {
     private synchronized Object setValue(String key, Serializable value) {
         //defer loading until we actually try and use the data structure
         if (isLoaded == false) {
+            System.out.println("Loading values for " + user.getClass().getCanonicalName());
             try {
                 load();
             } catch (Exception ex) {
-                Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
+                Logger.getLogger("Minecraft").log(Level.SEVERE, null, ex);
             }
         }
         key = "plugin." + user.getClass().getCanonicalName() + "." + key;
@@ -147,6 +154,7 @@ public class Persistance {
     private synchronized Object getValue(String key) {
         //defer loading until we actually try and use the data structure
         if (isLoaded == false) {
+            System.out.println("Loading values for " + user.getClass().getCanonicalName());
             try {
                 load();
             } catch (Exception ex) {
@@ -172,7 +180,7 @@ public class Persistance {
      * Since plugin values are global, you can use this to interact with other plugins. Caution should
      * be used when interacting with other plugin's values though.
      * @param key The key for this particular value
-     * @param value The value to store
+     * @param value The value to store. If value is null, the key is simply removed.
      * @return The object that was in this key, or null if the value did not exist.
      */
     public synchronized Object setValue(String[] key, Serializable value) {
@@ -240,10 +248,18 @@ public class Persistance {
      * @return An ArrayList of Map.Entries.
      */
     public synchronized ArrayList<Map.Entry> getNamespaceValues(String[] partialKey){
+
         ArrayList<Map.Entry> matches = new ArrayList<Map.Entry>();
         String m = getNamespace(partialKey);
         m = "plugin." + user.getClass().getCanonicalName() + "." + m;
         partialKey = m.split("\\.");
+        if(!isLoaded){
+            try {
+                load();
+            } catch (Exception ex) {
+                Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
         Iterator i = data.entrySet().iterator();
         while (i.hasNext()) {
             Map.Entry entry = (Map.Entry)i.next();
@@ -288,6 +304,7 @@ public class Persistance {
      * Prints all of the stored values to std out.
      */
     public synchronized void printValues() {
+        System.out.println("Printing all persisted values:");
         Iterator i = data.entrySet().iterator();
         while (i.hasNext()) {
             Map.Entry e = ((Map.Entry) i.next());
@@ -297,6 +314,7 @@ public class Persistance {
                     + ") "
                     + data.get(e.getKey().toString()).toString());
         }
+        System.out.println("Done printing persisted values");
     }
 
     public static void main(String[] args) throws Exception{
@@ -304,9 +322,8 @@ public class Persistance {
         p.setValue(new String[]{"player", "wraithguard01", "name"}, "wraithguard01");
         p.setValue(new String[]{"player", "wraithguard01", "age"}, "22");
         p.setValue(new String[]{"player", "other", "name"}, "other");
-        System.out.println(p.getNamespaceValues(new String[]{"player"}));
+        System.out.println(p.getNamespaceValues(new String[]{"player", "wraithguard01", "age"}));
         System.out.println();
-        System.out.println(p.getNamespaceValues(new String[]{"player", "wraithguard01"}));
         p.save();
     }
 
