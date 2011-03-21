@@ -23,11 +23,18 @@ public class AliasConfig {
      */
     Alias aliasFile = null;
 
+    /**
+     * Constructor. Creates a compiled version of the given script.
+     * @param config The config script to compile
+     * @throws ConfigCompileException If there is a compiler error in the script
+     */
     public AliasConfig(String config) throws ConfigCompileException{
+        //Convert all newlines into \n newlines
         config = config.replaceAll("\r\n", "\n");
         config = config + "\n"; //add a newline at the end so that parser will work. If it's extra,
         //nothing bad will happen, it'll just be ignored.
         ArrayList<Token> token_list = new ArrayList<Token>();
+        //Set our state variables
         boolean state_in_quote = false;
         boolean in_comment = false;
         boolean in_opt_var = false;
@@ -126,6 +133,15 @@ public class AliasConfig {
                     }
                     continue;
                 }
+            } else if(c == '\\'){
+                //escaped backslash
+                if(state_in_quote){
+                    if(buf.length() > 2 && buf.charAt(buf.length() - 1) == '\\'){
+                        buf = new StringBuffer(buf.substring(0, buf.length() - 1));
+                        buf.append("\\");
+                        continue;
+                    }
+                }
             } else if(state_in_quote){
                 buf.append(c);
                 continue;
@@ -141,7 +157,7 @@ public class AliasConfig {
                 buf.append(c);
                 continue;
             }
-        }
+        } //end lexing
 
         //So, there has to be a more efficient way to do this, but I don't
         //really care right now. It's only read in occasionally, so it's no biggie.
