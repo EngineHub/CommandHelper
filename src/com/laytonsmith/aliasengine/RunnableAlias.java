@@ -2,11 +2,11 @@
 
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.AliasConfig.Construct;
-import com.laytonsmith.aliasengine.AliasConfig.ConstructType;
+
 import com.laytonsmith.aliasengine.AliasConfig.Function;
 import com.laytonsmith.aliasengine.AliasConfig.Variable;
-import com.laytonsmith.aliasengine.AliasConfig.Name;
+import com.laytonsmith.aliasengine.functions.Construct;
+import com.laytonsmith.aliasengine.functions.Construct.ConstructType;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
@@ -22,6 +22,9 @@ public class RunnableAlias {
     Player player;
     String command;
     ArrayList<GenericTree<Construct>> actions;
+
+    String performAs = null;
+    boolean inPerformAs = false;
 
     public RunnableAlias(String command, ArrayList<GenericTree<Construct>> actions, Player player){
         this.command = command;
@@ -71,41 +74,43 @@ public class RunnableAlias {
 //            for(GenericTreeNode<Construct> c2 : c.getChildren()){
 //                args.add(eval(c2));
 //            }
-            if(f.name == Name.DIE){
+            if(f.name == FunctionName.DIE){
                 throw new CancelCommandException(eval(c.getChildren().get(0)));
-            } else if(f.name == Name.DATA_VALUES){
+            } else if(f.name == FunctionName.DATA_VALUES){
                 return Data_Values.val(eval(c.getChildren().get(0)));
-            } else if(f.name == Name.PLAYER){
+            } else if(f.name == FunctionName.PLAYER){
                 if(player != null){
                     return player.getName();
                 } else {
                     return "Player";
                 }
-            } else if(f.name == Name.MSG){
+            } else if(f.name == FunctionName.MSG){
                 if(player != null){
                     player.sendMessage(eval(c.getChildren().get(0)));
                 } else {
                     System.out.println("Sending message to player: " + eval(c.getChildren().get(0)));
                 }
-            } else if(f.name == Name.EQUALS){
+            } else if(f.name == FunctionName.EQUALS){
                 if(eval(c.getChildren().get(0)).equals(eval(c.getChildren().get(1)))){
                     return "1";
                 } else {
                     return "0";
                 }
-            } else if(f.name == Name.IF){
+            } else if(f.name == FunctionName.IF){
                 if(eval(c.getChildren().get(0)).equals("0") ||
                         eval(c.getChildren().get(0)).equals("false")){
                     return eval(c.getChildren().get(2));
                 } else{
                     return eval(c.getChildren().get(1));
                 }
-            } else if(f.name == Name.CONCAT){
+            } else if(f.name == FunctionName.CONCAT){
                 StringBuilder b = new StringBuilder();
                 for(int i = 0; i < c.getChildren().size(); i++){
                     b.append(eval(c.getChildren().get(i)));
                 }
                 return b.toString();
+            } else if(f.name == FunctionName.PERFORM){
+                //Construct m = eval(c.getChildren().get(0));
             }
             //It's feasible we don't return anything, so return a blank screen
             return "";

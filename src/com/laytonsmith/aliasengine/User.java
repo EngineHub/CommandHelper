@@ -6,6 +6,7 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.Persistance.Persistance;
+import com.sk89q.bukkit.migration.PermissionsResolverServerListener;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
@@ -21,8 +22,10 @@ import org.bukkit.plugin.Plugin;
 public class User {
     Player player;
     Persistance persist;
+    
 
     public User(Player player, Persistance persist){
+        //(new PermissionsResolverServerListener(perms)).register(this);
         this.player = player;
         this.persist = persist;
     }
@@ -94,6 +97,16 @@ public class User {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
+
+    /**
+     * Returns whether or not this user has permission to run a given function.
+     * @param f
+     * @return
+     */
+    public boolean hasPermission(FunctionName f){
+        return true;
+    }
+
 
 
 }

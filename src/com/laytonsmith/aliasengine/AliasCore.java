@@ -97,6 +97,10 @@ public class AliasCore {
     public boolean reload() throws ConfigCompileException{
         boolean is_loaded = false;
         try {
+            if(!aliasConfig.exists()){
+                aliasConfig.getParentFile().mkdirs();
+                aliasConfig.createNewFile();
+            }
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
             config = new AliasConfig(alias_config);
             is_loaded = true;
