@@ -27,8 +27,10 @@ import java.io.*;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
+import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  * Event listener for Hey0's server mod.
@@ -94,7 +96,7 @@ public class CommandHelperListener extends PlayerListener {
      * @param event Relevant event details
      */
     @Override
-    public void onPlayerCommandPreprocess(PlayerChatEvent event) {
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         
         try {
@@ -151,7 +153,7 @@ public class CommandHelperListener extends PlayerListener {
      * @param event Relevant event details
      */
     @Override
-    public void onPlayerQuit(PlayerEvent event) {
+    public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         sessions.remove(player.getName());
     }
