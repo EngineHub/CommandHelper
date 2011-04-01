@@ -102,7 +102,7 @@ public class AliasCore {
                 aliasConfig.createNewFile();
             }
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
-            config = new AliasConfig(alias_config);
+            config = new AliasConfig(alias_config, null);
             is_loaded = true;
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
@@ -125,13 +125,13 @@ public class AliasCore {
         return is_loaded;
     }
 
-    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config) throws ConfigCompileException{
+    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config, User u) throws ConfigCompileException{
         if(config == null){
             return null;
         }
         ArrayList<AliasConfig> alac = new ArrayList<AliasConfig>();
         for(int i = 0; i < config.size(); i++){
-            alac.add( new AliasConfig(config.get(i)) );
+            alac.add( new AliasConfig(config.get(i), u ));
         }
         return alac;
     }

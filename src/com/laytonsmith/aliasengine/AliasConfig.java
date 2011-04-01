@@ -5,9 +5,10 @@
 
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.functions.Construct;
-import com.laytonsmith.aliasengine.functions.Construct.ConstructType;
-import com.laytonsmith.aliasengine.functions.Construct.TType;
+import com.laytonsmith.aliasengine.Constructs.*;
+import com.laytonsmith.aliasengine.Constructs.Construct.*;
+import com.laytonsmith.aliasengine.functions.Function;
+import com.laytonsmith.aliasengine.functions.FunctionList;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -25,13 +26,15 @@ public class AliasConfig {
      * Once the config file is compiled, it gets added to this variable
      */
     Alias aliasFile = null;
+    FunctionList func_list;
 
     /**
      * Constructor. Creates a compiled version of the given script.
      * @param config The config script to compile
      * @throws ConfigCompileException If there is a compiler error in the script
      */
-    public AliasConfig(String config) throws ConfigCompileException{
+    public AliasConfig(String config, User u) throws ConfigCompileException{
+        func_list = new FunctionList(u);
         //Convert all newlines into \n newlines
         config = config.replaceAll("\r\n", "\n");
         config = config + "\n"; //add a newline at the end so that parser will work. If it's extra,
@@ -184,6 +187,7 @@ public class AliasConfig {
             } catch(IndexOutOfBoundsException e){}
         }
 
+        //Handle multiline constructs
         ArrayList<Token> tokens1_1 = new ArrayList<Token>();
         boolean inside_multiline = false;
         for(int i = 0; i < tokens1.size(); i++){
@@ -191,13 +195,13 @@ public class AliasConfig {
             Token thisToken = tokens1.get(i);
             Token nextToken = i + 1 < tokens1.size()?tokens1.get(i + 1):new Token(TType.UNKNOWN, "", 0);
             //take out newlines between the = >>> and <<< tokens (also the tokens)
-            if(thisToken.type.equals(TType.ALIAS_END) && nextToken.value.equals(">>>")){
+            if(thisToken.type.equals(TType.ALIAS_END) && nextToken.val().equals(">>>")){
                 inside_multiline = true;
                 tokens1_1.add(thisToken);
                 i++;
                 continue;
             }
-            if(thisToken.value.equals("<<<")){
+            if(thisToken.val().equals("<<<")){
                 if(!inside_multiline){
                     throw new ConfigCompileException("Found multiline end symbol, and no multiline start found",
                             thisToken.line_num);
@@ -205,7 +209,7 @@ public class AliasConfig {
                 inside_multiline = false;
                 continue;
             }
-            if(thisToken.value.equals(">>>") && !prevToken.type.equals(TType.ALIAS_END)){
+            if(thisToken.val().equals(">>>") && !prevToken.type.equals(TType.ALIAS_END)){
                 throw new ConfigCompileException("Multiline symbol must follow the alias_end token", thisToken.line_num);
             }
 
@@ -219,7 +223,7 @@ public class AliasConfig {
         //take out newlines that are behind a \
         ArrayList<Token> tokens2 = new ArrayList<Token>();
         for(int i = 0; i < tokens1_1.size(); i++){
-            if(!tokens1_1.get(i).type.equals(TType.STRING) && tokens1_1.get(i).value.equals("\\") && tokens1_1.size() > i
+            if(!tokens1_1.get(i).type.equals(TType.STRING) && tokens1_1.get(i).val().equals("\\") && tokens1_1.size() > i
                     && tokens1_1.get(i + 1).type.equals(TType.NEWLINE)){
                 tokens2.add(tokens1_1.get(i));
                 i++;
@@ -233,15 +237,15 @@ public class AliasConfig {
         //look at the tokens, and get meaning from them
         for(Token t : tokens2){
             if(t.type.equals(TType.UNKNOWN)){
-                if(t.value.matches("/.*")){
+                if(t.val().matches("/.*")){
                     t.type = TType.COMMAND;
-                } else if(t.value.matches("\\\\")){
+                } else if(t.val().matches("\\\\")){
                     t.type = TType.SEPERATOR;
-                } else if(t.value.matches("\\$[a-zA-Z0-9_]+")){
+                } else if(t.val().matches("\\$[a-zA-Z0-9_]+")){
                     t.type = TType.VARIABLE;
-                } else if(t.value.matches("\\@[a-zA-Z0-9_]+")){
+                } else if(t.val().matches("\\@[a-zA-Z0-9_]+")){
                     t.type = TType.IVARIABLE;
-                } else if(t.value.equals("$")){
+                } else if(t.val().equals("$")){
                     t.type = TType.FINAL_VAR;
                 }
                 else {
@@ -321,11 +325,11 @@ public class AliasConfig {
                    throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num);
                }
                if(t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)){
-                   left_vars.add(new Variable(t.value, null, t.line_num));
+                   left_vars.add(new Variable(t.val(), null, t.line_num));
                }
                if(j == 0 && !t.type.equals(TType.COMMAND)){
                    throw new ConfigCompileException("Expected command (/command) at start of alias." +
-                           " Instead, found " + t.type + " (" + t.value + ")", t.line_num);
+                           " Instead, found " + t.type + " (" + t.val() + ")", t.line_num);
                }
                if(after_no_def_opt_var && !inside_opt_var){
                    if(t.type.equals(TType.LIT) || t.type.equals(TType.STRING) || t.type.equals(TType.OPT_VAR_ASSIGN)){
@@ -341,18 +345,18 @@ public class AliasConfig {
                        !t.type.equals(TType.COMMAND) &&
                        !t.type.equals(TType.FINAL_VAR)){
                    if(!(t.type.equals(TType.STRING) && j - 1 > 0 && c.tokens.get(j - 1).type.equals(TType.OPT_VAR_ASSIGN)))
-                       throw new ConfigCompileException("Unexpected " + t.type + " (" + t.value + ")", t.line_num);
+                       throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.line_num);
                }
                if(last_token.type.equals(TType.COMMAND)){
                    if(!(t.type.equals(TType.VARIABLE) || t.type.equals(TType.OPT_VAR_START) || t.type.equals(TType.FINAL_VAR) ||
                             t.type.equals(TType.LIT))){
-                       throw new ConfigCompileException("Unexpected " + t.type + " (" + t.value + ") after command", t.line_num);
+                       throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.line_num);
                    }
                }
                if(last_token.type.equals(TType.OPT_VAR_START)){
                    inside_opt_var = true;
                    if(!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))){
-                       throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.value + ")", t.line_num);
+                       throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num);
                    }
                }
                if(inside_opt_var && t.type.equals(TType.OPT_VAR_ASSIGN)){
@@ -360,7 +364,7 @@ public class AliasConfig {
                            (next_token.type.equals(TType.OPT_VAR_END)))){
                        throw new ConfigCompileException("Unexpected token in optional variable", t.line_num);
                    } else if(next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)){
-                       left_vars.get(left_vars.size() - 1).def = next_token.value;
+                       left_vars.get(left_vars.size() - 1).def = next_token.val();
                    } else {
                        left_vars.get(left_vars.size() - 1).def = "";
                    }
@@ -405,16 +409,16 @@ public class AliasConfig {
                             || t.type.equals(TType.IVARIABLE)){
                         node.addChild(new GenericTreeNode<Construct>(t));
                     } else if(t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)){
-                        node.addChild(new GenericTreeNode<Construct>(new Variable(t.value, null, t.line_num)));
-                        right_vars.add(new Variable(t.value, null, t.line_num));
+                        node.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, t.line_num)));
+                        right_vars.add(new Variable(t.val(), null, t.line_num));
                     } else if(t.type.equals(TType.FUNC_NAME)){
                         try {
-                            GenericTreeNode<Construct> f = new GenericTreeNode<Construct>(new Function(t.value, t.line_num));
+                            GenericTreeNode<Construct> f = new GenericTreeNode<Construct>(new CFunction(t.val(), t.line_num));
                             node.addChild(f);
                             node = f;
                             parents.push(f);
                         } catch (Exception ex) {
-                            throw new ConfigCompileException("\"" + t.value + "\" is not a built in function", t.line_num);
+                            throw new ConfigCompileException("\"" + t.val() + "\" is not a built in function", t.line_num);
                         }
                     } else if(t.type.equals(TType.FUNC_START)){
                         if(!prev.type.equals(TType.FUNC_NAME)){
@@ -430,22 +434,24 @@ public class AliasConfig {
                         parents.pop();
                         node = parents.peek();
                     } else if(t.type.equals(TType.COMMAND)){
-                        node.addChild(new GenericTreeNode<Construct>(new Command(t.value, t.line_num)));
+                        node.addChild(new GenericTreeNode<Construct>(new Command(t.val(), t.line_num)));
                     } else if(t.type.equals(TType.COMMA)){
                         continue;
                     } else{
-                        throw new ConfigCompileException("Unexpected " + t.type + " (" + t.value + ")", t.line_num);
+                        throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.line_num);
                     }
                 }
                 rightTreeOne.add(root);
                 List<GenericTreeNode<Construct>> l = root.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
                 for(GenericTreeNode<Construct> n : l){
-                    if(n.getData() instanceof Function){
+                    if(n.getData() instanceof CFunction){
                         int args = n.getChildren().size();
-                        if(((Function)n.getData()).argTotal() != args &&
-                                ((Function)n.getData()).argTotal() != Integer.MAX_VALUE){
+                        Function f = func_list.getFunction((CFunction)n.getData());
+                        List<Integer> numArgs = Arrays.asList(f.numArgs());
+                        if(!numArgs.contains(args) &&
+                                !numArgs.contains(Integer.MAX_VALUE)){
                             throw new ConfigCompileException("Incorrect number of args for " +
-                                    ((Function)n.getData()).toString(), ((Function)n.getData()).line_num);
+                                    ((CFunction)n.getData()).toString(), n.data.line_num);
                         }
                     }
                 }
@@ -488,15 +494,15 @@ public class AliasConfig {
             for(int j = 0; j < c.tokens.size(); j++){
                 Token t = c.tokens.get(j);
                 if(t.type.equals(TType.VARIABLE)){
-                    ac.add(new Variable(t.value, null, t.line_num));
+                    ac.add(new Variable(t.val(), null, t.line_num));
                 } else if(t.type.equals(TType.FINAL_VAR)){
-                    Variable v = new Variable(t.value, null, t.line_num);
+                    Variable v = new Variable(t.val(), null, t.line_num);
                     v.final_var = true;
                     ac.add(v);
                 }else if(t.type.equals(TType.OPT_VAR_START)){
                     if(j + 2 < c.tokens.size() && c.tokens.get(j + 2).type.equals(TType.OPT_VAR_ASSIGN)){
-                        Variable v = new Variable(c.tokens.get(j + 1).value,
-                                c.tokens.get(j + 3).value, t.line_num);
+                        Variable v = new Variable(c.tokens.get(j + 1).val(),
+                                c.tokens.get(j + 3).val(), t.line_num);
                         v.optional = true;
                         if(c.tokens.get(j + 1).type.equals(TType.FINAL_VAR))
                             v.final_var = true;
@@ -504,15 +510,15 @@ public class AliasConfig {
                         j += 4;
                     } else{
                         t = c.tokens.get(j + 1);
-                        Variable v = new Variable(t.value, null, t.line_num);
+                        Variable v = new Variable(t.val(), null, t.line_num);
                         v.optional = true;
-                        if(t.value.equals("$"))
+                        if(t.val().equals("$"))
                             v.final_var = true;
                         ac.add(v);
                         j += 2;
                     }
                 } else if(t.type.equals(TType.COMMAND)){
-                    ac.add(new Command(t.value, t.line_num));
+                    ac.add(new Command(t.val(), t.line_num));
                 } else{
                     //Don't care what it is now. Just add it.
                     ac.add(t);
@@ -541,7 +547,7 @@ public class AliasConfig {
                             soFarAMatch = false;
                         } else {
                             //It's a literal, check to see if it's the same literal
-                            if(!c1.value.equals(c2.value)){
+                            if(!c1.val().equals(c2.val())){
                                 soFarAMatch = false;
                             }
                         }
@@ -578,11 +584,11 @@ public class AliasConfig {
                 if(soFarAMatch) {
                     String commandThis = "";
                     for (Construct c : thisCommand) {
-                        commandThis += c.value + " ";
+                        commandThis += c.val() + " ";
                     }
                     String commandThat = "";
                     for (Construct c : thatCommand) {
-                        commandThat += c.value + " ";
+                        commandThat += c.val() + " ";
                     }
                     throw new ConfigCompileException("The command " + commandThis + "is ambiguous because it "
                             + "matches the signature of " + commandThat, thisCommand.get(0).line_num);
@@ -593,10 +599,6 @@ public class AliasConfig {
         if(a.real.isEmpty()){
             System.err.println("No Aliases were defined.");
         }
-
-        //Copy this working config file to another file so that if a bad config file is read in, at least the old
-        //on can be recovered
-        //TODO
         else{
             System.out.println("Config file compiled sucessfully, with " + a.alias.size() + " alias(es) defined.");
             aliasFile = a;
@@ -635,7 +637,7 @@ public class AliasConfig {
                     if(c.ctype == ConstructType.COMMAND || 
                             c.ctype == ConstructType.TOKEN ||
                             c.ctype == ConstructType.LITERAL){
-                        if(!c.value.equals(arg)){
+                        if(!c.val().equals(arg)){
                             isAMatch = false;
                         }
                     }
@@ -702,7 +704,7 @@ public class AliasConfig {
                         }
                     }
                 }
-                return new RunnableAlias(command, tree, player);
+                return new RunnableAlias(command, tree, player, func_list);
             }
         }
 
@@ -734,72 +736,6 @@ public class AliasConfig {
         }
     }
 
-    
-
-    public class Function extends Construct{
-        ArrayList<Construct> args = new ArrayList<Construct>();
-        FunctionName name;
-
-        Function(String name, int line_num) throws Exception{
-            super(TType.FUNC_NAME, name, ConstructType.FUNCTION, line_num);
-            if(getName(this.value) == FunctionName.INVALID){
-                throw new Exception();
-            }
-            this.name = getName(this.value);
-            this.line_num = line_num;
-        }
-        void addArg(Construct function){
-            args.add(function);
-        }
-
-        int argTotal(){
-            switch(name){
-                case DIE:
-                    return 1;
-                case MSG:
-                    return 1;
-                case IF:
-                    return 3;
-                case EQUALS:
-                    return 2;
-                case DATA_VALUES:
-                    return 1;
-                case PLAYER:
-                    return 0;
-                case CONCAT:
-                    return Integer.MAX_VALUE;
-                case PERFORM:
-                    return 2;
-                default:
-                    return 0;
-            }
-        }
-        final FunctionName getName(String name){
-            name = name.toLowerCase();
-            if(name.equals("die"))
-                return FunctionName.DIE;
-            if(name.equals("msg"))
-                return FunctionName.MSG;
-            if(name.equals("if"))
-                return FunctionName.IF;
-            if(name.equals("equals"))
-                return FunctionName.EQUALS;
-            if(name.equals("data_values"))
-                return FunctionName.DATA_VALUES;
-            if(name.equals("player"))
-                return FunctionName.PLAYER;
-            if(name.equals("concat"))
-                return FunctionName.CONCAT;
-            if(name.equals("perform"))
-                return FunctionName.PERFORM;
-            return FunctionName.INVALID;
-        }
-
-        @Override
-        public String toString(){
-            return "function:" + name.toString().toLowerCase();
-        }
-    }
     public class AliasString{
         ArrayList<Token> tokens = new ArrayList<Token>();
         public AliasString(ArrayList<Token> a){
@@ -815,70 +751,4 @@ public class AliasConfig {
         }
     }
 
-    public class Token extends Construct{
-        public Token(TType type, String value, int line_num){
-            super(type, value, ConstructType.TOKEN, line_num);
-            this.type = type;
-            this.value = value;
-            this.line_num = line_num;
-        }
-        @Override
-        public String toString(){
-            if(type.equals(TType.NEWLINE)){
-                return "newline";
-            }
-            if(type.equals(TType.STRING)){
-                return "string:'" + value + "'";
-            }
-            return type + ":" + value;
-        }
-
-        public String toSimpleString(){
-            if(type.equals(TType.STRING)){
-                return "'" + value + "'";
-            }
-            return value;
-        }
-        public String toOutputString(){
-            if(type.equals(TType.STRING)){
-                return value.replace("'", "\\'");
-            }
-            return value;
-        }
-    }
-
-    public class Variable extends Construct{
-        String name;
-        String def;
-        boolean optional;
-        boolean final_var = false;
-        public Variable(String name, String def, int line_num){
-            super(TType.VARIABLE, name, ConstructType.VARIABLE, line_num);
-            this.name = name;
-            this.def = def;
-        }
-
-        @Override
-        public String toString(){
-            return "var:" + name;
-        }
-    }
-
-    public class Command extends Construct{
-        public Command(String name, int line_num){
-            super(TType.COMMAND, name, ConstructType.COMMAND, line_num);
-        }
-
-        @Override
-        public String toString(){
-            return "command:" + value;
-        }
-    }
-
-    
-
-
-    public static Construct[] getData(String arr){
-        return null;
-    }
 }

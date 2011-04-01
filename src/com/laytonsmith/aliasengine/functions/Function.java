@@ -5,11 +5,15 @@
 
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.CancelCommandException;
+
 /**
  *
  * @author layton
  */
 public interface Function {
-    public int numArgs();
-    public Construct exec(Construct ... args);
+    public String getName();
+    public Integer[] numArgs();
+    public Construct exec(int line_num, Construct ... args) throws CancelCommandException;
 }

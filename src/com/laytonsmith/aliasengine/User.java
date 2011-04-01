@@ -99,11 +99,22 @@ public class User {
     }
 
     /**
-     * Returns whether or not this user has permission to run a given function.
+     * Returns whether or not this user has permission to include this function
+     * in their scripts.
      * @param f
      * @return
      */
-    public boolean hasPermission(FunctionName f){
+    public boolean canCompile(String fname){
+        return true;
+    }
+
+    /**
+     * Returns whether or not this user has permission to run this function if it
+     * is already compiled into a script.
+     * @param fname
+     * @return
+     */
+    public boolean canRun(String fname){
         return true;
     }
 

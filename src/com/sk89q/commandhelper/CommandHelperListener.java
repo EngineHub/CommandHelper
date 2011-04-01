@@ -77,7 +77,7 @@ public class CommandHelperListener extends PlayerListener {
         try {
             User u = new User(player, plugin.persist);
             return CommandHelperPlugin.getCore().alias(command, player,
-                    CommandHelperPlugin.getCore().parse_user_config(u.getAliasesAsArray()));
+                    CommandHelperPlugin.getCore().parse_user_config(u.getAliasesAsArray(), u));
             //return globalAliases.get(command.toLowerCase());
             
         } catch (ConfigCompileException ex) {

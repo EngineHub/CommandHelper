@@ -45,7 +45,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author sk89q
  */
 public class CommandHelperPlugin extends JavaPlugin {
-    private static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
+    public static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
     private static AliasCore ac;
     public static Server myServer;
     public Persistance persist;
@@ -217,8 +217,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 
                 String alias = CommandHelperPlugin.joinString(args, " ");
                 try {
-                    AliasConfig uac = new AliasConfig(alias);
                     User u = new User(player, persist);
+                    AliasConfig uac = new AliasConfig(alias, u);
                     int id = u.addAlias(alias);
                     if(id > -1){
                         player.sendMessage(ChatColor.YELLOW + "Alias added with id '" + id + "'");
