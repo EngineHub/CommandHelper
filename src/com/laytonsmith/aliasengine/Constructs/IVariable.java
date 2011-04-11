@@ -12,8 +12,10 @@ package com.laytonsmith.aliasengine.Constructs;
 public class IVariable extends Variable{
     public IVariable(String name, int line_num){
         super(name, "", line_num);
+        this.ctype = ConstructType.IVARIABLE;
     }
     public IVariable(String name, String value, int line_num){
         super(name, value, line_num);
+        this.ctype = ConstructType.IVARIABLE;
     }
 }

@@ -6,7 +6,6 @@
 package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
-import com.sun.org.apache.bcel.internal.generic.IADD;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -15,10 +14,10 @@ import java.util.Arrays;
  * @author layton
  */
 public class CArray extends Construct{
-    ArrayList<Construct> array;
+    ArrayList<Construct> array = new ArrayList<Construct>();
     public CArray(int line_num, Construct ... items){
         super(TType.CONSTRUCT, null, ConstructType.ARRAY, line_num);
-        array = (ArrayList<Construct>) Arrays.asList(items);
+        array.addAll(Arrays.asList(items));
         regenValue();
     }
 
@@ -33,14 +32,17 @@ public class CArray extends Construct{
             }
         }
         b.append("}");
+        value = b.toString();
     }
 
     public void push(Construct c){
         array.add(c);
+        regenValue();
     }
 
     public void set(int index, Construct c){
         array.set(index, c);
+        regenValue();
     }
 
     public Construct get(int index){
@@ -49,5 +51,9 @@ public class CArray extends Construct{
         } catch(IndexOutOfBoundsException e){
             throw new ConfigRuntimeException("The element at index " + index + " does not exist");
         }
+    }
+    
+    public int size(){
+        return array.size();
     }
 }

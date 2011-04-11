@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct.*;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
+import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -27,14 +28,16 @@ public class AliasConfig {
      */
     Alias aliasFile = null;
     FunctionList func_list;
+    PermissionsResolverManager perms;
 
     /**
      * Constructor. Creates a compiled version of the given script.
      * @param config The config script to compile
      * @throws ConfigCompileException If there is a compiler error in the script
      */
-    public AliasConfig(String config, User u) throws ConfigCompileException{
+    public AliasConfig(String config, User u, PermissionsResolverManager perms) throws ConfigCompileException{
         func_list = new FunctionList(u);
+        this.perms = perms;
         //Convert all newlines into \n newlines
         config = config.replaceAll("\r\n", "\n");
         config = config + "\n"; //add a newline at the end so that parser will work. If it's extra,
@@ -91,6 +94,14 @@ public class AliasConfig {
                 }
                 token_list.add(new Token(TType.OPT_VAR_END, "]", line_num));
                 in_opt_var = false;
+                continue;
+            }
+            if(c == ':' && !state_in_quote){
+                if(buf.length() > 0){
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.IDENT, ":", line_num));
                 continue;
             }
             if(c == ',' && !state_in_quote){
@@ -153,6 +164,9 @@ public class AliasConfig {
                     
                     i++;
                     continue;
+                } else{
+                    //Control character backslash
+                    token_list.add(new Token(TType.SEPERATOR, "\\", line_num));
                 }
             } else if(state_in_quote){
                 buf.append(c);
@@ -264,7 +278,7 @@ public class AliasConfig {
             if(t.type.equals(TType.NEWLINE)){
                 if(aliasBuffer.size() > 0){
                     if(in_alias){
-                        throw new ConfigCompileException("Unexpected newline", line_num);
+                        throw new ConfigCompileException("Unexpected newline", t.line_num);
                     }
                     if(commandBuffer.size() > 0 || tinyCmdBuffer.size() > 0){
                         commandBuffer.add((ArrayList<Token>)tinyCmdBuffer.clone());
@@ -314,12 +328,26 @@ public class AliasConfig {
             ArrayList<Variable> right_vars = new ArrayList<Variable>();
             boolean inside_opt_var = false;
             boolean after_no_def_opt_var = false;
+            boolean has_label = false;
             for(int j = 0; j < c.tokens.size(); j++){
                Token t = c.tokens.get(j);
                //Token prev_token = j - 2 >= 0?c.tokens.get(j - 2):new Token(TType.UNKNOWN, "", t.line_num);
                Token last_token = j - 1 >= 0?c.tokens.get(j - 1):new Token(TType.UNKNOWN, "", t.line_num);
                Token next_token = j + 1 < c.tokens.size()?c.tokens.get(j + 1):new Token(TType.UNKNOWN, "", t.line_num);
                Token after_token = j + 2 < c.tokens.size()?c.tokens.get(j + 2):new Token(TType.UNKNOWN, "", t.line_num);
+               
+               if(j == 0){
+                   if(next_token.type == TType.IDENT){
+                       a.labels.add(t.val());
+                       has_label = true;
+                   } else {
+                       a.labels.add(null);
+                   }
+               }
+               
+               if(t.type == TType.IDENT){
+                   continue;
+               }
 
                if(t.type.equals(TType.FINAL_VAR) && c.tokens.size() - j >= 5){
                    throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num);
@@ -328,8 +356,10 @@ public class AliasConfig {
                    left_vars.add(new Variable(t.val(), null, t.line_num));
                }
                if(j == 0 && !t.type.equals(TType.COMMAND)){
-                   throw new ConfigCompileException("Expected command (/command) at start of alias." +
-                           " Instead, found " + t.type + " (" + t.val() + ")", t.line_num);
+                   if(!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)){
+                       throw new ConfigCompileException("Expected command (/command) at start of alias." +
+                               " Instead, found " + t.type + " (" + t.val() + ")", t.line_num);
+                   }
                }
                if(after_no_def_opt_var && !inside_opt_var){
                    if(t.type.equals(TType.LIT) || t.type.equals(TType.STRING) || t.type.equals(TType.OPT_VAR_ASSIGN)){
@@ -380,6 +410,11 @@ public class AliasConfig {
                    }
                }
             }
+            if(has_label){
+                //remove the label from the alias
+                a.alias.get(i).tokens.remove(0);
+                a.alias.get(i).tokens.remove(0);
+            }
             ArrayList<GenericTree<Construct>> rightTreeOne = new ArrayList<GenericTree<Construct>>();
 
             //Compile the right side into a program
@@ -405,9 +440,13 @@ public class AliasConfig {
                             || t.type.equals(TType.OPT_VAR_END)){
                         throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
                     }
-                    if(t.type.equals(TType.LIT) || t.type.equals(TType.STRING)
-                            || t.type.equals(TType.IVARIABLE)){
-                        node.addChild(new GenericTreeNode<Construct>(t));
+                    if(t.type.equals(TType.LIT)){
+                        //See what the type of each literal is, and see if it's a double, int, boolean, null, or other keyword.
+                        node.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num)));
+                    } else if(t.type.equals(TType.STRING)){
+                        node.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.line_num)));
+                    } else if(t.type.equals(TType.IVARIABLE)){
+                        node.addChild(new GenericTreeNode<Construct>(new IVariable(t.val(), line_num)));
                     } else if(t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)){
                         node.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, t.line_num)));
                         right_vars.add(new Variable(t.val(), null, t.line_num));
@@ -434,7 +473,8 @@ public class AliasConfig {
                         parents.pop();
                         node = parents.peek();
                     } else if(t.type.equals(TType.COMMAND)){
-                        node.addChild(new GenericTreeNode<Construct>(new Command(t.val(), t.line_num)));
+                        //For the sake of standardization, add this as a string
+                        node.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.line_num)));
                     } else if(t.type.equals(TType.COMMA)){
                         continue;
                     } else{
@@ -448,6 +488,19 @@ public class AliasConfig {
                         int args = n.getChildren().size();
                         Function f = func_list.getFunction((CFunction)n.getData());
                         List<Integer> numArgs = Arrays.asList(f.numArgs());
+                        if(f.isRestricted()){
+                            boolean perm;
+                            if(u != null && perms != null){
+                                perm = perms.hasPermission(u.player.getName(), "ch.func.compile." + f.getName())
+                                        || perms.hasPermission(u.player.getName(), "commandhelper.func.compile." + f.getName());
+                            } else {
+                                perm = true;
+                            }
+                            if(!perm){
+                                throw new ConfigCompileException("You do not have permission to compile the " + f.getName() + " function" +
+                                        " into your script.");
+                            }
+                        }
                         if(!numArgs.contains(args) &&
                                 !numArgs.contains(Integer.MAX_VALUE)){
                             throw new ConfigCompileException("Incorrect number of args for " +
@@ -461,6 +514,7 @@ public class AliasConfig {
                     for(Variable right_var : right_vars){
                         if(left_var.name.equals(right_var.name)){
                             found = true;
+                            break;
                         }
                     }
                     if(!found){
@@ -475,6 +529,7 @@ public class AliasConfig {
                         if(right_var.name.equals(left_var.name)){
                             found = true;
                             right_var.def = left_var.def;
+                            break;
                         }
                     }
                     if(!found){
@@ -597,7 +652,7 @@ public class AliasConfig {
         }
 
         if(a.real.isEmpty()){
-            System.err.println("No Aliases were defined.");
+            System.out.println("No Aliases were defined.");
         }
         else{
             System.out.println("Config file compiled sucessfully, with " + a.alias.size() + " alias(es) defined.");
@@ -628,7 +683,7 @@ public class AliasConfig {
             int lastJ = 0;
             try{
                 for(int j = 0; j < tokens.size(); j++){
-                    if(!isAMatch){
+                    if(!isAMatch){                        
                         break;
                     }
                     lastJ = j;
@@ -704,7 +759,7 @@ public class AliasConfig {
                         }
                     }
                 }
-                return new RunnableAlias(command, tree, player, func_list);
+                return new RunnableAlias(this.aliasFile.labels.get(i), tree, player, func_list);
             }
         }
 
@@ -720,6 +775,7 @@ public class AliasConfig {
         ArrayList<AliasString> alias = new ArrayList<AliasString>();
         ArrayList<ArrayList<Construct>> aliasConstructs = new ArrayList<ArrayList<Construct>>();
         ArrayList<ArrayList<AliasString>> real = new ArrayList<ArrayList<AliasString>>();
+        ArrayList<String> labels = new ArrayList<String>();
         ArrayList<ArrayList<GenericTree<Construct>>> rightTrees = new ArrayList<ArrayList<GenericTree<Construct>>>();
         HashMap<AliasString, ArrayList<AliasString>> map = new HashMap<AliasString, ArrayList<AliasString>>();
         @Override

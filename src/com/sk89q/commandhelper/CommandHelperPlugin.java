@@ -48,10 +48,8 @@ public class CommandHelperPlugin extends JavaPlugin {
     public static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
     private static AliasCore ac;
     public static Server myServer;
-    public Persistance persist;
-    PermissionsResolverManager perms =
-        new PermissionsResolverManager(getConfiguration(), getServer(),
-                getDescription().getName(), logger);
+    public static Persistance persist;
+    public static PermissionsResolverManager perms;
     /**
      * Listener for the plugin system.
      */
@@ -66,8 +64,10 @@ public class CommandHelperPlugin extends JavaPlugin {
         myServer = getServer();
         persist = new Persistance(new File("plugins/CommandHelper/persistance.ser"), this);
         logger.info("CommandHelper " + getDescription().getVersion() + " enabled");
+        perms = new PermissionsResolverManager(getConfiguration(), getServer(),
+                getDescription().getName(), logger);
         try {
-            ac = new AliasCore(true, 50, 5, new java.io.File("plugins/CommandHelper/config.txt"));
+            ac = new AliasCore(true, 50, 5, new java.io.File("plugins/CommandHelper/config.txt"), perms);
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
@@ -218,7 +218,7 @@ public class CommandHelperPlugin extends JavaPlugin {
                 String alias = CommandHelperPlugin.joinString(args, " ");
                 try {
                     User u = new User(player, persist);
-                    AliasConfig uac = new AliasConfig(alias, u);
+                    AliasConfig uac = new AliasConfig(alias, u, perms);
                     int id = u.addAlias(alias);
                     if(id > -1){
                         player.sendMessage(ChatColor.YELLOW + "Alias added with id '" + id + "'");

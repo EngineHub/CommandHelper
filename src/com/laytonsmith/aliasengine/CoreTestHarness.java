@@ -6,7 +6,6 @@
 package com.laytonsmith.aliasengine;
 
 import java.io.File;
-import java.util.ArrayList;
 
 /**
  *
@@ -15,8 +14,8 @@ import java.util.ArrayList;
 public class CoreTestHarness {
     public static void main(String[] args){
         try {
-            AliasCore core = new AliasCore(true, 10, 5, new File("plugins/CommandHelper/config.txt"));
-            boolean cmds = core.alias("/multi", null, null);
+            AliasCore core = new AliasCore(true, 10, 5, new File("plugins/CommandHelper/config.txt"), null);
+            boolean cmds = core.alias("/i 2", null, null);
             if (!cmds) {
                 System.out.println("No alias(es) found for that command");
             }

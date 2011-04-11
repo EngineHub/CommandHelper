@@ -20,7 +20,6 @@ class PluginLoader {
     }
     private static String parseFile(String dir) {
         String tempJars = "";
-        dir = dir.replace('\\', '/');
         File file = new File(dir);
         File[] tempFiles = file.listFiles();
         String tempString = "";
@@ -64,7 +63,6 @@ class PluginLoader {
             return;
         }
         String classPath = baseClassPath + System.getProperty("path.separator") + jars;
-        classPath = classPath.replace('\\', '/');
 
         System.setProperty("java.class.path", classPath);
     }

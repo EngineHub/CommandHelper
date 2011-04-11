@@ -11,13 +11,13 @@ package com.laytonsmith.aliasengine.Constructs;
  */
 public class Construct{
     public enum ConstructType{
-        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, DOUBLE, BOOLEAN, NULL
+        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE
     }
 
     public enum TType{
         UNKNOWN, OPT_VAR_START, OPT_VAR_END, OPT_VAR_ASSIGN, ALIAS_END, COMMA, FUNC_NAME, FUNC_START,
         FUNC_END, STRING, NEWLINE, MULTILINE_START, MULTILINE_END, COMMAND, SEPERATOR, VARIABLE,
-        IVARIABLE, FINAL_VAR, LIT, ROOT, 
+        IVARIABLE, FINAL_VAR, LIT, ROOT, IDENT,
         
         CONSTRUCT
     }
@@ -35,6 +35,10 @@ public class Construct{
     }
 
     public String val(){
+        return value;
+    }
+    
+    public String toString(){
         return value;
     }
 }

@@ -25,4 +25,11 @@ public class Variable extends Construct {
     public String toString() {
         return "var:" + name;
     }
+    public String getName(){
+        return name;
+    }
+    @Override
+    public String val(){
+        return def;
+    }
 }

@@ -2,14 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.laytonsmith.aliasengine;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileReader;
-import java.io.IOException;
+import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
@@ -23,13 +19,16 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class AliasCore {
+
     private boolean allowCustomAliases = true;
-    private int maxCustomAliases = 50;
+    private int maxCustomAliases = 5;
     private int maxCommands = 5;
     private File aliasConfig;
     AliasConfig config;
     static final Logger logger = Logger.getLogger("Minecraft");
     private ArrayList<String> echoCommand = new ArrayList<String>();
+    private PermissionsResolverManager perms;
+
     /**
      * This constructor accepts the configuration settings for the plugin, and ensures
      * that the manager uses these settings.
@@ -39,13 +38,15 @@ public class AliasCore {
      * macro, this can help prevent command spamming.
      */
     public AliasCore(boolean allowCustomAliases, int maxCustomAliases, int maxCommands,
-            File aliasConfig) throws ConfigCompileException{
+            File aliasConfig, PermissionsResolverManager perms) throws ConfigCompileException {
         this.allowCustomAliases = allowCustomAliases;
         this.maxCustomAliases = maxCustomAliases;
         this.maxCommands = maxCommands;
         this.aliasConfig = aliasConfig;
+        this.perms = perms;
         reload();
     }
+
     /**
      * This is the workhorse function. It takes a given command, then converts it
      * into the actual command(s). If the command maps to a defined alias, it will
@@ -55,10 +56,10 @@ public class AliasCore {
      * @param command
      * @return
      */
-    public boolean alias(String command, Player player, ArrayList<AliasConfig> playerCommands){
+    public boolean alias(String command, Player player, ArrayList<AliasConfig> playerCommands) {
         //If player is null, we are running the test harness, so don't
         //actually add the player to the array.
-        if(player != null && echoCommand.contains(player.getName())){
+        if (player != null && echoCommand.contains(player.getName())) {
             //we are running one of the expanded commands, so exit with false
             return false;
         }
@@ -66,72 +67,80 @@ public class AliasCore {
         //Global aliases override personal ones, so check the list first
         RunnableAlias a = config.getRunnableAliases(command, player);
 
-        if(a == null && playerCommands != null){
+        if (a == null && playerCommands != null) {
             //if we are still looking, look in the aliases for this player
-            for(AliasConfig ac : playerCommands){
+            for (AliasConfig ac : playerCommands) {
                 RunnableAlias b = ac.getRunnableAliases(command, player);
-                if(b != null){
+                if (b != null) {
                     a = b;
                 }
             }
 
         }
 
-        if(a == null){
+        if (a == null) {
             //apparently we couldn't find the command, so return false
             return false;
-        } else{
+        } else {
             //Run all the aliases
             a.player = player;
-            if(a.player != null) echoCommand.add(player.getName());
+            if (a.player != null) {
+                echoCommand.add(player.getName());
+            }
             a.run();
-            if(a.player != null) echoCommand.remove(player.getName());
+            if (a.player != null) {
+                echoCommand.remove(player.getName());
+            }
         }
         return true;
     }
 
-
     /**
      * Loads the global alias file in from
      */
-    public boolean reload() throws ConfigCompileException{
+    public boolean reload() throws ConfigCompileException {
         boolean is_loaded = false;
         try {
-            if(!aliasConfig.exists()){
+            if (!aliasConfig.exists()) {
                 aliasConfig.getParentFile().mkdirs();
                 aliasConfig.createNewFile();
+                try{
+                file_put_contents(aliasConfig,
+                        getStringResource(this.getClass().getResourceAsStream("/com/laytonsmith/aliasengine/samp_config.txt")),
+                        "o");
+                } catch (IOException e){
+                    logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
+                }
             }
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
-            config = new AliasConfig(alias_config, null);
+            config = new AliasConfig(alias_config, null, perms);
             is_loaded = true;
         } catch (ConfigCompileException ex) {
-            logger.log(Level.SEVERE, null, ex);
-        } catch(IOException ex){
-            logger.log(Level.SEVERE, null, "Path to config file is not correct/accessable. Please"
+            logger.log(Level.SEVERE, "CommandHelper: " + ex.toString());
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, "CommandHelper: Path to config file is not correct/accessable. Please"
                     + " check the location and try loading the plugin again.");
-        } catch(Throwable t){
+        } catch (Throwable t) {
             t.printStackTrace();
         } finally {
-            if(!is_loaded){
+            if (!is_loaded) {
                 //Try and pull the old config file, if it exists
                 boolean old_file_exists = false;
-
-
-                if(!old_file_exists){
-                    throw new ConfigCompileException("Unable to load working config file, aborting plugin operation", 0);
+                if (!old_file_exists) {
+                    logger.log(Level.SEVERE, "CommandHelper: Unable to load working config file, aborting plugin operation");
                 }
             }
         }
         return is_loaded;
     }
 
-    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config, User u) throws ConfigCompileException{
-        if(config == null){
+    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config, User u) throws ConfigCompileException {
+        if (config == null) {
             return null;
         }
         ArrayList<AliasConfig> alac = new ArrayList<AliasConfig>();
-        for(int i = 0; i < config.size(); i++){
-            alac.add( new AliasConfig(config.get(i), u ));
+        for (int i = 0; i < config.size(); i++) {
+            alac.add(new AliasConfig(config.get(i), u, perms));
         }
         return alac;
     }
@@ -152,5 +161,63 @@ public class AliasCore {
         }
         in.close();
         return ret;
+    }
+
+    /**
+     * This function writes the contents of a string to a file.
+     * @param file_location the location of the file on the disk
+     * @param contents the string to be written to the file
+     * @param mode the mode in which to write the file: <br />
+     * <ul>
+     * <li>"o" - overwrite the file if it exists, without asking</li>
+     * <li>"a" - append to the file if it exists, without asking</li>
+     * <li>"c" - cancel the operation if the file exists, without asking</li>
+     * </ul>
+     * @return true if the file was written, false if it wasn't. Throws an exception
+     * if the file could not be created, or if the mode is not valid.
+     * @throws Exception if the file could not be created
+     */
+    public static boolean file_put_contents(File file_location, String contents, String mode)
+            throws Exception {
+        BufferedWriter out = null;
+        File f = file_location;
+        if (f.exists()) {
+            //do different things depending on our mode
+            if (mode.equalsIgnoreCase("o")) {
+                out = new BufferedWriter(new FileWriter(file_location));
+            } else if (mode.equalsIgnoreCase("a")) {
+                out = new BufferedWriter(new FileWriter(file_location, true));
+            } else if (mode.equalsIgnoreCase("c")) {
+                return false;
+            } else {
+                throw new RuntimeException("Undefined mode in file_put_contents: " + mode);
+            }
+        } else {
+            out = new BufferedWriter(new FileWriter(file_location));
+        }
+        //At this point, we are assured that the file is open, and ready to be written in
+        //from this point in the file.
+        if (out != null) {
+            out.write(contents);
+            out.close();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    public static String getStringResource(InputStream is) throws IOException {
+        Writer writer = new StringWriter();
+        char[] buffer = new char[1024];
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(is));
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+        } finally {
+            is.close();
+        }
+        return writer.toString();
     }
 }
