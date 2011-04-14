@@ -16,7 +16,7 @@ import org.bukkit.material.Tree;
  * @author Layton
  */
 public class StringHandling {
-    public static class concat implements Function{
+    @api public static class concat implements Function{
 
         public String getName() {
             return "concat";
@@ -35,7 +35,7 @@ public class StringHandling {
         }
 
         public String docs() {
-            return "Concatenates any number of arguments together, and returns a string";
+            return "string {var1, [var2...]} Concatenates any number of arguments together, and returns a string";
         }
 
         public boolean isRestricted() {
@@ -50,7 +50,7 @@ public class StringHandling {
         
     }
     
-    public static class sconcat implements Function{
+    @api public static class sconcat implements Function{
 
         public String getName() {
             return "sconcat";
@@ -72,7 +72,7 @@ public class StringHandling {
         }
 
         public String docs() {
-            return "Concatenates any number of arguments together, but puts a space between elements";
+            return "string {var1, [var2...]} Concatenates any number of arguments together, but puts a space between elements";
         }
 
         public boolean isRestricted() {
@@ -87,7 +87,7 @@ public class StringHandling {
         
     }
     
-    public static class read implements Function{
+    @api public static class read implements Function{
 
         public String getName() {
             return "read";
@@ -102,7 +102,7 @@ public class StringHandling {
         }
 
         public String docs() {
-            return "Reads in a file from the file system and returns it as a string";
+            return "string {file} Reads in a file from the file system at location var1 and returns it as a string";
         }
 
         public boolean isRestricted() {

@@ -20,7 +20,7 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class DataHandling {
-    public static class array implements Function{
+    @api public static class array implements Function{
 
         public String getName() {
             return "array";
@@ -35,7 +35,7 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "Returns an array of objects";
+            return "array {[var1, [var2...]]} Creates an array of values.";
         }
 
         public boolean isRestricted() {
@@ -49,7 +49,7 @@ public class DataHandling {
         }
     }
     
-    public static class assign implements Function{
+    @api public static class assign implements Function{
         IVariableList varList;
         public String getName() {
             return "assign";
@@ -71,7 +71,7 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "Accepts an ivariable as a parameter, and puts the specified value in it. Returns the variable that was assigned.";
+            return "ivariable {ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it. Returns the variable that was assigned.";
         }
 
         public boolean isRestricted() {
@@ -88,7 +88,7 @@ public class DataHandling {
         
     }
     
-    public static class _for implements Function{
+    @api public static class _for implements Function{
         IVariableList varList;
         public String getName() {
             return "for";
@@ -123,7 +123,10 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "Acts as a typical for loop";
+            return "void {assign, condition, expression1, expression2} Acts as a typical for loop. The assignment is first run. Then, a"
+                    + " condition is checked. If that condition is checked, expression2 is run. After that, expression1 is run. In java"
+                    + " syntax, this would be: for(assign; condition; expression1){expression2}. assign must be an ivariable, either a "
+                    + "pre defined one, or the results of the assign() function. condition must be a boolean.";
         }
 
         public boolean isRestricted() {

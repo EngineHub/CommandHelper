@@ -32,7 +32,7 @@ import org.bukkit.util.Vector;
  * @author Layton
  */
 public class Meta {
-    public static class runas implements Function{
+    @api public static class runas implements Function{
 
         public String getName() {
             return "runas";
@@ -68,7 +68,7 @@ public class Meta {
         }
 
         public String docs() {
-            return "Runs a command as a particular user. The special user '~op' is a user that runs as op. Be careful with this very powerful function."
+            return "void {player, command} Runs a command as a particular user. The special user '~op' is a user that runs as op. Be careful with this very powerful function."
                     + " Commands cannot be run as an offline player. Returns void. If the first argument is an array of usernames, the command"
                     + " will be run in the context of each user in the array.";
         }
@@ -85,7 +85,7 @@ public class Meta {
         
     }
 
-    public static class run implements Function {
+    @api public static class run implements Function {
 
         public String getName() {
             return "run";
@@ -101,7 +101,7 @@ public class Meta {
         }
 
         public String docs() {
-            return "Runs a command as the current player. Useful for running commands in a loop.";
+            return "void {var1} Runs a command as the current player. Useful for running commands in a loop.";
         }
 
         public boolean isRestricted() {

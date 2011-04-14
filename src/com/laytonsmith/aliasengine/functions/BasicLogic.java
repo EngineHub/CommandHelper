@@ -16,7 +16,7 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class BasicLogic {
-    public static class _if implements Function{
+    @api public static class _if implements Function{
 
         public String getName() {
             return "if";
@@ -87,7 +87,7 @@ public class BasicLogic {
         
     }
     
-    public static class _equals implements Function{
+    @api public static class _equals implements Function{
 
         public String getName() {
             return "equals";
@@ -98,7 +98,21 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CBoolean(args[0].val().equals(args[1].val()), line_num);
+            if(Static.anyBooleans(args)){
+                boolean arg1 = Static.getBoolean(args[0]);
+                boolean arg2 = Static.getBoolean(args[1]);
+                return new CBoolean(arg1 == arg2, line_num);
+            }
+            if(args[0].val().equals(args[1].val())){
+                return new CBoolean(true, line_num);
+            }
+            try{
+                double arg1 = Static.getNumber(args[0]);
+                double arg2 = Static.getNumber(args[1]);
+                return new CBoolean(arg1 == arg2, line_num);
+            } catch (ConfigRuntimeException e){
+                return new CBoolean(false, line_num);
+            }
         }
 
         public String docs() {
@@ -117,7 +131,7 @@ public class BasicLogic {
         
     }
     
-    public static class lt implements Function{
+    @api public static class lt implements Function{
 
         public String getName() {
             return "lt";
@@ -149,7 +163,7 @@ public class BasicLogic {
         
     }
     
-    public static class gt implements Function{
+    @api public static class gt implements Function{
 
         public String getName() {
             return "gt";
@@ -181,7 +195,7 @@ public class BasicLogic {
         
     }
     
-    public static class lte implements Function{
+    @api public static class lte implements Function{
 
         public String getName() {
             return "lte";
@@ -213,7 +227,7 @@ public class BasicLogic {
         
     }
     
-    public static class gte implements Function{
+    @api public static class gte implements Function{
 
         public String getName() {
             return "gte";
@@ -245,10 +259,10 @@ public class BasicLogic {
         
     }
     
-    public static class add implements Function{
+    @api public static class and implements Function{
 
         public String getName() {
-            return "add";
+            return "and";
         }
 
         public Integer[] numArgs() {
@@ -256,101 +270,17 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            double tally = Static.getNumber(args[0]);
-            for(int i = 1; i < args.length; i++){
-                tally += Static.getNumber(args[i]);
-            }
-            if(Static.anyDoubles(args)){
-                return new CDouble(tally, line_num);
-            } else {
-                return new CInt((int)tally, line_num);
-            }
-        }
-
-        public String docs() {
-            return "Adds all the arguments together, and returns either a double or an integer";
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-        
-    }
-    
-    public static class subtract implements Function{
-
-        public String getName() {
-            return "subtract";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            double tally = Static.getNumber(args[0]);
-            for(int i = 1; i < args.length; i++){
-                tally -= Static.getNumber(args[i]);
-            }
-            if(Static.anyDoubles(args)){
-                return new CDouble(tally, line_num);
-            } else {
-                return new CInt((int)tally, line_num);
-            }
-        }
-
-        public String docs() {
-            return "Subtracts the arguments from left to right, and returns either a double or an integer";
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-        
-    }
-    
-    public static class multiply implements Function{
-
-        public String getName() {
-            return "multiply";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            double tally = Static.getNumber(args[0]);
-            for(int i = 1; i < args.length; i++){
-                tally *= Static.getNumber(args[i]);
-            }
-            if(Static.anyDoubles(args)){
-                return new CDouble(tally, line_num);
-            } else {
-                return new CInt((int)tally, line_num);
-            }
-        }
-
-        public String docs() {
-            return "Multiplies the arguments together, and returns either a double or an integer";
-        }
-
-        public boolean isRestricted() {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
+        public String docs() {
+            return "boolean {var1, [var2...]} Returns the boolean value of a logical AND across all arguments";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
         public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
@@ -359,10 +289,10 @@ public class BasicLogic {
         
     }
     
-    public static class divide implements Function{
+    @api public static class or implements Function{
 
         public String getName() {
-            return "divide";
+            return "or";
         }
 
         public Integer[] numArgs() {
@@ -370,19 +300,11 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            double tally = Static.getNumber(args[0]);
-            for(int i = 1; i < args.length; i++){
-                tally /= Static.getNumber(args[i]);
-            }
-            if(tally == (int)tally){
-                return new CInt((int)tally, line_num);
-            } else {
-                return new CDouble(tally, line_num);
-            }
+            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         public String docs() {
-            return "Divides the arguments from left to right, and returns either a double or an integer";
+            return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments";
         }
 
         public boolean isRestricted() {
@@ -397,25 +319,22 @@ public class BasicLogic {
         
     }
     
-    public static class mod implements Function{
+    @api public static class not implements Function{
 
         public String getName() {
-            return "mod";
+            return "not";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{1};
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            int arg1 = Static.getInt(args[0]);
-            int arg2 = Static.getInt(args[1]);
-            return new CInt(arg1 % arg2, line_num);
+            throw new UnsupportedOperationException("Not supported yet.");
         }
-        
 
         public String docs() {
-            return "Returns the modulo";
+            return "boolean {var1, [var2...]} Returns the boolean value of a logical NOT for this argument";
         }
 
         public boolean isRestricted() {
@@ -430,76 +349,5 @@ public class BasicLogic {
         
     }
     
-    public static class pow implements Function{
-
-        public String getName() {
-            return "pow";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2};
-        }
-
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            double arg1 = Static.getNumber(args[0]);
-            double arg2 = Static.getNumber(args[1]);
-            return new CDouble(Math.pow(arg1, arg2), line_num);
-        }
-
-        public String docs() {
-            return "Returns the mathematical power function";
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-        
-    }
     
-    public static class Static{
-        public static double getNumber(Construct c){
-            double d;
-            if(c instanceof CInt){
-                d = ((CInt)c).getInt();
-            } else if(c instanceof CDouble){
-                d = ((CDouble)c).getDouble();
-            } else{
-                throw new ConfigRuntimeException("Expecting a number, but recieved " + c.val() + " instead");
-            }
-            return d;
-        }
-        
-        public static double getDouble(Construct c){
-            try{
-                return getNumber(c);
-            } catch(ConfigRuntimeException e){
-                throw new ConfigRuntimeException("Expecting a double, but recieved " + c.val() + " instead");
-            }
-        }
-        
-        public static int getInt(Construct c){
-            int i;
-            if(c instanceof CInt){
-                i = ((CInt)c).getInt();
-            } else{
-                throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead");
-            }
-            return i;
-        }
-        
-        public static boolean anyDoubles(Construct ... c){
-            for(int i = 0; i < c.length; i++){
-                if(c[i] instanceof CDouble){
-                    return true;
-                }
-            }
-            return false;
-        }
-    }
 }

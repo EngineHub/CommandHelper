@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class ArrayHandling {
-    public static class array_size implements Function{
+    @api public static class array_size implements Function{
 
         public String getName() {
             return "array_size";
@@ -47,7 +47,7 @@ public class ArrayHandling {
         
     }
     
-    public static class array_get implements Function{
+    @api public static class array_get implements Function{
 
         public String getName() {
             return "array_get";
@@ -78,7 +78,7 @@ public class ArrayHandling {
         
     }
     
-    public static class array_set implements Function{
+    @api public static class array_set implements Function{
 
         public String getName() {
             return "array_set";
@@ -109,7 +109,7 @@ public class ArrayHandling {
         
     }
     
-    public static class array_push implements Function{
+    @api public static class array_push implements Function{
 
         public String getName() {
             return "array_push";

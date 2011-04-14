@@ -16,7 +16,7 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class Minecraft {
-    public static class data_values implements Function{
+    @api public static class data_values implements Function{
 
         public String getName() {
             return "data_values";
@@ -32,7 +32,7 @@ public class Minecraft {
         }
 
         public String docs() {
-            return "Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
+            return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
                     + " simply returns that number";
         }
 

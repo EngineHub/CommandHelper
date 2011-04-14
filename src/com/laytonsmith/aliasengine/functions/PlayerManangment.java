@@ -17,7 +17,7 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class PlayerManangment {
-    public static class player implements Function{
+    @api public static class player implements Function{
 
         public String getName() {
             return "player";
@@ -36,7 +36,7 @@ public class PlayerManangment {
         }
 
         public String docs() {
-            return "Returns the name of the player running the command";
+            return "string {} Returns the name of the player running the command";
         }
 
         public boolean isRestricted() {
@@ -51,7 +51,7 @@ public class PlayerManangment {
         
     }
     
-    public static class all_players implements Function{
+    @api public static class all_players implements Function{
 
         public String getName() {
             return "all_players";
@@ -71,7 +71,7 @@ public class PlayerManangment {
         }
 
         public String docs() {
-            return "Returns an array of all the player names of all the online players on the server";
+            return "array {} Returns an array of all the player names of all the online players on the server";
         }
 
         public boolean isRestricted() {

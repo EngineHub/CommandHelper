@@ -18,7 +18,7 @@ import org.bukkit.entity.Player;
  */
 public class Echoes {
 
-    public static class die implements Function{
+    @api public static class die implements Function{
         public Integer []numArgs() {
             return new Integer[] {0,1};
         }
@@ -35,7 +35,7 @@ public class Echoes {
 
         public String getName(){ return "die"; }
         public String docs(){
-            return "Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
+            return "nothing {[var1]} Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
         }
 
         public boolean isRestricted() {
@@ -49,7 +49,7 @@ public class Echoes {
         }
     }
     
-    public static class msg implements Function{
+    @api public static class msg implements Function{
 
         public String getName() {
             return "msg";
@@ -69,7 +69,7 @@ public class Echoes {
         }
 
         public String docs() {
-            return "Echoes a message to the player running the command";
+            return "void {var1, [var2...]} Echoes a message to the player running the command";
         }
 
         public boolean isRestricted() {
