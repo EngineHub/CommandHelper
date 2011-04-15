@@ -17,7 +17,7 @@ public class Main {
     static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki"}));
     public static void main(String [] args){
         if(args.length == 0){
-            CoreTestHarness.start(args);
+            CoreTestHarness.start(null);
         }
         List l = Arrays.asList(args);
         if(l.contains("-help") || l.contains("-h") || l.contains("--help") || l.contains("/?")){
@@ -58,15 +58,11 @@ public class Main {
                                 "along with this program. If not, see <http://www.gnu.org/licenses/>.\n");
             return;
         }
-        if(l.contains("--test-compile")){
-            CoreTestHarness.start(args);
-            return;
-        }
         for(int i = 0; i < l.size(); i++){
             String s = l.get(i).toString();
             if(s.matches("--docs")){
                 //Documentation generator
-                String type = (i <= l.size()?null:l.get(i + 1).toString().toLowerCase());
+                String type = (i <= l.size() - 1?l.get(i + 1).toString().toLowerCase():null);
                 if(type == null){
                     type = "html";
                 }
@@ -75,6 +71,10 @@ public class Main {
                     return;
                 }
                 System.out.println("Creating " + type + " documentation.");
+            } else if(s.matches("--test-compile")){
+                String file = (i <= l.size() - 1?l.get(i + 1).toString().toLowerCase():null);                
+                CoreTestHarness.start(file);
+                return;
             }
         }
     }

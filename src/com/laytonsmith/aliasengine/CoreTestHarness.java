@@ -12,13 +12,12 @@ import java.io.File;
  * @author Layton
  */
 public class CoreTestHarness {
-    public static void start(String[] args){
+    public static void start(String path){
         try {
-            AliasCore core = new AliasCore(true, 10, 5, new File("plugins/CommandHelper/config.txt"), null);
-            boolean cmds = core.alias("/i 2", null, null);
-            if (!cmds) {
-                System.out.println("No alias(es) found for that command");
+            if(path == null){
+                path = "plugins/CommandHelper/config.txt";
             }
+            AliasCore core = new AliasCore(true, 10, 5, new File("plugins/CommandHelper/config.txt"), null);
         } catch (ConfigCompileException ex) {
             System.err.println(ex);
         }
