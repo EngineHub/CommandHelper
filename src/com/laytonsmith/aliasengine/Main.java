@@ -71,6 +71,7 @@ public class Main {
                     return;
                 }
                 System.out.println("Creating " + type + " documentation.");
+                DocGen.start(type);
             } else if(s.matches("--test-compile")){
                 String file = (i <= l.size() - 1?l.get(i + 1).toString().toLowerCase():null);                
                 CoreTestHarness.start(file);

@@ -16,6 +16,9 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class BasicLogic {
+    public static String docs(){
+        return "These functions provide basic logical operations.";
+    }
     @api public static class _if implements Function{
 
         public String getName() {
@@ -70,7 +73,7 @@ public class BasicLogic {
         }
 
         public String docs() {
-            return "If the first argument evaluates to a true value, the second argument is returned, otherwise the third argument is returned."
+            return "mixed {cond, trueRet, [falseRet]} If the first argument evaluates to a true value, the second argument is returned, otherwise the third argument is returned."
                     + " If there is no third argument, it returns void.";
         }
 
@@ -116,7 +119,7 @@ public class BasicLogic {
         }
 
         public String docs() {
-            return "Returns true or false if the two arguments are equal";
+            return "boolean {var1, var2} Returns true or false if the two arguments are equal";
         }
 
         public boolean isRestricted() {
@@ -148,7 +151,7 @@ public class BasicLogic {
         }
 
         public String docs() {
-            return "Returns the results of a less than operation";
+            return "boolean {var1, var2} Returns the results of a less than operation";
         }
 
         public boolean isRestricted() {
@@ -180,7 +183,7 @@ public class BasicLogic {
         }
 
         public String docs() {
-            return "Returns the result of a greater than operation";
+            return "boolean {var1, var2} Returns the result of a greater than operation";
         }
 
         public boolean isRestricted() {
@@ -212,7 +215,7 @@ public class BasicLogic {
         }
 
         public String docs() {
-            return "Returns the result of a less than or equal to operation";
+            return "boolean {var1, var2} Returns the result of a less than or equal to operation";
         }
 
         public boolean isRestricted() {
@@ -244,7 +247,7 @@ public class BasicLogic {
         }
 
         public String docs() {
-            return "Returns the result of a greater than or equal to operation";
+            return "boolean {var1, var2} Returns the result of a greater than or equal to operation";
         }
 
         public boolean isRestricted() {

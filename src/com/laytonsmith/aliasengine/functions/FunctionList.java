@@ -182,4 +182,8 @@ public class FunctionList {
         }
         throw new ConfigCompileException("Function " + name + " is not defined");
     }
+    
+    public static ArrayList<Function> getFunctionList(){
+        return functions;
+    }
 }

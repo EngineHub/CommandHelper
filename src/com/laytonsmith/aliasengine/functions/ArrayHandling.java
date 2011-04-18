@@ -17,6 +17,9 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class ArrayHandling {
+    public static String docs(){
+        return "This class contains functions that provide a way to manipulate arrays. To create an array, use the <code>array</code> function.";
+    }
     @api public static class array_size implements Function{
 
         public String getName() {
@@ -32,7 +35,7 @@ public class ArrayHandling {
         }
 
         public String docs() {
-            return "Returns the size of this array as an integer";
+            return "int {array} Returns the size of this array as an integer";
         }
 
         public boolean isRestricted() {
@@ -62,7 +65,7 @@ public class ArrayHandling {
         }
 
         public String docs() {
-            return "Returns the element specified at the index of the array. If the element doesn't exist, an exception is thrown. "
+            return "mixed {array, index} Returns the element specified at the index of the array. If the element doesn't exist, an exception is thrown. "
                     + "array_get(array, index)";
         }
 
@@ -94,7 +97,7 @@ public class ArrayHandling {
         }
 
         public String docs() {
-            return "Sets the value of the array at the specified index. array_set(array, index, value). Returns void.";
+            return "void {array, index, value} Sets the value of the array at the specified index. array_set(array, index, value). Returns void.";
         }
 
         public boolean isRestricted() {
@@ -124,7 +127,7 @@ public class ArrayHandling {
         }
 
         public String docs() {
-            return "Pushes the specified value onto the end of the array";
+            return "void {array, value} Pushes the specified value onto the end of the array";
         }
 
         public boolean isRestricted() {

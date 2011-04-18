@@ -32,6 +32,9 @@ import org.bukkit.util.Vector;
  * @author Layton
  */
 public class Meta {
+    public static String docs(){
+        return "These functions provide a way to run other commands";
+    }
     @api public static class runas implements Function{
 
         public String getName() {
@@ -96,6 +99,9 @@ public class Meta {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args[1].val().charAt(0) != '/'){
+                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
+            }
             Static.getServer().dispatchCommand(p, args[0].val());
             return new CVoid(line_num);
         }

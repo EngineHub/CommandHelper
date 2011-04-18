@@ -9,13 +9,15 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import org.bukkit.entity.Player;
-import org.bukkit.material.Tree;
 
 /**
  *
  * @author Layton
  */
 public class StringHandling {
+    public static String docs(){
+        return "These class provides functions that allow strings to be manipulated";
+    }
     @api public static class concat implements Function{
 
         public String getName() {

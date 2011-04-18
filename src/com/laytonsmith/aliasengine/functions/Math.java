@@ -14,6 +14,9 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class Math {
+    public static String docs(){
+        return "Provides mathematical functions";
+    }
     @api public static class add implements Function{
 
         public String getName() {
@@ -117,7 +120,7 @@ public class Math {
         }
 
         public boolean isRestricted() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return false;
         }
 
         public void varList(IVariableList varList) {}

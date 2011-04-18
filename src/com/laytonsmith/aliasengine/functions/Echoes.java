@@ -17,7 +17,9 @@ import org.bukkit.entity.Player;
  * @author layton
  */
 public class Echoes {
-
+    public static String docs(){
+        return "These functions allow you to echo information to the screen";
+    }
     @api public static class die implements Function{
         public Integer []numArgs() {
             return new Integer[] {0,1};

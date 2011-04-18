@@ -20,6 +20,9 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class DataHandling {
+    public static String docs(){
+        return "";
+    }
     @api public static class array implements Function{
 
         public String getName() {

@@ -16,6 +16,9 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class Minecraft {
+    public static String docs(){
+        return "These functions provide a hook into game functionality.";
+    }
     @api public static class data_values implements Function{
 
         public String getName() {
