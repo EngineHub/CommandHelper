@@ -9,11 +9,8 @@ import com.laytonsmith.aliasengine.functions.FunctionList;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -38,6 +35,21 @@ public class DocGen {
                 functionlist.put(apiClass, fl);
             }
             fl.add(f);
+        }
+        if(type.equals("html")){
+            System.out.println("Functions greatly extend the capabilities of the plugin, "
+                    + "and make the config scripting language a "
+                    + "<a href=\"http://en.wikipedia.org/wiki/Turing_Complete\">Turing Complete</a> language. "
+                    + "There are several functions defined, and they are grouped into \"classes\". ");            
+        } else if(type.equals("wiki")){            
+            System.out.println("Functions greatly extend the capabilities of the plugin, "
+                    + "and make the config scripting language a "
+                    + "[http://en.wikipedia.org/wiki/Turing_Complete Turing Complete] language. "
+                    + "There are several functions defined, and they are grouped into \"classes\". ");
+        } else if(type.equals("text")){
+            System.out.println("Functions greatly extend the capabilities of the plugin, and make the config scripting language a "
+                    + "Turing Complete language [http://en.wikipedia.org/wiki/Turing_Complete].\n"
+                    + "There are several functions defined, and they are grouped into \"classes\".");
         }
         for (Map.Entry<Class, ArrayList<Function>> entry : functionlist.entrySet()) {
             Class apiClass = entry.getKey();
@@ -72,6 +84,14 @@ public class DocGen {
                                     "! scope=\"col\" width=\"15%\" | Arguments\n" + 
                                     "! scope=\"col\" width=\"69%\" | Description\n" +
                                     "! scope=\"col\" width=\"5%\" | Restricted");
+            } else if(type.equals("text")){
+                System.out.println("**********************************************************************************************");
+                if(className != null){
+                    System.out.println(classDocs == null?"":classDocs);
+                } else {
+                    System.out.println("Other Functions");
+                }
+                System.out.println("**********************************************************************************************");
             }
             for(Function f : entry.getValue()){
                 String doc = f.docs();
@@ -97,13 +117,31 @@ public class DocGen {
                             + "| " + desc + "\n"
                             + "| " + restricted);
                    
+                } else if(type.equals("text")){
+                    System.out.println(ret + f.getName() + "(" + args + ")" + "\n\t" + desc + (f.isRestricted()?"\n\tThis function is restricted":
+                            "\n\tThis function is not restricted"));
                 }
             }
             if(type.equals("html")){
                 System.out.println("</table>");
             } else if(type.equals("wiki")){
                 System.out.println("|}");
+            } else if(type.equals("text")){
+                System.out.println();
             }
+        }
+        if(type.equals("html")){
+            System.out.println(""
+                    + "<h2>Errors in documentation</h2>\n"
+                    + "<em>Please note that this documentation is generated automatically,"
+                    + " if you notice an error in the documentation, please file a bug report for the"
+                    + " plugin itself!</em>");
+        } else if(type.equals("wiki")){
+            System.out.println(""
+                    + "===Errors in documentation===\n"
+                    + "''Please note that this documentation is generated automatically,"
+                    + " if you notice an error in the documentation, please file a bug report for the"
+                    + " plugin itself!''");
         }
     }
 }

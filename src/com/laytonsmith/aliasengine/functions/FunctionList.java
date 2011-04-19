@@ -111,7 +111,7 @@ public class FunctionList {
 
     private static Class[] getClasses(String packageName)
             throws ClassNotFoundException, IOException {
-        ClassLoader classLoader = Thread.currentThread().getContextClassLoader();
+        ClassLoader classLoader = FunctionList.class.getClassLoader();
         assert classLoader != null;
         String path = packageName.replace('.', '/');
         Enumeration<URL> resources = classLoader.getResources(path);
@@ -163,6 +163,9 @@ public class FunctionList {
 
     public FunctionList(User u) {
         this.u = u;
+        if(functions.isEmpty()){
+            initFunctions();
+        }
     }
 
     public Construct exec(String name, int line_num, Player p, Construct... args) throws ConfigCompileException, CancelCommandException {
