@@ -31,7 +31,10 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CInt(((CArray)args[0]).size(), line_num);
+            if(args[0] instanceof CArray){
+                return new CInt(((CArray)args[0]).size(), line_num);
+            }
+            throw new CancelCommandException("Argument 1 of array_size must be an array");
         }
 
         public String docs() {
@@ -61,7 +64,11 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return ((CArray)args[0]).get(((CInt)args[1]).getInt());
+            if(args[0] instanceof CArray){
+                return ((CArray)args[0]).get(Static.getInt(args[1]));
+            } else{
+                throw new CancelCommandException("Argument 1 of array_get must be an array");
+            }
         }
 
         public String docs() {
@@ -92,12 +99,16 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            ((CArray)args[0]).set(((CInt)args[1]).getInt(), args[2]);
-            return new CVoid(line_num);
+            if(args[0] instanceof CArray){
+                ((CArray)args[0]).set(((CInt)args[1]).getInt(), args[2]);
+                return new CVoid(line_num);
+            }
+            throw new CancelCommandException("Argument 1 of array_set must be an array");
         }
 
         public String docs() {
-            return "void {array, index, value} Sets the value of the array at the specified index. array_set(array, index, value). Returns void.";
+            return "void {array, index, value} Sets the value of the array at the specified index. array_set(array, index, value). Returns void. If"
+                    + " the element at the specified index isn't already set, throws an exception. Use array_push to avoid this.";
         }
 
         public boolean isRestricted() {
@@ -107,7 +118,7 @@ public class ArrayHandling {
         public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
-            return false;
+            return true;
         }
         
     }
@@ -123,7 +134,11 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            if(args[0] instanceof CArray){
+                ((CArray)args[0]).push(args[1]);
+                return new CVoid(line_num);
+            }
+            throw new CancelCommandException("Argument 1 of array_push must be an array");
         }
 
         public String docs() {
@@ -137,7 +152,7 @@ public class ArrayHandling {
         public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
-            return false;
+            return true;
         }
         
     }

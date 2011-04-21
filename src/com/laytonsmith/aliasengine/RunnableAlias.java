@@ -51,7 +51,7 @@ public class RunnableAlias {
             List<GenericTreeNode<Construct>> l = t.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
             try{
                 for(GenericTreeNode<Construct> g : l){
-                    if(((Construct)g.data) == null){
+                    if(((Construct)g.data).val() == null){
                         b.append("");
                     }
                     else if(((Construct)g.data).val().equals("root")){
@@ -127,7 +127,7 @@ public class RunnableAlias {
                         perm = true;
                     }
                     if(!perm){
-                        throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.");
+                        throw new CancelCommandException("You do not have permission to use the " + f.getName() + " function.");
                     }
                 }
                 Object [] a = args.toArray();
@@ -149,7 +149,7 @@ public class RunnableAlias {
                     for(int i = 0; i < ca.length; i++){
                         if(ca[i] instanceof IVariable){
                             IVariable v = (IVariable) ca[i];
-                            ca[i] = Static.resolveConstruct(varList.get(v.getName()).val(), v.line_num);
+                            ca[i] = varList.get(v.getName()).ival();
                         }
                     }
                 }

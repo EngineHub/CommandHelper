@@ -11,7 +11,8 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import org.bukkit.entity.Player;
 
 /**
- *
+ * Note that to "activate" this class as a function, you must prefix the '@api' annotation
+ * to it.
  * @author layton
  */
 public interface Function {
@@ -53,7 +54,7 @@ public interface Function {
     public Construct exec(int line_num, Player p, Construct ... args) throws CancelCommandException, ConfigRuntimeException;
     /**
      * If a user asks for information about a particular function, this method is called to obtain the functions
-     * usage.
+     * usage. The returned string must follow the following format:
      * @return A string with the documentation, or null, which will give a standard message to the user telling them there
      * is no documentation for this function yet.
      */

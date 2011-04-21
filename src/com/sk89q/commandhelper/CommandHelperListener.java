@@ -21,6 +21,8 @@ package com.sk89q.commandhelper;
 
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
+import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.InternalException;
 import com.laytonsmith.aliasengine.User;
 import java.util.logging.Logger;
 import java.util.logging.Level;
@@ -110,21 +112,31 @@ public class CommandHelperListener extends PlayerListener {
      */
     @Override
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        if(event.isCancelled()){
+            return;
+        }
         Player player = event.getPlayer();
         String cmd = event.getMessage();
         if(cmd.equals("/.") || cmd.equals("/repeat")){
             return;
         }
         this.getSession(player).setLastCommand(cmd);
+        
         try {
             if (runAlias(event.getMessage(), player)) {
                 event.setCancelled(true);
                 //System.out.println("Command Cancelled: " + cmd);
                 return;
             }
-        } catch (Exception e) {
-            player.sendMessage(ChatColor.RED + e.getMessage());
-            //event.setCancelled(true);
+        } catch(InternalException e){
+            logger.log(Level.SEVERE, e.getMessage());
+        } catch(ConfigRuntimeException e){
+            //logger.log(Level.WARNING, e.getMessage());
+        } catch (Throwable e) {
+            player.sendMessage(ChatColor.RED + "Command failed with following reason: " + e.getMessage());
+            //Obviously the command is registered, but it somehow failed. Cancel the event.
+            event.setCancelled(true);
+            e.printStackTrace();
             return;
         }
     }

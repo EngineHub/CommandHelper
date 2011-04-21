@@ -64,9 +64,7 @@ public class DataHandling {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
-                IVariable v = (IVariable)args[0];
-                Construct c = args[1];
-                v.def = c.val();
+                IVariable v = new IVariable(((IVariable)args[0]).getName(), args[1], line_num);
                 varList.set(v);
                 return v;
             }

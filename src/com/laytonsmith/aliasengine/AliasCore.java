@@ -57,39 +57,52 @@ public class AliasCore {
      * @return
      */
     public boolean alias(String command, Player player, ArrayList<AliasConfig> playerCommands) {
-        //If player is null, we are running the test harness, so don't
-        //actually add the player to the array.
-        if (player != null && echoCommand.contains(player.getName())) {
-            //we are running one of the expanded commands, so exit with false
-            return false;
+
+        if(config == null){
+            throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded");
         }
-
-        //Global aliases override personal ones, so check the list first
-        RunnableAlias a = config.getRunnableAliases(command, player);
-
-        if (a == null && playerCommands != null) {
-            //if we are still looking, look in the aliases for this player
-            for (AliasConfig ac : playerCommands) {
-                RunnableAlias b = ac.getRunnableAliases(command, player);
-                if (b != null) {
-                    a = b;
-                }
+        
+        RunnableAlias a;
+        try { //catch RuntimeException
+            //If player is null, we are running the test harness, so don't
+            //actually add the player to the array.
+            if (player != null && echoCommand.contains(player.getName())) {
+                //we are running one of the expanded commands, so exit with false
+                return false;
             }
 
-        }
+            //Global aliases override personal ones, so check the list first
+            a = config.getRunnableAliases(command, player);
 
+            if (a == null && playerCommands != null) {
+                //if we are still looking, look in the aliases for this player
+                for (AliasConfig ac : playerCommands) {
+                    RunnableAlias b = ac.getRunnableAliases(command, player);
+                    if (b != null) {
+                        a = b;
+                    }
+                }
+
+            }
+        } catch (Throwable e) {
+            throw new InternalException("An error occured in the CommandHelper plugin: " + e.getMessage() + Arrays.asList(e.getStackTrace()));
+        }
+        assert a != null;
         if (a == null) {
             //apparently we couldn't find the command, so return false
             return false;
         } else {
             //Run all the aliases
             a.player = player;
-            if (a.player != null) {
-                echoCommand.add(player.getName());
-            }
-            a.run();
-            if (a.player != null) {
-                echoCommand.remove(player.getName());
+            try {
+                if (a.player != null) {
+                    echoCommand.add(player.getName());
+                }
+                a.run();
+            } finally {
+                if (a.player != null) {
+                    echoCommand.remove(player.getName());
+                }
             }
         }
         return true;
@@ -104,11 +117,11 @@ public class AliasCore {
             if (!aliasConfig.exists()) {
                 aliasConfig.getParentFile().mkdirs();
                 aliasConfig.createNewFile();
-                try{
-                file_put_contents(aliasConfig,
-                        getStringResource(this.getClass().getResourceAsStream("/com/laytonsmith/aliasengine/samp_config.txt")),
-                        "o");
-                } catch (IOException e){
+                try {
+                    file_put_contents(aliasConfig,
+                            getStringResource(this.getClass().getResourceAsStream("/com/laytonsmith/aliasengine/samp_config.txt")),
+                            "o");
+                } catch (IOException e) {
                     logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
                 }
             }

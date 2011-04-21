@@ -14,7 +14,7 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
 public class CBoolean extends Construct{
     boolean val;
     public CBoolean(boolean value, int line_num){
-        super(TType.CONSTRUCT, null, ConstructType.BOOLEAN, line_num);
+        super(TType.CONSTRUCT, Boolean.toString(value), ConstructType.BOOLEAN, line_num);
         val = value;
     }
 

@@ -61,10 +61,14 @@ public class Meta {
                 Static.getServer().dispatchCommand(new AlwaysOpPlayer(p), cmd);                
             } else{
                 Player m = Static.getServer().getPlayer(args[0].val());
-                if(m.isOnline()){
-                    Static.getServer().dispatchCommand(m, cmd);
-                } else {
-                    p.sendMessage("The player " + m.getName() + " is not online");
+                if(m != null){
+                    if(m.isOnline()){
+                        Static.getServer().dispatchCommand(m, cmd);
+                    } else {
+                        p.sendMessage("The player " + m.getName() + " is not online");
+                    }
+                } else{
+                    throw new CancelCommandException("The player " + args[0].val() + " is not online");
                 }
             }
             return new CVoid(line_num);
@@ -99,15 +103,13 @@ public class Meta {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[0].val().charAt(0) != '/'){
-                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
-            }
             Static.getServer().dispatchCommand(p, args[0].val());
             return new CVoid(line_num);
         }
 
         public String docs() {
-            return "void {var1} Runs a command as the current player. Useful for running commands in a loop.";
+            return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
+                    + "console; without a forward slash at the beginning.";
         }
 
         public boolean isRestricted() {

@@ -12,13 +12,14 @@ commands:
         aliases: .
     alias:
         description: Create an alias
-        usage: /<command> <name> <cmd>
+        usage: /<command> <alias>
     delalias:
         description: Remove an alias
         usage: /<command> <name>
     reloadaliases:
         description: Reloads aliases
         usage: /<command>
+        aliases: reloadalias
     viewalias:
         description: View all user defined aliases
         usage: /<command>
