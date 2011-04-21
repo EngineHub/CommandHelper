@@ -15,9 +15,9 @@ public class CoreTestHarness {
     public static void start(String path){
         try {
             if(path == null){
-                path = "plugins/CommandHelper/config.txt";
+                path = "CommandHelper/config.txt";
             }
-            AliasCore core = new AliasCore(true, 10, 5, new File("plugins/CommandHelper/config.txt"), null);
+            AliasCore core = new AliasCore(true, 10, 5, new File(path), null);
         } catch (ConfigCompileException ex) {
             System.err.println(ex);
         }

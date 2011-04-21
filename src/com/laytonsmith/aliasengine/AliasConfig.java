@@ -598,7 +598,7 @@ public class AliasConfig {
                     try{
                         Construct c1 = thisCommand.get(k);
                         Construct c2 = thatCommand.get(k);
-                        if(c1.ctype != c2.ctype){// && c1 instanceof Variable && !((Variable)c1).optional){
+                        if(c1.ctype != c2.ctype || ((c1 instanceof Variable) && !((Variable)c1).optional)){
                             soFarAMatch = false;
                         } else {
                             //It's a literal, check to see if it's the same literal

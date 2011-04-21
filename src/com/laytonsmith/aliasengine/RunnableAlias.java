@@ -5,6 +5,7 @@ package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct.ConstructType;
+import com.laytonsmith.aliasengine.functions.BasicLogic._if;
 import com.laytonsmith.aliasengine.functions.DataHandling._for;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
@@ -50,7 +51,10 @@ public class RunnableAlias {
             List<GenericTreeNode<Construct>> l = t.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
             try{
                 for(GenericTreeNode<Construct> g : l){
-                    if(((Construct)g.data).val().equals("root")){
+                    if(((Construct)g.data) == null){
+                        b.append("");
+                    }
+                    else if(((Construct)g.data).val().equals("root")){
                         for(GenericTreeNode<Construct> gg : g.getChildren()){
                             b.append(eval(gg)).append(" ");
                         }
@@ -84,7 +88,7 @@ public class RunnableAlias {
             try {
                 Function f;
                 f = func_list.getFunction(m);
-                //We have special handling for loop functions
+                //We have special handling for loop and other control flow functions
                 if(f instanceof _for){
                     _for fr = (_for)f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
@@ -92,6 +96,14 @@ public class RunnableAlias {
                         return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
                     } catch(IndexOutOfBoundsException e){
                         throw new ConfigRuntimeException("Invalid number of parameters passed to for");
+                    }
+                } else if(f instanceof _if){
+                    _if fr = (_if)f;
+                    List<GenericTreeNode<Construct>> ch = c.getChildren();
+                    try{
+                        return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.size() > 2?ch.get(2):null);
+                    } catch(IndexOutOfBoundsException e){
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to if");
                     }
                 }
                 ArrayList<Construct> args = new ArrayList<Construct>();
@@ -109,6 +121,9 @@ public class RunnableAlias {
                             perm = true;
                         }
                     } else {
+                        perm = true;
+                    }
+                    if(player.isOp()){
                         perm = true;
                     }
                     if(!perm){

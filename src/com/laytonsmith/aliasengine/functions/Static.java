@@ -20,6 +20,12 @@ public class Static {
             d = ((CInt) c).getInt();
         } else if (c instanceof CDouble) {
             d = ((CDouble) c).getDouble();
+        } else if(c instanceof CString){
+            try{
+                d = Double.parseDouble(c.val());
+            } catch(NumberFormatException e){
+                throw new ConfigRuntimeException("Expecting a number, but received " + c.val() + " instead");
+            }
         } else {
             throw new ConfigRuntimeException("Expecting a number, but recieved " + c.val() + " instead");
         }

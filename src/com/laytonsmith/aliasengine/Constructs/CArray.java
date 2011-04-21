@@ -27,6 +27,7 @@ public class CArray extends Construct{
         for(int i = 0; i < array.size(); i++){
             if(i > 0){
                 b.append(", ");
+                b.append(array.get(i).val());
             } else {
                 b.append(array.get(i).val());
             }

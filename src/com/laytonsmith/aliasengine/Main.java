@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -61,7 +62,7 @@ public class Main {
             String s = l.get(i).toString();
             if(s.matches("--docs")){
                 //Documentation generator
-                String type = (i <= l.size() - 1?l.get(i + 1).toString().toLowerCase():null);
+                String type = (i > l.size() - 1?l.get(i + 1).toString().toLowerCase():null);
                 if(type == null){
                     type = "html";
                 }
@@ -72,7 +73,20 @@ public class Main {
                 System.out.println("Creating " + type + " documentation.");
                 DocGen.start(type);
             } else if(s.matches("--test-compile")){
-                String file = (i <= l.size() - 1?l.get(i + 1).toString().toLowerCase():null);                
+                File f = new File(".");
+                for(File a : f.listFiles()){
+                    if(a.getName().equals("CommandHelper.jar")){
+                        //We are in the plugins folder
+                        f = new File("CommandHelper/bukkit.jar");
+                        if(!f.exists()){
+                            System.out.println("In order to run the --test-compile command, you must include the latest build of bukkit (not craftbukkit)"
+                                    + " in the CommandHelper folder. You MUST rename it to bukkit.jar. See the wiki for more information.");
+                            System.exit(1);
+                        }
+                        break;
+                    }
+                }
+                String file = (i > l.size() - 1?l.get(i + 1).toString().toLowerCase():null);                
                 CoreTestHarness.start(file);
                 return;
             }

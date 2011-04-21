@@ -122,9 +122,9 @@ public class CommandHelperListener extends PlayerListener {
                 //System.out.println("Command Cancelled: " + cmd);
                 return;
             }
-        } catch (/*InsufficientArguments*/Exception e) {
+        } catch (Exception e) {
             player.sendMessage(ChatColor.RED + e.getMessage());
-            event.setCancelled(true);
+            //event.setCancelled(true);
             return;
         }
     }

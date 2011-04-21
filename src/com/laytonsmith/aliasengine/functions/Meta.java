@@ -99,7 +99,7 @@ public class Meta {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[1].val().charAt(0) != '/'){
+            if(args[0].val().charAt(0) != '/'){
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
             }
             Static.getServer().dispatchCommand(p, args[0].val());

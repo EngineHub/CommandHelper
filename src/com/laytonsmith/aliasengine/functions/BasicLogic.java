@@ -4,11 +4,12 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import java.util.ArrayList;
+import com.laytonsmith.aliasengine.RunnableAlias;
 import org.bukkit.entity.Player;
 
 /**
@@ -27,6 +28,19 @@ public class BasicLogic {
 
         public Integer[] numArgs() {
             return new Integer[]{2, 3};
+        }
+        
+        public Construct execs(int line_num, Player p, RunnableAlias parent, 
+                GenericTreeNode<Construct> condition, GenericTreeNode<Construct> __if, 
+                GenericTreeNode<Construct> __else) throws CancelCommandException{
+            if(Static.getBoolean(parent.eval(condition))){
+                return parent.eval(__if);
+            } else {
+                if(__else == null){
+                    return new CVoid(line_num);
+                }
+                return parent.eval(__else);
+            }
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -84,7 +98,7 @@ public class BasicLogic {
         public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
-            return true;
+            return false;
         }
         
         
@@ -273,11 +287,18 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            for(Construct c : args){
+                boolean b = Static.getBoolean(c);
+                if(b == false){
+                    return new CBoolean(false, line_num);
+                }
+            }
+            return new CBoolean(true, line_num);
         }
 
         public String docs() {
-            return "boolean {var1, [var2...]} Returns the boolean value of a logical AND across all arguments";
+            return "boolean {var1, [var2...]} Returns the boolean value of a logical AND across all arguments. Uses lazy determination, so once "
+                    + "an argument returns false, the function returns.";
         }
 
         public boolean isRestricted() {
@@ -303,11 +324,17 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            for(Construct c : args){
+                if(Static.getBoolean(c)){
+                    return new CBoolean(true, line_num);
+                }
+            }
+            return new CBoolean(false, line_num);
         }
 
         public String docs() {
-            return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments";
+            return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy determination, so once an "
+                    + "argument resolves to true, the function returns.";
         }
 
         public boolean isRestricted() {
@@ -333,11 +360,11 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return new CBoolean(!Static.getBoolean(args[0]), line_num);
         }
 
         public String docs() {
-            return "boolean {var1, [var2...]} Returns the boolean value of a logical NOT for this argument";
+            return "boolean {var1} Returns the boolean value of a logical NOT for this argument";
         }
 
         public boolean isRestricted() {
