@@ -9,7 +9,9 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Data_Values;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
+import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -30,8 +32,12 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Construct c = args[0];
-            return new CInt(Data_Values.val(c.val()), line_num);
+            if(args[0] instanceof CInt){
+                return new CInt(Static.getInt(args[0]), line_num);
+            } else {
+                String c = args[0].val();
+                return new CInt(new MaterialData(Material.getMaterial(c)).getItemTypeId(), line_num);
+            }
         }
 
         public String docs() {

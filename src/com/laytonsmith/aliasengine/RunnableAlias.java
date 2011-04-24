@@ -31,16 +31,18 @@ public class RunnableAlias {
     FunctionList func_list;
     String label;
     IVariableList varList = new IVariableList();
+    String originalCommand;
 
     String performAs = null;
     boolean inPerformAs = false;
 
     public RunnableAlias(String label, ArrayList<GenericTree<Construct>> actions, Player player,
-            FunctionList func_list){
+            FunctionList func_list, String originalCommand){
         this.label = label;
         this.actions = actions;
         this.player = player;
         this.func_list = func_list;
+        this.originalCommand = originalCommand;
     }
 
     public boolean run(){
@@ -56,15 +58,19 @@ public class RunnableAlias {
                     }
                     else if(((Construct)g.data).val().equals("root")){
                         for(GenericTreeNode<Construct> gg : g.getChildren()){
-                            b.append(eval(gg)).append(" ");
+                            b.append(eval(gg).val()).append(" ");
                         }
                     }
                 }
                 String cmd = b.toString().trim();
-                System.out.println("Running command ----> " + cmd);
-                System.out.println("on player " + player);
+                System.out.println("CH: Running original command ----> " + originalCommand);
+                System.out.println("on " + player.getName());
                 if(player == null){
                     System.out.println("Player is null, assuming test harness is running");
+                } else {
+                    if(cmd.length() > 0 && cmd.charAt(0) == '/'){
+                        Static.getServer().dispatchCommand(player, cmd.substring(1));
+                    }
                 }
             } catch(CancelCommandException e){
                 if(player == null){

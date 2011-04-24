@@ -113,6 +113,20 @@ public class CommandHelperPlugin extends JavaPlugin {
             } catch (InsufficientArgumentsException e) {
                 return false;
             }
+        } else if(sender.isOp() && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
+            try {
+                if(ac.reload()){
+                    System.out.println("Command Helper scripts sucessfully recompiled.");
+                } else{
+                    System.out.println("An error occured when trying to compile the script. Check the console for more information.");
+                }
+                return true;
+            } catch (ConfigCompileException ex) {
+                logger.log(Level.SEVERE, null, ex);
+                System.out.println("An error occured when trying to compile the script. Check the console for more information.");
+                return false;
+            }
+            
         } else {
             return false;
         }
@@ -212,13 +226,20 @@ public class CommandHelperPlugin extends JavaPlugin {
         // Reload global aliases
         } else if (cmd.equalsIgnoreCase("reloadaliases")) {
             if(!perms.hasPermission(player.getName(), "commandhelper.reloadaliases") && !perms.hasPermission(player.getName(), "ch.reloadaliases")){
+                player.sendMessage(ChatColor.DARK_RED + "You do not have permission to use that command");
                 return false;
             }
             try {
-                ac.reload();
+                if(ac.reload()){
+                    player.sendMessage("Command Helper scripts sucessfully recompiled.");
+                } else{
+                    player.sendMessage("An error occured when trying to compile the script. Check the console for more information.");
+                }
+                commandRunning.remove(player);
                 return true;
             } catch (ConfigCompileException ex) {
                 logger.log(Level.SEVERE, null, ex);
+                player.sendMessage("An error occured when trying to compile the script. Check the console for more information.");
             }
         }
         commandRunning.remove(player);

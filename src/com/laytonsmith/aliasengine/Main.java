@@ -62,7 +62,7 @@ public class Main {
             String s = l.get(i).toString();
             if(s.matches("--docs")){
                 //Documentation generator
-                String type = (i > l.size() - 1?l.get(i + 1).toString().toLowerCase():null);
+                String type = (i + 1 <= l.size() - 1?l.get(i + 1).toString().toLowerCase():null);
                 if(type == null){
                     type = "html";
                 }

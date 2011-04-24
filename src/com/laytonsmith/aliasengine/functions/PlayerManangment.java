@@ -7,9 +7,12 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
+import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
 /**
@@ -75,6 +78,78 @@ public class PlayerManangment {
 
         public String docs() {
             return "array {} Returns an array of all the player names of all the online players on the server";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+        
+    }
+    
+    @api public static class ploc implements Function{
+
+        public String getName() {
+            return "ploc";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            p = p.getServer().getPlayer(args[0].val());
+            if(p == null){
+                throw new CancelCommandException("The player is not online");
+            }
+            Location l = p.getLocation();
+            return new CArray(line_num, new CInt((int)l.getX(), line_num),
+                    new CInt((int)l.getY(), line_num),
+                    new CInt((int)l.getZ(), line_num));
+        }
+
+        public String docs() {
+            return "array {playerName} Returns an array of x, y, z coords of the player";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+        
+    }
+    
+    @api public static class kill implements Function{
+
+        public String getName() {
+            return "kill";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            p = p.getServer().getPlayer(args[0].val());
+            if(p == null){
+                throw new CancelCommandException("The player is online");
+            }
+            p.setHealth(0);
+            return new CVoid(line_num);
+        }
+
+        public String docs() {
+            return "void {playerName} Kills the specified player";
         }
 
         public boolean isRestricted() {

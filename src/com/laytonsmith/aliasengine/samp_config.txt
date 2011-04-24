@@ -5,16 +5,16 @@
 #=========================================================================#
 
 #lines that start with # are comments
-#/multiline = >>>
-#msg('It works!')
-#msg('Yay!')
-#<<<
 
-#Essentials style /i command, with material name lookup
+#Give command, with material name lookup
 # Note that the second variable $qty is optional, and if no value
 # is given, 1 is the default. The function player() returns the
 # name of this player, and data_values() turns "stone" into 1
-/i $data [$qty=1] = /give player() data_values($data) $qty
+# Also note that the command is labelled with "creative". If you
+# are running a creative server, and the users should always be able to give
+# themselves items, then they can do so with this command, without having to be
+# opped.
+creative:/i $data [$qty=1] = runas('~op', sconcat(/give player() data_values($data) $qty))
 ###
 
 #Give the player a diamond pickaxe, shovel, and axe

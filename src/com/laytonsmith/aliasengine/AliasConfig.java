@@ -598,7 +598,7 @@ public class AliasConfig {
                             soFarAMatch = false;
                         } else {
                             //It's a literal, check to see if it's the same literal
-                            if(!c1.val().equals(c2.val())){
+                            if(c1.val() == null || !c1.val().equals(c2.val())){
                                 soFarAMatch = false;
                             }
                         }
@@ -755,7 +755,7 @@ public class AliasConfig {
                         }
                     }
                 }
-                return new RunnableAlias(this.aliasFile.labels.get(i), tree, player, func_list);
+                return new RunnableAlias(this.aliasFile.labels.get(i), tree, player, func_list, command);
             }
         }
 

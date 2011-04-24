@@ -13,8 +13,11 @@ import com.laytonsmith.aliasengine.Static;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import org.bukkit.Achievement;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.Statistic;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Arrow;
@@ -46,7 +49,7 @@ public class Meta {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[1].val().charAt(0) != '/'){
+            if(args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/'){
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
             }
             String cmd = args[1].val().substring(1);
@@ -416,6 +419,34 @@ public class Meta {
 
         public boolean isOp() {
             return true;
-        }      
+        }
+
+        public void setSleepingIgnored(boolean bln) {
+            r.setSleepingIgnored(bln);
+        }
+
+        public boolean isSleepingIgnored() {
+            return r.isSleepingIgnored();
+        }
+
+        public void awardAchievement(Achievement a) {
+            r.awardAchievement(a);
+        }
+
+        public void incrementStatistic(Statistic ststc) {
+            r.incrementStatistic(ststc);
+        }
+
+        public void incrementStatistic(Statistic ststc, int i) {
+            r.incrementStatistic(ststc, Material.AIR);
+        }
+
+        public void incrementStatistic(Statistic ststc, Material mtrl) {
+            r.incrementStatistic(ststc, mtrl);
+        }
+
+        public void incrementStatistic(Statistic ststc, Material mtrl, int i) {
+            r.incrementStatistic(ststc, mtrl, i);
+        }
     }
 }
