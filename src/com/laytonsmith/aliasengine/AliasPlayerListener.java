@@ -5,6 +5,7 @@ import org.bukkit.ChatColor;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerMoveEvent;
@@ -23,8 +24,7 @@ public class AliasPlayerListener extends PlayerListener {
     }
 
     @Override
-    public void onPlayerCommandPreprocess(PlayerChatEvent event) {
-        super.onPlayerCommandPreprocess(event);
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         Player player = event.getPlayer();
         String command = event.getMessage();
         player.sendMessage("Cancelling command: " + command);
