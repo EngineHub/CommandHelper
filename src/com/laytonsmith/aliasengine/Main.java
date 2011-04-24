@@ -36,12 +36,12 @@ public class Main {
                     + "--copyright - Displays the copyright notice and exits");
         }
         if(l.contains("--version")){
-            System.out.println("Whoops, no version information yet.");
+            System.out.println("You are running CommandHelper version 3.0.0");
             return;
         }
         if(l.contains("--copyright")){
             System.out.println("CommandHelper\n" +
-                                "Copyright (C) 2010 sk89q <http://www.sk89q.com> and \n" +
+                                "Copyright (C) 2010-2011 sk89q <http://www.sk89q.com> and \n" +
                                 "wraithguard01 <http://www.laytonsmith.com>\n" + 
                                 "\n" +
                                 "This program is free software: you can redistribute it and/or modify\n" +
@@ -86,7 +86,7 @@ public class Main {
                         break;
                     }
                 }
-                String file = (i > l.size() - 1?l.get(i + 1).toString().toLowerCase():null);                
+                String file = (i + 1 <= l.size() - 1?l.get(i + 1).toString().toLowerCase():null);                
                 CoreTestHarness.start(file);
                 return;
             }
