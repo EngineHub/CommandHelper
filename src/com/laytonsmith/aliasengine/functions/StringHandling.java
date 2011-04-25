@@ -106,13 +106,13 @@ public class StringHandling {
 
         public static String file_get_contents(String file_location) throws Exception {
             BufferedReader in = new BufferedReader(new FileReader(file_location));
-            String ret = "";
+            StringBuilder ret = new StringBuilder();
             String str;
             while ((str = in.readLine()) != null) {
-                ret += str + "\n";
+                ret.append(str).append("\n");
             }
             in.close();
-            return ret;
+            return ret.toString();
         }
 
         public String getName() {
