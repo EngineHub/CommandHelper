@@ -69,3 +69,22 @@ creative:/i $data [$qty=1] = runas('~op', sconcat(/give player() data_values($da
 #Echoes information back to the user
 # This demonstrates how to do string concatenation
 /ping $ = die(concat('Pong!', ' ', $))
+
+#Kills the player, optionally with a message. Demonstrates how to use the multiline construct.
+thor:/thor $player [$=''] = >>>
+    lightning(ploc($player))
+    msg('Thou hast smitten the evil player ', $player, ' with thy mighty hand')
+    tmsg($player, color('red'), if(equals($, ''), 'You have been smitten by Thor\'s Hammer!', $))
+    kill($player)
+<<<
+
+#Suppose we have a plugin that broadcasts messages only to moderators, but it doesn't include the user's name
+#Also suppose that it is a very long command.
+#We can use this command to fix that:
+/mb $ = /mod-broadcast concat('(',player(),')') $
+
+#Lets notify our users to use the new, shorter version
+/mod-broadcast [$] = die(concat(color('red'), 'Use /mb instead of /mod-broadcast'))
+
+#Creates a simple way to control the weather
+rain:/rain $true_false = storm($true_false)

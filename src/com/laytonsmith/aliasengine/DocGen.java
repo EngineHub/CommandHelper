@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -57,7 +58,13 @@ public class DocGen {
             String classDocs = null;
             try {
                 Method m = apiClass.getMethod("docs", (Class[]) null);
-                classDocs = (String) m.invoke(null, (Object[]) null);
+                Object o = null;
+                if((m.getModifiers() & Modifier.STATIC) == 0){
+                    try {
+                        o = apiClass.newInstance();
+                    } catch (InstantiationException ex) {}
+                }
+                classDocs = (String) m.invoke(o, (Object[]) null);
             } catch (IllegalAccessException ex) {
             } catch (IllegalArgumentException ex) {
             } catch (InvocationTargetException ex) {

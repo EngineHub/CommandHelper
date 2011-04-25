@@ -59,6 +59,14 @@ public class Static {
         return prm;
     }
     
+    public static Version getVersion() throws NotInitializedYetException{
+        Version v = com.sk89q.commandhelper.CommandHelperPlugin.version;
+        if(v == null){
+            throw new NotInitializedYetException("The plugin has not been initialized yet");
+        }
+        return v;
+    }
+    
     public static Construct resolveConstruct(String val, int line_num){
         if(val.equalsIgnoreCase("null")){
             return new CNull(line_num);

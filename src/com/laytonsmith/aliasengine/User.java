@@ -6,14 +6,12 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.Persistance.Persistance;
-import com.sk89q.bukkit.migration.PermissionsResolverServerListener;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 /**
  *

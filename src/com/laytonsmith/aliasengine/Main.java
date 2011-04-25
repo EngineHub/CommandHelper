@@ -36,7 +36,7 @@ public class Main {
                     + "--copyright - Displays the copyright notice and exits");
         }
         if(l.contains("--version")){
-            System.out.println("You are running CommandHelper version 3.0.0");
+            System.out.println("You are running CommandHelper version " + Static.getVersion());
             return;
         }
         if(l.contains("--copyright")){

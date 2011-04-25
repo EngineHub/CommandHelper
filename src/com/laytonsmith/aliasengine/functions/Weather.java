@@ -17,6 +17,10 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class Weather {
+    public static String docs(){
+        return "Provides functions to control the weather";
+    }
+    
     @api public static class lightning implements Function{
 
         public String getName() {

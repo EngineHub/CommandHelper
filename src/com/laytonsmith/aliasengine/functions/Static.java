@@ -16,6 +16,9 @@ public class Static {
 
     public static double getNumber(Construct c) {
         double d;
+        if(c == null){
+            return 0.0;
+        }
         if (c instanceof CInt) {
             d = ((CInt) c).getInt();
         } else if (c instanceof CDouble) {
@@ -42,6 +45,9 @@ public class Static {
 
     public static int getInt(Construct c) {
         int i;
+        if(c == null){
+            return 0;
+        }
         if (c instanceof CInt) {
             i = ((CInt) c).getInt();
         } else {
@@ -52,6 +58,9 @@ public class Static {
     
     public static boolean getBoolean(Construct c){
         boolean b = false;
+        if(c == null){
+            return false;
+        }
         if(c instanceof CBoolean){
             b = ((CBoolean)c).getBoolean();
         } else if(c instanceof CString){

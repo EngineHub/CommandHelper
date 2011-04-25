@@ -10,7 +10,6 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
-import com.laytonsmith.aliasengine.Static;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 

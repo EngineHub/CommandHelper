@@ -15,7 +15,7 @@ import org.bukkit.entity.Player;
  */
 public class Math {
     public static String docs(){
-        return "Provides mathematical functions";
+        return "Provides mathematical functions to scripts";
     }
     @api public static class add implements Function{
 
@@ -230,6 +230,100 @@ public class Math {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        
+    }
+    
+    @api public static class inc implements Function{
+
+        IVariableList varList;
+        
+        public String getName() {
+            return "inc";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args[0] instanceof IVariable){
+                IVariable v = varList.get(((IVariable)args[0]).getName());
+                Construct newVal;
+                if(Static.anyDoubles(v.ival())){
+                    newVal = new CDouble(Static.getDouble(v.ival()) + 1, line_num);
+                } else {
+                    newVal = new CInt(Static.getInt(v.ival()) + 1, line_num);
+                }
+                v = new IVariable(v.getName(), newVal, line_num);
+                varList.set(v);
+                return v;
+            }
+            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar");
+        }
+
+        public String docs() {
+            return "ivar {var} Adds 1 to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
+                    + " returns the ivar.";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {
+            this.varList = varList;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+        
+    }
+    
+    @api public static class dec implements Function{
+
+        IVariableList varList;
+        
+        public String getName() {
+            return "dec";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args[0] instanceof IVariable){
+                IVariable v = varList.get(((IVariable)args[0]).getName());
+                Construct newVal;
+                if(Static.anyDoubles(v.ival())){
+                    newVal = new CDouble(Static.getDouble(v.ival()) - 1, line_num);
+                } else {
+                    newVal = new CInt(Static.getInt(v.ival()) - 1, line_num);
+                }
+                v = new IVariable(v.getName(), newVal, line_num);
+                varList.set(v);
+                return v;
+            }
+            throw new ConfigRuntimeException("dec expects argument 1 to be an ivar");
+        }
+
+        public String docs() {
+            return "ivar {var} Subtracts 1 to var, and stores the new value. Equivalent to --var in other languages. Expects ivar to be a variable, then"
+                    + " returns the ivar.";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {
+            this.varList = varList;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
         }
         
     }
