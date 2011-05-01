@@ -1,6 +1,6 @@
 name: CommandHelper
 main: com.sk89q.commandhelper.CommandHelperPlugin
-version: CHVERSIONMACRO
+version: "${project.version}"
 commands:
     commandhelper:
         description: Command helper
