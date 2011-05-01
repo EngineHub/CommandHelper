@@ -19,7 +19,7 @@ import org.bukkit.entity.Player;
  *
  * @author Layton
  */
-public class PlayerManangment {
+public class PlayerManangement {
     public static String docs(){
         return "This class of functions allow a players to be managed";
     }

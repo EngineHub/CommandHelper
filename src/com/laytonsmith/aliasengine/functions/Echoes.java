@@ -126,7 +126,7 @@ public class Echoes {
         }
 
         public String docs() {
-            return "void {player, msg, [...]} Displays a message on the specified players screen, similar to msg";
+            return "void {player, msg, [...]} Displays a message on the specified players screen, similar to msg, but targets a specific user.";
         }
 
         public boolean isRestricted() {
