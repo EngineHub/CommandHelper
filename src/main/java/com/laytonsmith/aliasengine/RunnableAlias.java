@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.functions.BasicLogic._if;
 import com.laytonsmith.aliasengine.functions.DataHandling._for;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
+import com.laytonsmith.aliasengine.functions.FunctionList.group;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
@@ -111,6 +112,10 @@ public class RunnableAlias {
                     } catch(IndexOutOfBoundsException e){
                         throw new ConfigRuntimeException("Invalid number of parameters passed to if");
                     }
+                } else if(f instanceof group){
+                    group g = (group)f;
+                    List<GenericTreeNode<Construct>> ch = c.getChildren();
+                    return g.execs(m.line_num, player, this, ch);
                 }
                 ArrayList<Construct> args = new ArrayList<Construct>();
                 for (GenericTreeNode<Construct> c2 : c.getChildren()) {

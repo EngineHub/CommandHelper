@@ -5,13 +5,18 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.CancelCommandException;
+import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.CFunction;
+import com.laytonsmith.aliasengine.Constructs.CString;
+import com.laytonsmith.aliasengine.GenericTreeNode;
+import com.laytonsmith.aliasengine.RunnableAlias;
 import com.laytonsmith.aliasengine.User;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
@@ -67,6 +72,9 @@ public class FunctionList {
                 }
             }
         }
+        
+        //Internal, private functions
+        registerFunction(new group());
 
         //Now pull all the jars from plugins/CommandHelper/functions
         //TODO Finishing this has been defered until a later date
@@ -140,5 +148,42 @@ public class FunctionList {
 
     public static ArrayList<Function> getFunctionList() {
         return functions;
+    }
+    
+    public static class group implements Function{
+
+        public String getName() {
+            return "group";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        public Construct execs(int line_num, Player p, RunnableAlias that, List<GenericTreeNode<Construct>> ch) throws CancelCommandException{
+            StringBuilder b = new StringBuilder();
+            for(GenericTreeNode<Construct> c : ch){
+                b.append(that.eval(c).val());
+            }
+            return new CString(b.toString(), line_num);
+        }
+
+        public String docs() {
+            return "";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+        
     }
 }

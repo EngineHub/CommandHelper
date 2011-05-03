@@ -163,4 +163,39 @@ public class PlayerManangement {
         }
         
     }
+    @api public static class pgroup implements Function {
+
+        public String getName() {
+            return "pgroup";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String [] sa = com.laytonsmith.aliasengine.Static.getPermissionsResolverManager().getGroups(args[0].val());
+            Construct [] ca = new Construct[sa.length];
+            for(int i = 0; i < sa.length; i++){
+                ca[i] = new CString(sa[i], line_num);
+            }
+            CArray a = new CArray(line_num, ca);
+            return a;
+        }
+
+        public String docs() {
+            return "array {playerName} Returns an array of the groups a player is in.";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+        
+    }
 }

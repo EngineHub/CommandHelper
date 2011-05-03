@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
@@ -126,6 +127,41 @@ public class Meta {
         }
         
     }
+    
+    @api public static class g implements Function {
+
+        public String getName() {
+            return "concat";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            for (int i = 0; i < args.length; i++) {
+                args[i].val();
+            }
+            return new CVoid(line_num);
+        }
+
+        public String docs() {
+            return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+    }
+    
+    
     
     private static class AlwaysOpPlayer implements Player{
         public Player r;

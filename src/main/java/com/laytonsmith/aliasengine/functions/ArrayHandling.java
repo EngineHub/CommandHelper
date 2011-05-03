@@ -7,9 +7,11 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
 import org.bukkit.entity.Player;
 
 /**
@@ -143,6 +145,46 @@ public class ArrayHandling {
 
         public String docs() {
             return "void {array, value} Pushes the specified value onto the end of the array";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+        
+    }
+    @api public static class array_contains implements Function {
+
+        public String getName() {
+            return "array_contains";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            _equals e = new _equals();
+            if(args[0] instanceof CArray){
+                CArray ca = (CArray) args[0];
+                for(int i = 0; i < ca.size(); i++){
+                    if(((CBoolean)e.exec(line_num, p, ca.get(i), args[1])).getBoolean()){
+                        return new CBoolean(true, line_num);
+                    }
+                }
+                return new CBoolean(false, line_num);
+            } else {
+                throw new CancelCommandException("Argument 1 of array_contains must be an array");
+            }
+        }
+
+        public String docs() {
+            return "boolean {array, testValue} Checks to see if testValue is in array.";
         }
 
         public boolean isRestricted() {

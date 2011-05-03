@@ -1,0 +1,26 @@
+name: CommandHelper
+main: com.sk89q.commandhelper.CommandHelperPlugin
+version: "3.0.1-SNAPSHOT"
+commands:
+    commandhelper:
+        description: Command helper
+        usage: /<command>
+        aliases: ch
+    repeat:
+        description: Repeat the last command
+        usage: /<command>
+        aliases: .
+    alias:
+        description: Create an alias
+        usage: /<command> <alias>
+    delalias:
+        description: Remove an alias
+        usage: /<command> <name>
+    reloadaliases:
+        description: Reloads aliases
+        usage: /<command>
+        aliases: reloadalias
+    viewalias:
+        description: View all user defined aliases
+        usage: /<command>
+        aliases: viewaliases

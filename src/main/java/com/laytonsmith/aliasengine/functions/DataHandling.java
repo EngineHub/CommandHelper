@@ -143,4 +143,50 @@ public class DataHandling {
         }
         
     }
+    
+    @api public static class foreach implements Function{
+        IVariableList varList;
+        public String getName() {
+            return "foreach";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{3};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        
+        public Construct execs(int line_num, Player p, RunnableAlias that, GenericTreeNode<Construct> array, 
+                GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code) throws CancelCommandException{
+            //TODO: Finish the foreach
+            Construct arr = that.eval(array);
+            IVariable iv = (IVariable) that.eval(ivar);
+            if(arr instanceof CArray){
+                
+            } else {
+                throw new CancelCommandException("Parameter 1 of foreach must be an array");
+            }
+            
+            return new CVoid(line_num);
+        }
+
+        public String docs() {
+            return "void {array, ivar, code} Walks through array, setting ivar equal to each element in the array, then running code.";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {
+            this.varList = varList;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+        
+    }
 }
