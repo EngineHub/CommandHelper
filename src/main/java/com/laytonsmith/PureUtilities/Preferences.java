@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.PureUtilities;
 
 import java.io.BufferedWriter;
@@ -17,8 +14,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *
- * @author Layton
+ * This class allows an application to more easily manage user preferences. As
+ * an application grows, more preferences will likely be added, but if the application
+ * uses flat file storage, mananging these preferences while adding new preferences
+ * can be difficult. This class manages, documents, and provides default values, all the
+ * while not interfering with changes the user has made, meaning that you are free
+ * to add new preferences, or change default values, without fear of changing
+ * values that the user has specifically set.
+ * @author Layton Smith
  */
 public class Preferences {
     private final static Map<String, Preference> prefs = new HashMap<String, Preference>();
@@ -30,18 +33,39 @@ public class Preferences {
     /**
      * The type a particular preference can be. The value will be cast to the given type
      * if possible. NUMBER and DOUBLE are guaranteed to be castable to a Double. NUMBER 
-     * can also sometimes be cast to an int. 
+     * can also sometimes be cast to an int. BOOLEAN is cast to a boolean, and may be stored
+     * in the preferences file as either true/false, yes/no, on/off, or a number, which
+     * get parsed accordingly. STRING can be any value.
      */
     public enum Type{
         NUMBER, BOOLEAN, STRING, INT, DOUBLE
     }
     
+    /**
+     * An object corresponding to a single preference
+     */
     public static class Preference{
+        /**
+         * The name of the preference
+         */
         public String name;
+        /**
+         * The value of the preference, as a string
+         */
         public String value;
+        /**
+         * The allowed type of this value
+         */
         public Type allowed;
+        /**
+         * The description of this preference. Used to write out to file.
+         */
         public String description;
 
+        /**
+         * The object representation of this value. Should not be used
+         * directly.
+         */
         public Object objectValue;
         
         public Preference(String name, String def, Type allowed, String description) {
@@ -53,7 +77,9 @@ public class Preferences {
     }
     
     /**
-     * Empty constructor
+     * Provide the name of the app, and logger, for recording errors, and a list
+     * of defaults, in case the value is not provided by the user, or an invalid
+     * value is provided. 
      */
     public Preferences(String appName, Logger logger, ArrayList<Preference> defaults){
         this.appName = appName;
@@ -63,6 +89,14 @@ public class Preferences {
         }
     }
 
+    /**
+     * Given a file that the preferences are supposedly stored in, this
+     * function will try to load the preferences. If the preferences don't exist,
+     * or they are incomplete, this will also fill in the missing values, and 
+     * store the now complete preferences in the file location specified.
+     * @param prefFile
+     * @throws Exception 
+     */
     public void init(File prefFile) throws Exception {
         this.prefFile = prefFile;
         if(prefFile.exists()){
@@ -142,6 +176,10 @@ public class Preferences {
         } else if(value.equalsIgnoreCase("yes")){
             return true;
         } else if(value.equalsIgnoreCase("no")){
+            return false;
+        } else if(value.equalsIgnoreCase("on")){
+            return true;
+        } else if(value.equalsIgnoreCase("off")){
             return false;
         } else {
             double d = Double.parseDouble(value);
