@@ -107,13 +107,17 @@ public class Meta {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/'){
+                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
+            }
+            String cmd = args[0].val().substring(1);
             Static.getServer().dispatchCommand(p, args[0].val());
             return new CVoid(line_num);
         }
 
         public String docs() {
             return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
-                    + "console; without a forward slash at the beginning.";
+                    + "chat; with a forward slash in front.";
         }
 
         public boolean isRestricted() {
@@ -131,7 +135,7 @@ public class Meta {
     @api public static class g implements Function {
 
         public String getName() {
-            return "concat";
+            return "g";
         }
 
         public Integer[] numArgs() {

@@ -7,9 +7,9 @@ import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct.ConstructType;
 import com.laytonsmith.aliasengine.functions.BasicLogic._if;
 import com.laytonsmith.aliasengine.functions.DataHandling._for;
+import com.laytonsmith.aliasengine.functions.DataHandling.foreach;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
-import com.laytonsmith.aliasengine.functions.FunctionList.group;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
@@ -95,6 +95,7 @@ public class RunnableAlias {
             try {
                 Function f;
                 f = func_list.getFunction(m);
+                f.varList(varList);
                 //We have special handling for loop and other control flow functions
                 if(f instanceof _for){
                     _for fr = (_for)f;
@@ -112,10 +113,14 @@ public class RunnableAlias {
                     } catch(IndexOutOfBoundsException e){
                         throw new ConfigRuntimeException("Invalid number of parameters passed to if");
                     }
-                } else if(f instanceof group){
-                    group g = (group)f;
+                } else if(f instanceof foreach){
+                    foreach fe = (foreach)f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    return g.execs(m.line_num, player, this, ch);
+                    try{
+                        return fe.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2));
+                    } catch(IndexOutOfBoundsException e){
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to foreach");
+                    }
                 }
                 ArrayList<Construct> args = new ArrayList<Construct>();
                 for (GenericTreeNode<Construct> c2 : c.getChildren()) {
@@ -164,7 +169,7 @@ public class RunnableAlias {
                         }
                     }
                 }
-                f.varList(varList);
+                
                 return f.exec(m.line_num, player, ca);
                 //            } else if(f.name == FunctionName.PERFORM){
                 //                //Construct m = eval(c.getChildren().get(0));

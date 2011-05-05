@@ -12,12 +12,15 @@ import java.io.File;
  * @author Layton
  */
 public class CoreTestHarness {
-    public static void start(String path){
+    public static void start(String config, String prefs){
         try {
-            if(path == null){
-                path = "CommandHelper/config.txt";
+            if(config == null){
+                config = "CommandHelper/config.txt";
             }
-            AliasCore core = new AliasCore(true, 10, 5, new File(path), null);
+            if(prefs == null){
+                prefs = "CommandHelper/preferences.txt";
+            }
+            AliasCore core = new AliasCore(new File(config), new File(prefs), null);
         } catch (ConfigCompileException ex) {
             System.err.println(ex);
         }

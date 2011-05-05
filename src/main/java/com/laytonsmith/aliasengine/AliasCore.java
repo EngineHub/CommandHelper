@@ -20,10 +20,8 @@ import org.bukkit.entity.Player;
  */
 public class AliasCore {
 
-    private boolean allowCustomAliases = true;
-    private int maxCustomAliases = 5;
-    private int maxCommands = 5;
     private File aliasConfig;
+    private File prefFile;
     AliasConfig config;
     static final Logger logger = Logger.getLogger("Minecraft");
     private ArrayList<String> echoCommand = new ArrayList<String>();
@@ -37,12 +35,9 @@ public class AliasCore {
      * @param maxCommands How many commands an alias may contain. Since aliases can be used like a
      * macro, this can help prevent command spamming.
      */
-    public AliasCore(boolean allowCustomAliases, int maxCustomAliases, int maxCommands,
-            File aliasConfig, PermissionsResolverManager perms) throws ConfigCompileException {
-        this.allowCustomAliases = allowCustomAliases;
-        this.maxCustomAliases = maxCustomAliases;
-        this.maxCommands = maxCommands;
+    public AliasCore(File aliasConfig, File prefFile, PermissionsResolverManager perms) throws ConfigCompileException {
         this.aliasConfig = aliasConfig;
+        this.prefFile = prefFile;
         this.perms = perms;
         reload();
     }
@@ -125,6 +120,10 @@ public class AliasCore {
                     logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
                 }
             }
+            
+            Preferences prefs = Static.getPreferences();
+            prefs.init(prefFile);
+            
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
             config = new AliasConfig(alias_config, null, perms);
             is_loaded = true;

@@ -17,7 +17,7 @@ public class Main {
     static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
     public static void main(String [] args){  
         if(args.length == 0){
-            CoreTestHarness.start(null);
+            CoreTestHarness.start(null, null);
         }
         List l = Arrays.asList(args);
         if(l.contains("-help") || l.contains("-h") || l.contains("--help") || l.contains("/?")){
@@ -87,7 +87,7 @@ public class Main {
                     }
                 }
                 String file = (i + 1 <= l.size() - 1?l.get(i + 1).toString().toLowerCase():null);                
-                CoreTestHarness.start(file);
+                CoreTestHarness.start(file, null);
                 return;
             }
         }

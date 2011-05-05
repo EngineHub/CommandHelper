@@ -125,7 +125,7 @@ public class DataHandling {
 
         public String docs() {
             return "void {assign, condition, expression1, expression2} Acts as a typical for loop. The assignment is first run. Then, a"
-                    + " condition is checked. If that condition is checked, expression2 is run. After that, expression1 is run. In java"
+                    + " condition is checked. If that condition is checked and returns true, expression2 is run. After that, expression1 is run. In java"
                     + " syntax, this would be: for(assign; condition; expression1){expression2}. assign must be an ivariable, either a "
                     + "pre defined one, or the results of the assign() function. condition must be a boolean.";
         }
@@ -160,11 +160,21 @@ public class DataHandling {
         
         public Construct execs(int line_num, Player p, RunnableAlias that, GenericTreeNode<Construct> array, 
                 GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code) throws CancelCommandException{
-            //TODO: Finish the foreach
+            
             Construct arr = that.eval(array);
-            IVariable iv = (IVariable) that.eval(ivar);
+            Construct iv = that.eval(ivar);
+            
             if(arr instanceof CArray){
-                
+                if(iv instanceof IVariable){
+                    CArray one = (CArray)arr;
+                    IVariable two = (IVariable)iv;
+                    for(int i = 0; i < one.size(); i++){
+                        varList.set(new IVariable(two.getName(), one.get(i), line_num));
+                        that.eval(code);
+                    }
+                } else {
+                    throw new CancelCommandException("Parameter 2 of foreach must be an ivariable");
+                }
             } else {
                 throw new CancelCommandException("Parameter 1 of foreach must be an array");
             }

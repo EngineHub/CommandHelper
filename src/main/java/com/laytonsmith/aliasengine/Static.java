@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine;
 import com.laytonsmith.Persistance.Persistance;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.Server;
 
@@ -65,6 +66,14 @@ public class Static {
             throw new NotInitializedYetException("The plugin has not been initialized yet");
         }
         return v;
+    }
+    
+    public static Preferences getPreferences() throws NotInitializedYetException{
+        Preferences m = com.sk89q.commandhelper.CommandHelperPlugin.prefs;
+        if(m == null){
+            m = new Preferences();
+        }
+        return m;
     }
     
     public static Construct resolveConstruct(String val, int line_num){

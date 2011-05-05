@@ -23,4 +23,7 @@ public class IVariable extends Variable{
     public Construct ival(){
         return var_value;
     }
+    public void setIval(Construct c){
+        var_value = c;
+    }
 }

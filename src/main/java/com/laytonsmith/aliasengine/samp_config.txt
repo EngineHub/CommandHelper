@@ -88,3 +88,18 @@ thor:/thor $player [$=''] = >>>
 
 #Creates a simple way to control the weather
 rain:/rain $true_false = storm($true_false)
+
+#Demonstrates the for function, as well as ivars
+#Lists all players on the server
+/list = >>>
+    #Initialize an empty string
+    assign(@pl, '')
+    assign(@ap, all_players())
+    #loop through the array stored in @ap, from 0 to one less than the size of the array
+    for(assign(@i, 0), lt(@i, array_size(@ap)), assign(@i, add(@i, 1)),
+        #append our player's name to the end of @pl string
+        assign(@pl, concat(@pl, array_get(@ap, @i), ' '))
+    )
+    #output the string
+    msg(@pl)
+<<<

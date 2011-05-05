@@ -23,6 +23,7 @@ import com.laytonsmith.Persistance.Persistance;
 import com.laytonsmith.aliasengine.AliasConfig;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
+import com.laytonsmith.aliasengine.Preferences;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
@@ -52,6 +53,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     public static Persistance persist;
     public static PermissionsResolverManager perms;
     public static Version version;
+    public static Preferences prefs;
     /**
      * Listener for the plugin system.
      */
@@ -70,7 +72,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         perms = new PermissionsResolverManager(getConfiguration(), getServer(),
                 getDescription().getName(), logger);
         try {
-            ac = new AliasCore(true, 50, 5, new java.io.File("plugins/CommandHelper/config.txt"), perms);
+            ac = new AliasCore(new File("plugins/CommandHelper/config.txt"), new File("plugins/CommandHelper/preferences.txt"), perms);
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
         }

@@ -10,11 +10,8 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -167,7 +164,7 @@ public class StringHandling {
         }
 
         public String docs() {
-            return "string {thing, what, that} Replaces all instances of 'what' with 'that' in 'main'";
+            return "string {main, what, that} Replaces all instances of 'what' with 'that' in 'main'";
         }
 
         public boolean isRestricted() {
