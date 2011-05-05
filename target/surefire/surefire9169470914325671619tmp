@@ -1,0 +1,33 @@
+#surefire
+#Thu May 05 02:10:07 CDT 2011
+testClassesDirectory=C\:\\Users\\Layton\\Documents\\NetBeansProjects\\CommandHelper\\target\\test-classes
+classPathUrl.4=C\:\\Users\\Layton\\.m2\\repository\\de\\schlichtherle\\truezip\\6.8.3\\truezip-6.8.3.jar
+classPathUrl.3=C\:\\Users\\Layton\\.m2\\repository\\com\\sk89q\\dummypermscompat\\1.1\\dummypermscompat-1.1.jar
+classPathUrl.2=C\:\\Users\\Layton\\.m2\\repository\\com\\sk89q\\worldedit\\4.4.2\\worldedit-4.4.2.jar
+useManifestOnlyJar=true
+classPathUrl.1=C\:\\Users\\Layton\\Documents\\NetBeansProjects\\CommandHelper\\target\\classes
+reportsDirectory=C\:\\Users\\Layton\\Documents\\NetBeansProjects\\CommandHelper\\target\\surefire-reports
+classPathUrl.0=C\:\\Users\\Layton\\Documents\\NetBeansProjects\\CommandHelper\\target\\test-classes
+dirscanner.0=directoryScannerOptions
+providerConfiguration=org.apache.maven.surefire.junit4.JUnit4Provider
+testSuiteDefinitionTestSourceDirectory=C\:\\Users\\Layton\\Documents\\NetBeansProjects\\CommandHelper\\src\\test\\java
+surefireClassPathUrl.1=C\:\\Users\\Layton\\.m2\\repository\\org\\apache\\maven\\surefire\\surefire-api\\2.7.1\\surefire-api-2.7.1.jar
+surefireClassPathUrl.0=C\:\\Users\\Layton\\.m2\\repository\\org\\apache\\maven\\surefire\\surefire-junit4\\2.7.1\\surefire-junit4-2.7.1.jar
+report.2=org.apache.maven.surefire.report.XMLReporter
+useSystemClassLoader=true
+report.1=org.apache.maven.surefire.report.BriefFileReporter
+report.0=org.apache.maven.surefire.report.ForkingConsoleReporter
+excludes0=**/*$*
+isTrimStackTrace=true
+dirscanner.0.params=C\:\\Users\\Layton\\Documents\\NetBeansProjects\\CommandHelper\\target\\test-classes|[**/Test*.java, **/*Test.java, **/*TestCase.java]|[**/*$*]
+includes2=**/*TestCase.java
+enableAssertions=true
+includes1=**/*Test.java
+failIfNoTests=false
+includes0=**/Test*.java
+dirscanner.0.types=java.io.File|java.util.ArrayList|java.util.ArrayList
+classPathUrl.8=C\:\\Users\\Layton\\.m2\\repository\\org\\bukkit\\bukkit\\0.0.1-SNAPSHOT\\bukkit-0.0.1-SNAPSHOT.jar
+classPathUrl.7=C\:\\Users\\Layton\\.m2\\repository\\junit\\junit\\4.8.1\\junit-4.8.1.jar
+childDelegation=false
+classPathUrl.6=C\:\\Users\\Layton\\.m2\\repository\\com\\sk89q\\jchronic\\0.2.4a\\jchronic-0.2.4a.jar
+classPathUrl.5=C\:\\Users\\Layton\\.m2\\repository\\rhino\\js\\1.7R2\\js-1.7R2.jar

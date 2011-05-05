@@ -89,7 +89,8 @@ public class DocGen {
                                     "! scope=\"col\" width=\"6%\" | Function Name\n" + 
                                     "! scope=\"col\" width=\"5%\" | Returns\n" + 
                                     "! scope=\"col\" width=\"15%\" | Arguments\n" + 
-                                    "! scope=\"col\" width=\"69%\" | Description\n" +
+                                    "! scope=\"col\" width=\"66%\" | Description\n" +
+                                    "! scope=\"col\" width=\"3%\" | Since\n" + 
                                     "! scope=\"col\" width=\"5%\" | Restricted");
             } else if(type.equals("text")){
                 System.out.println("**********************************************************************************************");
@@ -107,6 +108,7 @@ public class DocGen {
                 String desc = null;
                 String restricted = f.isRestricted()?"<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>":
                         "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
+                String since = f.since();
                 Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
                 Matcher m = p.matcher(doc);
                 if(m.find()){
@@ -115,17 +117,18 @@ public class DocGen {
                     desc = m.group(3);
                 }
                 if(type.equals("html")){
-                    System.out.println("<tr><td>" + ret + "</td><td>" + args + "</td><td>" + desc + "</td><td>" + restricted + "</td></tr>\n");
+                    System.out.println("<tr><td>" + ret + "</td><td>" + args + "</td><td>" + desc + "</td><td>" + since + "</td><td>" + restricted + "</td></tr>\n");
                 } else if(type.equals("wiki")){
                     System.out.println("|-\n"
                             + "! scope=\"row\" | " + f.getName() + "\n"
                             + "| " + ret + "\n"
                             + "| " + args + "\n"
                             + "| " + desc + "\n"
+                            + "| " + since + "\n"
                             + "| " + restricted);
                    
                 } else if(type.equals("text")){
-                    System.out.println(ret + f.getName() + "(" + args + ")" + "\n\t" + desc + (f.isRestricted()?"\n\tThis function is restricted":
+                    System.out.println(ret + f.getName() + "(" + args + ")" + "\n\t" + desc + "\n\t" + since + (f.isRestricted()?"\n\tThis function is restricted":
                             "\n\tThis function is not restricted"));
                 }
             }

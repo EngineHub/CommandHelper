@@ -100,7 +100,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return false;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
         
     }
     
@@ -145,7 +147,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class lt implements Function{
@@ -177,7 +181,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class gt implements Function{
@@ -209,7 +215,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class lte implements Function{
@@ -241,7 +249,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class gte implements Function{
@@ -273,7 +283,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class and implements Function{
@@ -310,7 +322,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class or implements Function{
@@ -346,7 +360,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class not implements Function{
@@ -376,7 +392,9 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     

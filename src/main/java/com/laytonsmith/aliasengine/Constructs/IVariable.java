@@ -13,6 +13,7 @@ public class IVariable extends Variable{
     Construct var_value;
     public IVariable(String name, int line_num){
         super(name, "", line_num);
+        this.var_value = new CString("", line_num);
         this.ctype = ConstructType.IVARIABLE;
     }
     public IVariable(String name, Construct value, int line_num){

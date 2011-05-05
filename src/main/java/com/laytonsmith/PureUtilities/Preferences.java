@@ -109,7 +109,12 @@ public class Preferences {
                 String value = getObject(val, ((Preference)prefs.get(key))).toString();
                 Object ovalue = getObject(val, ((Preference)prefs.get(key)));
                 Preference p1 = prefs.get(key);
-                Preference p2 = new Preference(p1.name, value, p1.allowed, p1.description);
+                Preference p2;
+                if(p1 != null){
+                    p2 = new Preference(p1.name, value, p1.allowed, p1.description);
+                } else {
+                    p2 = new Preference(key, val, Type.STRING, "");
+                }
                 p2.objectValue = ovalue;
                 prefs.put(key, p2);
             }
@@ -208,7 +213,11 @@ public class Preferences {
                 Map.Entry<String, Preference> e = (Map.Entry<String, Preference>) it.next();
                 Preference p = e.getValue();
                 String nl = System.getProperty("line.separator");
-                b.append("#").append(p.description).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
+                String description = "This value is not used in " + appName;
+                if(!p.description.trim().equals("")){
+                    description = p.description;
+                }
+                b.append("#").append(description).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
             }
             BufferedWriter out = null;
             out = new BufferedWriter(new FileWriter(prefFile.getAbsolutePath()));

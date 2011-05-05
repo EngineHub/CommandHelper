@@ -58,6 +58,9 @@ public class StringHandling {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
     }
 
     @api
@@ -95,6 +98,9 @@ public class StringHandling {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
     }
 
@@ -143,6 +149,9 @@ public class StringHandling {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
     }
 
     @api
@@ -176,6 +185,9 @@ public class StringHandling {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
     }
 
@@ -220,5 +232,42 @@ public class StringHandling {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
+    }
+    
+    @api public static class trim implements Function{
+
+        public String getName() {
+            return "trim";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {s} Returns the string s with leading and trailing whitespace cut off";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.0.1";
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(args[0].val().trim(), args[0].line_num);
+        }
+        
     }
 }

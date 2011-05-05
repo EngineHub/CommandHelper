@@ -53,6 +53,9 @@ public class Minecraft {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
         
     }
 }

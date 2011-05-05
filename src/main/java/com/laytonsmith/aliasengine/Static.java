@@ -73,15 +73,15 @@ public class Static {
     }
     
     public static Preferences getPreferences() throws NotInitializedYetException{
-        Preferences m = com.sk89q.commandhelper.CommandHelperPlugin.prefs;
-        if(m == null){
+        if(com.sk89q.commandhelper.CommandHelperPlugin.prefs == null){
             ArrayList<Preferences.Preference> a = new ArrayList<Preferences.Preference>();
-            a.add(new Preference("check-for-updates", "true", Type.BOOLEAN, "Whether or not to check to see if there's an update for CommandHelper"));
+            //a.add(new Preference("check-for-updates", "false", Type.BOOLEAN, "Whether or not to check to see if there's an update for CommandHelper"));
             a.add(new Preference("debug-mode", "false", Type.BOOLEAN, "Whether or not to display debug information in the console"));
             a.add(new Preference("show-warnings", "true", Type.BOOLEAN, "Whether or not to display warnings in the console, while compiling"));
-            m = new Preferences("CommandHelper", getLogger(), a);
+            a.add(new Preference("console-log-commands", "true", Type.BOOLEAN, "Whether or not to display the original command in the console"));
+            com.sk89q.commandhelper.CommandHelperPlugin.prefs = new Preferences("CommandHelper", getLogger(), a);
         }
-        return m;
+        return com.sk89q.commandhelper.CommandHelperPlugin.prefs;
     }
     
     public static Construct resolveConstruct(String val, int line_num){

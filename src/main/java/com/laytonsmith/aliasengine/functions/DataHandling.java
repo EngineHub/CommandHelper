@@ -50,6 +50,9 @@ public class DataHandling {
         public boolean preResolveVariables() {
             return false;
         }
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class assign implements Function{
@@ -86,7 +89,9 @@ public class DataHandling {
         public boolean preResolveVariables() {
             return false;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class _for implements Function{
@@ -141,7 +146,9 @@ public class DataHandling {
         public boolean preResolveVariables() {
             return false;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class foreach implements Function{
@@ -162,6 +169,9 @@ public class DataHandling {
                 GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code) throws CancelCommandException{
             
             Construct arr = that.eval(array);
+            if(arr instanceof IVariable){
+                arr = varList.get(((IVariable)arr).getName()).ival();
+            }
             Construct iv = that.eval(ivar);
             
             if(arr instanceof CArray){
@@ -197,6 +207,8 @@ public class DataHandling {
         public boolean preResolveVariables() {
             return false;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
 }

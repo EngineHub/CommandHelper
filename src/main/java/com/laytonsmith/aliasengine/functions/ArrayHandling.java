@@ -52,6 +52,10 @@ public class ArrayHandling {
         public boolean preResolveVariables() {
             return true;
         }
+
+        public String since() {
+            return "3.0.1";
+        }
         
     }
     
@@ -86,6 +90,9 @@ public class ArrayHandling {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
         
     }
@@ -122,6 +129,9 @@ public class ArrayHandling {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
         
     }
     
@@ -155,6 +165,9 @@ public class ArrayHandling {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
         
     }
@@ -195,6 +208,9 @@ public class ArrayHandling {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
         
     }

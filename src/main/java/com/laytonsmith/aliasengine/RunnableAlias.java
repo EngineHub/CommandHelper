@@ -64,8 +64,10 @@ public class RunnableAlias {
                     }
                 }
                 String cmd = b.toString().trim();
-                System.out.println("CH: Running original command ----> " + originalCommand);
-                System.out.println("on " + player.getName());
+                if((Boolean)Static.getPreferences().getPreference("console-log-commands")){                    
+                    System.out.println("CH: Running original command ----> " + originalCommand);
+                    System.out.println("on " + player.getName());
+                }
                 if(player == null){
                     System.out.println("Player is null, assuming test harness is running");
                 } else {

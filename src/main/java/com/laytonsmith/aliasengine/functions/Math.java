@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.*;
+import java.util.Random;
 import org.bukkit.entity.Player;
 
 /**
@@ -52,7 +53,9 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class subtract implements Function{
@@ -90,7 +93,9 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class multiply implements Function{
@@ -127,6 +132,9 @@ public class Math {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
         
     }
@@ -166,6 +174,9 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
         
     }
     
@@ -199,6 +210,9 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
         
     }
     
@@ -230,6 +244,9 @@ public class Math {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
         
     }
@@ -278,6 +295,9 @@ public class Math {
         public boolean preResolveVariables() {
             return false;
         }
+        public String since() {
+            return "3.0.1";
+        }
         
     }
     
@@ -325,6 +345,58 @@ public class Math {
         public boolean preResolveVariables() {
             return false;
         }
+        public String since() {
+            return "3.0.1";
+        }
+    }
+    
+    @api public static class rand implements Function{
+        
+        Random r = new Random();
+
+        public String getName() {
+            return "rand";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "int {min/max, [max]} Returns a random number from 0 to max, or min to max, depending on usage. Max is exclusive. Min must"
+                    + " be less than max, and both numbers must be >= 0";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.0.1";
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            int min = 0;
+            int max = 0;
+            if(args.length == 1){
+                max = Static.getInt(args[0]);
+            } else {
+                min = Static.getInt(args[0]);
+                max = Static.getInt(args[1]);
+            }
+            int i = r.nextInt(max - min) + min;
+            
+            return new CInt(i, line_num);
+            
+        }
         
     }
+    
+    
 }

@@ -50,6 +50,9 @@ public class Echoes {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class msg implements Function{
@@ -89,6 +92,9 @@ public class Echoes {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
     
     }
@@ -138,7 +144,9 @@ public class Echoes {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class color implements Function{
@@ -152,11 +160,17 @@ public class Echoes {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CString(ChatColor.valueOf(args[0].val().toUpperCase()).toString(), line_num);
+            String color = ChatColor.WHITE.toString();
+            try{
+                color = ChatColor.valueOf(args[0].val().toUpperCase()).toString();
+            } catch(IllegalArgumentException e){}
+            
+            return new CString(color, line_num);
         }
 
         public String docs() {
-            return "string {name} Returns the color modifier given a color name";
+            return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
+                    + " The list of valid color names can be found in the ChatColor class, and case doesn't matter.";
         }
 
         public boolean isRestricted() {
@@ -167,6 +181,77 @@ public class Echoes {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
+        }
+    }
+    
+    @api public static class chat implements Function{
+
+        public String getName() {
+            return "chat";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            p.chat(args[0].val());
+            return new CVoid(line_num);
+        }
+
+        public String docs() {
+            return "void {string} Echoes string to the chat, as if the user simply typed something into the chat bar.";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+        public String since() {
+            return "3.0.1";
+        }
+        
+    }
+    
+    @api public static class broadcast implements Function{
+
+        public String getName() {
+            return "broadcast";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "void {message} Broadcasts a message to all players on the server";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.0.1";
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            p.getServer().broadcastMessage(args[0].val());
+            return new CVoid(line_num);
         }
         
     }

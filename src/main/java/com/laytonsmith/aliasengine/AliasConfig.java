@@ -515,7 +515,9 @@ public class AliasConfig {
                     }
                     if(!found){
                         //Just a warning in this case
-                        System.err.println("Notice: Defined variable " + left_var.name + " is unused near line " + left_var.line_num);
+                        if((Boolean)Static.getPreferences().getPreference("show-warnings")){
+                            System.err.println("Notice: Defined variable " + left_var.name + " is unused near line " + left_var.line_num);
+                        }
                     }
                 }
                 //Look to see if all the variables on the right are defined on the left

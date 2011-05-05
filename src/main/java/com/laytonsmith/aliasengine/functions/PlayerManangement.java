@@ -54,7 +54,9 @@ public class PlayerManangement {
         public boolean preResolveVariables() {
             return true;
         }
-        
+        public String since() {
+            return "3.0.1";
+        }
     }
     
     @api public static class all_players implements Function{
@@ -88,6 +90,9 @@ public class PlayerManangement {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
         
     }
@@ -126,6 +131,9 @@ public class PlayerManangement {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
         
     }
     
@@ -161,6 +169,9 @@ public class PlayerManangement {
         public boolean preResolveVariables() {
             return true;
         }
+        public String since() {
+            return "3.0.1";
+        }
         
     }
     @api public static class pgroup implements Function {
@@ -195,6 +206,9 @@ public class PlayerManangement {
 
         public boolean preResolveVariables() {
             return true;
+        }
+        public String since() {
+            return "3.0.1";
         }
         
     }

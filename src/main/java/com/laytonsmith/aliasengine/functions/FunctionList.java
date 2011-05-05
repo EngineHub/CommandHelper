@@ -73,8 +73,7 @@ public class FunctionList {
             }
         }
         
-        //Internal, private functions
-        registerFunction(new group());
+        
 
         //Now pull all the jars from plugins/CommandHelper/functions
         //TODO Finishing this has been defered until a later date
@@ -105,7 +104,9 @@ public class FunctionList {
 
     
     public static void registerFunction(Function f) {
-        //System.out.println("CommandHelper: Loaded function \"" + f.getName() + "\"");
+        if((Boolean)com.laytonsmith.aliasengine.Static.getPreferences().getPreference("debug-mode")){
+            System.out.println("CommandHelper: Loaded function \"" + f.getName() + "\"");
+        }
         functions.add(f);
     }
 
@@ -150,40 +151,4 @@ public class FunctionList {
         return functions;
     }
     
-    public static class group implements Function{
-
-        public String getName() {
-            return "group";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        public Construct execs(int line_num, Player p, RunnableAlias that, List<GenericTreeNode<Construct>> ch) throws CancelCommandException{
-            StringBuilder b = new StringBuilder();
-            for(GenericTreeNode<Construct> c : ch){
-                b.append(that.eval(c).val());
-            }
-            return new CString(b.toString(), line_num);
-        }
-
-        public String docs() {
-            return "";
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-        
-    }
 }

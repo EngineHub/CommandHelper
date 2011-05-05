@@ -24,7 +24,7 @@ public class Construct{
 
     public ConstructType ctype;
     public TType type;
-    protected String value;
+    protected String value = "";
     public int line_num;
 
     public Construct(TType type, String value, ConstructType ctype, int line_num){
