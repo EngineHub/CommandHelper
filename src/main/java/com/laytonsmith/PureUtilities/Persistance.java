@@ -1,4 +1,4 @@
-package com.laytonsmith.Persistance;
+package com.laytonsmith.PureUtilities;
 
 import java.io.File;
 import java.io.FileInputStream;

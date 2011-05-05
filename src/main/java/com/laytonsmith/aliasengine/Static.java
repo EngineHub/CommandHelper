@@ -4,9 +4,13 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.Persistance.Persistance;
+import com.laytonsmith.PureUtilities.Persistance;
+import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.aliasengine.Constructs.*;
+import com.laytonsmith.PureUtilities.Preferences.Preference;
+import com.laytonsmith.PureUtilities.Preferences.Type;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.Server;
@@ -71,7 +75,11 @@ public class Static {
     public static Preferences getPreferences() throws NotInitializedYetException{
         Preferences m = com.sk89q.commandhelper.CommandHelperPlugin.prefs;
         if(m == null){
-            m = new Preferences();
+            ArrayList<Preferences.Preference> a = new ArrayList<Preferences.Preference>();
+            a.add(new Preference("check-for-updates", "true", Type.BOOLEAN, "Whether or not to check to see if there's an update for CommandHelper"));
+            a.add(new Preference("debug-mode", "false", Type.BOOLEAN, "Whether or not to display debug information in the console"));
+            a.add(new Preference("show-warnings", "true", Type.BOOLEAN, "Whether or not to display warnings in the console, while compiling"));
+            m = new Preferences("CommandHelper", getLogger(), a);
         }
         return m;
     }

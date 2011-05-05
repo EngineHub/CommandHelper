@@ -19,11 +19,11 @@
 
 package com.sk89q.commandhelper;
 
-import com.laytonsmith.Persistance.Persistance;
+import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.aliasengine.AliasConfig;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
-import com.laytonsmith.aliasengine.Preferences;
+import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;

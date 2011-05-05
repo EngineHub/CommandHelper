@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.PureUtilities.Preferences;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.*;
 import java.util.ArrayList;

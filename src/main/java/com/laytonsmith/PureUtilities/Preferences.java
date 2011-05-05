@@ -2,16 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.aliasengine;
+package com.laytonsmith.PureUtilities;
 
-import com.laytonsmith.aliasengine.Constructs.CString;
-import com.sun.net.ssl.internal.ssl.DefaultSSLContextImpl;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Enumeration;
+import java.io.FileWriter;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Properties;
@@ -24,29 +22,27 @@ import java.util.logging.Logger;
  */
 public class Preferences {
     private final static Map<String, Preference> prefs = new HashMap<String, Preference>();
-    static{
-        //Store our default preferences here
-        prefs.put("check-for-updates", new Preference("check-for-updates", "true", Type.BOOLEAN, "Whether or not to check to see if there's an update for CommandHelper"));
-        prefs.put("debug-mode", new Preference("debug-mode", "false", Type.BOOLEAN, "Whether or not to display debug information in the console"));
-        prefs.put("show-warnings", new Preference("show-warnings", "true", Type.BOOLEAN, "Whether or not to display warnings in the console, while compiling"));
-    }
+    private final String appName;
+    private final Logger logger;
     
     private File prefFile;
     
     /**
-     * The type a particular preference can be
+     * The type a particular preference can be. The value will be cast to the given type
+     * if possible. NUMBER and DOUBLE are guaranteed to be castable to a Double. NUMBER 
+     * can also sometimes be cast to an int. 
      */
-    private enum Type{
+    public enum Type{
         NUMBER, BOOLEAN, STRING, INT, DOUBLE
     }
     
-    private static class Preference{
-        String name;
-        String value;
-        Type allowed;
-        String description;
+    public static class Preference{
+        public String name;
+        public String value;
+        public Type allowed;
+        public String description;
 
-        Object objectValue;
+        public Object objectValue;
         
         public Preference(String name, String def, Type allowed, String description) {
             this.name = name;
@@ -59,8 +55,12 @@ public class Preferences {
     /**
      * Empty constructor
      */
-    public Preferences(){
-        
+    public Preferences(String appName, Logger logger, ArrayList<Preference> defaults){
+        this.appName = appName;
+        this.logger = logger;
+        for(Preference p : defaults){
+            prefs.put(p.name, p);
+        }
     }
 
     public void init(File prefFile) throws Exception {
@@ -80,7 +80,7 @@ public class Preferences {
                 prefs.put(key, p2);
             }
         }
-        upgrade();
+        save();
     }
     
     private Object getObject(String value, Preference p){
@@ -95,21 +95,21 @@ public class Preferences {
                 try{
                     return Integer.parseInt(value);
                 } catch (NumberFormatException e){
-                    System.err.println("CommandHelper expects the value of " + p.name + " to be an integer. Using the default of " + p.value);
+                    logger.log(Level.WARNING, "[{0}] expects the value of {1} to be an integer. Using the default of {2}", new Object[]{appName, p.name, p.value});
                     return Integer.parseInt(p.value);
                 }
             case DOUBLE:
                 try{
                     return Double.parseDouble(value);
                 } catch (NumberFormatException e){
-                    System.err.println("CommandHelper expects the value of " + p.name + " to be a double. Using the default of " + p.value);
+                    logger.log(Level.WARNING, "[{0}] expects the value of {1} to be a double. Using the default of {2}", new Object[]{appName, p.name, p.value});
                     return Double.parseDouble(p.value);
                 }
             case BOOLEAN:
                 try{
                     return getBoolean(value);
                 } catch (NumberFormatException e){
-                    System.err.println("CommandHelper expects the value of " + p.name + " to be a boolean. Using the default of " + p.value);
+                    logger.log(Level.WARNING, "[{0}] expects the value of {1} to be a boolean. Using the default of {2}", new Object[]{appName, p.name, p.value});
                     return getBoolean(p.value);
                 }
             case NUMBER:
@@ -119,7 +119,7 @@ public class Preferences {
                     try{
                         return Double.parseDouble(value);
                     } catch(NumberFormatException f){
-                        System.err.println("CommandHelper expects the value of " + p.name + " to be a number. Using the default of " + p.value);
+                        logger.log(Level.WARNING, "[{0}] expects the value of {1} to be a number. Using the default of {2}", new Object[]{appName, p.name, p.value});
                         try{
                             return Integer.parseInt(p.value);
                         } catch(NumberFormatException g){
@@ -162,7 +162,7 @@ public class Preferences {
         return prefs.get(name).objectValue;
     }
     
-    private void upgrade(){
+    private void save(){
         try {
             StringBuilder b = new StringBuilder();
             Iterator it = prefs.entrySet().iterator();
@@ -172,9 +172,12 @@ public class Preferences {
                 String nl = System.getProperty("line.separator");
                 b.append("#").append(p.description).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
             }
-            AliasCore.file_put_contents(prefFile, b.toString(), "o");
+            BufferedWriter out = null;
+            out = new BufferedWriter(new FileWriter(prefFile.getAbsolutePath()));
+            out.write(b.toString());
+            out.close();
         } catch (Exception ex) {
-            System.err.println("CommandHelper: Could not write out preferences file");
+            logger.log(Level.WARNING, "[{0}] Could not write out preferences file", appName);
         }
     }
     

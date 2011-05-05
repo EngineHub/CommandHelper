@@ -5,7 +5,7 @@
 
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.Persistance.Persistance;
+import com.laytonsmith.PureUtilities.Persistance;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
