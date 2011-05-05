@@ -496,5 +496,17 @@ public class Meta {
         public void incrementStatistic(Statistic ststc, Material mtrl, int i) {
             r.incrementStatistic(ststc, mtrl, i);
         }
+
+        public void playNote(Location loc, byte instrument, byte note) {
+            r.playNote(loc, instrument, note);
+        }
+
+        public void sendBlockChange(Location loc, Material material, byte data) {
+            r.sendBlockChange(loc, material, data);
+        }
+
+        public void sendBlockChange(Location loc, int material, byte data) {
+            r.sendBlockChange(loc, material, data);
+        }
     }
 }

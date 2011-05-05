@@ -217,7 +217,17 @@ public class Preferences {
                 if(!p.description.trim().equals("")){
                     description = p.description;
                 }
-                b.append("#").append(description).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
+                StringBuilder c = new StringBuilder();
+                boolean first = true;
+                for(String line : description.split("\n|\r\n|\n\r")){
+                    if(first){
+                        c.append("#").append(line);
+                        first = false;
+                    } else {
+                        c.append(nl).append("#").append(line);
+                    }
+                }
+                b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
             }
             BufferedWriter out = null;
             out = new BufferedWriter(new FileWriter(prefFile.getAbsolutePath()));
