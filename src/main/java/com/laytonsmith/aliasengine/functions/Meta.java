@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
@@ -56,7 +57,7 @@ public class Meta {
             if(args[0] instanceof CArray){
                 CArray u = (CArray) args[0];
                 for(int i = 0; i < u.size(); i++){
-                    exec(line_num, Static.getServer().getPlayer(u.get(i).val()), args[1]);
+                    exec(line_num, p, new Construct[]{new CString(u.get(i).val(), line_num), args[1]});
                 }
                 return new CVoid(line_num);
             }

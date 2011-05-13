@@ -5,11 +5,13 @@
 
 package com.laytonsmith.aliasengine.Constructs;
 
+import java.io.Serializable;
+
 /**
  *
  * @author layton
  */
-public class Construct{
+public class Construct implements Serializable{
     public enum ConstructType{
         TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE
     }

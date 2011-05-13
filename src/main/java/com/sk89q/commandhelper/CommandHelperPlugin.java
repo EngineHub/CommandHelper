@@ -77,7 +77,7 @@ public class CommandHelperPlugin extends JavaPlugin {
             logger.log(Level.SEVERE, null, ex);
         }
         
-        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.High);
+        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Highest);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
         
         playerListener.loadGlobalAliases();

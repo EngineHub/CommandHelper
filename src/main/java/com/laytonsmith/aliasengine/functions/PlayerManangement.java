@@ -13,6 +13,7 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import org.bukkit.Location;
+import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 /**
@@ -133,6 +134,45 @@ public class PlayerManangement {
         }
         public String since() {
             return "3.0.1";
+        }
+        
+    }
+    
+    @api public static class pcursor implements Function{
+
+        public String getName() {
+            return "pcursor";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "array {player} Returns an array with the x, y, z coordinates of the block the player has highlighted"
+                    + " in their crosshairs.";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.0.2";
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Block b = p.getTargetBlock(null, 200);
+            if(b == null){
+                throw new CancelCommandException("No block in sight, or block too far");
+            }
+            return new CArray(line_num, new CInt(b.getX(), line_num), new CInt(b.getY(), line_num), new CInt(b.getZ(), line_num));
         }
         
     }

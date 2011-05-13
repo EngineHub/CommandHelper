@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
+import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
@@ -170,7 +171,9 @@ public class Echoes {
 
         public String docs() {
             return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
-                    + " The list of valid color names can be found in the ChatColor class, and case doesn't matter.";
+                    + " The list of valid color names can be found in the ChatColor class, and case doesn't matter. For your reference,"
+                    + " here is the list of valid colors: BLACK, DARK_BLUE, DARK_GREEN, DARK_AQUA, DARK_RED, DARK_PURPLE, GOLD GRAY, DARK_GRAY,"
+                    + " BLUE, GREEN, AQUA, RED, LIGHT_PURPLE, YELLOW, WHITE";
         }
 
         public boolean isRestricted() {
@@ -221,6 +224,42 @@ public class Echoes {
         
     }
     
+    @api public static class chatas implements Function{
+
+        public String getName() {
+            return "chatas";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {player, msg} Sends a chat message to the server, as the given player. Otherwise the same as the chat"
+                    + " function";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.0.2";
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            p.getServer().getPlayer(args[0].val()).chat(args[1].val());
+            return new CVoid(line_num);
+        }
+        
+    }
+    
     @api public static class broadcast implements Function{
 
         public String getName() {
@@ -251,6 +290,47 @@ public class Echoes {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             p.getServer().broadcastMessage(args[0].val());
+            return new CVoid(line_num);
+        }
+        
+    }
+    
+    @api public static class console implements Function{
+
+        public String getName() {
+            return "console";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {message, [prefix]} Logs a message to the console. If prefix is true, prepends \"CommandHelper:\""
+                    + " to the message. Default is true.";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.0.2";
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String mes = args[0].val();
+            boolean prefix = true;
+            if(args.length > 1){
+                prefix = Static.getBoolean(args[1]);
+            }
+            com.laytonsmith.aliasengine.Static.getLogger().log(Level.INFO, (prefix?"CommandHelper: ":"") + mes);
             return new CVoid(line_num);
         }
         
