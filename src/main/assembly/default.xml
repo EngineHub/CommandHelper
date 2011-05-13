@@ -25,6 +25,7 @@
   <fileSets>
     <fileSet>
       <includes>
+        <include>CHANGELOG.txt</include>
         <include>LICENSE.txt</include>
       </includes>
     </fileSet>
