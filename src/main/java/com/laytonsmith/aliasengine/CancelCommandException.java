@@ -14,4 +14,10 @@ public class CancelCommandException extends Exception{
     public CancelCommandException(String message){
         this.message = message;
     }
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
 }

@@ -10,6 +10,9 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.GenericTreeNode;
+import com.laytonsmith.aliasengine.MinescriptCompiler;
+import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
@@ -96,6 +99,9 @@ public class Meta {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return false;
+        }
         
     }
 
@@ -135,7 +141,9 @@ public class Meta {
         public String since() {
             return "3.0.1";
         }
-        
+        public boolean runAsync(){
+            return false;
+        }
     }
     
     @api public static class g implements Function {
@@ -172,9 +180,89 @@ public class Meta {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return true;
+        }
     }
     
+    @api public static class eval implements Function{
+
+        public String getName() {
+            return "eval";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {script_string} Executes arbitrary Minescript. Note that this function is very experimental, and is subject to changing or "
+                    + "removal.";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.0";
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CVoid(line_num);
+        }
+        //Doesn't matter, run out of state anyways
+        public boolean runAsync(){
+            return false;
+        }
+        
+    }
     
+    @api public static class sleep implements Function{
+
+        public String getName() {
+            return "sleep";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "void {seconds} Sleeps the script for the specified number of seconds, up to the maximum time limit defined in the preferences file."
+                    + " Seconds may be a double value, so 0.5 would be half a second."
+                    + " PLEASE NOTE: Sleep times are NOT very accurate, and should not be relied on for preciseness.";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.0";
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CVoid(line_num);
+        }
+        //Doesn't matter, run out of state anyways
+        public boolean runAsync(){
+            return false;
+        }
+        
+    }
     
     private static class AlwaysOpPlayer implements Player{
         public Player r;

@@ -15,7 +15,7 @@ public class CDouble extends Construct{
     double val;
 
     public CDouble(String value, int line_num){
-        super(TType.CONSTRUCT, value, ConstructType.INT, line_num);
+        super(value, ConstructType.INT, line_num);
         try{
             val = Double.parseDouble(value);
         } catch(NumberFormatException e){
@@ -24,7 +24,7 @@ public class CDouble extends Construct{
     }
 
     public CDouble(double value, int line_num){
-        super(TType.CONSTRUCT, Double.toString(value), ConstructType.DOUBLE, line_num);
+        super(Double.toString(value), ConstructType.DOUBLE, line_num);
         val = value;
     }
 

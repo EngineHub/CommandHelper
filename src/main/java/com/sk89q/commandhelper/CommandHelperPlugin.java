@@ -24,6 +24,7 @@ import com.laytonsmith.aliasengine.AliasConfig;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.aliasengine.MinescriptCompiler;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
@@ -54,6 +55,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     public static PermissionsResolverManager perms;
     public static Version version;
     public static Preferences prefs;
+    public static CommandHelperPlugin self;
     /**
      * Listener for the plugin system.
      */
@@ -65,6 +67,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      * Called on plugin enable.
      */
     public void onEnable() {
+        self = this;
         myServer = getServer();
         persist = new Persistance(new File("plugins/CommandHelper/persistance.ser"), this);
         logger.info("CommandHelper " + getDescription().getVersion() + " enabled");
@@ -174,12 +177,14 @@ public class CommandHelperPlugin extends JavaPlugin {
                 String alias = CommandHelperPlugin.joinString(args, " ");
                 try {
                     User u = new User(player, persist);
-                    AliasConfig uac = new AliasConfig(alias, u, perms);
+                    //AliasConfig uac = new AliasConfig(alias, u, perms);
+                    //MinescriptCompiler.compile(MinescriptCompiler.preprocess(MinescriptCompiler.lex(alias)));
+                    //TODO: Finish this
                     int id = u.addAlias(alias);
                     if(id > -1){
                         player.sendMessage(ChatColor.YELLOW + "Alias added with id '" + id + "'");
                     }
-                } catch (ConfigCompileException ex) {
+                } catch (/*ConfigCompile*/Exception ex) {
                     player.sendMessage(ChatColor.RED + ex.getMessage());
                 }
             } else{

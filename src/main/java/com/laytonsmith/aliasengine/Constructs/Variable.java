@@ -16,7 +16,7 @@ public class Variable extends Construct {
     public boolean final_var = false;
 
     public Variable(String name, String def, int line_num) {
-        super(TType.VARIABLE, name, ConstructType.VARIABLE, line_num);
+        super(name, ConstructType.VARIABLE, line_num);
         this.name = name;
         this.def = def;
     }

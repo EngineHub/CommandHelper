@@ -9,7 +9,9 @@ import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.RunnableAlias;
+import com.laytonsmith.aliasengine.Script;
+import com.laytonsmith.aliasengine.Static;
+import java.util.List;
 import org.bukkit.entity.Player;
 
 /**
@@ -30,16 +32,16 @@ public class BasicLogic {
             return new Integer[]{2, 3};
         }
         
-        public Construct execs(int line_num, Player p, RunnableAlias parent, 
+        public Construct execs(int line_num, Player p, Script parent, 
                 GenericTreeNode<Construct> condition, GenericTreeNode<Construct> __if, 
-                GenericTreeNode<Construct> __else) throws CancelCommandException{
-            if(Static.getBoolean(parent.eval(condition))){
-                return parent.eval(__if);
+                GenericTreeNode<Construct> __else, List<Variable> vars) throws CancelCommandException{
+            if(Static.getBoolean(parent.eval(condition, p, vars))){
+                return parent.eval(__if, p, vars);
             } else {
                 if(__else == null){
                     return new CVoid(line_num);
                 }
-                return parent.eval(__else);
+                return parent.eval(__else, p, vars);
             }
         }
 
@@ -103,6 +105,10 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
+        //Doesn't matter, this function is run out of state
+        public boolean runAsync() {
+            return false;
+        }
         
     }
     
@@ -150,6 +156,9 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync() {
+            return true;
+        }
     }
     
     @api public static class lt implements Function{
@@ -183,6 +192,9 @@ public class BasicLogic {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync() {
+            return true;
         }
     }
     
@@ -218,6 +230,10 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
+        
+        public boolean runAsync() {
+            return true;
+        }
     }
     
     @api public static class lte implements Function{
@@ -252,6 +268,9 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync() {
+            return true;
+        }
     }
     
     @api public static class gte implements Function{
@@ -285,6 +304,9 @@ public class BasicLogic {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync() {
+            return true;
         }
     }
     
@@ -325,6 +347,9 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync() {
+            return true;
+        }
     }
     
     @api public static class or implements Function{
@@ -363,6 +388,9 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync() {
+            return true;
+        }
     }
     
     @api public static class not implements Function{
@@ -394,6 +422,9 @@ public class BasicLogic {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync() {
+            return true;
         }
     }
     

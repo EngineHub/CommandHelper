@@ -15,7 +15,7 @@ import java.util.Map;
 public class CMap extends Construct{
     Map<String, Construct> array;
     public CMap(){
-        super(TType.CONSTRUCT, null, ConstructType.MAP, 0);
+        super(null, ConstructType.MAP, 0);
     }
 
     public Construct getValue(String key){

@@ -61,6 +61,9 @@ public class StringHandling {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return true;
+        }
     }
 
     @api
@@ -101,6 +104,9 @@ public class StringHandling {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync(){
+            return true;
         }
     }
 
@@ -152,6 +158,9 @@ public class StringHandling {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return true;
+        }
     }
 
     @api
@@ -188,6 +197,9 @@ public class StringHandling {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync(){
+            return true;
         }
     }
 
@@ -235,6 +247,9 @@ public class StringHandling {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class trim implements Function{
@@ -267,6 +282,9 @@ public class StringHandling {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().trim(), args[0].line_num);
+        }
+        public boolean runAsync(){
+            return true;
         }
         
     }

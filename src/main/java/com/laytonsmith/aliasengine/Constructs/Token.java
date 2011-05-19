@@ -8,13 +8,24 @@ package com.laytonsmith.aliasengine.Constructs;
  *
  * @author layton
  */
-public class Token extends Construct {
-
+public class Token{
+    public TType type;
+    public String value;
+    public int line_num;
+    
+    public enum TType{
+        UNKNOWN, OPT_VAR_START, OPT_VAR_END, OPT_VAR_ASSIGN, ALIAS_END, COMMA, FUNC_NAME, FUNC_START,
+        FUNC_END, STRING, NEWLINE, MULTILINE_START, MULTILINE_END, COMMAND, SEPERATOR, VARIABLE,
+        IVARIABLE, FINAL_VAR, LIT, ROOT, IDENT
+    }
     public Token(TType type, String value, int line_num) {
-        super(type, value, ConstructType.TOKEN, line_num);
         this.type = type;
         this.value = value;
         this.line_num = line_num;
+    }
+    
+    public String val(){
+        return value;
     }
 
     @Override

@@ -208,11 +208,16 @@ public class Preferences {
     private void save(){
         try {
             StringBuilder b = new StringBuilder();
+            String nl = System.getProperty("line.separator");
+            
+            b.append("#This file is generated automatically. Changes made to the values of this file")
+                    .append(nl)
+                    .append("#will persist, but changes to comments will not.")
+                    .append(nl).append(nl);
             Iterator it = prefs.entrySet().iterator();
             while(it.hasNext()){
                 Map.Entry<String, Preference> e = (Map.Entry<String, Preference>) it.next();
                 Preference p = e.getValue();
-                String nl = System.getProperty("line.separator");
                 String description = "This value is not used in " + appName;
                 if(!p.description.trim().equals("")){
                     description = p.description;

@@ -71,6 +71,14 @@ public interface Function {
      * @return 
      */
     public String since();
+    
+    /**
+     * Whether or not to run this function asynchronously from the main server thread. More than likely you should always
+     * return false from this. If you do return true, you may NOT have any interaction with the bukkit api, other than
+     * bukkit thread safe methods.
+     * @return 
+     */
+    public boolean runAsync();
     /**
      * This function is invoked when the alias is run. The line number is provided so that if there is an error,
      * the function can provide a more specific error message for the user. The function can throw a CancelCommandException

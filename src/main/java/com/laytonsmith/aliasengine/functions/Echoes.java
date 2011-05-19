@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
+import com.laytonsmith.aliasengine.Static;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -54,6 +55,9 @@ public class Echoes {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class msg implements Function{
@@ -96,6 +100,9 @@ public class Echoes {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync(){
+            return false;
         }
     
     }
@@ -148,6 +155,9 @@ public class Echoes {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return false;
+        }
     }
     
     @api public static class color implements Function{
@@ -188,6 +198,9 @@ public class Echoes {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class chat implements Function{
@@ -220,6 +233,9 @@ public class Echoes {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync(){
+            return false;
         }
         
     }
@@ -257,6 +273,9 @@ public class Echoes {
             p.getServer().getPlayer(args[0].val()).chat(args[1].val());
             return new CVoid(line_num);
         }
+        public boolean runAsync(){
+            return false;
+        }
         
     }
     
@@ -291,6 +310,9 @@ public class Echoes {
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             p.getServer().broadcastMessage(args[0].val());
             return new CVoid(line_num);
+        }
+        public boolean runAsync(){
+            return false;
         }
         
     }
@@ -332,6 +354,9 @@ public class Echoes {
             }
             com.laytonsmith.aliasengine.Static.getLogger().log(Level.INFO, (prefix?"CommandHelper: ":"") + mes);
             return new CVoid(line_num);
+        }
+        public boolean runAsync(){
+            return true;
         }
         
     }

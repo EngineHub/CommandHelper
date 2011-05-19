@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
 import org.bukkit.entity.Player;
 
@@ -56,6 +57,10 @@ public class ArrayHandling {
         public String since() {
             return "3.0.1";
         }
+
+        public boolean runAsync() {
+            return true;
+        }
         
     }
     
@@ -93,6 +98,10 @@ public class ArrayHandling {
         }
         public String since() {
             return "3.0.1";
+        }
+        
+        public boolean runAsync() {
+            return true;
         }
         
     }
@@ -133,6 +142,9 @@ public class ArrayHandling {
             return "3.0.1";
         }
         
+        public boolean runAsync() {
+            return true;
+        }
     }
     
     @api public static class array_push implements Function{
@@ -168,6 +180,10 @@ public class ArrayHandling {
         }
         public String since() {
             return "3.0.1";
+        }
+        
+        public boolean runAsync() {
+            return true;
         }
         
     }
@@ -211,6 +227,10 @@ public class ArrayHandling {
         }
         public String since() {
             return "3.0.1";
+        }
+        
+        public boolean runAsync() {
+            return true;
         }
         
     }

@@ -14,12 +14,12 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
 public class CBoolean extends Construct{
     boolean val;
     public CBoolean(boolean value, int line_num){
-        super(TType.CONSTRUCT, Boolean.toString(value), ConstructType.BOOLEAN, line_num);
+        super(Boolean.toString(value), ConstructType.BOOLEAN, line_num);
         val = value;
     }
 
     public CBoolean(String value, int line_num){
-        super(TType.CONSTRUCT, value, ConstructType.BOOLEAN, line_num);
+        super(value, ConstructType.BOOLEAN, line_num);
         try{
             int i = Integer.parseInt(value);
             if(i == 0){

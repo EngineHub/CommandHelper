@@ -12,7 +12,10 @@ import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
+import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.RunnableAlias;
+import com.laytonsmith.aliasengine.Script;
+import java.util.List;
 import org.bukkit.entity.Player;
 
 /**
@@ -53,6 +56,9 @@ public class DataHandling {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync() {
+            return true;
+        }
     }
     
     @api public static class assign implements Function{
@@ -92,6 +98,9 @@ public class DataHandling {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync() {
+            return true;
+        }
     }
     
     @api public static class _for implements Function{
@@ -103,15 +112,15 @@ public class DataHandling {
         public Integer[] numArgs() {
             return new Integer[]{4};
         }
-        public Construct execs(int line_num, Player p, RunnableAlias parent, GenericTreeNode<Construct> assign, 
+        public Construct execs(int line_num, Player p, Script parent, GenericTreeNode<Construct> assign, 
                 GenericTreeNode<Construct> condition, GenericTreeNode<Construct> expression, 
-                GenericTreeNode<Construct> runnable) throws CancelCommandException{
-            Construct counter = parent.eval(assign);
+                GenericTreeNode<Construct> runnable, List<Variable> vars) throws CancelCommandException{
+            Construct counter = parent.eval(assign, p, vars);
             if(!(counter instanceof IVariable)){
                 throw new ConfigRuntimeException("First parameter of for must be an ivariable");
             }
             while(true){
-                Construct cond = parent.eval(condition);
+                Construct cond = parent.eval(condition, p, vars);
                 if(!(cond instanceof CBoolean)){
                     throw new ConfigRuntimeException("Second parameter of for must return a boolean");
                 }
@@ -119,8 +128,8 @@ public class DataHandling {
                 if(bcond.getBoolean() == false){
                     break;
                 }
-                parent.eval(runnable);
-                parent.eval(expression);
+                parent.eval(runnable, p, vars);
+                parent.eval(expression, p, vars);
             }
             return new CVoid(line_num);
         }
@@ -149,6 +158,10 @@ public class DataHandling {
         public String since() {
             return "3.0.1";
         }
+        //Doesn't matter, run out of state
+        public boolean runAsync() {
+            return false;
+        }
     }
     
     @api public static class foreach implements Function{
@@ -165,14 +178,14 @@ public class DataHandling {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         
-        public Construct execs(int line_num, Player p, RunnableAlias that, GenericTreeNode<Construct> array, 
-                GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code) throws CancelCommandException{
+        public Construct execs(int line_num, Player p, Script that, GenericTreeNode<Construct> array, 
+                GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code, List<Variable> vars) throws CancelCommandException{
             
-            Construct arr = that.eval(array);
+            Construct arr = that.eval(array, p, vars);
             if(arr instanceof IVariable){
                 arr = varList.get(((IVariable)arr).getName()).ival();
             }
-            Construct iv = that.eval(ivar);
+            Construct iv = that.eval(ivar, p, vars);
             
             if(arr instanceof CArray){
                 if(iv instanceof IVariable){
@@ -180,7 +193,7 @@ public class DataHandling {
                     IVariable two = (IVariable)iv;
                     for(int i = 0; i < one.size(); i++){
                         varList.set(new IVariable(two.getName(), one.get(i), line_num));
-                        that.eval(code);
+                        that.eval(code, p, vars);
                     }
                 } else {
                     throw new CancelCommandException("Parameter 2 of foreach must be an ivariable");
@@ -209,6 +222,10 @@ public class DataHandling {
         }
         public String since() {
             return "3.0.1";
+        }
+        //Doesn't matter, runs out of state anyways
+        public boolean runAsync(){
+            return true;
         }
     }
 }

@@ -23,12 +23,17 @@ import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.InternalException;
+import com.laytonsmith.aliasengine.MinescriptCompiler;
+import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.User;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
@@ -79,8 +84,12 @@ public class CommandHelperListener extends PlayerListener {
     public boolean runAlias(String command, Player player) {
         try {
             User u = new User(player, plugin.persist);
-            return CommandHelperPlugin.getCore().alias(command, player,
-                    CommandHelperPlugin.getCore().parse_user_config(u.getAliasesAsArray(), u));
+            ArrayList<String> aliases = u.getAliasesAsArray();
+            ArrayList<Script> scripts = new ArrayList<Script>();
+            for(String script : aliases){
+                scripts.addAll(MinescriptCompiler.preprocess(MinescriptCompiler.lex(script)));
+            }
+            return CommandHelperPlugin.getCore().alias(command, player, scripts);
             //return globalAliases.get(command.toLowerCase());
             
         } catch (ConfigCompileException ex) {
@@ -112,15 +121,16 @@ public class CommandHelperListener extends PlayerListener {
      */
     @Override
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        String cmd = event.getMessage();
+        Player player = event.getPlayer();
+        this.getSession(player).setLastCommand(cmd);
+        
         if(event.isCancelled()){
             return;
         }
-        Player player = event.getPlayer();
-        String cmd = event.getMessage();
         if(cmd.equals("/.") || cmd.equals("/repeat")){
             return;
         }
-        this.getSession(player).setLastCommand(cmd);
         
         try {
             if (runAlias(event.getMessage(), player)) {

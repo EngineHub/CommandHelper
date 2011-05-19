@@ -9,6 +9,7 @@ import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
@@ -23,7 +24,8 @@ public class AliasCore {
 
     private File aliasConfig;
     private File prefFile;
-    AliasConfig config;
+    //AliasConfig config;
+    List<Script> scripts;
     static final Logger logger = Logger.getLogger("Minecraft");
     private ArrayList<String> echoCommand = new ArrayList<String>();
     private PermissionsResolverManager perms;
@@ -46,19 +48,19 @@ public class AliasCore {
     /**
      * This is the workhorse function. It takes a given command, then converts it
      * into the actual command(s). If the command maps to a defined alias, it will
-     * return an ArrayList of actual commands to run. It will search through the
+     * run the specified alias. It will search through the
      * global list of aliases, as well as the aliases defined for that specific player.
      * This function doesn't handle the /alias command however.
      * @param command
      * @return
      */
-    public boolean alias(String command, Player player, ArrayList<AliasConfig> playerCommands) {
+    public boolean alias(String command, final Player player, ArrayList<Script> playerCommands) {
 
-        if(config == null){
+        if (scripts == null) {
             throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded");
         }
-        
-        RunnableAlias a;
+
+        boolean match = false;
         try { //catch RuntimeException
             //If player is null, we are running the test harness, so don't
             //actually add the player to the array.
@@ -68,14 +70,44 @@ public class AliasCore {
             }
 
             //Global aliases override personal ones, so check the list first
-            a = config.getRunnableAliases(command, player);
+            //a = config.getRunnableAliases(command, player);
+            for (Script s : scripts) {
+                if (s.match(command)) {
+                    echoCommand.add(player.getName());
+                    s.run(s.getVariables(command), player, new MinescriptComplete() {
 
-            if (a == null && playerCommands != null) {
+                        public void done(String output) {
+                            if (output != null) {
+                                if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                    player.chat(output.trim());
+                                }
+                            }
+                            echoCommand.remove(player.getName());
+                        }
+                    });
+                    match = true;
+                    break;
+                }
+            }
+
+            if (match == false && playerCommands != null) {
                 //if we are still looking, look in the aliases for this player
-                for (AliasConfig ac : playerCommands) {
-                    RunnableAlias b = ac.getRunnableAliases(command, player);
-                    if (b != null) {
-                        a = b;
+                for (Script ac : playerCommands) {
+                    //RunnableAlias b = ac.getRunnableAliases(command, player);
+                    if (ac.match(command)) {
+                        echoCommand.add(player.getName());
+                        ac.run(ac.getVariables(command), player, new MinescriptComplete() {
+
+                            public void done(String output) {
+                                if (output != null) {
+                                    if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                        player.chat(output.trim());
+                                    }
+                                }
+                                echoCommand.remove(player.getName());
+                            }
+                        });
+                        match = true;
                     }
                 }
 
@@ -83,31 +115,32 @@ public class AliasCore {
         } catch (Throwable e) {
             throw new InternalException("An error occured in the CommandHelper plugin: " + e.getMessage() + Arrays.asList(e.getStackTrace()));
         }
-        assert a != null;
-        if (a == null) {
-            //apparently we couldn't find the command, so return false
-            return false;
-        } else {
-            //Run all the aliases
-            a.player = player;
-            try {
-                if (a.player != null) {
-                    echoCommand.add(player.getName());
-                }
-                a.run();
-            } finally {
-                if (a.player != null) {
-                    echoCommand.remove(player.getName());
-                }
-            }
-        }
-        return true;
+        return match;
+//        assert a != null;
+//        if (a == null) {
+//            //apparently we couldn't find the command, so return false
+//            return false;
+//        } else {
+//            //Run all the aliases
+//            a.player = player;
+//            try {
+//                if (a.player != null) {
+//                    echoCommand.add(player.getName());
+//                }
+//                a.run();
+//            } finally {
+//                if (a.player != null) {
+//                    echoCommand.remove(player.getName());
+//                }
+//            }
+//        }
+//        return true;
     }
 
     /**
      * Loads the global alias file in from
      */
-    public boolean reload() throws ConfigCompileException {
+    public final boolean reload() throws ConfigCompileException {
         boolean is_loaded = false;
         try {
             if (!aliasConfig.exists()) {
@@ -121,12 +154,32 @@ public class AliasCore {
                     logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
                 }
             }
-            
+
             Preferences prefs = Static.getPreferences();
             prefs.init(prefFile);
-            
+
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
-            config = new AliasConfig(alias_config, null, perms);
+            //config = new AliasConfig(alias_config, null, perms);
+            scripts = MinescriptCompiler.preprocess(MinescriptCompiler.lex(alias_config));
+            for (Script s : scripts) {
+                try {
+                    s.compile();
+                    s.checkAmbiguous((ArrayList<Script>) scripts);
+                } catch (ConfigCompileException e) {
+                    logger.log(Level.SEVERE, "[CommandHelper]: " + e.toString() + "\nCompilation will continue.");
+                }
+            }
+            int errors = 0;
+            for (Script s : scripts) {
+                if (s.compilerError) {
+                    errors++;
+                }
+            }
+            if (errors > 0) {
+                System.out.println("[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, with " + errors + " aliases with compile errors.");
+            } else {
+                System.out.println("[CommandHelper]: " + scripts.size() + " alias(es) defined.");
+            }
             is_loaded = true;
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, "CommandHelper: " + ex.toString());
@@ -135,29 +188,21 @@ public class AliasCore {
                     + " check the location and try loading the plugin again.");
         } catch (Throwable t) {
             t.printStackTrace();
-        } finally {
-            if (!is_loaded) {
-                //Try and pull the old config file, if it exists
-                boolean old_file_exists = false;
-                if (!old_file_exists) {
-                    logger.log(Level.SEVERE, "CommandHelper: Unable to load working config file, aborting plugin operation");
-                }
-            }
         }
+
         return is_loaded;
     }
 
-    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config, User u) throws ConfigCompileException {
-        if (config == null) {
-            return null;
-        }
-        ArrayList<AliasConfig> alac = new ArrayList<AliasConfig>();
-        for (int i = 0; i < config.size(); i++) {
-            alac.add(new AliasConfig(config.get(i), u, perms));
-        }
-        return alac;
-    }
-
+//    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config, User u) throws ConfigCompileException {
+//        if (config == null) {
+//            return null;
+//        }
+//        ArrayList<AliasConfig> alac = new ArrayList<AliasConfig>();
+//        for (int i = 0; i < config.size(); i++) {
+//            alac.add(new AliasConfig(config.get(i), u, perms));
+//        }
+//        return alac;
+//    }
     /**
      * Returns the contents of a file as a string. Accepts the file location
      * as a string.

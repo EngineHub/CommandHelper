@@ -16,7 +16,7 @@ import java.util.Arrays;
 public class CArray extends Construct{
     ArrayList<Construct> array = new ArrayList<Construct>();
     public CArray(int line_num, Construct ... items){
-        super(TType.CONSTRUCT, null, ConstructType.ARRAY, line_num);
+        super(null, ConstructType.ARRAY, line_num);
         array.addAll(Arrays.asList(items));
         regenValue();
     }

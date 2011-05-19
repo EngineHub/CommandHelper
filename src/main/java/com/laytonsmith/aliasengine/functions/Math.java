@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.*;
+import com.laytonsmith.aliasengine.Static;
 import java.util.Random;
 import org.bukkit.entity.Player;
 
@@ -56,6 +57,9 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class subtract implements Function{
@@ -95,6 +99,9 @@ public class Math {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync(){
+            return true;
         }
     }
     
@@ -136,7 +143,9 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class divide implements Function{
@@ -177,7 +186,9 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class mod implements Function{
@@ -213,7 +224,9 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class pow implements Function{
@@ -248,7 +261,9 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class inc implements Function{
@@ -298,7 +313,9 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class dec implements Function{
@@ -348,6 +365,9 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     @api public static class rand implements Function{
@@ -395,7 +415,9 @@ public class Math {
             return new CInt(i, line_num);
             
         }
-        
+        public boolean runAsync(){
+            return true;
+        }
     }
     
     

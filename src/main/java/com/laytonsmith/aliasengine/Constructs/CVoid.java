@@ -10,6 +10,6 @@ package com.laytonsmith.aliasengine.Constructs;
  */
 public class CVoid extends Construct{
     public CVoid(int line_num){
-        super(TType.CONSTRUCT, "", ConstructType.VOID, line_num);
+        super("", ConstructType.VOID, line_num);
     }
 }

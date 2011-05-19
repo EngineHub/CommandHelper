@@ -67,6 +67,9 @@ public class User {
                     .append(e.getValue().toString().length() > 45?"...":"")
                     .append("\n");
         }
+        if(al.isEmpty()){
+            b.append(ChatColor.AQUA).append("You have no aliases defined");
+        }
         return b.toString();
     }
 
@@ -95,27 +98,4 @@ public class User {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
-
-    /**
-     * Returns whether or not this user has permission to include this function
-     * in their scripts.
-     * @param f
-     * @return
-     */
-    public boolean canCompile(String fname){
-        return true;
-    }
-
-    /**
-     * Returns whether or not this user has permission to run this function if it
-     * is already compiled into a script.
-     * @param fname
-     * @return
-     */
-    public boolean canRun(String fname){
-        return true;
-    }
-
-
-
 }

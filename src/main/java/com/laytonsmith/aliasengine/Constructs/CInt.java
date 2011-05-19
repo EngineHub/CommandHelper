@@ -14,7 +14,7 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
 public class CInt extends Construct{
     int val;
     public CInt(String value, int line_num){
-        super(TType.CONSTRUCT, value, ConstructType.INT, line_num);
+        super(value, ConstructType.INT, line_num);
         try{
             val = Integer.parseInt(value);
         } catch(NumberFormatException e){
@@ -23,7 +23,7 @@ public class CInt extends Construct{
     }
 
     public CInt(int value, int line_num){
-        super(TType.CONSTRUCT, Integer.toString(value), ConstructType.INT, line_num);
+        super(Integer.toString(value), ConstructType.INT, line_num);
         val = value;
     }
 

@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
@@ -35,7 +36,7 @@ public class Minecraft {
                 return new CInt(Static.getInt(args[0]), line_num);
             } else {
                 String c = args[0].val();
-                return new CInt(new MaterialData(Material.getMaterial(c)).getItemTypeId(), line_num);
+                return new CInt(new MaterialData(Material.matchMaterial(c)).getItemTypeId(), line_num);
             }
         }
 
@@ -55,6 +56,9 @@ public class Minecraft {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync(){
+            return false;
         }
         
     }

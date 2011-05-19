@@ -10,6 +10,6 @@ package com.laytonsmith.aliasengine.Constructs;
  */
 public class CString extends Construct{
     public CString(String value, int line_num){
-        super(TType.CONSTRUCT, value, ConstructType.STRING, line_num);
+        super(value, ConstructType.STRING, line_num);
     }
 }

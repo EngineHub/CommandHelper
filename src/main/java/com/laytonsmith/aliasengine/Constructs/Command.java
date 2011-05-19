@@ -11,7 +11,7 @@ package com.laytonsmith.aliasengine.Constructs;
 public class Command extends Construct {
 
     public Command(String name, int line_num) {
-        super(TType.COMMAND, name, ConstructType.COMMAND, line_num);
+        super(name, ConstructType.COMMAND, line_num);
     }
 
     @Override

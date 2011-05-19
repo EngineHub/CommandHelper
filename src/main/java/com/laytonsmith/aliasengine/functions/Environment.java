@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -78,6 +79,9 @@ public class Environment {
             }
             Block b = p.getWorld().getBlockAt(x, y, z);
             return new CString(b.getTypeId() + ":" + b.getData(), line_num);
+        }
+        public boolean runAsync(){
+            return false;
         }
         
     }
@@ -164,6 +168,9 @@ public class Environment {
             b.setData(imeta);
             
             return new CVoid(line_num);
+        }
+        public boolean runAsync(){
+            return false;
         }
         
     }

@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -70,6 +71,9 @@ public class Weather {
         public String since() {
             return "3.0.1";
         }
+        public boolean runAsync(){
+            return false;
+        }
     }
     
     @api public static class storm implements Function{
@@ -103,6 +107,9 @@ public class Weather {
         }
         public String since() {
             return "3.0.1";
+        }
+        public boolean runAsync(){
+            return false;
         }
         
     }

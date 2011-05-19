@@ -69,6 +69,10 @@ public class Persistance {
             return new CVoid(line_num);
         }
         
+        public boolean runAsync(){
+            return true;
+        }
+        
     }
     
     @api public static class get_value implements Function{
@@ -111,6 +115,9 @@ public class Persistance {
             } catch(ClassCastException e){
                 return new CNull(line_num);
             }
+        }
+        public boolean runAsync(){
+            return true;
         }
         
     }

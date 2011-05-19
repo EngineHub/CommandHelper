@@ -11,7 +11,7 @@ package com.laytonsmith.aliasengine.Constructs;
 public class CFunction extends Construct {
 
     public CFunction(String name, int line_num) {
-        super(TType.CONSTRUCT, name, ConstructType.FUNCTION, line_num);
+        super(name, ConstructType.FUNCTION, line_num);
     }
 
     public String toString() {

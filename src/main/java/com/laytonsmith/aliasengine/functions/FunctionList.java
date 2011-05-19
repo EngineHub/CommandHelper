@@ -5,18 +5,13 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.CancelCommandException;
-import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.CFunction;
-import com.laytonsmith.aliasengine.Constructs.CString;
-import com.laytonsmith.aliasengine.GenericTreeNode;
-import com.laytonsmith.aliasengine.RunnableAlias;
 import com.laytonsmith.aliasengine.User;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
@@ -110,7 +105,7 @@ public class FunctionList {
         functions.add(f);
     }
 
-    public Function getFunction(Construct c) throws ConfigCompileException {
+    public static Function getFunction(Construct c) throws ConfigCompileException {
         if (c instanceof CFunction) {
             for (Function m : functions) {
                 if (m.getName().equals(c.val())) {
@@ -122,30 +117,30 @@ public class FunctionList {
         throw new ConfigCompileException("Excpecting CFunction type");
     }
 
-    public FunctionList(User u) {
-        this.u = u;
-        if (functions.isEmpty()) {
-            initFunctions();
-        }
-    }
+//    public FunctionList(User u) {
+//        this.u = u;
+//        if (functions.isEmpty()) {
+//            initFunctions();
+//        }
+//    }
 
-    public Construct exec(String name, int line_num, Player p, Construct... args) throws ConfigCompileException, CancelCommandException {
-        for (Function f : functions) {
-            if (f.getName().equals(name)) {
-                return f.exec(line_num, p, args);
-            }
-        }
-        throw new ConfigCompileException("Function " + name + " is not defined");
-    }
-
-    public Integer[] numArgs(String name) throws ConfigCompileException {
-        for (Function f : functions) {
-            if (f.getName().equals(name)) {
-                return f.numArgs();
-            }
-        }
-        throw new ConfigCompileException("Function " + name + " is not defined");
-    }
+//    public Construct exec(String name, int line_num, Player p, Construct... args) throws ConfigCompileException, CancelCommandException {
+//        for (Function f : functions) {
+//            if (f.getName().equals(name)) {
+//                return f.exec(line_num, p, args);
+//            }
+//        }
+//        throw new ConfigCompileException("Function " + name + " is not defined");
+//    }
+//
+//    public Integer[] numArgs(String name) throws ConfigCompileException {
+//        for (Function f : functions) {
+//            if (f.getName().equals(name)) {
+//                return f.numArgs();
+//            }
+//        }
+//        throw new ConfigCompileException("Function " + name + " is not defined");
+//    }
 
     public static ArrayList<Function> getFunctionList() {
         return functions;

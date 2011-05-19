@@ -11,6 +11,6 @@ package com.laytonsmith.aliasengine.Constructs;
  */
 public class CNull extends Construct{
     public CNull(int line_num){
-        super(TType.CONSTRUCT, null, ConstructType.NULL, line_num);
+        super("null", ConstructType.NULL, line_num);
     }
 }

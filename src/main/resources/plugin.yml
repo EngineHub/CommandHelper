@@ -2,10 +2,6 @@ name: CommandHelper
 main: com.sk89q.commandhelper.CommandHelperPlugin
 version: "${project.version}"
 commands:
-    commandhelper:
-        description: Command helper
-        usage: /<command>
-        aliases: ch
     repeat:
         description: Repeat the last command
         usage: /<command>
