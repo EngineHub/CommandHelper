@@ -1,5 +1,6 @@
 3.0.2:
-- Added new functions to allow scripts to interact with the environment around the player.
+- Added new functions to allow scripts to interact with the environment around
+    the player.
 
 3.0.1:
 - Added several new functions, including a foreach loop, and the g function.
