@@ -76,7 +76,7 @@ public class ArrayHandling {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                return ((CArray)args[0]).get(Static.getInt(args[1]));
+                return ((CArray)args[0]).get((int)Static.getInt(args[1]));
             } else{
                 throw new CancelCommandException("Argument 1 of array_get must be an array");
             }
@@ -118,7 +118,7 @@ public class ArrayHandling {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                ((CArray)args[0]).set(((CInt)args[1]).getInt(), args[2]);
+                ((CArray)args[0]).set((int)((CInt)args[1]).getInt(), args[2]);
                 return new CVoid(line_num);
             }
             throw new CancelCommandException("Argument 1 of array_set must be an array");

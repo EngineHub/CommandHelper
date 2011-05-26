@@ -15,7 +15,6 @@ import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
-import com.laytonsmith.aliasengine.functions.Meta.sleep;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
@@ -26,7 +25,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -53,7 +51,6 @@ public class Script {
     private List<GenericTreeNode<Construct>> cright;
     private String label;
     private List<Variable> left_vars;
-    private List<Variable> right_vars;
     FunctionList func_list;
     private IVariableList varList = new IVariableList();
     boolean hasBeenCompiled = false;
@@ -78,11 +75,12 @@ public class Script {
         return compilerError;
     }
 
-    public void run(final List<Variable> vars, final Player p, final MinescriptComplete done) {
+    public void run(final List<Variable> vars, final Player p, final MScriptComplete done) {
         if (!hasBeenCompiled || compilerError) {
             System.err.println("Unable to run script, not yet compiled, or compiler error.");
             return;
         }
+        
         final Plugin self = CommandHelperPlugin.self;
         Static.getServer().getScheduler().scheduleAsyncDelayedTask(self, new Runnable() {
 
@@ -145,27 +143,12 @@ public class Script {
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to foreach");
                     }
-                } else if (f instanceof sleep) {
-                    if(Thread.currentThread().getName().equals("Server thread")){
-                        throw new ConfigRuntimeException("sleep() cannot be run in the main server thread");
-                    }
-                    List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    if (ch.size() > 1) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to sleep");
-                    }
-                    Construct x = eval(ch.get(0), player, vars);
-                    double time = Static.getNumber(x);
-                    //TODO: Make sure time is less than the defined maximum
-                    try {
-                        Thread.sleep((int) (time * 1000));
-                    } catch (InterruptedException ex) {
-                    }
                 } else if (f instanceof eval) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() > 1) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to eval");
                     }
-                    GenericTreeNode<Construct> root = MinescriptCompiler.compile(MinescriptCompiler.lex(ch.get(0).getData().val()));
+                    GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val()));
                     StringBuilder b = new StringBuilder();
                     for (GenericTreeNode<Construct> child : root.getChildren()) {
                         CString cs = new CString(eval(child, player, vars).val(), 0);
@@ -244,7 +227,14 @@ public class Script {
             }
 
         } else if (m.ctype == ConstructType.VARIABLE) {
-            return ((Variable) m);
+            Variable v = (Variable)m;
+            for(Variable vx : vars){
+                if(v.getName().equals(vx.getName())){
+                    v = vx;
+                    break;
+                }
+            }            
+            return v;
         } else {
             return m;
         }
@@ -516,7 +506,7 @@ public class Script {
             Token t = left.get(i);
             if (t.type == Token.TType.COMMAND) {
                 cleft.add(new Command(t.val(), t.line_num));
-            } else if (t.type == Token.TType.VARIABLE || t.type == Token.TType.FINAL_VAR) {
+            } else if (t.type == Token.TType.VARIABLE) {
                 cleft.add(new Variable(t.val(), null, t.line_num));
             } else if (t.type.equals(TType.FINAL_VAR)) {
                 Variable v = new Variable(t.val(), null, t.line_num);
@@ -563,7 +553,7 @@ public class Script {
         right.add(temp);
         cright = new ArrayList<GenericTreeNode<Construct>>();
         for (List<Token> l : right) {
-            cright.add(MinescriptCompiler.compile(l));
+            cright.add(MScriptCompiler.compile(l));
         }
     }
 
@@ -636,6 +626,28 @@ public class Script {
                     this.compilerError = true;
                     throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
                             + "matches the signature of " + commandThat.trim(), thisCommand.get(0).line_num);
+                }
+            }
+            
+            //Also, check for undefined variables on the right, and unused variables on the left
+            ArrayList<String> left_copy = new ArrayList<String>();
+            for(Variable v : left_vars){
+                left_copy.add(v.getName());
+            }
+            for(GenericTreeNode<Construct> gtn : cright){
+                GenericTree<Construct> tree = new GenericTree<Construct>();
+                tree.setRoot(gtn);
+                for(GenericTreeNode<Construct> c : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
+                    if(c.getData() instanceof Variable){
+                        for(Variable v : left_vars){
+                            if(v.getName().equals(((Variable)c.getData()).getName())){
+                                //Found it, remove this from the left_copy, and break
+                                left_copy.remove(v.getName());
+                                break;
+                                //TODO: Layton!
+                            }
+                        }
+                    }
                 }
             }
         //}

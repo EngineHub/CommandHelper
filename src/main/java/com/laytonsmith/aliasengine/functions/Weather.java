@@ -41,9 +41,9 @@ public class Weather {
                 if(a.size() != 3){
                     throw new ConfigRuntimeException("lightning expects the array to have 3 integers");
                 }
-                x = Static.getInt(a.get(0));
-                y = Static.getInt(a.get(1));
-                z = Static.getInt(a.get(2));
+                x = (int)Static.getInt(a.get(0));
+                y = (int)Static.getInt(a.get(1));
+                z = (int)Static.getInt(a.get(2));
             } else {
                 throw new ConfigRuntimeException("lightning expects an array as the one argument");
             }

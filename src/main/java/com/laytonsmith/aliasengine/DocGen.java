@@ -38,17 +38,22 @@ public class DocGen {
             fl.add(f);
         }
         if(type.equals("html")){
-            System.out.println("Functions greatly extend the capabilities of the plugin, "
-                    + "and make the config scripting language a "
+            System.out.println("Command Helper uses a language called MScript, which greatly extend the capabilities of the plugin, "
+                    + "and make the plugin a fully "
                     + "<a href=\"http://en.wikipedia.org/wiki/Turing_Complete\">Turing Complete</a> language. "
                     + "There are several functions defined, and they are grouped into \"classes\". ");            
         } else if(type.equals("wiki")){            
-            System.out.println("Functions greatly extend the capabilities of the plugin, "
-                    + "and make the config scripting language a "
+            System.out.println("Command Helper uses a language called MScript, which greatly extend the capabilities of the plugin, "
+                    + "and make the plugin a fully "
                     + "[http://en.wikipedia.org/wiki/Turing_Complete Turing Complete] language. "
                     + "There are several functions defined, and they are grouped into \"classes\". ");
+            System.out.println("<p>Each function has its own page for documentation, where you can put examples for how to use"
+                    + " particular functions. Because this is a wiki, it is encouraged that you edit the pages if you see errors, "
+                    + "or can think of a better example to show. Please copy over [[CommandHelper/API/Function Template|this template]]"
+                    + " and use it.");
         } else if(type.equals("text")){
-            System.out.println("Functions greatly extend the capabilities of the plugin, and make the config scripting language a "
+            System.out.println("Command Helper uses a language called MScript, which greatly extend the capabilities of the plugin, "
+                    + "and make the plugin a fully "
                     + "Turing Complete language [http://en.wikipedia.org/wiki/Turing_Complete].\n"
                     + "There are several functions defined, and they are grouped into \"classes\".");
         }
@@ -120,7 +125,7 @@ public class DocGen {
                     System.out.println("<tr><td>" + ret + "</td><td>" + args + "</td><td>" + desc + "</td><td>" + since + "</td><td>" + restricted + "</td></tr>\n");
                 } else if(type.equals("wiki")){
                     System.out.println("|-\n"
-                            + "! scope=\"row\" | " + f.getName() + "\n"
+                            + "! scope=\"row\" | [[CommandHelper/API/" + f.getName() + "|" + f.getName() + "]]\n"
                             + "| " + ret + "\n"
                             + "| " + args + "\n"
                             + "| " + desc + "\n"

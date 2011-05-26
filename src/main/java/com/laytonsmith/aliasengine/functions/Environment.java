@@ -63,9 +63,9 @@ public class Environment {
                 if(args[0] instanceof CArray){
                     CArray ca = (CArray)args[0];
                     if(ca.size() == 3){
-                        x = Static.getInt(ca.get(0));
-                        y = Static.getInt(ca.get(1));
-                        z = Static.getInt(ca.get(2));
+                        x = (int)Static.getInt(ca.get(0));
+                        y = (int)Static.getInt(ca.get(1));
+                        z = (int)Static.getInt(ca.get(2));
                     } else {
                         throw new CancelCommandException("get_block_at expects param 1 to be an array with 3 arguments");
                     }
@@ -73,9 +73,9 @@ public class Environment {
                     throw new CancelCommandException("get_block_at expects param 1 to be an array");
                 }
             } else {
-                x = Static.getInt(args[0]);
-                y = Static.getInt(args[1]);
-                z = Static.getInt(args[2]);
+                x = (int)Static.getInt(args[0]);
+                y = (int)Static.getInt(args[1]);
+                z = (int)Static.getInt(args[2]);
             }
             Block b = p.getWorld().getBlockAt(x, y, z);
             return new CString(b.getTypeId() + ":" + b.getData(), line_num);
@@ -127,15 +127,15 @@ public class Environment {
                 if(ca.size() != 3){
                     throw new CancelCommandException("set_block_at expects the parameter 1 to be an array with 3 elements.");
                 }
-                x = Static.getInt(ca.get(0));
-                y = Static.getInt(ca.get(1));
-                z = Static.getInt(ca.get(2));
+                x = (int)Static.getInt(ca.get(0));
+                y = (int)Static.getInt(ca.get(1));
+                z = (int)Static.getInt(ca.get(2));
                 id = args[1].val();
                 
             } else {
-                x = Static.getInt(args[0]);
-                y = Static.getInt(args[1]);
-                z = Static.getInt(args[2]);
+                x = (int)Static.getInt(args[0]);
+                y = (int)Static.getInt(args[1]);
+                z = (int)Static.getInt(args[2]);
                 id = args[3].val();
             }
             

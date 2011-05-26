@@ -29,7 +29,6 @@ public class User {
     }
 
     public int addAlias(String alias){
-        System.out.println("Persistance hash code: " + persist.hashCode());
         try {
             ArrayList<Map.Entry> list = persist.getNamespaceValues(new String[]{player.getName(), "aliases"});
             System.out.println(list);

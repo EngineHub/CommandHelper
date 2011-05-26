@@ -74,11 +74,18 @@ public class AliasCore {
             for (Script s : scripts) {
                 if (s.match(command)) {
                     echoCommand.add(player.getName());
-                    s.run(s.getVariables(command), player, new MinescriptComplete() {
+                    if ((Boolean) Static.getPreferences().getPreference("console-log-commands")) {
+                        Static.getLogger().log(Level.INFO, "CH: Running original command ----> " + command);
+                        Static.getLogger().log(Level.INFO, "on player " + player.getName());
+                    }
+                    s.run(s.getVariables(command), player, new MScriptComplete() {
 
                         public void done(String output) {
                             if (output != null) {
                                 if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                    if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                    }
                                     player.chat(output.trim());
                                 }
                             }
@@ -96,11 +103,14 @@ public class AliasCore {
                     //RunnableAlias b = ac.getRunnableAliases(command, player);
                     if (ac.match(command)) {
                         echoCommand.add(player.getName());
-                        ac.run(ac.getVariables(command), player, new MinescriptComplete() {
+                        ac.run(ac.getVariables(command), player, new MScriptComplete() {
 
                             public void done(String output) {
                                 if (output != null) {
                                     if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                        if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                            Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                        }
                                         player.chat(output.trim());
                                     }
                                 }
@@ -160,7 +170,7 @@ public class AliasCore {
 
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
             //config = new AliasConfig(alias_config, null, perms);
-            scripts = MinescriptCompiler.preprocess(MinescriptCompiler.lex(alias_config));
+            scripts = MScriptCompiler.preprocess(MScriptCompiler.lex(alias_config));
             for (Script s : scripts) {
                 try {
                     s.compile();

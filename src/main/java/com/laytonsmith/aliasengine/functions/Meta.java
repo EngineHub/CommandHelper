@@ -10,13 +10,11 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.GenericTreeNode;
-import com.laytonsmith.aliasengine.MinescriptCompiler;
-import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Level;
 import org.bukkit.Achievement;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -39,10 +37,13 @@ import org.bukkit.util.Vector;
  * @author Layton
  */
 public class Meta {
-    public static String docs(){
+
+    public static String docs() {
         return "These functions provide a way to run other commands";
     }
-    @api public static class runas implements Function{
+
+    @api
+    public static class runas implements Function {
 
         public String getName() {
             return "runas";
@@ -53,28 +54,39 @@ public class Meta {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/'){
+            if (args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
             }
             String cmd = args[1].val().substring(1);
-            if(args[0] instanceof CArray){
+            if (args[0] instanceof CArray) {
                 CArray u = (CArray) args[0];
-                for(int i = 0; i < u.size(); i++){
+                for (int i = 0; i < u.size(); i++) {
                     exec(line_num, p, new Construct[]{new CString(u.get(i).val(), line_num), args[1]});
                 }
                 return new CVoid(line_num);
             }
-            if(args[0].val().equals("~op")){
-                Static.getServer().dispatchCommand(new AlwaysOpPlayer(p), cmd);                
-            } else{
+            if (args[0].val().equals("~op")) {
                 Player m = Static.getServer().getPlayer(args[0].val());
-                if(m != null){
-                    if(m.isOnline()){
+                if (m.isOnline()) {
+                    if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + m.getName() + " (running as op): " + cmd);
+                    }
+                    Static.getServer().dispatchCommand(new AlwaysOpPlayer(m), cmd);
+                } else {
+                    p.sendMessage("The player " + m.getName() + " is not online");
+                }
+            } else {
+                Player m = Static.getServer().getPlayer(args[0].val());
+                if (m != null) {
+                    if (m.isOnline()) {
+                        if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                            Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + " (as " + m.getName() + "): " + cmd.trim());
+                        }
                         Static.getServer().dispatchCommand(m, cmd);
                     } else {
                         p.sendMessage("The player " + m.getName() + " is not online");
                     }
-                } else{
+                } else {
                     throw new CancelCommandException("The player " + args[0].val() + " is not online");
                 }
             }
@@ -91,21 +103,24 @@ public class Meta {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
         }
+
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
+
+        public boolean runAsync() {
             return false;
         }
-        
     }
 
-    @api public static class run implements Function {
+    @api
+    public static class run implements Function {
 
         public String getName() {
             return "run";
@@ -116,11 +131,14 @@ public class Meta {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/'){
+            if (args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
             }
             String cmd = args[0].val().substring(1);
-            Static.getServer().dispatchCommand(p, args[0].val());
+            if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + ": " + args[0].val().trim());
+            }
+            Static.getServer().dispatchCommand(p, cmd);
             return new CVoid(line_num);
         }
 
@@ -133,20 +151,24 @@ public class Meta {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
         }
+
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
+
+        public boolean runAsync() {
             return false;
         }
     }
-    
-    @api public static class g implements Function {
+
+    @api
+    public static class g implements Function {
 
         public String getName() {
             return "g";
@@ -177,15 +199,18 @@ public class Meta {
         public boolean preResolveVariables() {
             return true;
         }
+
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
+
+        public boolean runAsync() {
             return true;
         }
     }
-    
-    @api public static class eval implements Function{
+
+    @api
+    public static class eval implements Function {
 
         public String getName() {
             return "eval";
@@ -196,7 +221,7 @@ public class Meta {
         }
 
         public String docs() {
-            return "string {script_string} Executes arbitrary Minescript. Note that this function is very experimental, and is subject to changing or "
+            return "string {script_string} Executes arbitrary MScript. Note that this function is very experimental, and is subject to changing or "
                     + "removal.";
         }
 
@@ -204,7 +229,8 @@ public class Meta {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -218,59 +244,20 @@ public class Meta {
             return new CVoid(line_num);
         }
         //Doesn't matter, run out of state anyways
-        public boolean runAsync(){
+
+        public boolean runAsync() {
             return false;
         }
-        
     }
-    
-    @api public static class sleep implements Function{
 
-        public String getName() {
-            return "sleep";
-        }
+    private static class AlwaysOpPlayer implements Player {
 
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "void {seconds} Sleeps the script for the specified number of seconds, up to the maximum time limit defined in the preferences file."
-                    + " Seconds may be a double value, so 0.5 would be half a second."
-                    + " PLEASE NOTE: Sleep times are NOT very accurate, and should not be relied on for preciseness.";
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public String since() {
-            return "3.1.0";
-        }
-
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CVoid(line_num);
-        }
-        //Doesn't matter, run out of state anyways
-        public boolean runAsync(){
-            return false;
-        }
-        
-    }
-    
-    private static class AlwaysOpPlayer implements Player{
         public Player r;
-        
-        public AlwaysOpPlayer(Player realPlayer){
+
+        public AlwaysOpPlayer(Player realPlayer) {
             r = realPlayer;
         }
-        
+
         public boolean isOnline() {
             return r.isOnline();
         }

@@ -23,7 +23,7 @@ import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.InternalException;
-import com.laytonsmith.aliasengine.MinescriptCompiler;
+import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.User;
 import java.util.logging.Logger;
@@ -87,7 +87,7 @@ public class CommandHelperListener extends PlayerListener {
             ArrayList<String> aliases = u.getAliasesAsArray();
             ArrayList<Script> scripts = new ArrayList<Script>();
             for(String script : aliases){
-                scripts.addAll(MinescriptCompiler.preprocess(MinescriptCompiler.lex(script)));
+                scripts.addAll(MScriptCompiler.preprocess(MScriptCompiler.lex(script)));
             }
             return CommandHelperPlugin.getCore().alias(command, player, scripts);
             //return globalAliases.get(command.toLowerCase());

@@ -12,7 +12,6 @@ import com.laytonsmith.aliasengine.Constructs.Token;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;
 import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.functions.FunctionList;
-import java.io.Console;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Stack;
@@ -21,7 +20,7 @@ import java.util.Stack;
  *
  * @author Layton
  */
-public class MinescriptCompiler {
+public class MScriptCompiler {
 
     public static List<Token> lex(String config) throws ConfigCompileException {
         config = config.replaceAll("\r\n", "\n");
@@ -170,17 +169,23 @@ public class MinescriptCompiler {
         return token_list;
     }
 
-    public static List<Script> preprocess(List<Token> list) throws ConfigCompileException {
+    /**
+     * This function breaks the token stream into parts, seperating the aliases/MScript from the command triggers
+     * @param tokenStream
+     * @return
+     * @throws ConfigCompileException 
+     */
+    public static List<Script> preprocess(List<Token> tokenStream) throws ConfigCompileException {
         //First, pull out the duplicate newlines
         ArrayList<Token> temp = new ArrayList<Token>();
-        for (int i = 0; i < list.size(); i++) {
+        for (int i = 0; i < tokenStream.size(); i++) {
             try {
-                if (list.get(i).type.equals(TType.NEWLINE)) {
-                    temp.add(new Token(TType.NEWLINE, "\n", list.get(i).line_num));
-                    while (list.get(++i).type.equals(TType.NEWLINE)) {
+                if (tokenStream.get(i).type.equals(TType.NEWLINE)) {
+                    temp.add(new Token(TType.NEWLINE, "\n", tokenStream.get(i).line_num));
+                    while (tokenStream.get(++i).type.equals(TType.NEWLINE)) {
                     }
                 }
-                temp.add(list.get(i));
+                temp.add(tokenStream.get(i));
             } catch (IndexOutOfBoundsException e) {
             }
         }
@@ -189,16 +194,16 @@ public class MinescriptCompiler {
             temp.remove(0);
         }
 
-        list = temp;
+        tokenStream = temp;
         temp = new ArrayList<Token>();
 
         //Handle multiline constructs
         ArrayList<Token> tokens1_1 = new ArrayList<Token>();
         boolean inside_multiline = false;
-        for (int i = 0; i < list.size(); i++) {
-            Token prevToken = i - 1 >= list.size() ? list.get(i - 1) : new Token(TType.UNKNOWN, "", 0);
-            Token thisToken = list.get(i);
-            Token nextToken = i + 1 < list.size() ? list.get(i + 1) : new Token(TType.UNKNOWN, "", 0);
+        for (int i = 0; i < tokenStream.size(); i++) {
+            Token prevToken = i - 1 >= tokenStream.size() ? tokenStream.get(i - 1) : new Token(TType.UNKNOWN, "", 0);
+            Token thisToken = tokenStream.get(i);
+            Token nextToken = i + 1 < tokenStream.size() ? tokenStream.get(i + 1) : new Token(TType.UNKNOWN, "", 0);
             //take out newlines between the = >>> and <<< tokens (also the tokens)
             if (thisToken.type.equals(TType.ALIAS_END) && nextToken.val().equals(">>>")) {
                 inside_multiline = true;
@@ -324,8 +329,8 @@ public class MinescriptCompiler {
                     }
 
                     if (stack <= 0) {
+                        Token lookfurther = tokenStream.get(j + 1);
                         if (!autoconcat) {
-                            Token lookfurther = tokenStream.get(j + 1);
                             if (!lookfurther.type.equals(TType.COMMA) && !lookfurther.type.equals(TType.FUNC_END)) {
                                 stream.add(new Token(TType.FUNC_NAME, "sconcat", t.line_num));
                                 stream.add(new Token(TType.FUNC_START, "(", t.line_num));
@@ -334,7 +339,7 @@ public class MinescriptCompiler {
                                 //No concatenation is needed
                                 break;
                             }
-                        } else if (autoconcat && (lookahead.type.equals(TType.COMMA) || lookahead.type.equals(TType.FUNC_END))) {
+                        } else if (autoconcat && (lookfurther.type.equals(TType.COMMA) || lookfurther.type.equals(TType.FUNC_END))) {
                             tokenStream.add(j, new Token(TType.FUNC_END, ")", lookahead.line_num));
                             size++;
                             break;

@@ -12,22 +12,22 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
  * @author layton
  */
 public class CInt extends Construct{
-    int val;
+    long val;
     public CInt(String value, int line_num){
         super(value, ConstructType.INT, line_num);
         try{
-            val = Integer.parseInt(value);
+            val = Long.parseLong(value);
         } catch(NumberFormatException e){
             throw new ConfigRuntimeException("Could not parse " + value + " as an integer");
         }
     }
 
-    public CInt(int value, int line_num){
-        super(Integer.toString(value), ConstructType.INT, line_num);
+    public CInt(long value, int line_num){
+        super(Long.toString(value), ConstructType.INT, line_num);
         val = value;
     }
 
-    public int getInt(){
+    public long getInt(){
         return val;
     }
 

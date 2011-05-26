@@ -24,11 +24,13 @@ import com.laytonsmith.aliasengine.AliasConfig;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.aliasengine.MinescriptCompiler;
+import com.laytonsmith.aliasengine.MScriptCompiler;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -75,7 +77,12 @@ public class CommandHelperPlugin extends JavaPlugin {
         perms = new PermissionsResolverManager(getConfiguration(), getServer(),
                 getDescription().getName(), logger);
         try {
-            ac = new AliasCore(new File("plugins/CommandHelper/config.txt"), new File("plugins/CommandHelper/preferences.txt"), perms);
+            File prefsFile = new File("plugins/CommandHelper/preferences.txt");
+            Static.getPreferences().init(prefsFile);
+            String script_name = (String) Static.getPreferences().getPreference("script-name");
+            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), prefsFile, perms);
+        } catch (IOException ex) {
+            logger.log(Level.SEVERE, null, ex);
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
@@ -178,7 +185,7 @@ public class CommandHelperPlugin extends JavaPlugin {
                 try {
                     User u = new User(player, persist);
                     //AliasConfig uac = new AliasConfig(alias, u, perms);
-                    //MinescriptCompiler.compile(MinescriptCompiler.preprocess(MinescriptCompiler.lex(alias)));
+                    //MScriptCompiler.compile(MScriptCompiler.preprocess(MScriptCompiler.lex(alias)));
                     //TODO: Finish this
                     int id = u.addAlias(alias);
                     if(id > -1){

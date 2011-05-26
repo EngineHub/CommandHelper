@@ -208,17 +208,17 @@ public class PlayerManangement {
                     if (ca.size() != 3) {
                         throw new ConfigRuntimeException("Expecting array at parameter 2 of set_ploc to have 3 values");
                     }
-                    x = Static.getInt(ca.get(0));
-                    y = Static.getInt(ca.get(1));
-                    z = Static.getInt(ca.get(2));
+                    x = (int)Static.getInt(ca.get(0));
+                    y = (int)Static.getInt(ca.get(1));
+                    z = (int)Static.getInt(ca.get(2));
                 } else {
                     throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc");
                 }
             } else {
                 player = args[0].val();
-                x = Static.getInt(args[1]);
-                y = Static.getInt(args[2]);
-                z = Static.getInt(args[3]);
+                x = (int)Static.getInt(args[1]);
+                y = (int)Static.getInt(args[2]);
+                z = (int)Static.getInt(args[3]);
             }
             Player m = p.getServer().getPlayer(player);
             return new CBoolean(m.teleport(new Location(p.getWorld(), x, y, z)), line_num);

@@ -126,6 +126,7 @@ public class Main {
     
     private static PluginDescriptionFile loadSelf() throws InvalidPluginException, IOException, InvalidDescriptionException{
         PluginDescriptionFile description = null;
+        System.out.println(new File(".").getAbsolutePath());
         File file = new File("./CommandHelper.jar");
         if (!file.exists()) {
             throw new InvalidPluginException(new FileNotFoundException(String.format("%s does not exist", file.getPath())));

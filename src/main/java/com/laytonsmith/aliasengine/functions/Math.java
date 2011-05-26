@@ -202,8 +202,8 @@ public class Math {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            int arg1 = Static.getInt(args[0]);
-            int arg2 = Static.getInt(args[1]);
+            long arg1 = Static.getInt(args[0]);
+            long arg2 = Static.getInt(args[1]);
             return new CInt(arg1 % arg2, line_num);
         }
         
@@ -402,15 +402,18 @@ public class Math {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            int min = 0;
-            int max = 0;
+            long min = 0;
+            long max = 0;
             if(args.length == 1){
                 max = Static.getInt(args[0]);
             } else {
                 min = Static.getInt(args[0]);
                 max = Static.getInt(args[1]);
             }
-            int i = r.nextInt(max - min) + min;
+            if(max > Integer.MAX_VALUE || min > Integer.MAX_VALUE){
+                throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE);
+            }
+            int i = r.nextInt((int)(max - min)) + ((int)min);
             
             return new CInt(i, line_num);
             

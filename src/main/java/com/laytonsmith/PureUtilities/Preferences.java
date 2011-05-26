@@ -5,6 +5,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -97,7 +98,7 @@ public class Preferences {
      * @param prefFile
      * @throws Exception 
      */
-    public void init(File prefFile) throws Exception {
+    public void init(File prefFile) throws IOException {
         this.prefFile = prefFile;
         if(prefFile.exists()){
             Properties userProperties = new Properties();
