@@ -58,8 +58,8 @@ public class ArrayHandling {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
         
     }
@@ -100,8 +100,8 @@ public class ArrayHandling {
             return "3.0.1";
         }
         
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
         
     }
@@ -142,8 +142,8 @@ public class ArrayHandling {
             return "3.0.1";
         }
         
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -182,8 +182,8 @@ public class ArrayHandling {
             return "3.0.1";
         }
         
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
         
     }
@@ -229,8 +229,8 @@ public class ArrayHandling {
             return "3.0.1";
         }
         
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
         
     }

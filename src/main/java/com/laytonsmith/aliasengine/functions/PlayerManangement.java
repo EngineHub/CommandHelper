@@ -13,6 +13,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
+import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
@@ -66,7 +67,7 @@ public class PlayerManangement {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
     }
@@ -110,7 +111,7 @@ public class PlayerManangement {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
     }
@@ -156,7 +157,7 @@ public class PlayerManangement {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
     }
@@ -192,7 +193,7 @@ public class PlayerManangement {
             return "3.1.0";
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
 
@@ -264,7 +265,7 @@ public class PlayerManangement {
             return new CArray(line_num, new CInt(b.getX(), line_num), new CInt(b.getY(), line_num), new CInt(b.getZ(), line_num));
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
     }
@@ -308,7 +309,7 @@ public class PlayerManangement {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
     }
@@ -353,8 +354,114 @@ public class PlayerManangement {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
+    }
+    
+    public static class pinfo implements Function{
+
+        public String getName() {
+            return "pinfo";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1, 2};
+        }
+
+        public String docs() {
+            return "mixed {[pName], [value]} Returns various information about the player specified, or the current player if no argument was given."
+                    + "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
+                    + " will be returned. Otherwise if value is not specified (or is -1), it returns an array of"
+                    + " information with the following pieces of information in the specified index: 0 - Player's name; This will return the player's exact name, "
+                    + " even if called with a partial match. 1 - Player's location; an array of the player's xyz coordinates 2 - Player's cursor; an array of the "
+                    + "location of the player's cursor. 3 - Player's IP; Returns the IP address of this player. 4 - Display name; The name that is used when the"
+                    + " player's name is displayed on screen typically. 5 - Player's health; Gets the current health of the player, which will be an int"
+                    + " from 0-20. 6 - Item in hand; The value returned by this will be similar to the value returned by get_block_at() 7 - "
+                    + "World name; Gets the name of the world this player is in. 8 - Is Op; true or false if this player is an op. 9 - Player groups;"
+                    + " An array of the permissions groups the player is in.";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String player = "";
+            int index = -1;
+            if(args.length == 0){
+                player = p.getName();
+                index = -1;
+            } else if(args.length == 1){
+                player = args[0].val();
+                index = -1;
+            } else {
+                player = args[0].val();
+                index = (int) Static.getInt(args[1]);
+            }
+            p = p.getServer().getPlayer(player);
+            if(index < -1 || index > 9 ){
+                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 8");
+            }
+            assert index >= -1 && index <= 9;
+            ArrayList<Construct> retVals = new ArrayList<Construct>();
+            if(index == 0 || index == -1){
+                //Player name
+                retVals.add(new CString(p.getName(), line_num));
+            }
+            if(index == 1 || index == -1){
+                //Player location
+                retVals.add(new CArray(line_num, new CInt((long)p.getLocation().getX(), line_num),
+                        new CInt((long)p.getLocation().getY(), line_num), new CInt((long)p.getLocation().getZ(), line_num)));
+            }
+            if(index == 2 || index == -1){
+                //Player cursor
+            }
+            if(index == 3 || index == -1){
+                //Player IP
+            }
+            if(index == 4 || index == -1){
+                //Display name
+            }
+            if(index == 5 || index == -1){
+                //Player health
+            }
+            if(index == 6 || index == -1){
+                //Item in hand
+            }
+            if(index == 7 || index == -1){
+                //World name
+            }
+            if(index == 8 || index == -1){
+                //Is op
+            }
+            if(index == 9 || index == -1){
+                //Player groups
+            }
+            if(retVals.size() == 1){
+                return retVals.get(0);
+            } else {
+                CArray ca = new CArray(line_num);
+                for(Construct c : retVals){
+                    ca.push(c);
+                }
+                return ca;
+            }
+        }
+        
     }
 }

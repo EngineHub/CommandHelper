@@ -28,6 +28,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Snowball;
 import org.bukkit.entity.Vehicle;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
@@ -66,21 +67,17 @@ public class Meta {
                 return new CVoid(line_num);
             }
             if (args[0].val().equals("~op")) {
-                Player m = Static.getServer().getPlayer(args[0].val());
-                if (m.isOnline()) {
-                    if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + m.getName() + " (running as op): " + cmd);
-                    }
-                    Static.getServer().dispatchCommand(new AlwaysOpPlayer(m), cmd);
-                } else {
-                    p.sendMessage("The player " + m.getName() + " is not online");
+                Player m = new AlwaysOpPlayer(p);
+                if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + m.getName() + " (running as op): /" + cmd);
                 }
+                Static.getServer().dispatchCommand(m, cmd);
             } else {
                 Player m = Static.getServer().getPlayer(args[0].val());
                 if (m != null) {
                     if (m.isOnline()) {
                         if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                            Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + " (as " + m.getName() + "): " + cmd.trim());
+                            Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + " (as " + m.getName() + "): /" + cmd.trim());
                         }
                         Static.getServer().dispatchCommand(m, cmd);
                     } else {
@@ -114,7 +111,7 @@ public class Meta {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
     }
@@ -162,7 +159,7 @@ public class Meta {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
     }
@@ -204,8 +201,8 @@ public class Meta {
             return "3.0.1";
         }
 
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
 
@@ -245,8 +242,8 @@ public class Meta {
         }
         //Doesn't matter, run out of state anyways
 
-        public boolean runAsync() {
-            return false;
+        public Boolean runAsync() {
+            return null;
         }
     }
 
@@ -583,6 +580,14 @@ public class Meta {
 
         public void sendBlockChange(Location loc, int material, byte data) {
             r.sendBlockChange(loc, material, data);
+        }
+
+        public void setLastDamageCause(EntityDamageEvent event) {
+            r.setLastDamageCause(event);
+        }
+
+        public EntityDamageEvent getLastDamageCause() {
+            return r.getLastDamageCause();
         }
     }
 }

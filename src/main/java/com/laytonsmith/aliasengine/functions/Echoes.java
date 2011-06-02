@@ -55,8 +55,8 @@ public class Echoes {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return false;
         }
     }
     
@@ -101,7 +101,7 @@ public class Echoes {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
             return false;
         }
     
@@ -155,7 +155,7 @@ public class Echoes {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
             return false;
         }
     }
@@ -198,8 +198,8 @@ public class Echoes {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -234,7 +234,7 @@ public class Echoes {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
             return false;
         }
         
@@ -273,7 +273,7 @@ public class Echoes {
             p.getServer().getPlayer(args[0].val()).chat(args[1].val());
             return new CVoid(line_num);
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
             return false;
         }
         
@@ -311,7 +311,7 @@ public class Echoes {
             p.getServer().broadcastMessage(args[0].val());
             return new CVoid(line_num);
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
             return false;
         }
         
@@ -355,8 +355,8 @@ public class Echoes {
             com.laytonsmith.aliasengine.Static.getLogger().log(Level.INFO, (prefix?"CommandHelper: ":"") + mes);
             return new CVoid(line_num);
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
         
     }

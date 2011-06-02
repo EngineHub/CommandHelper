@@ -203,6 +203,9 @@ public class Preferences {
      * @return 
      */
     public Object getPreference(String name){
+        if(prefs.get(name).objectValue == null){
+            prefs.get(name).objectValue = getObject(prefs.get(name).value, prefs.get(name));
+        }
         return prefs.get(name).objectValue;
     }
     

@@ -57,7 +57,7 @@ public class Minecraft {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
             return false;
         }
         

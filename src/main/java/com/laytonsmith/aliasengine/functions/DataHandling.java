@@ -13,8 +13,11 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.Constructs.Variable;
+import com.laytonsmith.aliasengine.LoopBreakException;
+import com.laytonsmith.aliasengine.LoopContinueException;
 import com.laytonsmith.aliasengine.RunnableAlias;
 import com.laytonsmith.aliasengine.Script;
+import com.laytonsmith.aliasengine.Static;
 import java.util.List;
 import org.bukkit.entity.Player;
 
@@ -56,8 +59,8 @@ public class DataHandling {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -98,8 +101,8 @@ public class DataHandling {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -119,6 +122,7 @@ public class DataHandling {
             if(!(counter instanceof IVariable)){
                 throw new ConfigRuntimeException("First parameter of for must be an ivariable");
             }
+            int _continue = 0;
             while(true){
                 Construct cond = parent.eval(condition, p, vars);
                 if(!(cond instanceof CBoolean)){
@@ -128,7 +132,23 @@ public class DataHandling {
                 if(bcond.getBoolean() == false){
                     break;
                 }
-                parent.eval(runnable, p, vars);
+                if(_continue > 1){
+                    --_continue;                    
+                    parent.eval(expression, p, vars);
+                    continue;
+                }
+                try{
+                    parent.eval(runnable, p, vars);
+                } catch(LoopBreakException e){
+                    int num = e.getTimes();
+                    if(num > 1){
+                        e.setTimes(--num);
+                        throw e;
+                    }
+                } catch(LoopContinueException e){
+                    _continue = e.getTimes() - 1;                    
+                    continue;
+                }
                 parent.eval(expression, p, vars);
             }
             return new CVoid(line_num);
@@ -159,8 +179,8 @@ public class DataHandling {
             return "3.0.1";
         }
         //Doesn't matter, run out of state
-        public boolean runAsync() {
-            return false;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -193,7 +213,18 @@ public class DataHandling {
                     IVariable two = (IVariable)iv;
                     for(int i = 0; i < one.size(); i++){
                         varList.set(new IVariable(two.getName(), one.get(i), line_num));
+                        try{
                         that.eval(code, p, vars);
+                        } catch(LoopBreakException e){
+                            int num = e.getTimes();
+                            if(num > 1){
+                                e.setTimes(--num);
+                                throw e;
+                            }
+                        } catch(LoopContinueException e){
+                            i += e.getTimes() - 1;
+                            continue;
+                        }
                     }
                 } else {
                     throw new CancelCommandException("Parameter 2 of foreach must be an ivariable");
@@ -224,8 +255,97 @@ public class DataHandling {
             return "3.0.1";
         }
         //Doesn't matter, runs out of state anyways
-        public boolean runAsync(){
+        public Boolean runAsync(){
+            return null;
+        }
+    }
+    
+    @api public static class _break implements Function{
+
+        public String getName() {
+            return "break";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0,1};
+        }
+
+        public String docs() {
+            return "nothing {[int]} Stops the current loop. If int is specified, and is greater than 1, the break travels that many loops up. So, if you had"
+                    + " a loop embedded in a loop, and you wanted to break in both loops, you would call break(2). If this function is called outside a loop"
+                    + " (or the number specified would cause the break to travel up further than any loops are defined), the function will fail. If no"
+                    + " argument is specified, it is the same as calling break(1).";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
             return true;
         }
+
+        public String since() {
+            return "3.1.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            int num = 1;
+            if(args.length == 1){
+                num = (int)Static.getInt(args[0]);
+            }
+            throw new LoopBreakException(num);
+        }
+        
+    }
+    
+    @api public static class _continue implements Function{
+
+        public String getName() {
+            return "continue";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[int]} Skips the rest of the code in this loop, and starts the loop over, with it continuing at the next index. If this function"
+                    + " is called outside of a loop, the command will fail. If int is set, it will skip 'int' repetitions. If no argument is specified,"
+                    + " 1 is used.";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            int num = 1;
+            if(args.length == 1){
+                num = (int)Static.getInt(args[0]);
+            }
+            throw new LoopContinueException(num);
+        }
+        
     }
 }

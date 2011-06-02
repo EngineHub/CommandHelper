@@ -80,7 +80,7 @@ public class Environment {
             Block b = p.getWorld().getBlockAt(x, y, z);
             return new CString(b.getTypeId() + ":" + b.getData(), line_num);
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
             return false;
         }
         
@@ -169,7 +169,7 @@ public class Environment {
             
             return new CVoid(line_num);
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
             return false;
         }
         

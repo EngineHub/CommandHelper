@@ -57,8 +57,8 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -100,8 +100,8 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -143,8 +143,8 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -186,8 +186,8 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -224,8 +224,8 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -261,8 +261,8 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -313,8 +313,8 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -365,8 +365,8 @@ public class Math {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     
@@ -418,8 +418,8 @@ public class Math {
             return new CInt(i, line_num);
             
         }
-        public boolean runAsync(){
-            return true;
+        public Boolean runAsync(){
+            return null;
         }
     }
     

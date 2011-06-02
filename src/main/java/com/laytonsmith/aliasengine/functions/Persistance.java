@@ -69,7 +69,8 @@ public class Persistance {
             return new CVoid(line_num);
         }
         
-        public boolean runAsync(){
+        public Boolean runAsync(){
+            //Because we do IO
             return true;
         }
         
@@ -116,7 +117,8 @@ public class Persistance {
                 return new CNull(line_num);
             }
         }
-        public boolean runAsync(){
+        public Boolean runAsync(){
+            //Because we do IO
             return true;
         }
         

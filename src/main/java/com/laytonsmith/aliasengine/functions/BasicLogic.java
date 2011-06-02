@@ -106,7 +106,7 @@ public class BasicLogic {
             return "3.0.1";
         }
         //Doesn't matter, this function is run out of state
-        public boolean runAsync() {
+        public Boolean runAsync() {
             return false;
         }
         
@@ -156,8 +156,8 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -193,8 +193,8 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -231,8 +231,8 @@ public class BasicLogic {
             return "3.0.1";
         }
         
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -268,8 +268,8 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -305,8 +305,8 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -347,8 +347,8 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -388,8 +388,8 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     
@@ -423,8 +423,8 @@ public class BasicLogic {
         public String since() {
             return "3.0.1";
         }
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
     }
     

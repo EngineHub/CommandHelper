@@ -50,8 +50,8 @@ public class Scheduling {
             return "3.1.0";
         }
 
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -89,8 +89,8 @@ public class Scheduling {
             return "3.1.0";
         }
 
-        public boolean runAsync() {
-            return true;
+        public Boolean runAsync() {
+            return null;
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -149,7 +149,8 @@ public class Scheduling {
             return new CVoid(line_num);
         }
 
-        public boolean runAsync() {
+        public Boolean runAsync() {
+            //Because we stop the thread
             return true;
         }
     }

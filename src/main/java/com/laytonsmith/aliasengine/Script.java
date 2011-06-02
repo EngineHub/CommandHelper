@@ -25,6 +25,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -77,8 +79,10 @@ public class Script {
 
     public void run(final List<Variable> vars, final Player p, final MScriptComplete done) {
         if (!hasBeenCompiled || compilerError) {
-            System.err.println("Unable to run script, not yet compiled, or compiler error.");
-            return;
+            throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.");
+//            System.err.println("Unable to run command, script not yet compiled, or a compiler error occured for that command.");
+//            p.sendMessage(ChatColor.RED + "Unable to run command, script not yet compiled, or a compiler error occured for that command.");
+//            return;
         }
         
         final Plugin self = CommandHelperPlugin.self;
@@ -101,6 +105,10 @@ public class Script {
                     System.out.println(e.getMessage());
                 } catch (CancelCommandException e) {
                     p.sendMessage(e.getMessage());
+                } catch(LoopBreakException e){
+                    p.sendMessage("The break() function must be used inside a for() or foreach() loop");
+                } catch(LoopContinueException e){
+                    p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
                 } catch (Throwable t) {
                     System.out.println("An unexpected exception occured during the execution of a script.");
                     t.printStackTrace();
@@ -211,7 +219,8 @@ public class Script {
                         }
                     }
                 }
-                if(f.runAsync()){
+                //TODO: Layton Hmm....
+                if(f.runAsync() == true || f.runAsync() == null){
                     return f.exec(m.line_num, player, ca);
                 } else {
                     return blockingNonThreadSafe(player, new Callable<Construct>() {
@@ -276,9 +285,10 @@ public class Script {
                 lastJ = j;
                 Construct c = cleft.get(j);
                 String arg = args.get(j);
-                if (c.ctype == ConstructType.COMMAND
-                        || c.ctype == ConstructType.TOKEN
-                        || c.ctype == ConstructType.LITERAL) {
+                if (c.ctype != ConstructType.VARIABLE){
+//                        || c.ctype == ConstructType.TOKEN
+//                        || c.ctype == ConstructType.LITERAL
+//                        || c.ctype == ConstructType.STRING || ConstructType.) {
                     if (!c.val().equals(arg)) {
                         isAMatch = false;
                         continue;
@@ -300,10 +310,21 @@ public class Script {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            if (cleft.get(lastJ).ctype == ConstructType.VARIABLE
+            if (cleft.get(lastJ).ctype != ConstructType.VARIABLE || 
+                    cleft.get(lastJ).ctype == ConstructType.VARIABLE
                     && !((Variable) cleft.get(lastJ)).optional) {
                 isAMatch = false;
             }
+        }
+        boolean lastIsFinal = false;
+        if(cleft.get(cleft.size() - 1) instanceof Variable){
+            Variable v = (Variable) cleft.get(cleft.size() - 1);
+            if(v.final_var){
+                lastIsFinal = true;
+            }
+        }
+        if(cleft.size() != cmds.length && !lastIsFinal){
+            isAMatch = false;
         }
         ArrayList<Variable> vars = new ArrayList<Variable>();
         Variable v = null;

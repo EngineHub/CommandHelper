@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 
 /**
@@ -78,32 +79,8 @@ public class AliasCore {
                         Static.getLogger().log(Level.INFO, "CH: Running original command ----> " + command);
                         Static.getLogger().log(Level.INFO, "on player " + player.getName());
                     }
-                    s.run(s.getVariables(command), player, new MScriptComplete() {
-
-                        public void done(String output) {
-                            if (output != null) {
-                                if (!output.trim().equals("") && output.trim().startsWith("/")) {
-                                    if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
-                                    }
-                                    player.chat(output.trim());
-                                }
-                            }
-                            echoCommand.remove(player.getName());
-                        }
-                    });
-                    match = true;
-                    break;
-                }
-            }
-
-            if (match == false && playerCommands != null) {
-                //if we are still looking, look in the aliases for this player
-                for (Script ac : playerCommands) {
-                    //RunnableAlias b = ac.getRunnableAliases(command, player);
-                    if (ac.match(command)) {
-                        echoCommand.add(player.getName());
-                        ac.run(ac.getVariables(command), player, new MScriptComplete() {
+                    try {
+                        s.run(s.getVariables(command), player, new MScriptComplete() {
 
                             public void done(String output) {
                                 if (output != null) {
@@ -117,6 +94,42 @@ public class AliasCore {
                                 echoCommand.remove(player.getName());
                             }
                         });
+                    } catch (/*ConfigRuntimeException*/Throwable e) {
+                        System.err.println(e.getMessage());
+                        player.sendMessage(ChatColor.RED + e.getMessage());
+                        echoCommand.remove(player.getName());
+                    }
+                    match = true;
+                    break;
+                }
+            }
+
+            if (match == false && playerCommands != null) {
+                //if we are still looking, look in the aliases for this player
+                for (Script ac : playerCommands) {
+                    //RunnableAlias b = ac.getRunnableAliases(command, player);
+                    if (ac.match(command)) {
+                        echoCommand.add(player.getName());
+                        try {
+                            ac.run(ac.getVariables(command), player, new MScriptComplete() {
+
+                                public void done(String output) {
+                                    if (output != null) {
+                                        if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                            if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                                Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                            }
+                                            player.chat(output.trim());
+                                        }
+                                    }
+                                    echoCommand.remove(player.getName());
+                                }
+                            });
+                        } catch (/*ConfigRuntimeException*/Throwable e) {
+                            System.err.println(e.getMessage());
+                            player.sendMessage(ChatColor.RED + e.getMessage());
+                            echoCommand.remove(player.getName());
+                        }
                         match = true;
                     }
                 }
@@ -158,9 +171,9 @@ public class AliasCore {
                 aliasConfig.createNewFile();
                 try {
                     file_put_contents(aliasConfig,
-                            getStringResource(this.getClass().getResourceAsStream("/com/laytonsmith/aliasengine/samp_config.txt")),
+                            getStringResource(AliasCore.class.getResourceAsStream("/com/laytonsmith/aliasengine/samp_config.txt")),
                             "o");
-                } catch (IOException e) {
+                } catch (Exception e) {
                     logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
                 }
             }
@@ -284,7 +297,9 @@ public class AliasCore {
                 writer.write(buffer, 0, n);
             }
         } finally {
-            is.close();
+            if (is != null) {
+                is.close();
+            }
         }
         return writer.toString();
     }

@@ -164,13 +164,15 @@ public class CommandHelperPlugin extends JavaPlugin {
         
         // Repeat command
         if (cmd.equals("repeat")) {
+            //Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
+            //an infinite loop though, because the preprocessor won't try to fire off a repeat command
+            commandRunning.remove(player);
             if (session.getLastCommand() != null) {
                 player.sendMessage(ChatColor.GRAY + session.getLastCommand());
                 execCommand(player, session.getLastCommand());
             } else {
                 player.sendMessage(ChatColor.RED + "No previous command.");
             }
-            commandRunning.remove(player);
             return true;
     
         // Save alias

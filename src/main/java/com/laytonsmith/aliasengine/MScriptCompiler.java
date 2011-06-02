@@ -329,20 +329,24 @@ public class MScriptCompiler {
                     }
 
                     if (stack <= 0) {
-                        Token lookfurther = tokenStream.get(j + 1);
-                        if (!autoconcat) {
-                            if (!lookfurther.type.equals(TType.COMMA) && !lookfurther.type.equals(TType.FUNC_END)) {
-                                stream.add(new Token(TType.FUNC_NAME, "sconcat", t.line_num));
-                                stream.add(new Token(TType.FUNC_START, "(", t.line_num));
-                                autoconcat = true;
-                            } else {
-                                //No concatenation is needed
+                        try {
+                            Token lookfurther = tokenStream.get(j + 1);
+                            if (!autoconcat) {
+                                if (!lookfurther.type.equals(TType.COMMA) && !lookfurther.type.equals(TType.FUNC_END)) {
+                                    stream.add(new Token(TType.FUNC_NAME, "sconcat", t.line_num));
+                                    stream.add(new Token(TType.FUNC_START, "(", t.line_num));
+                                    autoconcat = true;
+                                } else {
+                                    //No concatenation is needed
+                                    break;
+                                }
+                            } else if (autoconcat && (lookfurther.type.equals(TType.COMMA) || lookfurther.type.equals(TType.FUNC_END))) {
+                                tokenStream.add(j, new Token(TType.FUNC_END, ")", lookahead.line_num));
+                                size++;
                                 break;
                             }
-                        } else if (autoconcat && (lookfurther.type.equals(TType.COMMA) || lookfurther.type.equals(TType.FUNC_END))) {
-                            tokenStream.add(j, new Token(TType.FUNC_END, ")", lookahead.line_num));
-                            size++;
-                            break;
+                        } catch (IndexOutOfBoundsException e) {
+                            throw new ConfigCompileException("You are missing an ending parenthesis", tokenStream.get(j).line_num);
                         }
                     }
 

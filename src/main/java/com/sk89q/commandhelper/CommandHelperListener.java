@@ -123,12 +123,12 @@ public class CommandHelperListener extends PlayerListener {
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         String cmd = event.getMessage();
         Player player = event.getPlayer();
+        if(cmd.equals("/.") || cmd.equals("/repeat")){
+            return;
+        }
         this.getSession(player).setLastCommand(cmd);
         
         if(event.isCancelled()){
-            return;
-        }
-        if(cmd.equals("/.") || cmd.equals("/repeat")){
             return;
         }
         
