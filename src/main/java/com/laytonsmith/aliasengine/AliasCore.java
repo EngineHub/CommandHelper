@@ -83,21 +83,28 @@ public class AliasCore {
                         s.run(s.getVariables(command), player, new MScriptComplete() {
 
                             public void done(String output) {
-                                if (output != null) {
-                                    if (!output.trim().equals("") && output.trim().startsWith("/")) {
-                                        if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                                            Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                try{
+                                    if (output != null) {
+                                        if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                            if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                                Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                            }
+                                            player.chat(output.trim());
                                         }
-                                        player.chat(output.trim());
                                     }
+                                } catch(Throwable e){
+                                    System.err.println(e.getMessage());
+                                    player.sendMessage(ChatColor.RED + e.getMessage());
+                                } finally{
+                                    echoCommand.remove(player.getName());
                                 }
-                                echoCommand.remove(player.getName());
                             }
                         });
                     } catch (/*ConfigRuntimeException*/Throwable e) {
                         System.err.println(e.getMessage());
                         player.sendMessage(ChatColor.RED + e.getMessage());
-                        echoCommand.remove(player.getName());
+                    } finally{
+                        echoCommand.remove(player.getName());                        
                     }
                     match = true;
                     break;

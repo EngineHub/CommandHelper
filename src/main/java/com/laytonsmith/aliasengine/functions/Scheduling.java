@@ -99,7 +99,6 @@ public class Scheduling {
         
     }
     
-    @api
     public static class sleep implements Function {
 
         public String getName() {

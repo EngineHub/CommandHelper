@@ -85,10 +85,10 @@ public class Script {
 //            return;
         }
         
-        final Plugin self = CommandHelperPlugin.self;
-        Static.getServer().getScheduler().scheduleAsyncDelayedTask(self, new Runnable() {
+//        final Plugin self = CommandHelperPlugin.self;
+//        Static.getServer().getScheduler().scheduleAsyncDelayedTask(self, new Runnable() {
 
-            public void run() {
+//            public void run() {
                 try {
                     for (GenericTreeNode<Construct> rootNode : cright) {
                         StringBuilder b = new StringBuilder();
@@ -115,8 +115,8 @@ public class Script {
                     p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
                 }
                 done.done(null);
-            }
-        });
+//            }
+//        });
     }
 
     public Construct eval(GenericTreeNode<Construct> c, final Player player, final List<Variable> vars) throws CancelCommandException {
@@ -219,17 +219,18 @@ public class Script {
                         }
                     }
                 }
-                //TODO: Layton Hmm....
-                if(f.runAsync() == true || f.runAsync() == null){
+                //TODO: Will revisit this in the future. For now, remove the ability for
+                //functions to run asyncronously.
+                //if(f.runAsync() == true || f.runAsync() == null){
                     return f.exec(m.line_num, player, ca);
-                } else {
+                /*} else {
                     return blockingNonThreadSafe(player, new Callable<Construct>() {
 
                         public Construct call() throws Exception {
                             return f.exec(m.line_num, player, ca);
                         }
                     });
-                }
+                }*/
 
             } catch (ConfigCompileException ex) {
                 Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);

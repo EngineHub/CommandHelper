@@ -6,10 +6,14 @@ package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
+import java.util.List;
 import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
 import org.bukkit.material.MaterialData;
 
@@ -59,6 +63,49 @@ public class Minecraft {
         }
         public Boolean runAsync(){
             return false;
+        }
+        
+    }
+    
+    @api public static class get_worlds implements Function{
+
+        public String getName() {
+            return "get_worlds";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public String docs() {
+            return "array {} Returns the names of the worlds available in this server";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.0";
+        }
+
+        public Boolean runAsync() {
+            return true;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            List<World> worlds = p.getServer().getWorlds();
+            CArray c = new CArray(line_num);
+            for(World w : worlds){
+                c.push(new CString(w.getName(), line_num));
+            }
+            return c;
         }
         
     }

@@ -20,11 +20,9 @@
 package com.sk89q.commandhelper;
 
 import com.laytonsmith.PureUtilities.Persistance;
-import com.laytonsmith.aliasengine.AliasConfig;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
