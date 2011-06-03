@@ -1,3 +1,12 @@
+3.1.0:
+- Added several new functions, including eval, set_ploc, time, nano_time, break, 
+continue, get_worlds, pworld, pinfo, and kick. Also, reorganized the source code,
+and made it so that if one command would cause a compiler error, the entire script
+won't be affected, but just the one command. Also, concatenation automatically
+happens now, the g() function is no longer necessary. Debug mode now outputs what
+real command is being run, if debug mode is on. It is now possible to define
+the location of your config file, in the preferences.txt file.
+
 3.0.2:
 - Added new functions to allow scripts to interact with the environment around
     the player.
