@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sk89q</groupId>
     <artifactId>commandhelper</artifactId>
-    <version>3.1.0-SNAPSHOT</version>
+    <version>3.1.0</version>
     <name>CommandHelper</name>
     <description>CommandHelper adds powerful command related utility functions</description>
   
