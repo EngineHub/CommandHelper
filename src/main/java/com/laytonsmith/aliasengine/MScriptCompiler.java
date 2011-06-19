@@ -324,11 +324,14 @@ public class MScriptCompiler {
                     if (lookahead.type.equals(TType.FUNC_NAME)) {
                         stack++;
                         j++;
+                    
                     } else if (lookahead.type.equals(TType.FUNC_END)) {
-                        stack--;
+                        if(stack != 0 && !t.type.equals(TType.FUNC_START)){
+                            stack--;
+                        }
                     }
 
-                    if (stack <= 0) {
+                    if (stack < 0) {
                         try {
                             Token lookfurther = tokenStream.get(j + 1);
                             if (!autoconcat) {
