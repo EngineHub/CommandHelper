@@ -126,6 +126,30 @@
                 </configuration>
             </plugin>
             
+            <!-- Shade plugin -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>1.4</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>WEBundle</shadedClassifierName>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.sk89q:worldedit:jar:*</include>
+                                </includes>
+                            </artifactSet>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            
             <!-- Getting rid of maven warnings by providing versions for the following plugins -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
