@@ -27,6 +27,7 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -121,11 +122,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
         if (sender instanceof Player) {
-            try {
                 return runCommand((Player)sender, cmd.getName(), args);
-            } catch (InsufficientArgumentsException e) {
-                return false;
-            }
         } else if(sender.isOp() && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
             try {
                 if(ac.reload()){
@@ -152,7 +149,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      * @param split
      * @return
      */
-    private boolean runCommand(Player player, String cmd, String[] args) throws InsufficientArgumentsException {
+    private boolean runCommand(Player player, String cmd, String[] args) {
         CommandHelperSession session = playerListener.getSession(player);
         if(commandRunning.contains(player)){
             return true;
@@ -162,22 +159,31 @@ public class CommandHelperPlugin extends JavaPlugin {
         
         // Repeat command
         if (cmd.equals("repeat")) {
-            //Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
-            //an infinite loop though, because the preprocessor won't try to fire off a repeat command
-            commandRunning.remove(player);
-            if (session.getLastCommand() != null) {
-                player.sendMessage(ChatColor.GRAY + session.getLastCommand());
-                execCommand(player, session.getLastCommand());
+            if(perms.hasPermission(player.getName(), "commandhelper.repeat") ||
+                    perms.hasPermission(player.getName(), "ch.repeat")){
+                //Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
+                //an infinite loop though, because the preprocessor won't try to fire off a repeat command
+                commandRunning.remove(player);
+                if (session.getLastCommand() != null) {
+                    player.sendMessage(ChatColor.GRAY + session.getLastCommand());
+                    execCommand(player, session.getLastCommand());
+                } else {
+                    player.sendMessage(ChatColor.RED + "No previous command.");
+                }
+                return true;
             } else {
-                player.sendMessage(ChatColor.RED + "No previous command.");
+                player.sendMessage(Color.RED + "You do not have permission to access the repeat command");
+                commandRunning.remove(player);
+                return true;
             }
-            return true;
     
         // Save alias
         } else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper")
                 /*&& player.canUseCommand("/alias")*/) {
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                return false;
+                player.sendMessage(Color.RED + "You do not have permission to access the alias command");
+                commandRunning.remove(player);
+                return true;
             }
             if(args.length > 0){
 
@@ -207,7 +213,9 @@ public class CommandHelperPlugin extends JavaPlugin {
         //View all aliases for this user
         } else if(cmd.equalsIgnoreCase("viewalias")){
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                return false;
+                player.sendMessage(Color.RED + "You do not have permission to access the viewalias command");
+                commandRunning.remove(player);
+                return true;
             }
             User u = new User(player, persist);
             player.sendMessage(u.getAllAliases());
@@ -216,7 +224,9 @@ public class CommandHelperPlugin extends JavaPlugin {
         // Delete alias
         } else if (cmd.equalsIgnoreCase("delalias")) {
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                return false;
+                player.sendMessage(Color.RED + "You do not have permission to access the delalias command");
+                commandRunning.remove(player);
+                return true;
             }
             User u = new User(player, persist);
             try{
@@ -244,7 +254,8 @@ public class CommandHelperPlugin extends JavaPlugin {
         } else if (cmd.equalsIgnoreCase("reloadaliases")) {
             if(!perms.hasPermission(player.getName(), "commandhelper.reloadaliases") && !perms.hasPermission(player.getName(), "ch.reloadaliases")){
                 player.sendMessage(ChatColor.DARK_RED + "You do not have permission to use that command");
-                return false;
+                commandRunning.remove(player);
+                return true;
             }
             try {
                 if(ac.reload()){
@@ -261,24 +272,6 @@ public class CommandHelperPlugin extends JavaPlugin {
         }
         commandRunning.remove(player);
         return false;
-    }
-
-    /**
-     * Checks to make sure that there are enough but not too many arguments.
-     *
-     * @param args
-     * @param min
-     * @param max -1 for no maximum
-     * @param cmd command name
-     * @throws InsufficientArgumentsException
-     */
-    private void checkArgs(String[] args, int min, int max, String cmd)
-            throws InsufficientArgumentsException {
-        if (args.length < min) {
-            throw new InsufficientArgumentsException("Minimum " + min + " arguments");
-        } else if (max != -1 && args.length > max) {
-            throw new InsufficientArgumentsException("Maximum " + max + " arguments");
-        }
     }
 
     /**

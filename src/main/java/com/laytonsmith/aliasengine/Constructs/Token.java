@@ -29,6 +29,22 @@ public class Token{
     }
 
     @Override
+    public int hashCode() {
+        int hash = 7;
+        hash = 59 * hash + (this.type != null ? this.type.hashCode() : 0);
+        hash = 59 * hash + (this.value != null ? this.value.hashCode() : 0);
+        return hash;
+    }
+    
+    public boolean equals(Object o){
+        if(o instanceof Token){
+            Token t = (Token)o;
+            return (this.type.equals(t.type) && this.value.equals(t.value));
+        }
+        return false;
+    }
+
+    @Override
     public String toString() {
         if (type.equals(TType.NEWLINE)) {
             return "newline";
