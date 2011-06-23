@@ -1,3 +1,7 @@
+3.1.1:
+-Fixed a bug where no argument functions in the root of the command would give a 
+compile error.
+
 3.1.0:
 - Added several new functions, including eval, set_ploc, time, nano_time, break, 
 continue, get_worlds, pworld, pinfo, and kick. Also, reorganized the source code,
