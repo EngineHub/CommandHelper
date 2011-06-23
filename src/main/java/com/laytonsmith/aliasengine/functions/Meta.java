@@ -14,10 +14,14 @@ import com.laytonsmith.aliasengine.Static;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import org.bukkit.Achievement;
+import org.bukkit.Effect;
+import org.bukkit.Instrument;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.Note;
 import org.bukkit.Server;
 import org.bukkit.Statistic;
 import org.bukkit.World;
@@ -588,6 +592,42 @@ public class Meta {
 
         public EntityDamageEvent getLastDamageCause() {
             return r.getLastDamageCause();
+        }
+
+        public void playNote(Location loc, Instrument instrument, Note note) {
+            r.playNote(loc, instrument, note);
+        }
+
+        public void playEffect(Location loc, Effect effect, int data) {
+            r.playEffect(loc, effect, data);
+        }
+
+        public boolean sendChunkChange(Location loc, int sx, int sy, int sz, byte[] data) {
+            return r.sendChunkChange(loc, sx, sy, sz, data);
+        }
+
+        public void setPlayerTime(long time, boolean relative) {
+            r.setPlayerTime(time, relative);
+        }
+
+        public long getPlayerTime() {
+            return r.getPlayerTime();
+        }
+
+        public long getPlayerTimeOffset() {
+            return r.getPlayerTimeOffset();
+        }
+
+        public boolean isPlayerTimeRelative() {
+            return r.isPlayerTimeRelative();
+        }
+
+        public void resetPlayerTime() {
+            r.resetPlayerTime();
+        }
+
+        public UUID getUniqueId() {
+            return r.getUniqueId();
         }
     }
 }
