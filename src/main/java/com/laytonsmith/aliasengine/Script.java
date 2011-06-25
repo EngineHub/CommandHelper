@@ -292,6 +292,16 @@ public class Script {
                         isAMatch = false;
                         continue;
                     }
+                } else {
+                    //It's a variable. If it's optional, the rest of them are optional too, so as long as the size of
+                    //args isn't greater than the size of cleft, it's a match
+                    if(((Variable)c).optional){
+                        if(args.size() <= cleft.size()){
+                            return true;
+                        } else {
+                            return false;
+                        }
+                    }
                 }
                 if (j == cleft.size() - 1) {
                     if (cleft.get(j).ctype == ConstructType.VARIABLE) {
@@ -322,6 +332,10 @@ public class Script {
                 lastIsFinal = true;
             }
         }
+        if((cleft.get(lastJ) instanceof Variable && ((Variable)cleft.get(lastJ)).optional)){
+            return true;
+        }
+            
         if(cleft.size() != cmds.length && !lastIsFinal){
             isAMatch = false;
         }

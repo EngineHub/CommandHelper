@@ -83,7 +83,7 @@ public class AliasCore {
                         s.run(s.getVariables(command), player, new MScriptComplete() {
 
                             public void done(String output) {
-                                try{
+                                try {
                                     if (output != null) {
                                         if (!output.trim().equals("") && output.trim().startsWith("/")) {
                                             if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
@@ -92,10 +92,10 @@ public class AliasCore {
                                             player.chat(output.trim());
                                         }
                                     }
-                                } catch(Throwable e){
+                                } catch (Throwable e) {
                                     System.err.println(e.getMessage());
                                     player.sendMessage(ChatColor.RED + e.getMessage());
-                                } finally{
+                                } finally {
                                     echoCommand.remove(player.getName());
                                 }
                             }
@@ -103,8 +103,8 @@ public class AliasCore {
                     } catch (/*ConfigRuntimeException*/Throwable e) {
                         System.err.println(e.getMessage());
                         player.sendMessage(ChatColor.RED + e.getMessage());
-                    } finally{
-                        echoCommand.remove(player.getName());                        
+                    } finally {
+                        echoCommand.remove(player.getName());
                     }
                     match = true;
                     break;
@@ -115,29 +115,34 @@ public class AliasCore {
                 //if we are still looking, look in the aliases for this player
                 for (Script ac : playerCommands) {
                     //RunnableAlias b = ac.getRunnableAliases(command, player);
-                    if (ac.match(command)) {
-                        echoCommand.add(player.getName());
-                        try {
-                            ac.run(ac.getVariables(command), player, new MScriptComplete() {
+                    try {
+                        ac.compile();
+                        if (ac.match(command)) {
+                            echoCommand.add(player.getName());
+                            try {
+                                ac.run(ac.getVariables(command), player, new MScriptComplete() {
 
-                                public void done(String output) {
-                                    if (output != null) {
-                                        if (!output.trim().equals("") && output.trim().startsWith("/")) {
-                                            if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                                                Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                    public void done(String output) {
+                                        if (output != null) {
+                                            if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                                if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                                }
+                                                player.chat(output.trim());
                                             }
-                                            player.chat(output.trim());
                                         }
+                                        echoCommand.remove(player.getName());
                                     }
-                                    echoCommand.remove(player.getName());
-                                }
-                            });
-                        } catch (/*ConfigRuntimeException*/Throwable e) {
-                            System.err.println(e.getMessage());
-                            player.sendMessage(ChatColor.RED + e.getMessage());
-                            echoCommand.remove(player.getName());
+                                });
+                            } catch (/*ConfigRuntimeException*/Throwable e) {
+                                System.err.println(e.getMessage());
+                                player.sendMessage(ChatColor.RED + e.getMessage());
+                                echoCommand.remove(player.getName());
+                            }
+                            match = true;
                         }
-                        match = true;
+                    } catch (Exception e) {
+                        player.chat("An exception occured while trying to compile/run your alias: " + e.getMessage());
                     }
                 }
 

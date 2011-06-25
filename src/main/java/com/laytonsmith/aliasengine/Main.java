@@ -5,7 +5,6 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.PureUtilities.Persistance;
-import com.sun.jmx.remote.util.OrderClassLoaders;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -15,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.bukkit.Server;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;

@@ -25,6 +25,13 @@ import org.bukkit.Server;
  */
 public class Static {
 
+    /**
+     * This function pulls a numerical equivalent from any given construct. It throws a ConfigRuntimeException
+     * if it cannot be converted, for instance the string "s" cannot be cast to a number. The number returned
+     * will always be a double.
+     * @param c
+     * @return 
+     */
     public static double getNumber(Construct c) {
         double d;
         if (c == null) {
@@ -46,6 +53,11 @@ public class Static {
         return d;
     }
 
+    /**
+     * Alias to getNumber
+     * @param c
+     * @return 
+     */
     public static double getDouble(Construct c) {
         try {
             return getNumber(c);
@@ -54,6 +66,12 @@ public class Static {
         }
     }
 
+    /**
+     * Returns an integer from any given construct. If the number is not castable to an int, a ConfigRuntimeException
+     * is thrown.
+     * @param c
+     * @return 
+     */
     public static long getInt(Construct c) {
         long i;
         if (c == null) {
@@ -62,11 +80,21 @@ public class Static {
         if (c instanceof CInt) {
             i = ((CInt) c).getInt();
         } else {
-            throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead");
+            try{
+                i = Integer.parseInt(c.val());
+            } catch(NumberFormatException e){
+                throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead");
+            }
         }
         return i;
     }
 
+    /**
+     * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows the following rules:
+     * If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it is empty, it is false, otherwise it is true.
+     * @param c
+     * @return 
+     */
     public static boolean getBoolean(Construct c) {
         boolean b = false;
         if (c == null) {
@@ -82,6 +110,11 @@ public class Static {
         return b;
     }
 
+    /**
+     * Returns true if any of the constructs are a CDouble, false otherwise.
+     * @param c
+     * @return 
+     */
     public static boolean anyDoubles(Construct... c) {
         for (int i = 0; i < c.length; i++) {
             if (c[i] instanceof CDouble) {
@@ -91,6 +124,11 @@ public class Static {
         return false;
     }
 
+    /**
+     * Return true if any of the constructs are CStrings, false otherwise.
+     * @param c
+     * @return 
+     */
     public static boolean anyStrings(Construct... c) {
         for (int i = 0; i < c.length; i++) {
             if (c[i] instanceof CString) {
@@ -100,6 +138,11 @@ public class Static {
         return false;
     }
 
+    /**
+     * Returns true if any of the constructs are CBooleans, false otherwise.
+     * @param c
+     * @return 
+     */
     public static boolean anyBooleans(Construct... c) {
         for (int i = 0; i < c.length; i++) {
             if (c[i] instanceof CBoolean) {
@@ -109,6 +152,11 @@ public class Static {
         return false;
     }
 
+    /**
+     * Returns the logger for the plugin
+     * @return
+     * @throws NotInitializedYetException 
+     */
     public static Logger getLogger() throws NotInitializedYetException {
         Logger l = com.sk89q.commandhelper.CommandHelperPlugin.logger;
         if (l == null) {
@@ -117,6 +165,11 @@ public class Static {
         return l;
     }
 
+    /**
+     * Returns the server for this plugin
+     * @return
+     * @throws NotInitializedYetException 
+     */
     public static Server getServer() throws NotInitializedYetException {
         Server s = com.sk89q.commandhelper.CommandHelperPlugin.myServer;
         if (s == null) {
@@ -125,6 +178,11 @@ public class Static {
         return s;
     }
 
+    /**
+     * Gets the reference to the AliasCore for this plugin
+     * @return
+     * @throws NotInitializedYetException 
+     */
     public static AliasCore getAliasCore() throws NotInitializedYetException {
         AliasCore ac = com.sk89q.commandhelper.CommandHelperPlugin.getCore();
         if (ac == null) {
@@ -133,6 +191,11 @@ public class Static {
         return ac;
     }
 
+    /**
+     * Gets the persistance object for this plugin
+     * @return
+     * @throws NotInitializedYetException 
+     */
     public static Persistance getPersistance() throws NotInitializedYetException {
         Persistance p = com.sk89q.commandhelper.CommandHelperPlugin.persist;
         if (p == null) {
@@ -141,6 +204,11 @@ public class Static {
         return p;
     }
 
+    /**
+     * Gets the permissions resolver manager this plugin uses
+     * @return
+     * @throws NotInitializedYetException 
+     */
     public static PermissionsResolverManager getPermissionsResolverManager() throws NotInitializedYetException {
         PermissionsResolverManager prm = com.sk89q.commandhelper.CommandHelperPlugin.perms;
         if (prm == null) {
@@ -149,6 +217,11 @@ public class Static {
         return prm;
     }
 
+    /**
+     * Gets the current version of the plugin
+     * @return
+     * @throws NotInitializedYetException 
+     */
     public static Version getVersion() throws NotInitializedYetException {
         Version v = com.sk89q.commandhelper.CommandHelperPlugin.version;
         if (v == null) {
@@ -157,6 +230,12 @@ public class Static {
         return v;
     }
 
+    /**
+     * Gets the preferences object for this plugin, as well as setting it up if
+     * it is not already activated.
+     * @return
+     * @throws NotInitializedYetException 
+     */
     public static Preferences getPreferences() throws NotInitializedYetException {
         if (com.sk89q.commandhelper.CommandHelperPlugin.prefs == null) {
             ArrayList<Preferences.Preference> a = new ArrayList<Preferences.Preference>();
@@ -171,6 +250,13 @@ public class Static {
         return com.sk89q.commandhelper.CommandHelperPlugin.prefs;
     }
 
+    /**
+     * Given a string input, creates and returns a Construct of the appropriate
+     * type. This takes into account that null, true, and false are keywords.
+     * @param val
+     * @param line_num
+     * @return 
+     */
     public static Construct resolveConstruct(String val, int line_num) {
         if (val.equalsIgnoreCase("null")) {
             return new CNull(line_num);

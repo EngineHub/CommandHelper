@@ -7,6 +7,7 @@ package com.laytonsmith.testing;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.Version;
 import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
 import com.laytonsmith.aliasengine.functions.Function;
@@ -92,11 +93,39 @@ public class StaticTest {
         }
     }
     
+    /**
+     * Does the opposite of assertCEquals
+     * @param expected
+     * @param actual
+     * @throws CancelCommandException 
+     */
     public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException{
         _equals e = new _equals();
         CBoolean ret = (CBoolean)e.exec(0, null, expected, actual);
         if(ret.getBoolean() == true){
             throw new AssertionError("Did not expect " + expected + " and " + actual + " to be equal to each other");
+        }
+    }
+    
+    /**
+     * Verifies that the given construct <em>resolves</em> to true. The resolution uses Static.getBoolean to
+     * do the resolution.
+     * @param actual 
+     */
+    public static void assertCTrue(Construct actual){
+        if(!Static.getBoolean(actual)){
+            fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
+        }
+    }
+    
+    /**
+     * Verifies that the given construct <em>resolves</em> to false. The resolution uses Static.getBoolean to
+     * do the resolution.
+     * @param actual 
+     */
+    public static void assertCFalse(Construct actual){
+        if(Static.getBoolean(actual)){
+            fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
         }
     }
     

@@ -9,12 +9,29 @@ import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
+import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import java.util.List;
+import org.bukkit.DyeColor;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Chicken;
+import org.bukkit.entity.Cow;
+import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Ghast;
+import org.bukkit.entity.Pig;
+import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Skeleton;
+import org.bukkit.entity.Slime;
+import org.bukkit.entity.Spider;
+import org.bukkit.entity.Squid;
+import org.bukkit.entity.Wolf;
+import org.bukkit.entity.Zombie;
 import org.bukkit.material.MaterialData;
 
 /**
@@ -22,10 +39,13 @@ import org.bukkit.material.MaterialData;
  * @author Layton
  */
 public class Minecraft {
-    public static String docs(){
+
+    public static String docs() {
         return "These functions provide a hook into game functionality.";
     }
-    @api public static class data_values implements Function{
+
+    @api
+    public static class data_values implements Function {
 
         public String getName() {
             return "data_values";
@@ -36,7 +56,7 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[0] instanceof CInt){
+            if (args[0] instanceof CInt) {
                 return new CInt(Static.getInt(args[0]), line_num);
             } else {
                 String c = args[0].val();
@@ -53,21 +73,24 @@ public class Minecraft {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
         }
+
         public String since() {
             return "3.0.1";
         }
-        public Boolean runAsync(){
+
+        public Boolean runAsync() {
             return false;
         }
-        
     }
-    
-    @api public static class get_worlds implements Function{
+
+    @api
+    public static class get_worlds implements Function {
 
         public String getName() {
             return "get_worlds";
@@ -85,7 +108,8 @@ public class Minecraft {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -102,11 +126,138 @@ public class Minecraft {
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             List<World> worlds = p.getServer().getWorlds();
             CArray c = new CArray(line_num);
-            for(World w : worlds){
+            for (World w : worlds) {
                 c.push(new CString(w.getName(), line_num));
             }
             return c;
         }
-        
+    }
+
+    @api public static class spawn_mob implements Function {
+
+        public String getName() {
+            return "spawn_mob";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3};
+        }
+
+        public String docs() {
+            return "void {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
+                    + " to the location of the player. mobType can be one of: CHICKEN, COW, CREEPER, GHAST,"
+                    + " GIANT, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
+                    + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
+                    + " SHEEP:COLOR, where COLOR is any of the values that are allowed in the color() function. COLOR defaults to white if not"
+                    + " specified.";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        enum MOBS {
+
+            CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String mob = args[0].val();
+            String sheepColor = "WHITE";
+            if(mob.toUpperCase().startsWith("SHEEP:")){
+                sheepColor = mob.substring(6);
+                mob = "SHEEP";
+            }
+            int qty = 1;
+            if (args.length > 1) {
+                qty = (int) Static.getInt(args[1]);
+            }
+            if(qty > 50){
+                throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?");
+            }
+            Location l = p.getLocation();
+            if (args.length > 2) {
+                if (args[2] instanceof CArray) {
+                    CArray ca = (CArray) args[2];
+                    l = new Location(p.getWorld(), Static.getNumber(ca.get(0)),
+                            Static.getNumber(ca.get(1)), Static.getNumber(ca.get(2)));
+                } else {
+                    throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array");
+                }
+            }
+            Class mobType = null;
+            try {
+                switch (MOBS.valueOf(mob.toUpperCase())) {
+                    case CHICKEN:
+                        mobType = Chicken.class;
+                        break;
+                    case COW:
+                        mobType = Cow.class;
+                        break;
+                    case CREEPER:
+                        mobType = Creeper.class;
+                        break;
+                    case GHAST:
+                        mobType = Ghast.class;
+                        break;
+                    case PIG:
+                        mobType = Pig.class;
+                        break;
+                    case PIGZOMBIE:
+                        mobType = PigZombie.class;
+                        break;
+                    case SHEEP:
+                        mobType = Sheep.class;
+                        break;
+                    case SKELETON:
+                        mobType = Skeleton.class;
+                        break;
+                    case SLIME:
+                        mobType = Slime.class;
+                        break;
+                    case SPIDER:
+                        mobType = Spider.class;
+                        break;
+                    case SQUID:
+                        mobType = Squid.class;
+                        break;
+                    case WOLF:
+                        mobType = Wolf.class;
+                        break;
+                    case ZOMBIE:
+                        mobType = Zombie.class;
+                        break;
+                }                
+            } catch (IllegalArgumentException e) {
+                throw new ConfigRuntimeException("No mob of type " + mob + " exists");            
+            }
+            for(int i = 0; i < qty; i++){
+                Entity e = p.getWorld().spawn(l, mobType);
+                if(e instanceof Sheep){
+                    Sheep s = (Sheep)e;
+                    try{
+                    s.setColor(DyeColor.valueOf(sheepColor.toUpperCase()));
+                    } catch(IllegalArgumentException f){
+                        throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color");
+                    }
+                }
+            }
+            return new CVoid(line_num);
+        }
     }
 }

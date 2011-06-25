@@ -52,6 +52,12 @@ public class ArrayHandlingTest {
         assertReturn(ret, C.Int);
         assertCEquals(C.onstruct(3), ret);
     }
+    
+    @Test(expected=Exception.class)
+    public void testArraySizeEx() throws CancelCommandException{
+        ArrayHandling.array_size a = new ArrayHandling.array_size();
+        a.exec(0, fakePlayer, C.Int(0));
+    }
 
     @Test
     public void testArraySet() throws CancelCommandException {
@@ -65,6 +71,12 @@ public class ArrayHandlingTest {
         assertCEquals(C.onstruct("hi"), commonArray.get(1));
         assertCEquals(C.onstruct(3), commonArray.get(2));
     }
+    
+    @Test(expected=Exception.class)
+    public void testArraySetEx() throws CancelCommandException{
+        ArrayHandling.array_set a = new ArrayHandling.array_set();
+        a.exec(0, fakePlayer, C.Int(0), C.Int(1), C.String("hi"));
+    }
 
     @Test
     public void testArrayContains() throws CancelCommandException {
@@ -73,12 +85,24 @@ public class ArrayHandlingTest {
         assertCEquals(C.onstruct(true), a.exec(0, fakePlayer, commonArray, C.onstruct(1)));
         assertCEquals(C.onstruct(false), a.exec(0, fakePlayer, commonArray, C.onstruct(55)));
     }
+    
+    @Test(expected=Exception.class)
+    public void testArrayContainsEx() throws CancelCommandException{
+        ArrayHandling.array_contains a = new ArrayHandling.array_contains();
+        a.exec(0, fakePlayer, C.Int(0), C.Int(1));
+    }
 
     @Test
     public void testArrayGet() throws CancelCommandException {
         ArrayHandling.array_get a = new ArrayHandling.array_get();
         TestBoilerplate(a, "array_get");
         assertCEquals(C.onstruct(1), a.exec(0, fakePlayer, commonArray, C.onstruct(0)));
+    }
+    
+    @Test(expected=Exception.class)
+    public void testArrayGetEx() throws CancelCommandException{
+        ArrayHandling.array_get a = new ArrayHandling.array_get();
+        a.exec(0, fakePlayer, C.Int(0), C.Int(1));
     }
 
     @Test(expected = ConfigRuntimeException.class)
@@ -96,5 +120,11 @@ public class ArrayHandlingTest {
         assertCEquals(C.onstruct(2), commonArray.get(1));
         assertCEquals(C.onstruct(3), commonArray.get(2));
         assertCEquals(C.onstruct(4), commonArray.get(3));
+    }
+    
+    @Test(expected=Exception.class)
+    public void testArrayPushEx() throws CancelCommandException{
+        ArrayHandling.array_push a = new ArrayHandling.array_push();
+        a.exec(0, fakePlayer, C.Int(0), C.Int(1));
     }
 }

@@ -172,7 +172,7 @@ public class CommandHelperPlugin extends JavaPlugin {
                 }
                 return true;
             } else {
-                player.sendMessage(Color.RED + "You do not have permission to access the repeat command");
+                player.sendMessage(ChatColor.RED + "You do not have permission to access the repeat command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -181,7 +181,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         } else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper")
                 /*&& player.canUseCommand("/alias")*/) {
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                player.sendMessage(Color.RED + "You do not have permission to access the alias command");
+                player.sendMessage(ChatColor.RED + "You do not have permission to access the alias command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -213,7 +213,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         //View all aliases for this user
         } else if(cmd.equalsIgnoreCase("viewalias")){
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                player.sendMessage(Color.RED + "You do not have permission to access the viewalias command");
+                player.sendMessage(ChatColor.RED + "You do not have permission to access the viewalias command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -224,7 +224,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         // Delete alias
         } else if (cmd.equalsIgnoreCase("delalias")) {
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                player.sendMessage(Color.RED + "You do not have permission to access the delalias command");
+                player.sendMessage(ChatColor.RED + "You do not have permission to access the delalias command");
                 commandRunning.remove(player);
                 return true;
             }
