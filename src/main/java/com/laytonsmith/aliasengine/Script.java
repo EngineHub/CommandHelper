@@ -174,9 +174,19 @@ public class Script {
                     if (perms != null) {
                         perm = perms.hasPermission(player.getName(), "ch.func.use." + f.getName())
                                 || perms.hasPermission(player.getName(), "commandhelper.func.use." + f.getName());
-                        if (label != null && (perms.hasPermission(player.getName(), "ch.alias." + label))
-                                || perms.hasPermission(player.getName(), "commandhelper.alias." + label)) {
-                            perm = true;
+                        if(label != null && label.startsWith("~")){
+                            String[]groups = label.substring(1).split("/");
+                            for(String group : groups){
+                                if(perms.inGroup(player.getName(), group)){
+                                    perm = true;
+                                    break;
+                                }
+                            }
+                        } else {
+                            if (label != null && (perms.hasPermission(player.getName(), "ch.alias." + label))
+                                    || perms.hasPermission(player.getName(), "commandhelper.alias." + label)) {
+                                perm = true;
+                            }
                         }
                     } else {
                         perm = true;

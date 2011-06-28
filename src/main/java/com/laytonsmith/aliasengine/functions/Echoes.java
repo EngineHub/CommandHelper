@@ -5,6 +5,7 @@
 
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.CancelCommandException;
@@ -14,6 +15,7 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Static;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;
+import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
 /**
@@ -33,7 +35,8 @@ public class Echoes {
             if(args.length == 0){
                 throw new CancelCommandException("");
             } else if(args.length == 1){
-                throw new CancelCommandException(args[0].val());
+                Static.SendMessage(p, args[0].val());
+                throw new CancelCommandException("");
             } else{
                 return null;
             }
@@ -76,13 +79,14 @@ public class Echoes {
             for(int i = 0; i < args.length; i++){
                 b.append(args[i].val());
             }
-            int start = 0;
-            String s = b.toString();
-            while(true){
-                if(start >= s.length()) break;
-                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
-                start += 100;
-            }
+            Static.SendMessage(p, b.toString());
+//            int start = 0;
+//            String s = b.toString();
+//            while(true){
+//                if(start >= s.length()) break;
+//                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
+//                start += 100;
+//            }
             return new CVoid(line_num);
         }
 
@@ -130,13 +134,14 @@ public class Echoes {
             for(int i = 1; i < args.length; i++){
                 b.append(args[i].val());
             }
-            int start = 0;
-            String s = b.toString();
-            while(true){
-                if(start >= s.length()) break;
-                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
-                start += 100;
-            }
+            Static.SendMessage(p, b.toString());
+//            int start = 0;
+//            String s = b.toString();
+//            while(true){
+//                if(start >= s.length()) break;
+//                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
+//                start += 100;
+//            }
             return new CVoid(line_num);
         }
 
@@ -214,8 +219,14 @@ public class Echoes {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            p.chat(args[0].val());
+        public Construct exec(int line_num, final Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.SendMessage(new LineCallback() {
+
+                public void run(String line) {
+                    p.chat(line);
+                }
+            }, args[0].val());
+
             return new CVoid(line_num);
         }
 
@@ -271,7 +282,14 @@ public class Echoes {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            p.getServer().getPlayer(args[0].val()).chat(args[1].val());
+            final Player player = p.getServer().getPlayer(args[0].val());
+            Static.SendMessage(new LineCallback() {
+
+                public void run(String line) {
+                    player.chat(line);
+                }
+            }, args[1].val());
+            
             return new CVoid(line_num);
         }
         public Boolean runAsync(){
@@ -312,7 +330,13 @@ public class Echoes {
             if(args[0] instanceof CNull){
                 throw new ConfigRuntimeException("Trying to broadcast null won't work");
             }
-            p.getServer().broadcastMessage(args[0].val());
+            final Server server = p.getServer();
+            Static.SendMessage(new LineCallback() {
+
+                public void run(String line) {
+                    server.broadcastMessage(line);
+                }
+            }, args[0].val());
             return new CVoid(line_num);
         }
         public Boolean runAsync(){

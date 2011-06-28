@@ -14,6 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+import org.bukkit.ChatColor;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -28,6 +29,8 @@ public class Main {
     static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
 
     public static void main(String[] args) throws Exception {
+        System.out.println(ChatColor.RED);
+        System.exit(0);
         PluginDescriptionFile me = loadSelf();
         try {
             Static.getPreferences().init(new File("CommandHelper/preferences.txt"));

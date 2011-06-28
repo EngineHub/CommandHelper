@@ -13,6 +13,7 @@ import com.laytonsmith.aliasengine.Constructs.Token.TType;
 import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.functions.FunctionList;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
 
@@ -138,6 +139,8 @@ public class MScriptCompiler {
                         buf.append("\\");
                     } else if (c2 == '\'') {
                         buf.append("'");
+                    } else if(c2 == 'n'){
+                        buf.append("\n");
                     } else {
                         //Since we might expand this list later, don't let them
                         //use unescaped backslashes
@@ -417,7 +420,11 @@ public class MScriptCompiler {
                 }
                 parens--;
                 parents.pop();
-                tree = parents.peek();
+                try{
+                    tree = parents.peek();
+                } catch(EmptyStackException e){
+                    throw new ConfigCompileException("Unexpected end parenthesis", t.line_num);
+                }
             } else if (t.type.equals(TType.COMMA)) {
                 continue;
             }

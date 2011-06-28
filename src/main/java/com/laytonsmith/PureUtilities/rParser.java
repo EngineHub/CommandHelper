@@ -18,9 +18,9 @@ public class rParser {
      * Finds the last color sequence used in the string
      */
     public static String lastColor(String findColor) {
-        int i = findColor.lastIndexOf('?');
+        int i = findColor.lastIndexOf('§');
         if (i != -1 && i != findColor.length() - 1) {
-            return "?" + findColor.charAt(i + 1);
+            return "§" + findColor.charAt(i + 1);
         } else {
             return "";
         }
