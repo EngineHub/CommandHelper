@@ -134,6 +134,7 @@ public class StringHandling {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
+                String s = file_get_contents(args[0].val());
                 return new CString(file_get_contents(args[0].val()), line_num);
             } catch (Exception ex) {
                 throw new ConfigRuntimeException(ChatColor.RED + "File could not be read in.");

@@ -117,11 +117,11 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[0] instanceof CArray){
+            if(args[0] instanceof CArray && args[1] instanceof CInt){
                 ((CArray)args[0]).set((int)((CInt)args[1]).getInt(), args[2]);
                 return new CVoid(line_num);
             }
-            throw new CancelCommandException("Argument 1 of array_set must be an array");
+            throw new CancelCommandException("Argument 1 of array_set must be an array, and argument 2 must be an integer");
         }
 
         public String docs() {

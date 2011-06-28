@@ -9,11 +9,13 @@ import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.Preferences.Type;
+import com.laytonsmith.PureUtilities.rParser;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
 import org.bukkit.Server;
+import org.bukkit.entity.Player;
 
 /**
  * This class contains several static methods to get various objects that really should be static in the first
@@ -277,5 +279,23 @@ public class Static {
                 }
             }
         }
+    }
+    
+    /**
+     * This function sends a message to the player. It is useful to use this function because:
+     * It handles newlines for you. It handles wordwrapping for you. It handles encoding for
+     * you.
+     * @param p
+     * @param msg 
+     */
+    public static void SendMessage(Player p, String msg){
+        String [] newlines = msg.split("\n");
+        for(String line : newlines){
+            String [] arr = rParser.wordWrap(line);
+            for(String toMsg : arr){
+                p.sendMessage(toMsg);
+            }
+        }
+        
     }
 }

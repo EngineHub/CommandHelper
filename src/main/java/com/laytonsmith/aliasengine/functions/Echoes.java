@@ -8,6 +8,7 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.CancelCommandException;
+import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Static;
@@ -308,6 +309,9 @@ public class Echoes {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args[0] instanceof CNull){
+                throw new ConfigRuntimeException("Trying to broadcast null won't work");
+            }
             p.getServer().broadcastMessage(args[0].val());
             return new CVoid(line_num);
         }

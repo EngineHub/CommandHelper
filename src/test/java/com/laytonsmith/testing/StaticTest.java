@@ -4,7 +4,9 @@
  */
 package com.laytonsmith.testing;
 
+import org.bukkit.entity.Player;
 import com.laytonsmith.aliasengine.CancelCommandException;
+import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
@@ -12,6 +14,10 @@ import com.laytonsmith.aliasengine.Version;
 import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
 import com.laytonsmith.aliasengine.functions.Function;
 import java.util.Arrays;
+import org.bukkit.Server;
+import org.bukkit.World;
+import org.mockito.Mock;
+import org.mockito.Mockito;
 import static org.junit.Assert.*;
 /**
  * 
@@ -24,6 +30,11 @@ public class StaticTest {
      * @param f 
      */
     public static void TestBoilerplate(Function f, String name){
+        Player fakePlayer = Mockito.mock(Player.class);
+        Server fakeServer = Mockito.mock(Server.class);
+        World fakeWorld = Mockito.mock(World.class);
+        Mockito.when(fakePlayer.getServer()).thenReturn(fakeServer);
+        Mockito.when(fakePlayer.getWorld()).thenReturn(fakeWorld);
         System.out.println(name);
         //make sure that these functions don't throw an exception. Any other results
         //are fine
@@ -54,6 +65,36 @@ public class StaticTest {
         if(f.numArgs().length == 0){
             fail("numArgs must return an Integer array with more than zero values");
         }
+        //See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
+        //keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try
+        //strings, numbers, arrays, and nulls
+        for(Integer i : f.numArgs()){
+            if(i == Integer.MAX_VALUE){
+                //er.. let's just try with 100...
+                i = 100;
+            }
+            Construct[] con = new Construct[i];
+            for(int z = 0; z < 4; z++){
+                for(int a = 0; a < i; a++){
+                    switch(z){
+                        case 0:
+                            con[a] = C.onstruct("hi"); break;
+                        case 1:
+                            con[a] = C.onstruct(1); break;
+                        case 2:
+                            con[a] = C.Array(C.onstruct("hi"), C.onstruct(1)); break;
+                        case 3:
+                            con[a] = C.Null(); break;
+                    }
+                }
+                try{
+                    f.exec(0, fakePlayer, con);
+                } catch(CancelCommandException e){
+                } catch(ConfigRuntimeException e){                
+                }
+            }
+        }
+        
         
         //now the only function left to test is exec. This cannot be abstracted, unfortunately.
     }

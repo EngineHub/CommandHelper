@@ -65,7 +65,7 @@ public class Script {
         return b.toString();
     }
 
-    public Script(List<Token> left, List<Token> right) throws ConfigCompileException {
+    public Script(List<Token> left, List<Token> right){
         this.left = left;
         this.fullRight = right;
         this.left_vars = new ArrayList<Variable>();
@@ -299,6 +299,12 @@ public class Script {
                         if(args.size() <= cleft.size()){
                             return true;
                         } else {
+                            Construct fin = cleft.get(cleft.size() - 1);
+                            if(fin instanceof Variable){
+                                if(((Variable)fin).final_var){
+                                    return true;
+                                }
+                            }
                             return false;
                         }
                     }
