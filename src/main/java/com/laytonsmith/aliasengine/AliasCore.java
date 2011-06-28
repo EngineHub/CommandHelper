@@ -89,7 +89,10 @@ public class AliasCore {
                                             if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
                                                 Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
                                             }
+                                            //Sometimes bukkit works with one version of this, sometimes with the other. performCommand is prefered, but
+                                            //chat works more often
                                             player.chat(output.trim());
+                                            //player.performCommand(output.trim().substring(1));
                                         }
                                     }
                                 } catch (Throwable e) {

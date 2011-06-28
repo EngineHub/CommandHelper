@@ -372,53 +372,20 @@ public class Script {
     public List<Variable> getVariables(String command) {
         String[] cmds = command.split(" ");
         List<String> args = new ArrayList(Arrays.asList(cmds));
-        boolean isAMatch = true;
+
         StringBuilder lastVar = new StringBuilder();
-        int lastJ = 0;
-        try {
-            for (int j = 0; j < cleft.size(); j++) {
-                if (!isAMatch) {
-                    break;
-                }
-                lastJ = j;
-                Construct c = cleft.get(j);
-                String arg = args.get(j);
-                if (c.ctype == ConstructType.COMMAND
-                        || c.ctype == ConstructType.TOKEN
-                        || c.ctype == ConstructType.LITERAL) {
-                    if (!c.val().equals(arg)) {
-                        isAMatch = false;
-                    }
-                }
-                if (j == cleft.size() - 1) {
-                    if (cleft.get(j).ctype == ConstructType.VARIABLE) {
-                        Variable lv = (Variable) cleft.get(j);
-                        if (lv.final_var) {
-                            for (int a = j; a < args.size(); a++) {
-                                if (lastVar.length() == 0) {
-                                    lastVar.append(args.get(a));
-                                } else {
-                                    lastVar.append(" ").append(args.get(a));
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        } catch (IndexOutOfBoundsException e) {
-            if (cleft.get(lastJ).ctype == ConstructType.VARIABLE
-                    && !((Variable) cleft.get(lastJ)).optional) {
-                isAMatch = false;
-            }
-        }
+        
         ArrayList<Variable> vars = new ArrayList<Variable>();
         Variable v = null;
         for (int j = 0; j < cleft.size(); j++) {
             try {
                 if (cleft.get(j).ctype == ConstructType.VARIABLE) {
                     if (((Variable) cleft.get(j)).name.equals("$")) {
+                        for(int k = j; k < args.size(); k++){
+                            lastVar.append(args.get(k).trim()).append(" ");
+                        }
                         v = new Variable(((Variable) cleft.get(j)).name,
-                                lastVar.toString(), 0);
+                                lastVar.toString().trim(), 0);
                     } else {
                         v = new Variable(((Variable) cleft.get(j)).name,
                                 args.get(j), 0);
