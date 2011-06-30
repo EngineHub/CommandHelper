@@ -6,6 +6,7 @@
 package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 
 /**
  *
@@ -19,7 +20,7 @@ public class CDouble extends Construct{
         try{
             val = Double.parseDouble(value);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not cast " + value + " to double");
+            throw new ConfigRuntimeException("Could not cast " + value + " to double", ExceptionType.FormatException, line_num);
         }
     }
 

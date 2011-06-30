@@ -58,7 +58,7 @@ public class AliasCore {
     public boolean alias(String command, final Player player, ArrayList<Script> playerCommands) {
 
         if (scripts == null) {
-            throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded");
+            throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", 0);
         }
 
         boolean match = false;
@@ -89,8 +89,8 @@ public class AliasCore {
                                             if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
                                                 Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
                                             }
-                                            //Sometimes bukkit works with one version of this, sometimes with the other. performCommand is prefered, but
-                                            //chat works more often
+                                            //Sometimes bukkit works with one version of this, sometimes with the other. performCommand would be prefered, but
+                                            //chat works more often, because chat actually triggers a CommandPreprocessEvent, unlike performCommand.
                                             player.chat(output.trim());
                                             //player.performCommand(output.trim().substring(1));
                                         }
@@ -132,6 +132,7 @@ public class AliasCore {
                                                     Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
                                                 }
                                                 player.chat(output.trim());
+                                                //player.performCommand(output.trim().substring(1));
                                             }
                                         }
                                         echoCommand.remove(player.getName());
@@ -154,25 +155,6 @@ public class AliasCore {
             throw new InternalException("An error occured in the CommandHelper plugin: " + e.getMessage() + Arrays.asList(e.getStackTrace()));
         }
         return match;
-//        assert a != null;
-//        if (a == null) {
-//            //apparently we couldn't find the command, so return false
-//            return false;
-//        } else {
-//            //Run all the aliases
-//            a.player = player;
-//            try {
-//                if (a.player != null) {
-//                    echoCommand.add(player.getName());
-//                }
-//                a.run();
-//            } finally {
-//                if (a.player != null) {
-//                    echoCommand.remove(player.getName());
-//                }
-//            }
-//        }
-//        return true;
     }
 
     /**

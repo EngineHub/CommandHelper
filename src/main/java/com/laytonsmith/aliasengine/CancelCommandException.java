@@ -9,7 +9,7 @@ package com.laytonsmith.aliasengine;
  *
  * @author Layton
  */
-public class CancelCommandException extends Exception{
+public class CancelCommandException extends RuntimeException{
     String message;
     public CancelCommandException(String message){
         this.message = message;

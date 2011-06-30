@@ -67,9 +67,9 @@ public class ArrayHandlingTest {
         assertReturn(a.exec(0, fakePlayer, commonArray, C.Int(1), C.String("hi")), C.Void);
 
         //it should affect the 1-index element, but no others
-        assertCEquals(C.onstruct(1), commonArray.get(0));
-        assertCEquals(C.onstruct("hi"), commonArray.get(1));
-        assertCEquals(C.onstruct(3), commonArray.get(2));
+        assertCEquals(C.onstruct(1), commonArray.get(0, 0));
+        assertCEquals(C.onstruct("hi"), commonArray.get(1, 0));
+        assertCEquals(C.onstruct(3), commonArray.get(2, 0));
     }
     
     @Test(expected=Exception.class)
@@ -116,10 +116,10 @@ public class ArrayHandlingTest {
         ArrayHandling.array_push a = new ArrayHandling.array_push();
         TestBoilerplate(a, "array_push");
         assertReturn(a.exec(0, fakePlayer, commonArray, C.onstruct(4)), C.Void);
-        assertCEquals(C.onstruct(1), commonArray.get(0));
-        assertCEquals(C.onstruct(2), commonArray.get(1));
-        assertCEquals(C.onstruct(3), commonArray.get(2));
-        assertCEquals(C.onstruct(4), commonArray.get(3));
+        assertCEquals(C.onstruct(1), commonArray.get(0, 0));
+        assertCEquals(C.onstruct(2), commonArray.get(1, 0));
+        assertCEquals(C.onstruct(3), commonArray.get(2, 0));
+        assertCEquals(C.onstruct(4), commonArray.get(3, 0));
     }
     
     @Test(expected=Exception.class)

@@ -11,6 +11,8 @@ import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.functions.BasicLogic._if;
 import com.laytonsmith.aliasengine.functions.DataHandling._for;
 import com.laytonsmith.aliasengine.functions.DataHandling.foreach;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import com.laytonsmith.aliasengine.functions.Exceptions._try;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
 import com.laytonsmith.aliasengine.functions.IVariableList;
@@ -77,7 +79,12 @@ public class Script {
 
     public void run(final List<Variable> vars, final Player p, final MScriptComplete done) {
         if (!hasBeenCompiled || compilerError) {
-            throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.");
+            int line_num = 0;
+            if(left.size() >= 1){
+                line_num = left.get(0).line_num;
+            }
+            throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.",
+                    null, line_num);
 //            System.err.println("Unable to run command, script not yet compiled, or a compiler error occured for that command.");
 //            p.sendMessage(ChatColor.RED + "Unable to run command, script not yet compiled, or a compiler error occured for that command.");
 //            return;
@@ -99,10 +106,11 @@ public class Script {
                         done.done(b.toString());
                     }
                 } catch (ConfigRuntimeException e) {
-                    p.sendMessage(e.getMessage());
-                    System.out.println(e.getMessage());
+                    p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getLineNum());
+                    System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getLineNum());
                 } catch (CancelCommandException e) {
-                    p.sendMessage(e.getMessage());
+                    //p.sendMessage(e.getMessage());
+                    //The message in the exception is actually empty
                 } catch(LoopBreakException e){
                     p.sendMessage("The break() function must be used inside a for() or foreach() loop");
                 } catch(LoopContinueException e){
@@ -131,7 +139,7 @@ public class Script {
                     try {
                         return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3), vars);
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to for");
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
                 } else if (f instanceof _if) {
                     _if fr = (_if) f;
@@ -139,7 +147,7 @@ public class Script {
                     try {
                         return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null, vars);
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to if");
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
                 } else if (f instanceof foreach) {
                     foreach fe = (foreach) f;
@@ -147,12 +155,12 @@ public class Script {
                     try {
                         return fe.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), vars);
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to foreach");
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
                 } else if (f instanceof eval) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() > 1) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to eval");
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
                     GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val()));
                     StringBuilder b = new StringBuilder();
@@ -163,6 +171,16 @@ public class Script {
                         }
                     }
                     return new CString(b.toString(), 0);
+                } else if(f instanceof _try){
+                    List<GenericTreeNode<Construct>> ch = c.getChildren();
+                    if (ch.size() != 4 && ch.size() != 3) {
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to try", ExceptionType.InsufficientArgumentsException, m.line_num);
+                    }
+                    GenericTreeNode<Construct> fourth = null;
+                    if(ch.size() == 4){
+                        fourth = ch.get(3);
+                    }
+                    return ((_try)f).execs(m.line_num, player, this, vars, ch.get(0), ch.get(1), ch.get(2), fourth);
                 }
                 ArrayList<Construct> args = new ArrayList<Construct>();
                 for (GenericTreeNode<Construct> c2 : c.getChildren()) {
@@ -195,7 +213,8 @@ public class Script {
                         perm = true;
                     }
                     if (!perm) {
-                        throw new CancelCommandException("You do not have permission to use the " + f.getName() + " function.");
+                        throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
+                                ExceptionType.InsufficientPermissionException, m.line_num);
                     }
                 }
                 Object[] a = args.toArray();
@@ -216,7 +235,7 @@ public class Script {
                     if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
                             || ca[i] instanceof CInt || ca[i] instanceof CMap || ca[i] instanceof CNull
                             || ca[i] instanceof CString || ca[i] instanceof CVoid || ca[i] instanceof IVariable)) {
-                        throw new ConfigRuntimeException("Invalid Construct being passed as an argument to a function");
+                        throw new ConfigRuntimeException("Invalid Construct being passed as an argument to a function", null, m.line_num);
                     }
                 }
                 if (f.preResolveVariables()) {

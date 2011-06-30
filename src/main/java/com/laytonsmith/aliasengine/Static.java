@@ -11,7 +11,10 @@ import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.Preferences.Type;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.PureUtilities.rParser;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
@@ -49,10 +52,12 @@ public class Static {
             try {
                 d = Double.parseDouble(c.val());
             } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Expecting a number, but received " + c.val() + " instead");
+                throw new ConfigRuntimeException("Expecting a number, but received " + c.val() + " instead",
+                        ExceptionType.CastException, c.line_num);
             }
         } else {
-            throw new ConfigRuntimeException("Expecting a number, but recieved " + c.val() + " instead");
+            throw new ConfigRuntimeException("Expecting a number, but recieved " + c.val() + " instead",
+                    ExceptionType.CastException, c.line_num);
         }
         return d;
     }
@@ -66,7 +71,8 @@ public class Static {
         try {
             return getNumber(c);
         } catch (ConfigRuntimeException e) {
-            throw new ConfigRuntimeException("Expecting a double, but recieved " + c.val() + " instead");
+            throw new ConfigRuntimeException("Expecting a double, but recieved " + c.val() + " instead",
+                    ExceptionType.CastException, c.line_num);
         }
     }
 
@@ -87,7 +93,8 @@ public class Static {
             try{
                 i = Integer.parseInt(c.val());
             } catch(NumberFormatException e){
-                throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead");
+                throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead",
+                        ExceptionType.CastException, c.line_num);
             }
         }
         return i;
@@ -253,6 +260,10 @@ public class Static {
         }
         return com.sk89q.commandhelper.CommandHelperPlugin.prefs;
     }
+    
+    public static WorldEditPlugin getWorldEditPlugin(){
+        return CommandHelperPlugin.wep;
+    }
 
     /**
      * Given a string input, creates and returns a Construct of the appropriate
@@ -308,10 +319,13 @@ public class Static {
      * @param p
      * @param msg 
      */
-    public static void SendMessage(final Player p, String msg){
+    public static void SendMessage(final Player p, String msg, final int line_num){
         SendMessage(new LineCallback() {
 
             public void run(String line) {
+                if(!p.isOnline()){
+                    throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num);
+                }
                 p.sendMessage(line);
             }
         }, msg);

@@ -6,6 +6,7 @@
 package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 
 /**
  *
@@ -18,7 +19,7 @@ public class CInt extends Construct{
         try{
             val = Long.parseLong(value);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not parse " + value + " as an integer");
+            throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, line_num);
         }
     }
 

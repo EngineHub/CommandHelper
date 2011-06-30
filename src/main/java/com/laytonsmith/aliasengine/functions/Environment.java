@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -40,6 +41,10 @@ public class Environment {
                     + " y is the meta data for the block. All blocks will return in this format, but blocks"
                     + " that don't have meta data normally will return 0 in y.";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -63,14 +68,15 @@ public class Environment {
                 if(args[0] instanceof CArray){
                     CArray ca = (CArray)args[0];
                     if(ca.size() == 3){
-                        x = (int)Static.getInt(ca.get(0));
-                        y = (int)Static.getInt(ca.get(1));
-                        z = (int)Static.getInt(ca.get(2));
+                        x = (int)Static.getInt(ca.get(0, line_num));
+                        y = (int)Static.getInt(ca.get(1, line_num));
+                        z = (int)Static.getInt(ca.get(2, line_num));
                     } else {
-                        throw new CancelCommandException("get_block_at expects param 1 to be an array with 3 arguments");
+                        throw new ConfigRuntimeException("get_block_at expects the array at param 1 to have 3 arguments", ExceptionType.LengthException,
+                                line_num);
                     }
                 } else {
-                    throw new CancelCommandException("get_block_at expects param 1 to be an array");
+                    throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, line_num);
                 }
             } else {
                 x = (int)Static.getInt(args[0]);
@@ -102,6 +108,10 @@ public class Environment {
                             + " be a blocktype identifier similar to the type returned from get_block_at, except if the meta"
                             + " value is not specified, 0 is used.";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.FormatException};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -125,11 +135,12 @@ public class Environment {
             if(args.length == 2 && args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
                 if(ca.size() != 3){
-                    throw new CancelCommandException("set_block_at expects the parameter 1 to be an array with 3 elements.");
+                    throw new ConfigRuntimeException("set_block_at expects the parameter 1 to be an array with 3 elements.", ExceptionType.LengthException,
+                            line_num);
                 }
-                x = (int)Static.getInt(ca.get(0));
-                y = (int)Static.getInt(ca.get(1));
-                z = (int)Static.getInt(ca.get(2));
+                x = (int)Static.getInt(ca.get(0, line_num));
+                y = (int)Static.getInt(ca.get(1, line_num));
+                z = (int)Static.getInt(ca.get(2, line_num));
                 id = args[1].val();
                 
             } else {
@@ -147,7 +158,8 @@ public class Environment {
                 Character c = id.charAt(i);
                 if(!inMeta){
                     if(!Character.isDigit(c) && c != ':'){
-                        throw new CancelCommandException("id must be formatted as such: 'x:y' where x and y are integers");
+                        throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers", ExceptionType.FormatException,
+                                line_num);
                     }
                     if(c == ':'){
                         inMeta = true;

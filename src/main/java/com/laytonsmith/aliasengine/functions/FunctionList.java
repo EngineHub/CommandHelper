@@ -68,6 +68,10 @@ public class FunctionList {
             }
         }
         
+        if((Boolean)com.laytonsmith.aliasengine.Static.getPreferences().getPreference("debug-mode")){
+            System.out.println("CommandHelper: Loaded " + functions.size() + " function" + (functions.size()==1?"":"s"));
+        }
+        
         
 
         //Now pull all the jars from plugins/CommandHelper/functions

@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.util.Random;
 import org.bukkit.entity.Player;
 
@@ -39,6 +40,10 @@ public class Math {
             } else {
                 return new CInt((int)tally, line_num);
             }
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {
@@ -83,6 +88,10 @@ public class Math {
                 return new CInt((int)tally, line_num);
             }
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public String docs() {
             return "mixed {var1, [var2...]} Subtracts the arguments from left to right, and returns either a double or an integer";
@@ -125,6 +134,10 @@ public class Math {
             } else {
                 return new CInt((int)tally, line_num);
             }
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {
@@ -169,6 +182,10 @@ public class Math {
                 return new CDouble(tally, line_num);
             }
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public String docs() {
             return "mixed {var1, [var2...]} Divides the arguments from left to right, and returns either a double or an integer";
@@ -207,6 +224,9 @@ public class Math {
             return new CInt(arg1 % arg2, line_num);
         }
         
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public String docs() {
             return "int {x, n} Returns x modulo n";
@@ -247,6 +267,10 @@ public class Math {
 
         public String docs() {
             return "double {x, n} Returns x to the power of n";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -291,12 +315,16 @@ public class Math {
                 varList.set(v);
                 return v;
             }
-            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar");
+            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", ExceptionType.CastException, line_num);
         }
 
         public String docs() {
             return "ivar {var} Adds 1 to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
                     + " returns the ivar.";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -343,12 +371,16 @@ public class Math {
                 varList.set(v);
                 return v;
             }
-            throw new ConfigRuntimeException("dec expects argument 1 to be an ivar");
+            throw new ConfigRuntimeException("dec expects argument 1 to be an ivar", ExceptionType.CastException, line_num);
         }
 
         public String docs() {
             return "ivar {var} Subtracts 1 to var, and stores the new value. Equivalent to --var in other languages. Expects ivar to be a variable, then"
                     + " returns the ivar.";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -386,6 +418,10 @@ public class Math {
             return "int {min/max, [max]} Returns a random number from 0 to max, or min to max, depending on usage. Max is exclusive. Min must"
                     + " be less than max, and both numbers must be >= 0";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.RangeException};
+        }
 
         public boolean isRestricted() {
             return false;
@@ -411,7 +447,8 @@ public class Math {
                 max = Static.getInt(args[1]);
             }
             if(max > Integer.MAX_VALUE || min > Integer.MAX_VALUE){
-                throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE);
+                throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE, ExceptionType.RangeException,
+                        line_num);
             }
             int i = r.nextInt((int)(max - min)) + ((int)min);
             

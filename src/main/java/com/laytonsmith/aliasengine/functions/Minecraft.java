@@ -12,6 +12,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.util.List;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -68,6 +69,10 @@ public class Minecraft {
             return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
                     + " simply returns that number";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public boolean isRestricted() {
             return false;
@@ -102,6 +107,10 @@ public class Minecraft {
 
         public String docs() {
             return "array {} Returns the names of the worlds available in this server";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
         }
 
         public boolean isRestricted() {
@@ -151,6 +160,10 @@ public class Minecraft {
                     + " SHEEP:COLOR, where COLOR is any of the values that are allowed in the color() function. COLOR defaults to white if not"
                     + " specified.";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -188,16 +201,20 @@ public class Minecraft {
                 qty = (int) Static.getInt(args[1]);
             }
             if(qty > 50){
-                throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?");
+                throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?", ExceptionType.RangeException, line_num);
             }
             Location l = p.getLocation();
             if (args.length > 2) {
                 if (args[2] instanceof CArray) {
                     CArray ca = (CArray) args[2];
-                    l = new Location(p.getWorld(), Static.getNumber(ca.get(0)),
-                            Static.getNumber(ca.get(1)), Static.getNumber(ca.get(2)));
+                    if(ca.size() == 3){
+                        l = new Location(p.getWorld(), Static.getNumber(ca.get(0, line_num)),
+                                Static.getNumber(ca.get(1, line_num)), Static.getNumber(ca.get(2, line_num)));
+                    } else {
+                        throw new ConfigRuntimeException("Expected argument 3 to be an array with 3 items", ExceptionType.LengthException, line_num);
+                    }
                 } else {
-                    throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array");
+                    throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array", ExceptionType.CastException, line_num);
                 }
             }
             Class mobType = null;
@@ -244,7 +261,7 @@ public class Minecraft {
                         break;
                 }                
             } catch (IllegalArgumentException e) {
-                throw new ConfigRuntimeException("No mob of type " + mob + " exists");            
+                throw new ConfigRuntimeException("No mob of type " + mob + " exists", ExceptionType.FormatException, line_num);            
             }
             for(int i = 0; i < qty; i++){
                 Entity e = p.getWorld().spawn(l, mobType);
@@ -253,7 +270,7 @@ public class Minecraft {
                     try{
                     s.setColor(DyeColor.valueOf(sheepColor.toUpperCase()));
                     } catch(IllegalArgumentException f){
-                        throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color");
+                        throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color", ExceptionType.FormatException, line_num);
                     }
                 }
             }

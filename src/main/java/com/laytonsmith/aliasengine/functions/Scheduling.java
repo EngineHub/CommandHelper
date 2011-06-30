@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import org.bukkit.entity.Player;
 
@@ -34,6 +35,10 @@ public class Scheduling {
         public String docs() {
             return "int {} Returns the current unix time stamp, in milliseconds. The resolution of this is not guaranteed to be extremely accurate. If "
                     + "you need extreme accuracy, use nano_time()";
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
         }
 
         public boolean isRestricted() {
@@ -73,6 +78,10 @@ public class Scheduling {
         public String docs() {
             return "int {} Returns an arbitrary number based on the most accurate clock available on this system. Only useful when compared to other calls"
                     + " to nano_time(). The return is in nano seconds. See the Java API on System.nanoTime() for more information on the usage of this function.";
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
         }
 
         public boolean isRestricted() {
@@ -114,6 +123,10 @@ public class Scheduling {
                     + " Seconds may be a double value, so 0.5 would be half a second."
                     + " PLEASE NOTE: Sleep times are NOT very accurate, and should not be relied on for preciseness.";
         }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -132,7 +145,7 @@ public class Scheduling {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (Thread.currentThread().getName().equals("Server thread")) {
-                throw new ConfigRuntimeException("sleep() cannot be run in the main server thread");
+                throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", null, line_num);
             }
             Construct x = args[0];
             double time = Static.getNumber(x);
@@ -143,7 +156,8 @@ public class Scheduling {
                 } catch (InterruptedException ex) {
                 }
             } else {
-                throw new ConfigRuntimeException("The value passed to sleep must be less than the server defined value of " + i + " seconds or less.");
+                throw new ConfigRuntimeException("The value passed to sleep must be less than the server defined value of " + i + " seconds or less.", 
+                        ExceptionType.RangeException, line_num);
             }
             return new CVoid(line_num);
         }

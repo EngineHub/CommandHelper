@@ -6,6 +6,7 @@
 package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -46,11 +47,11 @@ public class CArray extends Construct{
         regenValue();
     }
 
-    public Construct get(int index){
+    public Construct get(int index, int line_num){
         try{
             return array.get(index);
         } catch(IndexOutOfBoundsException e){
-            throw new ConfigRuntimeException("The element at index " + index + " does not exist");
+            throw new ConfigRuntimeException("The element at index " + index + " does not exist", ExceptionType.IndexOverflowException, line_num);
         }
     }
     

@@ -6,9 +6,12 @@ package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
@@ -36,6 +39,10 @@ public class Persistance {
             return "void {key, value} Allows you to store a value, which can then be retrieved later. key must be a string containing"
                     + " only letters, numbers, underscores.";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.FormatException};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -57,10 +64,12 @@ public class Persistance {
             for(int i = 0; i < key.length(); i++){
                 Character c = key.charAt(i);
                 if(c != '_' && !Character.isLetterOrDigit(c)){
-                    throw new CancelCommandException("Param 1 in store_value must only contain letters, digits, or underscores.");
+                    throw new ConfigRuntimeException("Param 1 in store_value must only contain letters, digits, or underscores.",
+                            ExceptionType.FormatException, line_num);
                 }
             }
-            com.laytonsmith.aliasengine.Static.getPersistance().setValue(new String[]{"commandhelper", "function", "storage", key}, value);
+            Static.getPersistance().setValue(new String[]{"commandhelper", "function", "storage", key}, value);
+            Static.getPersistance().setValue(new String[]{}, null);
             try {
                 com.laytonsmith.aliasengine.Static.getPersistance().save();
             } catch (Exception ex) {
@@ -91,6 +100,10 @@ public class Persistance {
                     + " is returned. On a more detailed note: If the value stored in the persistance database is not actually a construct,"
                     + " then null is also returned.";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -107,7 +120,7 @@ public class Persistance {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
-            Object o = com.laytonsmith.aliasengine.Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()});
+            Object o = Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()});
             if(o == null){
                 return new CNull(line_num);
             }
@@ -120,6 +133,48 @@ public class Persistance {
         public Boolean runAsync(){
             //Because we do IO
             return true;
+        }
+        
+    }
+    
+    public static class has_value implements Function{
+
+        public String getName() {
+            return "has_value";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {key} Returns whether or not there is data stored at the specified key in the Persistance database.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return true;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(Static.getPersistance().isKeySet(new String[]{"commandhelper", "function", "storage", args[0].val()}), line_num);
         }
         
     }

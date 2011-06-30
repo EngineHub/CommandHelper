@@ -4,13 +4,17 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -57,6 +61,7 @@ public class DocGen {
                     + "Turing Complete language [http://en.wikipedia.org/wiki/Turing_Complete].\n"
                     + "There are several functions defined, and they are grouped into \"classes\".");
         }
+
         for (Map.Entry<Class, ArrayList<Function>> entry : functionlist.entrySet()) {
             Class apiClass = entry.getKey();
             String className = apiClass.getName().split("\\.")[apiClass.getName().split("\\.").length - 1];
@@ -93,8 +98,9 @@ public class DocGen {
                                     "|-\n" +
                                     "! scope=\"col\" width=\"6%\" | Function Name\n" + 
                                     "! scope=\"col\" width=\"5%\" | Returns\n" + 
-                                    "! scope=\"col\" width=\"15%\" | Arguments\n" + 
-                                    "! scope=\"col\" width=\"66%\" | Description\n" +
+                                    "! scope=\"col\" width=\"10%\" | Arguments\n" + 
+                                    "! scope=\"col\" width=\"10%\" | Throws\n" +
+                                    "! scope=\"col\" width=\"61%\" | Description\n" +
                                     "! scope=\"col\" width=\"3%\" | Since\n" + 
                                     "! scope=\"col\" width=\"5%\" | Restricted");
             } else if(type.equals("text")){
@@ -113,6 +119,19 @@ public class DocGen {
                 String desc = null;
                 String restricted = f.isRestricted()?"<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>":
                         "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
+                StringBuilder thrown = new StringBuilder();
+                if(f.thrown() != null){
+                    List thrownList = Arrays.asList(f.thrown());
+                    for(int i = 0; i < thrownList.size(); i++){
+                        ExceptionType t = (ExceptionType)thrownList.get(i);
+                        if(i == 0){
+                            thrown.append(t.toString());
+                        } else {
+                            thrown.append("<br />\n").append(t.toString());
+                        }
+                    }
+                }
+                
                 String since = f.since();
                 Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
                 Matcher m = p.matcher(doc);
@@ -124,10 +143,13 @@ public class DocGen {
                 if(type.equals("html")){
                     System.out.println("<tr><td>" + ret + "</td><td>" + args + "</td><td>" + desc + "</td><td>" + since + "</td><td>" + restricted + "</td></tr>\n");
                 } else if(type.equals("wiki")){
+                    //Turn args into a prettified version
+                    args = args.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
                     System.out.println("|-\n"
                             + "! scope=\"row\" | [[CommandHelper/API/" + f.getName() + "|" + f.getName() + "]]\n"
                             + "| " + ret + "\n"
                             + "| " + args + "\n"
+                            + "| " + thrown.toString() + "\n"
                             + "| " + desc + "\n"
                             + "| " + since + "\n"
                             + "| " + restricted);
@@ -159,4 +181,5 @@ public class DocGen {
                     + " plugin itself!''");
         }
     }
+
 }

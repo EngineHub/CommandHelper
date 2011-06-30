@@ -14,7 +14,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.bukkit.ChatColor;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
@@ -29,8 +28,7 @@ public class Main {
     static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
 
     public static void main(String[] args) throws Exception {
-        System.out.println(ChatColor.RED);
-        System.exit(0);
+        System.out.println("Running with arguments: " + Arrays.asList(args));
         PluginDescriptionFile me = loadSelf();
         try {
             Static.getPreferences().init(new File("CommandHelper/preferences.txt"));
@@ -128,7 +126,7 @@ public class Main {
     private static PluginDescriptionFile loadSelf() throws InvalidPluginException, IOException, InvalidDescriptionException{
         PluginDescriptionFile description = null;
         System.out.println(new File(".").getAbsolutePath());
-        File file = new File("./CommandHelper.jar");
+        File file = new File("./target/commandhelper-3.1.2-SNAPSHOT.jar");
         if (!file.exists()) {
             throw new InvalidPluginException(new FileNotFoundException(String.format("%s does not exist", file.getPath())));
         }

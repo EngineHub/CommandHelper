@@ -9,6 +9,8 @@ import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
+import com.laytonsmith.aliasengine.Constructs.CNull;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
@@ -18,6 +20,8 @@ import com.laytonsmith.aliasengine.LoopContinueException;
 import com.laytonsmith.aliasengine.RunnableAlias;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
 
@@ -41,6 +45,10 @@ public class DataHandling {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CArray(line_num, args);
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
         }
 
         public String docs() {
@@ -80,7 +88,11 @@ public class DataHandling {
                 varList.set(v);
                 return v;
             }
-            throw new ConfigRuntimeException("assign only accepts an ivariable as the first argument");
+            throw new ConfigRuntimeException("assign only accepts an ivariable as the first argument", ExceptionType.CastException, line_num);
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {
@@ -120,13 +132,13 @@ public class DataHandling {
                 GenericTreeNode<Construct> runnable, List<Variable> vars) throws CancelCommandException{
             Construct counter = parent.eval(assign, p, vars);
             if(!(counter instanceof IVariable)){
-                throw new ConfigRuntimeException("First parameter of for must be an ivariable");
+                throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, line_num);
             }
             int _continue = 0;
             while(true){
                 Construct cond = parent.eval(condition, p, vars);
                 if(!(cond instanceof CBoolean)){
-                    throw new ConfigRuntimeException("Second parameter of for must return a boolean");
+                    throw new ConfigRuntimeException("Second parameter of for must return a boolean", ExceptionType.CastException, line_num);
                 }
                 CBoolean bcond = ((CBoolean) cond);
                 if(bcond.getBoolean() == false){
@@ -152,6 +164,9 @@ public class DataHandling {
                 parent.eval(expression, p, vars);
             }
             return new CVoid(line_num);
+        }
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return null;
@@ -212,7 +227,7 @@ public class DataHandling {
                     CArray one = (CArray)arr;
                     IVariable two = (IVariable)iv;
                     for(int i = 0; i < one.size(); i++){
-                        varList.set(new IVariable(two.getName(), one.get(i), line_num));
+                        varList.set(new IVariable(two.getName(), one.get(i, line_num), line_num));
                         try{
                         that.eval(code, p, vars);
                         } catch(LoopBreakException e){
@@ -227,13 +242,17 @@ public class DataHandling {
                         }
                     }
                 } else {
-                    throw new CancelCommandException("Parameter 2 of foreach must be an ivariable");
+                    throw new ConfigRuntimeException("Parameter 2 of foreach must be an ivariable", ExceptionType.CastException, line_num);
                 }
             } else {
-                throw new CancelCommandException("Parameter 1 of foreach must be an array");
+                throw new ConfigRuntimeException("Parameter 1 of foreach must be an array", ExceptionType.CastException, line_num);
             }
             
             return new CVoid(line_num);
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {
@@ -275,6 +294,10 @@ public class DataHandling {
                     + " a loop embedded in a loop, and you wanted to break in both loops, you would call break(2). If this function is called outside a loop"
                     + " (or the number specified would cause the break to travel up further than any loops are defined), the function will fail. If no"
                     + " argument is specified, it is the same as calling break(1).";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
         }
 
         public boolean isRestricted() {
@@ -320,6 +343,10 @@ public class DataHandling {
                     + " is called outside of a loop, the command will fail. If int is set, it will skip 'int' repetitions. If no argument is specified,"
                     + " 1 is used.";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
+        }
 
         public boolean isRestricted() {
             return false;
@@ -348,6 +375,274 @@ public class DataHandling {
         }
         
     }
+    
+    @api public static class is_string implements Function{
+
+        public String getName() {
+            return "is_string";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {item} Returns whether or not the item is a string. Everything but arrays can be used as strings.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(!(args[0] instanceof CArray), line_num);
+        }
+        
+    }
+    
+    @api public static class is_array implements Function{
+
+        public String getName() {
+            return "is_array";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {item} Returns whether or not the item is an array";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CArray, line_num);
+        }
+        
+    }
+    
+    @api public static class is_double implements Function{
+
+        public String getName() {
+            return "is_double";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {item} Returns whether or not the given item is a double. Note that a numeric string will return true, and so"
+                    + " will integers.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            boolean b = true;
+            try{
+                Static.getDouble(args[0]);
+            } catch(ConfigRuntimeException e){
+                b = false;
+            }
+            return new CBoolean(b, line_num);
+        }
+        
+    }
+    
+    @api public static class is_integer implements Function{
+
+        public String getName() {
+            return "is_integer";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {item} Returns whether or not the given item is an integer. Note that numeric strings can be used as integers.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            boolean b = true;
+            try{
+                Static.getInt(args[0]);
+            } catch(ConfigRuntimeException e){
+                b = false;
+            }
+            return new CBoolean(b, line_num);
+        }
+        
+    }
+    
+    @api public static class is_boolean implements Function{
+
+        public String getName() {
+            return "is_boolean";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {item} Returns whether the given item is a boolean. Note that all datatypes can be used as booleans, however"
+                    + " null and arrays always return false. Essentially, this mean that this function ALWAYS returns true. Really, you"
+                    + " probably shouldn't ever use it.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(true, line_num);
+        }
+        
+    }
+    
+    @api public static class is_null implements Function{
+
+        public String getName() {
+            return "is_null";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {item} Returns whether or not the given item is null.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CNull, line_num);
+        }
+        
+    }
+    
     
     
 }

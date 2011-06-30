@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.util.List;
 import org.bukkit.entity.Player;
 
@@ -46,46 +47,11 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            //We need to test differently for each type of data
-            boolean val = false;
-            Construct test = args[0];
-            if(test instanceof CBoolean){
-                val = ((CBoolean)test).getBoolean();
-            } else if(test instanceof CDouble){
-                CDouble ctest = ((CDouble)test);
-                if(ctest.getDouble() > 0 || ctest.getDouble() < 0){
-                    val = true;
-                } else{
-                    val = false;
-                }
-            } else if(test instanceof CInt){
-                CInt ctest = (CInt) test;
-                if(ctest.getInt() > 0 || ctest.getInt() < 0){
-                    val = true;
-                } else {
-                    val = false;
-                }
-            } else if(test instanceof CNull){
-                val = false;
-            } else if(test instanceof CString){
-                if(test.val().equals("")){
-                    val = false;
-                } else {
-                    val = true;
-                }
-            } else if(test instanceof CVoid){
-                val = false;
-            }
-            
-            if(val){
-                return args[1];
-            } else{
-                if(args.length == 3){
-                    return args[2];
-                } else{
-                    return new CVoid(line_num);
-                }
-            }
+            throw new UnsupportedOperationException("That operation is not yet supported");
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {
@@ -139,6 +105,10 @@ public class BasicLogic {
                 return new CBoolean(false, line_num);
             }
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public String docs() {
             return "boolean {var1, var2} Returns true or false if the two arguments are equal";
@@ -176,6 +146,10 @@ public class BasicLogic {
             double arg2 = Static.getNumber(args[1]);
             return new CBoolean(arg1 < arg2, line_num);
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public String docs() {
             return "boolean {var1, var2} Returns the results of a less than operation";
@@ -212,6 +186,10 @@ public class BasicLogic {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
             return new CBoolean(arg1 > arg2, line_num);
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {
@@ -251,6 +229,10 @@ public class BasicLogic {
             double arg2 = Static.getNumber(args[1]);
             return new CBoolean(arg1 <= arg2, line_num);
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public String docs() {
             return "boolean {var1, var2} Returns the result of a less than or equal to operation";
@@ -287,6 +269,10 @@ public class BasicLogic {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
             return new CBoolean(arg1 >= arg2, line_num);
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {
@@ -329,6 +315,10 @@ public class BasicLogic {
             }
             return new CBoolean(true, line_num);
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public String docs() {
             return "boolean {var1, [var2...]} Returns the boolean value of a logical AND across all arguments. Uses lazy determination, so once "
@@ -370,6 +360,10 @@ public class BasicLogic {
             }
             return new CBoolean(false, line_num);
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public String docs() {
             return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy determination, so once an "
@@ -405,6 +399,10 @@ public class BasicLogic {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CBoolean(!Static.getBoolean(args[0]), line_num);
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {

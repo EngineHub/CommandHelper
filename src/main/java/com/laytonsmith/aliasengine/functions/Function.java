@@ -8,6 +8,8 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.util.List;
 import org.bukkit.entity.Player;
 
 /**
@@ -41,6 +43,12 @@ public interface Function {
      * is no documentation for this function yet.
      */
     public String docs();
+    
+    /**
+     * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
+     * @return An array of the exception enums, or null, if the function throws no catchable exceptions.
+     */
+    public ExceptionType[] thrown();
     /**
      * Whether or not a function needs to be checked against the permissions file, if there are possible security concerns
      * with a user compiling, or running this function. If this function returns true, the permissions file will be checked for
@@ -98,5 +106,5 @@ public interface Function {
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(int line_num, Player p, Construct ... args) throws CancelCommandException, ConfigRuntimeException;
+    public Construct exec(int line_num, Player p, Construct ... args) throws ConfigRuntimeException;
 }

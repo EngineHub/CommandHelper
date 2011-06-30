@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -29,23 +30,33 @@ public class Weather {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{1, 3};
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException};
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int x;
             int y;
             int z;
-            if(args[0] instanceof CArray){
-                CArray a = (CArray)args[0];
-                if(a.size() != 3){
-                    throw new ConfigRuntimeException("lightning expects the array to have 3 integers");
+            if(args.length == 1){
+                if(args[0] instanceof CArray){
+                    CArray a = (CArray)args[0];
+                    if(a.size() != 3){
+                        throw new ConfigRuntimeException("lightning expects the array to have 3 integers", ExceptionType.LengthException, line_num);
+                    }
+                    x = (int)Static.getInt(a.get(0, line_num));
+                    y = (int)Static.getInt(a.get(1, line_num));
+                    z = (int)Static.getInt(a.get(2, line_num));
+                } else {
+                    throw new ConfigRuntimeException("lightning expects an array as the one argument", ExceptionType.CastException, line_num);
                 }
-                x = (int)Static.getInt(a.get(0));
-                y = (int)Static.getInt(a.get(1));
-                z = (int)Static.getInt(a.get(2));
             } else {
-                throw new ConfigRuntimeException("lightning expects an array as the one argument");
+                x = (int)Static.getInt(args[0]);
+                y = (int)Static.getInt(args[1]);
+                z = (int)Static.getInt(args[2]);
             }
             p.getWorld().strikeLightning(new Location(p.getWorld(), x, y, z)); 
 //            World w = ((CraftWorld)p.getWorld()).getHandle();
@@ -56,7 +67,7 @@ public class Weather {
         }
 
         public String docs() {
-            return "void {strikeLocArray} Makes lightning strike at the x y z coordinates specified in the array(x, y, z).";
+            return "void {strikeLocArray | x, y, z} Makes lightning strike at the x y z coordinates specified in the array(x, y, z).";
         }
 
         public boolean isRestricted() {
@@ -94,6 +105,10 @@ public class Weather {
 
         public String docs() {
             return "void {isStorming} Creates a storm if isStorming is true, stops a storm if isStorming is false";
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {

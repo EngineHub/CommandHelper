@@ -6,6 +6,7 @@
 package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 
 /**
  *
@@ -39,7 +40,7 @@ public class CBoolean extends Construct{
                 try{
                     val = Boolean.parseBoolean(value);
                 } catch(NumberFormatException g){
-                    throw new ConfigRuntimeException("Could not parse value " + value + " into a Boolean type");
+                    throw new ConfigRuntimeException("Could not parse value " + value + " into a Boolean type", ExceptionType.FormatException, line_num);
                 }
             }
         }

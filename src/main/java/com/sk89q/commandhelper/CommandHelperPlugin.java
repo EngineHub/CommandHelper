@@ -27,6 +27,7 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -41,6 +42,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 /**
@@ -57,6 +59,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     public static Version version;
     public static Preferences prefs;
     public static CommandHelperPlugin self;
+    public static WorldEditPlugin wep;
     /**
      * Listener for the plugin system.
      */
@@ -75,6 +78,10 @@ public class CommandHelperPlugin extends JavaPlugin {
         version = new Version(getDescription().getVersion());
         perms = new PermissionsResolverManager(getConfiguration(), getServer(),
                 getDescription().getName(), logger);
+        Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
+        if(pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin){
+            wep = (WorldEditPlugin)pwep;
+        }
         try {
             File prefsFile = new File("plugins/CommandHelper/preferences.txt");
             Static.getPreferences().init(prefsFile);
@@ -103,6 +110,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     public void onDisable() {
         //free up some memory
         ac = null;
+        wep = null;
     }
     
     /**

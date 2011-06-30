@@ -21,7 +21,8 @@ import java.util.logging.Logger;
  * can be difficult. This class manages, documents, and provides default values, all the
  * while not interfering with changes the user has made, meaning that you are free
  * to add new preferences, or change default values, without fear of changing
- * values that the user has specifically set.
+ * values that the user has specifically set. For sample usage, see
+ * https://gist.github.com/1042094
  * @author Layton Smith
  */
 public class Preferences {

@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
@@ -60,13 +61,14 @@ public class Meta {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
-                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
+                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
+                        ExceptionType.FormatException, line_num);
             }
             String cmd = args[1].val().substring(1);
             if (args[0] instanceof CArray) {
                 CArray u = (CArray) args[0];
                 for (int i = 0; i < u.size(); i++) {
-                    exec(line_num, p, new Construct[]{new CString(u.get(i).val(), line_num), args[1]});
+                    exec(line_num, p, new Construct[]{new CString(u.get(i, line_num).val(), line_num), args[1]});
                 }
                 return new CVoid(line_num);
             }
@@ -88,10 +90,14 @@ public class Meta {
                         p.sendMessage("The player " + m.getName() + " is not online");
                     }
                 } else {
-                    throw new CancelCommandException("The player " + args[0].val() + " is not online");
+                    throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",ExceptionType.PlayerOfflineException, line_num);
                 }
             }
             return new CVoid(line_num);
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
         }
 
         public String docs() {
@@ -133,7 +139,8 @@ public class Meta {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')");
+                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
+                        ExceptionType.FormatException, line_num);
             }
             String cmd = args[0].val().substring(1);
             if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
@@ -146,6 +153,10 @@ public class Meta {
         public String docs() {
             return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
                     + "chat; with a forward slash in front.";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -189,6 +200,10 @@ public class Meta {
         public String docs() {
             return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
+        }
 
         public boolean isRestricted() {
             return false;
@@ -224,6 +239,10 @@ public class Meta {
         public String docs() {
             return "string {script_string} Executes arbitrary MScript. Note that this function is very experimental, and is subject to changing or "
                     + "removal.";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
         }
 
         public boolean isRestricted() {

@@ -13,6 +13,7 @@ import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -35,11 +36,18 @@ public class Echoes {
             if(args.length == 0){
                 throw new CancelCommandException("");
             } else if(args.length == 1){
-                Static.SendMessage(p, args[0].val());
-                throw new CancelCommandException("");
+                try{
+                    Static.SendMessage(p, args[0].val(), line_num);
+                } finally{
+                    throw new CancelCommandException("");
+                }
             } else{
                 return null;
             }
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
         }
 
         public String getName(){ return "die"; }
@@ -79,7 +87,7 @@ public class Echoes {
             for(int i = 0; i < args.length; i++){
                 b.append(args[i].val());
             }
-            Static.SendMessage(p, b.toString());
+            Static.SendMessage(p, b.toString(), line_num);
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){
@@ -88,6 +96,10 @@ public class Echoes {
 //                start += 100;
 //            }
             return new CVoid(line_num);
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
         public String docs() {
@@ -124,17 +136,17 @@ public class Echoes {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
-                throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg");
+                throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, line_num);
             }
             p = p.getServer().getPlayer(args[0].val());
             if(p == null){
-                throw new CancelCommandException("The player " + args[0].val() + " is not online");
+                throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, line_num);
             }
             StringBuilder b = new StringBuilder();
             for(int i = 1; i < args.length; i++){
                 b.append(args[i].val());
             }
-            Static.SendMessage(p, b.toString());
+            Static.SendMessage(p, b.toString(), line_num);
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){
@@ -147,6 +159,9 @@ public class Echoes {
 
         public String docs() {
             return "void {player, msg, [...]} Displays a message on the specified players screen, similar to msg, but targets a specific user.";
+        }
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.InsufficientArgumentsException};
         }
 
         public boolean isRestricted() {
@@ -191,6 +206,10 @@ public class Echoes {
                     + " here is the list of valid colors: BLACK, DARK_BLUE, DARK_GREEN, DARK_AQUA, DARK_RED, DARK_PURPLE, GOLD GRAY, DARK_GRAY,"
                     + " BLUE, GREEN, AQUA, RED, LIGHT_PURPLE, YELLOW, WHITE";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -233,6 +252,10 @@ public class Echoes {
         public String docs() {
             return "void {string} Echoes string to the chat, as if the user simply typed something into the chat bar.";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -265,6 +288,10 @@ public class Echoes {
         public String docs() {
             return "void {player, msg} Sends a chat message to the server, as the given player. Otherwise the same as the chat"
                     + " function";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{};
         }
 
         public boolean isRestricted() {
@@ -311,6 +338,10 @@ public class Echoes {
         public String docs() {
             return "void {message} Broadcasts a message to all players on the server";
         }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
 
         public boolean isRestricted() {
             return true;
@@ -328,7 +359,7 @@ public class Echoes {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
-                throw new ConfigRuntimeException("Trying to broadcast null won't work");
+                throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, line_num);
             }
             final Server server = p.getServer();
             Static.SendMessage(new LineCallback() {
@@ -358,6 +389,10 @@ public class Echoes {
         public String docs() {
             return "void {message, [prefix]} Logs a message to the console. If prefix is true, prepends \"CommandHelper:\""
                     + " to the message. Default is true.";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
