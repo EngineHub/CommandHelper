@@ -150,6 +150,7 @@ public class Exceptions {
                     ex.push(new CNull(line_num));
                     ex.push(new CInt(e.getLineNum(), line_num));
                     ivar.setIval(ex);
+                    varList.set(ivar);
                     that.eval(catchCode, p, vars);
                 } else {
                     throw e;
@@ -177,7 +178,7 @@ public class Exceptions {
 
         public String docs() {
             return "nothing {exceptionType, msg} This function causes an exception to be thrown. If the exception type is null,"
-                    + " it will be uncatchable. exceptionType may be any valid exception type.";
+                    + " it will be uncatchable. Otherwise, exceptionType may be any valid exception type.";
         }
         
         public ExceptionType[] thrown(){

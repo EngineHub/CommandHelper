@@ -124,10 +124,16 @@ public class DocGen {
                     List thrownList = Arrays.asList(f.thrown());
                     for(int i = 0; i < thrownList.size(); i++){
                         ExceptionType t = (ExceptionType)thrownList.get(i);
-                        if(i == 0){
+                        if(type.equals("html") || type.equals("text")){
+                            if(i != 0){
+                                thrown.append((type.equals("html")?"<br />\n":" | "));
+                            }
                             thrown.append(t.toString());
                         } else {
-                            thrown.append("<br />\n").append(t.toString());
+                            if(i != 0){
+                                thrown.append("<br />\n");
+                            }
+                            thrown.append("[[Exceptions#").append(t.toString()).append("|").append(t.toString()).append("]]");
                         }
                     }
                 }
@@ -141,7 +147,7 @@ public class DocGen {
                     desc = m.group(3);
                 }
                 if(type.equals("html")){
-                    System.out.println("<tr><td>" + ret + "</td><td>" + args + "</td><td>" + desc + "</td><td>" + since + "</td><td>" + restricted + "</td></tr>\n");
+                    System.out.println("<tr><td>" + ret + "</td><td>" + args + "</td><td>" + thrown.toString() + "</td><td>" + desc + "</td><td>" + since + "</td><td>" + restricted + "</td></tr>\n");
                 } else if(type.equals("wiki")){
                     //Turn args into a prettified version
                     args = args.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
@@ -155,7 +161,7 @@ public class DocGen {
                             + "| " + restricted);
                    
                 } else if(type.equals("text")){
-                    System.out.println(ret + f.getName() + "(" + args + ")" + "\n\t" + desc + "\n\t" + since + (f.isRestricted()?"\n\tThis function is restricted":
+                    System.out.println(ret + f.getName() + "(" + args + ")" + " {" + thrown.toString() + "}\n\t" + desc + "\n\t" + since + (f.isRestricted()?"\n\tThis function is restricted":
                             "\n\tThis function is not restricted"));
                 }
             }
