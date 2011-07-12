@@ -18,7 +18,6 @@ import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-import sun.java2d.SunGraphicsEnvironment.T1Filter;
 
 /**
  *
@@ -58,7 +57,7 @@ public class MScriptCompiler {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.OPT_VAR_START, "[", line_num));
+                token_list.add(new Token(TType.LSQUARE_BRACKET, "[", line_num));
                 in_opt_var = true;
                 continue;
             }
@@ -79,7 +78,7 @@ public class MScriptCompiler {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.OPT_VAR_END, "]", line_num));
+                token_list.add(new Token(TType.RSQUARE_BRACKET, "]", line_num));
                 in_opt_var = false;
                 continue;
             }
@@ -304,16 +303,35 @@ public class MScriptCompiler {
         Stack<GenericTreeNode> parents = new Stack<GenericTreeNode>();
         Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
         constructCount.push(new AtomicInteger(0));
+        Stack<AtomicInteger> arrayStack = new Stack<AtomicInteger>();
+        arrayStack.add(new AtomicInteger(-1));
         parents.push(tree);
         int parens = 0;
         Token t = null;
         for (int i = 0; i < stream.size(); i++) {
             t = stream.get(i);
             Token prev = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.line_num);
-            if (t.type.equals(TType.OPT_VAR_ASSIGN) || t.type.equals(TType.OPT_VAR_START)
-                    || t.type.equals(TType.OPT_VAR_END)) {
+            
+            //Array notation handling
+            if(t.type.equals(TType.LSQUARE_BRACKET)){                
+                arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
+                continue;
+            } else if(t.type.equals(TType.RSQUARE_BRACKET)){
+                int array = arrayStack.pop().get();
+                int index = array + 1;
+                GenericTreeNode<Construct> myArray = tree.getChildAt(array);
+                GenericTreeNode<Construct> myIndex = tree.getChildAt(index);
+                tree.setChildren(tree.getChildren().subList(0, array));
+                GenericTreeNode<Construct> arrayGet = new GenericTreeNode<Construct>(new CFunction("array_get", t.line_num));
+                arrayGet.addChild(myArray);
+                arrayGet.addChild(myIndex);
+                tree.addChild(arrayGet);
+                constructCount.peek().decrementAndGet();
+            }
+            /*if (t.type.equals(TType.OPT_VAR_ASSIGN) || t.type.equals(TType.LSQUARE_BRACKET)
+                    || t.type.equals(TType.RSQUARE_BRACKET)) {
                 throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
-            } else if (t.type == TType.LIT) {
+            } else */if (t.type == TType.LIT) {
                 tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
@@ -386,7 +404,7 @@ public class MScriptCompiler {
                 }
                 constructCount.peek().set(0);
                 continue;
-            }
+            } 
         }
         if (parens != 0) {
             throw new ConfigCompileException("Mismatched parenthesis", t.line_num);

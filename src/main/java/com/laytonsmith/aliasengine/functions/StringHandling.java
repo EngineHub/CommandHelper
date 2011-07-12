@@ -145,6 +145,8 @@ public class StringHandling {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
+                //Verify this file is not above the craftbukkit directory
+                
                 String s = file_get_contents(args[0].val());
                 return new CString(file_get_contents(args[0].val()), line_num);
             } catch (Exception ex) {

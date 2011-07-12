@@ -224,6 +224,49 @@ public class Meta {
             return null;
         }
     }
+    
+    @api
+    public static class p implements Function{
+
+        public String getName() {
+            return "p";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "Used internally by the compiler.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return Static.resolveConstruct(args[0].val(), line_num);
+        }
+        
+    }
 
     @api
     public static class eval implements Function {

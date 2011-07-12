@@ -498,9 +498,9 @@ public class Script {
                             + " first optional argument, other that other optional arguments with no default", t.line_num);
                 }
             }
-            if (!t.type.equals(TType.OPT_VAR_START)
+            if (!t.type.equals(TType.LSQUARE_BRACKET)
                     && !t.type.equals(TType.OPT_VAR_ASSIGN)
-                    && !t.type.equals(TType.OPT_VAR_END)
+                    && !t.type.equals(TType.RSQUARE_BRACKET)
                     && !t.type.equals(TType.VARIABLE)
                     && !t.type.equals(TType.LIT)
                     && !t.type.equals(TType.COMMAND)
@@ -510,20 +510,20 @@ public class Script {
                 }
             }
             if (last_token.type.equals(TType.COMMAND)) {
-                if (!(t.type.equals(TType.VARIABLE) || t.type.equals(TType.OPT_VAR_START) || t.type.equals(TType.FINAL_VAR)
+                if (!(t.type.equals(TType.VARIABLE) || t.type.equals(TType.LSQUARE_BRACKET) || t.type.equals(TType.FINAL_VAR)
                         || t.type.equals(TType.LIT))) {
                     throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.line_num);
                 }
             }
-            if (last_token.type.equals(TType.OPT_VAR_START)) {
+            if (last_token.type.equals(TType.LSQUARE_BRACKET)) {
                 inside_opt_var = true;
                 if (!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))) {
                     throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num);
                 }
             }
             if (inside_opt_var && t.type.equals(TType.OPT_VAR_ASSIGN)) {
-                if (!((next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) && after_token.type.equals(TType.OPT_VAR_END)
-                        || (next_token.type.equals(TType.OPT_VAR_END)))) {
+                if (!((next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) && after_token.type.equals(TType.RSQUARE_BRACKET)
+                        || (next_token.type.equals(TType.RSQUARE_BRACKET)))) {
                     throw new ConfigCompileException("Unexpected token in optional variable", t.line_num);
                 } else if (next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) {
                     left_vars.get(left_vars.size() - 1).def = next_token.val();
@@ -531,7 +531,7 @@ public class Script {
                     left_vars.get(left_vars.size() - 1).def = "";
                 }
             }
-            if (t.type.equals(TType.OPT_VAR_END)) {
+            if (t.type.equals(TType.RSQUARE_BRACKET)) {
                 if (!inside_opt_var) {
                     throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
                 }
@@ -558,7 +558,7 @@ public class Script {
                 Variable v = new Variable(t.val(), null, t.line_num);
                 v.final_var = true;
                 cleft.add(v);
-            } else if (t.type.equals(TType.OPT_VAR_START)) {
+            } else if (t.type.equals(TType.LSQUARE_BRACKET)) {
                 if (i + 2 < left.size() && left.get(i + 2).type.equals(TType.OPT_VAR_ASSIGN)) {
                     Variable v = new Variable(left.get(i + 1).val(),
                             left.get(i + 3).val(), t.line_num);
