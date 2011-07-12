@@ -106,14 +106,18 @@ public class Persistance {
                 tempData = new HashMap<String, Serializable>();
             }
             Iterator i = data.entrySet().iterator();
+            ArrayList<String> toRemove = new ArrayList<String>();
             while (i.hasNext()) {
                 String key = ((Map.Entry)i.next()).getKey().toString();
                 if(data.get(key) == null){
                     tempData.remove(key);
-                    data.remove(key);
+                    toRemove.add(key);
                 } else{
                     tempData.put(key, data.get(key));
                 }
+            }
+            for(String s : toRemove){
+                data.remove(s);
             }
             FileOutputStream fos = null;
             ObjectOutputStream out = null;

@@ -85,11 +85,19 @@ public class Script {
             }
             throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.",
                     null, line_num);
-//            System.err.println("Unable to run command, script not yet compiled, or a compiler error occured for that command.");
-//            p.sendMessage(ChatColor.RED + "Unable to run command, script not yet compiled, or a compiler error occured for that command.");
-//            return;
         }
-        
+        PermissionsResolverManager perms = Static.getPermissionsResolverManager();
+        String[]groups = label.substring(1).split("/");
+        for(String group : groups){
+            if(group.startsWith("-") && perms.inGroup(p.getName(), group.substring(1))){
+                //negative permission
+                throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
+                        0);
+            } else if(perms.inGroup(p.getName(), group)){
+                //They do have permission.
+                break;
+            }
+        }
 //        final Plugin self = CommandHelperPlugin.self;
 //        Static.getServer().getScheduler().scheduleAsyncDelayedTask(self, new Runnable() {
 
@@ -187,7 +195,7 @@ public class Script {
                     args.add(eval(c2, player, vars));
                 }
                 if (f.isRestricted()) {
-                    boolean perm;
+                    boolean perm = false;
                     PermissionsResolverManager perms = Static.getPermissionsResolverManager();
                     if (perms != null) {
                         perm = perms.hasPermission(player.getName(), "ch.func.use." + f.getName())

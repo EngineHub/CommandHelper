@@ -1,6 +1,7 @@
 name: CommandHelper
 main: com.sk89q.commandhelper.CommandHelperPlugin
 version: "${project.version}"
+depend: [ WorldEdit ]
 commands:
     repeat:
         description: Repeat the last command

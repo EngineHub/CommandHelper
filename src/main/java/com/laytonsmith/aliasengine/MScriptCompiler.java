@@ -298,92 +298,7 @@ public class MScriptCompiler {
         return scripts;
     }
 
-    public static GenericTreeNode<Construct> compile(List<Token> tokenStream) throws ConfigCompileException {
-        List<Token> stream = new ArrayList<Token>();
-        //int size = tokenStream.size();
-        stream = autoconcat(tokenStream);
-//        for (int i = 0; i < size; i++) {
-//            Token t = tokenStream.get(i);
-////            Token t2 = null;
-////            if (i < tokenStream.size() - 1) {
-////                t2 = tokenStream.get(i + 1);
-////            }
-////            Token t3 = null;
-////            if (i < tokenStream.size() - 2) {
-////                t3 = tokenStream.get(i + 2);
-////            }
-//            if (t.type.equals(TType.FUNC_START) || t.type.equals(TType.COMMA)) {
-//                stream.add(t);
-//                int stack = 0;
-//                boolean autoconcat = false;
-//                for (int j = i + 1; j < size; j++) {
-//                    Token lookahead = tokenStream.get(j);
-////                    if(stack == 0){
-////                        Token lookfurther = tokenStream.get(j + 1);
-////                        if(!lookahead.type.equals(TType.FUNC_NAME) && 
-////                                !(lookfurther.type.equals(TType.COMMA) 
-////                                   || lookfurther.type.equals(TType.FUNC_END)
-////                                )
-////                          ){
-////                            autoconcat = true;
-////                        }
-////                    }
-//                    if (lookahead.type.equals(TType.FUNC_NAME)) {
-//                        stack++;
-//                        j++;
-//                    
-//                    } else if (lookahead.type.equals(TType.FUNC_END)) {
-//                        if(stack != 0 && !t.type.equals(TType.FUNC_START)){
-//                            stack--;
-//                        }
-//                    }
-//
-//                    if (stack < 0) {
-//                        try {
-//                            Token lookfurther = tokenStream.get(j + 1);
-//                            if (!autoconcat) {
-//                                if (!lookfurther.type.equals(TType.COMMA) && !lookfurther.type.equals(TType.FUNC_END)) {
-//                                    stream.add(new Token(TType.FUNC_NAME, "sconcat", t.line_num));
-//                                    stream.add(new Token(TType.FUNC_START, "(", t.line_num));
-//                                    autoconcat = true;
-//                                } else {
-//                                    //No concatenation is needed
-//                                    break;
-//                                }
-//                            } else if (autoconcat && (lookfurther.type.equals(TType.COMMA) || lookfurther.type.equals(TType.FUNC_END))) {
-//                                tokenStream.add(j, new Token(TType.FUNC_END, ")", lookahead.line_num));
-//                                size++;
-//                                break;
-//                            }
-//                        } catch (IndexOutOfBoundsException e) {
-//                            throw new ConfigCompileException("You are missing an ending parenthesis", tokenStream.get(j).line_num);
-//                        }
-//                    }
-//
-////                    if(stack == -1){
-////                        //Its a no argument function (or possibly a compiler error,
-////                        //but that will get caught below anyways.
-////                        break;
-////                    }
-//                }
-////                if (!t3.type.equals(TType.COMMA) && !t3.type.equals(TType.FUNC_NAME)) {
-////                    stream.add(new Token(TType.FUNC_NAME, "sconcat", t.line_num));
-////                    stream.add(new Token(TType.FUNC_START, "(", t.line_num));
-////                    stack++;
-////                }
-////            } else if (t.type.equals(TType.FUNC_END)) {
-////                stream.add(t);
-////            } else if (t.type.equals(TType.COMMA)) {
-////                stream.add(t);
-////                if (!t3.type.equals(TType.COMMA) && !t3.type.equals(TType.FUNC_NAME)) {
-////                    stream.add(new Token(TType.FUNC_NAME, "sconcat", t.line_num));
-////                    stream.add(new Token(TType.FUNC_START, "(", t.line_num));
-////                    stack++;
-////                }
-//            } else {
-//                stream.add(t);
-//            }
-//        }
+    public static GenericTreeNode<Construct> compile(List<Token> stream) throws ConfigCompileException {
         GenericTreeNode<Construct> tree = new GenericTreeNode<Construct>();
         tree.setData(new Construct("root", Construct.ConstructType.NULL, 0));
         Stack<GenericTreeNode> parents = new Stack<GenericTreeNode>();
@@ -477,31 +392,5 @@ public class MScriptCompiler {
             throw new ConfigCompileException("Mismatched parenthesis", t.line_num);
         }
         return tree;
-    }
-    
-    public static List<Token> autoconcat(List<Token> tokens){
-        List<Token> stream = new ArrayList<Token>();
-        int stack = 0;
-        for(int i = 0; i < tokens.size(); i++){
-            Token t = tokens.get(i);
-
-            if(t.type.equals(TType.FUNC_START) || t.type.equals(TType.COMMA)){
-                stack = 0;
-                for(int j = i; j < tokens.size(); j++){
-                    Token t1 = tokens.get(j);
-                    if(t1.type.equals(TType.FUNC_NAME)){
-                       //This is the only token we will ignore
-                       continue;
-                    }
-                    if(t.type.equals(TType.FUNC_START)){
-                        stack++;
-                    }
-                }
-            }
-            
-            //push it on the stream now
-            stream.add(t);
-        }
-        return stream;
     }
 }
