@@ -313,7 +313,9 @@ public class Echoes {
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
-                    player.chat(line);
+                    if(player != null){
+                        player.chat(line);
+                    }
                 }
             }, args[1].val());
             

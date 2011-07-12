@@ -47,7 +47,7 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new UnsupportedOperationException("That operation is not yet supported");
+            return new CVoid(line_num);
         }
         
         public ExceptionType[] thrown(){

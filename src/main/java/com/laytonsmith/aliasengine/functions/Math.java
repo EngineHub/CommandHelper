@@ -420,7 +420,7 @@ public class Math {
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.RangeException};
+            return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -450,15 +450,62 @@ public class Math {
                 throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE, ExceptionType.RangeException,
                         line_num);
             }
-            int i = r.nextInt((int)(max - min)) + ((int)min);
-            
+           
+            int range = (int)(max - min);
+            if(range <= 0){
+                throw new ConfigRuntimeException("max - min must be greater than 0", ExceptionType.RangeException, line_num);
+            }
+            int i = r.nextInt(range) + (int)min;
+
             return new CInt(i, line_num);
-            
         }
         public Boolean runAsync(){
             return null;
         }
     }
     
+    @api
+    public static class abs implements Function{
+
+        public String getName() {
+            return "abs";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "double {arg} Returns the absolute value of the argument.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.2";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            double d = Static.getDouble(args[0]);
+            return new CDouble(java.lang.Math.abs(d), line_num);
+        }
+        
+    }
     
 }

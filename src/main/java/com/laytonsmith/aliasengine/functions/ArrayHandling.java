@@ -93,7 +93,11 @@ public class ArrayHandling {
 
         public String docs() {
             return "mixed {array, index} Returns the element specified at the index of the array. If the element doesn't exist, an exception is thrown. "
-                    + "array_get(array, index)";
+                    + "array_get(array, index). Note also that as of 3.1.2, you can use a more traditional method to access elements in an array: "
+                    + "array[index] is the same as array_get(array, index), where array is a variable, or function that is an array. In fact, the compiler"
+                    + " does some magic under the covers, and literally converts array[index] into array_get(array, index), so if there is a problem "
+                    + "with your code, you will get an error message about a problem with the array_get function, even though you may not be using "
+                    + "that function directly.";
         }
 
         public boolean isRestricted() {

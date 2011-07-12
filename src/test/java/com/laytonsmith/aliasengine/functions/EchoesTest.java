@@ -9,7 +9,6 @@ import com.laytonsmith.testing.C;
 import java.lang.reflect.InvocationTargetException;
 import org.bukkit.entity.Player;
 import org.bukkit.Server;
-import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -52,11 +51,12 @@ public class EchoesTest {
     @Test
     public void testDocs() {
         System.out.println("docs");
-        StaticTest.TestClassDocs(Echoes.docs(), Echoes.class);
+        TestClassDocs(Echoes.docs(), Echoes.class);
     }
     
     @Test public void testChat() throws CancelCommandException{
-        Echoes.chat a = new Echoes.chat();        
+        Echoes.chat a = new Echoes.chat();     
+        TestBoilerplate(a, "chat");
         a.exec(0, fakePlayer, C.onstruct("Hello World!"));
         verify(fakePlayer).chat("Hello World!");
     }
@@ -71,7 +71,9 @@ public class EchoesTest {
     
     @Test public void testChatas() throws CancelCommandException{
         Echoes.chatas a = new Echoes.chatas();
+        TestBoilerplate(a, "chatas");
         Player wraithguard01 = mock(Player.class);
+        when(fakePlayer.getServer()).thenReturn(fakeServer);
         when(fakeServer.getPlayer("wraithguard01")).thenReturn(wraithguard01);
         a.exec(0, fakePlayer, C.onstruct("wraithguard01"), C.onstruct("Hello World!"));
         verify(wraithguard01).chat("Hello World!");        

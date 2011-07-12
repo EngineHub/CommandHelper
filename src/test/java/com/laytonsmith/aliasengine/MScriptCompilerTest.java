@@ -156,5 +156,12 @@ public class MScriptCompilerTest {
         } catch(ConfigCompileException e){
             //passed
         }
+        try{
+            //extra parenthesis
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function) <<<")).get(0).compileRight();
+            fail("Did not expect test to pass");
+        } catch(ConfigCompileException e){
+            //passed
+        }
     }
 }

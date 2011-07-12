@@ -149,4 +149,9 @@ public class BasicLogicTest {
         assertCTrue(a.exec(0, fakePlayer, argn1_1, arg1_1));
         assertCFalse(a.exec(0, fakePlayer, arg1_1, argn1_1));
     }
+    
+    @Test public void testIf(){
+        BasicLogic._if a = new BasicLogic._if();
+        TestBoilerplate(a, "if");
+    }
 }

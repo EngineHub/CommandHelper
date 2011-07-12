@@ -17,6 +17,7 @@ import com.laytonsmith.aliasengine.Version;
 import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
 import com.laytonsmith.aliasengine.functions.Function;
 import java.util.Arrays;
+import java.util.Random;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.mockito.Mockito;
@@ -76,6 +77,10 @@ public class StaticTest {
                 i = 100;
             }
             Construct[] con = new Construct[i];
+            //Throw the book at it. Most functions will fail, and that is ok, what isn't
+            //ok is if it throws an unexpected type of exception. It should only ever
+            //throw a ConfigRuntimeException, or a CancelCommandException. Further,
+            //if it throws a ConfigRuntimeException, the documentation should state so.
             for(int z = 0; z < 4; z++){
                 for(int a = 0; a < i; a++){
                     switch(z){
@@ -87,12 +92,32 @@ public class StaticTest {
                             con[a] = C.Array(C.onstruct("hi"), C.onstruct(1)); break;
                         case 3:
                             con[a] = C.Null(); break;
+                        case 4:
+                            con[a] = C.onstruct(-1); break;
+                        case 5:
+                            con[a] = C.onstruct(0);
+                        case 6:
+                            con[a] = C.onstruct(90000);
+                        case 7:
+                            con[a] = C.onstruct(a);
+                        case 8:
+                            con[a] = C.onstruct(new Random(System.currentTimeMillis()).nextDouble());
+                        case 9:
+                            con[a] = C.onstruct(new Random(System.currentTimeMillis()).nextInt());
+                        case 10:
+                            con[a] = C.onstruct(new Random(System.currentTimeMillis()).nextBoolean());
                     }
                 }
                 try{
                     f.exec(0, fakePlayer, con);
                 } catch(CancelCommandException e){
-                } catch(ConfigRuntimeException e){                
+                } catch(ConfigRuntimeException e){         
+                    if(e.getExceptionType() != null){
+                        if(f.thrown() == null || !Arrays.asList(f.thrown()).contains(e.getExceptionType())){
+                            fail("The documentation for " + f.getName() + " doesn't state that it can throw a " + 
+                                    e.getExceptionType() + ", but it did.");
+                        }
+                    } //else it's uncatchable, which while it probably shouldn't happen often, it can.
                 }
             }
         }
