@@ -50,11 +50,12 @@ public class Exceptions {
          */
         PlayerOfflineException, 
         /**
-         * Some var arg functions may require at least a certain number of arguments to be passed to the 
+         * Some var arg functions may require at least a certain number of arguments to be passed to the function
          */
         InsufficientArgumentsException, 
         /**
-         * This exception is thrown if a function expected a string to be formatted in a 
+         * This exception is thrown if a function expected a string to be formatted in a particular way, but it could not interpret the 
+         * given value.
          */
         FormatException,
     }
@@ -116,7 +117,7 @@ public class Exceptions {
             }
             List<String> interest = new ArrayList<String>();
             if(types != null){
-            Construct ptypes = that.eval(types, p, vars);
+            Construct ptypes = Static.resolveDollarVar(that.eval(types, p, vars), vars);
                 if(ptypes instanceof CString){
                     interest.add(ptypes.val());
                 } else if(ptypes instanceof CArray){

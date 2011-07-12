@@ -136,7 +136,7 @@ public class DataHandling {
             }
             int _continue = 0;
             while(true){
-                Construct cond = parent.eval(condition, p, vars);
+                Construct cond = Static.resolveConstruct(Static.resolveDollarVar(parent.eval(condition, p, vars), vars).val(), line_num);
                 if(!(cond instanceof CBoolean)){
                     throw new ConfigRuntimeException("Second parameter of for must return a boolean", ExceptionType.CastException, line_num);
                 }
@@ -150,7 +150,7 @@ public class DataHandling {
                     continue;
                 }
                 try{
-                    parent.eval(runnable, p, vars);
+                    Static.resolveConstruct(Static.resolveDollarVar(parent.eval(runnable, p, vars), vars).val(), line_num);
                 } catch(LoopBreakException e){
                     int num = e.getTimes();
                     if(num > 1){

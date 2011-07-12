@@ -4,6 +4,9 @@
  */
 package com.laytonsmith.testing;
 
+import com.laytonsmith.aliasengine.Constructs.Token;
+import java.util.List;
+import java.util.ArrayList;
 import org.bukkit.entity.Player;
 import com.laytonsmith.aliasengine.CancelCommandException;
 import com.laytonsmith.aliasengine.ConfigRuntimeException;
@@ -16,7 +19,6 @@ import com.laytonsmith.aliasengine.functions.Function;
 import java.util.Arrays;
 import org.bukkit.Server;
 import org.bukkit.World;
-import org.mockito.Mock;
 import org.mockito.Mockito;
 import static org.junit.Assert.*;
 /**
@@ -199,5 +201,13 @@ public class StaticTest {
             }
             throw new AssertionError(b);
         }
+    }
+    
+    public static List<Token> tokens(Token ... array){
+        List<Token> tokens = new ArrayList<Token>();
+        for(Token t : array){
+            tokens.add(t);
+        }
+        return tokens;
     }
 }

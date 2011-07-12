@@ -1,3 +1,13 @@
+3.1.2:
+- Added exception handling, and fixed more bugs with command matching and 
+optional variables. Also added more advanced permission syntax for commands.
+- Added functions: set_display_name, reset_display_name, try, array_index_exists,
+is_array, is_boolean, is_double, is_integer, is_null, is_string, substr, to_lower,
+to_upper, length, throw
+- Newlines are now handled in an expected manner in all functions. The escape
+sequence '\n' has been added, which allows for newlines to be embedded in a 
+string in a script.
+
 3.1.1:
 -Fixed a bug where no argument functions in the root of the command would give a 
 compile error.

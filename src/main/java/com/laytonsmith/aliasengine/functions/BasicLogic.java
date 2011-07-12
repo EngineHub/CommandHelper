@@ -36,7 +36,7 @@ public class BasicLogic {
         public Construct execs(int line_num, Player p, Script parent, 
                 GenericTreeNode<Construct> condition, GenericTreeNode<Construct> __if, 
                 GenericTreeNode<Construct> __else, List<Variable> vars) throws CancelCommandException{
-            if(Static.getBoolean(parent.eval(condition, p, vars))){
+            if(Static.getBoolean(Static.resolveDollarVar(parent.eval(condition, p, vars), vars))){
                 return parent.eval(__if, p, vars);
             } else {
                 if(__else == null){

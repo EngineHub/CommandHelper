@@ -16,9 +16,8 @@ import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.util.ArrayList;
-import java.util.Map;
+import java.util.List;
 import java.util.logging.Logger;
-import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 
@@ -295,6 +294,19 @@ public class Static {
                 }
             }
         }
+    }
+    
+    public static Construct resolveDollarVar(Construct variable, List<Variable> vars){
+        if(variable instanceof Variable){
+            for(Variable var : vars){
+                if(var.getName().equals(((Variable)variable).getName())){
+                    return Static.resolveConstruct(var.val(), var.line_num);
+                }
+            }
+        } else {
+            return variable;
+        }
+        throw new ConfigRuntimeException("No value found for variable?", 0);
     }
     
     /**

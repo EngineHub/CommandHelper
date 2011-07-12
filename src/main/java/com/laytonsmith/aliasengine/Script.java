@@ -162,7 +162,7 @@ public class Script {
                     if (ch.size() > 1) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
-                    GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val()));
+                    GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(Static.resolveDollarVar(ch.get(0).getData(), vars).val()));
                     StringBuilder b = new StringBuilder();
                     for (GenericTreeNode<Construct> child : root.getChildren()) {
                         CString cs = new CString(eval(child, player, vars).val(), 0);

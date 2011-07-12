@@ -39,7 +39,7 @@ import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.util.Vector;
 
 /**
- *
+ * I'm So Meta, Even This Acronym
  * @author Layton
  */
 public class Meta {

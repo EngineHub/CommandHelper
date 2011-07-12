@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.aliasengine.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import java.util.ArrayList;
 import java.util.List;
@@ -102,4 +103,36 @@ public class MScriptCompilerTest {
 //        // TODO review the generated test code and remove the default call to fail.
 //        fail("The test case is a prototype.");
 //    }
+
+//    @Test
+//    public void testPreprocess() throws Exception {
+//        System.out.println("preprocess");
+//        List<Token> tokenStream = null;
+//        List expResult = null;
+//        List result = MScriptCompiler.preprocess(tokenStream);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+//
+//    @Test
+//    public void testCompile() throws Exception {
+//        System.out.println("compile");
+//        List<Token> tokenStream = null;
+//        GenericTreeNode expResult = null;
+//        GenericTreeNode result = MScriptCompiler.compile(tokenStream);
+//        assertEquals(expResult, result);
+//        // TODO review the generated test code and remove the default call to fail.
+//        fail("The test case is a prototype.");
+//    }
+    @Test public void testCompile() throws ConfigCompileException{
+        System.out.println("compile");        
+        MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)")).get(0).compileRight();
+        try{
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function)")).get(0).compileRight();
+            fail("Did not expect test to pass");
+        } catch(ConfigCompileException e){
+            //passed
+        }
+    }
 }
