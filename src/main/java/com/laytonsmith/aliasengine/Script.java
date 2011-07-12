@@ -86,16 +86,18 @@ public class Script {
             throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.",
                     null, line_num);
         }
-        PermissionsResolverManager perms = Static.getPermissionsResolverManager();
-        String[]groups = label.substring(1).split("/");
-        for(String group : groups){
-            if(group.startsWith("-") && perms.inGroup(p.getName(), group.substring(1))){
-                //negative permission
-                throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
-                        0);
-            } else if(perms.inGroup(p.getName(), group)){
-                //They do have permission.
-                break;
+        if(label != null){
+            PermissionsResolverManager perms = Static.getPermissionsResolverManager();
+            String[]groups = label.substring(1).split("/");
+            for(String group : groups){
+                if(group.startsWith("-") && perms.inGroup(p.getName(), group.substring(1))){
+                    //negative permission
+                    throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
+                            0);
+                } else if(perms.inGroup(p.getName(), group)){
+                    //They do have permission.
+                    break;
+                }
             }
         }
 //        final Plugin self = CommandHelperPlugin.self;

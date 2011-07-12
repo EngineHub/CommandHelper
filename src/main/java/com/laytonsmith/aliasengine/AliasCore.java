@@ -104,8 +104,9 @@ public class AliasCore {
                             }
                         });
                     } catch (/*ConfigRuntimeException*/Throwable e) {
-                        System.err.println(e.getMessage());
-                        player.sendMessage(ChatColor.RED + e.getMessage());
+                        System.err.println("An unexpected exception occured: " + e.getClass().getSimpleName());
+                        player.sendMessage("An unexpected exception occured: " + ChatColor.RED + e.getClass().getSimpleName());
+                        e.printStackTrace();
                     } finally {
                         echoCommand.remove(player.getName());
                     }
