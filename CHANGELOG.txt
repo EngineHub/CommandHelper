@@ -7,6 +7,8 @@ to_upper, length, throw
 - Newlines are now handled in an expected manner in all functions. The escape
 sequence '\n' has been added, which allows for newlines to be embedded in a 
 string in a script.
+-Command labels can now be used to specify what groups have permission to run this
+command
 
 3.1.1:
 -Fixed a bug where no argument functions in the root of the command would give a 

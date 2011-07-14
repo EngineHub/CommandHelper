@@ -237,7 +237,7 @@ public class Meta {
         }
 
         public String docs() {
-            return "Used internally by the compiler.";
+            return "mixed {c} Used internally by the compiler.";
         }
 
         public ExceptionType[] thrown() {

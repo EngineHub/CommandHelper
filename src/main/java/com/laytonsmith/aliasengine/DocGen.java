@@ -149,6 +149,9 @@ public class DocGen {
                     args = m.group(2);
                     desc = m.group(3);
                 }
+                if(ret == null || args == null || desc == null){
+                    System.out.println(f.getName() + "'s documentation is not correctly formatted. Please check it and try again.");
+                }
                 if(type.equals("html")){
                     System.out.println("<tr><td>" + ret + "</td><td>" + args + "</td><td>" + thrown.toString() + "</td><td>" + desc + "</td><td>" + since + "</td><td>" + restricted + "</td></tr>\n");
                 } else if(type.equals("wiki")){
