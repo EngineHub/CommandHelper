@@ -4,8 +4,11 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,6 +33,7 @@ public class AliasCore {
     static final Logger logger = Logger.getLogger("Minecraft");
     private ArrayList<String> echoCommand = new ArrayList<String>();
     private PermissionsResolverManager perms;
+    public static CommandHelperPlugin parent;
 
     /**
      * This constructor accepts the configuration settings for the plugin, and ensures
@@ -39,10 +43,11 @@ public class AliasCore {
      * @param maxCommands How many commands an alias may contain. Since aliases can be used like a
      * macro, this can help prevent command spamming.
      */
-    public AliasCore(File aliasConfig, File prefFile, PermissionsResolverManager perms) throws ConfigCompileException {
+    public AliasCore(File aliasConfig, File prefFile, PermissionsResolverManager perms, CommandHelperPlugin parent) throws ConfigCompileException {
         this.aliasConfig = aliasConfig;
         this.prefFile = prefFile;
         this.perms = perms;
+        this.parent = parent;
         reload();
     }
 

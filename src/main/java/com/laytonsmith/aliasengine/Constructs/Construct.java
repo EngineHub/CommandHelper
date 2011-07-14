@@ -13,8 +13,10 @@ import java.io.Serializable;
  */
 public class Construct implements Serializable{
     
+    public static final long serialVersionUID = 1L;
+    
     public enum ConstructType{
-        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE
+        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE
     }
 
     public ConstructType ctype;

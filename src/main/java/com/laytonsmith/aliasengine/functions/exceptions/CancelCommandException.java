@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package com.laytonsmith.aliasengine;
+package com.laytonsmith.aliasengine.functions.exceptions;
 
 /**
  *

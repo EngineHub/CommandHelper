@@ -21,7 +21,7 @@ package com.sk89q.commandhelper;
 
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.aliasengine.AliasCore;
-import com.laytonsmith.aliasengine.ConfigCompileException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
@@ -85,7 +85,7 @@ public class CommandHelperPlugin extends JavaPlugin {
             File prefsFile = new File("plugins/CommandHelper/preferences.txt");
             Static.getPreferences().init(prefsFile);
             String script_name = (String) Static.getPreferences().getPreference("script-name");
-            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), prefsFile, perms);
+            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), prefsFile, perms, this);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         } catch (ConfigCompileException ex) {

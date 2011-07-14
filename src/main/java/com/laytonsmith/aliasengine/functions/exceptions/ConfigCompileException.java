@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package com.laytonsmith.aliasengine;
+package com.laytonsmith.aliasengine.functions.exceptions;
 
 /**
  *
@@ -14,7 +14,7 @@ public class ConfigCompileException extends Exception{
     int line_num;
     String message;
 
-    ConfigCompileException(String message, int line_num) {
+    public ConfigCompileException(String message, int line_num) {
         this.message = message;
         this.line_num = line_num;
     }
@@ -23,8 +23,7 @@ public class ConfigCompileException extends Exception{
         message = string;
         line_num = 0;
     }
-
-
+    
     @Override
     public String getMessage() {
         return message;

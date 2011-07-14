@@ -5,8 +5,8 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.GenericTreeNode;
-import com.laytonsmith.aliasengine.CancelCommandException;
-import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CNull;
@@ -15,8 +15,8 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.Constructs.Variable;
-import com.laytonsmith.aliasengine.LoopBreakException;
-import com.laytonsmith.aliasengine.LoopContinueException;
+import com.laytonsmith.aliasengine.functions.exceptions.LoopBreakException;
+import com.laytonsmith.aliasengine.functions.exceptions.LoopContinueException;
 import com.laytonsmith.aliasengine.RunnableAlias;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;

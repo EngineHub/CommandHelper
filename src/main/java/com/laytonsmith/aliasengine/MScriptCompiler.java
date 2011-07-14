@@ -4,20 +4,19 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.Constructs.CFunction;
-import com.laytonsmith.aliasengine.Constructs.CString;
-import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.Constructs.IVariable;
-import com.laytonsmith.aliasengine.Constructs.Token;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;
-import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.functions.FunctionList;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -410,5 +409,5 @@ public class MScriptCompiler {
             throw new ConfigCompileException("Mismatched parenthesis", t.line_num);
         }
         return tree;
-    }
+    }      
 }

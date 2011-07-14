@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.testing.C;
 import org.junit.AfterClass;

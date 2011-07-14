@@ -4,6 +4,11 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.exceptions.LoopBreakException;
+import com.laytonsmith.aliasengine.functions.exceptions.LoopContinueException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct.ConstructType;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;

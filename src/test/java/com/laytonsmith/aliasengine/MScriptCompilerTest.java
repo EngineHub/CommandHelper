@@ -4,7 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.ConfigCompileException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import java.util.ArrayList;
 import java.util.List;

@@ -5,7 +5,7 @@
 
 package com.laytonsmith.aliasengine.Constructs;
 
-import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.util.Map;
 

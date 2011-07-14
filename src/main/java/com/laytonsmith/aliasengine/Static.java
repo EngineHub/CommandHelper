@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.aliasengine.Constructs.*;

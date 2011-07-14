@@ -5,9 +5,9 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.CancelCommandException;
-import com.laytonsmith.aliasengine.ConfigCompileException;
-import com.laytonsmith.aliasengine.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.testing.C;

@@ -4,9 +4,9 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.CancelCommandException;
+import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.ConfigCompileException;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.CFunction;
 import com.laytonsmith.aliasengine.User;
 import java.lang.annotation.Annotation;
@@ -54,7 +54,7 @@ public class FunctionList {
                     if (Arrays.asList(api.getInterfaces()).contains(Function.class)) {
                         try {
                             Function f = (Function) api.newInstance();
-                            registerFunction(f);
+                            registerFunction(f, apiClass);
                             //System.out.println("Loaded " + apiClass + "." + f.getName());
                         } catch (InstantiationException ex) {
                             Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
@@ -102,9 +102,11 @@ public class FunctionList {
     }
 
     
-    public static void registerFunction(Function f) {
-        if((Boolean)com.laytonsmith.aliasengine.Static.getPreferences().getPreference("debug-mode")){
-            System.out.println("CommandHelper: Loaded function \"" + f.getName() + "\"");
+    public static void registerFunction(Function f, String apiClass) {
+        if(!apiClass.equals("Sandbox")){
+            if((Boolean)com.laytonsmith.aliasengine.Static.getPreferences().getPreference("debug-mode")){
+                System.out.println("CommandHelper: Loaded function \"" + f.getName() + "\"");
+            }
         }
         functions.add(f);
     }

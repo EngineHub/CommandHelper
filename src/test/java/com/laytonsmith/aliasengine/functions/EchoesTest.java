@@ -4,7 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.CancelCommandException;
+import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.testing.C;
 import java.lang.reflect.InvocationTargetException;
 import org.bukkit.entity.Player;

@@ -65,6 +65,9 @@ public class DocGen {
         for (Map.Entry<Class, ArrayList<Function>> entry : functionlist.entrySet()) {
             Class apiClass = entry.getKey();
             String className = apiClass.getName().split("\\.")[apiClass.getName().split("\\.").length - 1];
+            if(className.equals("Sandbox")){
+                continue; //Skip Sandbox functions
+            }
             String classDocs = null;
             try {
                 Method m = apiClass.getMethod("docs", (Class[]) null);
@@ -184,7 +187,7 @@ public class DocGen {
                     + "===Errors in documentation===\n"
                     + "''Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
-                    + " plugin itself!''");
+                    + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]");
         }
     }
 

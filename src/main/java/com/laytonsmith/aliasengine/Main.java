@@ -32,10 +32,10 @@ public class Main {
         PluginDescriptionFile me = loadSelf();
         try {
             Static.getPreferences().init(new File("CommandHelper/preferences.txt"));
-            if (args.length == 0) {
-                CoreTestHarness.start(null, null);
-            }
             List l = Arrays.asList(args);
+            if (args.length == 0) {
+                l.add("-help");
+            }
             if (l.contains("-help") || l.contains("-h") || l.contains("--help") || l.contains("/?")) {
                 System.out.println("CommandHelper can be run as a standalone jar with the command:\n\n"
                         + "     java -jar CommandHelper.jar <options>\n\n"
@@ -96,22 +96,23 @@ public class Main {
                     System.out.println("Creating " + type + " documentation.");
                     DocGen.start(type);
                 } else if (s.matches("--test-compile")) {
-                    File f = new File(".");
-                    for (File a : f.listFiles()) {
-                        if (a.getName().equals("CommandHelper.jar")) {
-                            //We are in the plugins folder
-                            f = new File("CommandHelper/bukkit.jar");
-                            if (!f.exists()) {
-                                System.out.println("In order to run the --test-compile command, you must include the latest build of bukkit (not craftbukkit)"
-                                        + " in the CommandHelper folder. You MUST rename it to bukkit.jar. See the wiki for more information.");
-                                System.exit(1);
-                            }
-                            break;
-                        }
-                    }
-                    String file = (i + 1 <= l.size() - 1 ? l.get(i + 1).toString().toLowerCase() : null);
-                    CoreTestHarness.start(file, null);
-                    return;
+                    System.out.println("This functionality is not currently implemented!");
+//                    File f = new File(".");
+//                    for (File a : f.listFiles()) {
+//                        if (a.getName().equals("CommandHelper.jar")) {
+//                            //We are in the plugins folder
+//                            f = new File("CommandHelper/bukkit.jar");
+//                            if (!f.exists()) {
+//                                System.out.println("In order to run the --test-compile command, you must include the latest build of bukkit (not craftbukkit)"
+//                                        + " in the CommandHelper folder. You MUST rename it to bukkit.jar. See the wiki for more information.");
+//                                System.exit(1);
+//                            }
+//                            break;
+//                        }
+//                    }
+//                    String file = (i + 1 <= l.size() - 1 ? l.get(i + 1).toString().toLowerCase() : null);
+//                    
+//                    return;
                 }
             }
         } catch (NoClassDefFoundError error) {
