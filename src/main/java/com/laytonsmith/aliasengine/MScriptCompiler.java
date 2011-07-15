@@ -339,6 +339,9 @@ public class MScriptCompiler {
             } else if (t.type.equals(TType.IVARIABLE)) {
                 tree.addChild(new GenericTreeNode<Construct>(new IVariable(t.val(), t.line_num)));
                 constructCount.peek().incrementAndGet();
+            } else if(t.type.equals(TType.UNKNOWN)){
+                tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num)));
+                constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                 tree.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, t.line_num)));
                 constructCount.peek().incrementAndGet();
@@ -368,9 +371,17 @@ public class MScriptCompiler {
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
                     GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", 0));
-                    c.setChildren(tree.getChildren().subList(replaceAt, tree.getChildren().size()));
+                    List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
+                    for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
+                        subChildren.add(tree.getChildAt(b));
+                    }
+                    c.setChildren(subChildren);                    
                     if(replaceAt > 0){
-                        tree.setChildren(tree.getChildren().subList(0, replaceAt));
+                        List<GenericTreeNode<Construct>> firstChildren = new ArrayList<GenericTreeNode<Construct>>();
+                        for(int d = 0; d < replaceAt; d++){
+                            firstChildren.add(tree.getChildAt(d));
+                        }
+                        tree.setChildren(firstChildren);
                     } else {
                         tree.removeChildren();
                     }
@@ -393,13 +404,21 @@ public class MScriptCompiler {
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
                     GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", 0));
-                    c.setChildren(tree.getChildren().subList(replaceAt, tree.getChildren().size()));
+                    List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
+                    for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
+                        subChildren.add(tree.getChildAt(b));
+                    }
+                    c.setChildren(subChildren);                    
                     if(replaceAt > 0){
-                        tree.setChildren(tree.getChildren().subList(0, replaceAt));
+                        List<GenericTreeNode<Construct>> firstChildren = new ArrayList<GenericTreeNode<Construct>>();
+                        for(int d = 0; d < replaceAt; d++){
+                            firstChildren.add(tree.getChildAt(d));
+                        }
+                        tree.setChildren(firstChildren);
                     } else {
                         tree.removeChildren();
                     }
-                    tree.addChild(c);                    
+                    tree.addChild(c);                   
                 }
                 constructCount.peek().set(0);
                 continue;

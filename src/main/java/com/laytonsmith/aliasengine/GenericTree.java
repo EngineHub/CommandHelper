@@ -104,11 +104,12 @@ public class GenericTree<T> {
         return traversalResult;
     }
 
-    private void buildPreOrder(GenericTreeNode<T> node, List<GenericTreeNode<T>> traversalResult) {
+    private synchronized void buildPreOrder(GenericTreeNode<T> node, List<GenericTreeNode<T>> traversalResult) {
         traversalResult.add(node);
-
-        for(GenericTreeNode<T> child : node.getChildren()) {
-            buildPreOrder(child, traversalResult);
+        
+        for(int i = 0; i < node.getNumberOfChildren(); i++){
+        //for(GenericTreeNode<T> child : node.getChildren()) {
+            buildPreOrder(node.getChildAt(i), traversalResult);
         }
     }
 

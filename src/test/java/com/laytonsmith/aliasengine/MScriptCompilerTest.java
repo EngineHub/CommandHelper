@@ -144,24 +144,26 @@ public class MScriptCompilerTest {
         }
         try{
             //extra parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function)))))")).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)))))")).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //passed
         }
         try{
             //extra parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg((this is a string, if(true, and, another, oops) function))")).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg((this is a string, if(true, and, another) function))")).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //passed
         }
         try{
-            //extra parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function) <<<")).get(0).compileRight();
+            //extra multiline end construct
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function) <<<")).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //passed
         }
+        
+        MScriptCompiler.compile(MScriptCompiler.lex("if(1, msg('') msg(''))"));
     }
 }

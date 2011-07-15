@@ -25,7 +25,7 @@ public class GenericTreeNode<T> {
         setData(data);
     }
 
-    public List<GenericTreeNode<T>> getChildren() {
+    public synchronized List<GenericTreeNode<T>> getChildren() {
         return this.children;
     }
 

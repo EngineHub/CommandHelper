@@ -685,10 +685,12 @@ public class Script {
             for(Variable v : left_vars){
                 left_copy.add(v.getName());
             }
+            Arrays.asList(new String[]{}).toArray(new String[]{});
             for(GenericTreeNode<Construct> gtn : cright){
                 GenericTree<Construct> tree = new GenericTree<Construct>();
                 tree.setRoot(gtn);
-                for(GenericTreeNode<Construct> c : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
+                List<GenericTreeNode<Construct>> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
+                for(GenericTreeNode<Construct> c : builtTree){
                     if(c.getData() instanceof Variable){
                         for(Variable v : left_vars){
                             if(v.getName().equals(((Variable)c.getData()).getName())){
