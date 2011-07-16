@@ -143,9 +143,13 @@ public class MathTest {
         TestBoilerplate(a, "rand");
         for(int i = 0; i < 1000; i++){
             long j = Static.getInt(a.exec(0, fakePlayer, C.onstruct(10)));
-            assertTrue(j < 10 && j >= 0);
+            if(!(j < 10 && j >= 0)){
+                fail("Expected a number between 0 and 10, but got " + j);
+            }
             j = Static.getInt(a.exec(0, fakePlayer, C.onstruct(10), C.onstruct(20)));
-            assertTrue(j < 20 && j >= 10);
+            if(!(j < 20 && j >= 10)){
+                fail("Expected a number between 10 and 20, but got " + j);
+            }
         }
         try{
             a.exec(0, fakePlayer, C.onstruct(20), C.onstruct(10));

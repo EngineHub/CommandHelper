@@ -451,11 +451,13 @@ public class Math {
                         line_num);
             }
            
-            long range = (long)(max - min);
+            long range = max - min;
             if(range <= 0){
                 throw new ConfigRuntimeException("max - min must be greater than 0", ExceptionType.RangeException, line_num);
             }
-            long i = r.nextLong() % range + min;
+            long rand = java.lang.Math.abs(r.nextLong());
+            System.out.println(rand + " " + range + " " + min + " remainder: " + (rand % range));
+            long i = (rand % (range)) + min;
 
             return new CInt(i, line_num);
         }
