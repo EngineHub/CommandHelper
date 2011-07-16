@@ -38,7 +38,7 @@ public class Math {
             if(Static.anyDoubles(args)){
                 return new CDouble(tally, line_num);
             } else {
-                return new CInt((int)tally, line_num);
+                return new CInt((long)tally, line_num);
             }
         }
         
@@ -85,7 +85,7 @@ public class Math {
             if(Static.anyDoubles(args)){
                 return new CDouble(tally, line_num);
             } else {
-                return new CInt((int)tally, line_num);
+                return new CInt((long)tally, line_num);
             }
         }
         
@@ -132,7 +132,7 @@ public class Math {
             if(Static.anyDoubles(args)){
                 return new CDouble(tally, line_num);
             } else {
-                return new CInt((int)tally, line_num);
+                return new CInt((long)tally, line_num);
             }
         }
         
@@ -177,7 +177,7 @@ public class Math {
                 tally /= Static.getNumber(args[i]);
             }
             if(tally == (int)tally){
-                return new CInt((int)tally, line_num);
+                return new CInt((long)tally, line_num);
             } else {
                 return new CDouble(tally, line_num);
             }
@@ -451,11 +451,11 @@ public class Math {
                         line_num);
             }
            
-            int range = (int)(max - min);
+            long range = (long)(max - min);
             if(range <= 0){
                 throw new ConfigRuntimeException("max - min must be greater than 0", ExceptionType.RangeException, line_num);
             }
-            int i = r.nextInt(range) + (int)min;
+            long i = r.nextLong() % range + min;
 
             return new CInt(i, line_num);
         }
