@@ -456,7 +456,6 @@ public class Math {
                 throw new ConfigRuntimeException("max - min must be greater than 0", ExceptionType.RangeException, line_num);
             }
             long rand = java.lang.Math.abs(r.nextLong());
-            System.out.println(rand + " " + range + " " + min + " remainder: " + (rand % range));
             long i = (rand % (range)) + min;
 
             return new CInt(i, line_num);
