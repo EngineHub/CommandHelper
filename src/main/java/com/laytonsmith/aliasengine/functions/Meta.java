@@ -15,6 +15,7 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 import org.bukkit.Achievement;
@@ -36,6 +37,10 @@ import org.bukkit.entity.Vehicle;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.util.Vector;
 
 /**
@@ -690,6 +695,54 @@ public class Meta {
 
         public UUID getUniqueId() {
             return r.getUniqueId();
+        }
+
+        public boolean isPermissionSet(String name) {
+            return r.isPermissionSet(name);
+        }
+
+        public boolean isPermissionSet(Permission perm) {
+            return r.isPermissionSet(perm);
+        }
+
+        public boolean hasPermission(String name) {
+            return r.hasPermission(name);
+        }
+
+        public boolean hasPermission(Permission perm) {
+            return r.hasPermission(perm);
+        }
+
+        public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value) {
+            return r.addAttachment(plugin, name, value);
+        }
+
+        public PermissionAttachment addAttachment(Plugin plugin) {
+            return r.addAttachment(plugin);
+        }
+
+        public PermissionAttachment addAttachment(Plugin plugin, String name, boolean value, int ticks) {
+            return r.addAttachment(plugin, name, value, ticks);
+        }
+
+        public PermissionAttachment addAttachment(Plugin plugin, int ticks) {
+            return r.addAttachment(plugin, ticks);
+        }
+
+        public void removeAttachment(PermissionAttachment attachment) {
+            r.removeAttachment(attachment);
+        }
+
+        public void recalculatePermissions() {
+            r.recalculatePermissions();
+        }
+
+        public Set<PermissionAttachmentInfo> getEffectivePermissions() {
+            return r.getEffectivePermissions();
+        }
+
+        public void setOp(boolean value) {
+            r.setOp(value);
         }
     }
 }
