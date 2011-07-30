@@ -220,17 +220,17 @@ public class PlayerManangement {
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String player = null;
-            int x;
-            int y;
-            int z;
+            double x;
+            double y;
+            double z;
             Player m = null;
             if (args.length == 1) {
                 if (args[0] instanceof CArray) {
                     CArray ca = (CArray) args[0];
                     if (ca.size() == 3) {
-                        x = (int) Static.getInt(ca.get(0, line_num));
-                        y = (int) Static.getInt(ca.get(1, line_num));
-                        z = (int) Static.getInt(ca.get(2, line_num));
+                        x = Static.getNumber(ca.get(0, line_num));
+                        y = Static.getNumber(ca.get(1, line_num));
+                        z = Static.getNumber(ca.get(2, line_num));
                         m = p;
                     } else {
                         throw new ConfigRuntimeException("Expecting array at parameter 1 of set_ploc to have 3 values", ExceptionType.LengthException, line_num);
@@ -245,22 +245,22 @@ public class PlayerManangement {
                     if (ca.size() != 3) {
                         throw new ConfigRuntimeException("Expecting array at parameter 2 of set_ploc to have 3 values", ExceptionType.LengthException, line_num);
                     }
-                    x = (int) Static.getInt(ca.get(0, line_num));
-                    y = (int) Static.getInt(ca.get(1, line_num));
-                    z = (int) Static.getInt(ca.get(2, line_num));
+                    x = Static.getNumber(ca.get(0, line_num));
+                    y = Static.getNumber(ca.get(1, line_num));
+                    z = Static.getNumber(ca.get(2, line_num));
                 } else {
                     throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc", ExceptionType.CastException, line_num);
                 }
             } else if(args.length == 3){
                 m = p;
-                x = (int) Static.getInt(args[0]);
-                y = (int) Static.getInt(args[1]);
-                z = (int) Static.getInt(args[2]);
+                x = Static.getNumber(args[0]);
+                y = Static.getNumber(args[1]);
+                z = Static.getNumber(args[2]);
             } else {
                 player = args[0].val();
-                x = (int) Static.getInt(args[1]);
-                y = (int) Static.getInt(args[2]);
-                z = (int) Static.getInt(args[3]);
+                x = Static.getNumber(args[1]);
+                y = Static.getNumber(args[2]);
+                z = Static.getNumber(args[3]);
             }
             if(m == null){
                 m = p.getServer().getPlayer(player);
@@ -268,7 +268,7 @@ public class PlayerManangement {
             if(m == null || !m.isOnline()){
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
             }
-            return new CBoolean(m.teleport(new Location(p.getWorld(), x, y, z)), line_num);
+            return new CBoolean(m.teleport(new Location(p.getWorld(), x, y, z, p.getLocation().getYaw(), p.getLocation().getPitch())), line_num);
         }
     }
 
@@ -500,7 +500,7 @@ public class PlayerManangement {
                 index = (int) Static.getInt(args[1]);
             }
             p = p.getServer().getPlayer(player);
-            if (!p.isOnline()) {
+            if (p == null || !p.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num);
             }
             if (index < -1 || index > 9) {
@@ -681,7 +681,7 @@ public class PlayerManangement {
                 message = args[1].val();
             }
             Player ptok = m;
-            if (ptok.isOnline()) {
+            if (ptok != null && ptok.isOnline()) {
                 ptok.kickPlayer(message);
                 return new CVoid(line_num);
             } else {

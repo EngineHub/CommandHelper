@@ -336,7 +336,7 @@ public class Static {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
-                if(!p.isOnline()){
+                if(p == null || !p.isOnline()){
                     throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num);
                 }
                 p.sendMessage(line);

@@ -45,11 +45,12 @@ public class StaticTest {
         f.runAsync();
         f.varList(null);
         f.preResolveVariables();
+        f.thrown();
         
         //name should match the given value
         if(!f.getName().equals(name)){
             fail("Expected name of function to be " + name + ", but was given " + f.getName());
-        }        
+        }              
         
         //docs needs to at least be more than a non-empty string, though in the future this should follow a more strict 
         //requirement set.

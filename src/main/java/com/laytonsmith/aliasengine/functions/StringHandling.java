@@ -254,7 +254,8 @@ public class StringHandling {
 
         public String docs() {
             return "array {string} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
-                    + " $ into a usable array of items with which to script against.";
+                    + " $ into a usable array of items with which to script against. Extra spaces are ignored, so you would never get an empty"
+                    + " string as an input.";
         }
         
         public ExceptionType[] thrown() {
@@ -462,12 +463,12 @@ public class StringHandling {
         public String docs() {
             return "string {str, begin, [end]} Returns a substring of the given string str, starting from index begin, to index end, or the"
                     + " end of the string, if no index is given. If either begin or end are out of bounds of the string, an exception is thrown."
-                    + "substr('hamburger', 4, 8) \"urge\" and substr('smiles', 1, 5) returns \"mile\""
+                    + " substr('hamburger', 4, 8) returns \"urge\", substr('smiles', 1, 5) returns \"mile\", and substr('lightning', 5) returns \"ning\"."
                     + " See also length().";
         }
         
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.RangeException};
+            return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -496,7 +497,7 @@ public class StringHandling {
                 if(args.length == 3){
                     end = (int)Static.getInt(args[2]);
                 } else {
-                    end = s.length() - 1;
+                    end = s.length();
                 }
                 return new CString(s.substring(begin, end), line_num);
             } catch(IndexOutOfBoundsException e){

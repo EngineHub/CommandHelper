@@ -80,15 +80,11 @@ public class Meta {
                 Static.getServer().dispatchCommand(m, cmd);
             } else {
                 Player m = Static.getServer().getPlayer(args[0].val());
-                if (m != null) {
-                    if (m.isOnline()) {
-                        if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                            Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + " (as " + m.getName() + "): /" + cmd.trim());
-                        }
-                        Static.getServer().dispatchCommand(m, cmd);
-                    } else {
-                        p.sendMessage("The player " + m.getName() + " is not online");
+                if (m != null && m.isOnline()) {
+                    if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + " (as " + m.getName() + "): /" + cmd.trim());
                     }
+                    Static.getServer().dispatchCommand(m, cmd);
                 } else {
                     throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",ExceptionType.PlayerOfflineException, line_num);
                 }

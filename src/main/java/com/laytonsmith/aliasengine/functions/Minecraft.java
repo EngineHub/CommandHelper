@@ -157,7 +157,7 @@ public class Minecraft {
                     + " to the location of the player. mobType can be one of: CHICKEN, COW, CREEPER, GHAST,"
                     + " GIANT, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
-                    + " SHEEP:COLOR, where COLOR is any of the values that are allowed in the color() function. COLOR defaults to white if not"
+                    + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
                     + " specified.";
         }
         
