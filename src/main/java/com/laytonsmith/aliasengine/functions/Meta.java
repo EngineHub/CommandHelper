@@ -535,15 +535,15 @@ public class Meta {
             return r.teleport(entity);
         }
 
-        @Deprecated
-        public void teleportTo(Location lctn) {
-            r.teleportTo(lctn);
-        }
-
-        @Deprecated
-        public void teleportTo(Entity entity) {
-            r.teleportTo(entity);
-        }
+//        @Deprecated
+//        public void teleportTo(Location lctn) {
+//            r.teleportTo(lctn);
+//        }
+//
+//        @Deprecated
+//        public void teleportTo(Entity entity) {
+//            r.teleportTo(entity);
+//        }
 
         public List<Entity> getNearbyEntities(double d, double d1, double d2) {
             return r.getNearbyEntities(d, d1, d2);

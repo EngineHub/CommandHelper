@@ -1,0 +1,15 @@
+#This file is generated automatically. Changes made to the values of this file
+#will persist, but changes to comments will not.
+
+#Whether or not to display warnings in the console, while compiling
+show-warnings=true
+
+#Whether or not to display the original command in the console when it is run
+console-log-commands=true
+
+#Whether or not to display debug information in the console
+debug-mode=false
+
+#The path to the config file, relative to the CommandHelper plugin folder
+script-name=config.txt
+
