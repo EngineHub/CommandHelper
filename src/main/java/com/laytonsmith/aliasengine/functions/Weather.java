@@ -58,7 +58,7 @@ public class Weather {
                 y = (int)Static.getInt(args[1]);
                 z = (int)Static.getInt(args[2]);
             }
-            p.getWorld().strikeLightning(new Location(p.getWorld(), x, y, z)); 
+            p.getWorld().strikeLightning(new Location(p.getWorld(), x, y + 1, z)); 
 //            World w = ((CraftWorld)p.getWorld()).getHandle();
 //            EntityWeatherStorm e = new EntityWeatherStorm(w, x, y, z);
 //            w.a(e);

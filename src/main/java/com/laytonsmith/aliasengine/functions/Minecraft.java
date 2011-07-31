@@ -209,7 +209,7 @@ public class Minecraft {
                     CArray ca = (CArray) args[2];
                     if(ca.size() == 3){
                         l = new Location(p.getWorld(), Static.getNumber(ca.get(0, line_num)),
-                                Static.getNumber(ca.get(1, line_num)), Static.getNumber(ca.get(2, line_num)));
+                                Static.getNumber(ca.get(1, line_num)) + 1, Static.getNumber(ca.get(2, line_num)));
                     } else {
                         throw new ConfigRuntimeException("Expected argument 3 to be an array with 3 items", ExceptionType.LengthException, line_num);
                     }

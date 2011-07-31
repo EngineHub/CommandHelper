@@ -61,16 +61,16 @@ public class Environment {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            int x;
-            int y;
-            int z;
+            double x;
+            double y;
+            double z;
             if(args.length == 1){
                 if(args[0] instanceof CArray){
                     CArray ca = (CArray)args[0];
                     if(ca.size() == 3){
-                        x = (int)Static.getInt(ca.get(0, line_num));
-                        y = (int)Static.getInt(ca.get(1, line_num));
-                        z = (int)Static.getInt(ca.get(2, line_num));
+                        x = Static.getDouble(ca.get(0, line_num));
+                        y = Static.getDouble(ca.get(1, line_num));
+                        z = Static.getDouble(ca.get(2, line_num));
                     } else {
                         throw new ConfigRuntimeException("get_block_at expects the array at param 1 to have 3 arguments", ExceptionType.LengthException,
                                 line_num);
@@ -79,11 +79,14 @@ public class Environment {
                     throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, line_num);
                 }
             } else {
-                x = (int)Static.getInt(args[0]);
-                y = (int)Static.getInt(args[1]);
-                z = (int)Static.getInt(args[2]);
+                x = Static.getDouble(args[0]);
+                y = Static.getDouble(args[1]);
+                z = Static.getDouble(args[2]);
             }
-            Block b = p.getWorld().getBlockAt(x, y, z);
+            x = java.lang.Math.floor(x);
+            y = java.lang.Math.floor(y);
+            z = java.lang.Math.floor(z);
+            Block b = p.getWorld().getBlockAt((int)x, (int)y, (int)z);
             return new CString(b.getTypeId() + ":" + b.getData(), line_num);
         }
         public Boolean runAsync(){
@@ -128,9 +131,9 @@ public class Environment {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            int x;
-            int y;
-            int z;
+            double x;
+            double y;
+            double z;
             String id;
             if(args.length == 2 && args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
@@ -138,19 +141,25 @@ public class Environment {
                     throw new ConfigRuntimeException("set_block_at expects the parameter 1 to be an array with 3 elements.", ExceptionType.LengthException,
                             line_num);
                 }
-                x = (int)Static.getInt(ca.get(0, line_num));
-                y = (int)Static.getInt(ca.get(1, line_num));
-                z = (int)Static.getInt(ca.get(2, line_num));
+                x = Static.getDouble(ca.get(0, line_num));
+                y = Static.getDouble(ca.get(1, line_num));
+                z = Static.getDouble(ca.get(2, line_num));
                 id = args[1].val();
                 
             } else {
-                x = (int)Static.getInt(args[0]);
-                y = (int)Static.getInt(args[1]);
-                z = (int)Static.getInt(args[2]);
+                x = Static.getDouble(args[0]);
+                y = Static.getDouble(args[1]);
+                z = Static.getDouble(args[2]);
                 id = args[3].val();
             }
-            
-            Block b = p.getWorld().getBlockAt(x, y, z);
+            x = java.lang.Math.floor(x);
+            y = java.lang.Math.floor(y);
+            z = java.lang.Math.floor(z);
+            int ix = (int)x;
+            int iy = (int)y;
+            int iz = (int)z;
+            System.out.println("Setting block at " + ix + "," + iy + "," + iz);
+            Block b = p.getWorld().getBlockAt(ix, iy, iz);
             StringBuilder data = new StringBuilder();
             StringBuilder meta = new StringBuilder();
             boolean inMeta = false;

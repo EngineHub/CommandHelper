@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
+import com.laytonsmith.aliasengine.Constructs.CDouble;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
@@ -145,9 +146,10 @@ public class PlayerManangement {
                 }
             }
             Location l = p.getLocation();
-            return new CArray(line_num, new CInt((int) l.getX(), line_num),
-                    new CInt((int) l.getY(), line_num),
-                    new CInt((int) l.getZ(), line_num));
+            return new CArray(line_num, 
+                    new CDouble(l.getX(), line_num),
+                    new CDouble(l.getY() - 1, line_num),
+                    new CDouble(l.getZ(), line_num));
         }
 
         public String docs() {
@@ -268,7 +270,7 @@ public class PlayerManangement {
             if(m == null || !m.isOnline()){
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
             }
-            return new CBoolean(m.teleport(new Location(p.getWorld(), x, y, z, p.getLocation().getYaw(), p.getLocation().getPitch())), line_num);
+            return new CBoolean(m.teleport(new Location(p.getWorld(), x, y + 1, z, p.getLocation().getYaw(), p.getLocation().getPitch())), line_num);
         }
     }
 
@@ -454,13 +456,14 @@ public class PlayerManangement {
             return "mixed {[pName], [value]} Returns various information about the player specified, or the current player if no argument was given."
                     + "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
                     + " will be returned. Otherwise if value is not specified (or is -1), it returns an array of"
-                    + " information with the following pieces of information in the specified index: 0 - Player's name; This will return the player's exact name, "
-                    + " even if called with a partial match. 1 - Player's location; an array of the player's xyz coordinates 2 - Player's cursor; an array of the "
-                    + "location of the player's cursor, or null if the block is out of sight. 3 - Player's IP; Returns the IP address of this player. 4 - Display name; The name that is used when the"
-                    + " player's name is displayed on screen typically. 5 - Player's health; Gets the current health of the player, which will be an int"
-                    + " from 0-20. 6 - Item in hand; The value returned by this will be similar to the value returned by get_block_at() 7 - "
-                    + "World name; Gets the name of the world this player is in. 8 - Is Op; true or false if this player is an op. 9 - Player groups;"
-                    + " An array of the permissions groups the player is in.";
+                    + " information with the following pieces of information in the specified index: "
+                    + "<ul><li>0 - Player's name; This will return the player's exact name, "
+                    + " even if called with a partial match.</li><li>1 - Player's location; an array of the player's xyz coordinates</li><li>2 - Player's cursor; an array of the "
+                    + "location of the player's cursor, or null if the block is out of sight.<li><li>3 - Player's IP; Returns the IP address of this player.</li><li>4 - Display name; The name that is used when the"
+                    + " player's name is displayed on screen typically. </li><li>5 - Player's health; Gets the current health of the player, which will be an int"
+                    + " from 0-20.</li><li>6 - Item in hand; The value returned by this will be similar to the value returned by get_block_at()</li><li>7 - "
+                    + "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - Player groups;"
+                    + " An array of the permissions groups the player is in.</li></ul>";
         }
         
         public ExceptionType[] thrown() {
@@ -509,13 +512,13 @@ public class PlayerManangement {
             assert index >= -1 && index <= 9;
             ArrayList<Construct> retVals = new ArrayList<Construct>();
             if (index == 0 || index == -1) {
-                //Player name
+                //Player name 
                 retVals.add(new CString(p.getName(), line_num));
             }
             if (index == 1 || index == -1) {
                 //Player location
-                retVals.add(new CArray(line_num, new CInt((long) p.getLocation().getX(), line_num),
-                        new CInt((long) p.getLocation().getY(), line_num), new CInt((long) p.getLocation().getZ(), line_num)));
+                retVals.add(new CArray(line_num, new CDouble(p.getLocation().getX(), line_num),
+                        new CDouble(p.getLocation().getY() - 1, line_num), new CDouble(p.getLocation().getZ(), line_num)));
             }
             if (index == 2 || index == -1) {
                 //Player cursor
