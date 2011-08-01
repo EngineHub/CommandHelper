@@ -298,7 +298,7 @@ public class Static {
     }
     
     public static Construct resolveDollarVar(Construct variable, List<Variable> vars){
-        if(variable instanceof Variable){
+        if(variable.ctype == Construct.ConstructType.VARIABLE){
             for(Variable var : vars){
                 if(var.getName().equals(((Variable)variable).getName())){
                     return Static.resolveConstruct(var.val(), var.line_num);
