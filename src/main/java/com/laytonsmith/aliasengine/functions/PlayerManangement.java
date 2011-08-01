@@ -804,4 +804,133 @@ public class PlayerManangement {
             return new CVoid(line_num);
         }
     }
+    
+    @api public static class pfacing implements Function{
+
+        public String getName() {
+            return "pfacing";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1, 2, 3};
+        }
+
+        public String docs() {
+            return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;} Sets the direction the player is facing. When using the first variation, expects an integer 0-3, which will"
+                    + " set the direction the player faces using their existing pitch (up and down) but sets their yaw (left and right) to one of the"
+                    + " cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which corresponds to the directions given by F when"
+                    + " viewed with F3. In the second variation, specific yaw and pitches can be provided. If the player is not specified, the current player"
+                    + " is used. If just the player is specified, that player's yaw and pitch are returned as an array, or if no arguments are given, the"
+                    + " player running the command's yaw and pitch are returned. The function returns void when setting the values. (Note that while this"
+                    + " function looks like it has ambiguous arguments, players cannot be named numbers.)<p>A note on numbers: The values returned by the getter will always be"
+                    + " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
+                    + " always be a number between 0 and 359.999~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
+                    + " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            //Getter
+            if(args.length == 0 || args.length == 1){
+                Location l = null;
+                if(args.length == 0){
+                    l = p.getLocation();
+                } else if(args.length == 1){
+                    //if it's a number, we are setting F. Otherwise, it's a getter for the player specified.
+                    try{
+                        Integer.parseInt(args[0].val());
+                    } catch(NumberFormatException e){
+                        Player p2 = p.getServer().getPlayer(args[0].val());
+                        if(p2 == null || !p2.isOnline()){
+                            throw new ConfigRuntimeException("The specified player is offline", ExceptionType.PlayerOfflineException, line_num);
+                        } else {
+                            l = p2.getLocation();
+                        }
+                    }
+                }
+                if(l != null){
+                    float yaw = l.getYaw();
+                    float pitch = l.getPitch();
+                    //normalize yaw
+                    if(yaw < 0){
+                        yaw = (((yaw) % 360) + 360);
+                    }                    
+                    return new CArray(line_num, new CDouble(yaw, line_num), new CDouble(pitch, line_num));
+                }
+            }
+            //Setter
+            Player toSet = null;
+            float yaw = 0;
+            float pitch = 0;
+            if(args.length == 1){
+                //We are setting F for this player
+                toSet = p;
+                pitch = p.getLocation().getPitch();
+                int f = (int)Static.getInt(args[0]);
+                if(f < 0 || f > 3){
+                    throw new ConfigRuntimeException("The F specifed must be from 0 to 3", ExceptionType.RangeException, line_num);
+                }
+                yaw = f * 90;
+            } else if(args.length == 2){
+                //Either we are setting this player's pitch and yaw, or we are setting the specified player's F.
+                //Check to see if args[0] is a number
+                try{
+                    Float.parseFloat(args[0].val());
+                    //It's the yaw, pitch variation
+                    toSet = p;
+                    yaw = (float)Static.getNumber(args[0]);
+                    pitch = (float)Static.getNumber(args[1]);
+                } catch(NumberFormatException e){
+                    //It's the player, F variation
+                    toSet = p.getServer().getPlayer(args[0].val());
+                    pitch = toSet.getLocation().getPitch();
+                    int f = (int)Static.getInt(args[0]);
+                    if(f < 0 || f > 3){
+                        throw new ConfigRuntimeException("The F specifed must be from 0 to 3", ExceptionType.RangeException, line_num);
+                    }
+                    yaw = f * 90;
+                }
+            } else if(args.length == 3){
+                //It's the player, yaw, pitch variation
+                toSet = p.getServer().getPlayer(args[0].val());
+                yaw = (float)Static.getNumber(args[1]);
+                pitch = (float)Static.getNumber(args[2]);
+            }
+            
+            //Error check our data
+            if(toSet == null || !toSet.isOnline()){
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num);
+            }
+            if(pitch > 90 || pitch < -90){
+                throw new ConfigRuntimeException("pitch must be between -90 and 90", ExceptionType.RangeException, line_num);
+            }
+            Location l = toSet.getLocation().clone();
+            l.setPitch(pitch);
+            l.setYaw(yaw);
+            toSet.teleport(l);
+            return new CVoid(line_num);
+        }
+        
+    }
 }
