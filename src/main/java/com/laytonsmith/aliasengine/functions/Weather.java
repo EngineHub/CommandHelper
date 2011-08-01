@@ -47,16 +47,16 @@ public class Weather {
                     if(a.size() != 3){
                         throw new ConfigRuntimeException("lightning expects the array to have 3 integers", ExceptionType.LengthException, line_num);
                     }
-                    x = (int)Static.getInt(a.get(0, line_num));
-                    y = (int)Static.getInt(a.get(1, line_num));
-                    z = (int)Static.getInt(a.get(2, line_num));
+                    x = (int)java.lang.Math.floor(Static.getNumber(a.get(0, line_num)));
+                    y = (int)java.lang.Math.floor(Static.getNumber(a.get(1, line_num)));
+                    z = (int)java.lang.Math.floor(Static.getNumber(a.get(2, line_num)));
                 } else {
                     throw new ConfigRuntimeException("lightning expects an array as the one argument", ExceptionType.CastException, line_num);
                 }
             } else {
-                x = (int)Static.getInt(args[0]);
-                y = (int)Static.getInt(args[1]);
-                z = (int)Static.getInt(args[2]);
+                x = (int)java.lang.Math.floor(Static.getNumber(args[0]));
+                y = (int)java.lang.Math.floor(Static.getNumber(args[1]));
+                z = (int)java.lang.Math.floor(Static.getNumber(args[2]));
             }
             p.getWorld().strikeLightning(new Location(p.getWorld(), x, y + 1, z)); 
 //            World w = ((CraftWorld)p.getWorld()).getHandle();

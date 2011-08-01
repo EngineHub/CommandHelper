@@ -905,7 +905,7 @@ public class PlayerManangement {
                     //It's the player, F variation
                     toSet = p.getServer().getPlayer(args[0].val());
                     pitch = toSet.getLocation().getPitch();
-                    int f = (int)Static.getInt(args[0]);
+                    int f = (int)Static.getInt(args[1]);
                     if(f < 0 || f > 3){
                         throw new ConfigRuntimeException("The F specifed must be from 0 to 3", ExceptionType.RangeException, line_num);
                     }
