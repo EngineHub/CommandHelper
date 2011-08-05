@@ -76,6 +76,7 @@ public class MathTest {
         assertCEquals(C.onstruct(6), a.exec(0, fakePlayer, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(-4), a.exec(0, fakePlayer, C.onstruct(-3), C.onstruct(-1)));
         assertCEquals(C.onstruct(1), a.exec(0, fakePlayer, C.onstruct(1), C.onstruct(0)));
+        assertCEquals(C.onstruct(3.1415), a.exec(0, fakePlayer, C.onstruct(3), C.onstruct(0.1415)));
     }
     
     @Test
@@ -126,6 +127,7 @@ public class MathTest {
         assertCEquals(C.onstruct(10), a.exec(0, fakePlayer, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(9), a.exec(0, fakePlayer, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(6), a.exec(0, fakePlayer, C.onstruct(-3), C.onstruct(-2)));
+        assertCEquals(C.onstruct(5), a.exec(0, fakePlayer, C.onstruct(10), C.onstruct(0.5)));
     }
     
     @Test
@@ -159,6 +161,10 @@ public class MathTest {
             a.exec(0, fakePlayer, C.onstruct(-1));
             fail("Didn't expect this test to pass");
         } catch(ConfigRuntimeException e){}
+        try{
+            a.exec(0, fakePlayer, C.onstruct(87357983597853791L));
+            fail("Didn't expect this test to pass");
+        } catch(ConfigRuntimeException e){}
     }
     
     @Test
@@ -168,5 +174,21 @@ public class MathTest {
         assertCEquals(C.onstruct(3), a.exec(0, fakePlayer, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(0), a.exec(0, fakePlayer, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(-1), a.exec(0, fakePlayer, C.onstruct(-3), C.onstruct(-2)));
+        assertCEquals(C.onstruct(3), a.exec(0, fakePlayer, C.onstruct(3.1415), C.onstruct(0.1415)));
+    }
+    
+    @Test
+    public void testFloor(){
+        Math.floor a = new Math.floor();
+        TestBoilerplate(a, "floor");
+        assertCEquals(C.onstruct(3), a.exec(0, fakePlayer, C.onstruct(3.8415)));
+        assertCEquals(C.onstruct(-4), a.exec(0, fakePlayer, C.onstruct(-3.1415)));
+    }
+    
+    @Test public void testCeil(){
+        Math.ceil a = new Math.ceil();
+        TestBoilerplate(a, "ceil");
+        assertCEquals(C.onstruct(4), a.exec(0, fakePlayer, C.onstruct(3.1415)));
+        assertCEquals(C.onstruct(-3), a.exec(0, fakePlayer, C.onstruct(-3.1415)));
     }
 }

@@ -21,6 +21,7 @@ import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.PlayerInventory;
 
 /**
  *
@@ -467,7 +468,7 @@ public class PlayerManangement {
         }
         
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -930,6 +931,172 @@ public class PlayerManangement {
             l.setYaw(yaw);
             toSet.teleport(l);
             return new CVoid(line_num);
+        }
+        
+    }
+    
+    @api public static class pinv implements Function{
+
+        public String getName() {
+            return "pinv";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1, 2};
+        }
+
+        public String docs() {
+            return "mixed {[player], [index]} Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
+                    + " given will be returned, but in general, the return format is: array(array(data, qty), array(data, qty), ...) where data is the x:y value of the block (or just the"
+                    + " value if it's an item), and"
+                    + " qty is the number of items. The index of the array in the array is 0 - 35, which corresponds to the slot in the players inventory. To access armor"
+                    + " slots, you must specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
+                    + " of what slot is selected. If there is no item at the slot specified, null is returned.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException, ExceptionType.RangeException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            int index = -1;
+            boolean all = false;
+            Player m = null;
+            if(args.length == 0){
+                all = true;
+                m = p;
+            } else if(args.length == 1){
+                all = true;
+                m = p.getServer().getPlayer(args[0].val());
+            } else if(args.length == 2){
+                index = (int)Static.getInt(args[1]);
+                all = false;
+                m = p.getServer().getPlayer(args[0].val());
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num);
+            }
+            if(!all){
+                if(index < 0 || index > 35 && index < 100 || index > 103){
+                    throw new ConfigRuntimeException("The index specified must be between 0-35, or 100-103", ExceptionType.RangeException, line_num);
+                }                    
+            }
+            PlayerInventory inv = m.getInventory();
+            if(!all){
+                String value = "";
+                int qty = 0;
+                if(index >= 100 && index <= 103){
+                    qty = 1;
+                    switch(index){
+                        case 100:
+                            value = Integer.toString(inv.getBoots().getTypeId());
+                            break;
+                        case 101:
+                            value = Integer.toString(inv.getLeggings().getTypeId());
+                            break;
+                        case 102:
+                            value = Integer.toString(inv.getChestplate().getTypeId());
+                            break;
+                        case 103:
+                            value = Integer.toString(inv.getHelmet().getTypeId());
+                            break;
+                    }
+                    if(value.equals("0")){
+                        value = null;
+                        qty = 0;
+                    }
+                } else {
+                    if(inv.getItem(index).getTypeId() == 0){
+                        value = null;
+                    } else {
+                        value = inv.getItem(index).getTypeId() + (inv.getItem(index).getData()==null?"":":" + inv.getItem(index).getData().getData());
+                    }
+                    qty = inv.getItem(index).getAmount();
+                }
+                if(value == null){
+                    return new CNull(line_num);
+                } else {
+                    Construct cvalue = null;
+                    cvalue = new CString(value, line_num);
+                    return new CArray(line_num, cvalue, new CInt(qty, line_num));
+                }
+            } else {
+                CArray ca = new CArray(line_num);
+                for(int i = 0; i < 36; i++){
+                    ItemStack is = inv.getItem(i);
+                    if(is != null && is.getTypeId() != 0){
+                        ca.push(new CArray(line_num, 
+                                    new CString(is.getTypeId() + (is.getData()==null?"":":" + is.getData().getData()), line_num),
+                                    new CInt(is.getAmount(), line_num)
+                            ));
+                    } else {
+                        ca.push(new CNull(line_num));
+                    }
+                }
+                return ca;
+            }
+        }
+        
+    }
+    
+    public static class set_pinv implements Function{
+
+        public String getName() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Integer[] numArgs() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String docs() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public ExceptionType[] thrown() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean isRestricted() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void varList(IVariableList varList) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean preResolveVariables() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String since() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Boolean runAsync() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
         
     }

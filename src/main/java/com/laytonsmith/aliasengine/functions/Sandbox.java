@@ -27,12 +27,14 @@ import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.SimplePluginManager;
 
 /**
- * This class is for functions that are experimental. They don't actually get added
- * to the documentation, and are subject to removal at any point in time, nor are
- * likely to have good documentation.
  * @author Layton
  */
 public class Sandbox {
+    public static String docs(){
+        return "This class is for functions that are experimental. They don't actually get added"
+                + " to the documentation, and are subject to removal at any point in time, nor are they"
+                + " likely to have good documentation.";
+    }
     @api public static class plugin_cmd implements Function{
 
         public String getName() {

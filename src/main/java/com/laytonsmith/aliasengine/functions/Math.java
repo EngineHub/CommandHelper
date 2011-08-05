@@ -509,4 +509,88 @@ public class Math {
         
     }
     
+    @api public static class floor implements Function{
+
+        public String getName() {
+            return "floor";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "int {number} Returns the floor of any given number. For example, floor(3.8) returns 3, and floor(-1.1) returns 2";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CInt((long)java.lang.Math.floor(Static.getNumber(args[0])), line_num);
+        }
+        
+    }
+    
+    @api public static class ceil implements Function{
+
+        public String getName() {
+            return "ceil";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "int {number} Returns the ceiling of any given number. For example, ceil(3.2) returns 4, and ceil(-1.1) returns -1";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CInt((long)java.lang.Math.ceil(Static.getNumber(args[0])), line_num);
+        }
+        
+    }
+    
 }

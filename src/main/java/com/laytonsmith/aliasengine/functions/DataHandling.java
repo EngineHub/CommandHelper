@@ -31,7 +31,7 @@ import org.bukkit.entity.Player;
  */
 public class DataHandling {
     public static String docs(){
-        return "";
+        return "This class provides various methods to control script data and program flow.";
     }
     @api public static class array implements Function{
 
@@ -214,7 +214,7 @@ public class DataHandling {
         }
 
         public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return new CVoid(line_num);
         }
         
         public Construct execs(int line_num, Player p, Script that, GenericTreeNode<Construct> array, 
@@ -301,7 +301,7 @@ public class DataHandling {
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -349,7 +349,7 @@ public class DataHandling {
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
