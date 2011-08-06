@@ -432,13 +432,14 @@ public class MScriptCompiler {
         return tree;
     }      
     
-    public static void execute(GenericTreeNode<Construct> root, Player p, MScriptComplete done){
-        Script fakeScript = new Script(null, null);
-        fakeScript.label = null;
-        fakeScript.varList = new IVariableList();
+    public static void execute(GenericTreeNode<Construct> root, Player p, MScriptComplete done, Script script){
+        if(script == null){
+            script = new Script(null, null);
+            script.varList = new IVariableList();
+        }
         StringBuilder b = new StringBuilder();
         for (GenericTreeNode<Construct> gg : root.getChildren()) {
-            String ret = fakeScript.eval(gg, p).val();
+            String ret = script.eval(gg, p).val();
             if (ret != null && !ret.trim().equals("")) {
                 b.append(ret).append(" ");
             }

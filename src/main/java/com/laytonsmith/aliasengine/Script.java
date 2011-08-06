@@ -118,7 +118,7 @@ public class Script {
                                 tempNode.data = Static.resolveDollarVar(tempNode.data, vars);
                             }
                         }
-                        MScriptCompiler.execute(tree.getRoot(), p, done);
+                        MScriptCompiler.execute(tree.getRoot(), p, done, this);
                     }
                 } catch (ConfigRuntimeException e) {
                     p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getLineNum());

@@ -129,7 +129,7 @@ public class CommandHelperInterpreterListener extends PlayerListener {
                     }
                     interpreterMode.add(p.getName());
                 }
-            });
+            }, null);
         } catch (CancelCommandException e) {
             interpreterMode.add(p.getName());
         } catch(Exception e){
