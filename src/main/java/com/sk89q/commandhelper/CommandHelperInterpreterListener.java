@@ -11,11 +11,14 @@ import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.MScriptComplete;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -30,64 +33,65 @@ import org.bukkit.plugin.Plugin;
  *
  * @author Layton
  */
-public class CommandHelperInterpreterListener extends PlayerListener{
-    List<String> interpreterMode = new ArrayList<String>();
+public class CommandHelperInterpreterListener extends PlayerListener {
+
+    Set<String> interpreterMode = new HashSet<String>();
     Map<String, String> multilineMode = new HashMap<String, String>();
-    
+
     @Override
-    public void onPlayerChat(PlayerChatEvent event){
-        if(interpreterMode.contains(event.getPlayer().getName())){
+    public void onPlayerChat(PlayerChatEvent event) {
+        if (interpreterMode.contains(event.getPlayer().getName())) {
             Player p = event.getPlayer();
             textLine(p, event.getMessage());
             event.setCancelled(true);
         }
-        
+
     }
-    
+
     @Override
-    public void onPlayerQuit(PlayerQuitEvent event){
+    public void onPlayerQuit(PlayerQuitEvent event) {
         interpreterMode.remove(event.getPlayer().getName());
         multilineMode.remove(event.getPlayer().getName());
     }
-    
+
     @Override
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event){
-        if(interpreterMode.contains(event.getPlayer().getName())){
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+        if (interpreterMode.contains(event.getPlayer().getName())) {
             Player p = event.getPlayer();
             textLine(p, event.getMessage());
             event.setCancelled(true);
         }
     }
-    
-    public void textLine(Player p, String line){
-        if(line.equals("-")){
+
+    public void textLine(Player p, String line) {
+        if (line.equals("-")) {
             //Exit interpreter mode
             interpreterMode.remove(p.getName());
             Static.SendMessage(p, ChatColor.YELLOW + "Now exiting interpreter mode");
-        } else if(line.equals(">>>")){
+        } else if (line.equals(">>>")) {
             //Start multiline mode
-            if(multilineMode.containsKey(p.getName())){
+            if (multilineMode.containsKey(p.getName())) {
                 Static.SendMessage(p, ChatColor.RED + "You are already in multiline mode!");
             } else {
-               multilineMode.put(p.getName(), "");
-               Static.SendMessage(p, ChatColor.YELLOW + "You are now in multiline mode. Type <<< on a line by itself to execute.");
-               Static.SendMessage(p, ":" + ChatColor.GRAY + ">>>");
+                multilineMode.put(p.getName(), "");
+                Static.SendMessage(p, ChatColor.YELLOW + "You are now in multiline mode. Type <<< on a line by itself to execute.");
+                Static.SendMessage(p, ":" + ChatColor.GRAY + ">>>");
             }
-        } else if(line.equals("<<<")){
+        } else if (line.equals("<<<")) {
             //Execute multiline
             Static.SendMessage(p, ":" + ChatColor.GRAY + "<<<");
             String script = multilineMode.get(p.getName());
             multilineMode.remove(p.getName());
-            try{
+            try {
                 execute(script, p);
-            } catch(ConfigCompileException e){
+            } catch (ConfigCompileException e) {
                 Static.SendMessage(p, ChatColor.RED + e.getMessage() + ":" + e.getLineNum());
             }
         } else {
-            if(multilineMode.containsKey(p.getName())){
+            if (multilineMode.containsKey(p.getName())) {
                 //Queue multiline
                 multilineMode.put(p.getName(), multilineMode.get(p.getName()) + line + "\n");
-                Static.SendMessage(p, ":" + ChatColor.GRAY + line);                
+                Static.SendMessage(p, ":" + ChatColor.GRAY + line);
             } else {
                 try {
                     //Execute single line
@@ -98,37 +102,43 @@ public class CommandHelperInterpreterListener extends PlayerListener{
             }
         }
     }
-    
-    public void reload(){
-        
+
+    public void reload() {
     }
-    
-    public void execute(String script, final Player p) throws ConfigCompileException{
+
+    public void execute(String script, final Player p) throws ConfigCompileException {
         List<Token> stream = MScriptCompiler.lex(script);
         GenericTreeNode tree = MScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
-        MScriptCompiler.execute(tree, p, new MScriptComplete() {
+        try {
+            MScriptCompiler.execute(tree, p, new MScriptComplete() {
 
-            public void done(String output) {
-                output = output.trim();
-                if(output.equals("")){
-                    Static.SendMessage(p, ":");
-                } else {
-                    if(output.startsWith("/")){
-                        //Run the command
-                        Static.SendMessage(p, ":" + ChatColor.YELLOW + output);
-                        p.chat(output);
+                public void done(String output) {
+                    output = output.trim();
+                    if (output.equals("")) {
+                        Static.SendMessage(p, ":");
                     } else {
-                        //output the results
-                        Static.SendMessage(p, ":" + ChatColor.GREEN + output);
+                        if (output.startsWith("/")) {
+                            //Run the command
+                            Static.SendMessage(p, ":" + ChatColor.YELLOW + output);
+                            p.chat(output);
+                        } else {
+                            //output the results
+                            Static.SendMessage(p, ":" + ChatColor.GREEN + output);
+                        }
                     }
+                    interpreterMode.add(p.getName());
                 }
-                interpreterMode.add(p.getName());
-            }
-        });
+            });
+        } catch (CancelCommandException e) {
+            interpreterMode.add(p.getName());
+        } catch(Exception e){
+            Static.SendMessage(p, ChatColor.RED + e.getMessage());
+            interpreterMode.add(p.getName());
+        }
     }
-    
-    public void startInterpret(String playername){
+
+    public void startInterpret(String playername) {
         interpreterMode.add(playername);
     }
 }
