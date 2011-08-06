@@ -106,6 +106,7 @@ public class CommandHelperInterpreterListener extends PlayerListener{
     public void execute(String script, final Player p) throws ConfigCompileException{
         List<Token> stream = MScriptCompiler.lex(script);
         GenericTreeNode tree = MScriptCompiler.compile(stream);
+        interpreterMode.remove(p.getName());
         MScriptCompiler.execute(tree, p, new MScriptComplete() {
 
             public void done(String output) {
@@ -116,14 +117,13 @@ public class CommandHelperInterpreterListener extends PlayerListener{
                     if(output.startsWith("/")){
                         //Run the command
                         Static.SendMessage(p, ":" + ChatColor.YELLOW + output);
-                        interpreterMode.remove(p.getName());
                         p.chat(output);
-                        interpreterMode.add(p.getName());
                     } else {
                         //output the results
                         Static.SendMessage(p, ":" + ChatColor.GREEN + output);
                     }
                 }
+                interpreterMode.add(p.getName());
             }
         });
     }
