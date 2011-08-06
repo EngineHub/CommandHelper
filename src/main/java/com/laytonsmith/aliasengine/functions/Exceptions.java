@@ -106,9 +106,9 @@ public class Exceptions {
         public Boolean runAsync() {
             return null;
         }
-        public Construct execs(int line_num, Player p, Script that, List<Variable> vars, GenericTreeNode<Construct> tryCode,
+        public Construct execs(int line_num, Player p, Script that, GenericTreeNode<Construct> tryCode,
                 GenericTreeNode<Construct> varName, GenericTreeNode<Construct> catchCode, GenericTreeNode<Construct> types) throws CancelCommandException{
-            Construct pivar = that.eval(varName, p, vars);
+            Construct pivar = that.eval(varName, p);
             IVariable ivar;
             if(pivar instanceof IVariable){
                 ivar = (IVariable)pivar;
@@ -117,7 +117,7 @@ public class Exceptions {
             }
             List<String> interest = new ArrayList<String>();
             if(types != null){
-            Construct ptypes = Static.resolveDollarVar(that.eval(types, p, vars), vars);
+            Construct ptypes = that.eval(types, p);
                 if(ptypes instanceof CString){
                     interest.add(ptypes.val());
                 } else if(ptypes instanceof CArray){
@@ -139,7 +139,7 @@ public class Exceptions {
             }
             
             try{
-                that.eval(tryCode, p, vars);
+                that.eval(tryCode, p);
             } catch (ConfigRuntimeException e){
                 if((Boolean)Static.getPreferences().getPreference("debug-mode")){
                     System.out.println("[CommandHelper]: Exception thrown -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getLineNum());
@@ -152,7 +152,7 @@ public class Exceptions {
                     ex.push(new CInt(e.getLineNum(), line_num));
                     ivar.setIval(ex);
                     varList.set(ivar);
-                    that.eval(catchCode, p, vars);
+                    that.eval(catchCode, p);
                 } else {
                     throw e;
                 }

@@ -23,6 +23,7 @@ import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
@@ -64,6 +65,12 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     final CommandHelperListener playerListener =
             new CommandHelperListener(this);
+    
+    /**
+     * Interpreter listener
+     */
+    final CommandHelperInterpreterListener interpreterListener = 
+            new CommandHelperInterpreterListener();
 
     final ArrayList<Player> commandRunning = new ArrayList<Player>();
     /**
@@ -95,7 +102,13 @@ public class CommandHelperPlugin extends JavaPlugin {
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Highest);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
         
+        //interpreter events
+        registerEvent(Event.Type.PLAYER_CHAT, interpreterListener, Priority.Highest);
+        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, interpreterListener, Priority.Highest);
+        registerEvent(Event.Type.PLAYER_QUIT, interpreterListener, Priority.Normal);
+        
         playerListener.loadGlobalAliases();
+        interpreterListener.reload();
     }
 
     public static AliasCore getCore(){
@@ -156,7 +169,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      * @param split
      * @return
      */
-    private boolean runCommand(Player player, String cmd, String[] args) {
+    private boolean runCommand(final Player player, String cmd, String[] args) {
         CommandHelperSession session = playerListener.getSession(player);
         if(commandRunning.contains(player)){
             return true;
@@ -172,14 +185,14 @@ public class CommandHelperPlugin extends JavaPlugin {
                 //an infinite loop though, because the preprocessor won't try to fire off a repeat command
                 commandRunning.remove(player);
                 if (session.getLastCommand() != null) {
-                    player.sendMessage(ChatColor.GRAY + session.getLastCommand());
+                    Static.SendMessage(player, ChatColor.GRAY + session.getLastCommand());
                     execCommand(player, session.getLastCommand());
                 } else {
-                    player.sendMessage(ChatColor.RED + "No previous command.");
+                    Static.SendMessage(player, ChatColor.RED + "No previous command.");
                 }
                 return true;
             } else {
-                player.sendMessage(ChatColor.RED + "You do not have permission to access the repeat command");
+                Static.SendMessage(player, ChatColor.RED + "You do not have permission to access the repeat command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -188,7 +201,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         } else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper")
                 /*&& player.canUseCommand("/alias")*/) {
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                player.sendMessage(ChatColor.RED + "You do not have permission to access the alias command");
+                Static.SendMessage(player, ChatColor.RED + "You do not have permission to access the alias command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -202,14 +215,14 @@ public class CommandHelperPlugin extends JavaPlugin {
                     //TODO: Finish this
                     int id = u.addAlias(alias);
                     if(id > -1){
-                        player.sendMessage(ChatColor.YELLOW + "Alias added with id '" + id + "'");
+                        Static.SendMessage(player, ChatColor.YELLOW + "Alias added with id '" + id + "'");
                     }
                 } catch (/*ConfigCompile*/Exception ex) {
-                    player.sendMessage(ChatColor.RED + ex.getMessage());
+                    Static.SendMessage(player, ChatColor.RED + ex.getMessage());
                 }
             } else{
                 //Display a help message
-                player.sendMessage(ChatColor.GREEN + "Command usage: \n"
+                Static.SendMessage(player, ChatColor.GREEN + "Command usage: \n"
                         + ChatColor.GREEN + "/alias <alias> - adds an alias to your user defined list\n"
                         + ChatColor.GREEN + "/delalias <id> - deletes alias with id <id> from your user defined list\n"
                         + ChatColor.GREEN + "/viewalias - shows you all of your aliases");
@@ -220,18 +233,18 @@ public class CommandHelperPlugin extends JavaPlugin {
         //View all aliases for this user
         } else if(cmd.equalsIgnoreCase("viewalias")){
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                player.sendMessage(ChatColor.RED + "You do not have permission to access the viewalias command");
+                Static.SendMessage(player, ChatColor.RED + "You do not have permission to access the viewalias command");
                 commandRunning.remove(player);
                 return true;
             }
             User u = new User(player, persist);
-            player.sendMessage(u.getAllAliases());
+            Static.SendMessage(player, u.getAllAliases());
             commandRunning.remove(player);
             return true;
         // Delete alias
         } else if (cmd.equalsIgnoreCase("delalias")) {
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                player.sendMessage(ChatColor.RED + "You do not have permission to access the delalias command");
+                Static.SendMessage(player, ChatColor.RED + "You do not have permission to access the delalias command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -244,15 +257,15 @@ public class CommandHelperPlugin extends JavaPlugin {
                 }
                 if(args.length > 1){
                     String s = ChatColor.YELLOW + "Aliases " + deleted.toString() + " were deleted";
-                    player.sendMessage(s);
+                    Static.SendMessage(player, s);
 
                 } else{
-                    player.sendMessage(ChatColor.YELLOW + "Alias #" + args[0] + "was deleted");
+                    Static.SendMessage(player, ChatColor.YELLOW + "Alias #" + args[0] + "was deleted");
                 }
             } catch(NumberFormatException e){
-                player.sendMessage(ChatColor.RED + "The id must be a number");
+                Static.SendMessage(player, ChatColor.RED + "The id must be a number");
             } catch(ArrayIndexOutOfBoundsException e){
-                player.sendMessage(ChatColor.RED + "Usage: /delalias <id> <id> ...");
+                Static.SendMessage(player, ChatColor.RED + "Usage: /delalias <id> <id> ...");
             }
             commandRunning.remove(player);
             return true;
@@ -260,22 +273,36 @@ public class CommandHelperPlugin extends JavaPlugin {
         // Reload global aliases
         } else if (cmd.equalsIgnoreCase("reloadaliases")) {
             if(!perms.hasPermission(player.getName(), "commandhelper.reloadaliases") && !perms.hasPermission(player.getName(), "ch.reloadaliases")){
-                player.sendMessage(ChatColor.DARK_RED + "You do not have permission to use that command");
+                Static.SendMessage(player, ChatColor.DARK_RED + "You do not have permission to use that command");
                 commandRunning.remove(player);
                 return true;
             }
             try {
                 if(ac.reload()){
-                    player.sendMessage("Command Helper scripts sucessfully recompiled.");
+                    Static.SendMessage(player, "Command Helper scripts sucessfully recompiled.");
                 } else{
-                    player.sendMessage("An error occured when trying to compile the script. Check the console for more information.");
+                    Static.SendMessage(player, "An error occured when trying to compile the script. Check the console for more information.");
                 }
                 commandRunning.remove(player);
                 return true;
             } catch (ConfigCompileException ex) {
                 logger.log(Level.SEVERE, null, ex);
-                player.sendMessage("An error occured when trying to compile the script. Check the console for more information.");
+                Static.SendMessage(player, "An error occured when trying to compile the script. Check the console for more information.");
             }
+        } else if(cmd.equalsIgnoreCase("interpreter")){
+            if(perms.hasPermission(player.getName(), "commandhelper.interpreter")){
+                if((Boolean)Static.getPreferences().getPreference("enable-interpreter")){
+                    interpreterListener.startInterpret(player.getName());
+                    Static.SendMessage(player, ChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
+                            + " multiline mode.");
+                } else {
+                    Static.SendMessage(player, ChatColor.RED + "The interpreter is currently disabled. Check your preferences file.");
+                }
+            } else {
+                Static.SendMessage(player, ChatColor.RED + "You do not have permission to run that command");
+            }
+            commandRunning.remove(player);
+            return true;
         }
         commandRunning.remove(player);
         return false;

@@ -133,14 +133,14 @@ public class DataHandling {
         }
         public Construct execs(int line_num, Player p, Script parent, GenericTreeNode<Construct> assign, 
                 GenericTreeNode<Construct> condition, GenericTreeNode<Construct> expression, 
-                GenericTreeNode<Construct> runnable, List<Variable> vars) throws CancelCommandException{
-            Construct counter = parent.eval(assign, p, vars);
+                GenericTreeNode<Construct> runnable) throws CancelCommandException{
+            Construct counter = parent.eval(assign, p);
             if(!(counter instanceof IVariable)){
                 throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, line_num);
             }
             int _continue = 0;
             while(true){
-                Construct cond = Static.resolveConstruct(Static.resolveDollarVar(parent.eval(condition, p, vars), vars).val(), line_num);
+                Construct cond = Static.resolveConstruct(parent.eval(condition, p).val(), line_num);
                 if(!(cond instanceof CBoolean)){
                     throw new ConfigRuntimeException("Second parameter of for must return a boolean", ExceptionType.CastException, line_num);
                 }
@@ -150,11 +150,11 @@ public class DataHandling {
                 }
                 if(_continue > 1){
                     --_continue;                    
-                    parent.eval(expression, p, vars);
+                    parent.eval(expression, p);
                     continue;
                 }
                 try{
-                    Static.resolveConstruct(Static.resolveDollarVar(parent.eval(runnable, p, vars), vars).val(), line_num);
+                    Static.resolveConstruct(parent.eval(runnable, p).val(), line_num);
                 } catch(LoopBreakException e){
                     int num = e.getTimes();
                     if(num > 1){
@@ -165,7 +165,7 @@ public class DataHandling {
                     _continue = e.getTimes() - 1;                    
                     continue;
                 }
-                parent.eval(expression, p, vars);
+                parent.eval(expression, p);
             }
             return new CVoid(line_num);
         }
@@ -218,13 +218,13 @@ public class DataHandling {
         }
         
         public Construct execs(int line_num, Player p, Script that, GenericTreeNode<Construct> array, 
-                GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code, List<Variable> vars) throws CancelCommandException{
+                GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code) throws CancelCommandException{
             
-            Construct arr = that.eval(array, p, vars);
+            Construct arr = that.eval(array, p);
             if(arr instanceof IVariable){
                 arr = varList.get(((IVariable)arr).getName()).ival();
             }
-            Construct iv = that.eval(ivar, p, vars);
+            Construct iv = that.eval(ivar, p);
             
             if(arr instanceof CArray){
                 if(iv instanceof IVariable){
@@ -233,7 +233,7 @@ public class DataHandling {
                     for(int i = 0; i < one.size(); i++){
                         varList.set(new IVariable(two.getName(), one.get(i, line_num), line_num));
                         try{
-                        that.eval(code, p, vars);
+                        that.eval(code, p);
                         } catch(LoopBreakException e){
                             int num = e.getTimes();
                             if(num > 1){

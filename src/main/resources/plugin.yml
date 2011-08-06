@@ -21,3 +21,6 @@ commands:
         description: View all user defined aliases
         usage: /<command>
         aliases: viewaliases
+    interpreter:
+        description: Puts your chat into interpreter mode
+        usage: /<command>

@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;
 import com.laytonsmith.aliasengine.functions.FunctionList;
+import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -17,6 +18,7 @@ import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -429,4 +431,18 @@ public class MScriptCompiler {
         }
         return tree;
     }      
+    
+    public static void execute(GenericTreeNode<Construct> root, Player p, MScriptComplete done){
+        Script fakeScript = new Script(null, null);
+        fakeScript.label = null;
+        fakeScript.varList = new IVariableList();
+        StringBuilder b = new StringBuilder();
+        for (GenericTreeNode<Construct> gg : root.getChildren()) {
+            String ret = fakeScript.eval(gg, p).val();
+            if (ret != null && !ret.trim().equals("")) {
+                b.append(ret).append(" ");
+            }
+        }
+        done.done(b.toString().trim());
+    }
 }

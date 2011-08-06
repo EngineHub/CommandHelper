@@ -56,10 +56,9 @@ public class Script {
     private List<Token> fullRight;
     private List<Construct> cleft;
     private List<GenericTreeNode<Construct>> cright;
-    private String label;
+    String label;
     private List<Variable> left_vars;
-    FunctionList func_list;
-    private IVariableList varList = new IVariableList();
+    IVariableList varList = new IVariableList();
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
 
@@ -105,20 +104,21 @@ public class Script {
                 }
             }
         }
+                
 //        final Plugin self = CommandHelperPlugin.self;
 //        Static.getServer().getScheduler().scheduleAsyncDelayedTask(self, new Runnable() {
 
 //            public void run() {
                 try {
                     for (GenericTreeNode<Construct> rootNode : cright) {
-                        StringBuilder b = new StringBuilder();
-                        for (GenericTreeNode<Construct> gg : rootNode.getChildren()) {
-                            String ret = eval(gg, p, vars).val();
-                            if (ret != null && !ret.trim().equals("")) {
-                                b.append(ret).append(" ");
+                        GenericTree<Construct> tree = new GenericTree<Construct>();
+                        tree.setRoot(rootNode);
+                        for(GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
+                            if(tempNode.data instanceof Variable){
+                                tempNode.data = Static.resolveDollarVar(tempNode.data, vars);
                             }
                         }
-                        done.done(b.toString());
+                        MScriptCompiler.execute(tree.getRoot(), p, done);
                     }
                 } catch (ConfigRuntimeException e) {
                     p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getLineNum());
@@ -140,19 +140,19 @@ public class Script {
 //        });
     }
 
-    public Construct eval(GenericTreeNode<Construct> c, final Player player, final List<Variable> vars) throws CancelCommandException {
+    public Construct eval(GenericTreeNode<Construct> c, final Player player) throws CancelCommandException {
         final Construct m = c.getData();
         if (m.ctype == ConstructType.FUNCTION) {
             try {
                 final Function f;
-                f = func_list.getFunction(m);
+                f = FunctionList.getFunction(m);
                 f.varList(varList);
                 //We have special handling for loop and other control flow functions
                 if (f instanceof _for) {
                     _for fr = (_for) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3), vars);
+                        return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
@@ -160,7 +160,7 @@ public class Script {
                     _if fr = (_if) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null, vars);
+                        return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
@@ -168,7 +168,7 @@ public class Script {
                     foreach fe = (foreach) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fe.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), vars);
+                        return fe.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2));
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
@@ -177,10 +177,10 @@ public class Script {
                     if (ch.size() > 1) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
-                    GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(Static.resolveDollarVar(ch.get(0).getData(), vars).val()));
+                    GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val()));
                     StringBuilder b = new StringBuilder();
                     for (GenericTreeNode<Construct> child : root.getChildren()) {
-                        CString cs = new CString(eval(child, player, vars).val(), 0);
+                        CString cs = new CString(eval(child, player).val(), 0);
                         if (!cs.val().trim().equals("")) {
                             b.append(cs.val()).append(" ");
                         }
@@ -195,11 +195,11 @@ public class Script {
                     if(ch.size() == 4){
                         fourth = ch.get(3);
                     }
-                    return ((_try)f).execs(m.line_num, player, this, vars, ch.get(0), ch.get(1), ch.get(2), fourth);
+                    return ((_try)f).execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
                 }
                 ArrayList<Construct> args = new ArrayList<Construct>();
                 for (GenericTreeNode<Construct> c2 : c.getChildren()) {
-                    args.add(eval(c2, player, vars));
+                    args.add(eval(c2, player));
                 }
                 if (f.isRestricted()) {
                     boolean perm = false;
@@ -236,16 +236,6 @@ public class Script {
                 final Construct[] ca = new Construct[a.length];
                 for (int i = 0; i < a.length; i++) {
                     ca[i] = (Construct) a[i];
-                    //if it's a variable, go ahead and cast it to the correct data type
-                    if (ca[i].ctype == ConstructType.VARIABLE) {
-                        Variable v = (Variable) ca[i];
-                        for (Variable var : vars) {
-                            if (var.getName().equals(v.getName())) {
-                                ca[i] = Static.resolveConstruct(var.val(), var.line_num);
-                                break;
-                            }
-                        }
-                    }
                     //CArray, CBoolean, CDouble, CInt, CMap, CNull, CString, CVoid.
                     if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
                             || ca[i] instanceof CInt || ca[i] instanceof CMap || ca[i] instanceof CNull
@@ -278,15 +268,6 @@ public class Script {
                 Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
             }
 
-        } else if (m.ctype == ConstructType.VARIABLE) {
-            Variable v = (Variable)m;
-            for(Variable vx : vars){
-                if(v.getName().equals(vx.getName())){
-                    v = vx;
-                    break;
-                }
-            }            
-            return v;
         } else {
             return m;
         }
