@@ -351,7 +351,9 @@ public class MScriptCompiler {
             } else if (t.type.equals(TType.FUNC_NAME)) {
                 CFunction func = new CFunction(t.val(), t.line_num);
                 //This will throw an exception for us if the function doesn't exist
-                FunctionList.getFunction(func);
+                if(!func.val().matches("^_[^_].*")){
+                    FunctionList.getFunction(func);
+                }
                 GenericTreeNode<Construct> f = new GenericTreeNode<Construct>(func);
                 tree.addChild(f);
                 constructCount.push(new AtomicInteger(0));
@@ -390,9 +392,11 @@ public class MScriptCompiler {
                     tree.addChild(c);
                 }
                 //Check argument number now
-                Integer [] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
-                if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())){
-                    throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().line_num);
+                if(!tree.getData().val().matches("^_[^_].*")){
+                    Integer [] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
+                    if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())){
+                        throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().line_num);
+                    }
                 }
                 constructCount.pop();
                 constructCount.peek().incrementAndGet();

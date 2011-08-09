@@ -14,7 +14,7 @@ public class CClosure extends Construct {
 
     GenericTreeNode<Construct> node;
 
-    public CClosure(GenericTreeNode<Construct> node, int line_num) {
+    public CClosure(String name, GenericTreeNode<Construct> node, int line_num) {
         super(node.toString(), ConstructType.CLOSURE, line_num);
         this.node = node;
     }

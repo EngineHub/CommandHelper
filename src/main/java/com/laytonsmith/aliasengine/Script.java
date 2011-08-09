@@ -16,12 +16,14 @@ import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.functions.BasicLogic._if;
 import com.laytonsmith.aliasengine.functions.DataHandling._for;
 import com.laytonsmith.aliasengine.functions.DataHandling.foreach;
+import com.laytonsmith.aliasengine.functions.DataHandling.proc;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.Exceptions._try;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
+import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
@@ -61,6 +63,8 @@ public class Script {
     IVariableList varList = new IVariableList();
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
+    
+    List<Procedure> knownProcs = new ArrayList<Procedure>();
 
     public String toString() {
         StringBuilder b = new StringBuilder();
@@ -69,6 +73,15 @@ public class Script {
         }
         b.append("compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
         return b.toString();
+    }
+    
+    private Procedure getProc(String name){
+        for(Procedure p : knownProcs){
+            if(p.getName().equals(name)){
+                return p;
+            }
+        }
+        return null;
     }
 
     public Script(List<Token> left, List<Token> right){
@@ -144,6 +157,20 @@ public class Script {
         final Construct m = c.getData();
         if (m.ctype == ConstructType.FUNCTION) {
             try {
+                if(m.val().matches("^_[^_].*")){
+                    //Not really a function, so we can't put it in Function.
+                    Procedure p = getProc(m.val());
+                    if(p == null){
+                        throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.line_num);
+                    }
+                    try{
+                        //TODO
+                        //p.execute(, player);
+                        return new CVoid(m.line_num);
+                    } catch(FunctionReturnException e){
+                        return e.getReturn();
+                    }
+                }
                 final Function f;
                 f = FunctionList.getFunction(m);
                 f.varList(varList);
@@ -196,7 +223,41 @@ public class Script {
                         fourth = ch.get(3);
                     }
                     return ((_try)f).execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
+                } else if(f instanceof proc){
+                    List<GenericTreeNode<Construct>> ch = c.getChildren();
+                    if(ch.size() <= 1){
+                        throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.line_num);
+                    }
+                    String name = "";
+                    List<String> vars = new ArrayList<String>();
+                    GenericTreeNode<Construct> tree = null;
+                    for(int i = 0; i < ch.size(); i++){
+                        if(i == ch.size() - 1){
+                            tree = ch.get(i);
+                        } else {
+                            Construct cons = eval(ch.get(i), player);
+                            if(i == 0 && cons instanceof IVariable){
+                                //Soon, this will be allowed, so anonymous procedures can be created, but for now
+                                //it's not allowed
+                                throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, m.line_num);
+                            } else {
+                                if(i == 0 && !(cons instanceof IVariable)){
+                                    name = cons.val();                                    
+                                } else {
+                                    if(!(cons instanceof IVariable)){
+                                        throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.line_num);
+                                    } else {
+                                        vars.add(((IVariable)cons).name);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    Procedure myProc = new Procedure(name, vars, tree);
+                    knownProcs.add(myProc);
                 }
+                
+                
                 ArrayList<Construct> args = new ArrayList<Construct>();
                 for (GenericTreeNode<Construct> c2 : c.getChildren()) {
                     args.add(eval(c2, player));

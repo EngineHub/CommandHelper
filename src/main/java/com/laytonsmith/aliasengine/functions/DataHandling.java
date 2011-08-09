@@ -647,6 +647,55 @@ public class DataHandling {
         
     }
     
+    @api public static class proc implements Function{
+        
+        IVariableList varList;
+
+        public String getName() {
+            return "proc";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "void {[name], [ivar...], procCode} Creates a new user defined procedure (also known as \"function\") that can be called later in code. Please see the more detailed"
+                    + " documentation on procedures for more information.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {
+            this.varList = varList;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+        
+        
+
+        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(line_num);
+        }
+        
+    }
+    
     
     
 }

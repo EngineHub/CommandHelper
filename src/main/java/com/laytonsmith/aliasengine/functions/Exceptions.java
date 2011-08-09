@@ -58,6 +58,11 @@ public class Exceptions {
          * given value.
          */
         FormatException,
+        /**
+         * This exception is thrown if a procedure is used without being defined, or if a procedure name does not follow proper naming
+         * conventions.
+         */
+        InvalidProcedureException,
     }
     @api public static class _try implements Function{      
         
