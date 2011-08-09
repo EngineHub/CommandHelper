@@ -115,7 +115,7 @@ public class Script {
                         tree.setRoot(rootNode);
                         for(GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
                             if(tempNode.data instanceof Variable){
-                                tempNode.data = Static.resolveDollarVar(tempNode.data, vars);
+                                ((Variable)tempNode.data).def = Static.resolveDollarVar(tempNode.data, vars).toString();
                             }
                         }
                         MScriptCompiler.execute(tree.getRoot(), p, done, this);
@@ -267,7 +267,8 @@ public class Script {
             } catch (ConfigCompileException ex) {
                 Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
             }
-
+        } else if(m.ctype == ConstructType.VARIABLE){
+            return Static.resolveConstruct(m.val(), m.line_num);
         } else {
             return m;
         }
