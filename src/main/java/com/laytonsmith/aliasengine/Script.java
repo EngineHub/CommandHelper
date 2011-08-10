@@ -164,8 +164,11 @@ public class Script {
                         throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.line_num);
                     }
                     try{
-                        //TODO
-                        //p.execute(, player);
+                        List<Construct> variables = new ArrayList<Construct>();
+                        for(GenericTreeNode<Construct> child : c.getChildren()){
+                            variables.add(eval(child, player));
+                        }
+                        p.execute(variables, player);
                         return new CVoid(m.line_num);
                     } catch(FunctionReturnException e){
                         return e.getReturn();
@@ -255,6 +258,7 @@ public class Script {
                     }
                     Procedure myProc = new Procedure(name, vars, tree);
                     knownProcs.add(myProc);
+                    return new CVoid(m.line_num);
                 }
                 
                 

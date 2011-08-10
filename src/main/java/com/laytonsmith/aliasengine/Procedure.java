@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
@@ -48,20 +50,29 @@ public class Procedure {
     public void execute(List<Construct> variables, Player player){
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
+        Script fakeScript = new Script(null, null);
+        fakeScript.varList = new IVariableList();
+        CArray array = new CArray(0);
+        for(Construct c : variables){
+            array.push(c);
+        }
+        fakeScript.varList.set(new IVariable("@arguments", array, 0));
         for(GenericTreeNode<Construct> c : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
             if(c.getData() instanceof IVariable){
                 int index = indexOf(((IVariable)c.getData()).name);
-                IVariable var;
+                IVariable var = (IVariable)c.getData();
                 if(index == -1){
-                    ((IVariable)c.getData()).setIval(new CString("", ((IVariable)c.getData()).line_num));
+                    var.setIval(new CString("", var.line_num));
+                } else if(index > variables.size() - 1){
+                    var.setIval(new CNull(0));
                 } else {
-                    ((IVariable)c.getData()).setIval(variables.get(index));
+                    var.setIval(variables.get(index));
                 }
+                fakeScript.varList.set(var);
             }
         }
         
-        Script fakeScript = new Script(null, null);
-        fakeScript.varList = new IVariableList();
+        
         fakeScript.eval(tree, player);
     }
 }
