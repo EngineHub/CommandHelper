@@ -68,7 +68,7 @@ public class Meta {
         public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
-                        ExceptionType.FormatException, line_num);
+                        ExceptionType.FormatException, line_num, f);
             }
             String cmd = args[1].val().substring(1);
             if (args[0] instanceof CArray) {
@@ -92,7 +92,8 @@ public class Meta {
                     }
                     Static.getServer().dispatchCommand(m, cmd);
                 } else {
-                    throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",ExceptionType.PlayerOfflineException, line_num);
+                    throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",
+                            ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
             return new CVoid(line_num, f);
@@ -142,7 +143,7 @@ public class Meta {
         public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
-                        ExceptionType.FormatException, line_num);
+                        ExceptionType.FormatException, line_num, f);
             }
             String cmd = args[0].val().substring(1);
             if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {

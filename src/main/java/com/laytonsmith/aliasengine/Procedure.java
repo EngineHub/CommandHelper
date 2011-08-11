@@ -5,6 +5,7 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CFunction;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
@@ -25,12 +26,12 @@ public class Procedure {
     private GenericTreeNode<Construct> tree;
 
     
-    public Procedure(String name, List<String> varList, GenericTreeNode<Construct> tree){
+    public Procedure(String name, List<String> varList, GenericTreeNode<Construct> tree, CFunction f){
         this.name = name;
         this.varList = varList;
         this.tree = tree;
         if(!this.name.matches("^_[^_].*")){
-            throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, 0);
+            throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, f.line_num, f.file);
         }
     }
     

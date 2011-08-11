@@ -146,7 +146,8 @@ public class Scheduling {
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (Thread.currentThread().getName().equals("Server thread")) {
-                throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", null, line_num);
+                throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", 
+                        null, line_num, f);
             }
             Construct x = args[0];
             double time = Static.getNumber(x);
@@ -158,7 +159,7 @@ public class Scheduling {
                 }
             } else {
                 throw new ConfigRuntimeException("The value passed to sleep must be less than the server defined value of " + i + " seconds or less.", 
-                        ExceptionType.RangeException, line_num);
+                        ExceptionType.RangeException, line_num, f);
             }
             return new CVoid(line_num, f);
         }

@@ -39,7 +39,7 @@ public class ArrayHandling {
             if(args[0] instanceof CArray){
                 return new CInt(((CArray)args[0]).size(), line_num, f);
             }
-            throw new ConfigRuntimeException("Argument 1 of array_size must be an array", ExceptionType.CastException, line_num);
+            throw new ConfigRuntimeException("Argument 1 of array_size must be an array", ExceptionType.CastException, line_num, f);
         }
         
         public ExceptionType[] thrown(){
@@ -84,7 +84,7 @@ public class ArrayHandling {
             if(args[0] instanceof CArray){
                 return ((CArray)args[0]).get((int)Static.getInt(args[1]), line_num);
             } else{
-                throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, line_num);
+                throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, line_num, f);
             }
         }
         
@@ -135,7 +135,7 @@ public class ArrayHandling {
                 ((CArray)args[0]).set((int)((CInt)args[1]).getInt(), args[2]);
                 return new CVoid(line_num, f);
             }
-            throw new ConfigRuntimeException("Argument 1 of array_set must be an array, and argument 2 must be an integer", ExceptionType.CastException, line_num);        
+            throw new ConfigRuntimeException("Argument 1 of array_set must be an array, and argument 2 must be an integer", ExceptionType.CastException, line_num, f);        
         }
 
         public ExceptionType[] thrown(){
@@ -180,7 +180,7 @@ public class ArrayHandling {
                 ((CArray)args[0]).push(args[1]);
                 return new CVoid(line_num, f);
             }
-            throw new ConfigRuntimeException("Argument 1 of array_push must be an array", ExceptionType.CastException, line_num);
+            throw new ConfigRuntimeException("Argument 1 of array_push must be an array", ExceptionType.CastException, line_num, f);
         }
         
         public ExceptionType[] thrown(){
@@ -230,7 +230,7 @@ public class ArrayHandling {
                 }
                 return new CBoolean(false, line_num, f);
             } else {
-                throw new ConfigRuntimeException("Argument 1 of array_contains must be an array", ExceptionType.CastException, line_num);
+                throw new ConfigRuntimeException("Argument 1 of array_contains must be an array", ExceptionType.CastException, line_num, f);
             }
         }
         
@@ -303,7 +303,7 @@ public class ArrayHandling {
                 CArray ca = (CArray)args[0];
                 return new CBoolean(index <= ca.size() - 1, line_num, f);
             } else {
-                throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num);
+                throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num, f);
             }
         }
         

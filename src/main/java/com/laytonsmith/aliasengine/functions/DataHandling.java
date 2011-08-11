@@ -88,7 +88,7 @@ public class DataHandling {
                 varList.set(v);
                 return v;
             }
-            throw new ConfigRuntimeException("assign only accepts an ivariable as the first argument", ExceptionType.CastException, line_num);
+            throw new ConfigRuntimeException("assign only accepts an ivariable as the first argument", ExceptionType.CastException, line_num, f);
         }
         
         public ExceptionType[] thrown(){
@@ -132,13 +132,13 @@ public class DataHandling {
                 GenericTreeNode<Construct> runnable) throws CancelCommandException{
             Construct counter = parent.eval(assign, p);
             if(!(counter instanceof IVariable)){
-                throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, line_num);
+                throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, line_num, f);
             }
             int _continue = 0;
             while(true){
                 Construct cond = Static.resolveConstruct(parent.eval(condition, p).val(), line_num, f);
                 if(!(cond instanceof CBoolean)){
-                    throw new ConfigRuntimeException("Second parameter of for must return a boolean", ExceptionType.CastException, line_num);
+                    throw new ConfigRuntimeException("Second parameter of for must return a boolean", ExceptionType.CastException, line_num, f);
                 }
                 CBoolean bcond = ((CBoolean) cond);
                 if(bcond.getBoolean() == false){
@@ -242,10 +242,10 @@ public class DataHandling {
                         }
                     }
                 } else {
-                    throw new ConfigRuntimeException("Parameter 2 of foreach must be an ivariable", ExceptionType.CastException, line_num);
+                    throw new ConfigRuntimeException("Parameter 2 of foreach must be an ivariable", ExceptionType.CastException, line_num, f);
                 }
             } else {
-                throw new ConfigRuntimeException("Parameter 1 of foreach must be an array", ExceptionType.CastException, line_num);
+                throw new ConfigRuntimeException("Parameter 1 of foreach must be an array", ExceptionType.CastException, line_num, f);
             }
             
             return new CVoid(line_num, f);

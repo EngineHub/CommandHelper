@@ -144,7 +144,8 @@ public class PlayerManangement {
             if (args.length == 1) {
                 p = p.getServer().getPlayer(args[0].val());
                 if (p == null || !p.isOnline()) {
-                    throw new ConfigRuntimeException("The player is not online", ExceptionType.PlayerOfflineException, line_num);
+                    throw new ConfigRuntimeException("The player is not online", 
+                            ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
             Location l = p.getLocation();
@@ -237,23 +238,27 @@ public class PlayerManangement {
                         z = Static.getNumber(ca.get(2, line_num));
                         m = p;
                     } else {
-                        throw new ConfigRuntimeException("Expecting array at parameter 1 of set_ploc to have 3 values", ExceptionType.LengthException, line_num);
+                        throw new ConfigRuntimeException("Expecting array at parameter 1 of set_ploc to have 3 values", 
+                                ExceptionType.LengthException, line_num, f);
                     }
                 } else {
-                    throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_ploc", ExceptionType.CastException, line_num);
+                    throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_ploc", 
+                            ExceptionType.CastException, line_num, f);
                 }
             } else if (args.length == 2) {
                 if (args[1] instanceof CArray) {
                     CArray ca = (CArray) args[1];
                     player = args[0].val();
                     if (ca.size() != 3) {
-                        throw new ConfigRuntimeException("Expecting array at parameter 2 of set_ploc to have 3 values", ExceptionType.LengthException, line_num);
+                        throw new ConfigRuntimeException("Expecting array at parameter 2 of set_ploc to have 3 values", 
+                                ExceptionType.LengthException, line_num, f);
                     }
                     x = Static.getNumber(ca.get(0, line_num));
                     y = Static.getNumber(ca.get(1, line_num));
                     z = Static.getNumber(ca.get(2, line_num));
                 } else {
-                    throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc", ExceptionType.CastException, line_num);
+                    throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc", 
+                            ExceptionType.CastException, line_num, f);
                 }
             } else if (args.length == 3) {
                 m = p;
@@ -270,7 +275,8 @@ public class PlayerManangement {
                 m = p.getServer().getPlayer(player);
             }
             if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("That player is not online", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
             }
             return new CBoolean(m.teleport(new Location(p.getWorld(), x, y + 1, z, p.getLocation().getYaw(), p.getLocation().getPitch())), line_num, f);
         }
@@ -319,12 +325,14 @@ public class PlayerManangement {
             } else {
                 m = p.getServer().getPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
-                    throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
+                    throw new ConfigRuntimeException("That player is not online", 
+                            ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
             Block b = p.getTargetBlock(null, 200);
             if (b == null) {
-                throw new ConfigRuntimeException("No block in sight, or block too far", ExceptionType.RangeException, line_num);
+                throw new ConfigRuntimeException("No block in sight, or block too far", 
+                        ExceptionType.RangeException, line_num, f);
             }
             return new CArray(line_num, f, new CInt(b.getX(), line_num, f), new CInt(b.getY(), line_num, f), new CInt(b.getZ(), line_num, f));
         }
@@ -350,7 +358,8 @@ public class PlayerManangement {
                 p = p.getServer().getPlayer(args[0].val());
             }
             if (p == null) {
-                throw new ConfigRuntimeException("The player is not online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("The player is not online", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
             }
             p.setHealth(0);
             return new CVoid(line_num, f);
@@ -402,7 +411,8 @@ public class PlayerManangement {
             } else {
                 Player ap = p.getServer().getPlayer(args[0].val());
                 if (ap == null || !ap.isOnline()) {
-                    throw new ConfigRuntimeException("That player is not online.", ExceptionType.PlayerOfflineException, line_num);
+                    throw new ConfigRuntimeException("That player is not online.", 
+                            ExceptionType.PlayerOfflineException, line_num, f);
                 }
                 player = ap.getName();
             }
@@ -506,10 +516,12 @@ public class PlayerManangement {
             }
             p = p.getServer().getPlayer(player);
             if (p == null || !p.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("The specified player is not online", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
             }
             if (index < -1 || index > 9) {
-                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 8", ExceptionType.RangeException, line_num);
+                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 8", 
+                        ExceptionType.RangeException, line_num, f);
             }
             assert index >= -1 && index <= 9;
             ArrayList<Construct> retVals = new ArrayList<Construct>();
@@ -627,7 +639,8 @@ public class PlayerManangement {
             } else {
                 m = p.getServer().getPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
-                    throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
+                    throw new ConfigRuntimeException("That player is not online", 
+                            ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
             return new CString(m.getWorld().getName(), line_num, f);
@@ -690,7 +703,8 @@ public class PlayerManangement {
                 ptok.kickPlayer(message);
                 return new CVoid(line_num, f);
             } else {
-                throw new ConfigRuntimeException("The specified player does not seem to be online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("The specified player does not seem to be online", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
             }
         }
     }
@@ -746,7 +760,8 @@ public class PlayerManangement {
                 name = args[1].val();
             }
             if (player == null || !player.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("That player is not online", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
             }
             player.setDisplayName(name);
             return new CVoid(line_num, f);
@@ -800,7 +815,8 @@ public class PlayerManangement {
                 player = p.getServer().getPlayer(args[0].val());
             }
             if (player == null || !player.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("That player is not online", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
             }
             player.setDisplayName(player.getName());
             return new CVoid(line_num, f);
@@ -867,7 +883,8 @@ public class PlayerManangement {
                     } catch (NumberFormatException e) {
                         Player p2 = p.getServer().getPlayer(args[0].val());
                         if (p2 == null || !p2.isOnline()) {
-                            throw new ConfigRuntimeException("The specified player is offline", ExceptionType.PlayerOfflineException, line_num);
+                            throw new ConfigRuntimeException("The specified player is offline", 
+                                    ExceptionType.PlayerOfflineException, line_num, f);
                         } else {
                             l = p2.getLocation();
                         }
@@ -893,7 +910,8 @@ public class PlayerManangement {
                 pitch = p.getLocation().getPitch();
                 int g = (int) Static.getInt(args[0]);
                 if (g < 0 || g > 3) {
-                    throw new ConfigRuntimeException("The F specifed must be from 0 to 3", ExceptionType.RangeException, line_num);
+                    throw new ConfigRuntimeException("The F specifed must be from 0 to 3", 
+                            ExceptionType.RangeException, line_num, f);
                 }
                 yaw = g * 90;
             } else if (args.length == 2) {
@@ -911,7 +929,8 @@ public class PlayerManangement {
                     pitch = toSet.getLocation().getPitch();
                     int g = (int) Static.getInt(args[1]);
                     if (g < 0 || g > 3) {
-                        throw new ConfigRuntimeException("The F specifed must be from 0 to 3", ExceptionType.RangeException, line_num);
+                        throw new ConfigRuntimeException("The F specifed must be from 0 to 3", 
+                                ExceptionType.RangeException, line_num, f);
                     }
                     yaw = g * 90;
                 }
@@ -924,10 +943,12 @@ public class PlayerManangement {
 
             //Error check our data
             if (toSet == null || !toSet.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("The specified player is not online", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
             }
             if (pitch > 90 || pitch < -90) {
-                throw new ConfigRuntimeException("pitch must be between -90 and 90", ExceptionType.RangeException, line_num);
+                throw new ConfigRuntimeException("pitch must be between -90 and 90", 
+                        ExceptionType.RangeException, line_num, f);
             }
             Location l = toSet.getLocation().clone();
             l.setPitch(pitch);
@@ -1000,11 +1021,13 @@ public class PlayerManangement {
                 m = p.getServer().getPlayer(args[0].val());
             }
             if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("The specified player is not online", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
             }
             if (!all) {
                 if ((index < 0 || index > 35) && (index < 100 || index > 103) && index != -1) {
-                    throw new ConfigRuntimeException("The index specified must be between 0-35, or 100-103", ExceptionType.RangeException, line_num);
+                    throw new ConfigRuntimeException("The index specified must be between 0-35, or 100-103", 
+                            ExceptionType.RangeException, line_num, f);
                 }
             }
             PlayerInventory inv = m.getInventory();

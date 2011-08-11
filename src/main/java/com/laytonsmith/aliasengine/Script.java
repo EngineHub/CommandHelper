@@ -34,6 +34,7 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.management.loading.MLet;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -96,12 +97,12 @@ public class Script {
 
     public void run(final List<Variable> vars, final Player p, final MScriptComplete done) {
         if (!hasBeenCompiled || compilerError) {
-            int line_num = 0;
+            int line_num = 0;        
             if(left.size() >= 1){
                 line_num = left.get(0).line_num;
             }
             throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.",
-                    null, line_num);
+                    null, line_num, null);
         }
         if(label != null){
             PermissionsResolverManager perms = Static.getPermissionsResolverManager();
@@ -110,7 +111,7 @@ public class Script {
                 if(group.startsWith("-") && perms.inGroup(p.getName(), group.substring(1))){
                     //negative permission
                     throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
-                            0);
+                            0, null);
                 } else if(perms.inGroup(p.getName(), group)){
                     //They do have permission.
                     break;
@@ -134,8 +135,8 @@ public class Script {
                         MScriptCompiler.execute(tree.getRoot(), p, done, this);
                     }
                 } catch (ConfigRuntimeException e) {
-                    p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getLineNum());
-                    System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getLineNum());
+                    p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
+                    System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
                 } catch (CancelCommandException e) {
                     //p.sendMessage(e.getMessage());
                     //The message in the exception is actually empty
@@ -161,7 +162,7 @@ public class Script {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
                     if(p == null){
-                        throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.line_num);
+                        throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                     }
                     try{
                         List<Construct> variables = new ArrayList<Construct>();
@@ -184,7 +185,7 @@ public class Script {
                     try {
                         return fr.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.line_num);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
                     }
                 } else if (f instanceof _if) {
                     _if fr = (_if) f;
@@ -192,7 +193,7 @@ public class Script {
                     try {
                         return fr.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.line_num);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
                     }
                 } else if (f instanceof foreach) {
                     foreach fe = (foreach) f;
@@ -200,12 +201,12 @@ public class Script {
                     try {
                         return fe.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2));
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.line_num);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
                     }
                 } else if (f instanceof eval) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() > 1) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.line_num);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
                     }
                     GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val(), null));
                     StringBuilder b = new StringBuilder();
@@ -219,7 +220,7 @@ public class Script {
                 } else if(f instanceof _try){
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() != 4 && ch.size() != 3) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to try", ExceptionType.InsufficientArgumentsException, m.line_num);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to try", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
                     }
                     GenericTreeNode<Construct> fourth = null;
                     if(ch.size() == 4){
@@ -229,7 +230,7 @@ public class Script {
                 } else if(f instanceof proc){
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if(ch.size() <= 1){
-                        throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.line_num);
+                        throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                     }
                     String name = "";
                     List<String> vars = new ArrayList<String>();
@@ -242,13 +243,13 @@ public class Script {
                             if(i == 0 && cons instanceof IVariable){
                                 //Soon, this will be allowed, so anonymous procedures can be created, but for now
                                 //it's not allowed
-                                throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, m.line_num);
+                                throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                             } else {
                                 if(i == 0 && !(cons instanceof IVariable)){
                                     name = cons.val();                                    
                                 } else {
                                     if(!(cons instanceof IVariable)){
-                                        throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.line_num);
+                                        throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                                     } else {
                                         vars.add(((IVariable)cons).name);
                                     }
@@ -256,7 +257,7 @@ public class Script {
                             }
                         }
                     }
-                    Procedure myProc = new Procedure(name, vars, tree);
+                    Procedure myProc = new Procedure(name, vars, tree, (CFunction)c.getData());
                     knownProcs.add(myProc);
                     return new CVoid(m.line_num, m.file);
                 }
@@ -294,7 +295,7 @@ public class Script {
                     }
                     if (!perm) {
                         throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
-                                ExceptionType.InsufficientPermissionException, m.line_num);
+                                ExceptionType.InsufficientPermissionException, m.line_num, m.file);
                     }
                 }
                 Object[] a = args.toArray();
@@ -305,7 +306,7 @@ public class Script {
                     if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
                             || ca[i] instanceof CInt || ca[i] instanceof CMap || ca[i] instanceof CNull
                             || ca[i] instanceof CString || ca[i] instanceof CVoid || ca[i] instanceof IVariable)) {
-                        throw new ConfigRuntimeException("Invalid Construct being passed as an argument to a function", null, m.line_num);
+                        throw new ConfigRuntimeException("Invalid Construct being passed as an argument to a function", null, m.line_num, m.file);
                     }
                 }
                 if (f.preResolveVariables()) {

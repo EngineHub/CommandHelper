@@ -202,7 +202,8 @@ public class Minecraft {
                 qty = (int) Static.getInt(args[1]);
             }
             if(qty > 50){
-                throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?", ExceptionType.RangeException, line_num);
+                throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?", 
+                        ExceptionType.RangeException, line_num, f);
             }
             Location l = p.getLocation();
             if (args.length > 2) {
@@ -212,10 +213,12 @@ public class Minecraft {
                         l = new Location(p.getWorld(), Static.getNumber(ca.get(0, line_num)),
                                 Static.getNumber(ca.get(1, line_num)) + 1, Static.getNumber(ca.get(2, line_num)));
                     } else {
-                        throw new ConfigRuntimeException("Expected argument 3 to be an array with 3 items", ExceptionType.LengthException, line_num);
+                        throw new ConfigRuntimeException("Expected argument 3 to be an array with 3 items", 
+                                ExceptionType.LengthException, line_num, f);
                     }
                 } else {
-                    throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array", ExceptionType.CastException, line_num);
+                    throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array", 
+                            ExceptionType.CastException, line_num, f);
                 }
             }
             Class mobType = null;
@@ -262,7 +265,8 @@ public class Minecraft {
                         break;
                 }                
             } catch (IllegalArgumentException e) {
-                throw new ConfigRuntimeException("No mob of type " + mob + " exists", ExceptionType.FormatException, line_num);            
+                throw new ConfigRuntimeException("No mob of type " + mob + " exists", 
+                        ExceptionType.FormatException, line_num, f);            
             }
             for(int i = 0; i < qty; i++){
                 Entity e = p.getWorld().spawn(l, mobType);
@@ -271,7 +275,8 @@ public class Minecraft {
                     try{
                     s.setColor(DyeColor.valueOf(sheepColor.toUpperCase()));
                     } catch(IllegalArgumentException ex){
-                        throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color", ExceptionType.FormatException, line_num);
+                        throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color", 
+                                ExceptionType.FormatException, line_num, f);
                     }
                 }
             }

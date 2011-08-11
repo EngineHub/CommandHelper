@@ -66,7 +66,7 @@ public class Persistance {
                 Character c = key.charAt(i);
                 if(c != '_' && !Character.isLetterOrDigit(c)){
                     throw new ConfigRuntimeException("Param 1 in store_value must only contain letters, digits, or underscores.",
-                            ExceptionType.FormatException, line_num);
+                            ExceptionType.FormatException, line_num, f);
                 }
             }
             Static.getPersistance().setValue(new String[]{"commandhelper", "function", "storage", key}, value);

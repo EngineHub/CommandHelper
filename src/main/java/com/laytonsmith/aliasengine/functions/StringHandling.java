@@ -151,7 +151,8 @@ public class StringHandling {
                 String s = file_get_contents(args[0].val());
                 return new CString(file_get_contents(args[0].val()), line_num, f);
             } catch (Exception ex) {
-                throw new ConfigRuntimeException("File could not be read in.", ExceptionType.FormatException, line_num);
+                throw new ConfigRuntimeException("File could not be read in.", 
+                        ExceptionType.FormatException, line_num, f);
             }
         }
 
@@ -503,7 +504,7 @@ public class StringHandling {
                 return new CString(s.substring(begin, end), line_num, f);
             } catch(IndexOutOfBoundsException e){
                 throw new ConfigRuntimeException("The indices given are not valid for string '" + args[0].val() + "'",
-                        ExceptionType.RangeException, line_num);
+                        ExceptionType.RangeException, line_num, f);
             }
         }
         

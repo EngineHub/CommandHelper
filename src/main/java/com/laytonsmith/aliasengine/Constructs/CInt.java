@@ -20,7 +20,7 @@ public class CInt extends Construct{
         try{
             val = Long.parseLong(value);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, line_num);
+            throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, line_num, file);
         }
     }
 

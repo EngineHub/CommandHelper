@@ -41,7 +41,7 @@ public class CBoolean extends Construct{
                 try{
                     val = Boolean.parseBoolean(value);
                 } catch(NumberFormatException g){
-                    throw new ConfigRuntimeException("Could not parse value " + value + " into a Boolean type", ExceptionType.FormatException, line_num);
+                    throw new ConfigRuntimeException("Could not parse value " + value + " into a Boolean type", ExceptionType.FormatException, line_num, file);
                 }
             }
         }

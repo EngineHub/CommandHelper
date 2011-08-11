@@ -54,11 +54,11 @@ public class Static {
                 d = Double.parseDouble(c.val());
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting a number, but received " + c.val() + " instead",
-                        ExceptionType.CastException, c.line_num);
+                        ExceptionType.CastException, c.line_num, c.file);
             }
         } else {
             throw new ConfigRuntimeException("Expecting a number, but recieved " + c.val() + " instead",
-                    ExceptionType.CastException, c.line_num);
+                    ExceptionType.CastException, c.line_num, c.file);
         }
         return d;
     }
@@ -73,7 +73,7 @@ public class Static {
             return getNumber(c);
         } catch (ConfigRuntimeException e) {
             throw new ConfigRuntimeException("Expecting a double, but recieved " + c.val() + " instead",
-                    ExceptionType.CastException, c.line_num);
+                    ExceptionType.CastException, c.line_num, c.file);
         }
     }
 
@@ -95,7 +95,7 @@ public class Static {
                 i = Integer.parseInt(c.val());
             } catch(NumberFormatException e){
                 throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead",
-                        ExceptionType.CastException, c.line_num);
+                        ExceptionType.CastException, c.line_num, c.file);
             }
         }
         return i;
@@ -310,7 +310,7 @@ public class Static {
         } else {
             return variable;
         }
-        throw new ConfigRuntimeException("No value found for variable?", 0);
+        throw new ConfigRuntimeException("No value passed in for for variable " + variable.val(), 0, null);
     }
     
     /**
@@ -335,12 +335,12 @@ public class Static {
      * @param p
      * @param msg 
      */
-    public static void SendMessage(final Player p, String msg, final int line_num){
+    public static void SendMessage(final Player p, String msg, final int line_num, final File f){
         SendMessage(new LineCallback() {
 
             public void run(String line) {
                 if(p == null || !p.isOnline()){
-                    throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num);
+                    throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
                 }
                 p.sendMessage(line);
             }

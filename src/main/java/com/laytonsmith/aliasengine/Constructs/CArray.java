@@ -52,7 +52,7 @@ public class CArray extends Construct{
         try{
             return array.get(index);
         } catch(IndexOutOfBoundsException e){
-            throw new ConfigRuntimeException("The element at index " + index + " does not exist", ExceptionType.IndexOverflowException, line_num);
+            throw new ConfigRuntimeException("The element at index " + index + " does not exist", ExceptionType.IndexOverflowException, line_num, file);
         }
     }
     

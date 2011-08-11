@@ -74,10 +74,10 @@ public class Environment {
                         z = Static.getDouble(ca.get(2, line_num));
                     } else {
                         throw new ConfigRuntimeException("get_block_at expects the array at param 1 to have 3 arguments", ExceptionType.LengthException,
-                                line_num);
+                                line_num, f);
                     }
                 } else {
-                    throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, line_num);
+                    throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, line_num, f);
                 }
             } else {
                 x = Static.getDouble(args[0]);
@@ -140,7 +140,7 @@ public class Environment {
                 CArray ca = (CArray)args[0];
                 if(ca.size() != 3){
                     throw new ConfigRuntimeException("set_block_at expects the parameter 1 to be an array with 3 elements.", ExceptionType.LengthException,
-                            line_num);
+                            line_num, f);
                 }
                 x = Static.getDouble(ca.get(0, line_num));
                 y = Static.getDouble(ca.get(1, line_num));
@@ -169,7 +169,7 @@ public class Environment {
                 if(!inMeta){
                     if(!Character.isDigit(c) && c != ':'){
                         throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers", ExceptionType.FormatException,
-                                line_num);
+                                line_num, f);
                     }
                     if(c == ':'){
                         inMeta = true;

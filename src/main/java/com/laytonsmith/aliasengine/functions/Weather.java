@@ -46,13 +46,15 @@ public class Weather {
                 if(args[0] instanceof CArray){
                     CArray a = (CArray)args[0];
                     if(a.size() != 3){
-                        throw new ConfigRuntimeException("lightning expects the array to have 3 integers", ExceptionType.LengthException, line_num);
+                        throw new ConfigRuntimeException("lightning expects the array to have 3 integers", 
+                                ExceptionType.LengthException, line_num, f);
                     }
                     x = (int)java.lang.Math.floor(Static.getNumber(a.get(0, line_num)));
                     y = (int)java.lang.Math.floor(Static.getNumber(a.get(1, line_num)));
                     z = (int)java.lang.Math.floor(Static.getNumber(a.get(2, line_num)));
                 } else {
-                    throw new ConfigRuntimeException("lightning expects an array as the one argument", ExceptionType.CastException, line_num);
+                    throw new ConfigRuntimeException("lightning expects an array as the one argument", 
+                            ExceptionType.CastException, line_num, f);
                 }
             } else {
                 x = (int)java.lang.Math.floor(Static.getNumber(args[0]));

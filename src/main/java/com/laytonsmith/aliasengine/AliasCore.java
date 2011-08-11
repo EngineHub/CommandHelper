@@ -63,7 +63,7 @@ public class AliasCore {
     public boolean alias(String command, final Player player, ArrayList<Script> playerCommands) {
 
         if (scripts == null) {
-            throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", 0);
+            throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", 0, null);
         }
 
         boolean match = false;

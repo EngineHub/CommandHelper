@@ -21,7 +21,7 @@ public class CDouble extends Construct{
         try{
             val = Double.parseDouble(value);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not cast " + value + " to double", ExceptionType.FormatException, line_num);
+            throw new ConfigRuntimeException("Could not cast " + value + " to double", ExceptionType.FormatException, line_num, file);
         }
     }
 

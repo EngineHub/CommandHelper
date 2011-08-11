@@ -38,7 +38,7 @@ public class Echoes {
                 throw new CancelCommandException("");
             } else if(args.length == 1){
                 try{
-                    Static.SendMessage(p, args[0].val(), line_num);
+                    Static.SendMessage(p, args[0].val(), line_num, f);
                 } finally{
                     throw new CancelCommandException("");
                 }
@@ -88,7 +88,7 @@ public class Echoes {
             for(int i = 0; i < args.length; i++){
                 b.append(args[i].val());
             }
-            Static.SendMessage(p, b.toString(), line_num);
+            Static.SendMessage(p, b.toString(), line_num, f);
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){
@@ -137,17 +137,17 @@ public class Echoes {
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
-                throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, line_num);
+                throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, line_num, f);
             }
             p = p.getServer().getPlayer(args[0].val());
             if(p == null){
-                throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, line_num);
+                throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             StringBuilder b = new StringBuilder();
             for(int i = 1; i < args.length; i++){
                 b.append(args[i].val());
             }
-            Static.SendMessage(p, b.toString(), line_num);
+            Static.SendMessage(p, b.toString(), line_num, f);
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){
@@ -362,7 +362,7 @@ public class Echoes {
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
-                throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, line_num);
+                throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, line_num, f);
             }
             final Server server = p.getServer();
             Static.SendMessage(new LineCallback() {

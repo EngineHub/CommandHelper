@@ -39,12 +39,12 @@ public class ConfigRuntimeException extends RuntimeException {
         this.file = file;
     }
     
-    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
-        this(msg, ex, line_num, null);
-    }
-    public ConfigRuntimeException(String msg, int line_num){
-        this(msg, null, line_num, null);
-    }
+//    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
+//        this(msg, ex, line_num, null);
+//    }
+//    public ConfigRuntimeException(String msg, int line_num){
+//        this(msg, null, line_num, null);
+//    }
     
     /**
      * Creates an uncatchable exception (by user level code)
@@ -74,5 +74,9 @@ public class ConfigRuntimeException extends RuntimeException {
     
     public File getFile(){
         return this.file;
+    }
+    
+    public String getSimpleFile(){
+        return this.file.getName();
     }
 }

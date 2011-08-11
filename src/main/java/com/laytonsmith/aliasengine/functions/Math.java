@@ -316,7 +316,8 @@ public class Math {
                 varList.set(v);
                 return v;
             }
-            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", ExceptionType.CastException, line_num);
+            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", 
+                    ExceptionType.CastException, line_num, f);
         }
 
         public String docs() {
@@ -372,7 +373,8 @@ public class Math {
                 varList.set(v);
                 return v;
             }
-            throw new ConfigRuntimeException("dec expects argument 1 to be an ivar", ExceptionType.CastException, line_num);
+            throw new ConfigRuntimeException("dec expects argument 1 to be an ivar", 
+                    ExceptionType.CastException, line_num, f);
         }
 
         public String docs() {
@@ -448,13 +450,15 @@ public class Math {
                 max = Static.getInt(args[1]);
             }
             if(max > Integer.MAX_VALUE || min > Integer.MAX_VALUE){
-                throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE, ExceptionType.RangeException,
-                        line_num);
+                throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE, 
+                        ExceptionType.RangeException,
+                        line_num, f);
             }
            
             long range = max - min;
             if(range <= 0){
-                throw new ConfigRuntimeException("max - min must be greater than 0", ExceptionType.RangeException, line_num);
+                throw new ConfigRuntimeException("max - min must be greater than 0", 
+                        ExceptionType.RangeException, line_num, f);
             }
             long rand = java.lang.Math.abs(r.nextLong());
             long i = (rand % (range)) + min;
