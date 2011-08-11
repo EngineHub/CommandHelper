@@ -61,7 +61,7 @@ public class RandomTests {
     
     @Test public void testConstuctToString(){
         System.out.println("Construct.toString");
-        assertEquals("hello", new Construct("hello", Construct.ConstructType.STRING, 0).toString());
+        assertEquals("hello", new Construct("hello", Construct.ConstructType.STRING, 0, null).toString());
     }
     
 }

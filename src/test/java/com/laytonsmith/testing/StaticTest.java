@@ -143,7 +143,7 @@ public class StaticTest {
                     }
                 }
                 try {
-                    f.exec(0, p, con);
+                    f.exec(0, null, p, con);
                 } catch (CancelCommandException e) {
                 } catch (ConfigRuntimeException e) {
                     if (e.getExceptionType() != null) {
@@ -190,7 +190,7 @@ public class StaticTest {
      */
     public static void assertCEquals(Construct expected, Construct actual) throws CancelCommandException {
         _equals e = new _equals();
-        CBoolean ret = (CBoolean) e.exec(0, null, expected, actual);
+        CBoolean ret = (CBoolean) e.exec(0, null, null, expected, actual);
         if (ret.getBoolean() == false) {
             throw new AssertionError("Expected " + expected + " and " + actual + " to be equal to each other");
         }
@@ -204,7 +204,7 @@ public class StaticTest {
      */
     public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException {
         _equals e = new _equals();
-        CBoolean ret = (CBoolean) e.exec(0, null, expected, actual);
+        CBoolean ret = (CBoolean) e.exec(0, null, null, expected, actual);
         if (ret.getBoolean() == true) {
             throw new AssertionError("Did not expect " + expected + " and " + actual + " to be equal to each other");
         }

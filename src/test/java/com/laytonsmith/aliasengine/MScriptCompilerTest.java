@@ -50,15 +50,15 @@ public class MScriptCompilerTest {
         List e = null;
         e = new ArrayList();
         //This is the decomposed version of the above config
-        e.add(new Token(Token.TType.UNKNOWN, "/cmd", 1));
-        e.add(new Token(Token.TType.ALIAS_END, "=", 1));
-        e.add(new Token(Token.TType.FUNC_NAME, "msg", 1));
-        e.add(new Token(Token.TType.FUNC_START, "(", 1));
-        e.add(new Token(Token.TType.STRING, "string", 1));
-        e.add(new Token(Token.TType.FUNC_END, ")", 1));
-        e.add(new Token(Token.TType.NEWLINE, "\n", 2));
+        e.add(new Token(Token.TType.UNKNOWN, "/cmd", 1, null));
+        e.add(new Token(Token.TType.ALIAS_END, "=", 1, null));
+        e.add(new Token(Token.TType.FUNC_NAME, "msg", 1, null));
+        e.add(new Token(Token.TType.FUNC_START, "(", 1, null));
+        e.add(new Token(Token.TType.STRING, "string", 1, null));
+        e.add(new Token(Token.TType.FUNC_END, ")", 1, null));
+        e.add(new Token(Token.TType.NEWLINE, "\n", 2, null));
         
-        List result = MScriptCompiler.lex(config);
+        List result = MScriptCompiler.lex(config, null);
         assertEquals(e, result);
         
         String [] badConfigs = {
@@ -67,7 +67,7 @@ public class MScriptCompilerTest {
         };
         for(String c : badConfigs){
             try{
-                MScriptCompiler.lex(c);
+                MScriptCompiler.lex(c, null);
                 //Shouldn't get here
                 fail(c + " should not have lexed, but did.");
             } catch(ConfigCompileException ex){
@@ -127,43 +127,43 @@ public class MScriptCompilerTest {
 //    }
     @Test public void testCompile() throws ConfigCompileException{
         System.out.println("compile");        
-        MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)")).get(0).compileRight();
+        MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)", null)).get(0).compileRight();
         try{
             //extra parameter
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function)")).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function)", null)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //passed
         }
         try{
             //missing parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function")).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function", null)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //passed
         }
         try{
             //extra parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)))))")).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)))))", null)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //passed
         }
         try{
             //extra parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg((this is a string, if(true, and, another) function))")).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg((this is a string, if(true, and, another) function))", null)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //passed
         }
         try{
             //extra multiline end construct
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function) <<<")).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function) <<<", null)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //passed
         }
         
-        MScriptCompiler.compile(MScriptCompiler.lex("if(1, msg('') msg(''))"));
+        MScriptCompiler.compile(MScriptCompiler.lex("if(1, msg('') msg(''))", null));
     }
 }

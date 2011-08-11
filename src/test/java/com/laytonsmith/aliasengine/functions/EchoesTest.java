@@ -57,7 +57,7 @@ public class EchoesTest {
     @Test public void testChat() throws CancelCommandException{
         Echoes.chat a = new Echoes.chat();     
         TestBoilerplate(a, "chat");
-        a.exec(0, fakePlayer, C.onstruct("Hello World!"));
+        a.exec(0, null, fakePlayer, C.onstruct("Hello World!"));
         verify(fakePlayer).chat("Hello World!");
     }
     
@@ -65,7 +65,7 @@ public class EchoesTest {
             IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, CancelCommandException{
         Echoes.broadcast a = new Echoes.broadcast();
         TestBoilerplate(a, "broadcast");
-        a.exec(0, fakePlayer, C.onstruct("Hello World!"));
+        a.exec(0, null, fakePlayer, C.onstruct("Hello World!"));
         verify(fakeServer).broadcastMessage("Hello World!");        
     }
     
@@ -75,7 +75,7 @@ public class EchoesTest {
         Player wraithguard01 = mock(Player.class);
         when(fakePlayer.getServer()).thenReturn(fakeServer);
         when(fakeServer.getPlayer("wraithguard01")).thenReturn(wraithguard01);
-        a.exec(0, fakePlayer, C.onstruct("wraithguard01"), C.onstruct("Hello World!"));
+        a.exec(0, null, fakePlayer, C.onstruct("wraithguard01"), C.onstruct("Hello World!"));
         verify(wraithguard01).chat("Hello World!");        
     }
     
