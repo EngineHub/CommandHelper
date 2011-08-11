@@ -5,19 +5,21 @@
 
 package com.laytonsmith.aliasengine.Constructs;
 
+import java.io.File;
+
 /**
  *
  * @author layton
  */
 public class IVariable extends Variable{
     Construct var_value;
-    public IVariable(String name, int line_num){
-        super(name, "", line_num);
-        this.var_value = new CString("", line_num);
+    public IVariable(String name, int line_num, File file){
+        super(name, "", line_num, file);
+        this.var_value = new CString("", line_num, file);
         this.ctype = ConstructType.IVARIABLE;
     }
-    public IVariable(String name, Construct value, int line_num){
-        super(name, value.val(), line_num);
+    public IVariable(String name, Construct value, int line_num, File file){
+        super(name, value.val(), line_num, file);
         this.var_value = value;
         this.ctype = ConstructType.IVARIABLE;
     }

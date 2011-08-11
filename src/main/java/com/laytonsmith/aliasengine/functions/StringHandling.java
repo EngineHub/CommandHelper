@@ -13,6 +13,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
@@ -43,12 +44,12 @@ public class StringHandling {
             return new ExceptionType[]{};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
                 b.append(args[i].val());
             }
-            return new CString(b.toString(), line_num);
+            return new CString(b.toString(), line_num, f);
         }
 
         public String docs() {
@@ -84,7 +85,7 @@ public class StringHandling {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
                 if (i > 0) {
@@ -92,7 +93,7 @@ public class StringHandling {
                 }
                 b.append(args[i].val());
             }
-            return new CString(b.toString(), line_num);
+            return new CString(b.toString(), line_num, f);
         }
 
         public String docs() {
@@ -143,12 +144,12 @@ public class StringHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
                 //Verify this file is not above the craftbukkit directory
                 
                 String s = file_get_contents(args[0].val());
-                return new CString(file_get_contents(args[0].val()), line_num);
+                return new CString(file_get_contents(args[0].val()), line_num, f);
             } catch (Exception ex) {
                 throw new ConfigRuntimeException("File could not be read in.", ExceptionType.FormatException, line_num);
             }
@@ -193,11 +194,11 @@ public class StringHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String thing = args[0].val();
             String what = args[1].val();
             String that = args[2].val();
-            return new CString(thing.replace(what, that), line_num);
+            return new CString(thing.replace(what, that), line_num, f);
         }
 
         public String docs() {
@@ -237,19 +238,19 @@ public class StringHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String[] sa = args[0].val().split(" ");
             ArrayList<Construct> a = new ArrayList<Construct>();
             for (String s : sa) {
                 if (!s.trim().equals("")) {
-                    a.add(new CString(s.trim(), line_num));
+                    a.add(new CString(s.trim(), line_num, f));
                 }
             }
             Construct[] csa = new Construct[a.size()];
             for (int i = 0; i < a.size(); i++) {
                 csa[i] = a.get(i);
             }
-            return new CArray(line_num, csa);
+            return new CArray(line_num, f, csa);
         }
 
         public String docs() {
@@ -312,8 +313,8 @@ public class StringHandling {
             return "3.0.1";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CString(args[0].val().trim(), args[0].line_num);
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(args[0].val().trim(), args[0].line_num, args[0].file);
         }
         public Boolean runAsync(){
             return null;
@@ -357,11 +358,11 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                return new CInt(((CArray)args[0]).size(), line_num);
+                return new CInt(((CArray)args[0]).size(), line_num, f);
             } else {
-                return new CInt(args[0].val().length(), line_num);
+                return new CInt(args[0].val().length(), line_num, f);
             }
         }
         
@@ -403,8 +404,8 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CString(args[0].val().toUpperCase(), line_num);
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(args[0].val().toUpperCase(), line_num, f);
         }
         
     }
@@ -445,8 +446,8 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CString(args[0].val().toLowerCase(), line_num);
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(args[0].val().toLowerCase(), line_num, f);
         }        
     }
     
@@ -489,7 +490,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try{
                 String s = args[0].val();
                 int begin = (int)Static.getInt(args[1]);
@@ -499,7 +500,7 @@ public class StringHandling {
                 } else {
                     end = s.length();
                 }
-                return new CString(s.substring(begin, end), line_num);
+                return new CString(s.substring(begin, end), line_num, f);
             } catch(IndexOutOfBoundsException e){
                 throw new ConfigRuntimeException("The indices given are not valid for string '" + args[0].val() + "'",
                         ExceptionType.RangeException, line_num);

@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 
 /**
  *
@@ -14,8 +15,8 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
  */
 public class CInt extends Construct{
     long val;
-    public CInt(String value, int line_num){
-        super(value, ConstructType.INT, line_num);
+    public CInt(String value, int line_num, File file){
+        super(value, ConstructType.INT, line_num, file);
         try{
             val = Long.parseLong(value);
         } catch(NumberFormatException e){
@@ -23,8 +24,8 @@ public class CInt extends Construct{
         }
     }
 
-    public CInt(long value, int line_num){
-        super(Long.toString(value), ConstructType.INT, line_num);
+    public CInt(long value, int line_num, File file){
+        super(Long.toString(value), ConstructType.INT, line_num, file);
         val = value;
     }
 

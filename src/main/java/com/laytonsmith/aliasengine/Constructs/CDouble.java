@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 
 /**
  *
@@ -15,8 +16,8 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 public class CDouble extends Construct{
     double val;
 
-    public CDouble(String value, int line_num){
-        super(value, ConstructType.INT, line_num);
+    public CDouble(String value, int line_num, File file){
+        super(value, ConstructType.INT, line_num, file);
         try{
             val = Double.parseDouble(value);
         } catch(NumberFormatException e){
@@ -24,8 +25,8 @@ public class CDouble extends Construct{
         }
     }
 
-    public CDouble(double value, int line_num){
-        super(Double.toString(value), ConstructType.DOUBLE, line_num);
+    public CDouble(double value, int line_num, File file){
+        super(Double.toString(value), ConstructType.DOUBLE, line_num, file);
         val = value;
     }
 

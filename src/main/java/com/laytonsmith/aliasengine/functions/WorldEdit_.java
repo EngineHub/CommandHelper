@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.sk89q.worldedit.LocalSession;
+import java.io.File;
 import org.bukkit.entity.Player;
 
 /**
@@ -60,7 +61,7 @@ public class WorldEdit_ {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player player = p.getServer().getPlayer(args[0].val());
             if(args.length == 1){
                 //Getter
@@ -124,7 +125,7 @@ public class WorldEdit_ {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         

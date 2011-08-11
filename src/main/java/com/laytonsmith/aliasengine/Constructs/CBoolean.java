@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 
 /**
  *
@@ -14,13 +15,13 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
  */
 public class CBoolean extends Construct{
     boolean val;
-    public CBoolean(boolean value, int line_num){
-        super(Boolean.toString(value), ConstructType.BOOLEAN, line_num);
+    public CBoolean(boolean value, int line_num, File file){
+        super(Boolean.toString(value), ConstructType.BOOLEAN, line_num, file);
         val = value;
     }
 
-    public CBoolean(String value, int line_num){
-        super(value, ConstructType.BOOLEAN, line_num);
+    public CBoolean(String value, int line_num, File file){
+        super(value, ConstructType.BOOLEAN, line_num, file);
         try{
             int i = Integer.parseInt(value);
             if(i == 0){

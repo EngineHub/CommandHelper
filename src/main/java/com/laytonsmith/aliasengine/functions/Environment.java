@@ -12,6 +12,7 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
@@ -60,7 +61,7 @@ public class Environment {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x;
             double y;
             double z;
@@ -87,7 +88,7 @@ public class Environment {
             y = java.lang.Math.floor(y);
             z = java.lang.Math.floor(z);
             Block b = p.getWorld().getBlockAt((int)x, (int)y, (int)z);
-            return new CString(b.getTypeId() + ":" + b.getData(), line_num);
+            return new CString(b.getTypeId() + ":" + b.getData(), line_num, f);
         }
         public Boolean runAsync(){
             return false;
@@ -130,7 +131,7 @@ public class Environment {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x;
             double y;
             double z;
@@ -188,7 +189,7 @@ public class Environment {
             b.setTypeId(idata);
             b.setData(imeta);
             
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
         public Boolean runAsync(){
             return false;

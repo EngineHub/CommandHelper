@@ -5,29 +5,24 @@
 package com.sk89q.commandhelper;
 
 import com.laytonsmith.aliasengine.Constructs.Token;
-import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.MScriptComplete;
-import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
-import java.util.ArrayList;
+import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.Plugin;
 
 /**
  *
@@ -107,7 +102,7 @@ public class CommandHelperInterpreterListener extends PlayerListener {
     }
 
     public void execute(String script, final Player p) throws ConfigCompileException {
-        List<Token> stream = MScriptCompiler.lex(script);
+        List<Token> stream = MScriptCompiler.lex(script, new File("Interpreter"));
         GenericTreeNode tree = MScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
         try {

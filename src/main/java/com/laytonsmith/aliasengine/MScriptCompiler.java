@@ -10,6 +10,8 @@ import com.laytonsmith.aliasengine.Constructs.Token.TType;
 import com.laytonsmith.aliasengine.functions.FunctionList;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.sun.crypto.provider.TlsKeyMaterialGenerator;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
@@ -26,7 +28,7 @@ import org.bukkit.entity.Player;
  */
 public class MScriptCompiler {
 
-    public static List<Token> lex(String config) throws ConfigCompileException {
+    public static List<Token> lex(String config, File file) throws ConfigCompileException {
         config = config.replaceAll("\r\n", "\n");
         config = config + "\n";
         List<Token> token_list = new ArrayList<Token>();
@@ -55,82 +57,82 @@ public class MScriptCompiler {
             }
             if (c == '[' && !state_in_quote) {
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.LSQUARE_BRACKET, "[", line_num));
+                token_list.add(new Token(TType.LSQUARE_BRACKET, "[", line_num, file));
                 in_opt_var = true;
                 continue;
             }
             if (c == '=' && !state_in_quote) {
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
                 if (in_opt_var) {
-                    token_list.add(new Token(TType.OPT_VAR_ASSIGN, "=", line_num));
+                    token_list.add(new Token(TType.OPT_VAR_ASSIGN, "=", line_num, file));
                 } else {
-                    token_list.add(new Token(TType.ALIAS_END, "=", line_num));
+                    token_list.add(new Token(TType.ALIAS_END, "=", line_num, file));
                 }
                 continue;
             }
             if (c == ']' && !state_in_quote) {
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.RSQUARE_BRACKET, "]", line_num));
+                token_list.add(new Token(TType.RSQUARE_BRACKET, "]", line_num, file));
                 in_opt_var = false;
                 continue;
             }
             if (c == ':' && !state_in_quote) {
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.IDENT, ":", line_num));
+                token_list.add(new Token(TType.IDENT, ":", line_num, file));
                 continue;
             }
             if (c == ',' && !state_in_quote) {
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.COMMA, ",", line_num));
+                token_list.add(new Token(TType.COMMA, ",", line_num, file));
                 continue;
             }
             if (c == '(' && !state_in_quote) {
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.FUNC_NAME, buf.toString(), line_num));
+                    token_list.add(new Token(TType.FUNC_NAME, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.FUNC_START, "(", line_num));
+                token_list.add(new Token(TType.FUNC_START, "(", line_num, file));
                 continue;
             }
             if (c == ')' && !state_in_quote) {
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.FUNC_END, ")", line_num));
+                token_list.add(new Token(TType.FUNC_END, ")", line_num, file));
                 continue;
             }
             if (Character.isWhitespace(c) && !state_in_quote && c != '\n') {
                 //ignore the whitespace, but end the previous token
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
             } else if (c == '\'') {
                 if (state_in_quote) {
-                    token_list.add(new Token(TType.STRING, buf.toString(), line_num));
+                    token_list.add(new Token(TType.STRING, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                     state_in_quote = false;
                     continue;
                 } else {
                     state_in_quote = true;
                     if (buf.length() > 0) {
-                        token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                        token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                         buf = new StringBuffer();
                     }
                     continue;
@@ -154,17 +156,17 @@ public class MScriptCompiler {
                     continue;
                 } else {
                     //Control character backslash
-                    token_list.add(new Token(TType.SEPERATOR, "\\", line_num));
+                    token_list.add(new Token(TType.SEPERATOR, "\\", line_num, file));
                 }
             } else if (state_in_quote) {
                 buf.append(c);
                 continue;
             } else if (c == '\n') {
                 if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num));
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.NEWLINE, "\n", line_num));
+                token_list.add(new Token(TType.NEWLINE, "\n", line_num, file));
                 in_comment = false;
                 continue;
             } else { //in a literal
@@ -187,7 +189,7 @@ public class MScriptCompiler {
         for (int i = 0; i < tokenStream.size(); i++) {
             try {
                 if (tokenStream.get(i).type.equals(TType.NEWLINE)) {
-                    temp.add(new Token(TType.NEWLINE, "\n", tokenStream.get(i).line_num));
+                    temp.add(new Token(TType.NEWLINE, "\n", tokenStream.get(i).line_num, tokenStream.get(i).file));
                     while (tokenStream.get(++i).type.equals(TType.NEWLINE)) {
                     }
                 }
@@ -207,9 +209,9 @@ public class MScriptCompiler {
         ArrayList<Token> tokens1_1 = new ArrayList<Token>();
         boolean inside_multiline = false;
         for (int i = 0; i < tokenStream.size(); i++) {
-            Token prevToken = i - 1 >= tokenStream.size() ? tokenStream.get(i - 1) : new Token(TType.UNKNOWN, "", 0);
+            Token prevToken = i - 1 >= tokenStream.size() ? tokenStream.get(i - 1) : new Token(TType.UNKNOWN, "", 0, null);
             Token thisToken = tokenStream.get(i);
-            Token nextToken = i + 1 < tokenStream.size() ? tokenStream.get(i + 1) : new Token(TType.UNKNOWN, "", 0);
+            Token nextToken = i + 1 < tokenStream.size() ? tokenStream.get(i + 1) : new Token(TType.UNKNOWN, "", 0, null);
             //take out newlines between the = >>> and <<< tokens (also the tokens)
             if (thisToken.type.equals(TType.ALIAS_END) && nextToken.val().equals(">>>")) {
                 inside_multiline = true;
@@ -300,7 +302,7 @@ public class MScriptCompiler {
 
     public static GenericTreeNode<Construct> compile(List<Token> stream) throws ConfigCompileException {
         GenericTreeNode<Construct> tree = new GenericTreeNode<Construct>();
-        tree.setData(new Construct("root", Construct.ConstructType.NULL, 0));
+        tree.setData(new Construct("root", Construct.ConstructType.NULL, 0, null));
         Stack<GenericTreeNode> parents = new Stack<GenericTreeNode>();
         Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
         constructCount.push(new AtomicInteger(0));
@@ -311,7 +313,7 @@ public class MScriptCompiler {
         Token t = null;
         for (int i = 0; i < stream.size(); i++) {
             t = stream.get(i);
-            Token prev = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.line_num);
+            Token prev = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
             
             //Array notation handling
             if(t.type.equals(TType.LSQUARE_BRACKET)){                
@@ -323,7 +325,7 @@ public class MScriptCompiler {
                 GenericTreeNode<Construct> myArray = tree.getChildAt(array);
                 GenericTreeNode<Construct> myIndex = tree.getChildAt(index);
                 tree.setChildren(tree.getChildren().subList(0, array));
-                GenericTreeNode<Construct> arrayGet = new GenericTreeNode<Construct>(new CFunction("array_get", t.line_num));
+                GenericTreeNode<Construct> arrayGet = new GenericTreeNode<Construct>(new CFunction("array_get", t.line_num, t.file));
                 arrayGet.addChild(myArray);
                 arrayGet.addChild(myIndex);
                 tree.addChild(arrayGet);
@@ -333,23 +335,23 @@ public class MScriptCompiler {
                     || t.type.equals(TType.RSQUARE_BRACKET)) {
                 throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
             } else */if (t.type == TType.LIT) {
-                tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num)));
+                tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num, t.file)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
-                tree.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.line_num)));
+                tree.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.line_num, t.file)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.IVARIABLE)) {
-                tree.addChild(new GenericTreeNode<Construct>(new IVariable(t.val(), t.line_num)));
+                tree.addChild(new GenericTreeNode<Construct>(new IVariable(t.val(), t.line_num, t.file)));
                 constructCount.peek().incrementAndGet();
             } else if(t.type.equals(TType.UNKNOWN)){
-                tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num)));
+                tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num, t.file)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-                tree.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, t.line_num)));
+                tree.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, t.line_num, t.file)));
                 constructCount.peek().incrementAndGet();
                 //right_vars.add(new Variable(t.val(), null, t.line_num));
             } else if (t.type.equals(TType.FUNC_NAME)) {
-                CFunction func = new CFunction(t.val(), t.line_num);
+                CFunction func = new CFunction(t.val(), t.line_num, t.file);
                 //This will throw an exception for us if the function doesn't exist
                 if(!func.val().matches("^_[^_].*")){
                     FunctionList.getFunction(func);
@@ -374,7 +376,7 @@ public class MScriptCompiler {
                     //We need to autoconcat some stuff
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
-                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", 0));
+                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", 0, null));
                     List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
                     for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
                         subChildren.add(tree.getChildAt(b));
@@ -409,7 +411,7 @@ public class MScriptCompiler {
                 if(constructCount.peek().get() > 1){
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
-                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", 0));
+                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", 0, null));
                     List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
                     for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
                         subChildren.add(tree.getChildAt(b));

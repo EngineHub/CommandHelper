@@ -4,12 +4,14 @@
  */
 package com.laytonsmith.aliasengine.Constructs;
 
+import java.io.File;
+
 /**
  *
  * @author Layton
  */
 public class CString extends Construct{
-    public CString(String value, int line_num){
-        super(value, ConstructType.STRING, line_num);
+    public CString(String value, int line_num, File file){
+        super(value, ConstructType.STRING, line_num, file);
     }
 }

@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -37,7 +38,7 @@ public class Weather {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int x;
             int y;
             int z;
@@ -63,7 +64,7 @@ public class Weather {
 //            EntityWeatherStorm e = new EntityWeatherStorm(w, x, y, z);
 //            w.a(e);
             
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
 
         public String docs() {
@@ -97,10 +98,10 @@ public class Weather {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             boolean b = Static.getBoolean(args[0]);
             p.getWorld().setStorm(b);
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
 
         public String docs() {

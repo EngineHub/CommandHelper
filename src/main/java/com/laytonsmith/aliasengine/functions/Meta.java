@@ -12,6 +12,7 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 import java.util.List;
@@ -64,7 +65,7 @@ public class Meta {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
                         ExceptionType.FormatException, line_num);
@@ -73,9 +74,9 @@ public class Meta {
             if (args[0] instanceof CArray) {
                 CArray u = (CArray) args[0];
                 for (int i = 0; i < u.size(); i++) {
-                    exec(line_num, p, new Construct[]{new CString(u.get(i, line_num).val(), line_num), args[1]});
+                    exec(line_num, f, p, new Construct[]{new CString(u.get(i, line_num).val(), line_num, f), args[1]});
                 }
-                return new CVoid(line_num);
+                return new CVoid(line_num, f);
             }
             if (args[0].val().equals("~op")) {
                 Player m = new AlwaysOpPlayer(p);
@@ -94,7 +95,7 @@ public class Meta {
                     throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",ExceptionType.PlayerOfflineException, line_num);
                 }
             }
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
         
         public ExceptionType[] thrown(){
@@ -138,7 +139,7 @@ public class Meta {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
                         ExceptionType.FormatException, line_num);
@@ -148,7 +149,7 @@ public class Meta {
                 Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + ": " + args[0].val().trim());
             }
             Static.getServer().dispatchCommand(p, cmd);
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
 
         public String docs() {
@@ -191,11 +192,11 @@ public class Meta {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             for (int i = 0; i < args.length; i++) {
                 args[i].val();
             }
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
 
         public String docs() {
@@ -263,8 +264,8 @@ public class Meta {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
-            return Static.resolveConstruct(args[0].val(), line_num);
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            return Static.resolveConstruct(args[0].val(), line_num, f);
         }
         
     }
@@ -304,8 +305,8 @@ public class Meta {
             return "3.1.0";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CVoid(line_num);
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CVoid(line_num, f);
         }
         //Doesn't matter, run out of state anyways
 

@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;
@@ -111,7 +112,7 @@ public class Exceptions {
         public Boolean runAsync() {
             return null;
         }
-        public Construct execs(int line_num, Player p, Script that, GenericTreeNode<Construct> tryCode,
+        public Construct execs(int line_num, File f, Player p, Script that, GenericTreeNode<Construct> tryCode,
                 GenericTreeNode<Construct> varName, GenericTreeNode<Construct> catchCode, GenericTreeNode<Construct> types) throws CancelCommandException{
             Construct pivar = that.eval(varName, p);
             IVariable ivar;
@@ -150,11 +151,11 @@ public class Exceptions {
                     System.out.println("[CommandHelper]: Exception thrown -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getLineNum());
                 }
                 if(interest.isEmpty() || interest.contains(e.getExceptionType().toString())){
-                    CArray ex = new CArray(line_num);
-                    ex.push(new CString(e.getExceptionType().toString(), line_num));
-                    ex.push(new CString(e.getMessage(), line_num));
-                    ex.push(new CNull(line_num));
-                    ex.push(new CInt(e.getLineNum(), line_num));
+                    CArray ex = new CArray(line_num, f);
+                    ex.push(new CString(e.getExceptionType().toString(), line_num, f));
+                    ex.push(new CString(e.getMessage(), line_num, f));
+                    ex.push(new CNull(line_num, f));
+                    ex.push(new CInt(e.getLineNum(), line_num, f));
                     ivar.setIval(ex);
                     varList.set(ivar);
                     that.eval(catchCode, p);
@@ -164,9 +165,9 @@ public class Exceptions {
             }
             
             
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         
@@ -209,11 +210,11 @@ public class Exceptions {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try{
-                throw new ConfigRuntimeException(args[1].val(), ExceptionType.valueOf(args[0].val()), line_num, null);
+                throw new ConfigRuntimeException(args[1].val(), ExceptionType.valueOf(args[0].val()), line_num, f);
             } catch(IllegalArgumentException e){
-                throw new ConfigRuntimeException("Expected a valid exception type", ExceptionType.FormatException, line_num);
+                throw new ConfigRuntimeException("Expected a valid exception type", ExceptionType.FormatException, line_num, f);
             }
         }
         

@@ -83,7 +83,7 @@ public class CommandHelperListener extends PlayerListener {
             ArrayList<String> aliases = u.getAliasesAsArray();
             ArrayList<Script> scripts = new ArrayList<Script>();
             for(String script : aliases){
-                scripts.addAll(MScriptCompiler.preprocess(MScriptCompiler.lex(script)));
+                scripts.addAll(MScriptCompiler.preprocess(MScriptCompiler.lex(script, new File("Player"))));
             }
             return CommandHelperPlugin.getCore().alias(command, player, scripts);
             //return globalAliases.get(command.toLowerCase());

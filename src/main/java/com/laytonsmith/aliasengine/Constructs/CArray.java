@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -16,8 +17,8 @@ import java.util.Arrays;
  */
 public class CArray extends Construct{
     ArrayList<Construct> array = new ArrayList<Construct>();
-    public CArray(int line_num, Construct ... items){
-        super(null, ConstructType.ARRAY, line_num);
+    public CArray(int line_num, File file, Construct ... items){
+        super(null, ConstructType.ARRAY, line_num, file);
         array.addAll(Arrays.asList(items));
         regenValue();
     }

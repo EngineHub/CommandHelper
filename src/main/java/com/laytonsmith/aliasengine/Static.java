@@ -16,6 +16,7 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -274,26 +275,26 @@ public class Static {
      * @param line_num
      * @return 
      */
-    public static Construct resolveConstruct(String val, int line_num) {
+    public static Construct resolveConstruct(String val, int line_num, File file) {
         if(val == null){
-            return new CString("", line_num);
+            return new CString("", line_num, file);
         }
         if (val.equalsIgnoreCase("null")) {
-            return new CNull(line_num);
+            return new CNull(line_num, file);
         } else if (val.equalsIgnoreCase("true")) {
-            return new CBoolean(true, line_num);
+            return new CBoolean(true, line_num, file);
         } else if (val.equalsIgnoreCase("false")) {
-            return new CBoolean(false, line_num);
+            return new CBoolean(false, line_num, file);
         } else {
             try {
-                return new CInt(Integer.parseInt(val), line_num);
+                return new CInt(Integer.parseInt(val), line_num, file);
             } catch (NumberFormatException e) {
                 try {
-                    return new CDouble(Double.parseDouble(val), line_num);
+                    return new CDouble(Double.parseDouble(val), line_num, file);
                 } catch (NumberFormatException g) {
                     //It's a literal, but not a keyword. Push it in as a string to standardize everything
                     //later
-                    return new CString(val, line_num);
+                    return new CString(val, line_num, file);
                 }
             }
         }
@@ -303,7 +304,7 @@ public class Static {
         if(variable.ctype == Construct.ConstructType.VARIABLE){
             for(Variable var : vars){
                 if(var.getName().equals(((Variable)variable).getName())){
-                    return Static.resolveConstruct(var.val(), var.line_num);
+                    return Static.resolveConstruct(var.val(), var.line_num, var.file);
                 }
             }
         } else {

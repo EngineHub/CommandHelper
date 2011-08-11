@@ -36,7 +36,7 @@ public class IVariableList {
                 return l;
             }
         }
-        IVariable v = new IVariable(name, 0);
+        IVariable v = new IVariable(name, 0, null);
         varList.add(v);
         return v;
     }

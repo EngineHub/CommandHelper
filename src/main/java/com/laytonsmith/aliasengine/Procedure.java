@@ -52,19 +52,19 @@ public class Procedure {
         root.setRoot(tree);
         Script fakeScript = new Script(null, null);
         fakeScript.varList = new IVariableList();
-        CArray array = new CArray(0);
+        CArray array = new CArray(0, null);
         for(Construct c : variables){
             array.push(c);
         }
-        fakeScript.varList.set(new IVariable("@arguments", array, 0));
+        fakeScript.varList.set(new IVariable("@arguments", array, 0, null));
         for(GenericTreeNode<Construct> c : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
             if(c.getData() instanceof IVariable){
                 int index = indexOf(((IVariable)c.getData()).name);
                 IVariable var = (IVariable)c.getData();
                 if(index == -1){
-                    var.setIval(new CString("", var.line_num));
+                    var.setIval(new CString("", var.line_num, var.file));
                 } else if(index > variables.size() - 1){
-                    var.setIval(new CNull(0));
+                    var.setIval(new CNull(0, null));
                 } else {
                     var.setIval(variables.get(index));
                 }

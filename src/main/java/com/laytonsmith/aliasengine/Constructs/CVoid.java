@@ -4,12 +4,14 @@
  */
 package com.laytonsmith.aliasengine.Constructs;
 
+import java.io.File;
+
 /**
  *
  * @author Layton
  */
 public class CVoid extends Construct{
-    public CVoid(int line_num){
-        super("", ConstructType.VOID, line_num);
+    public CVoid(int line_num, File file){
+        super("", ConstructType.VOID, line_num, file);
     }
 }

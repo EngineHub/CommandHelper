@@ -14,6 +14,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import org.bukkit.entity.Player;
 
 /**
@@ -34,9 +35,9 @@ public class ArrayHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                return new CInt(((CArray)args[0]).size(), line_num);
+                return new CInt(((CArray)args[0]).size(), line_num, f);
             }
             throw new ConfigRuntimeException("Argument 1 of array_size must be an array", ExceptionType.CastException, line_num);
         }
@@ -79,7 +80,7 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 return ((CArray)args[0]).get((int)Static.getInt(args[1]), line_num);
             } else{
@@ -129,10 +130,10 @@ public class ArrayHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray && args[1] instanceof CInt){
                 ((CArray)args[0]).set((int)((CInt)args[1]).getInt(), args[2]);
-                return new CVoid(line_num);
+                return new CVoid(line_num, f);
             }
             throw new ConfigRuntimeException("Argument 1 of array_set must be an array, and argument 2 must be an integer", ExceptionType.CastException, line_num);        
         }
@@ -174,10 +175,10 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 ((CArray)args[0]).push(args[1]);
-                return new CVoid(line_num);
+                return new CVoid(line_num, f);
             }
             throw new ConfigRuntimeException("Argument 1 of array_push must be an array", ExceptionType.CastException, line_num);
         }
@@ -218,16 +219,16 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             _equals e = new _equals();
             if(args[0] instanceof CArray){
                 CArray ca = (CArray) args[0];
                 for(int i = 0; i < ca.size(); i++){
-                    if(((CBoolean)e.exec(line_num, p, ca.get(i, line_num), args[1])).getBoolean()){
-                        return new CBoolean(true, line_num);
+                    if(((CBoolean)e.exec(line_num, f, p, ca.get(i, line_num), args[1])).getBoolean()){
+                        return new CBoolean(true, line_num, f);
                     }
                 }
-                return new CBoolean(false, line_num);
+                return new CBoolean(false, line_num, f);
             } else {
                 throw new ConfigRuntimeException("Argument 1 of array_contains must be an array", ExceptionType.CastException, line_num);
             }
@@ -296,11 +297,11 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 int index = (int)Static.getInt(args[1]);
                 CArray ca = (CArray)args[0];
-                return new CBoolean(index <= ca.size() - 1, line_num);
+                return new CBoolean(index <= ca.size() - 1, line_num, f);
             } else {
                 throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num);
             }

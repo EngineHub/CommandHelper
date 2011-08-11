@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
+import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -71,7 +72,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
             Object o = Static.getAliasCore().parent.getServer().getPluginManager();
             if(o instanceof SimplePluginManager){
                 SimplePluginManager spm = (SimplePluginManager)o;
@@ -107,7 +108,7 @@ public class Sandbox {
                 }
             }
             
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
         
     }
@@ -148,7 +149,7 @@ public class Sandbox {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
             throw new FunctionReturnException(args[0]);
         }
         

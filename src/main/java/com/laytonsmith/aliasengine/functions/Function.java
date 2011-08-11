@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.util.List;
 import org.bukkit.entity.Player;
 
@@ -102,9 +103,10 @@ public interface Function {
      * CBoolean, CDouble, CInt, CNull, CString, CVoid, or IVariable. If you care, you'll need to do further checks
      * on the datatype to verify what the type actually is.
      * @param line_num The line that this function call is being run from
+     * @param f The file that this function call is being run from
      * @param args An array of evaluated Constructs
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(int line_num, Player p, Construct ... args) throws ConfigRuntimeException;
+    public Construct exec(int line_num, File f, Player p, Construct ... args) throws ConfigRuntimeException;
 }

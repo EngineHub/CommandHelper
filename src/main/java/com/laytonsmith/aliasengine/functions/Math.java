@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.util.Random;
 import org.bukkit.entity.Player;
 
@@ -30,15 +31,15 @@ public class Math {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
                 tally += Static.getNumber(args[i]);
             }
             if(Static.anyDoubles(args)){
-                return new CDouble(tally, line_num);
+                return new CDouble(tally, line_num, f);
             } else {
-                return new CInt((long)tally, line_num);
+                return new CInt((long)tally, line_num, f);
             }
         }
         
@@ -77,15 +78,15 @@ public class Math {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
                 tally -= Static.getNumber(args[i]);
             }
             if(Static.anyDoubles(args)){
-                return new CDouble(tally, line_num);
+                return new CDouble(tally, line_num, f);
             } else {
-                return new CInt((long)tally, line_num);
+                return new CInt((long)tally, line_num, f);
             }
         }
         
@@ -124,15 +125,15 @@ public class Math {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
                 tally *= Static.getNumber(args[i]);
             }
             if(Static.anyDoubles(args)){
-                return new CDouble(tally, line_num);
+                return new CDouble(tally, line_num, f);
             } else {
-                return new CInt((long)tally, line_num);
+                return new CInt((long)tally, line_num, f);
             }
         }
         
@@ -171,15 +172,15 @@ public class Math {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
                 tally /= Static.getNumber(args[i]);
             }
             if(tally == (int)tally){
-                return new CInt((long)tally, line_num);
+                return new CInt((long)tally, line_num, f);
             } else {
-                return new CDouble(tally, line_num);
+                return new CDouble(tally, line_num, f);
             }
         }
         
@@ -218,10 +219,10 @@ public class Math {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             long arg1 = Static.getInt(args[0]);
             long arg2 = Static.getInt(args[1]);
-            return new CInt(arg1 % arg2, line_num);
+            return new CInt(arg1 % arg2, line_num, f);
         }
         
         public ExceptionType[] thrown(){
@@ -259,10 +260,10 @@ public class Math {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
-            return new CDouble(java.lang.Math.pow(arg1, arg2), line_num);
+            return new CDouble(java.lang.Math.pow(arg1, arg2), line_num, f);
         }
 
         public String docs() {
@@ -302,16 +303,16 @@ public class Math {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
                 IVariable v = varList.get(((IVariable)args[0]).getName());
                 Construct newVal;
                 if(Static.anyDoubles(v.ival())){
-                    newVal = new CDouble(Static.getDouble(v.ival()) + 1, line_num);
+                    newVal = new CDouble(Static.getDouble(v.ival()) + 1, line_num, f);
                 } else {
-                    newVal = new CInt(Static.getInt(v.ival()) + 1, line_num);
+                    newVal = new CInt(Static.getInt(v.ival()) + 1, line_num, f);
                 }
-                v = new IVariable(v.getName(), newVal, line_num);
+                v = new IVariable(v.getName(), newVal, line_num, f);
                 varList.set(v);
                 return v;
             }
@@ -358,16 +359,16 @@ public class Math {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
                 IVariable v = varList.get(((IVariable)args[0]).getName());
                 Construct newVal;
                 if(Static.anyDoubles(v.ival())){
-                    newVal = new CDouble(Static.getDouble(v.ival()) - 1, line_num);
+                    newVal = new CDouble(Static.getDouble(v.ival()) - 1, line_num, f);
                 } else {
-                    newVal = new CInt(Static.getInt(v.ival()) - 1, line_num);
+                    newVal = new CInt(Static.getInt(v.ival()) - 1, line_num, f);
                 }
-                v = new IVariable(v.getName(), newVal, line_num);
+                v = new IVariable(v.getName(), newVal, line_num, f);
                 varList.set(v);
                 return v;
             }
@@ -437,7 +438,7 @@ public class Math {
             return "3.0.1";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             long min = 0;
             long max = 0;
             if(args.length == 1){
@@ -458,7 +459,7 @@ public class Math {
             long rand = java.lang.Math.abs(r.nextLong());
             long i = (rand % (range)) + min;
 
-            return new CInt(i, line_num);
+            return new CInt(i, line_num, f);
         }
         public Boolean runAsync(){
             return null;
@@ -502,9 +503,9 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
             double d = Static.getDouble(args[0]);
-            return new CDouble(java.lang.Math.abs(d), line_num);
+            return new CDouble(java.lang.Math.abs(d), line_num, f);
         }
         
     }
@@ -545,8 +546,8 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
-            return new CInt((long)java.lang.Math.floor(Static.getNumber(args[0])), line_num);
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CInt((long)java.lang.Math.floor(Static.getNumber(args[0])), line_num, f);
         }
         
     }
@@ -587,8 +588,8 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
-            return new CInt((long)java.lang.Math.ceil(Static.getNumber(args[0])), line_num);
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CInt((long)java.lang.Math.ceil(Static.getNumber(args[0])), line_num, f);
         }
         
     }

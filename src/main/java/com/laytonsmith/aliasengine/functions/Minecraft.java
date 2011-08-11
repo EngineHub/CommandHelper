@@ -13,6 +13,7 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.util.List;
 import org.bukkit.DyeColor;
 import org.bukkit.Location;
@@ -56,12 +57,12 @@ public class Minecraft {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0] instanceof CInt) {
-                return new CInt(Static.getInt(args[0]), line_num);
+                return new CInt(Static.getInt(args[0]), line_num, f);
             } else {
                 String c = args[0].val();
-                return new CInt(new MaterialData(Material.matchMaterial(c)).getItemTypeId(), line_num);
+                return new CInt(new MaterialData(Material.matchMaterial(c)).getItemTypeId(), line_num, f);
             }
         }
 
@@ -132,11 +133,11 @@ public class Minecraft {
             return true;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             List<World> worlds = p.getServer().getWorlds();
-            CArray c = new CArray(line_num);
+            CArray c = new CArray(line_num, f);
             for (World w : worlds) {
-                c.push(new CString(w.getName(), line_num));
+                c.push(new CString(w.getName(), line_num, f));
             }
             return c;
         }
@@ -189,7 +190,7 @@ public class Minecraft {
             CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mob = args[0].val();
             String sheepColor = "WHITE";
             if(mob.toUpperCase().startsWith("SHEEP:")){
@@ -269,12 +270,12 @@ public class Minecraft {
                     Sheep s = (Sheep)e;
                     try{
                     s.setColor(DyeColor.valueOf(sheepColor.toUpperCase()));
-                    } catch(IllegalArgumentException f){
+                    } catch(IllegalArgumentException ex){
                         throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color", ExceptionType.FormatException, line_num);
                     }
                 }
             }
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
     }
 }

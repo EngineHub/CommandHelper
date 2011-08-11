@@ -169,7 +169,7 @@ public class Script {
                             variables.add(eval(child, player));
                         }
                         p.execute(variables, player);
-                        return new CVoid(m.line_num);
+                        return new CVoid(m.line_num, m.file);
                     } catch(FunctionReturnException e){
                         return e.getReturn();
                     }
@@ -182,7 +182,7 @@ public class Script {
                     _for fr = (_for) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
+                        return fr.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
@@ -190,7 +190,7 @@ public class Script {
                     _if fr = (_if) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fr.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
+                        return fr.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
@@ -198,7 +198,7 @@ public class Script {
                     foreach fe = (foreach) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fe.execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2));
+                        return fe.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2));
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
@@ -207,15 +207,15 @@ public class Script {
                     if (ch.size() > 1) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.line_num);
                     }
-                    GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val()));
+                    GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val(), null));
                     StringBuilder b = new StringBuilder();
                     for (GenericTreeNode<Construct> child : root.getChildren()) {
-                        CString cs = new CString(eval(child, player).val(), 0);
+                        CString cs = new CString(eval(child, player).val(), 0, null);
                         if (!cs.val().trim().equals("")) {
                             b.append(cs.val()).append(" ");
                         }
                     }
-                    return new CString(b.toString(), 0);
+                    return new CString(b.toString(), 0, null);
                 } else if(f instanceof _try){
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() != 4 && ch.size() != 3) {
@@ -225,7 +225,7 @@ public class Script {
                     if(ch.size() == 4){
                         fourth = ch.get(3);
                     }
-                    return ((_try)f).execs(m.line_num, player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
+                    return ((_try)f).execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
                 } else if(f instanceof proc){
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if(ch.size() <= 1){
@@ -258,7 +258,7 @@ public class Script {
                     }
                     Procedure myProc = new Procedure(name, vars, tree);
                     knownProcs.add(myProc);
-                    return new CVoid(m.line_num);
+                    return new CVoid(m.line_num, m.file);
                 }
                 
                 
@@ -319,7 +319,7 @@ public class Script {
                 //TODO: Will revisit this in the future. For now, remove the ability for
                 //functions to run asyncronously.
                 //if(f.runAsync() == true || f.runAsync() == null){
-                    return f.exec(m.line_num, player, ca);
+                    return f.exec(m.line_num, m.file, player, ca);
                 /*} else {
                     return blockingNonThreadSafe(player, new Callable<Construct>() {
 
@@ -333,7 +333,7 @@ public class Script {
                 Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
             }
         } else if(m.ctype == ConstructType.VARIABLE){
-            return Static.resolveConstruct(m.val(), m.line_num);
+            return Static.resolveConstruct(m.val(), m.line_num, m.file);
         } else {
             return m;
         }
@@ -443,15 +443,15 @@ public class Script {
                 if (cleft.get(j).ctype == ConstructType.VARIABLE) {
                     if (((Variable) cleft.get(j)).name.equals("$")) {
                         v = new Variable(((Variable) cleft.get(j)).name,
-                                lastVar.toString(), 0);
+                                lastVar.toString(), 0, null);
                     } else {
                         v = new Variable(((Variable) cleft.get(j)).name,
-                                args.get(j), 0);
+                                args.get(j), 0, null);
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
                 v = new Variable(((Variable) cleft.get(j)).name,
-                        ((Variable) cleft.get(j)).def, 0);
+                        ((Variable) cleft.get(j)).def, 0, null);
             }
             if (v != null) {
                 vars.add(v);
@@ -476,15 +476,15 @@ public class Script {
                             lastVar.append(args.get(k).trim()).append(" ");
                         }
                         v = new Variable(((Variable) cleft.get(j)).name,
-                                lastVar.toString().trim(), 0);
+                                lastVar.toString().trim(), 0, null);
                     } else {
                         v = new Variable(((Variable) cleft.get(j)).name,
-                                args.get(j), 0);
+                                args.get(j), 0, null);
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
                 v = new Variable(((Variable) cleft.get(j)).name,
-                        ((Variable) cleft.get(j)).def, 0);
+                        ((Variable) cleft.get(j)).def, 0, null);
             }
             if (v != null) {
                 vars.add(v);
@@ -512,9 +512,9 @@ public class Script {
         for (int j = 0; j < left.size(); j++) {
             Token t = left.get(j);
             //Token prev_token = j - 2 >= 0?c.tokens.get(j - 2):new Token(TType.UNKNOWN, "", t.line_num);
-            Token last_token = j - 1 >= 0 ? left.get(j - 1) : new Token(TType.UNKNOWN, "", t.line_num);
-            Token next_token = j + 1 < left.size() ? left.get(j + 1) : new Token(TType.UNKNOWN, "", t.line_num);
-            Token after_token = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.line_num);
+            Token last_token = j - 1 >= 0 ? left.get(j - 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
+            Token next_token = j + 1 < left.size() ? left.get(j + 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
+            Token after_token = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
 
             if (j == 0) {
                 if (next_token.type == TType.IDENT) {
@@ -536,7 +536,7 @@ public class Script {
                 throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num);
             }
             if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-                left_vars.add(new Variable(t.val(), null, t.line_num));
+                left_vars.add(new Variable(t.val(), null, t.line_num, t.file));
             }
             if (j == 0 && !t.type.equals(TType.COMMAND)) {
                 if (!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)) {
@@ -603,17 +603,17 @@ public class Script {
         for (int i = 0; i < left.size(); i++) {
             Token t = left.get(i);
             if (t.type == Token.TType.COMMAND) {
-                cleft.add(new Command(t.val(), t.line_num));
+                cleft.add(new Command(t.val(), t.line_num, t.file));
             } else if (t.type == Token.TType.VARIABLE) {
-                cleft.add(new Variable(t.val(), null, t.line_num));
+                cleft.add(new Variable(t.val(), null, t.line_num, t.file));
             } else if (t.type.equals(TType.FINAL_VAR)) {
-                Variable v = new Variable(t.val(), null, t.line_num);
+                Variable v = new Variable(t.val(), null, t.line_num, t.file);
                 v.final_var = true;
                 cleft.add(v);
             } else if (t.type.equals(TType.LSQUARE_BRACKET)) {
                 if (i + 2 < left.size() && left.get(i + 2).type.equals(TType.OPT_VAR_ASSIGN)) {
                     Variable v = new Variable(left.get(i + 1).val(),
-                            left.get(i + 3).val(), t.line_num);
+                            left.get(i + 3).val(), t.line_num, t.file);
                     v.optional = true;
                     if (left.get(i + 1).type.equals(TType.FINAL_VAR)) {
                         v.final_var = true;
@@ -622,7 +622,7 @@ public class Script {
                     i += 4;
                 } else {
                     t = left.get(i + 1);
-                    Variable v = new Variable(t.val(), null, t.line_num);
+                    Variable v = new Variable(t.val(), null, t.line_num, t.file);
                     v.optional = true;
                     if (t.val().equals("$")) {
                         v.final_var = true;
@@ -631,7 +631,7 @@ public class Script {
                     i += 2;
                 }
             } else {
-                cleft.add(new CString(t.val(), t.line_num));
+                cleft.add(new CString(t.val(), t.line_num, t.file));
             }
         }
         return true;

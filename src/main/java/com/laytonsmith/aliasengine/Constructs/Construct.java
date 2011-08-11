@@ -5,6 +5,7 @@
 
 package com.laytonsmith.aliasengine.Constructs;
 
+import java.io.File;
 import java.io.Serializable;
 
 /**
@@ -22,11 +23,13 @@ public class Construct implements Serializable{
     public ConstructType ctype;
     protected String value = "";
     public int line_num;
+    transient public File file;
 
-    public Construct(String value, ConstructType ctype, int line_num){
+    public Construct(String value, ConstructType ctype, int line_num, File file){
         this.value = value;
         this.ctype = ctype;
         this.line_num = line_num;
+        this.file = file;
     }
 
     public String val(){

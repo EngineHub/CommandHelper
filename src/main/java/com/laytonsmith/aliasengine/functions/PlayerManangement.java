@@ -16,6 +16,7 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -44,11 +45,11 @@ public class PlayerManangement {
             return new Integer[]{0};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (p == null) {
-                return new CString("TestPlayer", line_num);
+                return new CString("TestPlayer", line_num, f);
             } else {
-                return new CString(p.getName(), line_num);
+                return new CString(p.getName(), line_num, f);
             }
         }
 
@@ -91,13 +92,13 @@ public class PlayerManangement {
             return new Integer[]{0};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player[] pa = Static.getServer().getOnlinePlayers();
             CString[] sa = new CString[pa.length];
             for (int i = 0; i < pa.length; i++) {
-                sa[i] = new CString(pa[i].getName(), line_num);
+                sa[i] = new CString(pa[i].getName(), line_num, f);
             }
-            return new CArray(line_num, sa);
+            return new CArray(line_num, f, sa);
         }
 
         public String docs() {
@@ -139,7 +140,7 @@ public class PlayerManangement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args.length == 1) {
                 p = p.getServer().getPlayer(args[0].val());
                 if (p == null || !p.isOnline()) {
@@ -147,10 +148,10 @@ public class PlayerManangement {
                 }
             }
             Location l = p.getLocation();
-            return new CArray(line_num,
-                    new CDouble(l.getX(), line_num),
-                    new CDouble(l.getY() - 1, line_num),
-                    new CDouble(l.getZ(), line_num));
+            return new CArray(line_num, f, 
+                    new CDouble(l.getX(), line_num, f),
+                    new CDouble(l.getY() - 1, line_num, f),
+                    new CDouble(l.getZ(), line_num, f));
         }
 
         public String docs() {
@@ -221,7 +222,7 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String player = null;
             double x;
             double y;
@@ -271,7 +272,7 @@ public class PlayerManangement {
             if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
             }
-            return new CBoolean(m.teleport(new Location(p.getWorld(), x, y + 1, z, p.getLocation().getYaw(), p.getLocation().getPitch())), line_num);
+            return new CBoolean(m.teleport(new Location(p.getWorld(), x, y + 1, z, p.getLocation().getYaw(), p.getLocation().getPitch())), line_num, f);
         }
     }
 
@@ -311,7 +312,7 @@ public class PlayerManangement {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player m;
             if (args.length == 0) {
                 m = p;
@@ -325,7 +326,7 @@ public class PlayerManangement {
             if (b == null) {
                 throw new ConfigRuntimeException("No block in sight, or block too far", ExceptionType.RangeException, line_num);
             }
-            return new CArray(line_num, new CInt(b.getX(), line_num), new CInt(b.getY(), line_num), new CInt(b.getZ(), line_num));
+            return new CArray(line_num, f, new CInt(b.getX(), line_num, f), new CInt(b.getY(), line_num, f), new CInt(b.getZ(), line_num, f));
         }
 
         public Boolean runAsync() {
@@ -344,7 +345,7 @@ public class PlayerManangement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args.length == 1) {
                 p = p.getServer().getPlayer(args[0].val());
             }
@@ -352,7 +353,7 @@ public class PlayerManangement {
                 throw new ConfigRuntimeException("The player is not online", ExceptionType.PlayerOfflineException, line_num);
             }
             p.setHealth(0);
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
 
         public String docs() {
@@ -394,7 +395,7 @@ public class PlayerManangement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String player;
             if (args.length == 0) {
                 player = p.getName();
@@ -408,9 +409,9 @@ public class PlayerManangement {
             String[] sa = Static.getPermissionsResolverManager().getGroups(player);
             Construct[] ca = new Construct[sa.length];
             for (int i = 0; i < sa.length; i++) {
-                ca[i] = new CString(sa[i], line_num);
+                ca[i] = new CString(sa[i], line_num, f);
             }
-            CArray a = new CArray(line_num, ca);
+            CArray a = new CArray(line_num, f, ca);
             return a;
         }
 
@@ -490,7 +491,7 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String player = "";
             int index = -1;
             if (args.length == 0) {
@@ -514,33 +515,33 @@ public class PlayerManangement {
             ArrayList<Construct> retVals = new ArrayList<Construct>();
             if (index == 0 || index == -1) {
                 //Player name 
-                retVals.add(new CString(p.getName(), line_num));
+                retVals.add(new CString(p.getName(), line_num, f));
             }
             if (index == 1 || index == -1) {
                 //Player location
-                retVals.add(new CArray(line_num, new CDouble(p.getLocation().getX(), line_num),
-                        new CDouble(p.getLocation().getY() - 1, line_num), new CDouble(p.getLocation().getZ(), line_num)));
+                retVals.add(new CArray(line_num, f, new CDouble(p.getLocation().getX(), line_num, f),
+                        new CDouble(p.getLocation().getY() - 1, line_num, f), new CDouble(p.getLocation().getZ(), line_num, f)));
             }
             if (index == 2 || index == -1) {
                 //Player cursor
                 Block b = p.getTargetBlock(null, 200);
                 if (b == null) {
-                    retVals.add(new CNull(line_num));
+                    retVals.add(new CNull(line_num, f));
                 } else {
-                    retVals.add(new CArray(line_num, new CInt(b.getX(), line_num), new CInt(b.getY(), line_num), new CInt(b.getZ(), line_num)));
+                    retVals.add(new CArray(line_num, f, new CInt(b.getX(), line_num, f), new CInt(b.getY(), line_num, f), new CInt(b.getZ(), line_num, f)));
                 }
             }
             if (index == 3 || index == -1) {
                 //Player IP
-                retVals.add(new CString(p.getAddress().getHostName(), line_num));
+                retVals.add(new CString(p.getAddress().getHostName(), line_num, f));
             }
             if (index == 4 || index == -1) {
                 //Display name
-                retVals.add(new CString(p.getDisplayName(), line_num));
+                retVals.add(new CString(p.getDisplayName(), line_num, f));
             }
             if (index == 5 || index == -1) {
                 //Player health
-                retVals.add(new CInt((long) p.getHealth(), line_num));
+                retVals.add(new CInt((long) p.getHealth(), line_num, f));
             }
             if (index == 6 || index == -1) {
                 //Item in hand
@@ -549,30 +550,30 @@ public class PlayerManangement {
                 if (is.getData() != null) {
                     data = is.getData().getData();
                 }
-                retVals.add(new CString(is.getTypeId() + ":" + data, line_num));
+                retVals.add(new CString(is.getTypeId() + ":" + data, line_num, f));
             }
             if (index == 7 || index == -1) {
                 //World name
-                retVals.add(new CString(p.getWorld().getName(), line_num));
+                retVals.add(new CString(p.getWorld().getName(), line_num, f));
             }
             if (index == 8 || index == -1) {
                 //Is op
-                retVals.add(new CBoolean(p.isOp(), line_num));
+                retVals.add(new CBoolean(p.isOp(), line_num, f));
             }
             if (index == 9 || index == -1) {
                 //Player groups
                 String[] sa = Static.getPermissionsResolverManager().getGroups(p.getName());
                 Construct[] ca = new Construct[sa.length];
                 for (int i = 0; i < sa.length; i++) {
-                    ca[i] = new CString(sa[i], line_num);
+                    ca[i] = new CString(sa[i], line_num, f);
                 }
-                CArray a = new CArray(line_num, ca);
+                CArray a = new CArray(line_num, f, ca);
                 retVals.add(a);
             }
             if (retVals.size() == 1) {
                 return retVals.get(0);
             } else {
-                CArray ca = new CArray(line_num);
+                CArray ca = new CArray(line_num, f);
                 for (Construct c : retVals) {
                     ca.push(c);
                 }
@@ -619,7 +620,7 @@ public class PlayerManangement {
             return true;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player m;
             if (args.length == 0) {
                 m = p;
@@ -629,7 +630,7 @@ public class PlayerManangement {
                     throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
                 }
             }
-            return new CString(m.getWorld().getName(), line_num);
+            return new CString(m.getWorld().getName(), line_num, f);
         }
     }
 
@@ -672,7 +673,7 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String message = "You have been kicked";
             Player m = null;
             if (args.length == 0) {
@@ -687,7 +688,7 @@ public class PlayerManangement {
             Player ptok = m;
             if (ptok != null && ptok.isOnline()) {
                 ptok.kickPlayer(message);
-                return new CVoid(line_num);
+                return new CVoid(line_num, f);
             } else {
                 throw new ConfigRuntimeException("The specified player does not seem to be online", ExceptionType.PlayerOfflineException, line_num);
             }
@@ -734,7 +735,7 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player player;
             String name;
             if (args.length == 1) {
@@ -748,7 +749,7 @@ public class PlayerManangement {
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
             }
             player.setDisplayName(name);
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
     }
 
@@ -791,7 +792,7 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player player;
             if (args.length == 0) {
                 player = p;
@@ -802,7 +803,7 @@ public class PlayerManangement {
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num);
             }
             player.setDisplayName(player.getName());
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
     }
 
@@ -853,7 +854,7 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
             //Getter
             if (args.length == 0 || args.length == 1) {
                 Location l = null;
@@ -879,7 +880,7 @@ public class PlayerManangement {
                     if (yaw < 0) {
                         yaw = (((yaw) % 360) + 360);
                     }
-                    return new CArray(line_num, new CDouble(yaw, line_num), new CDouble(pitch, line_num));
+                    return new CArray(line_num, f, new CDouble(yaw, line_num, f), new CDouble(pitch, line_num, f));
                 }
             }
             //Setter
@@ -890,11 +891,11 @@ public class PlayerManangement {
                 //We are setting F for this player
                 toSet = p;
                 pitch = p.getLocation().getPitch();
-                int f = (int) Static.getInt(args[0]);
-                if (f < 0 || f > 3) {
+                int g = (int) Static.getInt(args[0]);
+                if (g < 0 || g > 3) {
                     throw new ConfigRuntimeException("The F specifed must be from 0 to 3", ExceptionType.RangeException, line_num);
                 }
-                yaw = f * 90;
+                yaw = g * 90;
             } else if (args.length == 2) {
                 //Either we are setting this player's pitch and yaw, or we are setting the specified player's F.
                 //Check to see if args[0] is a number
@@ -908,11 +909,11 @@ public class PlayerManangement {
                     //It's the player, F variation
                     toSet = p.getServer().getPlayer(args[0].val());
                     pitch = toSet.getLocation().getPitch();
-                    int f = (int) Static.getInt(args[1]);
-                    if (f < 0 || f > 3) {
+                    int g = (int) Static.getInt(args[1]);
+                    if (g < 0 || g > 3) {
                         throw new ConfigRuntimeException("The F specifed must be from 0 to 3", ExceptionType.RangeException, line_num);
                     }
-                    yaw = f * 90;
+                    yaw = g * 90;
                 }
             } else if (args.length == 3) {
                 //It's the player, yaw, pitch variation
@@ -932,7 +933,7 @@ public class PlayerManangement {
             l.setPitch(pitch);
             l.setYaw(yaw);
             toSet.teleport(l);
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
     }
 
@@ -979,7 +980,7 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
             int index = -1;
             boolean all = false;
             Player m = null;
@@ -1013,11 +1014,11 @@ public class PlayerManangement {
                 if (index == -1) {
                     ItemStack is = m.getItemInHand();
                     if (is.getTypeId() != 0) {
-                        return new CArray(line_num,
-                                new CString(is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData()), line_num),
-                                new CInt(is.getAmount(), line_num));
+                        return new CArray(line_num, f,
+                                new CString(is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData()), line_num, f),
+                                new CInt(is.getAmount(), line_num, f));
                     } else {
-                        return new CNull(line_num);
+                        return new CNull(line_num, f);
                     }
                 }
                 if (index >= 100 && index <= 103) {
@@ -1049,22 +1050,22 @@ public class PlayerManangement {
                     qty = inv.getItem(index).getAmount();
                 }
                 if (value == null) {
-                    return new CNull(line_num);
+                    return new CNull(line_num, f);
                 } else {
                     Construct cvalue = null;
-                    cvalue = new CString(value, line_num);
-                    return new CArray(line_num, cvalue, new CInt(qty, line_num));
+                    cvalue = new CString(value, line_num, f);
+                    return new CArray(line_num, f, cvalue, new CInt(qty, line_num, f));
                 }
             } else {
-                CArray ca = new CArray(line_num);
+                CArray ca = new CArray(line_num, f);
                 for (int i = 0; i < 36; i++) {
                     ItemStack is = inv.getItem(i);
                     if (is != null && is.getTypeId() != 0) {
-                        ca.push(new CArray(line_num,
-                                new CString(is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData()), line_num),
-                                new CInt(is.getAmount(), line_num)));
+                        ca.push(new CArray(line_num, f,
+                                new CString(is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData()), line_num, f),
+                                new CInt(is.getAmount(), line_num, f)));
                     } else {
-                        ca.push(new CNull(line_num));
+                        ca.push(new CNull(line_num, f));
                     }
                 }
                 return ca;
@@ -1110,7 +1111,7 @@ public class PlayerManangement {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
     }

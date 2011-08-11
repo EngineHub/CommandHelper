@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.aliasengine.Constructs;
 
+import java.io.File;
+
 /**
  *
  * @author layton
@@ -15,8 +17,8 @@ public class Variable extends Construct {
     public boolean optional;
     public boolean final_var = false;
 
-    public Variable(String name, String def, int line_num) {
-        super(name, ConstructType.VARIABLE, line_num);
+    public Variable(String name, String def, int line_num, File file) {
+        super(name, ConstructType.VARIABLE, line_num, file);
         this.name = name;
         this.def = def;
     }

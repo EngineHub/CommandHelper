@@ -14,6 +14,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -32,7 +33,7 @@ public class Echoes {
             return new Integer[] {0,1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException{
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException{
             if(args.length == 0){
                 throw new CancelCommandException("");
             } else if(args.length == 1){
@@ -82,7 +83,7 @@ public class Echoes {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for(int i = 0; i < args.length; i++){
                 b.append(args[i].val());
@@ -95,7 +96,7 @@ public class Echoes {
 //                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
 //                start += 100;
 //            }
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
         
         public ExceptionType[] thrown(){
@@ -134,7 +135,7 @@ public class Echoes {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
                 throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, line_num);
             }
@@ -154,7 +155,7 @@ public class Echoes {
 //                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
 //                start += 100;
 //            }
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
 
         public String docs() {
@@ -191,13 +192,13 @@ public class Echoes {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String color = ChatColor.WHITE.toString();
             try{
                 color = ChatColor.valueOf(args[0].val().toUpperCase()).toString();
             } catch(IllegalArgumentException e){}
             
-            return new CString(color, line_num);
+            return new CString(color, line_num, f);
         }
 
         public String docs() {
@@ -238,7 +239,7 @@ public class Echoes {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, final Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, final Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
@@ -246,7 +247,7 @@ public class Echoes {
                 }
             }, args[0].val());
 
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
 
         public String docs() {
@@ -308,7 +309,7 @@ public class Echoes {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             final Player player = p.getServer().getPlayer(args[0].val());
             Static.SendMessage(new LineCallback() {
 
@@ -319,7 +320,7 @@ public class Echoes {
                 }
             }, args[1].val());
             
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
         public Boolean runAsync(){
             return false;
@@ -359,7 +360,7 @@ public class Echoes {
             return "3.0.1";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
                 throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, line_num);
             }
@@ -370,7 +371,7 @@ public class Echoes {
                     server.broadcastMessage(line);
                 }
             }, args[0].val());
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
         public Boolean runAsync(){
             return false;
@@ -411,14 +412,14 @@ public class Echoes {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mes = args[0].val();
             boolean prefix = true;
             if(args.length > 1){
                 prefix = Static.getBoolean(args[1]);
             }
             com.laytonsmith.aliasengine.Static.getLogger().log(Level.INFO, (prefix?"CommandHelper: ":"") + mes);
-            return new CVoid(line_num);
+            return new CVoid(line_num, f);
         }
         public Boolean runAsync(){
             return null;
