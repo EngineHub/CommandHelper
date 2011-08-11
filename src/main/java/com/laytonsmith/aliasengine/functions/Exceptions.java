@@ -63,7 +63,17 @@ public class Exceptions {
          * This exception is thrown if a procedure is used without being defined, or if a procedure name does not follow proper naming
          * conventions.
          */
-        InvalidProcedureException,
+        InvalidProcedureException, 
+        /**
+         * This exception is thrown if there is a problem with an include. Though this exception exists, it cannot be caught under
+         * normal circumstance, because include is not executed at the same time as the rest of the script. This is thrown if the argument
+         * passed to include is not a string, or if the path specified does not exist.
+         */
+        IncludeException,
+        /**
+         * This exception is thrown if a script tries to read or write to a location of the filesystem that is not allowed.
+         */
+        SecurityException,
     }
     @api public static class _try implements Function{      
         

@@ -54,8 +54,8 @@ public class Procedure {
         Script fakeScript = new Script(null, null);
         fakeScript.varList = new IVariableList();
         CArray array = new CArray(0, null);
-        for(Construct c : variables){
-            array.push(c);
+        for(Construct d : variables){
+            array.push(d);
         }
         fakeScript.varList.set(new IVariable("@arguments", array, 0, null));
         for(GenericTreeNode<Construct> c : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
@@ -63,7 +63,11 @@ public class Procedure {
                 int index = indexOf(((IVariable)c.getData()).name);
                 IVariable var = (IVariable)c.getData();
                 if(index == -1){
-                    var.setIval(new CString("", var.line_num, var.file));
+                    if(!var.name.equals("@arguments")){
+                        var.setIval(new CString("", var.line_num, var.file));
+                    } else {
+                        var.setIval(fakeScript.varList.get("@arguments"));
+                    }
                 } else if(index > variables.size() - 1){
                     var.setIval(new CNull(0, null));
                 } else {

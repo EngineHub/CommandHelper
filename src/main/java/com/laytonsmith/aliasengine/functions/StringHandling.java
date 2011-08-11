@@ -145,11 +145,15 @@ public class StringHandling {
         }
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String location = args[0].val();
+            //Verify this file is not above the craftbukkit directory (or whatever directory the user specified
+            if(!Static.CheckSecurity(location)){
+                throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'", 
+                        ExceptionType.SecurityException, line_num, f);
+            }
             try {
-                //Verify this file is not above the craftbukkit directory
-                
-                String s = file_get_contents(args[0].val());
-                return new CString(file_get_contents(args[0].val()), line_num, f);
+                String s = file_get_contents(location);
+                return new CString(s, line_num, f);
             } catch (Exception ex) {
                 throw new ConfigRuntimeException("File could not be read in.", 
                         ExceptionType.FormatException, line_num, f);
@@ -158,11 +162,12 @@ public class StringHandling {
 
         public String docs() {
             return "string {file} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
-                    + " CraftBukkit, not CommandHelper. If the file is not found, or otherwise can't be read in, a FormatException is thrown.";
+                    + " CraftBukkit, not CommandHelper. If the file is not found, or otherwise can't be read in, a FormatException is thrown."
+                    + " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown.";
         }
         
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.SecurityException};
         }
 
         public boolean isRestricted() {

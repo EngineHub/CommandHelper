@@ -598,4 +598,58 @@ public class Math {
         
     }
     
+    @api public static class sqrt implements Function{
+
+        public String getName() {
+            return "sqrt";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "number {number} Returns the square root of a number. Note that this is mathematically equivalent to pow(number, .5)."
+                    + " Imaginary numbers are not supported at this time, so number must be positive.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {
+            
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            double d = Static.getNumber(args[0]);
+            if(d < 0){
+               throw new ConfigRuntimeException("sqrt expects a number >= 0", ExceptionType.RangeException, line_num, f); 
+            }
+            double m = java.lang.Math.sqrt(d);
+            if(m == (int)m){
+                return new CInt((long) m, line_num, f);
+            } else {
+                return new CDouble(m, line_num, f);
+            }
+        }
+        
+    }
+    
 }

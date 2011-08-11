@@ -9,7 +9,6 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
-import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import java.io.File;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -109,48 +108,6 @@ public class Sandbox {
             }
             
             return new CVoid(line_num, f);
-        }
-        
-    }
-    
-    @api public static class _return implements Function{
-
-        public String getName() {
-            return "return";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "nothing {mixed} Returns the specified value from this function. It cannot be called outside a function.";
-        }
-
-        public ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public String since() {
-            return "0.0.0";
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
-            throw new FunctionReturnException(args[0]);
         }
         
     }

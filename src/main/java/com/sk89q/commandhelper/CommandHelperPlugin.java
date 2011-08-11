@@ -23,7 +23,6 @@ import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;

@@ -259,6 +259,8 @@ public class Static {
             a.add(new Preference("script-name", "config.txt", Type.STRING, "The path to the config file, relative to the CommandHelper plugin folder"));
             a.add(new Preference("enable-interpreter", "false", Type.BOOLEAN, "Whether or not to enable the /interpreter command. Note that even with this enabled, a player must still have the commandhelper.interpreter permission, but"
                     + " setting it to false prevents all players from accessing the interpreter regardless of their permissions."));
+            a.add(new Preference("base-dir", "", Type.STRING, "The base directory that scripts can read and write to. If left blank, then the default of the Bukkit directory will be used. "
+                    + "This setting affects functions like include and read."));
             com.sk89q.commandhelper.CommandHelperPlugin.prefs = new Preferences("CommandHelper", getLogger(), a);
         }
         return com.sk89q.commandhelper.CommandHelperPlugin.prefs;
@@ -356,5 +358,31 @@ public class Static {
                 }
             }
         }, msg);
+    }
+    
+    /**
+     * Returns true if this filepath is accessible to CH, false otherwise.
+     * @param location
+     * @return 
+     */
+    public static boolean CheckSecurity(String location){
+        String pref = (String)Static.getPreferences().getPreference("base-dir");
+        if(pref.trim().equals("")){
+            pref = ".";
+        }
+        File base_dir = new File(pref);
+        String base_final = base_dir.getAbsolutePath();
+        if(base_final.endsWith(".")){
+            base_final = base_final.substring(0, base_final.length() - 1);
+        }
+        File loc = new File(location);
+        return loc.getAbsolutePath().startsWith(base_final);
+    }
+    
+    /**
+     * Returns whether or not this location appears to be a url.
+     */
+    public static boolean ApparentURL(String toCheck){
+        return false;
     }
 }

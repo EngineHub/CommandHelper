@@ -18,6 +18,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.LoopContinueException;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import java.io.File;
 import org.bukkit.entity.Player;
 
@@ -688,6 +689,94 @@ public class DataHandling {
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class _return implements Function{
+
+        public String getName() {
+            return "return";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "nothing {mixed} Returns the specified value from this procedure. It cannot be called outside a procedure.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            Construct ret = (args.length == 1?args[0]:new CVoid(line_num, f));
+            throw new FunctionReturnException(ret);
+        }
+        
+    }
+    @api public static class include implements Function{
+
+        public String getName() {
+            return "include";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "void {path} Includes external code at the specified path.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.IncludeException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return true;
+        }
+
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(line_num, f);
+        }
+        
+        public void execs(int line_num, File f, Player p, String location){
+            
         }
         
     }

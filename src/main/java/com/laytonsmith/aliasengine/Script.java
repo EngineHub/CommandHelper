@@ -144,6 +144,8 @@ public class Script {
                     p.sendMessage("The break() function must be used inside a for() or foreach() loop");
                 } catch(LoopContinueException e){
                     p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
+                } catch(FunctionReturnException e){
+                    p.sendMessage("The return() function must be used inside a procedure.");
                 } catch (Throwable t) {
                     System.out.println("An unexpected exception occured during the execution of a script.");
                     t.printStackTrace();
