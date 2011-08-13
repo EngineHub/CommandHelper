@@ -10,6 +10,8 @@ import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import org.bukkit.entity.Player;
 
@@ -648,6 +650,152 @@ public class Math {
             } else {
                 return new CDouble(m, line_num, f);
             }
+        }
+        
+    }
+    
+    @api public static class min implements Function{
+
+        public String getName() {
+            return "min";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "number {num1, [num2...]} Returns the lowest number in a given list of numbers. If any of the arguments"
+                    + " are arrays, they are expanded into individual numbers, and also compared.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            if(args.length == 0){
+                throw new ConfigRuntimeException("You must send at least one parameter to min", 
+                        ExceptionType.InsufficientArgumentsException, line_num, f);
+            }
+            double lowest = Double.POSITIVE_INFINITY;
+            List<Construct> list = new ArrayList<Construct>();
+            recList(list, args);
+            for(Construct c : list){
+                double d = Static.getNumber(c);
+                if(d < lowest){
+                    lowest = d;
+                }
+            }
+            if(lowest == (long)lowest){
+                return new CInt((long)lowest, line_num, f);
+            } else {
+                return new CDouble(lowest, line_num, f);
+            }
+        }
+        
+        public List<Construct> recList(List<Construct> list, Construct ... args){
+            for(Construct c : args){
+                if(c instanceof CArray){
+                    for(int i = 0; i < ((CArray)c).size(); i++){
+                        recList(list, ((CArray)c).get(i, 0));
+                    }
+                } else {
+                    list.add(c);
+                }
+            }
+            return list;
+        }
+        
+    }
+    
+    @api public static class max implements Function{
+
+        public String getName() {
+            return "max";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "number {num1, [num2...]} Returns the highest number in a given list of numbers. If any of the arguments"
+                    + " are arrays, they are expanded into individual numbers, and also compared.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            if(args.length == 0){
+                throw new ConfigRuntimeException("You must send at least one parameter to max", 
+                        ExceptionType.InsufficientArgumentsException, line_num, f);
+            }
+            double highest = Double.NEGATIVE_INFINITY;
+            List<Construct> list = new ArrayList<Construct>();
+            recList(list, args);
+            for(Construct c : list){
+                double d = Static.getNumber(c);
+                if(d > highest){
+                    highest = d;
+                }
+            }
+            if(highest == (long)highest){
+                return new CInt((long)highest, line_num, f);
+            } else {
+                return new CDouble(highest, line_num, f);
+            }
+        }
+        
+        public List<Construct> recList(List<Construct> list, Construct ... args){
+            for(Construct c : args){
+                if(c instanceof CArray){
+                    for(int i = 0; i < ((CArray)c).size(); i++){
+                        recList(list, ((CArray)c).get(i, 0));
+                    }
+                } else {
+                    list.add(c);
+                }
+            }
+            return list;
         }
         
     }

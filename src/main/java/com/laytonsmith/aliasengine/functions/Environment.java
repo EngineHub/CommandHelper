@@ -142,15 +142,15 @@ public class Environment {
                     throw new ConfigRuntimeException("set_block_at expects the parameter 1 to be an array with 3 elements.", ExceptionType.LengthException,
                             line_num, f);
                 }
-                x = Static.getDouble(ca.get(0, line_num));
-                y = Static.getDouble(ca.get(1, line_num));
-                z = Static.getDouble(ca.get(2, line_num));
+                x = Static.getNumber(ca.get(0, line_num));
+                y = Static.getNumber(ca.get(1, line_num));
+                z = Static.getNumber(ca.get(2, line_num));
                 id = args[1].val();
                 
             } else {
-                x = Static.getDouble(args[0]);
-                y = Static.getDouble(args[1]);
-                z = Static.getDouble(args[2]);
+                x = Static.getNumber(args[0]);
+                y = Static.getNumber(args[1]);
+                z = Static.getNumber(args[2]);
                 id = args[3].val();
             }
             x = java.lang.Math.floor(x);

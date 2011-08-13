@@ -11,6 +11,8 @@ import java.io.File;
  * @author layton
  */
 public class CFunction extends Construct {
+    
+    public static final long serialVersionUID = 1L;
 
     public CFunction(String name, int line_num, File file) {
         super(name, ConstructType.FUNCTION, line_num, file);
@@ -18,5 +20,10 @@ public class CFunction extends Construct {
 
     public String toString() {
         return this.value;
+    }
+    
+    @Override
+    public CFunction clone() throws CloneNotSupportedException{
+        return (CFunction) super.clone();
     }
 }

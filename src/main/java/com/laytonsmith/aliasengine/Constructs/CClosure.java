@@ -12,11 +12,13 @@ import java.io.File;
  * @author Layton
  */
 public class CClosure extends Construct {
+    
+    public static final long serialVersionUID = 1L;
 
     GenericTreeNode<Construct> node;
 
     public CClosure(String name, GenericTreeNode<Construct> node, int line_num, File file) {
-        super(node.toString(), ConstructType.CLOSURE, line_num, file);
+        super(node!=null?node.toString():"", ConstructType.CLOSURE, line_num, file);
         this.node = node;
     }
     
@@ -28,4 +30,11 @@ public class CClosure extends Construct {
     public GenericTreeNode<Construct> getNode() {
         return node;
     }        
+    
+    @Override
+    public CClosure clone() throws CloneNotSupportedException{
+        CClosure clone = (CClosure) super.clone();
+        if(this.node != null) clone.node = this.node.clone();
+        return clone;
+    }
 }

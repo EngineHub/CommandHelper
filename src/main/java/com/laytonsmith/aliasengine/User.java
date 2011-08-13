@@ -5,7 +5,7 @@
 
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.PureUtilities.Persistance;
+import com.laytonsmith.PureUtilities.SerializedPersistance;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
@@ -19,10 +19,10 @@ import org.bukkit.entity.Player;
  */
 public class User {
     Player player;
-    Persistance persist;
+    SerializedPersistance persist;
     
 
-    public User(Player player, Persistance persist){
+    public User(Player player, SerializedPersistance persist){
         //(new PermissionsResolverServerListener(perms)).register(this);
         this.player = player;
         this.persist = persist;

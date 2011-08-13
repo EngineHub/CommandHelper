@@ -65,15 +65,18 @@ public class Exceptions {
          */
         InvalidProcedureException, 
         /**
-         * This exception is thrown if there is a problem with an include. Though this exception exists, it cannot be caught under
-         * normal circumstance, because include is not executed at the same time as the rest of the script. This is thrown if the argument
-         * passed to include is not a string, or if the path specified does not exist.
+         * This exception is thrown if there is a problem with an include. This is thrown if there is
+         * a compile error in the included script.
          */
         IncludeException,
         /**
          * This exception is thrown if a script tries to read or write to a location of the filesystem that is not allowed.
          */
-        SecurityException,
+        SecurityException, 
+        /**
+         * This exception is thrown if a file cannot be read or written to.
+         */
+        IOException,
     }
     @api public static class _try implements Function{      
         

@@ -18,7 +18,7 @@ public class IVariableList {
         boolean set = false;
         for(int i = 0; i < varList.size(); i++){
             IVariable l = varList.get(i);
-            if(l.name.equals(v.name)){
+            if(l.getName().equals(v.getName())){
                 varList.set(i, v);
                 set = true;
                 break;
@@ -32,7 +32,7 @@ public class IVariableList {
     public IVariable get(String name){
         for(int i = 0; i < varList.size(); i++){
             IVariable l = varList.get(i);
-            if(l.name.equals(name)){
+            if(l.getName().equals(name)){
                 return l;
             }
         }

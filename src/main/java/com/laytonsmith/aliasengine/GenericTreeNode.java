@@ -5,15 +5,43 @@
 
 package com.laytonsmith.aliasengine;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class GenericTreeNode<T> {
+public class GenericTreeNode<T> implements Cloneable{
 
     public T data;
     public List<GenericTreeNode<T>> children;
+    
+    @Override
+    public GenericTreeNode<T> clone() throws CloneNotSupportedException{
+        GenericTreeNode<T> clone = (GenericTreeNode<T>) super.clone();
+        Class c = data.getClass();
+        if(Arrays.asList(c.getInterfaces()).contains(Cloneable.class)){
+            try{
+                Method m = c.getMethod("clone", new Class[]{});
+                Object obj = m.invoke(data, new Object[]{});
+                clone.data = (T) obj;
+                clone.children = new ArrayList<GenericTreeNode<T>>(children);
+            } catch (IllegalAccessException ex) {
+                throw new CloneNotSupportedException();
+            } catch (IllegalArgumentException ex) {
+                throw new CloneNotSupportedException();
+            } catch (InvocationTargetException ex) {
+                throw new CloneNotSupportedException();
+            } catch(NoSuchMethodException e){
+                throw new CloneNotSupportedException();
+            }
+        }
+        return clone;
+    }
 
     public GenericTreeNode() {
         super();

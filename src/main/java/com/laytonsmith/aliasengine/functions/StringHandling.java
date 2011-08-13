@@ -156,18 +156,18 @@ public class StringHandling {
                 return new CString(s, line_num, f);
             } catch (Exception ex) {
                 throw new ConfigRuntimeException("File could not be read in.", 
-                        ExceptionType.FormatException, line_num, f);
+                        ExceptionType.IOException, line_num, f);
             }
         }
 
         public String docs() {
             return "string {file} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
-                    + " CraftBukkit, not CommandHelper. If the file is not found, or otherwise can't be read in, a FormatException is thrown."
+                    + " CraftBukkit, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
                     + " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown.";
         }
         
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.SecurityException};
+            return new ExceptionType[]{ExceptionType.IOException, ExceptionType.SecurityException};
         }
 
         public boolean isRestricted() {

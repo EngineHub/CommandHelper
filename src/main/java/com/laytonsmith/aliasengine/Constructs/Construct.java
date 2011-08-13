@@ -12,7 +12,7 @@ import java.io.Serializable;
  *
  * @author layton
  */
-public class Construct implements Serializable{
+public class Construct implements Serializable, Cloneable{
     
     public static final long serialVersionUID = 1L;
     
@@ -20,10 +20,10 @@ public class Construct implements Serializable{
         TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE
     }
 
-    public ConstructType ctype;
-    protected String value = "";
-    public int line_num;
-    transient public File file;
+    final public ConstructType ctype;
+    final protected String value;
+    final public int line_num;
+    final transient public File file;
 
     public Construct(String value, ConstructType ctype, int line_num, File file){
         this.value = value;
@@ -39,5 +39,10 @@ public class Construct implements Serializable{
     @Override
     public String toString(){
         return value;
+    }
+    
+    @Override
+    public Construct clone() throws CloneNotSupportedException{
+        return (Construct) super.clone();
     }
 }

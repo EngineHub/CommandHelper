@@ -50,7 +50,7 @@ public class MScriptCompilerTest {
         List e = null;
         e = new ArrayList();
         //This is the decomposed version of the above config
-        e.add(new Token(Token.TType.UNKNOWN, "/cmd", 1, null));
+        e.add(new Token(Token.TType.COMMAND, "/cmd", 1, null));
         e.add(new Token(Token.TType.ALIAS_END, "=", 1, null));
         e.add(new Token(Token.TType.FUNC_NAME, "msg", 1, null));
         e.add(new Token(Token.TType.FUNC_START, "(", 1, null));

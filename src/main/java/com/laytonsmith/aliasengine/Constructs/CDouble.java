@@ -13,8 +13,10 @@ import java.io.File;
  *
  * @author layton
  */
-public class CDouble extends Construct{
-    double val;
+public class CDouble extends Construct implements Cloneable{
+    
+    public static final long serialVersionUID = 1L;
+    final double val;
 
     public CDouble(String value, int line_num, File file){
         super(value, ConstructType.INT, line_num, file);
@@ -32,5 +34,10 @@ public class CDouble extends Construct{
 
     public double getDouble(){
         return val;
+    }
+    
+    @Override
+    public CDouble clone() throws CloneNotSupportedException{
+        return (CDouble) super.clone();
     }
 }

@@ -11,22 +11,39 @@ import java.io.File;
  *
  * @author layton
  */
-public class IVariable extends Variable{
-    Construct var_value;
+public class IVariable extends Construct implements Cloneable{
+    
+    public static final long serialVersionUID = 1L;
+    private Construct var_value;
+    final private String name;
+
     public IVariable(String name, int line_num, File file){
-        super(name, "", line_num, file);
+        super(name, ConstructType.IVARIABLE, line_num, file);
         this.var_value = new CString("", line_num, file);
-        this.ctype = ConstructType.IVARIABLE;
+        this.name = name;
     }
     public IVariable(String name, Construct value, int line_num, File file){
-        super(name, value.val(), line_num, file);
+        super(name, ConstructType.IVARIABLE, line_num, file);
         this.var_value = value;
-        this.ctype = ConstructType.IVARIABLE;
+        this.name = name;
+    }
+    @Override
+    public String val(){
+        return var_value.val();
     }
     public Construct ival(){
         return var_value;
     }
+    public String getName(){
+        return name;
+    }
     public void setIval(Construct c){
         var_value = c;
+    }
+    @Override
+    public IVariable clone() throws CloneNotSupportedException{
+        IVariable clone = (IVariable) super.clone();
+        if(this.var_value != null) clone.var_value = this.var_value.clone();
+        return (IVariable) clone;
     }
 }

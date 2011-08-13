@@ -13,8 +13,10 @@ import java.io.File;
  *
  * @author layton
  */
-public class CInt extends Construct{
-    long val;
+public class CInt extends Construct implements Cloneable{
+    
+    public static final long serialVersionUID = 1L;
+    final long val;
     public CInt(String value, int line_num, File file){
         super(value, ConstructType.INT, line_num, file);
         try{
@@ -31,6 +33,10 @@ public class CInt extends Construct{
 
     public long getInt(){
         return val;
+    }
+    
+    public CInt clone() throws CloneNotSupportedException{
+        return (CInt) super.clone();
     }
 
 }

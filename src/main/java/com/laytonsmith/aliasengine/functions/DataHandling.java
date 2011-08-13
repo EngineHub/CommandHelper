@@ -13,6 +13,7 @@ import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
+import com.laytonsmith.aliasengine.Procedure;
 import com.laytonsmith.aliasengine.functions.exceptions.LoopBreakException;
 import com.laytonsmith.aliasengine.functions.exceptions.LoopContinueException;
 import com.laytonsmith.aliasengine.Script;
@@ -20,6 +21,12 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.bukkit.entity.Player;
 
 /**
@@ -59,7 +66,7 @@ public class DataHandling {
         public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
-            return false;
+            return true;
         }
         public String since() {
             return "3.0.1";
@@ -775,8 +782,126 @@ public class DataHandling {
             return new CVoid(line_num, f);
         }
         
-        public void execs(int line_num, File f, Player p, String location){
-            
+        public Construct execs(int line_num, File f, Player p, List<GenericTreeNode<Construct>> children, Script parent){
+            GenericTreeNode<Construct> tree = children.get(0);
+            Construct arg = parent.eval(tree, p);
+            arg = parent.preResolveVariables(new Construct[]{arg})[0];
+            String location = arg.val();
+            GenericTreeNode<Construct> include = IncludeCache.get(new File(location), line_num, f);
+            parent.eval(include.getChildAt(0), p);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class call_proc implements Function{
+
+        public String getName() {
+            return "call_proc";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "mixed {proc_name, [var1...]} Dynamically calls a user defined procedure. call_proc(_myProc, 'var1') is the equivalent of"
+                    + " _myProc('var1'), except you could dynamically build the procedure name if need be. This is useful for having callbacks"
+                    + " in procedures. Throws an InvalidProcedureException if the procedure isn't defined.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidProcedureException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(line_num, f);
+        }
+        
+        public Construct execs(int line_num, File f, Player p, Map<String, Procedure> procs, Construct ... args){
+            Procedure proc = procs.get(args[0].val());
+            if(proc != null){
+                List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
+                vars.remove(0);
+                try{
+                    proc.execute(vars, p, new HashMap<String, Procedure>(procs));
+                    return new CVoid(line_num, f);
+                } catch(FunctionReturnException e){
+                    return e.getReturn();
+                }
+            }            
+            throw new ConfigRuntimeException("Unknown procedure \"" + args[0].val() + "\"", 
+                    ExceptionType.InvalidProcedureException, line_num, f);
+        }
+        
+    }
+    
+    @api public static class is_proc implements Function{
+
+        public String getName() {
+            return "is_proc";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {procName} Returns whether or not the given procName is currently defined, i.e. if calling this proc wouldn't"
+                    + " throw an exception.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(line_num, f);
+        }
+        
+        public Construct execs(int line_num, File f, Player p, List<Procedure> procs, Construct ... args){
+            for(Procedure proc : procs){
+                if(proc.getName().equals(args[0].val())){
+                    return new CBoolean(true, line_num, f);
+                }
+            }
+            return new CBoolean(false, line_num, f);
         }
         
     }

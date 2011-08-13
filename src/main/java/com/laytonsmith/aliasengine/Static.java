@@ -5,7 +5,7 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
-import com.laytonsmith.PureUtilities.Persistance;
+import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
@@ -208,8 +208,8 @@ public class Static {
      * @return
      * @throws NotInitializedYetException 
      */
-    public static Persistance getPersistance() throws NotInitializedYetException {
-        Persistance p = com.sk89q.commandhelper.CommandHelperPlugin.persist;
+    public static SerializedPersistance getPersistance() throws NotInitializedYetException {
+        SerializedPersistance p = com.sk89q.commandhelper.CommandHelperPlugin.persist;
         if (p == null) {
             throw new NotInitializedYetException("The persistance framework has not been initialized yet");
         }

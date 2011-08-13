@@ -50,7 +50,7 @@ public class C {
         return new IVariable(name, val, 0, null);
     }
     public static Variable Variable(String name, String val){
-        return new Variable(name, val, 0, null);
+        return new Variable(name, val, false, false, 0, null);
     }
     /**
      * Returns a construct in the same way that constructs are resolved in scripts.

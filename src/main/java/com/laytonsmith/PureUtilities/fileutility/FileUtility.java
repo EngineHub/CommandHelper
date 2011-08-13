@@ -74,6 +74,7 @@ public class FileUtility {
         }
         FileWriter fw = new FileWriter(f, append);
         fw.write(s);
+        fw.close();
     }
 
     /**

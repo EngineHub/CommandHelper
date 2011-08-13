@@ -13,8 +13,10 @@ import java.io.File;
  *
  * @author layton
  */
-public class CBoolean extends Construct{
-    boolean val;
+public class CBoolean extends Construct implements Cloneable{
+    
+    public static final long serialVersionUID = 1L;
+    private boolean val;
     public CBoolean(boolean value, int line_num, File file){
         super(Boolean.toString(value), ConstructType.BOOLEAN, line_num, file);
         val = value;
@@ -58,6 +60,11 @@ public class CBoolean extends Construct{
         } else{
             return "false";
         }
+    }
+    
+    @Override
+    public CBoolean clone() throws CloneNotSupportedException{
+        return (CBoolean) super.clone();
     }
 
 }

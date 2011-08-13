@@ -174,6 +174,24 @@ public class MScriptCompiler {
                 continue;
             }
         } //end lexing
+                //look at the tokens, and get meaning from them
+        for (Token t : token_list) {
+            if (t.type.equals(TType.UNKNOWN)) {
+                if (t.val().matches("/.*")) {
+                    t.type = TType.COMMAND;
+                } else if (t.val().matches("\\\\")) {
+                    t.type = TType.SEPERATOR;
+                } else if (t.val().matches("\\$[a-zA-Z0-9_]+")) {
+                    t.type = TType.VARIABLE;
+                } else if (t.val().matches("\\@[a-zA-Z0-9_]+")) {
+                    t.type = TType.IVARIABLE;
+                } else if (t.val().equals("$")) {
+                    t.type = TType.FINAL_VAR;
+                } else {
+                    t.type = TType.LIT;
+                }
+            }
+        }
         return token_list;
     }
 
@@ -252,24 +270,7 @@ public class MScriptCompiler {
 
 
 
-        //look at the tokens, and get meaning from them
-        for (Token t : tokens2) {
-            if (t.type.equals(TType.UNKNOWN)) {
-                if (t.val().matches("/.*")) {
-                    t.type = TType.COMMAND;
-                } else if (t.val().matches("\\\\")) {
-                    t.type = TType.SEPERATOR;
-                } else if (t.val().matches("\\$[a-zA-Z0-9_]+")) {
-                    t.type = TType.VARIABLE;
-                } else if (t.val().matches("\\@[a-zA-Z0-9_]+")) {
-                    t.type = TType.IVARIABLE;
-                } else if (t.val().equals("$")) {
-                    t.type = TType.FINAL_VAR;
-                } else {
-                    t.type = TType.LIT;
-                }
-            }
-        }
+
 
         //Now that we have all lines minified, we should be able to split
         //on newlines, and easily find the left and right sides
@@ -347,7 +348,7 @@ public class MScriptCompiler {
                 tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num, t.file)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-                tree.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, t.line_num, t.file)));
+                tree.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.line_num, t.file)));
                 constructCount.peek().incrementAndGet();
                 //right_vars.add(new Variable(t.val(), null, t.line_num));
             } else if (t.type.equals(TType.FUNC_NAME)) {
@@ -450,6 +451,8 @@ public class MScriptCompiler {
                 b.append(ret).append(" ");
             }
         }
-        done.done(b.toString().trim());
+        if(done != null){
+            done.done(b.toString().trim());
+        }
     }
 }

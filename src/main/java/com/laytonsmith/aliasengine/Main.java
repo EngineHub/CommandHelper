@@ -4,7 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.PureUtilities.Persistance;
+import com.laytonsmith.PureUtilities.SerializedPersistance;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -78,7 +78,7 @@ public class Main {
                 return;
             }
             if (l.contains("--print-db")) {
-                new Persistance(new File("CommandHelper/persistance.ser"), null).printValues();
+                new SerializedPersistance(new File("CommandHelper/persistance.ser"), null).printValues(System.out);
                 return;
             }
             for (int i = 0; i < l.size(); i++) {

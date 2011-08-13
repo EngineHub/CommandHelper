@@ -19,10 +19,11 @@
 
 package com.sk89q.commandhelper;
 
-import com.laytonsmith.PureUtilities.Persistance;
+import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.aliasengine.Installer;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
@@ -53,7 +54,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     public static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
     private static AliasCore ac;
     public static Server myServer;
-    public static Persistance persist;
+    public static SerializedPersistance persist;
     public static PermissionsResolverManager perms;
     public static Version version;
     public static Preferences prefs;
@@ -72,13 +73,18 @@ public class CommandHelperPlugin extends JavaPlugin {
             new CommandHelperInterpreterListener();
 
     final ArrayList<Player> commandRunning = new ArrayList<Player>();
+    
+    @Override
+    public void onLoad(){
+        Installer.Install();
+    }
     /**
      * Called on plugin enable.
      */
     public void onEnable() {
         self = this;
         myServer = getServer();
-        persist = new Persistance(new File("plugins/CommandHelper/persistance.ser"), this);
+        persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), this);
         logger.info("CommandHelper " + getDescription().getVersion() + " enabled");
         version = new Version(getDescription().getVersion());
         perms = new PermissionsResolverManager(getConfiguration(), getServer(),

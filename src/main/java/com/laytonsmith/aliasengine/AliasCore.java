@@ -176,7 +176,7 @@ public class AliasCore {
                 aliasConfig.createNewFile();
                 try {
                     file_put_contents(aliasConfig,
-                            getStringResource(AliasCore.class.getResourceAsStream("/com/laytonsmith/aliasengine/samp_config.txt")),
+                            getStringResource(AliasCore.class.getResourceAsStream("/samp_config.txt")),
                             "o");
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");

@@ -10,15 +10,20 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 /**
  *
  * @author layton
  */
 public class CArray extends Construct{
-    ArrayList<Construct> array = new ArrayList<Construct>();
+    
+    public static final long serialVersionUID = 1L;
+    private List<Construct> array;
+    private String mutVal;
     public CArray(int line_num, File file, Construct ... items){
         super(null, ConstructType.ARRAY, line_num, file);
+        array = new ArrayList<Construct>();
         array.addAll(Arrays.asList(items));
         regenValue();
     }
@@ -35,7 +40,7 @@ public class CArray extends Construct{
             }
         }
         b.append("}");
-        value = b.toString();
+        mutVal = b.toString();
     }
 
     public void push(Construct c){
@@ -56,7 +61,24 @@ public class CArray extends Construct{
         }
     }
     
+    @Override
+    public String val(){
+        return mutVal;
+    }
+    
+    @Override
+    public String toString(){
+        return mutVal;
+    }
+    
     public int size(){
         return array.size();
+    }
+    
+    @Override
+    public CArray clone() throws CloneNotSupportedException{
+        CArray clone = (CArray) super.clone();
+        if(array != null) clone.array = new ArrayList<Construct>(this.array);
+        return clone;
     }
 }
