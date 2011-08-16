@@ -843,7 +843,7 @@ public class PlayerManangement {
                     + " player running the command's yaw and pitch are returned. The function returns void when setting the values. (Note that while this"
                     + " function looks like it has ambiguous arguments, players cannot be named numbers.)<p>A note on numbers: The values returned by the getter will always be"
                     + " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
-                    + " always be a number between 0 and 359.999~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
+                    + " always be a number between 0 and 359.9~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
                     + " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
         }
 

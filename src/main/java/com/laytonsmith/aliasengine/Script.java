@@ -377,15 +377,15 @@ public class Script {
                 IVariable v = (IVariable) ca[i];
                 ca[i] = varList.get(v.getName()).ival();
             } else if(ca[i] instanceof CArray){
-                CArray ca2 = (CArray) ca[i];
-                Construct [] ca_raw = new Construct[ca2.size()];
-                for(int j = 0; j < ca_raw.length; j++){
-                    ca_raw[j] = ca2.get(j, 0);
-                }
-                List<Construct> resolved = Arrays.asList(preResolveVariables(ca_raw));
-                for(int j = 0; j < resolved.size(); j++){
-                    
-                }
+//                CArray ca2 = (CArray) ca[i];
+//                Construct [] ca_raw = new Construct[ca2.size()];
+//                for(int j = 0; j < ca_raw.length; j++){
+//                    ca_raw[j] = ca2.get(j, 0);
+//                }
+//                List<Construct> resolved = Arrays.asList(preResolveVariables(ca_raw));
+//                for(int j = 0; j < resolved.size(); j++){
+//                    
+//                }
             }
         }
         return ca;

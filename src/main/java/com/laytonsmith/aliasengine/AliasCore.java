@@ -308,4 +308,12 @@ public class AliasCore {
         }
         return writer.toString();
     }
+    
+    public void removePlayerReference(Player p){
+        echoCommand.remove(p.getName());
+    }
+    
+    public void addPlayerReference(Player p){
+        echoCommand.add(p.getName());
+    }
 }

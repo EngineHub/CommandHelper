@@ -32,6 +32,8 @@ import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -72,7 +74,8 @@ public class CommandHelperPlugin extends JavaPlugin {
     final CommandHelperInterpreterListener interpreterListener = 
             new CommandHelperInterpreterListener();
 
-    final ArrayList<Player> commandRunning = new ArrayList<Player>();
+    final Set<Player> commandRunning = new HashSet<Player>();
+    
     
     @Override
     public void onLoad(){
