@@ -1099,19 +1099,20 @@ public class PlayerManangement {
     public static class set_pinv implements Function {
 
         public String getName() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return "set_pinv";
         }
 
         public Integer[] numArgs() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return "void {slot, item_id, [qty]} Sets the index of the slot to the specified item_id, with the specified qty,"
+                    + " or 1 by default.";
         }
 
         public ExceptionType[] thrown() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return new ExceptionType[]{};
         }
 
         public boolean isRestricted() {

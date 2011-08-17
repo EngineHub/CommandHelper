@@ -13,7 +13,9 @@ import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
@@ -32,7 +34,7 @@ public class AliasCore {
     //AliasConfig config;
     List<Script> scripts;
     static final Logger logger = Logger.getLogger("Minecraft");
-    private ArrayList<String> echoCommand = new ArrayList<String>();
+    private Set<String> echoCommand = new HashSet<String>();
     private PermissionsResolverManager perms;
     public static CommandHelperPlugin parent;
 

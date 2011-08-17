@@ -25,12 +25,14 @@ import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.InternalException;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.Script;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.*;
+import java.lang.reflect.Proxy;
 import java.util.ArrayList;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
@@ -124,20 +126,23 @@ public class CommandHelperListener extends PlayerListener {
         }
         this.getSession(player).setLastCommand(cmd);
         
-        if(event.isCancelled()){
-            return;
-        }
+        if(!(Boolean)Static.getPreferences().getPreference("play-dirty")){
+            if(event.isCancelled()){
+                return;
+            }
+        } //If we are playing dirty, ignore the cancelled flag
         
         try {
             if (runAlias(event.getMessage(), player)) {
                 event.setCancelled(true);
+                this.removeEventFromQueue(event);
                 //System.out.println("Command Cancelled: " + cmd);
                 return;
             }
         } catch(InternalException e){
             logger.log(Level.SEVERE, e.getMessage());
         } catch(ConfigRuntimeException e){
-            //logger.log(Level.WARNING, e.getMessage());
+            logger.log(Level.WARNING, e.getMessage());
         } catch (Throwable e) {
             player.sendMessage(ChatColor.RED + "Command failed with following reason: " + e.getMessage());
             //Obviously the command is registered, but it somehow failed. Cancel the event.
@@ -257,5 +262,10 @@ public class CommandHelperListener extends PlayerListener {
                 CommandHelperPlugin.execCommand(player, cmd);
             }
         }
+    }
+    
+
+    private void removeEventFromQueue(PlayerCommandPreprocessEvent event) {
+        
     }
 }
