@@ -20,8 +20,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.Server;
+import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 /**
  * This class contains several static methods to get various objects that really should be static in the first
@@ -91,9 +96,9 @@ public class Static {
         if (c instanceof CInt) {
             i = ((CInt) c).getInt();
         } else {
-            try{
+            try {
                 i = Integer.parseInt(c.val());
-            } catch(NumberFormatException e){
+            } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead",
                         ExceptionType.CastException, c.line_num, c.file);
             }
@@ -266,8 +271,8 @@ public class Static {
         }
         return com.sk89q.commandhelper.CommandHelperPlugin.prefs;
     }
-    
-    public static WorldEditPlugin getWorldEditPlugin(){
+
+    public static WorldEditPlugin getWorldEditPlugin() {
         return CommandHelperPlugin.wep;
     }
 
@@ -279,7 +284,7 @@ public class Static {
      * @return 
      */
     public static Construct resolveConstruct(String val, int line_num, File file) {
-        if(val == null){
+        if (val == null) {
             return new CString("", line_num, file);
         }
         if (val.equalsIgnoreCase("null")) {
@@ -302,11 +307,11 @@ public class Static {
             }
         }
     }
-    
-    public static Construct resolveDollarVar(Construct variable, List<Variable> vars){
-        if(variable.ctype == Construct.ConstructType.VARIABLE){
-            for(Variable var : vars){
-                if(var.getName().equals(((Variable)variable).getName())){
+
+    public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
+        if (variable.ctype == Construct.ConstructType.VARIABLE) {
+            for (Variable var : vars) {
+                if (var.getName().equals(((Variable) variable).getName())) {
                     return Static.resolveConstruct(var.val(), var.line_num, var.file);
                 }
             }
@@ -315,75 +320,148 @@ public class Static {
         }
         throw new ConfigRuntimeException("No value passed in for for variable " + variable.val(), 0, null);
     }
-    
+
     /**
      * This function breaks a string into chunks based on Minecraft line length,
      * and newlines, then calls the LineCallback with each line.
      * @param c
      * @param msg 
      */
-    public static void SendMessage(LineCallback c, String msg){        
-        String [] newlines = msg.split("\n");
-        for(String line : newlines){
-            String [] arr = rParser.wordWrap(line);
-            for(String toMsg : arr){                
+    public static void SendMessage(LineCallback c, String msg) {
+        String[] newlines = msg.split("\n");
+        for (String line : newlines) {
+            String[] arr = rParser.wordWrap(line);
+            for (String toMsg : arr) {
                 c.run(toMsg.trim());
             }
         }
-        
+
     }
+
     /**
      * This function sends a message to the player. It is useful to use this function because:
      * It handles newlines and wordwrapping for you.
      * @param p
      * @param msg 
      */
-    public static void SendMessage(final Player p, String msg, final int line_num, final File f){
+    public static void SendMessage(final Player p, String msg, final int line_num, final File f) {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
-                if(p == null || !p.isOnline()){
+                if (p == null || !p.isOnline()) {
                     throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
                 }
                 p.sendMessage(line);
             }
         }, msg);
     }
-    
-    public static void SendMessage(final Player p, String msg){
+
+    public static void SendMessage(final Player p, String msg) {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
-                if(p != null && p.isOnline()){
+                if (p != null && p.isOnline()) {
                     p.sendMessage(line);
                 }
             }
         }, msg);
     }
-    
+
     /**
      * Returns true if this filepath is accessible to CH, false otherwise.
      * @param location
      * @return 
      */
-    public static boolean CheckSecurity(String location){
-        String pref = (String)Static.getPreferences().getPreference("base-dir");
-        if(pref.trim().equals("")){
+    public static boolean CheckSecurity(String location) {
+        String pref = (String) Static.getPreferences().getPreference("base-dir");
+        if (pref.trim().equals("")) {
             pref = ".";
         }
         File base_dir = new File(pref);
         String base_final = base_dir.getAbsolutePath();
-        if(base_final.endsWith(".")){
+        if (base_final.endsWith(".")) {
             base_final = base_final.substring(0, base_final.length() - 1);
         }
         File loc = new File(location);
         return loc.getAbsolutePath().startsWith(base_final);
     }
-    
+
     /**
      * Returns whether or not this location appears to be a url.
      */
-    public static boolean ApparentURL(String toCheck){
+    public static boolean ApparentURL(String toCheck) {
         return false;
+    }
+
+    public static ItemStack ParseItemNotation(String functionName, String notation, int qty, int line_num, File f) {
+        int type = 0;
+        byte data = 0;
+        ItemStack is = null;
+        if (notation.matches("\\d*:\\d*")) {
+            String[] sData = notation.split(":");
+            try {
+                type = (int) Integer.parseInt(sData[0]);
+                data = (byte) Integer.parseInt(sData[1]);
+            } catch (NumberFormatException e) {
+                throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation, ExceptionType.FormatException, line_num, f);
+            }
+        } else {
+            type = (int) Static.getInt(Static.resolveConstruct(notation, line_num, f));
+        }
+        
+        is = new ItemStack(type, qty);
+        is.setData(new MaterialData(type, data));
+        return is;
+    }
+    
+    public static Player GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException{
+        Player m = Static.getServer().getPlayer(player);
+        if(m == null || !m.isOnline()){
+            throw new ConfigRuntimeException("The specified player (player) is not online", ExceptionType.PlayerOfflineException, line_num, f);
+        }
+        return m;
+    }
+    
+    public static Location GetLocation(Construct c, World w, int line_num, File f){
+        if(!(c instanceof CArray)){
+            throw new ConfigRuntimeException("Expecting an array, received " + c.ctype, ExceptionType.FormatException, line_num, f);
+        }
+        CArray array = (CArray)c;
+        World world = w;
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        float yaw = 0;
+        float pitch = 0;
+        if(array.size() == 3){
+            //Just the xyz, with default yaw and pitch, and given world
+            x = Static.getNumber(array.get(0, line_num));
+            y = Static.getNumber(array.get(1, line_num));
+            z = Static.getNumber(array.get(2, line_num));
+        } else if(array.size() == 4){
+            //world, x, y, z
+            world = Static.getServer().getWorld(array.get(0, line_num).val());
+            x = Static.getNumber(array.get(1, line_num));
+            y = Static.getNumber(array.get(2, line_num));
+            z = Static.getNumber(array.get(3, line_num));
+        } else if(array.size() == 5){
+            //x, y, z, yaw, pitch, with given world
+            x = Static.getNumber(array.get(0, line_num));
+            y = Static.getNumber(array.get(1, line_num));
+            z = Static.getNumber(array.get(2, line_num));
+            yaw = (float)Static.getNumber(array.get(3, line_num));
+            pitch = (float)Static.getNumber(array.get(4, line_num));
+        } else if(array.size() == 6){
+            //All have been given
+            world = Static.getServer().getWorld(array.get(0, line_num).val());
+            x = Static.getNumber(array.get(1, line_num));
+            y = Static.getNumber(array.get(2, line_num));
+            z = Static.getNumber(array.get(3, line_num));
+            yaw = (float)Static.getNumber(array.get(4, line_num));
+            pitch = (float)Static.getNumber(array.get(5, line_num));
+        } else {
+            throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, line_num, f);
+        }
+        return new Location(world, x, y, z, yaw, pitch);
     }
 }

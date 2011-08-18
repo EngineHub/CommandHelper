@@ -1103,12 +1103,13 @@ public class PlayerManangement {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2, 3};
+            return new Integer[]{3, 4};
         }
 
         public String docs() {
-            return "void {slot, item_id, [qty]} Sets the index of the slot to the specified item_id, with the specified qty,"
-                    + " or 1 by default.";
+            return "void {[player], slot, item_id, [qty]} Sets the index of the slot to the specified item_id, with the specified qty,"
+                    + " or 1 by default. If the qty of armor indexes is greater than 1, it is silently ignored, and only 1 is added."
+                    + " item_id follows the same notation for items used elsewhere.";
         }
 
         public ExceptionType[] thrown() {
@@ -1116,27 +1117,34 @@ public class PlayerManangement {
         }
 
         public boolean isRestricted() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return true;
         }
 
-        public void varList(IVariableList varList) {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+        public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return true;
         }
 
         public String since() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return "3.2.0";
         }
 
         public Boolean runAsync() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return false;
         }
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            int slot = (int)Static.getInt(args[0]);
+            int qty = 1;
+            if(args.length == 3){
+                qty = (int)Static.getInt(args[2]);
+            }
+            ItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, line_num, f);
+            
+            return new CVoid(line_num, f);
         }
     }
+    
+    
 }
