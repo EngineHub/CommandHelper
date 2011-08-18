@@ -106,7 +106,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-        
+        playerListener.playDirty();
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Lowest);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
         

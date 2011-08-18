@@ -15,11 +15,11 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
-
+ */
 package com.sk89q.commandhelper;
 
 import com.laytonsmith.aliasengine.AliasCore;
+import com.laytonsmith.aliasengine.DirtyRegisteredListener;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.InternalException;
@@ -34,11 +34,17 @@ import java.util.HashMap;
 import java.io.*;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
+import org.bukkit.plugin.EventExecutor;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredListener;
 
 /**
  * Event listener for Hey0's server mod.
@@ -46,16 +52,16 @@ import org.bukkit.event.player.PlayerQuitEvent;
  * @author sk89q
  */
 public class CommandHelperListener extends PlayerListener {
+
     /**
      * Logger.
      */
     private static final Logger logger = Logger.getLogger("Minecraft");
-    
     /**
      * Sessions.
      */
-    private Map<String,CommandHelperSession> sessions =
-            new HashMap<String,CommandHelperSession>();
+    private Map<String, CommandHelperSession> sessions =
+            new HashMap<String, CommandHelperSession>();
     /**
      * List of global aliases.
      */
@@ -84,12 +90,12 @@ public class CommandHelperListener extends PlayerListener {
             User u = new User(player, plugin.persist);
             ArrayList<String> aliases = u.getAliasesAsArray();
             ArrayList<Script> scripts = new ArrayList<Script>();
-            for(String script : aliases){
+            for (String script : aliases) {
                 scripts.addAll(MScriptCompiler.preprocess(MScriptCompiler.lex(script, new File("Player"))));
             }
             return CommandHelperPlugin.getCore().alias(command, player, scripts);
             //return globalAliases.get(command.toLowerCase());
-            
+
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
             return false;
@@ -121,27 +127,31 @@ public class CommandHelperListener extends PlayerListener {
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         String cmd = event.getMessage();
         Player player = event.getPlayer();
-        if(cmd.equals("/.") || cmd.equals("/repeat")){
+        playDirty();
+        if (cmd.equals("/.") || cmd.equals("/repeat")) {
             return;
         }
         this.getSession(player).setLastCommand(cmd);
-        
-        if(!(Boolean)Static.getPreferences().getPreference("play-dirty")){
-            if(event.isCancelled()){
+
+        if (!(Boolean) Static.getPreferences().getPreference("play-dirty")) {
+            if (event.isCancelled()) {
                 return;
             }
         } //If we are playing dirty, ignore the cancelled flag
-        
+
         try {
             if (runAlias(event.getMessage(), player)) {
                 event.setCancelled(true);
-                this.removeEventFromQueue(event);
+                if((Boolean) Static.getPreferences().getPreference("play-dirty")){
+                    //Super cancel the event
+                    DirtyRegisteredListener.setCancelled(event);
+                }
                 //System.out.println("Command Cancelled: " + cmd);
                 return;
             }
-        } catch(InternalException e){
+        } catch (InternalException e) {
             logger.log(Level.SEVERE, e.getMessage());
-        } catch(ConfigRuntimeException e){
+        } catch (ConfigRuntimeException e) {
             logger.log(Level.WARNING, e.getMessage());
         } catch (Throwable e) {
             player.sendMessage(ChatColor.RED + "Command failed with following reason: " + e.getMessage());
@@ -184,7 +194,6 @@ public class CommandHelperListener extends PlayerListener {
 //
 //        return false;
 //    }
-
     /**
      * Called when a player leaves a server
      *
@@ -208,7 +217,7 @@ public class CommandHelperListener extends PlayerListener {
         }
 
         String[] args = cmd.split(" ");
-        
+
         if (args[0].equalsIgnoreCase("@read")) {
             if (args.length >= 2) {
                 try {
@@ -242,7 +251,7 @@ public class CommandHelperListener extends PlayerListener {
             String[] args, boolean scriptable) {
         for (String cmd : commands) {
             String[] parts = cmd.split(" ");
-            
+
             for (int i = 0; i < parts.length; i++) {
                 if (parts[i].matches("%[0-9]+")) {
                     int n = Integer.parseInt(parts[i].substring(1)) - 1;
@@ -263,9 +272,29 @@ public class CommandHelperListener extends PlayerListener {
             }
         }
     }
+
     
 
-    private void removeEventFromQueue(PlayerCommandPreprocessEvent event) {
-        
+    /**
+     * Sets up CommandHelper to play-dirty, if the user has specified as such
+     */
+    public void playDirty() {
+        if ((Boolean) Static.getPreferences().getPreference("play-dirty")) {
+            try {
+                    //Set up our "proxy"
+                    DirtyRegisteredListener.Repopulate();                
+            } catch (NoSuchMethodException ex) {
+                Logger.getLogger(CommandHelperListener.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchFieldException ex) {
+                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+            } catch (ClassCastException ex) {
+                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+            } catch (IllegalArgumentException ex) {
+                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+            } catch (IllegalAccessException ex) {
+                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+            }
+        } //else play nice :(
     }
+
 }
