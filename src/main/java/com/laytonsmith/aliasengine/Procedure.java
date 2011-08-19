@@ -57,12 +57,13 @@ public class Procedure implements Cloneable {
         return -1;
     }
     
-    public void execute(List<Construct> variables, Player player, Map<String, Procedure> procStack){
+    public void execute(List<Construct> variables, Player player, Map<String, Procedure> procStack, String label){
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         Script fakeScript = new Script(null, null);
         fakeScript.varList = new IVariableList();
         fakeScript.knownProcs = procStack;
+        fakeScript.label = label;
         CArray array = new CArray(0, null);
         for(Construct d : variables){
             array.push(d);

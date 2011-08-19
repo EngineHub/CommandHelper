@@ -836,13 +836,13 @@ public class DataHandling {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Player p, Map<String, Procedure> procs, Construct ... args){
+        public Construct execs(int line_num, File f, Player p, Map<String, Procedure> procs, String label, Construct ... args){
             Procedure proc = procs.get(args[0].val());
             if(proc != null){
                 List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
                 vars.remove(0);
                 try{
-                    proc.execute(vars, p, new HashMap<String, Procedure>(procs));
+                    proc.execute(vars, p, new HashMap<String, Procedure>(procs), label);
                     return new CVoid(line_num, f);
                 } catch(FunctionReturnException e){
                     return e.getReturn();

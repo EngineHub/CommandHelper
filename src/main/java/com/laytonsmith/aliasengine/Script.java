@@ -188,7 +188,7 @@ public class Script {
                         for(GenericTreeNode<Construct> child : c.getChildren()){
                             variables.add(eval(child, player));
                         }
-                        p.execute(variables, player, new HashMap<String, Procedure>(knownProcs));
+                        p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);
                         return new CVoid(m.line_num, m.file);
                     } catch(FunctionReturnException e){
                         return e.getReturn();
@@ -292,7 +292,7 @@ public class Script {
                         ar[i] = eval(c.getChildAt(i), player);
                     }
                     ar = preResolveVariables(ar);
-                    return ((call_proc)f).execs(m.line_num, m.file, player, knownProcs, ar);
+                    return ((call_proc)f).execs(m.line_num, m.file, player, knownProcs, this.label, ar);
                 } else if(f instanceof include){
                     return ((include)f).execs(m.line_num, m.file, player, c.getChildren(), this);
                 }
