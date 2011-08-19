@@ -401,7 +401,9 @@ public class Static {
             String[] sData = notation.split(":");
             try {
                 type = (int) Integer.parseInt(sData[0]);
-                data = (byte) Integer.parseInt(sData[1]);
+                if(sData.length > 1){
+                    data = (byte) Integer.parseInt(sData[1]);
+                }
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation, ExceptionType.FormatException, line_num, f);
             }

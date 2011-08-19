@@ -19,6 +19,7 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -1096,20 +1097,21 @@ public class PlayerManangement {
         }
     }
 
-    public static class set_pinv implements Function {
+    @api public static class set_pinv implements Function {
 
         public String getName() {
             return "set_pinv";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{3, 4};
+            return new Integer[]{2, 3, 4, 5};
         }
 
         public String docs() {
-            return "void {[player], slot, item_id, [qty]} Sets the index of the slot to the specified item_id, with the specified qty,"
+            return "void {[player], slot, item_id, [qty], [damage]} Sets the index of the slot to the specified item_id, with the specified qty,"
                     + " or 1 by default. If the qty of armor indexes is greater than 1, it is silently ignored, and only 1 is added."
-                    + " item_id follows the same notation for items used elsewhere.";
+                    + " item_id follows the same notation for items used elsewhere. Damage defaults to 0, and is a percentage from 0-100, of"
+                    + " how damaged an item is.";
         }
 
         public ExceptionType[] thrown() {
@@ -1135,12 +1137,31 @@ public class PlayerManangement {
         }
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
-            int slot = (int)Static.getInt(args[0]);
+            Player m = p;
+            int slot = 0;
+            int offset = 0;
             int qty = 1;
-            if(args.length == 3){
-                qty = (int)Static.getInt(args[2]);
+            short damage = 0;
+            if(args[0].val().matches("\\d*")){
+                //We're using the slot as arg 1
+                slot = (int)Static.getInt(args[0]);
+            } else {
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                slot = (int)Static.getInt(args[1]);
+                offset = 1;
             }
-            ItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, line_num, f);
+            if(args.length > 2 + offset){
+                qty = (int)Static.getInt(args[2 + offset]);
+            }            
+            ItemStack is = Static.ParseItemNotation(this.getName(), args[1 + offset].val(), qty, line_num, f);
+            if(args.length > 3 + offset){
+                damage = (short)Static.getInt(args[3 + offset]);
+            }
+            damage = (short)java.lang.Math.max(0, java.lang.Math.min(100, damage));
+            short max = is.getType().getMaxDurability();
+            is.setDurability((short)((max * damage) / 100));
+            
+            m.getInventory().setItem(slot, is);
             
             return new CVoid(line_num, f);
         }
