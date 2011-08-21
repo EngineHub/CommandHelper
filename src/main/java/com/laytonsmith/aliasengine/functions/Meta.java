@@ -47,7 +47,7 @@ public class Meta {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
                         ExceptionType.FormatException, line_num, f);
             }
-            String cmd = args[1].val();//.substring(1);
+            String cmd = args[1].val().substring(1);
             if (args[0] instanceof CArray) {
                 CArray u = (CArray) args[0];
                 for (int i = 0; i < u.size(); i++) {
@@ -70,16 +70,16 @@ public class Meta {
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
                     Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + m.getName() + " (running as op): /" + cmd);
                 }
-                m.chat(cmd);
-                //Static.getServer().dispatchCommand(m, cmd);
+                //m.chat(cmd);
+                Static.getServer().dispatchCommand(m, cmd);
             } else {
                 Player m = Static.getServer().getPlayer(args[0].val());
                 if (m != null && m.isOnline()) {
                     if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + " (as " + m.getName() + "): /" + cmd.trim());
                     }
-                    m.chat(cmd);
-                    //Static.getServer().dispatchCommand(m, cmd);
+                    //m.chat(cmd);
+                    Static.getServer().dispatchCommand(m, cmd);
                 } else {
                     throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",
                             ExceptionType.PlayerOfflineException, line_num, f);
@@ -134,12 +134,12 @@ public class Meta {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
                         ExceptionType.FormatException, line_num, f);
             }
-            String cmd = args[0].val();//.substring(1);
+            String cmd = args[0].val().substring(1);
             if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
                 Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + p.getName() + ": " + args[0].val().trim());
             }
-            p.chat(cmd);
-            //Static.getServer().dispatchCommand(p, cmd);
+            //p.chat(cmd);
+            Static.getServer().dispatchCommand(p, cmd);
             return new CVoid(line_num, f);
         }
 
