@@ -205,14 +205,14 @@ public class MScriptCompilerTest {
         verify(fakePlayer).sendMessage("hello");
     }
     
-    @Test public void testExcecute3() throws ConfigCompileException{
+    @Test public void testExcecute3(){
         try{
             String script = 
                     "[]";
 
 
             MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
-        } catch(ConfigRuntimeException ex){
+        } catch(ConfigCompileException ex){
             //Passed
         }
     }

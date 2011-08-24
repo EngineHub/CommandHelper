@@ -321,6 +321,9 @@ public class MScriptCompiler {
                 arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
                 continue;
             } else if(t.type.equals(TType.RSQUARE_BRACKET)){
+                if(prev.type.equals(TType.LSQUARE_BRACKET)){
+                    throw new ConfigCompileException("Empty array_get operator ([])", t.line_num); 
+                }
                 int array = arrayStack.pop().get();
                 int index = array + 1;
                 GenericTreeNode<Construct> myArray = tree.getChildAt(array);
