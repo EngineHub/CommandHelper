@@ -41,7 +41,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.management.loading.MLet;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -74,6 +73,7 @@ public class Script {
     
     Map<String, Procedure> knownProcs = new HashMap<String, Procedure>();
 
+    @Override
     public String toString() {
         StringBuilder b = new StringBuilder();
         for (Token t : left) {
@@ -188,6 +188,7 @@ public class Script {
                         for(GenericTreeNode<Construct> child : c.getChildren()){
                             variables.add(eval(child, player));
                         }
+                        variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
                         p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);
                         return new CVoid(m.line_num, m.file);
                     } catch(FunctionReturnException e){

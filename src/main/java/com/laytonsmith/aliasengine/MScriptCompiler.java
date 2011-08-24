@@ -439,6 +439,15 @@ public class MScriptCompiler {
         return tree;
     }      
     
+    /**
+     * Executes a pre-compiled mscript, given the specified Script environment. Both done and script 
+     * may be null, and if so, reasonable defaults will be provided. Technically, this function doesn't
+     * check to see if p is null either.
+     * @param root
+     * @param p
+     * @param done
+     * @param script 
+     */
     public static void execute(GenericTreeNode<Construct> root, Player p, MScriptComplete done, Script script){
         if(script == null){
             script = new Script(null, null);

@@ -25,6 +25,7 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.mockito.Mockito;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 /**
  * 
@@ -265,5 +266,19 @@ public class StaticTest {
             tokens.add(t);
         }
         return tokens;
+    }
+    
+    public static Player GetOnlinePlayer(){
+        Player p = mock(Player.class);
+        when(p.isOnline()).thenReturn(true);
+        when(p.getName()).thenReturn("wraithguard01");        
+        //when(p.getServer()).thenReturn(GetFakeServer());
+        return p;
+    }
+    
+    public static Server GetFakeServer(){
+        Server s = mock(Server.class);
+        
+        return s;
     }
 }

@@ -4,8 +4,12 @@
  */
 package com.laytonsmith.aliasengine;
 
+import org.bukkit.Server;
+import org.bukkit.entity.Player;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.Token;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.testing.StaticTest;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.After;
@@ -14,12 +18,17 @@ import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
+import static com.laytonsmith.testing.StaticTest.*;
 
 /**
  *
  * @author Layton
  */
 public class MScriptCompilerTest {
+    
+    Server fakeServer;
+    Player fakePlayer;
     
     public MScriptCompilerTest() {
     }
@@ -34,6 +43,8 @@ public class MScriptCompilerTest {
     
     @Before
     public void setUp() {
+        fakePlayer = StaticTest.GetOnlinePlayer();
+        fakeServer = StaticTest.GetFakeServer();
     }
     
     @After
@@ -165,5 +176,56 @@ public class MScriptCompilerTest {
         }
         
         MScriptCompiler.compile(MScriptCompiler.lex("if(1, msg('') msg(''))", null));
+    }
+    
+    @Test public void testExecute1() throws ConfigCompileException{
+        String script = "proc(_hello, @hello,"
+                + "         msg(@hello)"
+                + "      )"
+                + "      assign(@hello, 'hello')"
+                + "      _hello(@hello)";
+        
+        
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("hello");
+    }
+    
+    @Test public void testExcecute2() throws ConfigCompileException{
+        String script = 
+                "proc(_hello,"
+                + "     assign(@hello, 'hello')"
+                + "     return(@hello)"
+                + ")"
+                + "assign(@blah, 'blah')"
+                + "assign(@blah, _hello())"
+                + "msg(@blah)";
+        
+        
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("hello");
+    }
+    
+    @Test public void testExcecute3() throws ConfigCompileException{
+        try{
+            String script = 
+                    "[]";
+
+
+            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        } catch(ConfigRuntimeException ex){
+            //Passed
+        }
+    }
+    
+    @Test public void testExcecute4() throws ConfigCompileException{
+        String script = 
+                "proc(_hello,"
+                + "     return('hello')"
+                + ")"
+                + "msg(_hello())";
+        
+        
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("hello");
     }
 }
