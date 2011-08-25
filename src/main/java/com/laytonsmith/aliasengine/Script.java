@@ -168,7 +168,9 @@ public class Script {
                     t.printStackTrace();
                     p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
                 }
-                done.done(null);
+                if(done != null){
+                    done.done(null);
+                }
 //            }
 //        });
     }

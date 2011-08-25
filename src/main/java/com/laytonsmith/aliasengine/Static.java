@@ -466,4 +466,12 @@ public class Static {
         }
         return new Location(world, x, y, z, yaw, pitch);
     }
+
+    public static boolean isNull(Construct construct) {
+        return construct instanceof CNull;
+    }
+    
+    public static int Normalize(int i, int min, int max){
+        return java.lang.Math.min(max, java.lang.Math.max(min, i));
+    }
 }

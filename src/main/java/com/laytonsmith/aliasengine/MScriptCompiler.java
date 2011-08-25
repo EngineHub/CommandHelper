@@ -9,8 +9,6 @@ import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;
 import com.laytonsmith.aliasengine.functions.FunctionList;
 import com.laytonsmith.aliasengine.functions.IVariableList;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
-import com.sun.crypto.provider.TlsKeyMaterialGenerator;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,9 +16,8 @@ import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.entity.Player;
+import sun.font.TrueTypeFont;
 
 /**
  *
@@ -35,6 +32,7 @@ public class MScriptCompiler {
         //Set our state variables
         boolean state_in_quote = false;
         boolean in_comment = false;
+            boolean comment_is_block = false;
         boolean in_opt_var = false;
         StringBuffer buf = new StringBuffer();
         int line_num = 1;
@@ -48,11 +46,27 @@ public class MScriptCompiler {
             if (c == '\n') {
                 line_num++;
             }
-            if ((token_list.isEmpty() || token_list.get(token_list.size() - 1).type.equals(TType.NEWLINE))
-                    && c == '#') {
+//            if ((token_list.isEmpty() || token_list.get(token_list.size() - 1).type.equals(TType.NEWLINE))
+//                    && c == '#') {
+            if((c == '#' || (c == '/' && (c2 == '/' || c2 == '*'))) && !in_comment && !state_in_quote){
                 in_comment = true;
+                if(c == '/'){
+                    i++;
+                }
+                if(c2 == '*'){
+                    comment_is_block = true;
+                }
+                continue;
             }
-            if (in_comment && c != '\n') {
+            if (in_comment){                
+                if(!comment_is_block && c != '\n' || comment_is_block && c != '*' && (c2 != null && c2 != '/')){
+                    continue;
+                }
+            }
+            if(c == '*' && c2 == '/' && in_comment && comment_is_block){
+                in_comment = false;
+                comment_is_block = false;
+                i++;
                 continue;
             }
             if (c == '[' && !state_in_quote) {
@@ -161,19 +175,26 @@ public class MScriptCompiler {
             } else if (state_in_quote) {
                 buf.append(c);
                 continue;
-            } else if (c == '\n') {
+            } else if (c == '\n' && !comment_is_block) {
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                 }
                 token_list.add(new Token(TType.NEWLINE, "\n", line_num, file));
                 in_comment = false;
+                comment_is_block = false;
                 continue;
             } else { //in a literal
                 buf.append(c);
                 continue;
             }
         } //end lexing
+        if(state_in_quote){
+            throw new ConfigCompileException("Unended string literal", line_num);
+        }
+        if(in_comment || comment_is_block){
+            throw new ConfigCompileException("Unended comment", line_num);
+        }
                 //look at the tokens, and get meaning from them
         for (Token t : token_list) {
             if (t.type.equals(TType.UNKNOWN)) {
@@ -324,6 +345,9 @@ public class MScriptCompiler {
                 if(prev.type.equals(TType.LSQUARE_BRACKET)){
                     throw new ConfigCompileException("Empty array_get operator ([])", t.line_num); 
                 }
+                if(arrayStack.size() == 1){
+                    throw new ConfigCompileException("Mismatched square bracket", t.line_num);
+                }
                 int array = arrayStack.pop().get();
                 int index = array + 1;
                 GenericTreeNode<Construct> myArray = tree.getChildAt(array);
@@ -435,6 +459,9 @@ public class MScriptCompiler {
                 constructCount.peek().set(0);
                 continue;
             } 
+        }
+        if(arrayStack.size() != 1){
+            throw new ConfigCompileException("Mismatched square brackets", t.line_num);
         }
         if (parens != 0) {
             throw new ConfigCompileException("Mismatched parenthesis", t.line_num);

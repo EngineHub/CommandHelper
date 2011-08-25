@@ -1144,15 +1144,24 @@ public class PlayerManangement {
             short damage = 0;
             if(args[0].val().matches("\\d*")){
                 //We're using the slot as arg 1
-                slot = (int)Static.getInt(args[0]);
+                if(Static.isNull(args[0])){
+                    slot = -1;
+                } else {
+                    slot = (int)Static.getInt(args[0]);
+                }
             } else {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                slot = (int)Static.getInt(args[1]);
+                if(Static.isNull(args[1])){
+                    slot = -1;
+                } else {
+                    slot = (int)Static.getInt(args[1]);
+                }
                 offset = 1;
             }
             if(args.length > 2 + offset){
                 qty = (int)Static.getInt(args[2 + offset]);
             }            
+            qty = Static.Normalize(qty, 0, Integer.MAX_VALUE);
             ItemStack is = Static.ParseItemNotation(this.getName(), args[1 + offset].val(), qty, line_num, f);
             if(args.length > 3 + offset){
                 damage = (short)Static.getInt(args[3 + offset]);
@@ -1161,8 +1170,25 @@ public class PlayerManangement {
             short max = is.getType().getMaxDurability();
             is.setDurability((short)((max * damage) / 100));
             
-            m.getInventory().setItem(slot, is);
+            if(is.getTypeId() == 0){
+                qty = 0; //Giving the player air crashes their client, so just remove the item
+                is.setTypeId(1);
+            }
             
+            if(qty == 0){
+                is.setAmount(0);
+                if(slot == -1){
+                    m.setItemInHand(null);
+                } else {
+                    m.getInventory().setItem(slot, null);
+                }
+            } else {
+                if(slot == -1){
+                    m.setItemInHand(is);
+                } else {
+                    m.getInventory().setItem(slot, is);
+                }
+            }
             return new CVoid(line_num, f);
         }
     }
