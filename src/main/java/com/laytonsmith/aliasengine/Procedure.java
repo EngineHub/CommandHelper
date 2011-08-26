@@ -8,11 +8,13 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CFunction;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
+import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import com.sk89q.util.StringUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -88,8 +90,12 @@ public class Procedure implements Cloneable {
             }
         }
         
-        
-        fakeScript.eval(tree, player);
+        try{
+            fakeScript.eval(tree, player);
+        } catch(FunctionReturnException e){
+            throw e;
+        }
+        throw new FunctionReturnException(new CVoid(0, null));
     }
     
     @Override

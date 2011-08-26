@@ -85,55 +85,6 @@ public class MScriptCompilerTest {
             }
         }
     }
-
-//    /**
-//     * Test of preprocess method, of class MScriptCompiler.
-//     */
-//    @Test
-//    public void testPreprocess() throws Exception {
-//        System.out.println("preprocess");
-//        List<Token> tokenStream = null;
-//        List expResult = null;
-//        List result = MScriptCompiler.preprocess(tokenStream);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    /**
-//     * Test of compile method, of class MScriptCompiler.
-//     */
-//    @Test
-//    public void testCompile() throws Exception {
-//        System.out.println("compile");
-//        List<Token> tokenStream = null;
-//        GenericTreeNode expResult = null;
-//        GenericTreeNode result = MScriptCompiler.compile(tokenStream);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//    @Test
-//    public void testPreprocess() throws Exception {
-//        System.out.println("preprocess");
-//        List<Token> tokenStream = null;
-//        List expResult = null;
-//        List result = MScriptCompiler.preprocess(tokenStream);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
-//
-//    @Test
-//    public void testCompile() throws Exception {
-//        System.out.println("compile");
-//        List<Token> tokenStream = null;
-//        GenericTreeNode expResult = null;
-//        GenericTreeNode result = MScriptCompiler.compile(tokenStream);
-//        assertEquals(expResult, result);
-//        // TODO review the generated test code and remove the default call to fail.
-//        fail("The test case is a prototype.");
-//    }
     @Test
     public void testCompile() throws ConfigCompileException {
         System.out.println("compile");
@@ -193,13 +144,13 @@ public class MScriptCompilerTest {
     @Test
     public void testExecute2() throws ConfigCompileException {
         String script =
-                "proc(_hello,"
-                + "     assign(@hello, 'hello')"
-                + "     return(@hello)"
-                + ")"
-                + "assign(@blah, 'blah')"
-                + "assign(@blah, _hello())"
-                + "msg(@blah)";
+                "proc(_hello,\n"
+                + "     assign(@hello, 'hello')\n"
+                + "     return(@hello)\n"
+                + ")\n"
+                + "assign(@blah, 'blah')\n"
+                + "assign(@blah, _hello())\n"
+                + "msg(@blah)\n";
 
 
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
@@ -330,7 +281,7 @@ public class MScriptCompilerTest {
     public void testCompile1() {
         try {
             String config = "/cmd [$p] $q = msg('')";
-            MScriptCompiler.preprocess(MScriptCompiler.lex(config, null));
+            MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0).compile();
             fail("Test passed, but wasn't supposed to");
         } catch (ConfigCompileException ex) {
             //Passed
@@ -341,7 +292,7 @@ public class MScriptCompilerTest {
     public void testCompile2() {
         try {
             String config = "/cmd [$p=player()] = msg('')";
-            MScriptCompiler.preprocess(MScriptCompiler.lex(config, null));
+            MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0).compile();
             fail("Test passed, but wasn't supposed to");
         } catch (ConfigCompileException ex) {
             //Passed

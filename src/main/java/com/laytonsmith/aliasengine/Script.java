@@ -194,7 +194,7 @@ public class Script {
                         p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);
                         return new CVoid(m.line_num, m.file);
                     } catch(FunctionReturnException e){
-                        return e.getReturn();
+                        return e.getReturn();                        
                     }
                 }
                 final Function f;
@@ -590,7 +590,12 @@ public class Script {
                 throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num);
             }
             if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-                left_vars.add(new Variable(t.val(), null, t.line_num, t.file));
+                Variable v = new Variable(t.val(), null, t.line_num, t.file);
+                v.setOptional(last_token.type.equals(TType.LSQUARE_BRACKET));
+                left_vars.add(v);
+                if(v.isOptional()){
+                    after_no_def_opt_var = true;
+                }
             }
             if (j == 0 && !t.type.equals(TType.COMMAND)) {
                 if (!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)) {
@@ -599,7 +604,7 @@ public class Script {
                 }
             }
             if (after_no_def_opt_var && !inside_opt_var) {
-                if (t.type.equals(TType.LIT) || t.type.equals(TType.STRING) || t.type.equals(TType.OPT_VAR_ASSIGN)) {
+                if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                     throw new ConfigCompileException("You cannot have anything other than optional arguments after your"
                             + " first optional argument, other that other optional arguments with no default", t.line_num);
                 }
@@ -642,10 +647,10 @@ public class Script {
                     throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
                 }
                 inside_opt_var = false;
-                if (last_token.type.equals(TType.VARIABLE)
-                        || last_token.type.equals(TType.FINAL_VAR)) {
-                    after_no_def_opt_var = true;
-                }
+//                if (last_token.type.equals(TType.VARIABLE)
+//                        || last_token.type.equals(TType.FINAL_VAR)) {
+//                    after_no_def_opt_var = true;
+//                }
             }
         }
 
