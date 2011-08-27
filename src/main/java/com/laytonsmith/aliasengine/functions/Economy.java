@@ -12,7 +12,9 @@ import com.nijikokun.register.payment.Method;
 import com.nijikokun.register.payment.Method.MethodAccount;
 import com.nijikokun.register.payment.Methods;
 import java.io.File;
+import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
 
 /**
  *
@@ -628,6 +630,15 @@ public class Economy {
     
     public static Method GetMethod(int line_num, File file){
         com.nijikokun.register.payment.Methods m = new Methods();
+        if(!m.hasMethod()){
+            //initialize our plugin if it isn't already
+            Plugin [] plugins = Bukkit.getServer().getPluginManager().getPlugins();
+            for(Plugin plugin : plugins){
+                if(m.setMethod(plugin)){
+                    break;
+                }
+            }
+        }
         if(m.getMethod() == null){
             throw new ConfigRuntimeException("", ExceptionType.InvalidPluginException, line_num, file);
         } else {
