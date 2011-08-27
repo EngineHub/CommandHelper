@@ -77,6 +77,10 @@ public class ConfigRuntimeException extends RuntimeException {
     }
     
     public String getSimpleFile(){
-        return this.file.getName();
+        if(this.file != null){
+            return this.file.getName();
+        } else {
+            return null;
+        }
     }
 }

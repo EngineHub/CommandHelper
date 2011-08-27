@@ -40,4 +40,23 @@ public class IVariableList {
         varList.add(v);
         return v;
     }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        b.append("[");
+        boolean first = true;
+        for(IVariable iv : varList){
+            if(first){
+                first = false;
+            } else {
+                b.append(", ");
+            }
+            b.append(iv.getName()).append(":").append("(").append(iv.ival().getClass().getSimpleName()).append(")").append(iv.ival().val());
+        }
+        b.append("]");
+        return b.toString();
+    }
+    
+    
 }

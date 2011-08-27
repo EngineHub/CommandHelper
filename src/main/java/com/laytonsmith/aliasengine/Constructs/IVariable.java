@@ -40,6 +40,13 @@ public class IVariable extends Construct implements Cloneable{
     public void setIval(Construct c){
         var_value = c;
     }
+
+    @Override
+    public String toString() {
+        return this.name + ":(" + this.ival().getClass().getSimpleName() + ") '" + this.ival().val() + "'";
+    }
+    
+    
     @Override
     public IVariable clone() throws CloneNotSupportedException{
         IVariable clone = (IVariable) super.clone();

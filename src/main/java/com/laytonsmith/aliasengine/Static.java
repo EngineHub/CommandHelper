@@ -315,10 +315,10 @@ public class Static {
                     return Static.resolveConstruct(var.val(), var.line_num, var.file);
                 }
             }
+            return Static.resolveConstruct(((Variable)variable).getDefault(), variable.line_num, variable.file);
         } else {
             return variable;
         }
-        throw new ConfigRuntimeException("No value passed in for for variable " + variable.val(), 0, null);
     }
 
     /**

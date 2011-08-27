@@ -33,6 +33,7 @@ import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -66,7 +67,7 @@ public class Script {
     private List<Construct> cleft;
     private List<GenericTreeNode<Construct>> cright;
     String label;
-    private List<Variable> left_vars;
+    private Map<String, Variable> left_vars;
     IVariableList varList = new IVariableList();
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
@@ -98,7 +99,7 @@ public class Script {
     public Script(List<Token> left, List<Token> right){
         this.left = left;
         this.fullRight = right;
-        this.left_vars = new ArrayList<Variable>();
+        this.left_vars = new HashMap<String, Variable>();
     }
 
     public boolean uncompilable() {
@@ -141,7 +142,7 @@ public class Script {
                             if(tempNode.data instanceof Variable){
                                 ((Variable)tempNode.data).setVal(
                                         Static.resolveConstruct(
-                                            Static.resolveDollarVar(tempNode.data, vars).toString(), tempNode.data.line_num, tempNode.data.file
+                                            Static.resolveDollarVar(left_vars.get(((Variable)tempNode.data).getName()), vars).toString(), tempNode.data.line_num, tempNode.data.file
                                         ));
                             }
                         }
@@ -347,13 +348,15 @@ public class Script {
                         throw new ConfigRuntimeException("Invalid Construct being passed as an argument to a function", null, m.line_num, m.file);
                     }
                 }
+                f.varList(varList);
                 if (f.preResolveVariables()) {
                     ca = preResolveVariables(ca);
                 }
                 //TODO: Will revisit this in the future. For now, remove the ability for
                 //functions to run asyncronously.
                 //if(f.runAsync() == true || f.runAsync() == null){
-                    return f.exec(m.line_num, m.file, player, ca);
+                    Construct ret = f.exec(m.line_num, m.file, player, ca);
+                    return ret;
                 /*} else {
                     return blockingNonThreadSafe(player, new Callable<Construct>() {
 
@@ -375,6 +378,8 @@ public class Script {
     }
     
     public Construct [] preResolveVariables(Construct [] ca){
+        System.out.println("Preresolving Constructs: " + Arrays.toString(ca));
+        System.out.println("... From varList: " + varList);
         for (int i = 0; i < ca.length; i++) {
             if (ca[i] instanceof IVariable) {
                 IVariable v = (IVariable) ca[i];
@@ -563,6 +568,7 @@ public class Script {
     private boolean verifyLeft() throws ConfigCompileException {
         boolean inside_opt_var = false;
         boolean after_no_def_opt_var = false;
+        String lastVar = null;
         for (int j = 0; j < left.size(); j++) {
             Token t = left.get(j);
             //Token prev_token = j - 2 >= 0?c.tokens.get(j - 2):new Token(TType.UNKNOWN, "", t.line_num);
@@ -591,8 +597,9 @@ public class Script {
             }
             if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                 Variable v = new Variable(t.val(), null, t.line_num, t.file);
+                lastVar = t.val();
                 v.setOptional(last_token.type.equals(TType.LSQUARE_BRACKET));
-                left_vars.add(v);
+                left_vars.put(t.val(), v);
                 if(v.isOptional()){
                     after_no_def_opt_var = true;
                 }
@@ -601,6 +608,12 @@ public class Script {
                 if (!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)) {
                     throw new ConfigCompileException("Expected command (/command) at start of alias."
                             + " Instead, found " + t.type + " (" + t.val() + ")", t.line_num);
+                }
+            }
+            if (last_token.type.equals(TType.LSQUARE_BRACKET)) {
+                inside_opt_var = true;
+                if (!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))) {
+                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num);
                 }
             }
             if (after_no_def_opt_var && !inside_opt_var) {
@@ -626,20 +639,14 @@ public class Script {
                     throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.line_num);
                 }
             }
-            if (last_token.type.equals(TType.LSQUARE_BRACKET)) {
-                inside_opt_var = true;
-                if (!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))) {
-                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num);
-                }
-            }
             if (inside_opt_var && t.type.equals(TType.OPT_VAR_ASSIGN)) {
                 if (!((next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) && after_token.type.equals(TType.RSQUARE_BRACKET)
                         || (next_token.type.equals(TType.RSQUARE_BRACKET)))) {
                     throw new ConfigCompileException("Unexpected token in optional variable", t.line_num);
                 } else if (next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) {
-                    left_vars.get(left_vars.size() - 1).setDefault(next_token.val());
+                    left_vars.get(lastVar).setDefault(next_token.val());
                 } else {
-                    left_vars.get(left_vars.size() - 1).setDefault("");
+                    left_vars.get(lastVar).setDefault("");
                 }
             }
             if (t.type.equals(TType.RSQUARE_BRACKET)) {
@@ -788,8 +795,8 @@ public class Script {
             
             //Also, check for undefined variables on the right, and unused variables on the left
             ArrayList<String> left_copy = new ArrayList<String>();
-            for(Variable v : left_vars){
-                left_copy.add(v.getName());
+            for(Map.Entry<String, Variable> v : left_vars.entrySet()){
+                left_copy.add(v.getValue().getName());
             }
             Arrays.asList(new String[]{}).toArray(new String[]{});
             for(GenericTreeNode<Construct> gtn : cright){
@@ -798,10 +805,10 @@ public class Script {
                 List<GenericTreeNode<Construct>> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
                 for(GenericTreeNode<Construct> c : builtTree){
                     if(c.getData() instanceof Variable){
-                        for(Variable v : left_vars){
-                            if(v.getName().equals(((Variable)c.getData()).getName())){
+                        for(Map.Entry<String, Variable> v : left_vars.entrySet()){
+                            if(v.getValue().getName().equals(((Variable)c.getData()).getName())){
                                 //Found it, remove this from the left_copy, and break
-                                left_copy.remove(v.getName());
+                                left_copy.remove(v.getValue().getName());
                                 break;
                                 //TODO: Layton!
                             }

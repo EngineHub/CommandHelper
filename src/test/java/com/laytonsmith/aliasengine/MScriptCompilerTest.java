@@ -276,6 +276,7 @@ public class MScriptCompilerTest {
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
         verify(fakePlayer).sendMessage("0");
     }
+    
 
     @Test
     public void testCompile1() {
@@ -351,6 +352,21 @@ public class MScriptCompilerTest {
             new Variable("$", "several variables", false, true, 0, null)}), fakePlayer, null);
         verify(fakePlayer).sendMessage("first");
         verify(fakePlayer).sendMessage("several variables");
+    }
+    
+    @Test
+    public void testCompile9() throws ConfigCompileException {
+        String config = "/test [$var=1] = >>>\n"
+                + "msg($var)"
+                + "<<<";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        s.compile();
+        assertTrue(s.match("/test 2"));
+        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
+        verify(fakePlayer).sendMessage("2");
+        assertTrue(s.match("/test"));
+        s.run(new ArrayList<Variable>(), fakePlayer, null);
+        verify(fakePlayer).sendMessage("1");
     }
     
     
