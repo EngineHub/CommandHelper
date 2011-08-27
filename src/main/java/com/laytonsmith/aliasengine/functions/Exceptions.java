@@ -76,7 +76,18 @@ public class Exceptions {
         /**
          * This exception is thrown if a file cannot be read or written to.
          */
-        IOException,
+        IOException, 
+        /**
+         * This exception is thrown if a function uses an external plugin, and that plugin is not loaded, 
+         * or otherwise unusable.
+         */
+        InvalidPluginException,
+        /**
+         * This exception is thrown when a plugin is loaded, but a call to the plugin failed, usually
+         * for some reason specific to the plugin. Check the error message for more details about this
+         * error.
+         */
+        PluginInternalException,
     }
     @api public static class _try implements Function{      
         

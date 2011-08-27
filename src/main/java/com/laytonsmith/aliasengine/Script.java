@@ -378,8 +378,6 @@ public class Script {
     }
     
     public Construct [] preResolveVariables(Construct [] ca){
-        System.out.println("Preresolving Constructs: " + Arrays.toString(ca));
-        System.out.println("... From varList: " + varList);
         for (int i = 0; i < ca.length; i++) {
             if (ca[i] instanceof IVariable) {
                 IVariable v = (IVariable) ca[i];

@@ -102,7 +102,7 @@ public class CommandHelperInterpreterListener extends PlayerListener {
     }
 
     public void execute(String script, final Player p) throws ConfigCompileException {
-        List<Token> stream = MScriptCompiler.lex(script, new File("Interpreter"));
+        List<Token> stream = MScriptCompiler.lex("include('plugins/CommandHelper/auto_include.ms')\n" + script, new File("Interpreter"));
         GenericTreeNode tree = MScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
         try {

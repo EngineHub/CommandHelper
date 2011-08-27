@@ -28,6 +28,12 @@
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2/</url>
         </repository>
+        <!-- Temporary until sk89q uploads other dependencies -->
+        <repository>
+            <id>campusbookmart.com</id>
+            <name>campusbookmart.com-releases</name>
+            <url>http://www.campusbookmart.com:8081/artifactory/campusbookmart</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -65,6 +71,13 @@
             <artifactId>ebean</artifactId>
             <version>2.7.3</version>
             <scope>test</scope>
+        </dependency>
+        
+        <!-- Used for economy stuff -->
+        <dependency>
+            <groupId>com.nijikokun</groupId>
+            <artifactId>register</artifactId>
+            <version>1.0</version>
         </dependency>
     </dependencies>
     <properties>
@@ -143,6 +156,7 @@
                 <version>1.4</version>
                 <executions>
                     <execution>
+                        <id>WEBundle</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
@@ -153,6 +167,23 @@
                             <artifactSet>
                                 <includes>
                                     <include>com.sk89q:worldedit:jar:*</include>
+                                    <include>com.nijikokun:register:jar:*</include>
+                                </includes>
+                            </artifactSet>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>Shade</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedClassifierName>ShadedBundle</shadedClassifierName>
+                            <artifactSet>
+                                <includes>
+                                    <include>com.nijikokun:register:jar:*</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
