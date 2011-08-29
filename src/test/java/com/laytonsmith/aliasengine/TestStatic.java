@@ -100,11 +100,11 @@ public class TestStatic {
         assertNotNull(Static.getLogger());
     }
 
-    @Test(expected=NotInitializedYetException.class)
-    public void testGetServer() {
-        System.out.println("getServer");
-        Static.getServer();
-    }
+////    @Test(expected=NotInitializedYetException.class)
+////    public void testGetServer() {
+////        System.out.println("getServer");
+////        Static.getServer();
+////    }
 
     @Test(expected=NotInitializedYetException.class)
     public void testGetAliasCore() {
@@ -118,11 +118,11 @@ public class TestStatic {
         Static.getPersistance();
     }
 
-    @Test(expected=NotInitializedYetException.class)
-    public void testGetPermissionsResolverManager() {
-        System.out.println("getPermissionsResolverManager");
-        Static.getPermissionsResolverManager();
-    }
+//    @Test(expected=NotInitializedYetException.class)
+//    public void testGetPermissionsResolverManager() {
+//        System.out.println("getPermissionsResolverManager");
+//        Static.getPermissionsResolverManager();
+//    }
 
     @Test(expected=NotInitializedYetException.class)
     public void testGetVersion() {

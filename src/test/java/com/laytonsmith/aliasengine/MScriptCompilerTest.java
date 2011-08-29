@@ -4,12 +4,14 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.aliasengine.Constructs.Variable;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import com.laytonsmith.testing.StaticTest;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -367,6 +369,24 @@ public class MScriptCompilerTest {
         assertTrue(s.match("/test"));
         s.run(new ArrayList<Variable>(), fakePlayer, null);
         verify(fakePlayer).sendMessage("1");
+    }
+    
+    @Test public void testCompile11() throws ConfigCompileException{
+        
+        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
+        CommandHelperPlugin.myServer = fakeServer;
+        when(fakeServer.getOnlinePlayers()).thenReturn(new Player[]{fakePlayer});
+        String config = "safe:/test $var = >>>\n"
+                + "all_players()\n"
+                + "msg($var)\n"
+                + "<<<";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);        
+        s.compile();
+        assertEquals("safe", s.label);
+        assertTrue(s.match("/test 2"));
+        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
+        verify(fakePlayer).sendMessage("2");
     }
     
     

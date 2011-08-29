@@ -577,12 +577,10 @@ public class Script {
             if (j == 0) {
                 if (next_token.type == TType.IDENT) {
                     label = t.val();
-                    j += 1;
+                    j--;
                     left.remove(0);
                     left.remove(0);
                     continue;
-                } else {
-                    label = null;
                 }
             }
 
@@ -600,6 +598,8 @@ public class Script {
                 left_vars.put(t.val(), v);
                 if(v.isOptional()){
                     after_no_def_opt_var = true;
+                } else {
+                    v.setDefault("");
                 }
             }
             if (j == 0 && !t.type.equals(TType.COMMAND)) {
@@ -643,8 +643,6 @@ public class Script {
                     throw new ConfigCompileException("Unexpected token in optional variable", t.line_num);
                 } else if (next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) {
                     left_vars.get(lastVar).setDefault(next_token.val());
-                } else {
-                    left_vars.get(lastVar).setDefault("");
                 }
             }
             if (t.type.equals(TType.RSQUARE_BRACKET)) {

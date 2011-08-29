@@ -19,7 +19,6 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -1115,7 +1114,7 @@ public class PlayerManangement {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
         public boolean isRestricted() {

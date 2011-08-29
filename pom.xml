@@ -28,12 +28,6 @@
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2/</url>
         </repository>
-        <!-- Temporary until sk89q uploads other dependencies -->
-        <repository>
-            <id>campusbookmart.com</id>
-            <name>campusbookmart.com-releases</name>
-            <url>http://www.campusbookmart.com:8081/artifactory/campusbookmart</url>
-        </repository>
     </repositories>
 
     <dependencies>

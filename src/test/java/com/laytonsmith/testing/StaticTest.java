@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.testing;
 
+import java.lang.reflect.Field;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import java.util.List;
 import java.util.ArrayList;
@@ -280,5 +281,14 @@ public class StaticTest {
         Server s = mock(Server.class);
         
         return s;
+    }
+    
+    public static Object GetVariable(Object instance, String var) throws Exception{
+        return GetVariable(instance.getClass(), var, instance);
+    }
+    public static Object GetVariable(Class c, String var, Object instance) throws Exception{
+        Field f = c.getField(var);
+        f.setAccessible(true);
+        return f.get(instance);
     }
 }
