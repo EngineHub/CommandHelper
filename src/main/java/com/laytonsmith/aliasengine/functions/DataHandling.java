@@ -151,7 +151,7 @@ public class DataHandling {
                 if(bcond.getBoolean() == false){
                     break;
                 }
-                if(_continue > 1){
+                if(_continue >= 1){
                     --_continue;                    
                     parent.eval(expression, p);
                     continue;
@@ -164,8 +164,10 @@ public class DataHandling {
                         e.setTimes(--num);
                         throw e;
                     }
+                    return new CVoid(line_num, f);
                 } catch(LoopContinueException e){
                     _continue = e.getTimes() - 1;                    
+                    parent.eval(expression, p);
                     continue;
                 }
                 parent.eval(expression, p);

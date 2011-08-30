@@ -387,6 +387,7 @@ public class MScriptCompilerTest {
         assertTrue(s.match("/test 2"));
         s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
         verify(fakePlayer).sendMessage("2");
+        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
     }
     
     
