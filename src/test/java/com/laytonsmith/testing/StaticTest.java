@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.testing;
 
+import java.lang.reflect.Field;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import java.util.List;
 import java.util.ArrayList;
@@ -269,9 +270,12 @@ public class StaticTest {
     }
     
     public static Player GetOnlinePlayer(){
+        return GetOnlinePlayer("wraithguard01");
+    }
+    public static Player GetOnlinePlayer(String name){
         Player p = mock(Player.class);
         when(p.isOnline()).thenReturn(true);
-        when(p.getName()).thenReturn("wraithguard01");        
+        when(p.getName()).thenReturn(name);        
         //when(p.getServer()).thenReturn(GetFakeServer());
         return p;
     }
@@ -280,5 +284,14 @@ public class StaticTest {
         Server s = mock(Server.class);
         
         return s;
+    }
+    
+    public static Object GetVariable(Object instance, String var) throws Exception{
+        return GetVariable(instance.getClass(), var, instance);
+    }
+    public static Object GetVariable(Class c, String var, Object instance) throws Exception{
+        Field f = c.getField(var);
+        f.setAccessible(true);
+        return f.get(instance);
     }
 }

@@ -186,17 +186,12 @@ public class Script {
                     if(p == null){
                         throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                     }
-                    try{
-                        List<Construct> variables = new ArrayList<Construct>();
-                        for(GenericTreeNode<Construct> child : c.getChildren()){
-                            variables.add(eval(child, player));
-                        }
-                        variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
-                        p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);
-                        return new CVoid(m.line_num, m.file);
-                    } catch(FunctionReturnException e){
-                        return e.getReturn();                        
+                    List<Construct> variables = new ArrayList<Construct>();
+                    for(GenericTreeNode<Construct> child : c.getChildren()){
+                        variables.add(eval(child, player));
                     }
+                    variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
+                    return p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);                    
                 }
                 final Function f;
                 f = FunctionList.getFunction(m);
@@ -256,7 +251,7 @@ public class Script {
                         throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                     }
                     String name = "";
-                    List<String> vars = new ArrayList<String>();
+                    List<IVariable> vars = new ArrayList<IVariable>();
                     GenericTreeNode<Construct> tree = null;
                     for(int i = 0; i < ch.size(); i++){
                         if(i == ch.size() - 1){
@@ -273,8 +268,8 @@ public class Script {
                                 } else {
                                     if(!(cons instanceof IVariable)){
                                         throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.line_num, m.file);
-                                    } else {
-                                        vars.add(((IVariable)cons).getName());
+                                    } else {                                        
+                                        vars.add((IVariable)cons);
                                     }
                                 }
                             }
@@ -577,12 +572,10 @@ public class Script {
             if (j == 0) {
                 if (next_token.type == TType.IDENT) {
                     label = t.val();
-                    j += 1;
+                    j--;
                     left.remove(0);
                     left.remove(0);
                     continue;
-                } else {
-                    label = null;
                 }
             }
 
@@ -600,6 +593,8 @@ public class Script {
                 left_vars.put(t.val(), v);
                 if(v.isOptional()){
                     after_no_def_opt_var = true;
+                } else {
+                    v.setDefault("");
                 }
             }
             if (j == 0 && !t.type.equals(TType.COMMAND)) {
@@ -643,8 +638,6 @@ public class Script {
                     throw new ConfigCompileException("Unexpected token in optional variable", t.line_num);
                 } else if (next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) {
                     left_vars.get(lastVar).setDefault(next_token.val());
-                } else {
-                    left_vars.get(lastVar).setDefault("");
                 }
             }
             if (t.type.equals(TType.RSQUARE_BRACKET)) {

@@ -4,15 +4,18 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.aliasengine.Constructs.Variable;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import com.laytonsmith.testing.StaticTest;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -130,11 +133,11 @@ public class MScriptCompilerTest {
 
     @Test
     public void testExecute1() throws ConfigCompileException {
-        String script = "proc(_hello, @hello,"
-                + "         msg(@hello)"
+        String script = "proc(_hello, @hello0,"
+                + "         msg(@hello0)"
                 + "      )"
-                + "      assign(@hello, 'hello')"
-                + "      _hello(@hello)";
+                + "      assign(@hello1, 'hello')"
+                + "      _hello(@hello1)";
 
 
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
@@ -277,6 +280,107 @@ public class MScriptCompilerTest {
         verify(fakePlayer).sendMessage("0");
     }
     
+    @Test
+    public void testExecute14() throws ConfigCompileException {
+        String script =
+                "proc(_hello, assign(@i, 'world'),"
+                + "     return(@i)"
+                + ")"
+                + "msg(_hello('hello'))"
+                + "msg(_hello())";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("hello");
+        verify(fakePlayer).sendMessage("world");
+    }
+    
+    @Test public void testExecute15() throws ConfigCompileException{
+        String script =
+                "assign(@i, 0)\n"
+                + "msg('@i is currently' @i)\n"
+                + "proc(_out, @i,\n"
+                + "     msg('@i is currently' @i 'and @j is' @j)\n"
+                + ")\n"
+                + "_out('hello')\n"
+                + "assign(@j, 'goodbye')\n"
+                + "_out('world')\n";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("@i is currently 0");
+        verify(fakePlayer).sendMessage("@i is currently hello and @j is");
+        verify(fakePlayer).sendMessage("@i is currently world and @j is");
+    }
+    
+    @Test public void testExecute16() throws ConfigCompileException{
+        String script =
+                "proc(_myProc, @i, @j, @k, msg(@i @j @k))\n"
+                + "_myProc()\n"
+                + "_myProc(1)\n"
+                + "_myProc(1, 2)\n"
+                + "_myProc(1, 2, 3)\n"
+                + "_myProc(1, 2, 3, 4)\n";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        //verify(fakePlayer).sendMessage("null null null");
+        verify(fakePlayer).sendMessage("1");
+        verify(fakePlayer).sendMessage("1 2");
+        verify(fakePlayer, times(2)).sendMessage("1 2 3");
+    }
+    
+    @Test public void testExecute17() throws ConfigCompileException{
+        String script =
+                "proc(_addition, @i, @j, msg(add(@i, @j)))\n"
+                + "_addition(1, 1)\n"
+                + "_addition(2, 2)";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        //verify(fakePlayer).sendMessage("null null null");
+        verify(fakePlayer).sendMessage("2");
+        verify(fakePlayer).sendMessage("4");       
+    }
+    
+    @Test public void testExecute18() throws ConfigCompileException{
+        String script =
+                "proc(_myProc, msg(@arguments))\n"
+                + "_myProc()\n"
+                + "_myProc(1)\n"
+                + "_myProc(1, 2)";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        //verify(fakePlayer).sendMessage("null null null");
+        verify(fakePlayer).sendMessage("{}");
+        verify(fakePlayer).sendMessage("{1}");       
+        verify(fakePlayer).sendMessage("{1, 2}");       
+    }
+    
+    /**
+     * Variables are locked in when the procedure is defined
+     * @throws ConfigCompileException 
+     */
+    @Test
+    public void testExecute19() throws ConfigCompileException {
+        String script =
+                "assign(@j, 'world')\n"
+                + "proc(_hello, assign(@i, @j),"
+                + "     return(@i)"
+                + ")\n"
+                + "assign(@j, 'goodbye')\n"
+                + "msg(_hello('hello'))"
+                + "msg(_hello())";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("hello");
+        verify(fakePlayer).sendMessage("world");
+    }
+    @Test
+    public void testExecute20() throws ConfigCompileException {
+        final AtomicBoolean bool = new AtomicBoolean(false);
+        String script =
+                "msg('hello') world";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, new MScriptComplete() {
+
+            public void done(String output) {
+                assertEquals("world", output.trim());
+                bool.set(true);
+            }
+        }, null);
+        verify(fakePlayer).sendMessage("hello");
+        assertTrue(bool.get());
+    }
 
     @Test
     public void testCompile1() {
@@ -379,6 +483,25 @@ public class MScriptCompilerTest {
         assertTrue(s.match("/test 2"));
         assertFalse(s.match("/test"));
         s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
+    }
+    
+    @Test public void testCompile11() throws ConfigCompileException{
+        
+        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
+        CommandHelperPlugin.myServer = fakeServer;
+        when(fakeServer.getOnlinePlayers()).thenReturn(new Player[]{fakePlayer});
+        String config = "safe:/test $var = >>>\n"
+                + "all_players()\n"
+                + "msg($var)\n"
+                + "<<<";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);        
+        s.compile();
+        assertEquals("safe", s.label);
+        assertTrue(s.match("/test 2"));
+        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
+        verify(fakePlayer).sendMessage("2");
+        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
     }
     
     

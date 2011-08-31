@@ -17,7 +17,6 @@ import java.util.jar.JarFile;
 import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
-import org.yaml.snakeyaml.error.YAMLException;
 
 /**
  *
@@ -146,7 +145,7 @@ public class Main {
             jar.close();
         } catch (IOException ex) {
             throw new InvalidPluginException(ex);
-        } catch (YAMLException ex) {
+        } catch (Exception ex) {
             throw new InvalidPluginException(ex);
         }
         return description;

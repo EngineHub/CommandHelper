@@ -28,12 +28,6 @@
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2/</url>
         </repository>
-        <!-- Temporary until sk89q uploads other dependencies -->
-        <repository>
-            <id>campusbookmart.com</id>
-            <name>campusbookmart.com-releases</name>
-            <url>http://www.campusbookmart.com:8081/artifactory/campusbookmart</url>
-        </repository>
     </repositories>
 
     <dependencies>
@@ -156,13 +150,13 @@
                 <version>1.4</version>
                 <executions>
                     <execution>
-                        <id>WEBundle</id>
+                        <id>ShadedBundle</id>
                         <phase>package</phase>
                         <goals>
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
+                            <shadedArtifactAttached>false</shadedArtifactAttached>
                             <shadedClassifierName>WEBundle</shadedClassifierName>
                             <artifactSet>
                                 <includes>
@@ -170,22 +164,24 @@
                                     <include>com.nijikokun:register:jar:*</include>
                                 </includes>
                             </artifactSet>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>Shade</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>true</shadedArtifactAttached>
-                            <shadedClassifierName>ShadedBundle</shadedClassifierName>
-                            <artifactSet>
-                                <includes>
-                                    <include>com.nijikokun:register:jar:*</include>
-                                </includes>
-                            </artifactSet>
+                            <filters>
+                                <filter>
+                                    <artifact>com.sk89q:worldedit:jar:*</artifact>
+                                    <includes>
+                                        <include>com/sk89q/bukkit/migration/**</include>                                        
+                                    </includes>
+                                    <excludes>
+                                        <exclude>com/sk89q/jchronic/**</exclude>
+                                        <exclude>com/google/**</exclude>
+                                    </excludes>
+                                </filter>
+                                <filter>
+                                    <artifact>com.nijikokun:register:jar:*</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
