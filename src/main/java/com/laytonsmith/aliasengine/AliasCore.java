@@ -81,45 +81,50 @@ public class AliasCore {
             //Global aliases override personal ones, so check the list first
             //a = config.getRunnableAliases(command, player);
             for (Script s : scripts) {
-                if (s.match(command)) {
-                    echoCommand.add(player.getName());
-                    if ((Boolean) Static.getPreferences().getPreference("console-log-commands")) {
-                        Static.getLogger().log(Level.INFO, "CH: Running original command ----> " + command);
-                        Static.getLogger().log(Level.INFO, "on player " + player.getName());
-                    }
-                    try {
-                        s.run(s.getVariables(command), player, new MScriptComplete() {
+                try{
+                    if (s.match(command)) {
+                        echoCommand.add(player.getName());
+                        if ((Boolean) Static.getPreferences().getPreference("console-log-commands")) {
+                            Static.getLogger().log(Level.INFO, "CH: Running original command ----> " + command);
+                            Static.getLogger().log(Level.INFO, "on player " + player.getName());
+                        }
+                        try {
+                            s.run(s.getVariables(command), player, new MScriptComplete() {
 
-                            public void done(String output) {
-                                try {
-                                    if (output != null) {
-                                        if (!output.trim().equals("") && output.trim().startsWith("/")) {
-                                            if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                                                Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                public void done(String output) {
+                                    try {
+                                        if (output != null) {
+                                            if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                                if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                                }
+                                                //Sometimes bukkit works with one version of this, sometimes with the other. performCommand would be prefered, but
+                                                //chat works more often, because chat actually triggers a CommandPreprocessEvent, unlike performCommand.
+                                                player.chat(output.trim());
+                                                //player.performCommand(output.trim().substring(1));
                                             }
-                                            //Sometimes bukkit works with one version of this, sometimes with the other. performCommand would be prefered, but
-                                            //chat works more often, because chat actually triggers a CommandPreprocessEvent, unlike performCommand.
-                                            player.chat(output.trim());
-                                            //player.performCommand(output.trim().substring(1));
                                         }
+                                    } catch (Throwable e) {
+                                        System.err.println(e.getMessage());
+                                        player.sendMessage(ChatColor.RED + e.getMessage());
+                                    } finally {
+                                        echoCommand.remove(player.getName());
                                     }
-                                } catch (Throwable e) {
-                                    System.err.println(e.getMessage());
-                                    player.sendMessage(ChatColor.RED + e.getMessage());
-                                } finally {
-                                    echoCommand.remove(player.getName());
                                 }
-                            }
-                        });
-                    } catch (/*ConfigRuntimeException*/Throwable e) {
-                        System.err.println("An unexpected exception occured: " + e.getClass().getSimpleName());
-                        player.sendMessage("An unexpected exception occured: " + ChatColor.RED + e.getClass().getSimpleName());
-                        e.printStackTrace();
-                    } finally {
-                        echoCommand.remove(player.getName());
+                            });
+                        } catch (/*ConfigRuntimeException*/Throwable e) {
+                            System.err.println("An unexpected exception occured: " + e.getClass().getSimpleName());
+                            player.sendMessage("An unexpected exception occured: " + ChatColor.RED + e.getClass().getSimpleName());
+                            e.printStackTrace();
+                        } finally {
+                            echoCommand.remove(player.getName());
+                        }
+                        match = true;
+                        break;
                     }
-                    match = true;
-                    break;
+                } catch(Exception e){
+                    System.err.println("An unexpected exception occured inside the command " + s.toString());
+                    e.printStackTrace();
                 }
             }
 
