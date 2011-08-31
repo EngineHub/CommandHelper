@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
@@ -47,7 +48,7 @@ public class ArrayHandling {
         }
 
         public String docs() {
-            return "int {array} Returns the size of this array as an integer";
+            return "int {array} Returns the size of this array as an integer.";
         }
 
         public boolean isRestricted() {
@@ -132,14 +133,18 @@ public class ArrayHandling {
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray && args[1] instanceof CInt){
+                try{
                 ((CArray)args[0]).set((int)((CInt)args[1]).getInt(), args[2]);
+                } catch(IndexOutOfBoundsException e){
+                    throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, line_num, f);
+                }
                 return new CVoid(line_num, f);
             }
             throw new ConfigRuntimeException("Argument 1 of array_set must be an array, and argument 2 must be an integer", ExceptionType.CastException, line_num, f);        
         }
 
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
         }
         
         public String docs() {
@@ -235,7 +240,7 @@ public class ArrayHandling {
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.IndexOverflowException};
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public String docs() {
@@ -305,6 +310,64 @@ public class ArrayHandling {
             } else {
                 throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num, f);
             }
+        }
+        
+    }
+    
+    @api public static class array_resize implements Function{
+
+        public String getName() {
+            return "array_resize";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public String docs() {
+            return "void {array, size, [fill]} Resizes the given array so that it is at least of size size, filling the blank spaces with"
+                    + " fill, or null by default. If the size of the array is already at least size, nothing happens; in other words this"
+                    + " function can only be used to increase the size of the array.";
+                    //+ " If the array is an associative array, the non numeric values are simply copied over.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+            if(args[0] instanceof CArray && args[1] instanceof CInt){
+                CArray original = (CArray)args[0];
+                int size = (int)((CInt)args[1]).getInt();
+                Construct fill = new CNull(line_num, f);
+                if(args.length == 3){
+                    fill = args[2];
+                }
+                for(int i = original.size(); i < size; i++){
+                    original.push(fill);
+                }
+            } else {
+                throw new ConfigRuntimeException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", ExceptionType.CastException, line_num, f);
+            }
+            return new CVoid(line_num, f);
         }
         
     }

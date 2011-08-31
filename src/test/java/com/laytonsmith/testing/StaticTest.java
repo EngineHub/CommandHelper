@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.testing;
 
+import com.laytonsmith.aliasengine.MScriptCompiler;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import java.lang.reflect.Field;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import java.util.List;
@@ -293,5 +295,15 @@ public class StaticTest {
         Field f = c.getField(var);
         f.setAccessible(true);
         return f.get(instance);
+    }
+    
+    /**
+     * Lexes, compiles, and runs a given mscript, using the given player.
+     * @param script
+     * @param player
+     * @throws ConfigCompileException 
+     */
+    public static void Run(String script, Player player) throws ConfigCompileException{
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), player, null, null);
     }
 }

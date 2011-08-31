@@ -43,11 +43,20 @@ public class CArray extends Construct{
         mutVal = b.toString();
     }
 
+    /**
+     * Pushes a new Construct onto the array
+     * @param c 
+     */
     public void push(Construct c){
         array.add(c);
         regenValue();
     }
 
+    /**
+     * 
+     * @param index
+     * @param c 
+     */
     public void set(int index, Construct c){
         array.set(index, c);
         regenValue();

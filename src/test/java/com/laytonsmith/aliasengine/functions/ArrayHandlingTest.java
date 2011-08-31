@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
@@ -11,6 +12,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.testing.C;
+import com.laytonsmith.testing.StaticTest;
 import org.bukkit.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
@@ -31,7 +33,7 @@ public class ArrayHandlingTest {
 
     @Before
     public void setUp() {
-        fakePlayer = mock(Player.class);
+        fakePlayer = StaticTest.GetOnlinePlayer();
         commonArray = new CArray(0, null, new CInt(1, 0, null), new CInt(2, 0, null), new CInt(3, 0, null));
     }
 
@@ -60,22 +62,20 @@ public class ArrayHandlingTest {
     }
 
     @Test
-    public void testArraySet() throws CancelCommandException {
-        ArrayHandling.array_set a = new ArrayHandling.array_set();
-        TestBoilerplate(a, "array_set");
-
-        assertReturn(a.exec(0, null, fakePlayer, commonArray, C.Int(1), C.String("hi")), C.Void);
-
-        //it should affect the 1-index element, but no others
-        assertCEquals(C.onstruct(1), commonArray.get(0, 0));
-        assertCEquals(C.onstruct("hi"), commonArray.get(1, 0));
-        assertCEquals(C.onstruct(3), commonArray.get(2, 0));
+    public void testArraySet() throws  ConfigCompileException {
+        String script =
+                "assign(@array, array(1,2,3)) msg(@array) array_set(@array, 2, 1) msg(@array)";
+        //MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        StaticTest.Run(script, fakePlayer);
+        verify(fakePlayer).sendMessage("{1, 2, 3}");
+        verify(fakePlayer).sendMessage("{1, 2, 1}");
     }
     
-    @Test(expected=Exception.class)
-    public void testArraySetEx() throws CancelCommandException{
-        ArrayHandling.array_set a = new ArrayHandling.array_set();
-        a.exec(0, null, fakePlayer, C.Int(0), C.Int(1), C.String("hi"));
+    @Test(expected=ConfigRuntimeException.class)
+    public void testArraySetEx() throws CancelCommandException, ConfigCompileException{
+        String script =
+                "assign(@array, array()) array_set(@array, 3, 1) msg(@array)";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
     }
 
     @Test
@@ -126,5 +126,13 @@ public class ArrayHandlingTest {
     public void testArrayPushEx() throws CancelCommandException{
         ArrayHandling.array_push a = new ArrayHandling.array_push();
         a.exec(0, null, fakePlayer, C.Int(0), C.Int(1));
+    }
+    
+    @Test public void testArrayResize() throws ConfigCompileException{
+        String script = "assign(@array, array(1)) msg(@array) array_resize(@array, 2) msg(@array) array_resize(@array, 3, 'hello') msg(@array)";
+        StaticTest.Run(script, fakePlayer);
+        verify(fakePlayer).sendMessage("{1}");
+        verify(fakePlayer).sendMessage("{1, null}");
+        verify(fakePlayer).sendMessage("{1, null, hello}");
     }
 }
