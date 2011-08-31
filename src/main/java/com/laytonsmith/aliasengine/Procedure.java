@@ -4,19 +4,14 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.Constructs.CArray;
-import com.laytonsmith.aliasengine.Constructs.CFunction;
-import com.laytonsmith.aliasengine.Constructs.CNull;
-import com.laytonsmith.aliasengine.Constructs.CString;
-import com.laytonsmith.aliasengine.Constructs.CVoid;
-import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.Constructs.IVariable;
+import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import com.sk89q.util.StringUtil;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.entity.Player;
@@ -27,13 +22,20 @@ import org.bukkit.entity.Player;
  */
 public class Procedure implements Cloneable {
     private String name;
-    private List<String> varList;
+    private Map<String, IVariable> varList;
+    private Map<String, Construct> originals = new HashMap<String, Construct>();
+    private List<IVariable> varIndex = new ArrayList<IVariable>();
     private GenericTreeNode<Construct> tree;
 
     
-    public Procedure(String name, List<String> varList, GenericTreeNode<Construct> tree, CFunction f){
-        this.name = name;
-        this.varList = varList;
+    public Procedure(String name, List<IVariable> varList, GenericTreeNode<Construct> tree, CFunction f){
+        this.name = name;        
+        this.varList = new HashMap<String, IVariable>();
+        for(IVariable var : varList){
+            this.varList.put(var.getName(), var);
+            this.varIndex.add(var);
+            this.originals.put(var.getName(), var.ival());
+        }        
         this.tree = tree;
         if(!this.name.matches("^_[^_].*")){
             throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, f.line_num, f.file);
@@ -46,19 +48,12 @@ public class Procedure implements Cloneable {
     
     @Override
     public String toString(){
-        return name + "(" + StringUtil.joinString(varList, ", ", 0) + ")";
+        return name + "(" + StringUtil.joinString(varList.keySet(), ", ", 0) + ")";
     }
     
-    private int indexOf(String name){
-        for(int i = 0; i < varList.size(); i++){
-            if(varList.get(i).equals(name)){
-                return i;
-            }
-        }
-        return -1;
-    }
     
     public void execute(List<Construct> variables, Player player, Map<String, Procedure> procStack, String label){
+        resetVariables();
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         Script fakeScript = new Script(null, null);
@@ -72,18 +67,23 @@ public class Procedure implements Cloneable {
         fakeScript.varList.set(new IVariable("@arguments", array, 0, null));
         for(GenericTreeNode<Construct> c : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
             if(c.getData() instanceof IVariable){
-                int index = indexOf(((IVariable)c.getData()).getName());
-                IVariable var = (IVariable)c.getData();
-                if(index == -1){
-                    if(!var.getName().equals("@arguments")){
-                        var.setIval(new CString("", var.line_num, var.file));
-                    } else {
-                        var.setIval(fakeScript.varList.get("@arguments"));
+
+                String varname = ((IVariable)c.getData()).getName();
+                IVariable var = varList.get(((IVariable)c.getData()).getName());
+                if(var == null){
+                    var = new IVariable(varname, c.getData().line_num, c.getData().file);
+                }
+                if(varname.equals("@arguments")){
+                    var.setIval(fakeScript.varList.get("@arguments"));
+                }
+                int index = indexOf(varname);
+                if(index != -1){
+                    //This variable has not been explicitly set, so we use the default
+                    try{
+                        var.setIval(Static.resolveConstruct(variables.get(index).val(), var.line_num, var.file));
+                    } catch(ArrayIndexOutOfBoundsException e){
+                        //var.setIval(new CNull(var.line_num, var.file));
                     }
-                } else if(index > variables.size() - 1){
-                    var.setIval(new CNull(0, null));
-                } else {
-                    var.setIval(variables.get(index));
                 }
                 fakeScript.varList.set(var);
             }
@@ -97,10 +97,25 @@ public class Procedure implements Cloneable {
         throw new FunctionReturnException(new CVoid(0, null));
     }
     
+    private int indexOf(String name){
+        for(IVariable v : varIndex){
+            if(v.getName().equals(name)){
+                return varIndex.indexOf(v);
+            }
+        }
+        return -1;
+    }
+    
+    private void resetVariables(){
+        for(Map.Entry<String, IVariable> varEntry : varList.entrySet()){
+            varEntry.getValue().setIval(originals.get(varEntry.getKey()));
+        }
+    }
+    
     @Override
     public Procedure clone() throws CloneNotSupportedException{
         Procedure clone = (Procedure) super.clone();
-        if(this.varList != null) clone.varList = new ArrayList<String>(this.varList);
+        if(this.varList != null) clone.varList = new HashMap<String, IVariable>(this.varList);
         if(this.tree != null) clone.tree = this.tree.clone();
         return clone;
     }

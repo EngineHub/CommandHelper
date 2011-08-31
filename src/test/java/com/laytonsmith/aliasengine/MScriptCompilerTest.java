@@ -132,11 +132,11 @@ public class MScriptCompilerTest {
 
     @Test
     public void testExecute1() throws ConfigCompileException {
-        String script = "proc(_hello, @hello,"
-                + "         msg(@hello)"
+        String script = "proc(_hello, @hello0,"
+                + "         msg(@hello0)"
                 + "      )"
-                + "      assign(@hello, 'hello')"
-                + "      _hello(@hello)";
+                + "      assign(@hello1, 'hello')"
+                + "      _hello(@hello1)";
 
 
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
@@ -279,6 +279,92 @@ public class MScriptCompilerTest {
         verify(fakePlayer).sendMessage("0");
     }
     
+    @Test
+    public void testExecute14() throws ConfigCompileException {
+        String script =
+                "proc(_hello, assign(@i, 'world'),"
+                + "     return(@i)"
+                + ")"
+                + "msg(_hello('hello'))"
+                + "msg(_hello())";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("hello");
+        verify(fakePlayer).sendMessage("world");
+    }
+    
+    @Test public void testExecute15() throws ConfigCompileException{
+        String script =
+                "assign(@i, 0)\n"
+                + "msg('@i is currently' @i)\n"
+                + "proc(_out, @i,\n"
+                + "     msg('@i is currently' @i 'and @j is' @j)\n"
+                + ")\n"
+                + "_out('hello')\n"
+                + "assign(@j, 'goodbye')\n"
+                + "_out('world')\n";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("@i is currently 0");
+        verify(fakePlayer).sendMessage("@i is currently hello and @j is");
+        verify(fakePlayer).sendMessage("@i is currently world and @j is");
+    }
+    
+    @Test public void testExecute16() throws ConfigCompileException{
+        String script =
+                "proc(_myProc, @i, @j, @k, msg(@i @j @k))\n"
+                + "_myProc()\n"
+                + "_myProc(1)\n"
+                + "_myProc(1, 2)\n"
+                + "_myProc(1, 2, 3)\n"
+                + "_myProc(1, 2, 3, 4)\n";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        //verify(fakePlayer).sendMessage("null null null");
+        verify(fakePlayer).sendMessage("1");
+        verify(fakePlayer).sendMessage("1 2");
+        verify(fakePlayer, times(2)).sendMessage("1 2 3");
+    }
+    
+    @Test public void testExecute17() throws ConfigCompileException{
+        String script =
+                "proc(_addition, @i, @j, msg(add(@i, @j)))\n"
+                + "_addition(1, 1)\n"
+                + "_addition(2, 2)";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        //verify(fakePlayer).sendMessage("null null null");
+        verify(fakePlayer).sendMessage("2");
+        verify(fakePlayer).sendMessage("4");       
+    }
+    
+    @Test public void testExecute18() throws ConfigCompileException{
+        String script =
+                "proc(_myProc, msg(@arguments))\n"
+                + "_myProc()\n"
+                + "_myProc(1)\n"
+                + "_myProc(1, 2)";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        //verify(fakePlayer).sendMessage("null null null");
+        verify(fakePlayer).sendMessage("{}");
+        verify(fakePlayer).sendMessage("{1}");       
+        verify(fakePlayer).sendMessage("{1, 2}");       
+    }
+    
+    /**
+     * Variables are locked in when the procedure is defined
+     * @throws ConfigCompileException 
+     */
+    @Test
+    public void testExecute19() throws ConfigCompileException {
+        String script =
+                "assign(@j, 'world')\n"
+                + "proc(_hello, assign(@i, @j),"
+                + "     return(@i)"
+                + ")\n"
+                + "assign(@j, 'goodbye')\n"
+                + "msg(_hello('hello'))"
+                + "msg(_hello())";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("hello");
+        verify(fakePlayer).sendMessage("world");
+    }
 
     @Test
     public void testCompile1() {

@@ -256,7 +256,7 @@ public class Script {
                         throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                     }
                     String name = "";
-                    List<String> vars = new ArrayList<String>();
+                    List<IVariable> vars = new ArrayList<IVariable>();
                     GenericTreeNode<Construct> tree = null;
                     for(int i = 0; i < ch.size(); i++){
                         if(i == ch.size() - 1){
@@ -273,8 +273,8 @@ public class Script {
                                 } else {
                                     if(!(cons instanceof IVariable)){
                                         throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.line_num, m.file);
-                                    } else {
-                                        vars.add(((IVariable)cons).getName());
+                                    } else {                                        
+                                        vars.add((IVariable)cons);
                                     }
                                 }
                             }
