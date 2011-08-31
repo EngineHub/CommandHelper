@@ -4,7 +4,11 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import java.io.File;
+import com.laytonsmith.PureUtilities.fileutility.FileUtility;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
+import java.io.IOException;
 import org.bukkit.entity.Player;
 import org.bukkit.Server;
 import com.laytonsmith.aliasengine.Constructs.Variable;
@@ -52,7 +56,7 @@ public class DataHandlingTest {
 
 
     @Test
-    public void testFor() throws ConfigCompileException {
+    public void testFor1() throws ConfigCompileException {
         String config = "/for = >>>\n"
                 + " assign(@array, array())"
                 + " for(assign(@i, 0), lt(@i, 5), inc(@i),\n"
@@ -64,6 +68,98 @@ public class DataHandlingTest {
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
         verify(fakePlayer).sendMessage("{0, 1, 2, 3, 4}");
+    }
+    
+    @Test(expected=ConfigRuntimeException.class) 
+    public void testFor2() throws ConfigCompileException{
+        String script = "/for = >>>\n"
+                + " assign(@array, array())"
+                + " for(assign(@i, 0), 'nope', inc(@i),\n"
+                + "     array_push(@array, @i)\n"
+                + " )\n"
+                + " msg(@array)\n"
+                + "<<<\n";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        
+    }
+    
+    @Test(expected=ConfigRuntimeException.class) 
+    public void testFor3() throws ConfigCompileException{
+        String script = 
+                "   assign(@array, array())"
+                + " for('nope', lt(@i, 5), inc(@i),\n"
+                + "     array_push(@array, @i)\n"
+                + " )\n"
+                + " msg(@array)\n";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        
+    }
+    
+    @Test public void testForeach1() throws ConfigCompileException{
+        String config = "/for = >>>\n"
+                + " assign(@array, array(1, 2, 3, 4, 5))\n"
+                + " assign(@array2, array())"
+                + " foreach(@array, @i,\n"
+                + "     array_push(@array2, @i)\n"
+                + " )\n"
+                + " msg(@array2)\n"
+                + "<<<\n";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        s.compile();
+        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        verify(fakePlayer).sendMessage("{1, 2, 3, 4, 5}");
+    }
+    
+    @Test public void testForeach2() throws ConfigCompileException{
+        String config = "/for = >>>\n"
+                + " assign(@array, array(1, 2, 3, 4, 5))\n"
+                + " assign(@array2, array())"
+                + " foreach(@array, @i,\n"
+                + "     if(equals(@i, 1), continue(2))"
+                + "     array_push(@array2, @i)\n"
+                + " )\n"
+                + " msg(@array2)\n"
+                + "<<<\n";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        s.compile();
+        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        verify(fakePlayer).sendMessage("{3, 4, 5}");
+    }
+    
+    @Test public void testForeach3() throws ConfigCompileException{
+        String config = "/for = >>>\n"
+                + " assign(@array, array(1, 2, 3, 4, 5))\n"
+                + " assign(@array1, array(1, 2, 3, 4, 5))\n"
+                + " assign(@array2, array())\n"
+                + " foreach(@array1, @j,"
+                + "     foreach(@array, @i,\n"
+                + "         if(equals(@i, 3), break(2))"
+                + "         array_push(@array2, @i)\n"
+                + "     )\n"
+                + " )"
+                + " msg(@array2)\n"
+                + "<<<\n";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        s.compile();
+        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        verify(fakePlayer).sendMessage("{1, 2}");
+    }
+    
+    @Test public void testCallProcIsProc() throws ConfigCompileException{
+        String config = "/for = >>>\n"
+                + " msg(is_proc(_proc))\n"
+                + " proc(_proc,"
+                + "     msg('hello world')"
+                + " )"
+                + " msg(is_proc(_proc))"
+                + " call_proc(_proc)"
+                + "<<<\n";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        s.compile();
+        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        verify(fakePlayer).sendMessage("false");
+        verify(fakePlayer).sendMessage("true");
+        verify(fakePlayer).sendMessage("hello world");
     }
     
     /**
@@ -149,5 +245,17 @@ public class DataHandlingTest {
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
         verify(fakePlayer).sendMessage("{j:0, j:1}");
+    }
+    
+    @Test public void testInclude() throws ConfigCompileException, IOException{
+        String script = 
+                "include('unit_test_inc.ms')";
+        //Create the test file
+        File test = new File("unit_test_inc.ms");
+        FileUtility.write("msg('hello')", test);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        verify(fakePlayer).sendMessage("hello");
+        //delete the test file
+        test.delete();
     }
 }

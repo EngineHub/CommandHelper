@@ -52,7 +52,7 @@ public class Procedure implements Cloneable {
     }
     
     
-    public void execute(List<Construct> variables, Player player, Map<String, Procedure> procStack, String label){
+    public Construct execute(List<Construct> variables, Player player, Map<String, Procedure> procStack, String label){
         resetVariables();
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
@@ -92,9 +92,9 @@ public class Procedure implements Cloneable {
         try{
             fakeScript.eval(tree, player);
         } catch(FunctionReturnException e){
-            throw e;
+            return e.getReturn();
         }
-        throw new FunctionReturnException(new CVoid(0, null));
+        return new CVoid(0, null);
     }
     
     private int indexOf(String name){

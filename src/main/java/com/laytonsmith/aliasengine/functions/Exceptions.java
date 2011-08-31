@@ -176,11 +176,11 @@ public class Exceptions {
                 if((Boolean)Static.getPreferences().getPreference("debug-mode")){
                     System.out.println("[CommandHelper]: Exception thrown -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
                 }
-                if(interest.isEmpty() || interest.contains(e.getExceptionType().toString())){
+                if(e.getExceptionType() != null  && (interest.isEmpty() || interest.contains(e.getExceptionType().toString()))){
                     CArray ex = new CArray(line_num, f);
                     ex.push(new CString(e.getExceptionType().toString(), line_num, f));
                     ex.push(new CString(e.getMessage(), line_num, f));
-                    ex.push(new CString(e.getFile().getAbsolutePath(), line_num, f));
+                    ex.push(new CString((e.getFile()!=null?e.getFile().getAbsolutePath():"null"), line_num, f));
                     ex.push(new CInt(e.getLineNum(), line_num, f));
                     ivar.setIval(ex);
                     varList.set(ivar);
@@ -238,7 +238,11 @@ public class Exceptions {
 
         public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try{
-                throw new ConfigRuntimeException(args[1].val(), ExceptionType.valueOf(args[0].val()), line_num, f);
+                ExceptionType c = null;
+                if(!(args[0] instanceof CNull)){
+                    c = ExceptionType.valueOf(args[0].val());
+                }
+                throw new ConfigRuntimeException(args[1].val(), c, line_num, f);
             } catch(IllegalArgumentException e){
                 throw new ConfigRuntimeException("Expected a valid exception type", ExceptionType.FormatException, line_num, f);
             }

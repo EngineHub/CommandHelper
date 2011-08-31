@@ -15,6 +15,7 @@ import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -364,6 +365,21 @@ public class MScriptCompilerTest {
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
         verify(fakePlayer).sendMessage("hello");
         verify(fakePlayer).sendMessage("world");
+    }
+    @Test
+    public void testExecute20() throws ConfigCompileException {
+        final AtomicBoolean bool = new AtomicBoolean(false);
+        String script =
+                "msg('hello') world";
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, new MScriptComplete() {
+
+            public void done(String output) {
+                assertEquals("world", output.trim());
+                bool.set(true);
+            }
+        }, null);
+        verify(fakePlayer).sendMessage("hello");
+        assertTrue(bool.get());
     }
 
     @Test

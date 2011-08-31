@@ -238,13 +238,14 @@ public class DataHandling {
                     for(int i = 0; i < one.size(); i++){
                         varList.set(new IVariable(two.getName(), one.get(i, line_num), line_num, f));
                         try{
-                        that.eval(code, p);
+                            that.eval(code, p);
                         } catch(LoopBreakException e){
                             int num = e.getTimes();
                             if(num > 1){
                                 e.setTimes(--num);
                                 throw e;
                             }
+                            return new CVoid(line_num, f);
                         } catch(LoopContinueException e){
                             i += e.getTimes() - 1;
                             continue;
@@ -841,13 +842,8 @@ public class DataHandling {
             Procedure proc = procs.get(args[0].val());
             if(proc != null){
                 List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
-                vars.remove(0);
-                try{
-                    proc.execute(vars, p, new HashMap<String, Procedure>(procs), label);
-                    return new CVoid(line_num, f);
-                } catch(FunctionReturnException e){
-                    return e.getReturn();
-                }
+                vars.remove(0);                
+                return proc.execute(vars, p, new HashMap<String, Procedure>(procs), label);
             }            
             throw new ConfigRuntimeException("Unknown procedure \"" + args[0].val() + "\"", 
                     ExceptionType.InvalidProcedureException, line_num, f);

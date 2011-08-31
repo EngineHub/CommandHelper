@@ -186,17 +186,12 @@ public class Script {
                     if(p == null){
                         throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                     }
-                    try{
-                        List<Construct> variables = new ArrayList<Construct>();
-                        for(GenericTreeNode<Construct> child : c.getChildren()){
-                            variables.add(eval(child, player));
-                        }
-                        variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
-                        p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);
-                        return new CVoid(m.line_num, m.file);
-                    } catch(FunctionReturnException e){
-                        return e.getReturn();                        
+                    List<Construct> variables = new ArrayList<Construct>();
+                    for(GenericTreeNode<Construct> child : c.getChildren()){
+                        variables.add(eval(child, player));
                     }
+                    variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
+                    return p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);                    
                 }
                 final Function f;
                 f = FunctionList.getFunction(m);

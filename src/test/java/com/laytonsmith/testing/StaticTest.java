@@ -270,9 +270,12 @@ public class StaticTest {
     }
     
     public static Player GetOnlinePlayer(){
+        return GetOnlinePlayer("wraithguard01");
+    }
+    public static Player GetOnlinePlayer(String name){
         Player p = mock(Player.class);
         when(p.isOnline()).thenReturn(true);
-        when(p.getName()).thenReturn("wraithguard01");        
+        when(p.getName()).thenReturn(name);        
         //when(p.getServer()).thenReturn(GetFakeServer());
         return p;
     }
