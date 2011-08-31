@@ -230,10 +230,10 @@ public class MScriptCompilerTest {
         verify(fakePlayer).sendMessage("hello");
     }
 
-    @Test
+    @Test(expected=ConfigCompileException.class)
     public void testExecute8() throws ConfigCompileException {
         String script =
-                "msg('hello') //This is a comment too invalid()'\"'' function\n";
+                "msg('hello') //This is no longer a comment too :( invalid()'\"'' function\n";
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
         verify(fakePlayer).sendMessage("hello");
     }

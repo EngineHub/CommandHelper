@@ -47,11 +47,8 @@ public class MScriptCompiler {
             }
 //            if ((token_list.isEmpty() || token_list.get(token_list.size() - 1).type.equals(TType.NEWLINE))
 //                    && c == '#') {
-            if((c == '#' || (c == '/' && (c2 == '/' || c2 == '*'))) && !in_comment && !state_in_quote){
+            if((c == '#' || (c == '/' && (c2 == '*'))) && !in_comment && !state_in_quote){
                 in_comment = true;
-                if(c == '/'){
-                    i++;
-                }
                 if(c2 == '*'){
                     comment_is_block = true;
                 }
