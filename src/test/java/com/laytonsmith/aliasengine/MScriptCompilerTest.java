@@ -369,5 +369,17 @@ public class MScriptCompilerTest {
         verify(fakePlayer).sendMessage("1");
     }
     
+    @Test
+    public void testCompile10() throws ConfigCompileException{
+        String config = "/test $var = >>>\n"
+                + "msg($var)"
+                + "<<<";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        s.compile();
+        assertTrue(s.match("/test 2"));
+        assertFalse(s.match("/test"));
+        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
+    }
+    
     
 }

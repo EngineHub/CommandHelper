@@ -127,7 +127,7 @@ public class Main {
     private static PluginDescriptionFile loadSelf() throws InvalidPluginException, IOException, InvalidDescriptionException{
         PluginDescriptionFile description = null;
         System.out.println(new File(".").getAbsolutePath());
-        File file = new File("./target/commandhelper-3.1.2-SNAPSHOT.jar");
+        File file = new File("./target/commandhelper-3.1.2-ShadedBundle.jar");
         if (!file.exists()) {
             throw new InvalidPluginException(new FileNotFoundException(String.format("%s does not exist", file.getPath())));
         }

@@ -19,7 +19,6 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -472,7 +471,7 @@ public class PlayerManangement {
                     + " information with the following pieces of information in the specified index: "
                     + "<ul><li>0 - Player's name; This will return the player's exact name, "
                     + " even if called with a partial match.</li><li>1 - Player's location; an array of the player's xyz coordinates</li><li>2 - Player's cursor; an array of the "
-                    + "location of the player's cursor, or null if the block is out of sight.<li><li>3 - Player's IP; Returns the IP address of this player.</li><li>4 - Display name; The name that is used when the"
+                    + "location of the player's cursor, or null if the block is out of sight.</li><li>3 - Player's IP; Returns the IP address of this player.</li><li>4 - Display name; The name that is used when the"
                     + " player's name is displayed on screen typically. </li><li>5 - Player's health; Gets the current health of the player, which will be an int"
                     + " from 0-20.</li><li>6 - Item in hand; The value returned by this will be similar to the value returned by get_block_at()</li><li>7 - "
                     + "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - Player groups;"
@@ -841,8 +840,8 @@ public class PlayerManangement {
                     + " cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which corresponds to the directions given by F when"
                     + " viewed with F3. In the second variation, specific yaw and pitches can be provided. If the player is not specified, the current player"
                     + " is used. If just the player is specified, that player's yaw and pitch are returned as an array, or if no arguments are given, the"
-                    + " player running the command's yaw and pitch are returned. The function returns void when setting the values. (Note that while this"
-                    + " function looks like it has ambiguous arguments, players cannot be named numbers.)<p>A note on numbers: The values returned by the getter will always be"
+                    + " player running the command's yaw and pitch are returned as an array. The function returns void when setting the values. (Note that while this"
+                    + " function looks like it has ambiguous arguments, players cannot be named numbers.) A note on numbers: The values returned by the getter will always be"
                     + " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
                     + " always be a number between 0 and 359.9~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
                     + " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";

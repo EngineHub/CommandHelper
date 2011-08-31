@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
@@ -13,7 +12,6 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
-import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.io.File;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
@@ -317,7 +315,7 @@ public class Meta {
         }
 
         public String docs() {
-            return "Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
+            return "void {cmd} Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
                     + " a script that runs \"/jail = /jail\" for instance, would simply be calling whatever plugin that actually"
                     + " provides the jail functionality's /jail command. However, using this function makes the command loop back"
                     + " to CommandHelper only.";
