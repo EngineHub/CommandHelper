@@ -12,8 +12,6 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.event.Cancellable;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListener;
 
@@ -28,7 +26,7 @@ public class CommandHelperServerListener extends ServerListener{
         CommandSender player = event.getSender();
 
         try {
-            Static.getAliasCore().alias(event.getCommand(), player, new ArrayList<Script>());
+            Static.getAliasCore().alias("/" + event.getCommand(), player, new ArrayList<Script>());
         } catch (InternalException e) {
             Static.getLogger().log(Level.SEVERE, e.getMessage());
         } catch (ConfigRuntimeException e) {
@@ -39,6 +37,9 @@ public class CommandHelperServerListener extends ServerListener{
             e.printStackTrace();
             return;
         }
+        //To prevent "unknown console command" error, set the command to the meta command
+        //commandhelper null, which just returns true.
+        event.setCommand("commandhelper null");
     }
     
 }

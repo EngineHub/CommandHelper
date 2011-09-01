@@ -23,3 +23,6 @@ commands:
     interpreter:
         description: Puts your chat into interpreter mode
         usage: /<command>
+    commandhelper:
+        description: Used to gain meta information about CommandHelper
+        usage: /<command> <arguments>

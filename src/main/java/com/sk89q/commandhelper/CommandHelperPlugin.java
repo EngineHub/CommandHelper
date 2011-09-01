@@ -73,6 +73,11 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     final CommandHelperInterpreterListener interpreterListener = 
             new CommandHelperInterpreterListener();
+    /**
+     * Server Command Listener, for console commands
+     */
+    final CommandHelperServerListener serverListener =
+            new CommandHelperServerListener();
 
     final Set<Player> commandRunning = new HashSet<Player>();
     
@@ -114,6 +119,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         registerEvent(Event.Type.PLAYER_CHAT, interpreterListener, Priority.Lowest);
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, interpreterListener, Priority.Lowest);
         registerEvent(Event.Type.PLAYER_QUIT, interpreterListener, Priority.Normal);
+        registerEvent(Event.Type.SERVER_COMMAND, serverListener, Priority.Lowest);
         
         playerListener.loadGlobalAliases();
         interpreterListener.reload();
@@ -149,9 +155,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if (sender instanceof Player) {
-                return runCommand((Player)sender, cmd.getName(), args);
-        } else if(sender.isOp() && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
+        if(sender.isOp() && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
             try {
                 if(ac.reload()){
                     System.out.println("Command Helper scripts sucessfully recompiled.");
@@ -164,7 +168,10 @@ public class CommandHelperPlugin extends JavaPlugin {
                 System.out.println("An error occured when trying to compile the script. Check the console for more information.");
                 return false;
             }
-            
+        } else if(cmd.getName().equals("commandhelper") && args[0].equalsIgnoreCase("null")){
+            return true;
+        } else if (sender instanceof Player) {
+                return runCommand((Player)sender, cmd.getName(), args);
         } else {
             return false;
         }
