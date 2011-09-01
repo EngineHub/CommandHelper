@@ -112,7 +112,7 @@ public class AliasCore {
                                                 if (player instanceof Player) {
                                                     ((Player) player).chat(output.trim());
                                                 } else {
-                                                    Static.getServer().dispatchCommand(player, output.trim());
+                                                    Static.getServer().dispatchCommand(player, output.trim().substring(1));
                                                 }
                                                 //player.performCommand(output.trim().substring(1));
                                             }
