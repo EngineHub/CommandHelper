@@ -13,8 +13,7 @@ import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.util.List;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -34,7 +33,7 @@ public class BasicLogic {
             return new Integer[]{2, 3};
         }
         
-        public Construct execs(int line_num, File f, Player p, Script parent, 
+        public Construct execs(int line_num, File f, CommandSender p, Script parent, 
                 GenericTreeNode<Construct> condition, GenericTreeNode<Construct> __if, 
                 GenericTreeNode<Construct> __else) throws CancelCommandException{
             if(Static.getBoolean(parent.eval(condition, p))){
@@ -47,7 +46,7 @@ public class BasicLogic {
             }
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
@@ -89,7 +88,7 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(Static.anyBooleans(args)){
                 boolean arg1 = Static.getBoolean(args[0]);
                 boolean arg2 = Static.getBoolean(args[1]);
@@ -142,7 +141,7 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
             return new CBoolean(arg1 < arg2, line_num, f);
@@ -183,7 +182,7 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
             return new CBoolean(arg1 > arg2, line_num, f);
@@ -225,7 +224,7 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
             return new CBoolean(arg1 <= arg2, line_num, f);
@@ -266,7 +265,7 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
             return new CBoolean(arg1 >= arg2, line_num, f);
@@ -307,7 +306,7 @@ public class BasicLogic {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             for(Construct c : args){
                 boolean b = Static.getBoolean(c);
                 if(b == false){
@@ -353,7 +352,7 @@ public class BasicLogic {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             for(Construct c : args){
                 if(Static.getBoolean(c)){
                     return new CBoolean(true, line_num, f);
@@ -398,7 +397,7 @@ public class BasicLogic {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CBoolean(!Static.getBoolean(args[0]), line_num, f);
         }
         

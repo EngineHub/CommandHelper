@@ -13,7 +13,7 @@ import com.laytonsmith.aliasengine.Static;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -47,7 +47,8 @@ public class Exceptions {
          */
         InsufficientPermissionException,
         /**
-         * This exception is thrown if a function expected an online player, but that player was offline
+         * This exception is thrown if a function expected an online player, but that player was offline, or the
+         * command is being run from somewhere not in game, and the function was trying to use the current player.
          */
         PlayerOfflineException, 
         /**
@@ -88,6 +89,10 @@ public class Exceptions {
          * error.
          */
         PluginInternalException,
+        /**
+         * If a function requests a world, and the world given doesn't exist, this is thrown
+         */
+        InvalidWorldException,
     }
     @api public static class _try implements Function{      
         
@@ -136,7 +141,7 @@ public class Exceptions {
         public Boolean runAsync() {
             return null;
         }
-        public Construct execs(int line_num, File f, Player p, Script that, GenericTreeNode<Construct> tryCode,
+        public Construct execs(int line_num, File f, CommandSender p, Script that, GenericTreeNode<Construct> tryCode,
                 GenericTreeNode<Construct> varName, GenericTreeNode<Construct> catchCode, GenericTreeNode<Construct> types) throws CancelCommandException{
             Construct pivar = that.eval(varName, p);
             IVariable ivar;
@@ -193,7 +198,7 @@ public class Exceptions {
             
             return new CVoid(line_num, f);
         }
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         
@@ -236,7 +241,7 @@ public class Exceptions {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try{
                 ExceptionType c = null;
                 if(!(args[0] instanceof CNull)){

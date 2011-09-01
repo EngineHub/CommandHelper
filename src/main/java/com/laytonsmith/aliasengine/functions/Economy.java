@@ -16,7 +16,7 @@ import com.nijikokun.register.payment.Method.MethodBankAccount;
 import com.nijikokun.register.payment.Methods;
 import java.io.File;
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -68,7 +68,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             MethodAccount ma = GetAccount(this.getName(), line_num, f, args);
             return new CDouble(ma.balance(), line_num, f);
         }
@@ -110,7 +110,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), line_num, f, args).set(Static.getNumber(args[1]))){
                 return new CVoid(line_num, f);
             } else {
@@ -155,7 +155,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), line_num, f, args).add(Static.getNumber(args[1]))){
                 return new CVoid(line_num, f);
             } else {
@@ -200,7 +200,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), line_num, f, args).subtract(Static.getNumber(args[1]))){
                 return new CVoid(line_num, f);
             } else {
@@ -245,7 +245,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), line_num, f, args).multiply(Static.getNumber(args[1]))){
                 return new CVoid(line_num, f);
             } else {
@@ -290,7 +290,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), line_num, f, args).divide(Static.getNumber(args[1]))){
                 return new CVoid(line_num, f);
             } else {
@@ -335,7 +335,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), line_num, f, args).remove()){
                 return new CVoid(line_num, f);
             } else {
@@ -380,7 +380,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CDouble(GetBankAccount(this.getName(), line_num, f, args).balance(), line_num, f);
         }
         
@@ -421,7 +421,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), line_num, f, args).set(Static.getNumber(args[2]))){
                 return new CVoid(line_num, f);
             } else {
@@ -466,7 +466,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), line_num, f, args).add(Static.getNumber(args[2]))){
                 return new CVoid(line_num, f);
             } else {
@@ -511,7 +511,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), line_num, f, args).subtract(Static.getNumber(args[2]))){
                 return new CVoid(line_num, f);
             } else {
@@ -556,7 +556,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), line_num, f, args).multiply(Static.getNumber(args[2]))){
                 return new CVoid(line_num, f);
             } else {
@@ -601,7 +601,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), line_num, f, args).divide(Static.getNumber(args[2]))){
                 return new CVoid(line_num, f);
             } else {
@@ -646,7 +646,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), line_num, f, args).remove()){
                 return new CVoid(line_num, f);
             } else {

@@ -13,6 +13,8 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import org.bukkit.Location;
+import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
@@ -35,23 +37,26 @@ public class Weather {
         }
         
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int x;
             int y;
             int z;
+            World w = null;
             if(args.length == 1){
                 if(args[0] instanceof CArray){
                     CArray a = (CArray)args[0];
                     if(a.size() != 3){
-                        throw new ConfigRuntimeException("lightning expects the array to have 3 integers", 
+                        throw new ConfigRuntimeException("lightning expects the array to be a location array", 
                                 ExceptionType.LengthException, line_num, f);
                     }
-                    x = (int)java.lang.Math.floor(Static.getNumber(a.get(0, line_num)));
-                    y = (int)java.lang.Math.floor(Static.getNumber(a.get(1, line_num)));
-                    z = (int)java.lang.Math.floor(Static.getNumber(a.get(2, line_num)));
+                    Location l = Static.GetLocation(a, (p instanceof Player?((Player)p).getWorld():null), line_num, f);
+                    x = (int)java.lang.Math.floor(l.getX());
+                    y = (int)java.lang.Math.floor(l.getY());
+                    z = (int)java.lang.Math.floor(l.getZ());
+                    w = l.getWorld();
                 } else {
                     throw new ConfigRuntimeException("lightning expects an array as the one argument", 
                             ExceptionType.CastException, line_num, f);
@@ -61,7 +66,11 @@ public class Weather {
                 y = (int)java.lang.Math.floor(Static.getNumber(args[1]));
                 z = (int)java.lang.Math.floor(Static.getNumber(args[2]));
             }
-            p.getWorld().strikeLightning(new Location(p.getWorld(), x, y + 1, z)); 
+            if(w != null){
+                w.strikeLightning(new Location(w, x, y + 1, z)); 
+            } else {
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
+            }
 //            World w = ((CraftWorld)p.getWorld()).getHandle();
 //            EntityWeatherStorm e = new EntityWeatherStorm(w, x, y, z);
 //            w.a(e);
@@ -97,21 +106,32 @@ public class Weather {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{1, 2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             boolean b = Static.getBoolean(args[0]);
-            p.getWorld().setStorm(b);
+            World w = null;
+            if(p instanceof Player){
+                w = ((Player)p).getWorld();
+            }
+            if(args.length == 2){
+                w = Static.getServer().getWorld(args[1].val());
+            }
+            if(w != null){
+                w.setStorm(b);
+            } else {
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
+            }
             return new CVoid(line_num, f);
         }
 
         public String docs() {
-            return "void {isStorming} Creates a storm if isStorming is true, stops a storm if isStorming is false";
+            return "void {isStorming, [world]} Creates a storm if isStorming is true, stops a storm if isStorming is false";
         }
         
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException};
         }
 
         public boolean isRestricted() {

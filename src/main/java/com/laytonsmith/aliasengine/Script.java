@@ -42,6 +42,8 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
@@ -71,7 +73,6 @@ public class Script {
     IVariableList varList = new IVariableList();
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
-    
     Map<String, Procedure> knownProcs = new HashMap<String, Procedure>();
 
     @Override
@@ -83,20 +84,20 @@ public class Script {
         b.append("compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
         return b.toString();
     }
-    
-    private Procedure getProc(String name){
+
+    private Procedure getProc(String name) {
         return knownProcs.get(name);
     }
-    
-    private List<Procedure> getProcList(){
+
+    private List<Procedure> getProcList() {
         List<Procedure> procs = new ArrayList<Procedure>();
-        for(Map.Entry<String, Procedure> m : knownProcs.entrySet()){
+        for (Map.Entry<String, Procedure> m : knownProcs.entrySet()) {
             procs.add(m.getValue());
         }
         return procs;
     }
 
-    public Script(List<Token> left, List<Token> right){
+    public Script(List<Token> left, List<Token> right) {
         this.left = left;
         this.fullRight = right;
         this.left_vars = new HashMap<String, Variable>();
@@ -106,92 +107,93 @@ public class Script {
         return compilerError;
     }
 
-    public void run(final List<Variable> vars, final Player p, final MScriptComplete done) {
+    public void run(final List<Variable> vars, final CommandSender p, final MScriptComplete done) {
         if (!hasBeenCompiled || compilerError) {
-            int line_num = 0;        
-            if(left.size() >= 1){
+            int line_num = 0;
+            if (left.size() >= 1) {
                 line_num = left.get(0).line_num;
             }
             throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.",
                     null, line_num, null);
         }
-        if(label != null){
-            PermissionsResolverManager perms = Static.getPermissionsResolverManager();
-            String[]groups = label.substring(1).split("/");
-            for(String group : groups){
-                if(group.startsWith("-") && perms.inGroup(p.getName(), group.substring(1))){
-                    //negative permission
-                    throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
-                            0, null);
-                } else if(perms.inGroup(p.getName(), group)){
-                    //They do have permission.
-                    break;
+        if (p instanceof Player) {
+            if (label != null) {
+                PermissionsResolverManager perms = Static.getPermissionsResolverManager();
+                String[] groups = label.substring(1).split("/");
+                for (String group : groups) {
+                    if (group.startsWith("-") && perms.inGroup(((Player)p).getName(), group.substring(1))) {
+                        //negative permission
+                        throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
+                                0, null);
+                    } else if (perms.inGroup(((Player)p).getName(), group)) {
+                        //They do have permission.
+                        break;
+                    }
                 }
             }
         }
-                
+
 //        final Plugin self = CommandHelperPlugin.self;
 //        Static.getServer().getScheduler().scheduleAsyncDelayedTask(self, new Runnable() {
 
 //            public void run() {
-                try {
-                    for (GenericTreeNode<Construct> rootNode : cright) {
-                        GenericTree<Construct> tree = new GenericTree<Construct>();
-                        tree.setRoot(rootNode);
-                        for(GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
-                            if(tempNode.data instanceof Variable){
-                                ((Variable)tempNode.data).setVal(
-                                        Static.resolveConstruct(
-                                            Static.resolveDollarVar(left_vars.get(((Variable)tempNode.data).getName()), vars).toString(), tempNode.data.line_num, tempNode.data.file
-                                        ));
-                            }
-                        }
-                        File auto_include = new File("plugins/CommandHelper/auto_include.ms");
-                        if(auto_include.exists()){
-                            MScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), p, null, this);
-                        }
-                        MScriptCompiler.execute(tree.getRoot(), p, done, this);
+        try {
+            for (GenericTreeNode<Construct> rootNode : cright) {
+                GenericTree<Construct> tree = new GenericTree<Construct>();
+                tree.setRoot(rootNode);
+                for (GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)) {
+                    if (tempNode.data instanceof Variable) {
+                        ((Variable) tempNode.data).setVal(
+                                Static.resolveConstruct(
+                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.line_num, tempNode.data.file));
                     }
-                } catch (ConfigRuntimeException e) {
-                    p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
-                    System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
-                } catch (CancelCommandException e) {
-                    //p.sendMessage(e.getMessage());
-                    //The message in the exception is actually empty
-                } catch(LoopBreakException e){
-                    p.sendMessage("The break() function must be used inside a for() or foreach() loop");
-                } catch(LoopContinueException e){
-                    p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
-                } catch(FunctionReturnException e){
-                    p.sendMessage("The return() function must be used inside a procedure.");
-                } catch (Throwable t) {
-                    System.out.println("An unexpected exception occured during the execution of a script.");
-                    t.printStackTrace();
-                    p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
                 }
-                if(done != null){
-                    done.done(null);
+                File auto_include = new File("plugins/CommandHelper/auto_include.ms");
+                if (auto_include.exists()) {
+                    MScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), p, null, this);
                 }
+                MScriptCompiler.execute(tree.getRoot(), p, done, this);
+            }
+        } catch (ConfigRuntimeException e) {
+            p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
+            System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
+        } catch (CancelCommandException e) {
+            //p.sendMessage(e.getMessage());
+            //The message in the exception is actually empty
+        } catch (LoopBreakException e) {
+            p.sendMessage("The break() function must be used inside a for() or foreach() loop");
+        } catch (LoopContinueException e) {
+            p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
+        } catch (FunctionReturnException e) {
+            p.sendMessage("The return() function must be used inside a procedure.");
+        } catch (Throwable t) {
+            System.out.println("An unexpected exception occured during the execution of a script.");
+            t.printStackTrace();
+            p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
+        }
+        if (done != null) {
+            done.done(null);
+        }
 //            }
 //        });
     }
 
-    public Construct eval(GenericTreeNode<Construct> c, final Player player) throws CancelCommandException {
+    public Construct eval(GenericTreeNode<Construct> c, final CommandSender player) throws CancelCommandException {
         final Construct m = c.getData();
         if (m.ctype == ConstructType.FUNCTION) {
             try {
-                if(m.val().matches("^_[^_].*")){
+                if (m.val().matches("^_[^_].*")) {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
-                    if(p == null){
+                    if (p == null) {
                         throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                     }
                     List<Construct> variables = new ArrayList<Construct>();
-                    for(GenericTreeNode<Construct> child : c.getChildren()){
+                    for (GenericTreeNode<Construct> child : c.getChildren()) {
                         variables.add(eval(child, player));
                     }
                     variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
-                    return p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);                    
+                    return p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);
                 }
                 final Function f;
                 f = FunctionList.getFunction(m);
@@ -235,68 +237,68 @@ public class Script {
                         }
                     }
                     return new CString(b.toString(), 0, null);
-                } else if(f instanceof _try){
+                } else if (f instanceof _try) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() != 4 && ch.size() != 3) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to try", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
                     }
                     GenericTreeNode<Construct> fourth = null;
-                    if(ch.size() == 4){
+                    if (ch.size() == 4) {
                         fourth = ch.get(3);
                     }
-                    return ((_try)f).execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
-                } else if(f instanceof proc){
+                    return ((_try) f).execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
+                } else if (f instanceof proc) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    if(ch.size() <= 1){
+                    if (ch.size() <= 1) {
                         throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                     }
                     String name = "";
                     List<IVariable> vars = new ArrayList<IVariable>();
                     GenericTreeNode<Construct> tree = null;
-                    for(int i = 0; i < ch.size(); i++){
-                        if(i == ch.size() - 1){
+                    for (int i = 0; i < ch.size(); i++) {
+                        if (i == ch.size() - 1) {
                             tree = ch.get(i);
                         } else {
                             Construct cons = eval(ch.get(i), player);
-                            if(i == 0 && cons instanceof IVariable){
+                            if (i == 0 && cons instanceof IVariable) {
                                 //Soon, this will be allowed, so anonymous procedures can be created, but for now
                                 //it's not allowed
                                 throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, m.line_num, m.file);
                             } else {
-                                if(i == 0 && !(cons instanceof IVariable)){
-                                    name = cons.val();                                    
+                                if (i == 0 && !(cons instanceof IVariable)) {
+                                    name = cons.val();
                                 } else {
-                                    if(!(cons instanceof IVariable)){
+                                    if (!(cons instanceof IVariable)) {
                                         throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.line_num, m.file);
-                                    } else {                                        
-                                        vars.add((IVariable)cons);
+                                    } else {
+                                        vars.add((IVariable) cons);
                                     }
                                 }
                             }
                         }
                     }
-                    Procedure myProc = new Procedure(name, vars, tree, (CFunction)c.getData());
+                    Procedure myProc = new Procedure(name, vars, tree, (CFunction) c.getData());
                     knownProcs.put(name, myProc);
                     return new CVoid(m.line_num, m.file);
-                } else if(f instanceof is_proc){
-                    Construct [] ar = new Construct[c.getChildren().size()];
-                    for(int i = 0; i < c.getChildren().size(); i++){
+                } else if (f instanceof is_proc) {
+                    Construct[] ar = new Construct[c.getChildren().size()];
+                    for (int i = 0; i < c.getChildren().size(); i++) {
                         ar[i] = eval(c.getChildAt(i), player);
                     }
                     ar = preResolveVariables(ar);
-                    return ((is_proc)f).execs(m.line_num, m.file, player, getProcList(), ar);
-                } else if(f instanceof call_proc){
-                    Construct [] ar = new Construct[c.getChildren().size()];
-                    for(int i = 0; i < c.getChildren().size(); i++){
+                    return ((is_proc) f).execs(m.line_num, m.file, player, getProcList(), ar);
+                } else if (f instanceof call_proc) {
+                    Construct[] ar = new Construct[c.getChildren().size()];
+                    for (int i = 0; i < c.getChildren().size(); i++) {
                         ar[i] = eval(c.getChildAt(i), player);
                     }
                     ar = preResolveVariables(ar);
-                    return ((call_proc)f).execs(m.line_num, m.file, player, knownProcs, this.label, ar);
-                } else if(f instanceof include){
-                    return ((include)f).execs(m.line_num, m.file, player, c.getChildren(), this);
+                    return ((call_proc) f).execs(m.line_num, m.file, player, knownProcs, this.label, ar);
+                } else if (f instanceof include) {
+                    return ((include) f).execs(m.line_num, m.file, player, c.getChildren(), this);
                 }
-                
-                
+
+
                 ArrayList<Construct> args = new ArrayList<Construct>();
                 for (GenericTreeNode<Construct> c2 : c.getChildren()) {
                     args.add(eval(c2, player));
@@ -305,21 +307,25 @@ public class Script {
                     boolean perm = false;
                     PermissionsResolverManager perms = Static.getPermissionsResolverManager();
                     if (perms != null) {
-                        perm = perms.hasPermission(player.getName(), "ch.func.use." + f.getName())
-                                || perms.hasPermission(player.getName(), "commandhelper.func.use." + f.getName());
-                        if(label != null && label.startsWith("~")){
-                            String[]groups = label.substring(1).split("/");
-                            for(String group : groups){
-                                if(perms.inGroup(player.getName(), group)){
+                        if(player instanceof Player){
+                            perm = perms.hasPermission(((Player)player).getName(), "ch.func.use." + f.getName())
+                                    || perms.hasPermission(((Player)player).getName(), "commandhelper.func.use." + f.getName());
+                            if (label != null && label.startsWith("~")) {
+                                String[] groups = label.substring(1).split("/");
+                                for (String group : groups) {
+                                    if (perms.inGroup(((Player)player).getName(), group)) {
+                                        perm = true;
+                                        break;
+                                    }
+                                }
+                            } else {
+                                if (label != null && (perms.hasPermission(((Player)player).getName(), "ch.alias." + label))
+                                        || perms.hasPermission(((Player)player).getName(), "commandhelper.alias." + label)) {
                                     perm = true;
-                                    break;
                                 }
                             }
-                        } else {
-                            if (label != null && (perms.hasPermission(player.getName(), "ch.alias." + label))
-                                    || perms.hasPermission(player.getName(), "commandhelper.alias." + label)) {
-                                perm = true;
-                            }
+                        } else if(player instanceof ConsoleCommandSender){
+                            perm = true;
                         }
                     } else {
                         perm = true;
@@ -350,34 +356,34 @@ public class Script {
                 //TODO: Will revisit this in the future. For now, remove the ability for
                 //functions to run asyncronously.
                 //if(f.runAsync() == true || f.runAsync() == null){
-                    Construct ret = f.exec(m.line_num, m.file, player, ca);
-                    return ret;
+                Construct ret = f.exec(m.line_num, m.file, player, ca);
+                return ret;
                 /*} else {
-                    return blockingNonThreadSafe(player, new Callable<Construct>() {
-
-                        public Construct call() throws Exception {
-                            return f.exec(m.line_num, player, ca);
-                        }
-                    });
+                return blockingNonThreadSafe(player, new Callable<Construct>() {
+                
+                public Construct call() throws Exception {
+                return f.exec(m.line_num, player, ca);
+                }
+                });
                 }*/
 
             } catch (ConfigCompileException ex) {
                 Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else if(m.ctype == ConstructType.VARIABLE){
+        } else if (m.ctype == ConstructType.VARIABLE) {
             return Static.resolveConstruct(m.val(), m.line_num, m.file);
         } else {
             return m;
         }
         return null;
     }
-    
-    public Construct [] preResolveVariables(Construct [] ca){
+
+    public Construct[] preResolveVariables(Construct[] ca) {
         for (int i = 0; i < ca.length; i++) {
             if (ca[i] instanceof IVariable) {
                 IVariable v = (IVariable) ca[i];
                 ca[i] = varList.get(v.getName()).ival();
-            } else if(ca[i] instanceof CArray){
+            } else if (ca[i] instanceof CArray) {
 //                CArray ca2 = (CArray) ca[i];
 //                Construct [] ca_raw = new Construct[ca2.size()];
 //                for(int j = 0; j < ca_raw.length; j++){
@@ -392,27 +398,26 @@ public class Script {
         return ca;
     }
 
-    private Construct blockingNonThreadSafe(final Player p, Callable task) throws CancelCommandException {
-        Plugin self = CommandHelperPlugin.self;
-        try {
-            Future<Construct> f = Static.getServer().getScheduler().callSyncMethod(self, task);
-            while (!f.isDone()) {
-                Thread.sleep(10);
-            }
-            return f.get();
-        } catch (InterruptedException ex) {
-            Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
-        } catch (ExecutionException ex) {
-            if (ex.getCause() instanceof CancelCommandException) {
-                CancelCommandException e = (CancelCommandException) ex.getCause();
-                throw e;
-            } else {
-                Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex.getCause());
-            }
-        }
-        return null;
-    }
-
+//    private Construct blockingNonThreadSafe(final Player p, Callable task) throws CancelCommandException {
+//        Plugin self = CommandHelperPlugin.self;
+//        try {
+//            Future<Construct> f = Static.getServer().getScheduler().callSyncMethod(self, task);
+//            while (!f.isDone()) {
+//                Thread.sleep(10);
+//            }
+//            return f.get();
+//        } catch (InterruptedException ex) {
+//            Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
+//        } catch (ExecutionException ex) {
+//            if (ex.getCause() instanceof CancelCommandException) {
+//                CancelCommandException e = (CancelCommandException) ex.getCause();
+//                throw e;
+//            } else {
+//                Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex.getCause());
+//            }
+//        }
+//        return null;
+//    }
     public boolean match(String command) {
         String[] cmds = command.split(" ");
         List<String> args = new ArrayList(Arrays.asList(cmds));
@@ -427,7 +432,7 @@ public class Script {
                 lastJ = j;
                 Construct c = cleft.get(j);
                 String arg = args.get(j);
-                if (c.ctype != ConstructType.VARIABLE){
+                if (c.ctype != ConstructType.VARIABLE) {
 //                        || c.ctype == ConstructType.TOKEN
 //                        || c.ctype == ConstructType.LITERAL
 //                        || c.ctype == ConstructType.STRING || ConstructType.) {
@@ -438,13 +443,13 @@ public class Script {
                 } else {
                     //It's a variable. If it's optional, the rest of them are optional too, so as long as the size of
                     //args isn't greater than the size of cleft, it's a match
-                    if(((Variable)c).isOptional()){
-                        if(args.size() <= cleft.size()){
+                    if (((Variable) c).isOptional()) {
+                        if (args.size() <= cleft.size()) {
                             return true;
                         } else {
                             Construct fin = cleft.get(cleft.size() - 1);
-                            if(fin instanceof Variable){
-                                if(((Variable)fin).isFinal()){
+                            if (fin instanceof Variable) {
+                                if (((Variable) fin).isFinal()) {
                                     return true;
                                 }
                             }
@@ -468,24 +473,24 @@ public class Script {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            if (cleft.get(lastJ).ctype != ConstructType.VARIABLE || 
-                    cleft.get(lastJ).ctype == ConstructType.VARIABLE
+            if (cleft.get(lastJ).ctype != ConstructType.VARIABLE
+                    || cleft.get(lastJ).ctype == ConstructType.VARIABLE
                     && !((Variable) cleft.get(lastJ)).isOptional()) {
                 isAMatch = false;
             }
         }
         boolean lastIsFinal = false;
-        if(cleft.get(cleft.size() - 1) instanceof Variable){
+        if (cleft.get(cleft.size() - 1) instanceof Variable) {
             Variable v = (Variable) cleft.get(cleft.size() - 1);
-            if(v.isFinal()){
+            if (v.isFinal()) {
                 lastIsFinal = true;
             }
         }
-        if((cleft.get(lastJ) instanceof Variable && ((Variable)cleft.get(lastJ)).isOptional())){
+        if ((cleft.get(lastJ) instanceof Variable && ((Variable) cleft.get(lastJ)).isOptional())) {
             return true;
         }
-            
-        if(cleft.size() != cmds.length && !lastIsFinal){
+
+        if (cleft.size() != cmds.length && !lastIsFinal) {
             isAMatch = false;
         }
         ArrayList<Variable> vars = new ArrayList<Variable>();
@@ -517,14 +522,14 @@ public class Script {
         List<String> args = new ArrayList(Arrays.asList(cmds));
 
         StringBuilder lastVar = new StringBuilder();
-        
+
         ArrayList<Variable> vars = new ArrayList<Variable>();
         Variable v = null;
         for (int j = 0; j < cleft.size(); j++) {
             try {
                 if (cleft.get(j).ctype == ConstructType.VARIABLE) {
                     if (((Variable) cleft.get(j)).getName().equals("$")) {
-                        for(int k = j; k < args.size(); k++){
+                        for (int k = j; k < args.size(); k++) {
                             lastVar.append(args.get(k).trim()).append(" ");
                         }
                         v = new Variable(((Variable) cleft.get(j)).getName(),
@@ -591,7 +596,7 @@ public class Script {
                 lastVar = t.val();
                 v.setOptional(last_token.type.equals(TType.LSQUARE_BRACKET));
                 left_vars.put(t.val(), v);
-                if(v.isOptional()){
+                if (v.isOptional()) {
                     after_no_def_opt_var = true;
                 } else {
                     v.setDefault("");
@@ -714,99 +719,99 @@ public class Script {
 
     public void checkAmbiguous(ArrayList<Script> scripts) throws ConfigCompileException {
         //for (int i = 0; i < scripts.size(); i++) {
-            List<Construct> thisCommand = this.cleft;
-            for (int j = 0; j < scripts.size(); j++) {
-                List<Construct> thatCommand = scripts.get(j).cleft;
-                if(thatCommand == null){
-                    //it hasn't been compiled yet.
-                    return;
-                }
-                if (this.cleft == scripts.get(j).cleft) {
-                    //Of course this command is going to match it's own signature
-                    continue;
-                }
-                boolean soFarAMatch = true;
-                for (int k = 0; k < thisCommand.size(); k++) {
-                    try {
-                        Construct c1 = thisCommand.get(k);
-                        Construct c2 = thatCommand.get(k);
-                        if (c1.ctype != c2.ctype || ((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
-                            soFarAMatch = false;
-                        } else {
-                            //It's a literal, check to see if it's the same literal
-                            if (c1.val() == null || !c1.val().equals(c2.val())) {
-                                soFarAMatch = false;
-                            }
-                        }
-                    } catch (IndexOutOfBoundsException e) {
-                        /**
-                         * The two commands:
-                         * /cmd $var1 [$var2]
-                         * /cmd $var1
-                         * would cause this exception to be thrown, but the signatures
-                         * are the same, so the fact that they've matched this far means
-                         * they are ambiguous. However,
-                         * /cmd $var1 $var2
-                         * /cmd $var1
-                         * is not ambiguous
-                         */
-                        //thatCommand is the short one
-                        if (!(thisCommand.get(k) instanceof Variable)
-                                || (thisCommand.get(k) instanceof Variable
-                                && !((Variable) thisCommand.get(k)).isOptional())) {
+        List<Construct> thisCommand = this.cleft;
+        for (int j = 0; j < scripts.size(); j++) {
+            List<Construct> thatCommand = scripts.get(j).cleft;
+            if (thatCommand == null) {
+                //it hasn't been compiled yet.
+                return;
+            }
+            if (this.cleft == scripts.get(j).cleft) {
+                //Of course this command is going to match it's own signature
+                continue;
+            }
+            boolean soFarAMatch = true;
+            for (int k = 0; k < thisCommand.size(); k++) {
+                try {
+                    Construct c1 = thisCommand.get(k);
+                    Construct c2 = thatCommand.get(k);
+                    if (c1.ctype != c2.ctype || ((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
+                        soFarAMatch = false;
+                    } else {
+                        //It's a literal, check to see if it's the same literal
+                        if (c1.val() == null || !c1.val().equals(c2.val())) {
                             soFarAMatch = false;
                         }
                     }
-                }
-                if (thatCommand.size() > thisCommand.size()) {
-                    int k = thisCommand.size();
-                    //thisCommand is the short one
-                    if (!(thatCommand.get(k) instanceof Variable)
-                            || (thatCommand.get(k) instanceof Variable
-                            && !((Variable) thatCommand.get(k)).isOptional())) {
+                } catch (IndexOutOfBoundsException e) {
+                    /**
+                     * The two commands:
+                     * /cmd $var1 [$var2]
+                     * /cmd $var1
+                     * would cause this exception to be thrown, but the signatures
+                     * are the same, so the fact that they've matched this far means
+                     * they are ambiguous. However,
+                     * /cmd $var1 $var2
+                     * /cmd $var1
+                     * is not ambiguous
+                     */
+                    //thatCommand is the short one
+                    if (!(thisCommand.get(k) instanceof Variable)
+                            || (thisCommand.get(k) instanceof Variable
+                            && !((Variable) thisCommand.get(k)).isOptional())) {
                         soFarAMatch = false;
                     }
                 }
-
-                if (soFarAMatch) {
-                    String commandThis = "";
-                    for (Construct c : thisCommand) {
-                        commandThis += c.val() + " ";
-                    }
-                    String commandThat = "";
-                    for (Construct c : thatCommand) {
-                        commandThat += c.val() + " ";
-                    }
-                    scripts.get(j).compilerError = true;
-                    this.compilerError = true;
-                    throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
-                            + "matches the signature of " + commandThat.trim(), thisCommand.get(0).line_num);
+            }
+            if (thatCommand.size() > thisCommand.size()) {
+                int k = thisCommand.size();
+                //thisCommand is the short one
+                if (!(thatCommand.get(k) instanceof Variable)
+                        || (thatCommand.get(k) instanceof Variable
+                        && !((Variable) thatCommand.get(k)).isOptional())) {
+                    soFarAMatch = false;
                 }
             }
-            
-            //Also, check for undefined variables on the right, and unused variables on the left
-            ArrayList<String> left_copy = new ArrayList<String>();
-            for(Map.Entry<String, Variable> v : left_vars.entrySet()){
-                left_copy.add(v.getValue().getName());
+
+            if (soFarAMatch) {
+                String commandThis = "";
+                for (Construct c : thisCommand) {
+                    commandThis += c.val() + " ";
+                }
+                String commandThat = "";
+                for (Construct c : thatCommand) {
+                    commandThat += c.val() + " ";
+                }
+                scripts.get(j).compilerError = true;
+                this.compilerError = true;
+                throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
+                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).line_num);
             }
-            Arrays.asList(new String[]{}).toArray(new String[]{});
-            for(GenericTreeNode<Construct> gtn : cright){
-                GenericTree<Construct> tree = new GenericTree<Construct>();
-                tree.setRoot(gtn);
-                List<GenericTreeNode<Construct>> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
-                for(GenericTreeNode<Construct> c : builtTree){
-                    if(c.getData() instanceof Variable){
-                        for(Map.Entry<String, Variable> v : left_vars.entrySet()){
-                            if(v.getValue().getName().equals(((Variable)c.getData()).getName())){
-                                //Found it, remove this from the left_copy, and break
-                                left_copy.remove(v.getValue().getName());
-                                break;
-                                //TODO: Layton!
-                            }
+        }
+
+        //Also, check for undefined variables on the right, and unused variables on the left
+        ArrayList<String> left_copy = new ArrayList<String>();
+        for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
+            left_copy.add(v.getValue().getName());
+        }
+        Arrays.asList(new String[]{}).toArray(new String[]{});
+        for (GenericTreeNode<Construct> gtn : cright) {
+            GenericTree<Construct> tree = new GenericTree<Construct>();
+            tree.setRoot(gtn);
+            List<GenericTreeNode<Construct>> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
+            for (GenericTreeNode<Construct> c : builtTree) {
+                if (c.getData() instanceof Variable) {
+                    for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
+                        if (v.getValue().getName().equals(((Variable) c.getData()).getName())) {
+                            //Found it, remove this from the left_copy, and break
+                            left_copy.remove(v.getValue().getName());
+                            break;
+                            //TODO: Layton!
                         }
                     }
                 }
             }
+        }
         //}
     }
 }

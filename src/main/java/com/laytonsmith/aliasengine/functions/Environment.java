@@ -13,7 +13,9 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
@@ -32,19 +34,20 @@ public class Environment {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 3};
+            return new Integer[]{1, 2, 3, 4};
         }
 
         public String docs() {
-            return "string {x, y, z | xyzArray} Gets the id of the block at x, y, z. This function expects "
+            return "string {x, y, z, [world] | xyzArray, [world]} Gets the id of the block at x, y, z. This function expects "
                     + "either 1 or 3 arguments. If 1 argument is passed, it should be an array with the x, y, z"
                     + " coordinates. The format of the return will be x:y where x is the id of the block, and"
                     + " y is the meta data for the block. All blocks will return in this format, but blocks"
-                    + " that don't have meta data normally will return 0 in y.";
+                    + " that don't have meta data normally will return 0 in y. If world isn't specified, the current"
+                    + " player's world is used.";
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
         }
 
         public boolean isRestricted() {
@@ -61,11 +64,16 @@ public class Environment {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            double x;
-            double y;
-            double z;
-            if(args.length == 1){
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            double x = 0;
+            double y = 0;
+            double z = 0;
+            World w = null;
+            String world = null;
+            if(p instanceof Player){
+                w = ((Player)p).getWorld();
+            }
+            if(args.length == 1 || args.length == 2){
                 if(args[0] instanceof CArray){
                     CArray ca = (CArray)args[0];
                     if(ca.size() == 3){
@@ -79,15 +87,27 @@ public class Environment {
                 } else {
                     throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, line_num, f);
                 }
-            } else {
+                if(args.length == 2){
+                    world = args[1].val();
+                }
+            } else if(args.length == 3 || args.length == 4){
                 x = Static.getDouble(args[0]);
                 y = Static.getDouble(args[1]);
                 z = Static.getDouble(args[2]);
+                if(args.length == 4){
+                    world = args[3].val();
+                }
+            }
+            if(world != null){
+                w = Static.getServer().getWorld(world);
+            }
+            if(w == null){
+                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
             }
             x = java.lang.Math.floor(x);
             y = java.lang.Math.floor(y);
             z = java.lang.Math.floor(z);
-            Block b = p.getWorld().getBlockAt((int)x, (int)y, (int)z);
+            Block b = w.getBlockAt((int)x, (int)y, (int)z);
             return new CString(b.getTypeId() + ":" + b.getData(), line_num, f);
         }
         public Boolean runAsync(){
@@ -103,18 +123,19 @@ public class Environment {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2, 4};
+            return new Integer[]{2, 3, 4, 5};
         }
 
         public String docs() {
-            return "void {x, y, z, id | xyzArray, id} Sets the id of the block at the x y z coordinates specified. If the"
+            return "void {x, y, z, id, [world] | xyzArray, id, [world]} Sets the id of the block at the x y z coordinates specified. If the"
                     + " first argument passed is an array, it should be x y z coordinates. id must"
-                            + " be a blocktype identifier similar to the type returned from get_block_at, except if the meta"
-                            + " value is not specified, 0 is used.";
+                    + " be a blocktype identifier similar to the type returned from get_block_at, except if the meta"
+                    + " value is not specified, 0 is used. If world isn't specified, the current player's world"
+                    + " is used.";
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.FormatException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
         }
 
         public boolean isRestricted() {
@@ -131,12 +152,17 @@ public class Environment {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            double x;
-            double y;
-            double z;
-            String id;
-            if(args.length == 2 && args[0] instanceof CArray){
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            double x = 0;
+            double y = 0;
+            double z = 0;
+            String id = null;
+            String world = null;
+            World w = null;
+            if(p instanceof Player){
+                w = ((Player)p).getWorld();
+            }
+            if((args.length == 2 || args.length == 3) && args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
                 if(ca.size() != 3){
                     throw new ConfigRuntimeException("set_block_at expects the parameter 1 to be an array with 3 elements.", ExceptionType.LengthException,
@@ -146,12 +172,24 @@ public class Environment {
                 y = Static.getNumber(ca.get(1, line_num));
                 z = Static.getNumber(ca.get(2, line_num));
                 id = args[1].val();
+                if(args.length == 3){
+                    world = args[2].val();
+                }
                 
             } else {
                 x = Static.getNumber(args[0]);
                 y = Static.getNumber(args[1]);
                 z = Static.getNumber(args[2]);
                 id = args[3].val();
+                if(args.length == 5){
+                    world = args[4].val();
+                }
+            }
+            if(world != null){
+                w = Static.getServer().getWorld(world);
+            }
+            if(w == null){
+                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
             }
             x = java.lang.Math.floor(x);
             y = java.lang.Math.floor(y);
@@ -160,7 +198,7 @@ public class Environment {
             int iy = (int)y;
             int iz = (int)z;
             System.out.println("Setting block at " + ix + "," + iy + "," + iz);
-            Block b = p.getWorld().getBlockAt(ix, iy, iz);
+            Block b = w.getBlockAt(ix, iy, iz);
             StringBuilder data = new StringBuilder();
             StringBuilder meta = new StringBuilder();
             boolean inMeta = false;

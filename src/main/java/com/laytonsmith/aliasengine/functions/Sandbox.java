@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -74,7 +75,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             Object o = Static.getAliasCore().parent.getServer().getPluginManager();
             if(o instanceof SimplePluginManager){
                 SimplePluginManager spm = (SimplePluginManager)o;
@@ -154,12 +155,15 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
 
             Location l = null;
             int qty = 1;
             ItemStack is = null;
             boolean natural = false;
+            if(p instanceof Player){
+                l = ((Player)p).getLocation();
+            }
             if(args.length == 1){
                 //It is just the item
                 is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, line_num, f);
@@ -173,7 +177,7 @@ public class Sandbox {
                     natural = true;
                 } else {
                     if(args[0] instanceof CArray){
-                        l = Static.GetLocation(args[0], p.getWorld(), line_num, f);
+                        l = Static.GetLocation(args[0], (l != null?l.getWorld():null), line_num, f);
                         natural = false;
                     } else {
                         l = Static.GetPlayer(args[0].val(), line_num, f).getLocation();
@@ -185,7 +189,7 @@ public class Sandbox {
             } else if(args.length == 3){
                 //We are specifying all 3
                 if(args[0] instanceof CArray){
-                    l = Static.GetLocation(args[0], p.getWorld(), line_num, f);
+                    l = Static.GetLocation(args[0], (l != null?l.getWorld():null), line_num, f);
                     natural = false;
                 } else {
                     l = Static.GetPlayer(args[0].val(), line_num, f).getLocation();
@@ -194,10 +198,14 @@ public class Sandbox {
                 qty = (int)Static.getInt(args[2]);
                 is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, line_num, f);
             }      
-            if(natural){
-                l.getWorld().dropItemNaturally(l, is);
+            if(l.getWorld() != null){
+                if(natural){
+                    l.getWorld().dropItemNaturally(l, is);
+                } else {
+                    l.getWorld().dropItem(l, is);
+                }
             } else {
-                l.getWorld().dropItem(l, is);
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
             }
 
             return new CVoid(line_num, f);

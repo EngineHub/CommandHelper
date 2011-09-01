@@ -32,19 +32,12 @@ import java.util.logging.Level;
 import java.util.Map;
 import java.util.HashMap;
 import java.io.*;
-import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.List;
 import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
-import org.bukkit.plugin.EventExecutor;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredListener;
 
 /**
  * Event listener for Hey0's server mod.
@@ -117,6 +110,7 @@ public class CommandHelperListener extends PlayerListener {
             return session;
         }
     }
+        
 
     /**
      * Called when a player attempts to use a command
@@ -125,7 +119,7 @@ public class CommandHelperListener extends PlayerListener {
      */
     @Override
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
-        String cmd = event.getMessage();
+        String cmd = event.getMessage();        
         Player player = event.getPlayer();
         playDirty();
         if (cmd.equals("/.") || cmd.equals("/repeat")) {

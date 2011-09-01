@@ -16,7 +16,7 @@ import java.util.EmptyStackException;
 import java.util.List;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -474,7 +474,7 @@ public class MScriptCompiler {
      * @param done
      * @param script 
      */
-    public static void execute(GenericTreeNode<Construct> root, Player p, MScriptComplete done, Script script){
+    public static void execute(GenericTreeNode<Construct> root, CommandSender p, MScriptComplete done, Script script){
         if(script == null){
             script = new Script(null, null);
             script.varList = new IVariableList();

@@ -16,7 +16,7 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -36,7 +36,7 @@ public class ArrayHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 return new CInt(((CArray)args[0]).size(), line_num, f);
             }
@@ -81,7 +81,7 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 return ((CArray)args[0]).get((int)Static.getInt(args[1]), line_num);
             } else{
@@ -131,7 +131,7 @@ public class ArrayHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray && args[1] instanceof CInt){
                 try{
                 ((CArray)args[0]).set((int)((CInt)args[1]).getInt(), args[2]);
@@ -180,7 +180,7 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 ((CArray)args[0]).push(args[1]);
                 return new CVoid(line_num, f);
@@ -224,7 +224,7 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             _equals e = new _equals();
             if(args[0] instanceof CArray){
                 CArray ca = (CArray) args[0];
@@ -302,7 +302,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 int index = (int)Static.getInt(args[1]);
                 CArray ca = (CArray)args[0];
@@ -353,7 +353,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray && args[1] instanceof CInt){
                 CArray original = (CArray)args[0];
                 int size = (int)((CInt)args[1]).getInt();

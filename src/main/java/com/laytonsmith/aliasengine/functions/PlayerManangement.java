@@ -20,6 +20,8 @@ import java.io.File;
 import java.util.ArrayList;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -45,16 +47,20 @@ public class PlayerManangement {
             return new Integer[]{0};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if (p == null) {
-                return new CString("TestPlayer", line_num, f);
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(p instanceof Player){
+                return new CString(((Player)p).getName(), line_num, f);            
+            } else if(p instanceof ConsoleCommandSender){
+                return new CString("~console", line_num, f);
             } else {
-                return new CString(p.getName(), line_num, f);
+                return new CNull(line_num, f);
             }
         }
 
         public String docs() {
-            return "string {} Returns the name of the player running the command";
+            return "string {} Returns the name of the player running the command. If the command is being run from the console, then the string '~console'"
+                    + " is returned. If the command is coming from elsewhere, null is returned, and the behavior is undefined. Note that most functions"
+                    + " won't support the user '~console' (they'll throw a PlayerOfflineException), but you can use this to determine where a command is being run from.";
         }
 
         public ExceptionType[] thrown() {
@@ -92,7 +98,7 @@ public class PlayerManangement {
             return new Integer[]{0};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player[] pa = Static.getServer().getOnlinePlayers();
             CString[] sa = new CString[pa.length];
             for (int i = 0; i < pa.length; i++) {
@@ -140,15 +146,22 @@ public class PlayerManangement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player m = null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
             if (args.length == 1) {
-                p = p.getServer().getPlayer(args[0].val());
-                if (p == null || !p.isOnline()) {
+                m = Static.getServer().getPlayer(args[0].val());
+                if (m == null || !m.isOnline()) {
                     throw new ConfigRuntimeException("The player is not online", 
                             ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
-            Location l = p.getLocation();
+            if(m == null){
+                throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            Location l = m.getLocation();
             return new CArray(line_num, f, 
                     new CDouble(l.getX(), line_num, f),
                     new CDouble(l.getY() - 1, line_num, f),
@@ -195,13 +208,13 @@ public class PlayerManangement {
         }
 
         public String docs() {
-            return "boolean {player, xyzArray | player, x, y, z | xyzArray | x, y, z} Sets the location of the player to the specified coordinates. If the coordinates"
+            return "boolean {[player], xyzArray | [player], x, y, z} Sets the location of the player to the specified coordinates. If the coordinates"
                     + " are not valid, or the player was otherwise prevented from moving, false is returned, otherwise true. If player is omitted, "
                     + " the current player is used";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.PlayerOfflineException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -223,24 +236,24 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String player = null;
             double x;
             double y;
             double z;
             Player m = null;
+            Location l = null;
             if (args.length == 1) {
                 if (args[0] instanceof CArray) {
                     CArray ca = (CArray) args[0];
-                    if (ca.size() == 3) {
-                        x = Static.getNumber(ca.get(0, line_num));
-                        y = Static.getNumber(ca.get(1, line_num));
-                        z = Static.getNumber(ca.get(2, line_num));
-                        m = p;
-                    } else {
-                        throw new ConfigRuntimeException("Expecting array at parameter 1 of set_ploc to have 3 values", 
-                                ExceptionType.LengthException, line_num, f);
+                    l = Static.GetLocation(ca, (p instanceof Player?((Player)p).getWorld():null), line_num, f);                                       
+                    x = Static.getNumber(ca.get(0, line_num));
+                    y = Static.getNumber(ca.get(1, line_num));
+                    z = Static.getNumber(ca.get(2, line_num));
+                    if(p instanceof Player){
+                        m = ((Player)p);
                     }
+
                 } else {
                     throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_ploc", 
                             ExceptionType.CastException, line_num, f);
@@ -249,19 +262,18 @@ public class PlayerManangement {
                 if (args[1] instanceof CArray) {
                     CArray ca = (CArray) args[1];
                     player = args[0].val();
-                    if (ca.size() != 3) {
-                        throw new ConfigRuntimeException("Expecting array at parameter 2 of set_ploc to have 3 values", 
-                                ExceptionType.LengthException, line_num, f);
-                    }
-                    x = Static.getNumber(ca.get(0, line_num));
-                    y = Static.getNumber(ca.get(1, line_num));
-                    z = Static.getNumber(ca.get(2, line_num));
+                    l = Static.GetLocation(ca, Static.getServer().getPlayer(player).getWorld(), line_num, f);
+                    x = l.getX();
+                    y = l.getY();
+                    z = l.getZ();
                 } else {
                     throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc", 
                             ExceptionType.CastException, line_num, f);
                 }
             } else if (args.length == 3) {
-                m = p;
+                if(p instanceof Player){
+                    m = (Player)p;
+                }
                 x = Static.getNumber(args[0]);
                 y = Static.getNumber(args[1]);
                 z = Static.getNumber(args[2]);
@@ -270,15 +282,16 @@ public class PlayerManangement {
                 x = Static.getNumber(args[1]);
                 y = Static.getNumber(args[2]);
                 z = Static.getNumber(args[3]);
+                l = new Location(Static.getServer().getPlayer(player).getWorld(), x, y, z);
             }
-            if (m == null) {
-                m = p.getServer().getPlayer(player);
+            if (m == null && player != null) {
+                m = Static.getServer().getPlayer(player);
             }
             if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("That player is not online", 
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
-            return new CBoolean(m.teleport(new Location(p.getWorld(), x, y + 1, z, p.getLocation().getYaw(), p.getLocation().getPitch())), line_num, f);
+            return new CBoolean(m.teleport(new Location(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), line_num, f);
         }
     }
 
@@ -318,10 +331,12 @@ public class PlayerManangement {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Player m;
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player m = null;
             if (args.length == 0) {
-                m = p;
+                if(p instanceof Player){
+                    m = (Player)p;
+                }
             } else {
                 m = p.getServer().getPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
@@ -329,12 +344,16 @@ public class PlayerManangement {
                             ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
-            Block b = p.getTargetBlock(null, 200);
-            if (b == null) {
-                throw new ConfigRuntimeException("No block in sight, or block too far", 
-                        ExceptionType.RangeException, line_num, f);
+            if(m != null){
+                Block b = m.getTargetBlock(null, 200);
+                if (b == null) {
+                    throw new ConfigRuntimeException("No block in sight, or block too far", 
+                            ExceptionType.RangeException, line_num, f);
+                }
+                return new CArray(line_num, f, new CInt(b.getX(), line_num, f), new CInt(b.getY(), line_num, f), new CInt(b.getZ(), line_num, f));
+            } else {
+                throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f); 
             }
-            return new CArray(line_num, f, new CInt(b.getX(), line_num, f), new CInt(b.getY(), line_num, f), new CInt(b.getZ(), line_num, f));
         }
 
         public Boolean runAsync() {
@@ -353,15 +372,20 @@ public class PlayerManangement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player m = null;
             if (args.length == 1) {
-                p = p.getServer().getPlayer(args[0].val());
+                m = Static.getServer().getPlayer(args[0].val());
+            } else {
+                if(p instanceof Player){
+                    m = (Player)p;
+                }
             }
-            if (p == null) {
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The player is not online", 
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
-            p.setHealth(0);
+            m.setHealth(0);
             return new CVoid(line_num, f);
         }
 
@@ -404,19 +428,24 @@ public class PlayerManangement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            String player;
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player m = null;
             if (args.length == 0) {
-                player = p.getName();
-            } else {
-                Player ap = p.getServer().getPlayer(args[0].val());
-                if (ap == null || !ap.isOnline()) {
-                    throw new ConfigRuntimeException("That player is not online.", 
-                            ExceptionType.PlayerOfflineException, line_num, f);
+                if(p instanceof Player){
+                    m = (Player)p;
                 }
-                player = ap.getName();
+            } else {
+                m = Static.getServer().getPlayer(args[0].val());
             }
-            String[] sa = Static.getPermissionsResolverManager().getGroups(player);
+            
+            if(m == null){
+                throw new ConfigRuntimeException("Player was not specified, or is offline", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            if (m == null || !m.isOnline()) {
+                throw new ConfigRuntimeException("That player is not online.", 
+                        ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            String[] sa = Static.getPermissionsResolverManager().getGroups(m.getName());
             Construct[] ca = new Construct[sa.length];
             for (int i = 0; i < sa.length; i++) {
                 ca[i] = new CString(sa[i], line_num, f);
@@ -501,11 +530,11 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender m, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String player = "";
             int index = -1;
             if (args.length == 0) {
-                player = p.getName();
+                player = (m instanceof Player?((Player)m).getName():null);
                 index = -1;
             } else if (args.length == 1) {
                 player = args[0].val();
@@ -514,7 +543,10 @@ public class PlayerManangement {
                 player = args[0].val();
                 index = (int) Static.getInt(args[1]);
             }
-            p = p.getServer().getPlayer(player);
+            if(player == null){
+                throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            Player p = Static.getServer().getPlayer(player);
             if (p == null || !p.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", 
                         ExceptionType.PlayerOfflineException, line_num, f);
@@ -632,12 +664,14 @@ public class PlayerManangement {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Player m;
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player m = null;
             if (args.length == 0) {
-                m = p;
+                if(p instanceof Player){
+                    m = (Player)p;
+                }
             } else {
-                m = p.getServer().getPlayer(args[0].val());
+                m = Static.getServer().getPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
                     throw new ConfigRuntimeException("That player is not online", 
                             ExceptionType.PlayerOfflineException, line_num, f);
@@ -686,14 +720,16 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String message = "You have been kicked";
             Player m = null;
             if (args.length == 0) {
-                m = p;
+                if(p instanceof Player){
+                    m = (Player)p;
+                }
             }
             if (args.length >= 1) {
-                m = p.getServer().getPlayer(args[0].val());
+                m = Static.getServer().getPlayer(args[0].val());
             }
             if (args.length >= 2) {
                 message = args[1].val();
@@ -749,11 +785,13 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Player player;
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player player = null;
             String name;
             if (args.length == 1) {
-                player = p;
+                if(p instanceof Player){
+                    player = (Player)p;
+                }
                 name = args[0].val();
             } else {
                 player = p.getServer().getPlayer(args[0].val());
@@ -807,10 +845,12 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Player player;
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player player = null;
             if (args.length == 0) {
-                player = p;
+                if(p instanceof Player){
+                    player = (Player)p;
+                }
             } else {
                 player = p.getServer().getPlayer(args[0].val());
             }
@@ -870,12 +910,14 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             //Getter
             if (args.length == 0 || args.length == 1) {
                 Location l = null;
                 if (args.length == 0) {
-                    l = p.getLocation();
+                    if(p instanceof Player){
+                        l = ((Player)p).getLocation();
+                    }
                 } else if (args.length == 1) {
                     //if it's a number, we are setting F. Otherwise, it's a getter for the player specified.
                     try {
@@ -906,8 +948,10 @@ public class PlayerManangement {
             float pitch = 0;
             if (args.length == 1) {
                 //We are setting F for this player
-                toSet = p;
-                pitch = p.getLocation().getPitch();
+                if(p instanceof Player){
+                    toSet = (Player)p;
+                    pitch = toSet.getLocation().getPitch();
+                }
                 int g = (int) Static.getInt(args[0]);
                 if (g < 0 || g > 3) {
                     throw new ConfigRuntimeException("The F specifed must be from 0 to 3", 
@@ -920,7 +964,9 @@ public class PlayerManangement {
                 try {
                     Float.parseFloat(args[0].val());
                     //It's the yaw, pitch variation
-                    toSet = p;
+                    if(p instanceof Player){
+                        toSet = (Player)p;
+                    }
                     yaw = (float) Static.getNumber(args[0]);
                     pitch = (float) Static.getNumber(args[1]);
                 } catch (NumberFormatException e) {
@@ -1001,13 +1047,15 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             int index = -1;
             boolean all = false;
             Player m = null;
             if (args.length == 0) {
                 all = true;
-                m = p;
+                if(p instanceof Player){
+                    m = (Player)p;
+                }
             } else if (args.length == 1) {
                 all = true;
                 m = p.getServer().getPlayer(args[0].val());
@@ -1135,8 +1183,11 @@ public class PlayerManangement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
-            Player m = p;
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
             int slot = 0;
             int offset = 0;
             int qty = 1;

@@ -15,6 +15,7 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
@@ -59,7 +60,7 @@ public class Persistance {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String key = args[0].val();
             Construct value = args[1];
             for(int i = 0; i < key.length(); i++){
@@ -120,7 +121,7 @@ public class Persistance {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
             Object o = Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()});
             if(o == null){
                 return new CNull(line_num, f);
@@ -174,7 +175,7 @@ public class Persistance {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(Static.getPersistance().isKeySet(new String[]{"commandhelper", "function", "storage", args[0].val()}), line_num, f);
         }
         

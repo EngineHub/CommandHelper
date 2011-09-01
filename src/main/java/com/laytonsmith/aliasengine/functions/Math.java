@@ -13,7 +13,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -33,7 +33,7 @@ public class Math {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
                 tally += Static.getNumber(args[i]);
@@ -80,7 +80,7 @@ public class Math {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
                 tally -= Static.getNumber(args[i]);
@@ -127,7 +127,7 @@ public class Math {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
                 tally *= Static.getNumber(args[i]);
@@ -174,7 +174,7 @@ public class Math {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
                 tally /= Static.getNumber(args[i]);
@@ -221,7 +221,7 @@ public class Math {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             long arg1 = Static.getInt(args[0]);
             long arg2 = Static.getInt(args[1]);
             return new CInt(arg1 % arg2, line_num, f);
@@ -262,7 +262,7 @@ public class Math {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
             return new CDouble(java.lang.Math.pow(arg1, arg2), line_num, f);
@@ -305,7 +305,7 @@ public class Math {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
                 IVariable v = varList.get(((IVariable)args[0]).getName());
                 Construct newVal;
@@ -362,7 +362,7 @@ public class Math {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
                 IVariable v = varList.get(((IVariable)args[0]).getName());
                 Construct newVal;
@@ -442,7 +442,7 @@ public class Math {
             return "3.0.1";
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             long min = 0;
             long max = 0;
             if(args.length == 1){
@@ -509,7 +509,7 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             double d = Static.getDouble(args[0]);
             return new CDouble(java.lang.Math.abs(d), line_num, f);
         }
@@ -552,7 +552,7 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CInt((long)java.lang.Math.floor(Static.getNumber(args[0])), line_num, f);
         }
         
@@ -594,7 +594,7 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CInt((long)java.lang.Math.ceil(Static.getNumber(args[0])), line_num, f);
         }
         
@@ -639,7 +639,7 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             double d = Static.getNumber(args[0]);
             if(d < 0){
                throw new ConfigRuntimeException("sqrt expects a number >= 0", ExceptionType.RangeException, line_num, f); 
@@ -691,7 +691,7 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(args.length == 0){
                 throw new ConfigRuntimeException("You must send at least one parameter to min", 
                         ExceptionType.InsufficientArgumentsException, line_num, f);
@@ -764,7 +764,7 @@ public class Math {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             if(args.length == 0){
                 throw new ConfigRuntimeException("You must send at least one parameter to max", 
                         ExceptionType.InsufficientArgumentsException, line_num, f);

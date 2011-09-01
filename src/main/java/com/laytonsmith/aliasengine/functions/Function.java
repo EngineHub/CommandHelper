@@ -10,8 +10,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.util.List;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation
@@ -108,5 +107,5 @@ public interface Function {
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(int line_num, File f, Player p, Construct ... args) throws ConfigRuntimeException;
+    public Construct exec(int line_num, File f, CommandSender p, Construct ... args) throws ConfigRuntimeException;
 }

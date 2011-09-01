@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.testing;
 
+import org.bukkit.command.CommandSender;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import java.lang.reflect.Field;
@@ -26,6 +27,7 @@ import java.util.Arrays;
 import java.util.Random;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.command.ConsoleCommandSender;
 import org.mockito.Mockito;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -288,6 +290,12 @@ public class StaticTest {
         return s;
     }
     
+    public static ConsoleCommandSender GetFakeConsoleCommandSender(){
+        ConsoleCommandSender c = mock(ConsoleCommandSender.class);        
+        
+        return c;
+    }
+    
     public static Object GetVariable(Object instance, String var) throws Exception{
         return GetVariable(instance.getClass(), var, instance);
     }
@@ -303,7 +311,7 @@ public class StaticTest {
      * @param player
      * @throws ConfigCompileException 
      */
-    public static void Run(String script, Player player) throws ConfigCompileException{
+    public static void Run(String script, CommandSender player) throws ConfigCompileException{
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), player, null, null);
     }
 }

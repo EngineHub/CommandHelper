@@ -24,6 +24,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
@@ -344,24 +345,41 @@ public class Static {
      * @param p
      * @param msg 
      */
-    public static void SendMessage(final Player p, String msg, final int line_num, final File f) {
+    public static void SendMessage(final CommandSender m, String msg, final int line_num, final File f) {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
-                if (p == null || !p.isOnline()) {
-                    throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
+                Player p = null;
+                if(m instanceof Player){
+                    p = (Player)m;
+                    if (p == null || !p.isOnline()) {
+                        throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
+                    }
+                    p.sendMessage(line);
+                } else {
+                    if(m == null){
+                        throw new ConfigRuntimeException("THE SYSTEM IS DOWN!?", line_num, f);
+                    }
+                    m.sendMessage(line);
                 }
-                p.sendMessage(line);
             }
         }, msg);
     }
 
-    public static void SendMessage(final Player p, String msg) {
+    public static void SendMessage(final CommandSender m, String msg) {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
-                if (p != null && p.isOnline()) {
-                    p.sendMessage(line);
+                Player p = null;
+                if(m instanceof Player){
+                    p = (Player)m;
+                    if (p != null && p.isOnline()) {
+                        p.sendMessage(line);
+                    }
+                } else {
+                    if(m != null){
+                        m.sendMessage(line);
+                    }
                 }
             }
         }, msg);

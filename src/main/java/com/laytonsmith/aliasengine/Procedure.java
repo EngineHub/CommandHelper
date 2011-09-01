@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -52,7 +52,7 @@ public class Procedure implements Cloneable {
     }
     
     
-    public Construct execute(List<Construct> variables, Player player, Map<String, Procedure> procStack, String label){
+    public Construct execute(List<Construct> variables, CommandSender player, Map<String, Procedure> procStack, String label){
         resetVariables();
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);

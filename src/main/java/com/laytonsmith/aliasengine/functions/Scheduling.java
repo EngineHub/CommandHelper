@@ -12,8 +12,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.util.ArrayList;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -60,7 +59,7 @@ public class Scheduling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CInt(System.currentTimeMillis(), line_num, f);
         }
         
@@ -103,7 +102,7 @@ public class Scheduling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CInt(System.nanoTime(), line_num, f);
         }
         
@@ -144,7 +143,7 @@ public class Scheduling {
             return "3.1.0";
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (Thread.currentThread().getName().equals("Server thread")) {
                 throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", 
                         null, line_num, f);

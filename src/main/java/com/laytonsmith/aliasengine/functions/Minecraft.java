@@ -19,6 +19,7 @@ import org.bukkit.DyeColor;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
@@ -57,7 +58,7 @@ public class Minecraft {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0] instanceof CInt) {
                 return new CInt(Static.getInt(args[0]), line_num, f);
             } else {
@@ -70,8 +71,8 @@ public class Minecraft {
             return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
                     + " simply returns that number";
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException};
         }
 
@@ -109,8 +110,8 @@ public class Minecraft {
         public String docs() {
             return "array {} Returns the names of the worlds available in this server";
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{};
         }
 
@@ -133,7 +134,7 @@ public class Minecraft {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             List<World> worlds = p.getServer().getWorlds();
             CArray c = new CArray(line_num, f);
             for (World w : worlds) {
@@ -143,7 +144,8 @@ public class Minecraft {
         }
     }
 
-    @api public static class spawn_mob implements Function {
+    @api
+    public static class spawn_mob implements Function {
 
         public String getName() {
             return "spawn_mob";
@@ -156,13 +158,13 @@ public class Minecraft {
         public String docs() {
             return "void {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
                     + " to the location of the player. mobType can be one of: CHICKEN, COW, CREEPER, GHAST,"
-                    + " GIANT, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
+                    + " PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
                     + " specified.";
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
         }
 
@@ -190,10 +192,10 @@ public class Minecraft {
             CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mob = args[0].val();
             String sheepColor = "WHITE";
-            if(mob.toUpperCase().startsWith("SHEEP:")){
+            if (mob.toUpperCase().startsWith("SHEEP:")) {
                 sheepColor = mob.substring(6);
                 mob = "SHEEP";
             }
@@ -201,23 +203,27 @@ public class Minecraft {
             if (args.length > 1) {
                 qty = (int) Static.getInt(args[1]);
             }
-            if(qty > 50){
-                throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?", 
+            if (qty > 50) {
+                throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
                         ExceptionType.RangeException, line_num, f);
             }
-            Location l = p.getLocation();
+            Location l = null;
+            if (p instanceof Player) {
+                l = ((Player) p).getLocation();
+            }
             if (args.length > 2) {
                 if (args[2] instanceof CArray) {
                     CArray ca = (CArray) args[2];
-                    if(ca.size() == 3){
-                        l = new Location(p.getWorld(), Static.getNumber(ca.get(0, line_num)),
-                                Static.getNumber(ca.get(1, line_num)) + 1, Static.getNumber(ca.get(2, line_num)));
+                    if (ca.size() == 3) {
+                        //l = new Location(p.getWorld(), Static.getNumber(ca.get(0, line_num)),
+                        //        Static.getNumber(ca.get(1, line_num)) + 1, Static.getNumber(ca.get(2, line_num)));
+                        l = Static.GetLocation(ca, (l != null?l.getWorld():null), line_num, f);
                     } else {
-                        throw new ConfigRuntimeException("Expected argument 3 to be an array with 3 items", 
+                        throw new ConfigRuntimeException("Expected argument 3 to be an array with 3 items",
                                 ExceptionType.LengthException, line_num, f);
                     }
                 } else {
-                    throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array", 
+                    throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array",
                             ExceptionType.CastException, line_num, f);
                 }
             }
@@ -263,22 +269,26 @@ public class Minecraft {
                     case ZOMBIE:
                         mobType = Zombie.class;
                         break;
-                }                
+                }
             } catch (IllegalArgumentException e) {
-                throw new ConfigRuntimeException("No mob of type " + mob + " exists", 
-                        ExceptionType.FormatException, line_num, f);            
+                throw new ConfigRuntimeException("No mob of type " + mob + " exists",
+                        ExceptionType.FormatException, line_num, f);
             }
-            for(int i = 0; i < qty; i++){
-                Entity e = p.getWorld().spawn(l, mobType);
-                if(e instanceof Sheep){
-                    Sheep s = (Sheep)e;
-                    try{
-                    s.setColor(DyeColor.valueOf(sheepColor.toUpperCase()));
-                    } catch(IllegalArgumentException ex){
-                        throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color", 
-                                ExceptionType.FormatException, line_num, f);
+            if (l.getWorld() != null) {
+                for (int i = 0; i < qty; i++) {
+                    Entity e = l.getWorld().spawn(l, mobType);
+                    if (e instanceof Sheep) {
+                        Sheep s = (Sheep) e;
+                        try {
+                            s.setColor(DyeColor.valueOf(sheepColor.toUpperCase()));
+                        } catch (IllegalArgumentException ex) {
+                            throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color",
+                                    ExceptionType.FormatException, line_num, f);
+                        }
                     }
                 }
+            } else {
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
             }
             return new CVoid(line_num, f);
         }

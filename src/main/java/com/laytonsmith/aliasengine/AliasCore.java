@@ -19,6 +19,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
@@ -63,7 +64,7 @@ public class AliasCore {
      * @param command
      * @return
      */
-    public boolean alias(String command, final Player player, ArrayList<Script> playerCommands) {
+    public boolean alias(String command, final CommandSender player, ArrayList<Script> playerCommands) {
 
         if (scripts == null) {
             throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", 0, null);
@@ -73,7 +74,7 @@ public class AliasCore {
         try { //catch RuntimeException
             //If player is null, we are running the test harness, so don't
             //actually add the player to the array.
-            if (player != null && echoCommand.contains(player.getName())) {
+            if (player != null && player instanceof Player && echoCommand.contains(((Player) player).getName())) {
                 //we are running one of the expanded commands, so exit with false
                 return false;
             }
@@ -81,12 +82,16 @@ public class AliasCore {
             //Global aliases override personal ones, so check the list first
             //a = config.getRunnableAliases(command, player);
             for (Script s : scripts) {
-                try{
+                try {
                     if (s.match(command)) {
-                        echoCommand.add(player.getName());
+                        this.addPlayerReference(player);
                         if ((Boolean) Static.getPreferences().getPreference("console-log-commands")) {
                             Static.getLogger().log(Level.INFO, "CH: Running original command ----> " + command);
-                            Static.getLogger().log(Level.INFO, "on player " + player.getName());
+                            if (player instanceof Player) {
+                                Static.getLogger().log(Level.INFO, "on player " + ((Player) player).getName());
+                            } else {
+                                Static.getLogger().log(Level.INFO, "from a CommandSender");
+                            }
                         }
                         try {
                             s.run(s.getVariables(command), player, new MScriptComplete() {
@@ -96,11 +101,19 @@ public class AliasCore {
                                         if (output != null) {
                                             if (!output.trim().equals("") && output.trim().startsWith("/")) {
                                                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                                                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                                    if (player instanceof Player) {
+                                                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) player).getName() + ": " + output.trim());
+                                                    } else {
+                                                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + output.trim());
+                                                    }
                                                 }
                                                 //Sometimes bukkit works with one version of this, sometimes with the other. performCommand would be prefered, but
                                                 //chat works more often, because chat actually triggers a CommandPreprocessEvent, unlike performCommand.
-                                                player.chat(output.trim());
+                                                if (player instanceof Player) {
+                                                    ((Player) player).chat(output.trim());
+                                                } else {
+                                                    Static.getServer().dispatchCommand(player, output.trim());
+                                                }
                                                 //player.performCommand(output.trim().substring(1));
                                             }
                                         }
@@ -108,7 +121,7 @@ public class AliasCore {
                                         System.err.println(e.getMessage());
                                         player.sendMessage(ChatColor.RED + e.getMessage());
                                     } finally {
-                                        echoCommand.remove(player.getName());
+                                        Static.getAliasCore().removePlayerReference(player);
                                     }
                                 }
                             });
@@ -117,53 +130,54 @@ public class AliasCore {
                             player.sendMessage("An unexpected exception occured: " + ChatColor.RED + e.getClass().getSimpleName());
                             e.printStackTrace();
                         } finally {
-                            echoCommand.remove(player.getName());
+                            Static.getAliasCore().removePlayerReference(player);
                         }
                         match = true;
                         break;
                     }
-                } catch(Exception e){
+                } catch (Exception e) {
                     System.err.println("An unexpected exception occured inside the command " + s.toString());
                     e.printStackTrace();
                 }
             }
 
-            if (match == false && playerCommands != null) {
-                //if we are still looking, look in the aliases for this player
-                for (Script ac : playerCommands) {
-                    //RunnableAlias b = ac.getRunnableAliases(command, player);
-                    try {
-                        ac.compile();
-                        if (ac.match(command)) {
-                            echoCommand.add(player.getName());
-                            try {
-                                ac.run(ac.getVariables(command), player, new MScriptComplete() {
+            if (player instanceof Player) {
+                if (match == false && playerCommands != null) {
+                    //if we are still looking, look in the aliases for this player
+                    for (Script ac : playerCommands) {
+                        //RunnableAlias b = ac.getRunnableAliases(command, player);
+                        try {
+                            ac.compile();
+                            if (ac.match(command)) {
+                                Static.getAliasCore().addPlayerReference(player);
+                                try {
+                                    ac.run(ac.getVariables(command), player, new MScriptComplete() {
 
-                                    public void done(String output) {
-                                        if (output != null) {
-                                            if (!output.trim().equals("") && output.trim().startsWith("/")) {
-                                                if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                                                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + player.getName() + ": " + output.trim());
+                                        public void done(String output) {
+                                            if (output != null) {
+                                                if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                                    if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player)player).getName() + ": " + output.trim());
+                                                    }
+                                                    ((Player)player).chat(output.trim());
                                                 }
-                                                player.chat(output.trim());
-                                                //player.performCommand(output.trim().substring(1));
                                             }
+                                            Static.getAliasCore().removePlayerReference(player);
                                         }
-                                        echoCommand.remove(player.getName());
-                                    }
-                                });
-                            } catch (/*ConfigRuntimeException*/Throwable e) {
-                                System.err.println(e.getMessage());
-                                player.sendMessage(ChatColor.RED + e.getMessage());
-                                echoCommand.remove(player.getName());
+                                    });
+                                } catch (/*ConfigRuntimeException*/Throwable e) {
+                                    System.err.println(e.getMessage());
+                                    player.sendMessage(ChatColor.RED + e.getMessage());
+                                    Static.getAliasCore().removePlayerReference(player);
+                                }
+                                match = true;
                             }
-                            match = true;
+                        } catch (Exception e) {
+                            ((Player)player).chat("An exception occured while trying to compile/run your alias: " + e.getMessage());
                         }
-                    } catch (Exception e) {
-                        player.chat("An exception occured while trying to compile/run your alias: " + e.getMessage());
                     }
-                }
 
+                }
             }
         } catch (Throwable e) {
             throw new InternalException("An error occured in the CommandHelper plugin: " + e.getMessage() + Arrays.asList(e.getStackTrace()));
@@ -315,12 +329,17 @@ public class AliasCore {
         }
         return writer.toString();
     }
-    
-    public void removePlayerReference(Player p){
-        echoCommand.remove(p.getName());
+
+    public void removePlayerReference(CommandSender p) {
+        //If they're not a player, oh well.
+        if (p instanceof Player) {
+            echoCommand.remove(((Player) p).getName());
+        }
     }
-    
-    public void addPlayerReference(Player p){
-        echoCommand.add(p.getName());
+
+    public void addPlayerReference(CommandSender p) {
+        if (p instanceof Player) {
+            echoCommand.add(((Player) p).getName());
+        }
     }
 }

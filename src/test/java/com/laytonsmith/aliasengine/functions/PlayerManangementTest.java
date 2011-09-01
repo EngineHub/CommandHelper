@@ -4,14 +4,19 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.testing.StaticTest;
+import org.junit.Test;
 import org.bukkit.entity.Player;
 import org.bukkit.Server;
+import org.bukkit.command.ConsoleCommandSender;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import static org.mockito.Mockito.*;
 import static com.laytonsmith.testing.StaticTest.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -35,8 +40,8 @@ public class PlayerManangementTest {
     
     @Before
     public void setUp() {
-        fakePlayer = mock(Player.class);
-        fakeServer = mock(Server.class);
+        fakePlayer = GetOnlinePlayer();
+        fakeServer = GetFakeServer();
         when(fakePlayer.getServer()).thenReturn(fakeServer);
     }
     
@@ -44,5 +49,16 @@ public class PlayerManangementTest {
     public void tearDown() {
     }
 
+    @Test public void testPlayer() throws ConfigCompileException{
+        String script = "msg(player())";
+        Run(script, fakePlayer);
+        verify(fakePlayer).sendMessage(fakePlayer.getName());
+    }
     
+    @Test public void testPlayer2() throws ConfigCompileException{
+        String script = "msg(player())";
+        ConsoleCommandSender c = GetFakeConsoleCommandSender();
+        Run(script, c);
+        verify(c).sendMessage("~console");
+    }
 }

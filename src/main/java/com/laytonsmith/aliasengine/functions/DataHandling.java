@@ -26,7 +26,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -46,7 +46,7 @@ public class DataHandling {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CArray(line_num, f, args);
         }
         
@@ -85,7 +85,7 @@ public class DataHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Construct c = args[1];
             while(c instanceof IVariable){
                 c = varList.get(((IVariable)c).getName()).ival();
@@ -134,7 +134,7 @@ public class DataHandling {
         public Integer[] numArgs() {
             return new Integer[]{4};
         }
-        public Construct execs(int line_num, File f, Player p, Script parent, GenericTreeNode<Construct> assign, 
+        public Construct execs(int line_num, File f, CommandSender p, Script parent, GenericTreeNode<Construct> assign, 
                 GenericTreeNode<Construct> condition, GenericTreeNode<Construct> expression, 
                 GenericTreeNode<Construct> runnable) throws CancelCommandException{
             Construct counter = parent.eval(assign, p);
@@ -177,7 +177,7 @@ public class DataHandling {
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.CastException};
         }
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return null;
         }
 
@@ -218,11 +218,11 @@ public class DataHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Player p, Script that, GenericTreeNode<Construct> array, 
+        public Construct execs(int line_num, File f, CommandSender p, Script that, GenericTreeNode<Construct> array, 
                 GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code) throws CancelCommandException{
             
             Construct arr = that.eval(array, p);
@@ -328,7 +328,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int num = 1;
             if(args.length == 1){
                 num = (int)Static.getInt(args[0]);
@@ -376,7 +376,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int num = 1;
             if(args.length == 1){
                 num = (int)Static.getInt(args[0]);
@@ -422,7 +422,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(!(args[0] instanceof CArray), line_num, f);
         }
         
@@ -464,7 +464,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CArray, line_num, f);
         }
         
@@ -507,7 +507,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             boolean b = true;
             try{
                 Static.getDouble(args[0]);
@@ -555,7 +555,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             boolean b = true;
             try{
                 Static.getInt(args[0]);
@@ -605,7 +605,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(true, line_num, f);
         }
         
@@ -647,7 +647,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CNull, line_num, f);
         }
         
@@ -696,7 +696,7 @@ public class DataHandling {
         
         
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
@@ -738,7 +738,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             Construct ret = (args.length == 1?args[0]:new CVoid(line_num, f));
             throw new FunctionReturnException(ret);
         }
@@ -780,11 +780,11 @@ public class DataHandling {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Player p, List<GenericTreeNode<Construct>> children, Script parent){
+        public Construct execs(int line_num, File f, CommandSender p, List<GenericTreeNode<Construct>> children, Script parent){
             GenericTreeNode<Construct> tree = children.get(0);
             Construct arg = parent.eval(tree, p);
             arg = parent.preResolveVariables(new Construct[]{arg})[0];
@@ -834,11 +834,11 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Player p, Map<String, Procedure> procs, String label, Construct ... args){
+        public Construct execs(int line_num, File f, CommandSender p, Map<String, Procedure> procs, String label, Construct ... args){
             Procedure proc = procs.get(args[0].val());
             if(proc != null){
                 List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
@@ -888,11 +888,11 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Player p, List<Procedure> procs, Construct ... args){
+        public Construct execs(int line_num, File f, CommandSender p, List<Procedure> procs, Construct ... args){
             for(Procedure proc : procs){
                 if(proc.getName().equals(args[0].val())){
                     return new CBoolean(true, line_num, f);

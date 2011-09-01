@@ -16,8 +16,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.util.ArrayList;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -44,7 +43,7 @@ public class StringHandling {
             return new ExceptionType[]{};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
                 b.append(args[i].val());
@@ -85,7 +84,7 @@ public class StringHandling {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
                 if (i > 0) {
@@ -144,7 +143,7 @@ public class StringHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String location = args[0].val();
             //Verify this file is not above the craftbukkit directory (or whatever directory the user specified
             if(!Static.CheckSecurity(location)){
@@ -200,7 +199,7 @@ public class StringHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String thing = args[0].val();
             String what = args[1].val();
             String that = args[2].val();
@@ -244,7 +243,7 @@ public class StringHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String[] sa = args[0].val().split(" ");
             ArrayList<Construct> a = new ArrayList<Construct>();
             for (String s : sa) {
@@ -319,7 +318,7 @@ public class StringHandling {
             return "3.0.1";
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().trim(), args[0].line_num, args[0].file);
         }
         public Boolean runAsync(){
@@ -364,7 +363,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 return new CInt(((CArray)args[0]).size(), line_num, f);
             } else {
@@ -410,7 +409,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().toUpperCase(), line_num, f);
         }
         
@@ -452,7 +451,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().toLowerCase(), line_num, f);
         }        
     }
@@ -496,7 +495,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Player p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try{
                 String s = args[0].val();
                 int begin = (int)Static.getInt(args[1]);
