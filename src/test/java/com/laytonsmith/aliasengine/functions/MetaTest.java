@@ -57,7 +57,7 @@ public class MetaTest {
     @Test public void testRunas1() throws ConfigCompileException{
         String script = 
                 "runas('wraithguard02', '/cmd yay')";
-        Player fakePlayer2 = StaticTest.GetOnlinePlayer("wraithguard02");
+        Player fakePlayer2 = StaticTest.GetOnlinePlayer("wraithguard02", fakeServer);
         when(fakeServer.getPlayer("wraithguard02")).thenReturn(fakePlayer2);
         when(fakePlayer.isOp()).thenReturn(true);
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);

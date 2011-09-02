@@ -41,9 +41,9 @@ public class MathTest {
     
     @Before
     public void setUp() {
-        fakePlayer = mock(Player.class);
-        fakeServer = mock(Server.class);
-        when(fakePlayer.getServer()).thenReturn(fakeServer);
+        fakePlayer = GetOnlinePlayer();
+        fakeServer = GetFakeServer();
+
         varList = new IVariableList();
         varList.set(new IVariable("var", C.onstruct(1), 0, null));
         varList.set(new IVariable("var2", C.onstruct(2.5), 0, null));

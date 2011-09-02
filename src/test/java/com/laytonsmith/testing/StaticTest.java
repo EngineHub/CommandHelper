@@ -23,8 +23,11 @@ import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import com.laytonsmith.aliasengine.functions.exceptions.LoopBreakException;
 import com.laytonsmith.aliasengine.functions.exceptions.LoopContinueException;
+import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.Arrays;
 import java.util.Random;
+import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.command.ConsoleCommandSender;
@@ -90,6 +93,7 @@ public class StaticTest {
         if (!runQualityTestsOnly) {
             TestExec(f, fakePlayer);
             TestExec(f, null);
+            TestExec(f, StaticTest.GetFakeConsoleCommandSender());
         }
 
         //now the only function left to test is exec. This cannot be abstracted, unfortunately.
@@ -102,7 +106,7 @@ public class StaticTest {
         //TODO
     }
 
-    public static void TestExec(Function f, Player p) {
+    public static void TestExec(Function f, CommandSender p) {
         //See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
         //keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try
         //strings, numbers, arrays, and nulls
@@ -274,25 +278,37 @@ public class StaticTest {
     }
     
     public static Player GetOnlinePlayer(){
-        return GetOnlinePlayer("wraithguard01");
+        Server s = GetFakeServer();
+        return GetOnlinePlayer("wraithguard01", s);
     }
-    public static Player GetOnlinePlayer(String name){
+    
+    public static Player GetOnlinePlayer(Server s){
+        return GetOnlinePlayer("wraithguard01", s);
+    }
+    
+    public static Player GetOnlinePlayer(String name, Server s){
         Player p = mock(Player.class);
         when(p.isOnline()).thenReturn(true);
         when(p.getName()).thenReturn(name);        
-        //when(p.getServer()).thenReturn(GetFakeServer());
+        when(p.getServer()).thenReturn(s); 
+        if(s != null && s.getOnlinePlayers() != null){
+            List<Player> online = new ArrayList<Player>(Arrays.asList(s.getOnlinePlayers()));
+            online.add(p);
+            when(s.getOnlinePlayers()).thenReturn(online.toArray(new Player[]{}));
+        }
         return p;
     }
     
-    public static Server GetFakeServer(){
-        Server s = mock(Server.class);
-        
-        return s;
+    public static Player GetOp(String name, Server s){
+        Player p = GetOnlinePlayer(name, s);
+        when(p.isOp()).thenReturn(true);
+        return p;
     }
     
     public static ConsoleCommandSender GetFakeConsoleCommandSender(){
-        ConsoleCommandSender c = mock(ConsoleCommandSender.class);        
-        
+        ConsoleCommandSender c = mock(ConsoleCommandSender.class);
+        Server s = GetFakeServer();
+        when(c.getServer()).thenReturn(s);
         return c;
     }
     
@@ -314,4 +330,22 @@ public class StaticTest {
     public static void Run(String script, CommandSender player) throws ConfigCompileException{
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), player, null, null);
     }
+    
+    /**
+     * Creates an entire fake server environment, adding players and everything.
+     */
+    public static Server GetFakeServer(){
+        Server fakeServer = mock(Server.class);
+        String [] pnames = new String[]{"wraithguard01", "wraithguard02", "wraithguard03"};
+        ArrayList<Player> pps = new ArrayList<Player>();
+        for(String p : pnames){
+            Player pp = GetOnlinePlayer(p, fakeServer);
+            pps.add(pp);
+        }
+        when(fakeServer.getOnlinePlayers()).thenReturn(pps.toArray(new Player[]{}));  
+        CommandHelperPlugin.myServer = fakeServer;  
+        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+        return fakeServer;
+    }
+    
 }

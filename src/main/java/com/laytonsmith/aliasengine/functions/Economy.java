@@ -660,7 +660,7 @@ public class Economy {
         com.nijikokun.register.payment.Methods m = new Methods();
         if(!m.hasMethod()){
             //initialize our plugin if it isn't already
-            Plugin [] plugins = Bukkit.getServer().getPluginManager().getPlugins();
+            Plugin [] plugins = Static.getServer().getPluginManager().getPlugins();
             for(Plugin plugin : plugins){
                 if(m.setMethod(plugin)){
                     break;

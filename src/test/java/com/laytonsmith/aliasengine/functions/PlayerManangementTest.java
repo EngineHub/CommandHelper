@@ -61,4 +61,9 @@ public class PlayerManangementTest {
         Run(script, c);
         verify(c).sendMessage("~console");
     }
+    
+    @Test public void testAllPlayers(){
+        String script = "msg(all_players())";
+        
+    }
 }
