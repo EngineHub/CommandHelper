@@ -24,9 +24,9 @@ public class CommandHelperServerListener extends ServerListener{
     @Override
     public void onServerCommand(ServerCommandEvent event){
         CommandSender player = event.getSender();
-
+        boolean match = false;
         try {
-            Static.getAliasCore().alias("/" + event.getCommand(), player, new ArrayList<Script>());
+            match = Static.getAliasCore().alias("/" + event.getCommand(), player, new ArrayList<Script>());
         } catch (InternalException e) {
             Static.getLogger().log(Level.SEVERE, e.getMessage());
         } catch (ConfigRuntimeException e) {
@@ -39,7 +39,9 @@ public class CommandHelperServerListener extends ServerListener{
         }
         //To prevent "unknown console command" error, set the command to the meta command
         //commandhelper null, which just returns true.
-        event.setCommand("commandhelper null");
+        if(match){
+            event.setCommand("commandhelper null");
+        }
     }
     
 }
