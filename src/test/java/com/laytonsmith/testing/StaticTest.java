@@ -16,6 +16,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.MScriptComplete;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.Version;
 import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
@@ -293,8 +294,17 @@ public class StaticTest {
         when(p.getServer()).thenReturn(s); 
         if(s != null && s.getOnlinePlayers() != null){
             List<Player> online = new ArrayList<Player>(Arrays.asList(s.getOnlinePlayers()));
-            online.add(p);
-            when(s.getOnlinePlayers()).thenReturn(online.toArray(new Player[]{}));
+            boolean alreadyOnline = false;
+            for(Player o : online){
+                if(o.getName().equals(name)){
+                    alreadyOnline = true;
+                    break;
+                }
+            }
+            if(!alreadyOnline){
+                online.add(p);
+                when(s.getOnlinePlayers()).thenReturn(online.toArray(new Player[]{}));
+            }            
         }
         return p;
     }
@@ -303,6 +313,12 @@ public class StaticTest {
         Player p = GetOnlinePlayer(name, s);
         when(p.isOp()).thenReturn(true);
         return p;
+    }
+    
+    public static World GetWorld(String name){
+        World w = mock(World.class);
+        when(w.getName()).thenReturn(name);
+        return w;
     }
     
     public static ConsoleCommandSender GetFakeConsoleCommandSender(){
@@ -328,7 +344,11 @@ public class StaticTest {
      * @throws ConfigCompileException 
      */
     public static void Run(String script, CommandSender player) throws ConfigCompileException{
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), player, null, null);
+        Run(script, player, null);
+    }
+    
+    public static void Run(String script, CommandSender player, MScriptComplete done) throws ConfigCompileException{
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), player, done, null);
     }
     
     /**

@@ -169,7 +169,8 @@ public class PlayerManangement {
         }
 
         public String docs() {
-            return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise.";
+            return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
+                    + " in relation to the player's head, not their feet.";
         }
 
         public ExceptionType[] thrown() {
@@ -210,7 +211,8 @@ public class PlayerManangement {
         public String docs() {
             return "boolean {[player], xyzArray | [player], x, y, z} Sets the location of the player to the specified coordinates. If the coordinates"
                     + " are not valid, or the player was otherwise prevented from moving, false is returned, otherwise true. If player is omitted, "
-                    + " the current player is used";
+                    + " the current player is used. Note that 1 is automatically added to the y component, which means that sending a player to"
+                    + " x, y, z coordinates shown with F3 will work as expected, instead of getting them stuck inside the floor. ";
         }
 
         public ExceptionType[] thrown() {
@@ -277,6 +279,7 @@ public class PlayerManangement {
                 x = Static.getNumber(args[0]);
                 y = Static.getNumber(args[1]);
                 z = Static.getNumber(args[2]);
+                l = m.getLocation();
             } else {
                 player = args[0].val();
                 x = Static.getNumber(args[1]);
@@ -338,7 +341,7 @@ public class PlayerManangement {
                     m = (Player)p;
                 }
             } else {
-                m = p.getServer().getPlayer(args[0].val());
+                m = Static.getServer().getPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
                     throw new ConfigRuntimeException("That player is not online", 
                             ExceptionType.PlayerOfflineException, line_num, f);
