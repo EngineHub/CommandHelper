@@ -6,7 +6,7 @@ package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.MScriptComplete;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
-import com.laytonsmith.testing.StaticTest;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import org.bukkit.Location;
 import org.junit.Test;
@@ -14,6 +14,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -48,6 +49,8 @@ public class PlayerManangementTest {
         fakeServer = GetFakeServer();
         fakePlayer = GetOp("wraithguard01", fakeServer);
         when(fakePlayer.getServer()).thenReturn(fakeServer);
+        CommandHelperPlugin.myServer = fakeServer;
+        when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
     }
     
     @After
@@ -57,7 +60,10 @@ public class PlayerManangementTest {
     @Test public void testPlayer() throws ConfigCompileException{
         String script = "msg(player())";
         Run(script, fakePlayer);
-        verify(fakePlayer).sendMessage(fakePlayer.getName());
+        //The previous time is the setUp
+        verify(fakePlayer, times(2)).sendMessage(fakePlayer.getName());
+        Run(script, null);
+        verify(fakePlayer).sendMessage("null");
     }
     
     @Test public void testPlayer2() throws ConfigCompileException{
@@ -65,6 +71,12 @@ public class PlayerManangementTest {
         ConsoleCommandSender c = GetFakeConsoleCommandSender();
         Run(script, c);
         verify(c).sendMessage("~console");
+    }
+    
+    @Test(expected=ConfigRuntimeException.class) 
+    public void testPlayer3() throws ConfigCompileException{
+        CommandSender c = GetFakeConsoleCommandSender();
+        Run("player()", c);
     }
     
     @Test public void testAllPlayers() throws ConfigCompileException{
@@ -76,6 +88,7 @@ public class PlayerManangementTest {
                 done.append(output);
             }
         });
+        //This output is too long to test with msg()        
         assertEquals("{wraithguard01, wraithguard02, wraithguard03}", done.toString());
     }
     
@@ -121,5 +134,57 @@ public class PlayerManangementTest {
         Run("pcursor()", fakePlayer);
         Run("pcursor('" + fakePlayer.getName() + "')", fakePlayer);
         verify(fakePlayer, times(2)).getTargetBlock(null, 200);
+    }
+    
+    @Test public void testKill() throws ConfigCompileException{        
+        Run("kill()", fakePlayer);
+        Run("kill('" + fakePlayer.getName() + "')", fakePlayer);
+        verify(fakePlayer, times(2)).setHealth(0);
+    }
+    
+    //@Test
+    public void testPgroup() throws ConfigCompileException{
+        Run("", fakePlayer);
+        Run("", fakePlayer);
+    }
+    
+    //@Test
+    public void testPinfo(){
+        
+    }
+    
+    //@Test
+    public void testPworld(){
+        
+    }
+    
+    //@Test
+    public void testKick(){
+        
+    }
+    
+    //@Test
+    public void testSetDisplayName(){
+        
+    }
+    
+    //@Test
+    public void testResetDisplayName(){
+        
+    }
+    
+    //@Test
+    public void testPFacing(){
+        
+    }
+    
+    //@Test
+    public void testPinv(){
+        
+    }
+    
+    //@Test
+    public void testSetPinv(){
+        
     }
 }

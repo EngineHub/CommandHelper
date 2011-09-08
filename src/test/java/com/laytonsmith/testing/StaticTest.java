@@ -49,7 +49,7 @@ public class StaticTest {
      */
     public static void TestBoilerplate(Function f, String name) {
         //For the "quality test code coverage" number, set this to true
-        boolean runQualityTestsOnly = false;
+        boolean runQualityTestsOnly = true;
 
         Player fakePlayer = Mockito.mock(Player.class);
         Server fakeServer = Mockito.mock(Server.class);
@@ -349,6 +349,17 @@ public class StaticTest {
     
     public static void Run(String script, CommandSender player, MScriptComplete done) throws ConfigCompileException{
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), player, done, null);
+    }
+    
+    public static String SRun(String script, CommandSender player) throws ConfigCompileException{
+        final StringBuffer b = new StringBuffer();
+        Run(script, player, new MScriptComplete() {
+
+            public void done(String output) {
+                b.append(output);
+            }
+        });
+        return b.toString();
     }
     
     /**
