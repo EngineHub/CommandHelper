@@ -137,7 +137,12 @@ public class ArrayHandlingTest {
         verify(fakePlayer).sendMessage("{1, null, hello}");
     }
     
-    @Test public void testRange() throws ConfigCompileException{
+    /**
+     * Because we are testing a loop, we put in an infinite loop detection of 10 seconds
+     * @throws ConfigCompileException 
+     */
+    @Test(timeout=10000) 
+    public void testRange() throws ConfigCompileException{
         assertEquals("{0, 1, 2, 3, 4, 5, 6, 7, 8, 9}", SRun("range(10)", fakePlayer));
         assertEquals("{1, 2, 3, 4, 5, 6, 7, 8, 9, 10}", SRun("range(1, 11)", fakePlayer));
         assertEquals("{0, 5, 10, 15, 20, 25}", SRun("range(0, 30, 5)", fakePlayer));

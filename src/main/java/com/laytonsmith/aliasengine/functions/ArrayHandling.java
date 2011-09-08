@@ -428,7 +428,7 @@ public class ArrayHandling {
                 return new CArray(line_num, f);
             }
             CArray ret = new CArray(line_num, f);
-            for(long i = start; i <= start + (i * increment); i = i + increment){
+            for(long i = start; (increment > 0?i < finish:i > finish); i = i + increment){
                 ret.push(new CInt(i, line_num, f));
             }
             return ret;

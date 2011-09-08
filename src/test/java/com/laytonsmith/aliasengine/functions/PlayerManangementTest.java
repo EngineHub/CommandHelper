@@ -58,12 +58,9 @@ public class PlayerManangementTest {
     }
 
     @Test public void testPlayer() throws ConfigCompileException{
-        String script = "msg(player())";
-        Run(script, fakePlayer);
-        //The previous time is the setUp
-        verify(fakePlayer, times(2)).sendMessage(fakePlayer.getName());
-        Run(script, null);
-        verify(fakePlayer).sendMessage("null");
+        String script = "player()";
+        assertEquals(fakePlayer.getName(), SRun(script, fakePlayer));
+        assertEquals("null", SRun(script, null));
     }
     
     @Test public void testPlayer2() throws ConfigCompileException{
@@ -73,23 +70,17 @@ public class PlayerManangementTest {
         verify(c).sendMessage("~console");
     }
     
-    @Test(expected=ConfigRuntimeException.class) 
+    @Test 
     public void testPlayer3() throws ConfigCompileException{
         CommandSender c = GetFakeConsoleCommandSender();
-        Run("player()", c);
+        assertEquals("~console", SRun("player()", c));
     }
     
     @Test public void testAllPlayers() throws ConfigCompileException{
         String script = "all_players()";
-        final StringBuilder done = new StringBuilder();
-        Run(script, fakePlayer, new MScriptComplete() {
-
-            public void done(String output) {
-                done.append(output);
-            }
-        });
+        String done = SRun(script, fakePlayer);
         //This output is too long to test with msg()        
-        assertEquals("{wraithguard01, wraithguard02, wraithguard03}", done.toString());
+        assertEquals("{wraithguard01, wraithguard02, wraithguard03}", done);
     }
     
     @Test public void testPloc() throws ConfigCompileException{

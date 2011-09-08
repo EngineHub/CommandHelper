@@ -357,10 +357,9 @@ public class Static {
                     }
                     p.sendMessage(line);
                 } else {
-                    if(m == null){
-                        throw new ConfigRuntimeException("THE SYSTEM IS DOWN!?", line_num, f);
+                    if(m != null){
+                        m.sendMessage(line);
                     }
-                    m.sendMessage(line);
                 }
             }
         }, msg);
