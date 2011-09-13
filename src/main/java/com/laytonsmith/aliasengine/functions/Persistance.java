@@ -129,12 +129,13 @@ public class Persistance {
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
             Object o;
             try {
-                o = Construct.json_decode(Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()}).toString());
+                Object obj = Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()});
+                if(obj == null){
+                    return new CNull(line_num, f);
+                }
+                o = Construct.json_decode(obj.toString());
             } catch (MarshalException ex) {
                 throw new ConfigRuntimeException(ex.getMessage(), line_num, f);
-            }
-            if(o == null){
-                return new CNull(line_num, f);
             }
             try{
                 return (Construct)o;
