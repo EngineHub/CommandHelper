@@ -371,4 +371,68 @@ public class ArrayHandling {
         }
         
     }
+    
+    @api public static class range implements Function{
+
+        public String getName() {
+            return "range";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3};
+        }
+
+        public String docs() {
+            return "array {start, finish, [increment] | finish} Returns an array of numbers from start to (finish - 1)"
+                    + " skipping increment integers per count. start defaults to 0, and increment defaults to 1. All inputs"
+                    + " must be integers. If the input doesn't make sense, it will reasonably degrade, and return an empty array.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            long start = 0;
+            long finish = 0;
+            long increment = 1;
+            if(args.length == 1){
+                finish = Static.getInt(args[0]);
+            } else if(args.length == 2){
+                start = Static.getInt(args[0]);
+                finish = Static.getInt(args[1]);
+            } else if(args.length == 3){
+                start = Static.getInt(args[0]);
+                finish = Static.getInt(args[1]);
+                increment = Static.getInt(args[2]);
+            }
+            if(start < finish && increment < 0 || start > finish && increment > 0  || increment == 0){
+                return new CArray(line_num, f);
+            }
+            CArray ret = new CArray(line_num, f);
+            for(long i = start; (increment > 0?i < finish:i > finish); i = i + increment){
+                ret.push(new CInt(i, line_num, f));
+            }
+            return ret;
+        }
+        
+    }
 }
