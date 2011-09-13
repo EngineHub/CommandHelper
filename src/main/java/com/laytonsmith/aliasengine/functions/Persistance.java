@@ -12,11 +12,11 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import com.laytonsmith.aliasengine.functions.exceptions.MarshalException;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -62,7 +62,12 @@ public class Persistance {
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String key = args[0].val();
-            Construct value = args[1];
+            String value = null;
+            try{
+                value = Construct.json_encode(args[1]);
+            } catch(MarshalException e){
+                throw new ConfigRuntimeException(e.getMessage(), line_num, f);
+            }
             for(int i = 0; i < key.length(); i++){
                 Character c = key.charAt(i);
                 if(c != '_' && !Character.isLetterOrDigit(c)){
@@ -122,7 +127,12 @@ public class Persistance {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
-            Object o = Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()});
+            Object o;
+            try {
+                o = Construct.json_decode(Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()}).toString());
+            } catch (MarshalException ex) {
+                throw new ConfigRuntimeException(ex.getMessage(), line_num, f);
+            }
             if(o == null){
                 return new CNull(line_num, f);
             }

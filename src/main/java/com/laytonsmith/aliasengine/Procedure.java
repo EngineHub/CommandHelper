@@ -38,7 +38,7 @@ public class Procedure implements Cloneable {
         }        
         this.tree = tree;
         if(!this.name.matches("^_[^_].*")){
-            throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, f.line_num, f.file);
+            throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, f.getLineNum(), f.getFile());
         }
     }
     
@@ -71,7 +71,7 @@ public class Procedure implements Cloneable {
                 String varname = ((IVariable)c.getData()).getName();
                 IVariable var = varList.get(((IVariable)c.getData()).getName());
                 if(var == null){
-                    var = new IVariable(varname, c.getData().line_num, c.getData().file);
+                    var = new IVariable(varname, c.getData().getLineNum(), c.getData().getFile());
                 }
                 if(varname.equals("@arguments")){
                     var.setIval(fakeScript.varList.get("@arguments"));
@@ -80,7 +80,7 @@ public class Procedure implements Cloneable {
                 if(index != -1){
                     //This variable has not been explicitly set, so we use the default
                     try{
-                        var.setIval(Static.resolveConstruct(variables.get(index).val(), var.line_num, var.file));
+                        var.setIval(Static.resolveConstruct(variables.get(index).val(), var.getLineNum(), var.getFile()));
                     } catch(ArrayIndexOutOfBoundsException e){
                         //var.setIval(new CNull(var.line_num, var.file));
                     }

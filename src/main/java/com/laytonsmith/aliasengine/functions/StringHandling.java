@@ -319,7 +319,7 @@ public class StringHandling {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CString(args[0].val().trim(), args[0].line_num, args[0].file);
+            return new CString(args[0].val().trim(), args[0].getLineNum(), args[0].getFile());
         }
         public Boolean runAsync(){
             return null;

@@ -320,7 +320,7 @@ public class MScriptCompiler {
 
     public static GenericTreeNode<Construct> compile(List<Token> stream) throws ConfigCompileException {
         GenericTreeNode<Construct> tree = new GenericTreeNode<Construct>();
-        tree.setData(new Construct("root", Construct.ConstructType.NULL, 0, null));
+        tree.setData(new CNull(0, null));
         Stack<GenericTreeNode> parents = new Stack<GenericTreeNode>();
         Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
         constructCount.push(new AtomicInteger(0));
@@ -421,7 +421,7 @@ public class MScriptCompiler {
                 if(!tree.getData().val().matches("^_[^_].*")){
                     Integer [] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
                     if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())){
-                        throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().line_num);
+                        throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().getLineNum());
                     }
                 }
                 constructCount.pop();

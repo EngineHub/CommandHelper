@@ -29,23 +29,17 @@ import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
 import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
-import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 
 /**
  * A script is a section of code that has been preprocessed and split into separate 
@@ -145,7 +139,7 @@ public class Script {
                     if (tempNode.data instanceof Variable) {
                         ((Variable) tempNode.data).setVal(
                                 Static.resolveConstruct(
-                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.line_num, tempNode.data.file));
+                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getLineNum(), tempNode.data.getFile()));
                     }
                 }
                 File auto_include = new File("plugins/CommandHelper/auto_include.ms");
@@ -180,13 +174,13 @@ public class Script {
 
     public Construct eval(GenericTreeNode<Construct> c, final CommandSender player) throws CancelCommandException {
         final Construct m = c.getData();
-        if (m.ctype == ConstructType.FUNCTION) {
+        if (m.getCType() == ConstructType.FUNCTION) {
             try {
                 if (m.val().matches("^_[^_].*")) {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
                     if (p == null) {
-                        throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.line_num, m.file);
+                        throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
                     }
                     List<Construct> variables = new ArrayList<Construct>();
                     for (GenericTreeNode<Construct> child : c.getChildren()) {
@@ -203,30 +197,30 @@ public class Script {
                     _for fr = (_for) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fr.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
+                        return fr.execs(m.getLineNum(), m.getFile(), player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
                 } else if (f instanceof _if) {
                     _if fr = (_if) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fr.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
+                        return fr.execs(m.getLineNum(), m.getFile(), player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
                 } else if (f instanceof foreach) {
                     foreach fe = (foreach) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fe.execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2));
+                        return fe.execs(m.getLineNum(), m.getFile(), player, this, ch.get(0), ch.get(1), ch.get(2));
                     } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
                 } else if (f instanceof eval) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() > 1) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
                     GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val(), null));
                     StringBuilder b = new StringBuilder();
@@ -240,17 +234,17 @@ public class Script {
                 } else if (f instanceof _try) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() != 4 && ch.size() != 3) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to try", ExceptionType.InsufficientArgumentsException, m.line_num, m.file);
+                        throw new ConfigRuntimeException("Invalid number of parameters passed to try", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
                     GenericTreeNode<Construct> fourth = null;
                     if (ch.size() == 4) {
                         fourth = ch.get(3);
                     }
-                    return ((_try) f).execs(m.line_num, m.file, player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
+                    return ((_try) f).execs(m.getLineNum(), m.getFile(), player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
                 } else if (f instanceof proc) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() <= 1) {
-                        throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.line_num, m.file);
+                        throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
                     }
                     String name = "";
                     List<IVariable> vars = new ArrayList<IVariable>();
@@ -263,13 +257,13 @@ public class Script {
                             if (i == 0 && cons instanceof IVariable) {
                                 //Soon, this will be allowed, so anonymous procedures can be created, but for now
                                 //it's not allowed
-                                throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, m.line_num, m.file);
+                                throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
                             } else {
                                 if (i == 0 && !(cons instanceof IVariable)) {
                                     name = cons.val();
                                 } else {
                                     if (!(cons instanceof IVariable)) {
-                                        throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.line_num, m.file);
+                                        throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
                                     } else {
                                         vars.add((IVariable) cons);
                                     }
@@ -279,23 +273,23 @@ public class Script {
                     }
                     Procedure myProc = new Procedure(name, vars, tree, (CFunction) c.getData());
                     knownProcs.put(name, myProc);
-                    return new CVoid(m.line_num, m.file);
+                    return new CVoid(m.getLineNum(), m.getFile());
                 } else if (f instanceof is_proc) {
                     Construct[] ar = new Construct[c.getChildren().size()];
                     for (int i = 0; i < c.getChildren().size(); i++) {
                         ar[i] = eval(c.getChildAt(i), player);
                     }
                     ar = preResolveVariables(ar);
-                    return ((is_proc) f).execs(m.line_num, m.file, player, getProcList(), ar);
+                    return ((is_proc) f).execs(m.getLineNum(), m.getFile(), player, getProcList(), ar);
                 } else if (f instanceof call_proc) {
                     Construct[] ar = new Construct[c.getChildren().size()];
                     for (int i = 0; i < c.getChildren().size(); i++) {
                         ar[i] = eval(c.getChildAt(i), player);
                     }
                     ar = preResolveVariables(ar);
-                    return ((call_proc) f).execs(m.line_num, m.file, player, knownProcs, this.label, ar);
+                    return ((call_proc) f).execs(m.getLineNum(), m.getFile(), player, knownProcs, this.label, ar);
                 } else if (f instanceof include) {
-                    return ((include) f).execs(m.line_num, m.file, player, c.getChildren(), this);
+                    return ((include) f).execs(m.getLineNum(), m.getFile(), player, c.getChildren(), this);
                 }
 
 
@@ -335,7 +329,7 @@ public class Script {
                     }
                     if (!perm) {
                         throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
-                                ExceptionType.InsufficientPermissionException, m.line_num, m.file);
+                                ExceptionType.InsufficientPermissionException, m.getLineNum(), m.getFile());
                     }
                 }
                 Object[] a = args.toArray();
@@ -346,7 +340,7 @@ public class Script {
                     if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
                             || ca[i] instanceof CInt || ca[i] instanceof CNull
                             || ca[i] instanceof CString || ca[i] instanceof CVoid || ca[i] instanceof IVariable)) {
-                        throw new ConfigRuntimeException("Invalid Construct being passed as an argument to a function", null, m.line_num, m.file);
+                        throw new ConfigRuntimeException("Invalid Construct being passed as an argument to a function", null, m.getLineNum(), m.getFile());
                     }
                 }
                 f.varList(varList);
@@ -356,13 +350,13 @@ public class Script {
                 //TODO: Will revisit this in the future. For now, remove the ability for
                 //functions to run asyncronously.
                 //if(f.runAsync() == true || f.runAsync() == null){
-                Construct ret = f.exec(m.line_num, m.file, player, ca);
+                Construct ret = f.exec(m.getLineNum(), m.getFile(), player, ca);
                 return ret;
                 /*} else {
                 return blockingNonThreadSafe(player, new Callable<Construct>() {
                 
                 public Construct call() throws Exception {
-                return f.exec(m.line_num, player, ca);
+                return f.exec(m.getLineNum(), player, ca);
                 }
                 });
                 }*/
@@ -370,8 +364,8 @@ public class Script {
             } catch (ConfigCompileException ex) {
                 Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } else if (m.ctype == ConstructType.VARIABLE) {
-            return Static.resolveConstruct(m.val(), m.line_num, m.file);
+        } else if (m.getCType() == ConstructType.VARIABLE) {
+            return Static.resolveConstruct(m.val(), m.getLineNum(), m.getFile());
         } else {
             return m;
         }
@@ -432,10 +426,10 @@ public class Script {
                 lastJ = j;
                 Construct c = cleft.get(j);
                 String arg = args.get(j);
-                if (c.ctype != ConstructType.VARIABLE) {
-//                        || c.ctype == ConstructType.TOKEN
-//                        || c.ctype == ConstructType.LITERAL
-//                        || c.ctype == ConstructType.STRING || ConstructType.) {
+                if (c.getCType() != ConstructType.VARIABLE) {
+//                        || c.getCType() == ConstructType.TOKEN
+//                        || c.getCType() == ConstructType.LITERAL
+//                        || c.getCType() == ConstructType.STRING || ConstructType.) {
                     if (!c.val().equals(arg)) {
                         isAMatch = false;
                         continue;
@@ -458,7 +452,7 @@ public class Script {
                     }
                 }
                 if (j == cleft.size() - 1) {
-                    if (cleft.get(j).ctype == ConstructType.VARIABLE) {
+                    if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
                         Variable lv = (Variable) cleft.get(j);
                         if (lv.isFinal()) {
                             for (int a = j; a < args.size(); a++) {
@@ -473,8 +467,8 @@ public class Script {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            if (cleft.get(lastJ).ctype != ConstructType.VARIABLE
-                    || cleft.get(lastJ).ctype == ConstructType.VARIABLE
+            if (cleft.get(lastJ).getCType() != ConstructType.VARIABLE
+                    || cleft.get(lastJ).getCType() == ConstructType.VARIABLE
                     && !((Variable) cleft.get(lastJ)).isOptional()) {
                 isAMatch = false;
             }
@@ -497,7 +491,7 @@ public class Script {
         Variable v = null;
         for (int j = 0; j < cleft.size(); j++) {
             try {
-                if (cleft.get(j).ctype == ConstructType.VARIABLE) {
+                if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
                     if (((Variable) cleft.get(j)).getName().equals("$")) {
                         v = new Variable(((Variable) cleft.get(j)).getName(),
                                 lastVar.toString(), 0, null);
@@ -527,7 +521,7 @@ public class Script {
         Variable v = null;
         for (int j = 0; j < cleft.size(); j++) {
             try {
-                if (cleft.get(j).ctype == ConstructType.VARIABLE) {
+                if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
                     if (((Variable) cleft.get(j)).getName().equals("$")) {
                         for (int k = j; k < args.size(); k++) {
                             lastVar.append(args.get(k).trim()).append(" ");
@@ -735,7 +729,7 @@ public class Script {
                 try {
                     Construct c1 = thisCommand.get(k);
                     Construct c2 = thatCommand.get(k);
-                    if (c1.ctype != c2.ctype || ((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
+                    if (c1.getCType() != c2.getCType() || ((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
                         soFarAMatch = false;
                     } else {
                         //It's a literal, check to see if it's the same literal
@@ -785,7 +779,7 @@ public class Script {
                 scripts.get(j).compilerError = true;
                 this.compilerError = true;
                 throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
-                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).line_num);
+                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getLineNum());
             }
         }
 

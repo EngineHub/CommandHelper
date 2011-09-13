@@ -60,11 +60,11 @@ public class Static {
                 d = Double.parseDouble(c.val());
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting a number, but received " + c.val() + " instead",
-                        ExceptionType.CastException, c.line_num, c.file);
+                        ExceptionType.CastException, c.getLineNum(), c.getFile());
             }
         } else {
             throw new ConfigRuntimeException("Expecting a number, but recieved " + c.val() + " instead",
-                    ExceptionType.CastException, c.line_num, c.file);
+                    ExceptionType.CastException, c.getLineNum(), c.getFile());
         }
         return d;
     }
@@ -79,7 +79,7 @@ public class Static {
             return getNumber(c);
         } catch (ConfigRuntimeException e) {
             throw new ConfigRuntimeException("Expecting a double, but recieved " + c.val() + " instead",
-                    ExceptionType.CastException, c.line_num, c.file);
+                    ExceptionType.CastException, c.getLineNum(), c.getFile());
         }
     }
 
@@ -101,7 +101,7 @@ public class Static {
                 i = Integer.parseInt(c.val());
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead",
-                        ExceptionType.CastException, c.line_num, c.file);
+                        ExceptionType.CastException, c.getLineNum(), c.getFile());
             }
         }
         return i;
@@ -310,13 +310,13 @@ public class Static {
     }
 
     public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
-        if (variable.ctype == Construct.ConstructType.VARIABLE) {
+        if (variable.getCType() == Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {
                 if (var.getName().equals(((Variable) variable).getName())) {
-                    return Static.resolveConstruct(var.val(), var.line_num, var.file);
+                    return Static.resolveConstruct(var.val(), var.getLineNum(), var.getFile());
                 }
             }
-            return Static.resolveConstruct(((Variable)variable).getDefault(), variable.line_num, variable.file);
+            return Static.resolveConstruct(((Variable)variable).getDefault(), variable.getLineNum(), variable.getFile());
         } else {
             return variable;
         }
@@ -444,7 +444,7 @@ public class Static {
     
     public static Location GetLocation(Construct c, World w, int line_num, File f){
         if(!(c instanceof CArray)){
-            throw new ConfigRuntimeException("Expecting an array, received " + c.ctype, ExceptionType.FormatException, line_num, f);
+            throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, line_num, f);
         }
         CArray array = (CArray)c;
         World world = w;

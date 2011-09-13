@@ -64,7 +64,14 @@ public class SerializedPersistance implements Persistance{
             fis = new FileInputStream(storageLocation);
             in = new ObjectInputStream(fis);
             HashMap<String, Serializable> tempData = (HashMap<String, Serializable>) in.readObject();
-            String[] myNamespace = ("plugin." + user.getClass().getCanonicalName()).split("\\.");
+            String[] myNamespace;
+            if(user != null){
+                myNamespace = ("plugin." + user.getClass().getCanonicalName()).split("\\.");
+            } else {
+                //We're running from the command line
+                data = tempData;
+                return;
+            }
             Iterator i = tempData.entrySet().iterator();
             while (i.hasNext()) {
                 String[] key = ((Map.Entry)i.next()).getKey().toString().split("\\.");
@@ -309,17 +316,19 @@ public class SerializedPersistance implements Persistance{
      * Prints all of the stored values to the specified print stream.
      */
     public synchronized void printValues(PrintStream out) {
-        out.println("Printing all persisted values:");
-        Iterator i = data.entrySet().iterator();
-        while (i.hasNext()) {
-            Map.Entry e = ((Map.Entry) i.next());
-            out.println(e.getKey()
-                    + ":("
-                    + data.get(e.getKey().toString()).getClass().getCanonicalName()
-                    + ") "
-                    + data.get(e.getKey().toString()).toString());
+        try {
+            out.println("Printing all persisted values:");
+            load();
+            Iterator i = data.entrySet().iterator();
+            while (i.hasNext()) {
+                Map.Entry e = ((Map.Entry) i.next());
+                out.println(e.getKey()
+                        + ": " + data.get(e.getKey().toString()).toString());
+            }
+            out.println("Done printing persisted values");
+        } catch (Exception ex) {
+            Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
         }
-        out.println("Done printing persisted values");
     }
 
     public static void main(String[] args) throws Exception{

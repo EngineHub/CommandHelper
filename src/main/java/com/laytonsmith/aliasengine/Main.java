@@ -28,7 +28,6 @@ public class Main {
 
     public static void main(String[] args) throws Exception {
         System.out.println("Running with arguments: " + Arrays.asList(args));
-        PluginDescriptionFile me = loadSelf();
         try {
             Static.getPreferences().init(new File("CommandHelper/preferences.txt"));
             List l = Arrays.asList(args);
@@ -54,6 +53,7 @@ public class Main {
                         );
             }
             if (l.contains("--version")) {
+                PluginDescriptionFile me = loadSelf();
                 System.out.println("You are running CommandHelper version " + me.getVersion());
                 return;
             }

@@ -11,7 +11,6 @@ import java.io.File;
  * @author layton
  */
 public class Command extends Construct implements Cloneable {
-    public static final long serialVersionUID = 1L;
     
     public Command(String name, int line_num, File file) {
         super(name, ConstructType.COMMAND, line_num, file);
@@ -21,4 +20,5 @@ public class Command extends Construct implements Cloneable {
     public Command clone() throws CloneNotSupportedException{
         return (Command) super.clone();
     }
+
 }

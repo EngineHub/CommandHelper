@@ -5,6 +5,7 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.aliasengine.Constructs.*;
+import com.laytonsmith.aliasengine.functions.exceptions.MarshalException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import com.laytonsmith.aliasengine.functions.Function;
@@ -54,7 +55,7 @@ public class RandomTests {
     
     @Test public void testConstuctToString(){
         System.out.println("Construct.toString");
-        assertEquals("hello", new Construct("hello", Construct.ConstructType.STRING, 0, null).toString());
+        assertEquals("hello", new CString("hello", 0, null).toString());
     }
     
     @Test public void testClone() throws CloneNotSupportedException{
@@ -68,9 +69,38 @@ public class RandomTests {
         CString c8 = C.String("").clone();
         CVoid c9 = C.Void().clone();
         Command c10 = new Command("/c", 0, null).clone();
-        Construct c11 = new Construct("", Construct.ConstructType.TOKEN, 0, null).clone();
         IVariable c12 = new IVariable("@name", C.Null(), 0, null).clone();
         Variable c13 = new Variable("$name", "", false, false, 0, null);
+    }
+    
+    @Test public void testJSONEscapeString() throws MarshalException{
+        CArray ca = new CArray(0, null);
+        ca.push(C.Int(1));
+        ca.push(C.Double(2.2));
+        ca.push(C.String("string"));
+        ca.push(C.String("\"Quote\""));
+        ca.push(C.Boolean(true));
+        ca.push(C.Boolean(false));
+        ca.push(C.Null());
+        ca.push(C.Void());
+        ca.push(new Command("/Command", 0, null));
+        ca.push(new CArray(0, null, new CInt(1, 0, null)));
+        assertEquals("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Construct.json_encode(ca));
+    }
+    
+    @Test public void testJSONDecodeString() throws MarshalException{
+        CArray ca = new CArray(0, null);
+        ca.push(C.Int(1));
+        ca.push(C.Double(2.2));
+        ca.push(C.String("string"));
+        ca.push(C.String("\"Quote\""));
+        ca.push(C.Boolean(true));
+        ca.push(C.Boolean(false));
+        ca.push(C.Null());
+        ca.push(C.Void());
+        ca.push(new Command("/Command", 0, null));
+        ca.push(new CArray(0, null, new CInt(1, 0, null)));
+        StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]"));
     }
     
 }

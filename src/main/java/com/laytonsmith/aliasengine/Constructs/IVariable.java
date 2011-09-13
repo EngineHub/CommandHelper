@@ -53,4 +53,5 @@ public class IVariable extends Construct implements Cloneable{
         if(this.var_value != null) clone.var_value = this.var_value.clone();
         return (IVariable) clone;
     }
+
 }

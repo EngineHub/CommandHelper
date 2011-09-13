@@ -20,6 +20,7 @@ public class Variable extends Construct {
     private boolean optional;
     private boolean final_var;
     private Construct var_value;
+    
 
     public Variable(String name, String def, boolean optional, boolean final_var, int line_num, File file) {
         super(name, ConstructType.VARIABLE, line_num, file);
@@ -72,4 +73,5 @@ public class Variable extends Construct {
         if(this.var_value != null) clone.var_value = var_value;
         return clone;
     }
+
 }
