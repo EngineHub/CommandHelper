@@ -118,7 +118,7 @@ public class CommandHelperListener extends PlayerListener {
      * @param event Relevant event details
      */
     @Override
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {        
         String cmd = event.getMessage();        
         Player player = event.getPlayer();
         playDirty();

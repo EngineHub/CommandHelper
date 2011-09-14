@@ -142,6 +142,12 @@ public class DirtyRegisteredListener extends RegisteredListener {
         return new DirtyRegisteredListener(nListener, nExecutor, nPriority, nPlugin);
     }
     
+    /**
+     * This is the magic method we need to override. When we call the event, if it
+     * is "super cancelled", then we don't run it. Cancelled events are still run
+     * if they aren't "super cancelled", which mirrors existing behavior.
+     * @param event 
+     */
     @Override
     public void callEvent(Event event){
         //If it isn't super cancelled, call it, even if it is cancelled

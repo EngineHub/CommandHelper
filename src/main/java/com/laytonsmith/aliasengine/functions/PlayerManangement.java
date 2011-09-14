@@ -1147,7 +1147,7 @@ public class PlayerManangement {
         }
     }
 
-    @api public static class set_pinv implements Function {
+    /*@api*/ public static class set_pinv implements Function {
 
         public String getName() {
             return "set_pinv";
