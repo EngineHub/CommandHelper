@@ -1365,5 +1365,321 @@ public class PlayerManangement {
         
     }
     
+    @api public static class pexp implements Function{
+        public String getName() {
+            return "pexp";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[player]} Gets the experience of a player within this level.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 1){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            return new CInt(m.getExperience(), line_num, f);
+        }
+    }
+    
+    @api public static class set_pexp implements Function{
+        public String getName() {
+            return "set_pexp";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], xp} Sets the experience of a player within the current level.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            int xp = 0;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                xp = (int)Static.getInt(args[1]);
+            } else {
+                xp = (int)Static.getInt(args[0]);
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            m.setExperience(xp);
+            return new CVoid(line_num, f);
+        }
+    }
+        
+    @api public static class plevel implements Function{
+        public String getName() {
+            return "plevel";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[player]} Gets the experience of a player within this level.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 1){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            return new CInt(m.getLevel(), line_num, f);
+        }
+    }
+    
+    @api public static class set_plevel implements Function{
+        public String getName() {
+            return "set_plevel";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], level} Sets the level of a player.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            int xp = 0;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                xp = (int)Static.getInt(args[1]);
+            } else {
+                xp = (int)Static.getInt(args[0]);
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            m.setLevel(xp);
+            return new CVoid(line_num, f);
+        }
+    }
+    
+    @api public static class ptexp implements Function{
+        public String getName() {
+            return "ptexp";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[player]} Gets the total experience of a player.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 1){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            return new CInt(m.getTotalExperience(), line_num, f);
+        }
+    }
+    
+    @api public static class set_ptexp implements Function{
+
+        public String getName() {
+            return "set_ptexp";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], xp} Sets the total experience of a player.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            int xp = 0;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                xp = (int)Static.getInt(args[1]);
+            } else {
+                xp = (int)Static.getInt(args[0]);
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            m.setTotalExperience(xp);
+            return new CVoid(line_num, f);
+        }
+        
+    }
     
 }

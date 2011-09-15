@@ -16,19 +16,23 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.List;
 import org.bukkit.DyeColor;
+import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.CaveSpider;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Sheep;
+import org.bukkit.entity.Silverfish;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Spider;
@@ -158,7 +162,8 @@ public class Minecraft {
         public String docs() {
             return "void {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
                     + " to the location of the player. mobType can be one of: CHICKEN, COW, CREEPER, GHAST,"
-                    + " PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
+                    + " PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER,"
+                    + " ENDERMAN, SILVERFISH. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
                     + " specified.";
@@ -189,7 +194,8 @@ public class Minecraft {
 
         enum MOBS {
 
-            CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE
+            CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, 
+            SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -269,6 +275,14 @@ public class Minecraft {
                     case ZOMBIE:
                         mobType = Zombie.class;
                         break;
+                    case CAVESPIDER:
+                        mobType = CaveSpider.class;
+                        break;
+                    case ENDERMAN:
+                        mobType = Enderman.class;
+                        break;
+                    case SILVERFISH:
+                        mobType = Silverfish.class;
                 }
             } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("No mob of type " + mob + " exists",
@@ -292,5 +306,65 @@ public class Minecraft {
             }
             return new CVoid(line_num, f);
         }
+    }
+    
+    @api public static class make_effect implements Function{
+
+        public String getName() {
+            return "make_effect";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public String docs() {
+            return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
+                    + " the radius (or 64 by default). The effect can be one of the following:"
+                    + " BOW_FIRE, CLICK1, CLICK2, DOOR_TOGGLE, EXTINGUISH.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Location l = Static.GetLocation(args[0], (p instanceof Player?((Player)p).getWorld():null), line_num, f);
+            Effect e = null;
+            try{
+                e = Effect.valueOf(args[1].val().toUpperCase());
+                if(e.equals(Effect.RECORD_PLAY) || e.equals(Effect.SMOKE) || e.equals(Effect.STEP_SOUND)){
+                    throw new IllegalArgumentException();
+                }
+            } catch(IllegalArgumentException ex){
+                throw new ConfigRuntimeException("The effect type " + args[1].val() + " is not valid", ExceptionType.FormatException, line_num, f);
+            }
+            int data = 0;
+            int radius = 64;
+            if(args.length == 3){
+                radius = (int) Static.getInt(args[2]);
+            }
+            l.getWorld().playEffect(l, e, data, radius);
+            return new CVoid(line_num, f);
+        }
+        
     }
 }

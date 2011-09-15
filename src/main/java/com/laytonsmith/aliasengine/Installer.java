@@ -22,11 +22,11 @@ public class Installer {
         File auto_include = new File("plugins/CommandHelper/auto_include.ms");
         if(!auto_include.exists()){
             String sample = parseISToString(Installer.class.getResourceAsStream("/samp_auto_include.txt"));
-            try {
-                FileUtility.write(sample, auto_include);
-            } catch (IOException ex) {
-                Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
-            }
+//            try {
+//                FileUtility.write(sample, auto_include);
+//            } catch (IOException ex) {
+//                Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
+//            }
         }
     }
 

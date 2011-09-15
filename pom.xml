@@ -20,10 +20,12 @@
             <url>http://mvn2.sk89q.com/repo</url>
         </repository>
     <!-- Repository for Bukkit -->
+        <!--
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/artifactory/repo</url>
         </repository>
+        -->
         <repository>
             <id>bukkit-maven</id>
             <url>http://ci.bukkit.org/plugin/repository/project/dev-Bukkit/LastSuccessful/repository/</url>
