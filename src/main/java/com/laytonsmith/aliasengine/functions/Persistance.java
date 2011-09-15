@@ -24,7 +24,7 @@ import org.bukkit.command.CommandSender;
  */
 public class Persistance {
     public static String docs(){
-        return "Allows scripts to store data from execution to execution.";
+        return "Allows scripts to store data from execution to execution. See the guide on [[CommandHelper/Persistance|persistance]] for more information.";
     }
     
     @api public static class store_value implements Function{

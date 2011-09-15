@@ -25,6 +25,13 @@
             <url>http://repo.bukkit.org/artifactory/repo</url>
         </repository>
         <repository>
+            <id>bukkit-maven</id>
+            <url>http://ci.bukkit.org/plugin/repository/project/dev-Bukkit/LastSuccessful/repository/</url>
+            <snapshots>
+                <enabled>true</enabled>
+            </snapshots>
+        </repository>
+        <repository>
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2/</url>
         </repository>

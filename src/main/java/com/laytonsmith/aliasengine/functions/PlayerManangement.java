@@ -18,6 +18,7 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
+import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
@@ -1244,6 +1245,124 @@ public class PlayerManangement {
             }
             return new CVoid(line_num, f);
         }
+    }
+    
+    @api public static class pmode implements Function{
+
+        public String getName() {
+            return "pmode";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "string {[player]} Returns the player's game mode. It will be one of \"CREATIVE\" or \"SURVIVAL\".";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 1){
+                m = Static.getServer().getPlayer(args[0].val());
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("The specified player is offline", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            String mode = m.getGameMode().name();            
+            return new CString(mode, line_num, f);
+        }
+        
+    }
+    
+    @api public static class set_pmode implements Function {
+
+        public String getName() {
+            return "set_pmode";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], mode} Sets the player's game mode. mode must be either \"CREATIVE\" or \"SURVIVAL\""
+                    + " (case doesn't matter)";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.1.3";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            String mode = "";
+            GameMode gm;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 2){
+                m = Static.getServer().getPlayer(args[0].val());
+                mode = args[1].val();
+            } else {
+                mode = args[0].val();
+            }
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            
+            try{
+                gm = GameMode.valueOf(mode.toUpperCase());
+            } catch(IllegalArgumentException e){
+                throw new ConfigRuntimeException("Mode must be either 'CREATIVE' or 'SURVIVAL'", ExceptionType.FormatException, line_num, f);
+            }
+            m.setGameMode(gm);
+            return new CVoid(line_num, f);
+        }
+        
     }
     
     
