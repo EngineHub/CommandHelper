@@ -20,12 +20,12 @@
             <url>http://mvn2.sk89q.com/repo</url>
         </repository>
     <!-- Repository for Bukkit -->
-        <!--
+        
         <repository>
             <id>bukkit-repo</id>
             <url>http://repo.bukkit.org/artifactory/repo</url>
         </repository>
-        -->
+        
         <repository>
             <id>bukkit-maven</id>
             <url>http://ci.bukkit.org/plugin/repository/project/dev-Bukkit/LastSuccessful/repository/</url>
@@ -55,7 +55,7 @@
         </dependency>
         
         <!-- CraftBukkit Dependency for experimental features -->
-        <!--
+        
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
@@ -64,9 +64,9 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>minecraft-server</artifactId>
-            <version>1.7.3</version>
+            <version>1.8_01</version>
         </dependency>
-        -->
+        
         
     
         <dependency>
