@@ -652,8 +652,8 @@ public class DataHandling {
         }
         
     }
-    
-    /*@api*/ public static class proc implements Function{
+    //TODO: proc
+    @api public static class proc implements Function{
         
         IVariableList varList;
 
@@ -701,8 +701,8 @@ public class DataHandling {
         }
         
     }
-    
-    /*@api*/ public static class _return implements Function{
+    //TODO: proc
+    @api public static class _return implements Function{
 
         public String getName() {
             return "return";
@@ -744,7 +744,9 @@ public class DataHandling {
         }
         
     }
-    /*@api*/ public static class include implements Function{
+    
+    //TODO: proc
+    @api public static class include implements Function{
 
         public String getName() {
             return "include";
@@ -796,7 +798,8 @@ public class DataHandling {
         
     }
     
-    /*@api*/ public static class call_proc implements Function{
+    //TODO: proc
+    @api public static class call_proc implements Function{
 
         public String getName() {
             return "call_proc";
@@ -851,7 +854,8 @@ public class DataHandling {
         
     }
     
-    /*@api*/ public static class is_proc implements Function{
+    //TODO: proc
+    @api public static class is_proc implements Function{
 
         public String getName() {
             return "is_proc";
