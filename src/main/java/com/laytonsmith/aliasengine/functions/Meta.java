@@ -55,31 +55,23 @@ public class Meta {
                 return new CVoid(line_num, f);
             }
             if (args[0].val().equals("~op")) {
-                CommandSender m = null;
-                if (p.isOp()) {
-                    m = p;
-                } else {
-                    m = (Player) Proxy.newProxyInstance(Player.class.getClassLoader(), new Class[]{Player.class},
-                            new InvocationHandler() {
-
-                                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                                    if (method.getName().equals("isOp")) {
-                                        return true;
-                                    } else {
-                                        return method.invoke(p, args);
-                                    }
-                                }
-                            });
-                }
+                Boolean isOp = p.isOp();
+                
+                if(!isOp){
+                	p.setOp(true);
+                }                
+                
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                    if (m instanceof Player) {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) m).getName() + ": " + args[1].val().trim());
+                    if (p instanceof Player) {
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) p).getName() + ": " + args[1].val().trim());
                     } else {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[1].val().trim());
                     }
                 }
                 //m.chat(cmd);
-                Static.getServer().dispatchCommand(m, cmd);
+                Static.getServer().dispatchCommand(p, cmd);
+                
+                p.setOp(isOp);
             } else {
                 Player m = Static.getServer().getPlayer(args[0].val());
                 if (m != null && m.isOnline()) {
