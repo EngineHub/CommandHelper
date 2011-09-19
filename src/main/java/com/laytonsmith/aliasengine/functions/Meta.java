@@ -13,11 +13,13 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.lang.reflect.InvocationHandler;
-import java.lang.reflect.Method;
-import java.lang.reflect.Proxy;
+import java.lang.reflect.Field;
+import java.util.Set;
 import java.util.logging.Level;
+import net.minecraft.server.ServerConfigurationManager;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;
 
 /**
@@ -56,11 +58,11 @@ public class Meta {
             }
             if (args[0].val().equals("~op")) {
                 Boolean isOp = p.isOp();
-                
-                if(!isOp){
-                	p.setOp(true);
-                }                
-                
+
+                if (!isOp) {
+                    this.setOp(p, true);
+                }
+
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
                     if (p instanceof Player) {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) p).getName() + ": " + args[1].val().trim());
@@ -69,9 +71,11 @@ public class Meta {
                     }
                 }
                 //m.chat(cmd);
-                Static.getServer().dispatchCommand(p, cmd);
-                
-                p.setOp(isOp);
+                try {
+                    Static.getServer().dispatchCommand(p, cmd);
+                } finally {
+                    this.setOp(p, isOp);
+                }
             } else {
                 Player m = Static.getServer().getPlayer(args[0].val());
                 if (m != null && m.isOnline()) {
@@ -117,6 +121,41 @@ public class Meta {
 
         public Boolean runAsync() {
             return false;
+        }
+        
+        /**
+         * Set OP status for player without saving to ops.txt
+         * 
+         * @param player
+         * @param value 
+         */
+        protected void setOp(CommandSender player, Boolean value) {            
+            if (!(player instanceof Player) || player.isOp() == value) {
+                return;
+            }
+
+            try {
+                CraftServer server = (CraftServer) Bukkit.getServer();
+
+                Field opSetField = ServerConfigurationManager.class.getDeclaredField("h");
+                
+                opSetField.setAccessible(true); // make field mutable for reflection 
+                
+                Set opSet = (Set)opSetField.get(server.getHandle()); 
+                
+                // since all Java objects pass by reference, we don't need to set field back to object
+                if(value){
+                    opSet.add(player.getName().toLowerCase());
+                } else {
+                    opSet.remove(player.getName().toLowerCase());
+                }
+                
+                player.recalculatePermissions();
+                
+            } catch (Exception e) {
+                Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
+            }
+
         }
     }
 
