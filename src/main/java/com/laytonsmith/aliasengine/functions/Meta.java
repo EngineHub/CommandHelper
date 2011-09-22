@@ -63,7 +63,7 @@ public class Meta {
                             new InvocationHandler() {
 
                                 public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                                    if (method.getName().equals("isOp")) {
+                                    if (method.getName().equals("isOp") || method.getName().equals("isPermissionSet") || method.getName().equals("hasPermission")) {
                                         return true;
                                     } else {
                                         return method.invoke(p, args);
