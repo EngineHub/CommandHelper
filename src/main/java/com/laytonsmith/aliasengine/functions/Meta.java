@@ -14,12 +14,15 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationHandler;
+import java.lang.reflect.Method;
+import java.lang.reflect.Proxy;
 import java.util.Set;
 import java.util.logging.Level;
 import net.minecraft.server.ServerConfigurationManager;
 import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
-import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.entity.Player;
 
 /**
@@ -59,10 +62,6 @@ public class Meta {
             if (args[0].val().equals("~op")) {
                 Boolean isOp = p.isOp();
 
-                if (!isOp) {
-                    this.setOp(p, true);
-                }
-
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
                     if (p instanceof Player) {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) p).getName() + ": " + args[1].val().trim());
@@ -70,9 +69,13 @@ public class Meta {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[1].val().trim());
                     }
                 }
-                //m.chat(cmd);
+
+                if (!isOp) {
+                    this.setOp(p, true);
+                }
+
                 try {
-                    Static.getServer().dispatchCommand(p, cmd);
+                    Static.getServer().dispatchCommand(this.getOPCommandSender(p), cmd);
                 } finally {
                     this.setOp(p, isOp);
                 }
@@ -122,40 +125,67 @@ public class Meta {
         public Boolean runAsync() {
             return false;
         }
-        
+
         /**
          * Set OP status for player without saving to ops.txt
          * 
          * @param player
          * @param value 
          */
-        protected void setOp(CommandSender player, Boolean value) {            
+        protected void setOp(CommandSender player, Boolean value) {
             if (!(player instanceof Player) || player.isOp() == value) {
                 return;
             }
 
             try {
-                CraftServer server = (CraftServer) Bukkit.getServer();
+                Server server = Bukkit.getServer();
+
+                Class serverClass = Class.forName("org.bukkit.craftbukkit.CraftServer", true, server.getClass().getClassLoader());
+
+                if (!server.getClass().isAssignableFrom(serverClass)) {
+                    throw new IllegalStateException("Running server isn't CraftBukkit");
+                }
 
                 Field opSetField = ServerConfigurationManager.class.getDeclaredField("h");
-                
-                opSetField.setAccessible(true); // make field mutable for reflection 
-                
-                Set opSet = (Set)opSetField.get(server.getHandle()); 
-                
+
+                opSetField.setAccessible(true); // make field accessible for reflection 
+
+                // Reflection magic
+                Set opSet = (Set) opSetField.get((ServerConfigurationManager) serverClass.getMethod("getHandle").invoke(server));
+
                 // since all Java objects pass by reference, we don't need to set field back to object
-                if(value){
+                if (value) {
                     opSet.add(player.getName().toLowerCase());
                 } else {
                     opSet.remove(player.getName().toLowerCase());
                 }
-                
+
                 player.recalculatePermissions();
                 
-            } catch (Exception e) {
+            } catch (ClassNotFoundException e) {
+            } catch (IllegalStateException e) {
+            } catch (Throwable e) {
                 Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
             }
+        }
 
+        protected CommandSender getOPCommandSender(final CommandSender sender) {
+            if (sender.isOp()) {
+                return sender;
+            }
+
+            return (CommandSender) Proxy.newProxyInstance(sender.getClass().getClassLoader(),
+                    new Class[] { (sender instanceof Player) ? Player.class : CommandSender.class },
+                    new InvocationHandler() {
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            String methodName = method.getName();
+                            if ("isOp".equals(methodName) || "hasPermission".equals(methodName) || "isPermissionSet".equals(methodName)) {
+                                return true;
+                            } else {
+                                return method.invoke(sender, args);
+                            }
+                        }
+                    });            
         }
     }
 
