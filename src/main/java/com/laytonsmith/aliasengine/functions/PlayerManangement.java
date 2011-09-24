@@ -18,11 +18,13 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
+import net.minecraft.server.EntityPlayer;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -1789,6 +1791,60 @@ public class PlayerManangement {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             m.setFoodLevel(level);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class set_peffect implements Function{
+
+        public String getName() {
+            return "set_peffect";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{3, 4};
+        }
+
+        public String docs() {
+            return "void {player, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "0.0.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = Static.GetPlayer(args[0].val(), line_num, f);
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            int effect = (int)Static.getInt(args[1]);
+            int strength = (int)Static.getInt(args[2]);
+            int seconds = 30;
+            if(args.length == 4){
+                seconds = (int)Static.getInt(args[3]);
+            }
+            EntityPlayer ep = ((CraftPlayer)m).getHandle();
+            ep.d(new net.minecraft.server.MobEffect(effect, seconds * 20, strength));
             return new CVoid(line_num, f);
         }
         

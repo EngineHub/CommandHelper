@@ -71,6 +71,7 @@ public class Meta {
                                 }
                             });
                 }
+                
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
                     if (m instanceof Player) {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) m).getName() + ": " + args[1].val().trim());
