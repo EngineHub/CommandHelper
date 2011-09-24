@@ -17,8 +17,13 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.MobEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
@@ -28,6 +33,7 @@ import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.omg.CORBA.MARSHAL;
 
 /**
  *
@@ -1844,7 +1850,22 @@ public class PlayerManangement {
                 seconds = (int)Static.getInt(args[3]);
             }
             EntityPlayer ep = ((CraftPlayer)m).getHandle();
-            ep.d(new net.minecraft.server.MobEffect(effect, seconds * 20, strength));
+            Class epc = EntityPlayer.class;
+            try{
+                Method meth = epc.getDeclaredMethod("d", net.minecraft.server.MobEffect.class);
+                net.minecraft.server.MobEffect me = new net.minecraft.server.MobEffect(effect, seconds * 20, strength);
+                //ep.d(new net.minecraft.server.MobEffect(effect, seconds * 20, strength));
+                //Call it reflectively, because it's deobfuscated in newer versions of CB
+                meth.invoke(ep, me);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch(IllegalAccessException ex){
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch(NoSuchMethodException e){
+                
+            }
             return new CVoid(line_num, f);
         }
         

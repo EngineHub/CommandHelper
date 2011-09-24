@@ -413,6 +413,7 @@ public class Script {
 //        return null;
 //    }
     public boolean match(String command) {
+        boolean case_sensitive = (Boolean)Static.getPreferences().getPreference("case-sensitive");
         String[] cmds = command.split(" ");
         List<String> args = new ArrayList(Arrays.asList(cmds));
         boolean isAMatch = true;
@@ -430,7 +431,7 @@ public class Script {
 //                        || c.getCType() == ConstructType.TOKEN
 //                        || c.getCType() == ConstructType.LITERAL
 //                        || c.getCType() == ConstructType.STRING || ConstructType.) {
-                    if (!c.val().equals(arg)) {
+                    if (case_sensitive && !c.val().equals(arg) || !case_sensitive && !c.val().equalsIgnoreCase(arg)) {
                         isAMatch = false;
                         continue;
                     }
