@@ -239,8 +239,6 @@
                 <artifactId>maven-surefire-plugin</artifactId>
                 <version>2.9</version>
                 <configuration>
-                    <!-- Temporary while the proc tests are failing -->
-                    <skipTests>true</skipTests>
                     <includes>
                         <!-- Include the default test cases, since we're overwriting them -->
                         <include>**/*Test.java</include>

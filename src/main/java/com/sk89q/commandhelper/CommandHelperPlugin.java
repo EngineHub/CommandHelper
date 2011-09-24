@@ -28,6 +28,7 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.bukkit.migration.PermissionsResolverServerListener;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
 import java.io.IOException;
@@ -120,6 +121,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, interpreterListener, Priority.Lowest);
         registerEvent(Event.Type.PLAYER_QUIT, interpreterListener, Priority.Normal);
         registerEvent(Event.Type.SERVER_COMMAND, serverListener, Priority.Lowest);
+        (new PermissionsResolverServerListener(perms)).register(this);
         
         playerListener.loadGlobalAliases();
         interpreterListener.reload();
