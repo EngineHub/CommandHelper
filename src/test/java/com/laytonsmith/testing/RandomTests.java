@@ -152,6 +152,7 @@ public class RandomTests {
         assertEquals(0, l2.getPitch(), 0.0000000000000000001);
         assertEquals(50, l3.getPitch(), 0.0000000000000000001);
         assertEquals(50, l4.getPitch(), 0.0000000000000000001);
+        CommandHelperPlugin.myServer = null;
     }
     
 }
