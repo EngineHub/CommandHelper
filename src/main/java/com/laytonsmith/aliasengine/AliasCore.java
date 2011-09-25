@@ -196,9 +196,11 @@ public class AliasCore {
                 aliasConfig.getParentFile().mkdirs();
                 aliasConfig.createNewFile();
                 try {
-                    file_put_contents(aliasConfig,
-                            getStringResource(AliasCore.class.getResourceAsStream("/samp_config.txt")),
-                            "o");
+                    String samp_config = getStringResource(AliasCore.class.getResourceAsStream("/samp_config.txt"));
+                    //Because the sample config may have been written an a machine that isn't this type, replace all
+                    //line endings
+                    samp_config = samp_config.replaceAll("\n|\r\n", System.getProperty("line.separator"));
+                    file_put_contents(aliasConfig, samp_config, "o");
                 } catch (Exception e) {
                     logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
                 }

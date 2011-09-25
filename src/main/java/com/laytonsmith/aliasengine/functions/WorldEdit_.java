@@ -5,7 +5,6 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.CArray;
-import com.laytonsmith.aliasengine.Constructs.CDouble;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
@@ -71,11 +70,6 @@ public class WorldEdit_ {
             } else if(args.length == 1){
                 if(args[0] instanceof CArray){
                     l = Static.GetLocation(args[0], (m==null?null:m.getWorld()), line_num, f);
-                    setter = true;
-                }
-            } else if (args.length == 1) {
-                if (args[0] instanceof CArray) {
-                    l = Static.GetLocation(args[0], (m == null ? null : m.getWorld()), line_num, f);
                     setter = true;
                 } else {
                     m = Static.GetPlayer(args[0].val(), line_num, f);

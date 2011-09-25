@@ -129,6 +129,7 @@ public class CommandHelperInterpreterListener extends PlayerListener {
             interpreterMode.add(p.getName());
         } catch(Exception e){
             Static.SendMessage(p, ChatColor.RED + e.toString());
+            e.printStackTrace();
             interpreterMode.add(p.getName());
         }
     }

@@ -279,6 +279,12 @@ public class Static {
     }
 
     public static WorldEditPlugin getWorldEditPlugin() {
+        if(CommandHelperPlugin.wep == null){
+            Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
+            if(pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin){
+                CommandHelperPlugin.wep = (WorldEditPlugin)pwep;
+            }
+        }
         return CommandHelperPlugin.wep;
     }
 
