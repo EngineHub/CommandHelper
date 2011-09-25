@@ -5,10 +5,13 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import java.io.File;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.bukkit.command.CommandSender;
 
@@ -63,7 +66,74 @@ public class Regex {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            Pattern pattern = getPattern(args[0], line_num, f);
+            String subject = args[1].val();
+            CArray ret = new CArray(line_num, f);
+            Matcher m = pattern.matcher(subject);
+            if(m.find()){
+                ret.push(new CString(m.group(0), line_num, f));
+
+                for(int i = 1; i <= m.groupCount(); i++){
+                    ret.push(new CString(m.group(i), line_num, f));
+                }
+            }
+            return ret;
+        }
+        
+    }
+    
+    @api public static class reg_match_all implements Function{
+
+        public String getName() {
+            return "reg_match_all";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "array {pattern, subject} Searches subject for all matches to the regular expression given in pattern, unlike reg_match,"
+                    + " which just returns the first match.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Pattern pattern = getPattern(args[0], line_num, f);
+            String subject = args[1].val();
+            CArray fret = new CArray(line_num, f);
+            Matcher m = pattern.matcher(subject);
+            while(m.find()){
+                CArray ret = new CArray(line_num, f);
+                ret.push(new CString(m.group(0), line_num, f));
+
+                for(int i = 1; i <= m.groupCount(); i++){
+                    ret.push(new CString(m.group(i), line_num, f));
+                }
+                fret.push(ret);
+            }
+            return fret;
         }
         
     }
@@ -106,7 +176,14 @@ public class Regex {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            Pattern pattern = getPattern(args[0], line_num, f);
+            String replacement = args[1].val();
+            String subject = args[2].val();
+            String ret = "";
+            
+            ret = pattern.matcher(subject).replaceAll(replacement);
+            
+            return new CString(ret, line_num, f);
         }
         
     }
@@ -122,7 +199,8 @@ public class Regex {
         }
 
         public String docs() {
-            return "array {pattern, subject}";
+            return "array {pattern, subject} Splits a string on the given regex, and returns an array of the parts. If"
+                    + " nothing matched, an array with one element, namely the original subject, is returned.";
         }
 
         public ExceptionType[] thrown() {
@@ -148,8 +226,16 @@ public class Regex {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            Pattern pattern = getPattern(args[0], line_num, f);
+            String subject = args[1].val();
+            String [] rsplit = pattern.split(subject);
+            CArray ret = new CArray(line_num, f);
+            for(String split : rsplit){
+                ret.push(new CString(split, line_num, f));
+            }
+            return ret;
         }
+        
         
     }  
     
@@ -164,7 +250,7 @@ public class Regex {
         }
 
         public String docs() {
-            return "int {pattern, subject}";
+            return "int {pattern, subject} Counts the number of occurances in the subject.";
         }
 
         public ExceptionType[] thrown() {
@@ -190,7 +276,14 @@ public class Regex {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            Pattern pattern = getPattern(args[0], line_num, f);
+            String subject = args[1].val();
+            long ret = 0;
+            Matcher m = pattern.matcher(subject);
+            while(m.find()){
+                ret++;
+            }
+            return new CInt(ret, line_num, f);
         }
         
     }
