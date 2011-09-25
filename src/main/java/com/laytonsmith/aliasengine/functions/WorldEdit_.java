@@ -7,6 +7,7 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CDouble;
 import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
@@ -14,6 +15,13 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+
+import com.sk89q.worldedit.IncompleteRegionException;
+import com.sk89q.worldedit.bukkit.BukkitUtil;
+import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
+import com.sk89q.worldedit.bukkit.selections.Selection;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -48,41 +56,55 @@ public class WorldEdit_ {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            try {
-                Player m = null;
-                Location l = null;
-                boolean setter = false;
-
-                if (p instanceof Player) {
-                    m = (Player) p;
-                }
-                if (args.length == 2) {
-                    m = Static.GetPlayer(args[0].val(), line_num, f);
-                    l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+            Player m = null;
+            Location l = null;
+            boolean setter = false;
+            Static.checkPlugin("WorldEdit", line_num, f);
+            
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+                setter = true;
+            } else if(args.length == 1){
+                if(args[0] instanceof CArray){
+                    l = Static.GetLocation(args[0], (m==null?null:m.getWorld()), line_num, f);
                     setter = true;
-                } else if (args.length == 1) {
-                    if (args[0] instanceof CArray) {
-                        l = Static.GetLocation(args[0], (m == null ? null : m.getWorld()), line_num, f);
-                        setter = true;
-                    } else {
-                        m = Static.GetPlayer(args[0].val(), line_num, f);
-                    }
                 }
-
-                if (setter) {
-                    //m and l are not null at this point, so set location l for player m at point 1.
-                    //@zml
-                    return new CVoid(line_num, f);
+            } else if (args.length == 1) {
+                if (args[0] instanceof CArray) {
+                    l = Static.GetLocation(args[0], (m == null ? null : m.getWorld()), line_num, f);
+                    setter = true;
                 } else {
-                    //We are trying to return the value for Player m, so set it to l
-                    //@zml
-                    return new CArray(line_num, f,
-                            new CInt(l.getBlockX(), line_num, f),
-                            new CInt(l.getBlockY(), line_num, f),
-                            new CInt(l.getBlockZ(), line_num, f));
+                    m = Static.GetPlayer(args[0].val(), line_num, f);
                 }
-            } catch (NoClassDefFoundError e) {
-                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
+            }
+
+            if(setter){
+                Selection sel = Static.getWorldEditPlugin().getSelection(m);
+                if (!(sel instanceof CuboidSelection)) {
+                    throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
+                }
+                sel.getRegionSelector().selectPrimary(BukkitUtil.toVector(l));
+                return new CVoid(line_num, f);
+            } else {
+                Selection sel = Static.getWorldEditPlugin().getSelection(m);
+                if (!(sel instanceof CuboidSelection)) {
+                    throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
+                }
+                Vector pt = null;
+                try {
+                    pt = sel.getRegionSelector().getPrimaryPosition();
+                } catch (IncompleteRegionException e) {
+                    throw new ConfigRuntimeException(e.getMessage(), ExceptionType.PluginInternalException, line_num, f);
+                }
+                return new CArray(line_num, f,
+                        new CInt(pt.getBlockX(), line_num, f),
+                        new CInt(pt.getBlockY(), line_num, f),
+                        new CInt(pt.getBlockZ(), line_num, f),
+                        new CString(m.getWorld().getName(), line_num, f));
             }
         }
     }
@@ -106,41 +128,50 @@ public class WorldEdit_ {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            try {
-                Player m = null;
-                Location l = null;
-                boolean setter = false;
+            Player m = null;
+            Location l = null;
+            boolean setter = false;
+            Static.checkPlugin("WorldEdit", line_num, f);
 
-                if (p instanceof Player) {
-                    m = (Player) p;
-                }
-                if (args.length == 2) {
-                    m = Static.GetPlayer(args[0].val(), line_num, f);
-                    l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+            if (p instanceof Player) {
+                m = (Player)p;
+            }
+            if (args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+                setter = true;
+            } else if (args.length == 1){
+                if (args[0] instanceof CArray) {
+                    l = Static.GetLocation(args[0], (m==null?null:m.getWorld()), line_num, f);
                     setter = true;
-                } else if (args.length == 1) {
-                    if (args[0] instanceof CArray) {
-                        l = Static.GetLocation(args[0], (m == null ? null : m.getWorld()), line_num, f);
-                        setter = true;
-                    } else {
-                        m = Static.GetPlayer(args[0].val(), line_num, f);
-                    }
-                }
-
-                if (setter) {
-                    //m and l are not null at this point, so set location l for player m at point 2.
-                    //@zml
-                    return new CVoid(line_num, f);
                 } else {
-                    //We are trying to return the value for Player m, so set it to l
-                    //@zml
-                    return new CArray(line_num, f,
-                            new CInt(l.getBlockX(), line_num, f),
-                            new CInt(l.getBlockY(), line_num, f),
-                            new CInt(l.getBlockZ(), line_num, f));
+                    m = Static.GetPlayer(args[0].val(), line_num, f);
                 }
-            } catch (NoClassDefFoundError e) {
-                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
+            }
+
+            if(setter){
+                Selection sel = Static.getWorldEditPlugin().getSelection(m);
+                if (!(sel instanceof CuboidSelection)) {
+                    throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
+                }
+                sel.getRegionSelector().selectSecondary(BukkitUtil.toVector(l));
+                return new CVoid(line_num, f);
+            } else {
+                Selection sel = Static.getWorldEditPlugin().getSelection(m);
+                if (!(sel instanceof CuboidSelection)) {
+                    throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
+                }
+                Vector pt = null;
+                try {
+                    pt = ((CuboidRegion)sel.getRegionSelector().getRegion()).getPos2();
+                } catch (IncompleteRegionException e) {
+                    throw new ConfigRuntimeException(e.getMessage(), ExceptionType.PluginInternalException, line_num, f);
+                }
+                return new CArray(line_num, f,
+                        new CInt(pt.getBlockX(), line_num, f),
+                        new CInt(pt.getBlockY(), line_num, f),
+                        new CInt(pt.getBlockZ(), line_num, f),
+                        new CString(m.getWorld().getName(), line_num, f));
             }
         }
     }
