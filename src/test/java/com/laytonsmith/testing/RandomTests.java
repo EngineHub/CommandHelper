@@ -4,16 +4,24 @@
  */
 package com.laytonsmith.testing;
 
+import org.bukkit.Location;
+import org.bukkit.World;
 import com.laytonsmith.aliasengine.Constructs.*;
+import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.functions.exceptions.MarshalException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.FunctionList;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.Server;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static com.laytonsmith.testing.StaticTest.*;
+import static org.mockito.Mockito.*;
 
 /**
  *
@@ -101,6 +109,49 @@ public class RandomTests {
         ca.push(new Command("/Command", 0, null));
         ca.push(new CArray(0, null, new CInt(1, 0, null)));
         StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]"));
+    }
+    
+    @Test public void testReturnArrayFromProc() throws ConfigCompileException{
+        assertEquals("{1, 2, 3}", SRun("proc(_test, @var, assign(@array, array(1, 2)) array_push(@array, @var) return(@array)) _test(3)", null));
+    }
+    
+    @Test public void testStaticGetLocation(){
+        World fakeWorld = mock(World.class);
+        Server fakeServer = mock(Server.class);
+        when(fakeServer.getWorld("world")).thenReturn(fakeWorld);
+        CommandHelperPlugin.myServer = fakeServer;
+        CArray ca1 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3));
+        CArray ca2 = new CArray(0, null, C.onstruct("world"), C.onstruct(1), C.onstruct(2), C.onstruct(3));
+        CArray ca3 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
+        CArray ca4 = new CArray(0, null, C.onstruct("world"), C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
+        Location l1 = Static.GetLocation(ca1, fakeWorld, 0, null);
+        Location l2 = Static.GetLocation(ca2, fakeWorld, 0, null);
+        Location l3 = Static.GetLocation(ca3, fakeWorld, 0, null);
+        Location l4 = Static.GetLocation(ca4, fakeWorld, 0, null);
+        assertEquals(fakeWorld, l1.getWorld());
+        assertEquals(fakeWorld, l2.getWorld());
+        assertEquals(fakeWorld, l3.getWorld());
+        assertEquals(fakeWorld, l4.getWorld());
+        assertEquals(1, l1.getX(), 0.00000000000000001);
+        assertEquals(1, l2.getX(), 0.00000000000000001);
+        assertEquals(1, l4.getX(), 0.00000000000000001);
+        assertEquals(1, l4.getX(), 0.00000000000000001);
+        assertEquals(2, l1.getY(), 0.00000000000000001);
+        assertEquals(2, l2.getY(), 0.00000000000000001);
+        assertEquals(2, l3.getY(), 0.00000000000000001);
+        assertEquals(2, l4.getY(), 0.00000000000000001);
+        assertEquals(3, l1.getZ(), 0.00000000000000001);
+        assertEquals(3, l2.getZ(), 0.00000000000000001);
+        assertEquals(3, l3.getZ(), 0.00000000000000001);
+        assertEquals(3, l4.getZ(), 0.00000000000000001);
+        assertEquals(0, l1.getYaw(), 0.0000000000000000001);
+        assertEquals(0, l2.getYaw(), 0.0000000000000000001);
+        assertEquals(45, l3.getYaw(), 0.0000000000000000001);
+        assertEquals(45, l4.getYaw(), 0.0000000000000000001);
+        assertEquals(0, l1.getPitch(), 0.0000000000000000001);
+        assertEquals(0, l2.getPitch(), 0.0000000000000000001);
+        assertEquals(50, l3.getPitch(), 0.0000000000000000001);
+        assertEquals(50, l4.getPitch(), 0.0000000000000000001);
     }
     
 }

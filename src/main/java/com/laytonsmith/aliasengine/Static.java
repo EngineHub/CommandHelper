@@ -442,6 +442,23 @@ public class Static {
         return m;
     }
     
+    /**
+     * Location "objects" are mscript arrays that represent a location in game. There are 
+     * 4 usages:
+     * <ul>
+     * <li>(x, y, z)</li>
+     * <li>(world, x, y, z)</li>
+     * <li>(x, y, z, yaw, pitch)</li>
+     * <li>(world, x, y, z, yaw, pitch)</li>
+     * </ul>
+     * In all cases, the pitch and yaw default to 0, and the world defaults to the specified world.
+     * <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em> 
+     * @param c
+     * @param w
+     * @param line_num
+     * @param f
+     * @return 
+     */
     public static Location GetLocation(Construct c, World w, int line_num, File f){
         if(!(c instanceof CArray)){
             throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, line_num, f);

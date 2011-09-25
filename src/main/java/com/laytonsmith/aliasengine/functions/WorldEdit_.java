@@ -4,12 +4,17 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -35,12 +40,37 @@ public class WorldEdit_ {
         }
 
         public String docs() {
-            return "mixed {[player], array | [player]} Sets the player's point 1, or returns it if the array to set isn't specified";
+            return "mixed {[player], locationArray | [player]} Sets the player's point 1, or returns it if the array to set isn't specified";
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player m = null;
+            Location l = null;
+            boolean setter = false;
             
-            return null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+                setter = true;
+            } else if(args.length == 1){
+                if(args[0] instanceof CArray){
+                    l = Static.GetLocation(args[0], (m==null?null:m.getWorld()), line_num, f);
+                    setter = true;
+                } else {
+                    m = Static.GetPlayer(args[0].val(), line_num, f);
+                }
+            }
+
+            if(setter){
+                //m and l are not null at this point, so set location l for player m at point 1.
+                
+                return new CVoid(line_num, f);
+            } else {
+                //We are trying to return the value for Player m
+            }         
         }
         
     }
