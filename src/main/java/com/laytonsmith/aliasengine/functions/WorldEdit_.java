@@ -36,7 +36,7 @@ public class WorldEdit_ {
         return "Provides various methods for programmatically hooking into WorldEdit";
     }
 
-    public static class sk_pos1 extends SKFunction {
+    @api public static class sk_pos1 extends SKFunction {
 
         public String getName() {
             return "sk_pos1";
@@ -109,7 +109,7 @@ public class WorldEdit_ {
         }
     }
 
-    public static class sk_pos2 extends SKFunction {
+    @api public static class sk_pos2 extends SKFunction {
 
         public String getName() {
             return "sk_pos2";

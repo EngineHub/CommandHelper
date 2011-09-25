@@ -4,10 +4,12 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import java.io.File;
+import java.util.regex.Pattern;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -77,7 +79,8 @@ public class Regex {
         }
 
         public String docs() {
-            return "string {pattern, replacement, subject}";
+            return "string {pattern, replacement, subject} Replaces any occurances of pattern with the replacement in subject."
+                    + " Back references are allowed.";
         }
 
         public ExceptionType[] thrown() {
@@ -190,5 +193,30 @@ public class Regex {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         
+    }
+    
+    private static Pattern getPattern(Construct c, int line_num, File f){
+        String regex = "";
+        int flags = 0;
+        String sflags = "";
+        if(c instanceof CArray){
+            CArray ca = (CArray)c;
+            regex = ca.get(0, line_num).val();
+            sflags = ca.get(1, line_num).val();
+            for(int i = 0; i < sflags.length(); i++){
+                if(sflags.toLowerCase().charAt(i) == 'i'){
+                    flags |= Pattern.CASE_INSENSITIVE;
+                } else if(sflags.toLowerCase().charAt(i) == 'm'){
+                    flags |= Pattern.MULTILINE;
+                } else if(sflags.toLowerCase().charAt(i) == 's'){
+                    flags |= Pattern.DOTALL;
+                } else {
+                    throw new ConfigRuntimeException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), ExceptionType.FormatException, line_num, f);
+                }
+            }
+        } else {
+            regex = c.val();
+        }
+        return Pattern.compile(regex, flags);
     }
 }

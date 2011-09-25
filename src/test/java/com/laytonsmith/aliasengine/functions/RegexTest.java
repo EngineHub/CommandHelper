@@ -39,24 +39,24 @@ public class RegexTest {
     public void tearDown() {
     }
 
-//    @Test public void testRegMatch() throws ConfigCompileException{
-//        assertEquals("{word}", SRun("reg_match('word', 'This is a word')", null));
-//        assertEquals("{}", SRun("reg_match('word', 'This is an airplane')", null));
-//        assertEquals("{word, word}", SRun("reg_match('word', 'This is a word')", null));
-//        assertEquals("{This is a word, word}", SRun("reg_match('This is a (word)', 'This is a word')", null));
-//    }
-//    
-//    @Test public void testRegReplace() throws ConfigCompileException{
-//        assertEquals("word", SRun("reg_replace('This is a (word)', '$1', 'This is a word')", null));
-//        assertEquals("It's a wordy day!", SRun("reg_replace('sunn', 'word', 'It\\'s a sunny day!')", null));
-//    }
-//    
-//    @Test public void testRegSplit() throws ConfigCompileException{
-//        assertEquals("{one, two, three}", SRun("reg_split('|', 'one|two|three')", null));
-//    }
-//    
-//    @Test public void testRegCount() throws ConfigCompileException{
-//        assertEquals("3", SRun("reg_count('/', '///yay')", null));
-//        assertEquals("0", SRun("reg_count('poppycock', 'tiddly winks')", null));
-//    }
+    @Test public void testRegMatch() throws ConfigCompileException{
+        assertEquals("{word}", SRun("reg_match('word', 'This is a word')", null));
+        assertEquals("{}", SRun("reg_match('word', 'This is an airplane')", null));
+        assertEquals("{word, word}", SRun("reg_match('word', 'This is a word')", null));
+        assertEquals("{This is a word, word}", SRun("reg_match('This is a (word)', 'This is a word')", null));
+    }
+    
+    @Test public void testRegReplace() throws ConfigCompileException{
+        assertEquals("word", SRun("reg_replace('This is a (word)', '$1', 'This is a word')", null));
+        assertEquals("It's a wordy day!", SRun("reg_replace('sunn', 'word', 'It\\'s a sunny day!')", null));
+    }
+    
+    @Test public void testRegSplit() throws ConfigCompileException{
+        assertEquals("{one, two, three}", SRun("reg_split('|', 'one|two|three')", null));
+    }
+    
+    @Test public void testRegCount() throws ConfigCompileException{
+        assertEquals("3", SRun("reg_count('/', '///yay')", null));
+        assertEquals("0", SRun("reg_count('poppycock', 'tiddly winks')", null));
+    }
 }
