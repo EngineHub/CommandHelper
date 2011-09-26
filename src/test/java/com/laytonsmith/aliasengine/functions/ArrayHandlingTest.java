@@ -63,13 +63,28 @@ public class ArrayHandlingTest {
     }
 
     @Test
-    public void testArraySet() throws  ConfigCompileException {
+    public void testArraySet1() throws  ConfigCompileException {
         String script =
                 "assign(@array, array(1,2,3)) msg(@array) array_set(@array, 2, 1) msg(@array)";
         //MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
         StaticTest.Run(script, fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2, 3}");
         verify(fakePlayer).sendMessage("{1, 2, 1}");
+    }
+    
+    @Test public void testArraySet2() throws ConfigCompileException{
+        SRun("assign(@array, array(1, 2)) assign(@array2, @array) array_set(@array, 0, 2) msg(@array) msg(@array2)", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("{2, 2}");
+    }
+    
+    @Test public void testArrayReferenceBeingCorrect() throws ConfigCompileException{
+        SRun("assign(@array, array(1, 2))"
+                + "assign(@array2, @array[])"
+                + "array_set(@array, 0, 2)"
+                + "msg(@array)"
+                + "msg(@array2)", fakePlayer);
+        verify(fakePlayer).sendMessage("{2, 2}");
+        verify(fakePlayer).sendMessage("{1, 2}");
     }
     
     @Test(expected=ConfigRuntimeException.class)
@@ -150,5 +165,17 @@ public class ArrayHandlingTest {
         assertEquals("{0, -1, -2, -3, -4, -5, -6, -7, -8, -9}", SRun("range(0, -10, -1)", fakePlayer));
         assertEquals("{}", SRun("range(0)", fakePlayer));
         assertEquals("{}", SRun("range(1, 0)", fakePlayer));
+    }
+    
+    @Test public void testArraySliceAndNegativeIndexes() throws ConfigCompileException{
+        assertEquals("e", SRun("array(a, b, c, d, e)[-1]", null));
+        assertEquals("{a, b, c, d, e}", SRun("array(a, b, c, d, e)[]", null));
+        assertEquals("{b, c}", SRun("array(a, b, c, d, e)[1..2]", null));
+        assertEquals("{b, c, d, e}", SRun("array(a, b, c, d, e)[1..-1]", null));
+        assertEquals("1", SRun("array(a, array(1, 2), c, d, e)[0..1][1][0]", null));
+        assertEquals("{a, b}", SRun("array(a, b, c, d, e)[..1]", null));
+        assertEquals("{c, d, e}", SRun("array(a, b, c, d, e)[2..]", null));
+        assertEquals("{}", SRun("array(1, 2, 3, 4, 5)[3..0]", null));
+        assertEquals("{a, b}", SRun("array_get(array(a, b))", null));
     }
 }

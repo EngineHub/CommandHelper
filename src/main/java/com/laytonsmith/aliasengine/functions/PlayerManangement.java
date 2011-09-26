@@ -1850,22 +1850,8 @@ public class PlayerManangement {
                 seconds = (int)Static.getInt(args[3]);
             }
             EntityPlayer ep = ((CraftPlayer)m).getHandle();
-            Class epc = EntityPlayer.class;
-            try{
-                Method meth = epc.getDeclaredMethod("d", net.minecraft.server.MobEffect.class);
-                net.minecraft.server.MobEffect me = new net.minecraft.server.MobEffect(effect, seconds * 20, strength);
-                //ep.d(new net.minecraft.server.MobEffect(effect, seconds * 20, strength));
-                //Call it reflectively, because it's deobfuscated in newer versions of CB
-                meth.invoke(ep, me);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvocationTargetException ex) {
-                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-            } catch(IllegalAccessException ex){
-                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-            } catch(NoSuchMethodException e){
-                
-            }
+            ep.addEffect(new net.minecraft.server.MobEffect(effect, seconds * 20, strength));
+
             return new CVoid(line_num, f);
         }
         
