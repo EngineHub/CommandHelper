@@ -22,6 +22,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import net.minecraft.server.EntityLiving;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MobEffect;
 import org.bukkit.GameMode;
@@ -1850,8 +1851,37 @@ public class PlayerManangement {
                 seconds = (int)Static.getInt(args[3]);
             }
             EntityPlayer ep = ((CraftPlayer)m).getHandle();
-            ep.addEffect(new net.minecraft.server.MobEffect(effect, seconds * 20, strength));
-
+            Class epc = EntityLiving.class;
+            MobEffect me = new MobEffect(effect, seconds * 20, strength);
+            try{
+                Method meth = epc.getDeclaredMethod("d", net.minecraft.server.MobEffect.class);
+                //ep.d(new MobEffect(effect, seconds * 20, strength));
+                //Call it reflectively, because it's deobfuscated in newer versions of CB
+                meth.invoke(ep, me);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch(IllegalAccessException ex){
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch(NoSuchMethodException e){
+                try {
+                    //Look for the addEffect version                
+                    Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
+                    //ep.addEffect(me);
+                    meth.invoke(ep, me);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (NoSuchMethodException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SecurityException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
             return new CVoid(line_num, f);
         }
         
