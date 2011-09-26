@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.CFunction;
@@ -14,7 +13,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -23,17 +21,6 @@ import org.bukkit.entity.Player;
 public class FunctionList {
 
     private static ArrayList<Function> functions = new ArrayList<Function>();
-    private User u;
-//    private static Function[] internalFunctions = {new Echoes.die(), new Echoes.msg(), new PlayerManangment.player(),
-//        new BasicLogic._equals(), new BasicLogic._if(), new StringHandling.concat(), new Minecraft.data_values(), new Math.pow(),
-//        new Math.add(), new Math.subtract(), new Math.multiply(), new Math.divide(),
-//        new BasicLogic.lt(), new BasicLogic.gt(), new BasicLogic.lte(), new BasicLogic.gte(), new Math.mod(),
-//        new StringHandling.read(), new Meta.runas(), new StringHandling.sconcat(), new PlayerManangment.all_players(),
-//        new DataHandling._for(), new DataHandling.assign(), new DataHandling.array(), new ArrayHandling.array_get(),
-//        new ArrayHandling.array_push(), new ArrayHandling.array_set(), new ArrayHandling.array_size(),
-//        new Meta.run(), new BasicLogic.and(), new BasicLogic.or(), new BasicLogic.not()};
-    private static ArrayList<Function> iList = new ArrayList<Function>();
-
     static {
         //Initialize all our functions as soon as we start up
         initFunctions();
@@ -51,7 +38,7 @@ public class FunctionList {
                     String apiClass = (api.getEnclosingClass() != null
                             ? api.getEnclosingClass().getName().split("\\.")[api.getEnclosingClass().getName().split("\\.").length - 1]
                             : "<global>");
-                    if (Arrays.asList(api.getInterfaces()).contains(Function.class)) {
+                    if (Function.class.isAssignableFrom(api)) {
                         try {
                             Function f = (Function) api.newInstance();
                             registerFunction(f, apiClass);
@@ -62,7 +49,7 @@ public class FunctionList {
                             Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else {
-                        System.out.println("@api functions must implement " + FunctionList.class.getPackage().getName() + ".Function!");
+                        System.out.println("@api functions must implement " + FunctionList.class.getPackage().getName() + ".Function! " + api.getSimpleName() + " cannot be loaded.");
                     }
                 }
             }

@@ -13,10 +13,15 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.Set;
 import java.util.logging.Level;
+import net.minecraft.server.ServerConfigurationManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -55,31 +60,25 @@ public class Meta {
                 return new CVoid(line_num, f);
             }
             if (args[0].val().equals("~op")) {
-                CommandSender m = null;
-                if (p.isOp()) {
-                    m = p;
-                } else {
-                    m = (Player) Proxy.newProxyInstance(Player.class.getClassLoader(), new Class[]{Player.class},
-                            new InvocationHandler() {
+                Boolean isOp = p.isOp();
 
-                                public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                                    if (method.getName().equals("isOp")) {
-                                        return true;
-                                    } else {
-                                        return method.invoke(p, args);
-                                    }
-                                }
-                            });
-                }
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                    if (m instanceof Player) {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) m).getName() + ": " + args[1].val().trim());
+                    if (p instanceof Player) {
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) p).getName() + ": " + args[1].val().trim());
                     } else {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[1].val().trim());
                     }
                 }
-                //m.chat(cmd);
-                Static.getServer().dispatchCommand(m, cmd);
+
+                if (!isOp) {
+                    this.setOp(p, true);
+                }
+
+                try {
+                    Static.getServer().dispatchCommand(this.getOPCommandSender(p), cmd);
+                } finally {
+                    this.setOp(p, isOp);
+                }
             } else {
                 Player m = Static.getServer().getPlayer(args[0].val());
                 if (m != null && m.isOnline()) {
@@ -125,6 +124,68 @@ public class Meta {
 
         public Boolean runAsync() {
             return false;
+        }
+
+        /**
+         * Set OP status for player without saving to ops.txt
+         * 
+         * @param player
+         * @param value 
+         */
+        protected void setOp(CommandSender player, Boolean value) {
+            if (!(player instanceof Player) || player.isOp() == value) {
+                return;
+            }
+
+            try {
+                Server server = Bukkit.getServer();
+
+                Class serverClass = Class.forName("org.bukkit.craftbukkit.CraftServer", true, server.getClass().getClassLoader());
+
+                if (!server.getClass().isAssignableFrom(serverClass)) {
+                    throw new IllegalStateException("Running server isn't CraftBukkit");
+                }
+
+                Field opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
+
+                opSetField.setAccessible(true); // make field accessible for reflection 
+
+                // Reflection magic
+                Set opSet = (Set) opSetField.get((ServerConfigurationManager) serverClass.getMethod("getHandle").invoke(server));
+
+                // since all Java objects pass by reference, we don't need to set field back to object
+                if (value) {
+                    opSet.add(player.getName().toLowerCase());
+                } else {
+                    opSet.remove(player.getName().toLowerCase());
+                }
+
+                player.recalculatePermissions();
+                
+            } catch (ClassNotFoundException e) {
+            } catch (IllegalStateException e) {
+            } catch (Throwable e) {
+                Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
+            }
+        }
+
+        protected CommandSender getOPCommandSender(final CommandSender sender) {
+            if (sender.isOp()) {
+                return sender;
+            }
+
+            return (CommandSender) Proxy.newProxyInstance(sender.getClass().getClassLoader(),
+                    new Class[] { (sender instanceof Player) ? Player.class : CommandSender.class },
+                    new InvocationHandler() {
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            String methodName = method.getName();
+                            if ("isOp".equals(methodName) || "hasPermission".equals(methodName) || "isPermissionSet".equals(methodName)) {
+                                return true;
+                            } else {
+                                return method.invoke(sender, args);
+                            }
+                        }
+                    });            
         }
     }
 

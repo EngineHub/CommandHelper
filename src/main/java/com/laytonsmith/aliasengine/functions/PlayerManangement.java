@@ -17,15 +17,24 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.minecraft.server.EntityLiving;
+import net.minecraft.server.EntityPlayer;
+import net.minecraft.server.MobEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
+import org.omg.CORBA.MARSHAL;
 
 /**
  *
@@ -1789,6 +1798,147 @@ public class PlayerManangement {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             m.setFoodLevel(level);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class set_peffect implements Function{
+
+        public String getName() {
+            return "set_peffect";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{3, 4};
+        }
+
+        public String docs() {
+            return "void {player, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "0.0.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = Static.GetPlayer(args[0].val(), line_num, f);
+            if(m == null || !m.isOnline()){
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            int effect = (int)Static.getInt(args[1]);
+            int strength = (int)Static.getInt(args[2]);
+            int seconds = 30;
+            if(args.length == 4){
+                seconds = (int)Static.getInt(args[3]);
+            }
+            EntityPlayer ep = ((CraftPlayer)m).getHandle();
+            Class epc = EntityLiving.class;
+            MobEffect me = new MobEffect(effect, seconds * 20, strength);
+            try{
+                Method meth = epc.getDeclaredMethod("d", net.minecraft.server.MobEffect.class);
+                //ep.d(new MobEffect(effect, seconds * 20, strength));
+                //Call it reflectively, because it's deobfuscated in newer versions of CB
+                meth.invoke(ep, me);
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (InvocationTargetException ex) {
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch(IllegalAccessException ex){
+                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+            } catch(NoSuchMethodException e){
+                try {
+                    //Look for the addEffect version                
+                    Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
+                    //ep.addEffect(me);
+                    meth.invoke(ep, me);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (NoSuchMethodException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (SecurityException ex) {
+                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class set_phealth implements Function{
+
+        public String getName() {
+            return "set_phealth";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], health} Sets the player's health. health should be an integer from 0-20.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            int health = 0;
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                health = (int)Static.getInt(args[1]);
+            } else {
+                health = (int)Static.getInt(args[0]);
+            }
+            if(health < 0 || health > 20){
+                throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, line_num, f);
+            }
+            m.setHealth(health);
             return new CVoid(line_num, f);
         }
         

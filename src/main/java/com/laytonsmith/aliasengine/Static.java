@@ -17,9 +17,12 @@ import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
+import java.nio.channels.FileLockInterruptionException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
+
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Server;
@@ -28,6 +31,7 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
+import org.bukkit.plugin.Plugin;
 
 /**
  * This class contains several static methods to get various objects that really should be static in the first
@@ -268,13 +272,27 @@ public class Static {
             a.add(new Preference("base-dir", "", Type.STRING, "The base directory that scripts can read and write to. If left blank, then the default of the Bukkit directory will be used. "
                     + "This setting affects functions like include and read."));
             a.add(new Preference("play-dirty", "false", Type.BOOLEAN, "Makes CommandHelper play dirty and break all sorts of programming rules, so that other plugins can't interfere with the operations that you defined. Note that doing this essentially makes CommandHelper have absolute say over commands. Use this setting only if you can't get another plugin to cooperate with CH, because it is a global setting."));
+            a.add(new Preference("case-sensitive", "true", Type.BOOLEAN, "Makes command matching be case sensitive. If set to false, if your config defines /cmd, but the user runs /CMD, it will trigger the command anyways."));
             com.sk89q.commandhelper.CommandHelperPlugin.prefs = new Preferences("CommandHelper", getLogger(), a);
         }
         return com.sk89q.commandhelper.CommandHelperPlugin.prefs;
     }
 
     public static WorldEditPlugin getWorldEditPlugin() {
+        if(CommandHelperPlugin.wep == null){
+            Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
+            if(pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin){
+                CommandHelperPlugin.wep = (WorldEditPlugin)pwep;
+            }
+        }
         return CommandHelperPlugin.wep;
+    }
+
+    public static void checkPlugin(String name, int line_number, File f) throws ConfigRuntimeException {
+        if (Bukkit.getServer().getPluginManager().getPlugin(name) == null) {
+            throw new ConfigRuntimeException("Needed plugin " + name + " not found!",
+                    ExceptionType.InvalidPluginException, line_number, f);
+        }
     }
 
     /**
@@ -441,6 +459,23 @@ public class Static {
         return m;
     }
     
+    /**
+     * Location "objects" are mscript arrays that represent a location in game. There are 
+     * 4 usages:
+     * <ul>
+     * <li>(x, y, z)</li>
+     * <li>(world, x, y, z)</li>
+     * <li>(x, y, z, yaw, pitch)</li>
+     * <li>(world, x, y, z, yaw, pitch)</li>
+     * </ul>
+     * In all cases, the pitch and yaw default to 0, and the world defaults to the specified world.
+     * <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em> 
+     * @param c
+     * @param w
+     * @param line_num
+     * @param f
+     * @return 
+     */
     public static Location GetLocation(Construct c, World w, int line_num, File f){
         if(!(c instanceof CArray)){
             throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, line_num, f);

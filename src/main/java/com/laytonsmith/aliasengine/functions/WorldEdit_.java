@@ -4,14 +4,23 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CString;
+import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
-import com.sk89q.worldedit.LocalSession;
 import java.io.File;
+
+import com.sk89q.worldedit.bukkit.BukkitUtil;
+import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.CuboidRegionSelector;
+import com.sk89q.worldedit.regions.RegionSelector;
+import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -20,115 +29,275 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class WorldEdit_ {
-    public static String docs(){
+
+    public static String docs() {
         return "Provides various methods for programmatically hooking into WorldEdit";
     }
-    
-    public static class hpos1 implements Function{
+
+    @api public static class sk_pos1 extends SKFunction {
 
         public String getName() {
-            return "hpos1";
+            return "sk_pos1";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1,2,4};
+            return new Integer[]{0, 1, 2};
         }
-        
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+
+        public String docs() {
+            return "mixed {[player], locationArray | [player]} Sets the player's point 1, or returns it if the array to set isn't specified. If"
+                    + " the location is returned, it is returned as a 4 index array:(x, y, z, world)";
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player m = null;
+            Location l = null;
+            boolean setter = false;
+            Static.checkPlugin("WorldEdit", line_num, f);
+            
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+                setter = true;
+            } else if(args.length == 1){
+                if(args[0] instanceof CArray){
+                    l = Static.GetLocation(args[0], (m==null?null:m.getWorld()), line_num, f);
+                    setter = true;
+                } else {
+                    m = Static.GetPlayer(args[0].val(), line_num, f);
+                }
+            }
+
+            if (m == null) {
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+
+            RegionSelector sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld()));
+            if (!(sel instanceof CuboidRegionSelector)) {
+                throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
+            }
+            if(setter){
+                sel.selectPrimary(BukkitUtil.toVector(l));
+                return new CVoid(line_num, f);
+            } else {
+                Vector pt = ((CuboidRegion) sel.getIncompleteRegion()).getPos1();
+                if (pt == null) throw new ConfigRuntimeException("Point in " + this.getName() +  "undefined", line_num, f);
+                return new CArray(line_num, f,
+                        new CInt(pt.getBlockX(), line_num, f),
+                        new CInt(pt.getBlockY(), line_num, f),
+                        new CInt(pt.getBlockZ(), line_num, f),
+                        new CString(m.getWorld().getName(), line_num, f));
+            }
+        }
+    }
+
+    @api public static class sk_pos2 extends SKFunction {
+
+        public String getName() {
+            return "sk_pos2";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1, 2};
+        }
+
+        public String docs() {
+            return "mixed {[player], array | [player]} Sets the player's point 2, or returns it if the array to set isn't specified";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Player m = null;
+            Location l = null;
+            boolean setter = false;
+            Static.checkPlugin("WorldEdit", line_num, f);
+
+            if (p instanceof Player) {
+                m = (Player)p;
+            }
+            if (args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+                setter = true;
+            } else if (args.length == 1){
+                if (args[0] instanceof CArray) {
+                    l = Static.GetLocation(args[0], (m==null?null:m.getWorld()), line_num, f);
+                    setter = true;
+                } else {
+                    m = Static.GetPlayer(args[0].val(), line_num, f);
+                }
+            }
+
+            if (m == null) {
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+
+            RegionSelector sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld()));
+            if (!(sel instanceof CuboidRegionSelector)) {
+                throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
+            }
+
+            if(setter){
+                sel.selectSecondary(BukkitUtil.toVector(l));
+                return new CVoid(line_num, f);
+            } else {
+                Vector pt = ((CuboidRegion)sel.getIncompleteRegion()).getPos2();
+                if (pt == null) throw new ConfigRuntimeException("Point in " + this.getName() +  "undefined", line_num, f);
+                return new CArray(line_num, f,
+                        new CInt(pt.getBlockX(), line_num, f),
+                        new CInt(pt.getBlockY(), line_num, f),
+                        new CInt(pt.getBlockZ(), line_num, f),
+                        new CString(m.getWorld().getName(), line_num, f));
+            }
+        }
+    }
+
+    public static class sk_points extends SKFunction {
+
+        public String getName() {
+            return "sk_points";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1, 2};
+        }
+
+        public String docs() {
+            return "mixed {[player], arrayOfArrays | [player]} Sets a series of points, or returns the poly selection for this player, if one is specified."
+                    + " The array should be an array of arrays, and the arrays should be array(x, y, z)";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            try {
+                return null;
+            } catch (NoClassDefFoundError e) {
+                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
+            }
+        }
+    }
+
+    public static class sk_region_info extends SKFunction {
+
+        public String getName() {
+            return "sk_region_info";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{};
+        }
+
+        public String docs() {
+            return "array {region} Given a region name, returns an array of information about that region, as follows:<ul>"
+                    + " <li>0 - An array of points that define this region</li>"
+                    + " <li>1 - An array of owners of this region</li>"
+                    + " <li>2 - An array of members of this region</li>"
+                    + " <li>3 - An array of arrays of this region's flags, where each array is: array(flag_name, value)</li>"
+                    + " <li>4 - This region's priority</li>"
+                    + " <li>5 - The volume of this region (in meters cubed)</li>"
+                    + "</ul>"
+                    + "If the region cannot be found, a PluginInternalException is thrown.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            try {
+                return null;
+            } catch (NoClassDefFoundError e) {
+                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
+            }
+        }
+    }
+
+    public static class sk_region_overlaps extends SKFunction {
+
+        public String getName() {
+            return "sk_region_overlaps";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "boolean {region1, region2, [regionN...]} Returns true or false whether or not the specified regions overlap.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            try {
+                return null;
+            } catch (NoClassDefFoundError e) {
+                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
+            }
+        }
+    }
+
+    public static class sk_all_regions extends SKFunction {
+
+        public String getName() {
+            return "sk_all_regions";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "array {[world]} Returns all the regions in all worlds, or just the one world, if specified.";
+        }
+
         public ExceptionType[] thrown() {
             return new ExceptionType[]{};
         }
 
-        public String docs() {
-            return "array {player | player, array | player, x, y, z} In the first usage, returns an array for the player's currently selected primary point,"
-                    + " selected through WorldEdit. In the second usage, sets the player's primary point to the specified x,y,z location. In the third usage,"
-                    + " it works the same, except you needn't send an array.";
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public String since() {
-            return "3.1.2";
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Player player = p.getServer().getPlayer(args[0].val());
-            if(args.length == 1){
-                //Getter
-                LocalSession ls = Static.getWorldEditPlugin().getSession(player);
-                
-            } else {
-                int x;
-                int y;
-                int z;
-                if(args[1] instanceof CArray){
-                    CArray ca = (CArray)args[1];
-                    x = (int)Static.getInt(ca.get(0, line_num));
-                    y = (int)Static.getInt(ca.get(1, line_num));
-                    z = (int)Static.getInt(ca.get(2, line_num));
-                } else {
-                    x = (int)Static.getInt(args[1]);
-                    y = (int)Static.getInt(args[2]);
-                    z = (int)Static.getInt(args[3]);
-                }
-                //Setter
+            try {
+                return null;
+            } catch (NoClassDefFoundError e) {
+                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
             }
-            return null;
         }
-        
     }
-    public static class hpos2 implements Function{
 
-        public String getName() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
+    public static abstract class SKFunction implements Function {
 
-        public Integer[] numArgs() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public String docs() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public ExceptionType[] thrown() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
         public boolean isRestricted() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return true;
         }
 
         public void varList(IVariableList varList) {
-            throw new UnsupportedOperationException("Not supported yet.");
         }
 
         public boolean preResolveVariables() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return true;
         }
 
         public String since() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return "3.2.0";
         }
 
         public Boolean runAsync() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return false;
         }
-
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
     }
 }

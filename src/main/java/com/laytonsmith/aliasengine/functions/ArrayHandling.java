@@ -24,7 +24,8 @@ import org.bukkit.command.CommandSender;
  */
 public class ArrayHandling {
     public static String docs(){
-        return "This class contains functions that provide a way to manipulate arrays. To create an array, use the <code>array</code> function.";
+        return "This class contains functions that provide a way to manipulate arrays. To create an array, use the <code>array</code> function."
+                + " For more detailed information on array usage, see the page on [[CommandHelper/Arrays|arrays]]";
     }
     @api public static class array_size implements Function{
 
@@ -78,12 +79,63 @@ public class ArrayHandling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{1, 2};
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                return ((CArray)args[0]).get((int)Static.getInt(args[1]), line_num);
+                CArray ca = (CArray)args[0];
+                String index = "0..-1";
+                if(args.length == 2){
+                    index = args[1].val();
+                }
+                if(index.contains("..")){
+                    //It's a range
+                    int start = 0;
+                    int finish = 0;
+                    String[] split = index.split("\\.\\.");
+                    try{
+                        if(split[0].isEmpty()){
+                            start = 0;
+                        } else {
+                            start = Integer.parseInt(split[0]);
+                        }
+                        if(split.length == 1 || split[1].isEmpty()){
+                            finish = ca.size() - 1;
+                        } else {
+                            finish = Integer.parseInt(split[1]);
+                        }
+                        //Convert negative indexes 
+                        if(start < 0){
+                            start = ca.size() + start;
+                        }
+                        if(finish < 0){
+                            finish = ca.size() + finish;
+                        }
+                        CArray na = new CArray(line_num, f);
+                        if(finish <= start){
+                            //return an empty array in cases where the indexes don't make sense
+                            return na;
+                        }
+                        for(int i = start; i <= finish; i++){
+                            try{
+                                na.push(ca.get(i, line_num).clone());
+                            } catch(CloneNotSupportedException e){
+                                na.push(ca.get(i, line_num));
+                            }
+                        }
+                        return na;
+                    } catch(NumberFormatException e){
+                        throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, line_num, f);
+                    }
+                } else {
+                    int iindex = (int)Static.getInt(args[1]);
+                    if(iindex < 0){
+                        //negative index, convert to positive index
+                        iindex = ca.size() + iindex;
+                    }
+                    return ca.get(iindex, line_num);
+                }
             } else{
                 throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, line_num, f);
             }
