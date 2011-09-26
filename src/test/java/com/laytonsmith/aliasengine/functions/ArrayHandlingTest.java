@@ -78,11 +78,13 @@ public class ArrayHandlingTest {
     }
     
     @Test public void testArrayReferenceBeingCorrect() throws ConfigCompileException{
-        SRun("assign(@array, array(1, 2))"
-                + "assign(@array2, @array[])"
-                + "array_set(@array, 0, 2)"
-                + "msg(@array)"
-                + "msg(@array2)", fakePlayer);
+        SRun("assign(@array, array(1, 2)) assign(@array2, @array[]) array_set(@array, 0, 2) msg(@array) msg(@array2)", fakePlayer);
+        verify(fakePlayer).sendMessage("{2, 2}");
+        verify(fakePlayer).sendMessage("{1, 2}");
+    }
+    
+    @Test public void testArrayReferenceBeingCorrectWithArrayGet() throws ConfigCompileException{
+        SRun("assign(@array, array(1, 2)) assign(@array2, array_get(@array)) array_set(@array, 0, 2) msg(@array) msg(@array2)", fakePlayer);
         verify(fakePlayer).sendMessage("{2, 2}");
         verify(fakePlayer).sendMessage("{1, 2}");
     }
