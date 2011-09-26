@@ -1,6 +1,9 @@
 #This file is generated automatically. Changes made to the values of this file
 #will persist, but changes to comments will not.
 
+#Makes command matching be case sensitive. If set to false, if your config defines /cmd, but the user runs /CMD, it will trigger the command anyways.
+case-sensitive=true
+
 #Whether or not to display warnings in the console, while compiling
 show-warnings=true
 

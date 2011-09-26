@@ -167,14 +167,6 @@ public class MScriptCompilerTest {
     public void testExecute3() {
         try {
             String script =
-                    "[]";
-            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
-            fail("Test passed, but wasn't supposed to");
-        } catch (ConfigCompileException ex) {
-            //Passed
-        }
-        try {
-            String script =
                     "[";
             MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
             fail("Test passed, but wasn't supposed to");

@@ -338,8 +338,10 @@ public class MScriptCompiler {
                 arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
                 continue;
             } else if(t.type.equals(TType.RSQUARE_BRACKET)){
+                boolean emptyArray = false;
                 if(prev.type.equals(TType.LSQUARE_BRACKET)){
-                    throw new ConfigCompileException("Empty array_get operator ([])", t.line_num); 
+                    //throw new ConfigCompileException("Empty array_get operator ([])", t.line_num); 
+                    emptyArray = true;
                 }
                 if(arrayStack.size() == 1){
                     throw new ConfigCompileException("Mismatched square bracket", t.line_num);
@@ -347,7 +349,12 @@ public class MScriptCompiler {
                 int array = arrayStack.pop().get();
                 int index = array + 1;
                 GenericTreeNode<Construct> myArray = tree.getChildAt(array);
-                GenericTreeNode<Construct> myIndex = tree.getChildAt(index);
+                GenericTreeNode<Construct> myIndex;
+                if(!emptyArray){
+                    myIndex = tree.getChildAt(index);
+                } else {
+                    myIndex = new GenericTreeNode<Construct>(new CString("0..-1", t.line_num, t.file));
+                }
                 tree.setChildren(tree.getChildren().subList(0, array));
                 GenericTreeNode<Construct> arrayGet = new GenericTreeNode<Construct>(new CFunction("array_get", t.line_num, t.file));
                 arrayGet.addChild(myArray);
