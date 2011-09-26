@@ -1887,4 +1887,61 @@ public class PlayerManangement {
         
     }
     
+    @api public static class set_phealth implements Function{
+
+        public String getName() {
+            return "set_phealth";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], health} Sets the player's health. health should be an integer from 0-20.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            if(p instanceof Player){
+                m = (Player)p;
+            }
+            int health = 0;
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                health = (int)Static.getInt(args[1]);
+            } else {
+                health = (int)Static.getInt(args[0]);
+            }
+            if(health < 0 || health > 20){
+                throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, line_num, f);
+            }
+            m.setHealth(health);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
 }

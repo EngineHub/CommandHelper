@@ -82,7 +82,7 @@ public class WorldEdit_ {
             }
 
             if(setter){
-                Region sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld())).getIncompleteRegion();
+                Region sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(l.getWorld())).getIncompleteRegion();
                 if (!(sel instanceof CuboidRegion)) {
                     throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
                 }
@@ -149,7 +149,7 @@ public class WorldEdit_ {
             }
 
             if(setter){
-                Region sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld())).getIncompleteRegion();
+                Region sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(l.getWorld())).getIncompleteRegion();
                 if (!(sel instanceof CuboidRegion)) {
                     throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
                 }
