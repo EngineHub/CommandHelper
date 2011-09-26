@@ -302,17 +302,21 @@ public class Math {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{1, 2};
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
                 IVariable v = varList.get(((IVariable)args[0]).getName());
                 Construct newVal;
+                long value = 1;
+                if(args.length == 2){
+                    value = Static.getInt(args[1]);
+                }
                 if(Static.anyDoubles(v.ival())){
-                    newVal = new CDouble(Static.getDouble(v.ival()) + 1, line_num, f);
+                    newVal = new CDouble(Static.getDouble(v.ival()) + value, line_num, f);
                 } else {
-                    newVal = new CInt(Static.getInt(v.ival()) + 1, line_num, f);
+                    newVal = new CInt(Static.getInt(v.ival()) + value, line_num, f);
                 }
                 v = new IVariable(v.getName(), newVal, line_num, f);
                 varList.set(v);
@@ -359,17 +363,21 @@ public class Math {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{1, 2};
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
                 IVariable v = varList.get(((IVariable)args[0]).getName());
+                long value = 1;
+                if(args.length == 2){
+                    value = Static.getInt(args[1]);
+                }
                 Construct newVal;
                 if(Static.anyDoubles(v.ival())){
-                    newVal = new CDouble(Static.getDouble(v.ival()) - 1, line_num, f);
+                    newVal = new CDouble(Static.getDouble(v.ival()) - value, line_num, f);
                 } else {
-                    newVal = new CInt(Static.getInt(v.ival()) - 1, line_num, f);
+                    newVal = new CInt(Static.getInt(v.ival()) - value, line_num, f);
                 }
                 v = new IVariable(v.getName(), newVal, line_num, f);
                 varList.set(v);
@@ -380,7 +388,7 @@ public class Math {
         }
 
         public String docs() {
-            return "ivar {var} Subtracts 1 to var, and stores the new value. Equivalent to --var in other languages. Expects ivar to be a variable, then"
+            return "ivar {var, [value]} Subtracts value from var, and stores the new value. Value defaults to 1. Equivalent to --var (or var -= value) in other languages. Expects ivar to be a variable, then"
                     + " returns the ivar.";
         }
         

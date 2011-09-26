@@ -156,6 +156,19 @@ public class MScriptCompiler {
                         buf.append("'");
                     } else if(c2 == 'n'){
                         buf.append("\n");
+                    } else if(c2 == 'u'){
+                        //Grab the next 4 characters, and check to see if they are numbers
+                        StringBuilder unicode = new StringBuilder();
+                        for(int m = 0; m < 4; m++){
+                            unicode.append(config.charAt(i + 2 + m));
+                        }
+                        try{
+                            Integer.parseInt(unicode.toString(), 16);
+                        } catch(NumberFormatException e){
+                            throw new ConfigCompileException("Unrecognized unicode escape sequence", line_num);
+                        }
+                        buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));                        
+                        i += 4;
                     } else {
                         //Since we might expand this list later, don't let them
                         //use unescaped backslashes

@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.Static;
@@ -80,7 +81,7 @@ public class MathTest {
     }
     
     @Test
-    public void testDec(){
+    public void testDec() throws ConfigCompileException{
         Math.dec a = new Math.dec();
         TestBoilerplate(a, "dec");
         a.varList(varList);
@@ -88,6 +89,8 @@ public class MathTest {
         IVariable v2 = (IVariable)a.exec(0, null, fakePlayer,new IVariable("var2", C.onstruct(2.5), 0, null));
         assertCEquals(C.onstruct(0), v.ival());
         assertCEquals(C.onstruct(1.5), v2.ival());
+        StaticTest.SRun("assign(@var, 0) dec(@var, 2) msg(@var)", fakePlayer);
+        verify(fakePlayer).sendMessage("-2");
     }
     
     @Test
@@ -101,7 +104,7 @@ public class MathTest {
     }
     
     @Test
-    public void testInc(){
+    public void testInc() throws ConfigCompileException{
         Math.inc a = new Math.inc();
         TestBoilerplate(a, "inc");
         a.varList(varList);
@@ -109,6 +112,8 @@ public class MathTest {
         IVariable v2 = (IVariable)a.exec(0, null, fakePlayer,new IVariable("var2", C.onstruct(2.5), 0, null));
         assertCEquals(C.onstruct(2), v.ival());
         assertCEquals(C.onstruct(3.5), v2.ival());
+        StaticTest.SRun("assign(@var, 0) inc(@var, 2) msg(@var)", fakePlayer);
+        verify(fakePlayer).sendMessage("2");
     }
     
     @Test
@@ -190,5 +195,24 @@ public class MathTest {
         TestBoilerplate(a, "ceil");
         assertCEquals(C.onstruct(4), a.exec(0, null, fakePlayer, C.onstruct(3.1415)));
         assertCEquals(C.onstruct(-3), a.exec(0, null, fakePlayer, C.onstruct(-3.1415)));
+    }
+    
+    @Test public void testSqrt() throws ConfigCompileException{
+        assertEquals("3", StaticTest.SRun("sqrt(9)", fakePlayer));
+        assertEquals("Test failed", java.lang.Math.sqrt(2), Double.parseDouble(StaticTest.SRun("sqrt(2)", fakePlayer)), .000001);        
+        try{
+            StaticTest.SRun("sqrt(-1)", fakePlayer);
+            fail("Did not expect to pass");
+        } catch(ConfigRuntimeException e){
+            //pass
+        }
+    }
+    
+    @Test public void testMin() throws ConfigCompileException{
+        assertEquals("-2", StaticTest.SRun("min(2, array(5, 6, 4), -2)", fakePlayer));
+    }
+    
+    @Test public void testMax() throws ConfigCompileException{
+        assertEquals("50", StaticTest.SRun("max(6, 7, array(4, 4, 50), 2, 5)", fakePlayer));
     }
 }

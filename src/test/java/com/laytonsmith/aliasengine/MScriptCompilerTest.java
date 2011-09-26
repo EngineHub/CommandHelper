@@ -4,13 +4,13 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.testing.StaticTest;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.aliasengine.Constructs.Variable;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.Token;
-import com.laytonsmith.testing.StaticTest;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -23,6 +23,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static com.laytonsmith.testing.StaticTest.*;
 
 /**
  *
@@ -502,6 +503,11 @@ public class MScriptCompilerTest {
         s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
         verify(fakePlayer).sendMessage("2");
         verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
+    }
+    
+    @Test public void testUnicode() throws ConfigCompileException{
+        SRun("msg('\\u0037 is win!')", fakePlayer);
+        verify(fakePlayer).sendMessage("7 is win!");
     }
     
     

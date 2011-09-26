@@ -18,9 +18,7 @@ import java.util.logging.Logger;
  */
 public class MainSandbox {
     public static void main(String[] args) throws Exception{
-        CNull c = new CNull(0, null);
-        CNull d = c.clone();
-        System.out.println(d.getLineNum());
+        System.out.println("\u0037");
     }
     
     public static void printPackets(){
