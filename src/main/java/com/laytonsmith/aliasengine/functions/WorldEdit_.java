@@ -21,6 +21,7 @@ import com.sk89q.worldedit.bukkit.selections.CuboidSelection;
 import com.sk89q.worldedit.bukkit.selections.Selection;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
+import com.sk89q.worldedit.regions.Region;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -76,24 +77,24 @@ public class WorldEdit_ {
                 }
             }
 
+            if (m == null) {
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+
             if(setter){
-                Selection sel = Static.getWorldEditPlugin().getSelection(m);
-                if (!(sel instanceof CuboidSelection)) {
+                Region sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld())).getIncompleteRegion();
+                if (!(sel instanceof CuboidRegion)) {
                     throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
                 }
-                sel.getRegionSelector().selectPrimary(BukkitUtil.toVector(l));
+                ((CuboidRegion) sel).setPos1(BukkitUtil.toVector(l));
                 return new CVoid(line_num, f);
             } else {
-                Selection sel = Static.getWorldEditPlugin().getSelection(m);
-                if (!(sel instanceof CuboidSelection)) {
+                Region sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld())).getIncompleteRegion();
+                if (!(sel instanceof CuboidRegion)) {
                     throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
                 }
-                Vector pt = null;
-                try {
-                    pt = sel.getRegionSelector().getPrimaryPosition();
-                } catch (IncompleteRegionException e) {
-                    throw new ConfigRuntimeException(e.getMessage(), ExceptionType.PluginInternalException, line_num, f);
-                }
+                Vector pt = ((CuboidRegion) sel).getPos1();
+                if (pt == null) throw new ConfigRuntimeException("Point in " + this.getName() +  "undefined", line_num, f);
                 return new CArray(line_num, f,
                         new CInt(pt.getBlockX(), line_num, f),
                         new CInt(pt.getBlockY(), line_num, f),
@@ -143,24 +144,24 @@ public class WorldEdit_ {
                 }
             }
 
+            if (m == null) {
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+
             if(setter){
-                Selection sel = Static.getWorldEditPlugin().getSelection(m);
-                if (!(sel instanceof CuboidSelection)) {
+                Region sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld())).getIncompleteRegion();
+                if (!(sel instanceof CuboidRegion)) {
                     throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
                 }
-                sel.getRegionSelector().selectSecondary(BukkitUtil.toVector(l));
+                ((CuboidRegion) sel).setPos2(BukkitUtil.toVector(l));
                 return new CVoid(line_num, f);
             } else {
-                Selection sel = Static.getWorldEditPlugin().getSelection(m);
+                Region sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld())).getIncompleteRegion();
                 if (!(sel instanceof CuboidSelection)) {
                     throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
                 }
-                Vector pt = null;
-                try {
-                    pt = ((CuboidRegion)sel.getRegionSelector().getRegion()).getPos2();
-                } catch (IncompleteRegionException e) {
-                    throw new ConfigRuntimeException(e.getMessage(), ExceptionType.PluginInternalException, line_num, f);
-                }
+                Vector pt = ((CuboidRegion)sel).getPos2();
+                if (pt == null) throw new ConfigRuntimeException("Point in " + this.getName() +  "undefined", line_num, f);
                 return new CArray(line_num, f,
                         new CInt(pt.getBlockX(), line_num, f),
                         new CInt(pt.getBlockY(), line_num, f),
