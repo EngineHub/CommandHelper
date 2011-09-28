@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.testing;
 
+import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
 import org.bukkit.command.CommandSender;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
@@ -19,7 +20,6 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.MScriptComplete;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.Version;
-import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
 import com.laytonsmith.aliasengine.functions.Function;
 import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import com.laytonsmith.aliasengine.functions.exceptions.LoopBreakException;
@@ -200,7 +200,7 @@ public class StaticTest {
      * @param actual 
      */
     public static void assertCEquals(Construct expected, Construct actual) throws CancelCommandException {
-        _equals e = new _equals();
+        equals e = new equals();
         CBoolean ret = (CBoolean) e.exec(0, null, null, expected, actual);
         if (ret.getBoolean() == false) {
             throw new AssertionError("Expected " + expected + " and " + actual + " to be equal to each other");
@@ -214,7 +214,7 @@ public class StaticTest {
      * @throws CancelCommandException 
      */
     public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException {
-        _equals e = new _equals();
+        equals e = new equals();
         CBoolean ret = (CBoolean) e.exec(0, null, null, expected, actual);
         if (ret.getBoolean() == true) {
             throw new AssertionError("Did not expect " + expected + " and " + actual + " to be equal to each other");

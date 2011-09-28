@@ -78,7 +78,7 @@ public class BasicLogic {
         
     }
     
-    @api public static class _equals implements Function{
+    @api public static class equals implements Function{
 
         public String getName() {
             return "equals";
@@ -129,6 +129,63 @@ public class BasicLogic {
         public Boolean runAsync() {
             return null;
         }
+    }
+    
+    @api public static class equals_ic implements Function{
+
+        public String getName() {
+            return "equals_ic";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {val1, val2} Returns true if the two values are equal to each other, while"
+                    + " ignoring case.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.2.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            if(Static.anyBooleans(args)){
+                boolean arg1 = Static.getBoolean(args[0]);
+                boolean arg2 = Static.getBoolean(args[1]);
+                return new CBoolean(arg1 == arg2, line_num, f);
+            }
+            if(args[0].val().equalsIgnoreCase(args[1].val())){
+                return new CBoolean(true, line_num, f);
+            }
+            try{
+                double arg1 = Static.getNumber(args[0]);
+                double arg2 = Static.getNumber(args[1]);
+                return new CBoolean(arg1 == arg2, line_num, f);
+            } catch (ConfigRuntimeException e){
+                return new CBoolean(false, line_num, f);
+            }
+        }
+        
     }
     
     @api public static class lt implements Function{

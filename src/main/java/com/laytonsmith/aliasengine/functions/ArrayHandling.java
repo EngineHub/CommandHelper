@@ -13,7 +13,7 @@ import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
-import com.laytonsmith.aliasengine.functions.BasicLogic._equals;
+import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import org.bukkit.command.CommandSender;
@@ -277,7 +277,7 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            _equals e = new _equals();
+            equals e = new equals();
             if(args[0] instanceof CArray){
                 CArray ca = (CArray) args[0];
                 for(int i = 0; i < ca.size(); i++){
