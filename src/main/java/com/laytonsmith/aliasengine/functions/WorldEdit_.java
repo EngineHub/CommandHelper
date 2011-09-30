@@ -5,6 +5,7 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CDouble;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
@@ -20,6 +21,10 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionSelector;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -218,7 +223,52 @@ public class WorldEdit_ {
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
-                return null;
+                String regionName = args[0].val();
+                //Fill these data structures in with the information we need
+                List<Location> points = new ArrayList<Location>();
+                List<Player> owners = new ArrayList<Player>();
+                List<Player> members = new ArrayList<Player>();
+                Map<String, String> flags = new HashMap<String, String>();
+                int priority = -1;
+                float volume = -1;
+                
+                //@zml2008
+                
+                CArray ret = new CArray(line_num, f);
+                
+                CArray pointSet = new CArray(line_num, f);
+                for(Location l : points){
+                    CArray point = new CArray(line_num, f);
+                    point.push(new CInt(l.getBlockX(), line_num, f));
+                    point.push(new CInt(l.getBlockY(), line_num, f));
+                    point.push(new CInt(l.getBlockZ(), line_num, f));
+                    point.push(new CString(l.getWorld().getName(), line_num, f));
+                    pointSet.push(point);
+                }
+                CArray ownerSet = new CArray(line_num, f);
+                for(Player owner : owners){
+                    ownerSet.push(new CString(owner.getName(), line_num, f));
+                }
+                CArray memberSet = new CArray(line_num, f);
+                for(Player member : members){
+                    memberSet.push(new CString(member.getName(), line_num, f));
+                }
+                CArray flagSet = new CArray(line_num, f);
+                for(Map.Entry<String, String> flag : flags.entrySet()){
+                    CArray fl = new CArray(line_num, f, 
+                            new CString(flag.getKey(), line_num, f), 
+                            new CString(flag.getValue(), line_num, f)
+                    );
+                    flagSet.push(fl);
+                }
+                ret.push(pointSet);
+                ret.push(ownerSet);
+                ret.push(memberSet);
+                ret.push(flagSet);
+                ret.push(new CInt(priority, line_num, f));
+                ret.push(new CDouble(volume, line_num, f));
+                return ret;
+                
             } catch (NoClassDefFoundError e) {
                 throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
             }
