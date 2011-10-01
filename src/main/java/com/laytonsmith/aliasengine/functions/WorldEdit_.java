@@ -4,27 +4,30 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.Constructs.CArray;
-import com.laytonsmith.aliasengine.Constructs.CDouble;
-import com.laytonsmith.aliasengine.Constructs.CInt;
-import com.laytonsmith.aliasengine.Constructs.CString;
-import com.laytonsmith.aliasengine.Constructs.CVoid;
+import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 
+import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.bukkit.BukkitUtil;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionSelector;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+
+import java.util.*;
+
+import com.sk89q.worldguard.protection.GlobalRegionManager;
+import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
+import com.sk89q.worldguard.protection.flags.Flag;
+import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
+import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.command.CommandSender;
@@ -188,26 +191,23 @@ public class WorldEdit_ {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            try {
-                return null;
-            } catch (NoClassDefFoundError e) {
-                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
-            }
+            Static.checkPlugin("WorldEdit", line_num, f);
+            return new CVoid(line_num, f);
         }
     }
 
-    public static class sk_region_info extends SKFunction {
+    @api public static class sk_region_info extends SKFunction {
 
         public String getName() {
             return "sk_region_info";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{};
+            return new Integer[]{2};
         }
 
         public String docs() {
-            return "array {region} Given a region name, returns an array of information about that region, as follows:<ul>"
+            return "array {region, world} Given a region name, returns an array of information about that region, as follows:<ul>"
                     + " <li>0 - An array of points that define this region</li>"
                     + " <li>1 - An array of owners of this region</li>"
                     + " <li>2 - An array of members of this region</li>"
@@ -225,15 +225,39 @@ public class WorldEdit_ {
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
                 String regionName = args[0].val();
+                String worldName = args[1].val();
                 //Fill these data structures in with the information we need
                 List<Location> points = new ArrayList<Location>();
-                List<Player> owners = new ArrayList<Player>();
-                List<Player> members = new ArrayList<Player>();
+                List<String> owners = new ArrayList<String>();
+                List<String> members = new ArrayList<String>();
                 Map<String, String> flags = new HashMap<String, String>();
                 int priority = -1;
                 float volume = -1;
+                World world = Bukkit.getServer().getWorld(worldName);
+                if (world == null) throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, line_num, f);
+                RegionManager mgr = Static.getWorldGuardPlugin().getGlobalRegionManager().get(world);
+                ProtectedRegion region = mgr.getRegion(regionName);
+                if (region == null) throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, line_num, f);
                 
-                //@zml2008
+                owners.addAll(region.getOwners().getPlayers());
+                members.addAll(region.getMembers().getPlayers());
+                for (Map.Entry<Flag<?>, Object> ent: region.getFlags().entrySet()) {
+                    flags.put(ent.getKey().getName(), String.valueOf(ent.getValue()));
+                }
+                priority = region.getPriority();
+                volume = region.volume();
+                boolean first = true;
+                if (region instanceof ProtectedPolygonalRegion) {
+                    for (BlockVector2D pt : ((ProtectedPolygonalRegion) region).getPoints()) {
+                        points.add(new Location(world, pt.getX(), first ? region.getMaximumPoint().getY() 
+                                    : region.getMinimumPoint().getY(), pt.getZ()));
+                        first = false;
+                    }
+                } else {
+                    points.add(com.sk89q.worldguard.bukkit.BukkitUtil.toLocation(world, region.getMaximumPoint()));
+                    points.add(com.sk89q.worldguard.bukkit.BukkitUtil.toLocation(world, region.getMinimumPoint()));
+                }
+                
                 
                 CArray ret = new CArray(line_num, f);
                 
@@ -247,12 +271,12 @@ public class WorldEdit_ {
                     pointSet.push(point);
                 }
                 CArray ownerSet = new CArray(line_num, f);
-                for(Player owner : owners){
-                    ownerSet.push(new CString(owner.getName(), line_num, f));
+                for(String owner : owners){
+                    ownerSet.push(new CString(owner, line_num, f));
                 }
                 CArray memberSet = new CArray(line_num, f);
-                for(Player member : members){
-                    memberSet.push(new CString(member.getName(), line_num, f));
+                for(String member : members){
+                    memberSet.push(new CString(member, line_num, f));
                 }
                 CArray flagSet = new CArray(line_num, f);
                 for(Map.Entry<String, String> flag : flags.entrySet()){
@@ -276,20 +300,18 @@ public class WorldEdit_ {
         }
     }
 
-    public static class sk_region_overlaps extends SKFunction {
+    @api public static class sk_region_overlaps extends SKFunction {
 
         public String getName() {
             return "sk_region_overlaps";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
+            return new Integer[]{Integer.MAX_VALUE}; //@wraithguard01
         }
 
         public String docs() {
-            return "array {region1, region2, [regionN...]} Returns the intersection as an array of two location arrays of two regions."
-                    + " If the two regions don't overlap anywhere, null is returned. Currently only"
-                    + " cuboid areas are supported.";
+            return "boolean {world, region1, array(region2, [regionN...])} Returns true or false whether or not the specified regions overlap.";
         }
 
         public ExceptionType[] thrown() {
@@ -297,19 +319,36 @@ public class WorldEdit_ {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            try {
-                return null;
-            } catch (NoClassDefFoundError e) {
-                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
+            String region1 = args[1].val();
+            List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
+            Static.checkPlugin("WorldGuard", line_num, f);
+            World world = Bukkit.getServer().getWorld(args[0].val());
+            if (world == null) throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, line_num, f);
+            RegionManager mgr = Static.getWorldGuardPlugin().getGlobalRegionManager().get(world);
+            if (args[2] instanceof CArray) {
+                CArray arg = (CArray)args[2];
+                for (int i = 0; i < arg.size(); i++) {
+                    ProtectedRegion region = mgr.getRegion(arg.get(i, line_num).val());
+                    if (region == null) throw new ConfigRuntimeException("Region " + arg.get(i, line_num).val() + " could not be found!", ExceptionType.PluginInternalException, line_num, f);
+                    checkRegions.add(region);
+                }
+            } else {
+                ProtectedRegion region = mgr.getRegion(args[2].val());
+                    if (region == null) throw new ConfigRuntimeException("Region " + args[2] + " could not be found!", ExceptionType.PluginInternalException, line_num, f);
+                    checkRegions.add(region);
             }
-        }
-        
-        public boolean RegionOverlaps(){
             
+            ProtectedRegion region = mgr.getRegion(region1);
+            if (region == null) throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, line_num, f);
+            
+            try {
+                if (!region.getIntersectingRegions(checkRegions).isEmpty()) return new CBoolean(true, line_num, f);
+            } catch (UnsupportedIntersectionException e) {}
+            return new CBoolean(false, line_num, f);
         }
     }
 
-    public static class sk_all_regions extends SKFunction {
+    @api public static class sk_all_regions extends SKFunction {
 
         public String getName() {
             return "sk_all_regions";
@@ -328,23 +367,22 @@ public class WorldEdit_ {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            try {
-                World w = null;
-                if(args.length == 1){
-                    w = Static.getServer().getWorld(args[0].val());
-                }
-                List<String> regionNames = new ArrayList<String>();
-                
-                //@zml2008
-                
-                CArray ret = new CArray(line_num, f);
-                for(String region : regionNames){
-                    ret.push(new CString(region, line_num, f));
-                }
-                return ret;
-            } catch (NoClassDefFoundError e) {
-                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
+            Static.checkPlugin("WorldGuard", line_num, f);
+            List<World> checkWorlds = null;
+            CArray arr = new CArray(line_num, f);
+            if (args.length == 1) {
+                World world = Bukkit.getServer().getWorld(args[0].val());
+                if (world != null) checkWorlds = Arrays.asList(world);
             }
+            if (checkWorlds == null) {
+                checkWorlds = Bukkit.getServer().getWorlds();
+            }
+            GlobalRegionManager mgr = Static.getWorldGuardPlugin().getGlobalRegionManager();
+            for (World world : checkWorlds) {
+                for (String region : mgr.get(world).getRegions().keySet()) arr.push(new CString(region, line_num, f));
+            }
+            return arr;
+            
         }
     }
 
