@@ -26,6 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -286,7 +287,9 @@ public class WorldEdit_ {
         }
 
         public String docs() {
-            return "boolean {region1, region2, [regionN...]} Returns true or false whether or not the specified regions overlap.";
+            return "array {region1, region2, [regionN...]} Returns the intersection as an array of two location arrays of two regions."
+                    + " If the two regions don't overlap anywhere, null is returned. Currently only"
+                    + " cuboid areas are supported.";
         }
 
         public ExceptionType[] thrown() {
@@ -299,6 +302,10 @@ public class WorldEdit_ {
             } catch (NoClassDefFoundError e) {
                 throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
             }
+        }
+        
+        public boolean RegionOverlaps(){
+            
         }
     }
 
@@ -322,7 +329,19 @@ public class WorldEdit_ {
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
-                return null;
+                World w = null;
+                if(args.length == 1){
+                    w = Static.getServer().getWorld(args[0].val());
+                }
+                List<String> regionNames = new ArrayList<String>();
+                
+                //@zml2008
+                
+                CArray ret = new CArray(line_num, f);
+                for(String region : regionNames){
+                    ret.push(new CString(region, line_num, f));
+                }
+                return ret;
             } catch (NoClassDefFoundError e) {
                 throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f);
             }
