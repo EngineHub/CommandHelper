@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
 
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -287,6 +288,15 @@ public class Static {
         }
         return CommandHelperPlugin.wep;
     }
+    
+    public static WorldGuardPlugin getWorldGuardPlugin() {
+        Plugin pwgp = getServer().getPluginManager().getPlugin("WorldGuard");
+        if(pwgp != null && pwgp.isEnabled() && pwgp instanceof WorldGuardPlugin){
+            return (WorldGuardPlugin) pwgp;
+        }
+        return null;
+    }
+    
 
     public static void checkPlugin(String name, int line_number, File f) throws ConfigRuntimeException {
         if (Bukkit.getServer().getPluginManager().getPlugin(name) == null) {

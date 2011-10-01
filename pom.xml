@@ -61,13 +61,13 @@
             <artifactId>craftbukkit</artifactId>
             <version>0.0.1-SNAPSHOT</version>
         </dependency>
+        
+        <!-- WorldGuard for some of the sk functions -->
         <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>minecraft-server</artifactId>
-            <version>1.8_01</version>
+            <groupId>com.sk89q</groupId>
+            <artifactId>worldguard</artifactId>
+            <version>5.2.3-SNAPSHOT</version>
         </dependency>
-        
-        
     
         <dependency>
             <groupId>org.yaml</groupId>
