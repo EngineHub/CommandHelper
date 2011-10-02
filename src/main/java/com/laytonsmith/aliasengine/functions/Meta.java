@@ -150,7 +150,13 @@ public class Meta {
                     throw new IllegalStateException("Running server isn't CraftBukkit");
                 }
 
-                Field opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
+                Field opSetField;
+
+                try {
+                    opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
+                } catch (NoSuchFieldException e){
+                    opSetField = ServerConfigurationManager.class.getDeclaredField("h");
+                }
 
                 opSetField.setAccessible(true); // make field accessible for reflection 
 
