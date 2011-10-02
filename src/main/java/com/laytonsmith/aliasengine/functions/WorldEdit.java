@@ -37,7 +37,7 @@ import org.bukkit.entity.Player;
  *
  * @author Layton
  */
-public class WorldEdit_ {
+public class WorldEdit {
 
     public static String docs() {
         return "Provides various methods for programmatically hooking into WorldEdit";
