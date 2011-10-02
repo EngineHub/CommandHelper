@@ -171,30 +171,30 @@ public class WorldEdit {
         }
     }
 
-    public static class sk_points extends SKFunction {
-
-        public String getName() {
-            return "sk_points";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0, 1, 2};
-        }
-
-        public String docs() {
-            return "mixed {[player], arrayOfArrays | [player]} Sets a series of points, or returns the poly selection for this player, if one is specified."
-                    + " The array should be an array of arrays, and the arrays should be array(x, y, z)";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
-        }
-
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Static.checkPlugin("WorldEdit", line_num, f);
-            return new CVoid(line_num, f);
-        }
-    }
+//    public static class sk_points extends SKFunction {
+//
+//        public String getName() {
+//            return "sk_points";
+//        }
+//
+//        public Integer[] numArgs() {
+//            return new Integer[]{0, 1, 2};
+//        }
+//
+//        public String docs() {
+//            return "mixed {[player], arrayOfArrays | [player]} Sets a series of points, or returns the poly selection for this player, if one is specified."
+//                    + " The array should be an array of arrays, and the arrays should be array(x, y, z)";
+//        }
+//
+//        public ExceptionType[] thrown() {
+//            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+//        }
+//
+//        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+//            Static.checkPlugin("WorldEdit", line_num, f);
+//            return new CVoid(line_num, f);
+//        }
+//    }
 
     @api public static class sk_region_info extends SKFunction {
 
