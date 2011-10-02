@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.sk89q</groupId>
     <artifactId>commandhelper</artifactId>
-    <version>3.1.2-SNAPSHOT</version>
+    <version>3.1.2</version>
     <name>CommandHelper</name>
     <description>CommandHelper adds powerful command related utility functions</description>
   
@@ -66,7 +66,7 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldguard</artifactId>
-            <version>5.2.3-SNAPSHOT</version>
+            <version>5.3</version>
         </dependency>
     
         <dependency>
