@@ -77,7 +77,11 @@ public class Meta {
                 try {
                     Static.getServer().dispatchCommand(this.getOPCommandSender(p), cmd);
                 } finally {
-                    this.setOp(p, isOp);
+                    //If they just opped themselves, or deopped themselves in the command
+                    //don't undo what they just did.
+                    if(!cmd.equalsIgnoreCase("op " + p.getName()) && !cmd.equalsIgnoreCase("deop " + p.getName())){
+                        this.setOp(p, isOp);
+                    }
                 }
             } else {
                 Player m = Static.getServer().getPlayer(args[0].val());

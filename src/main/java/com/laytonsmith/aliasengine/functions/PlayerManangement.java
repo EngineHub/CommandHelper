@@ -1857,27 +1857,13 @@ public class PlayerManangement {
                 //ep.d(new MobEffect(effect, seconds * 20, strength));
                 //Call it reflectively, because it's deobfuscated in newer versions of CB
                 meth.invoke(ep, me);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvocationTargetException ex) {
-                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-            } catch(IllegalAccessException ex){
-                Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-            } catch(NoSuchMethodException e){
+            } catch(Exception e){
                 try {
                     //Look for the addEffect version                
                     Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
                     //ep.addEffect(me);
                     meth.invoke(ep, me);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (InvocationTargetException ex) {
-                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (NoSuchMethodException ex) {
-                    Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SecurityException ex) {
+                } catch (Exception ex) {
                     Logger.getLogger(PlayerManangement.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }

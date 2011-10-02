@@ -175,7 +175,6 @@ public class Script {
     public Construct eval(GenericTreeNode<Construct> c, final CommandSender player) throws CancelCommandException {
         final Construct m = c.getData();
         if (m.getCType() == ConstructType.FUNCTION) {
-            try {
                 if (m.val().matches("^_[^_].*")) {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
@@ -190,7 +189,12 @@ public class Script {
                     return p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);
                 }
                 final Function f;
-                f = FunctionList.getFunction(m);
+                try{
+                    f = FunctionList.getFunction(m);
+                } catch(ConfigCompileException e){
+                    //Turn it into a config runtime exception. This shouldn't ever happen though.
+                    throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getLineNum(), m.getFile());
+                }
                 f.varList(varList);
                 //We have special handling for loop and other control flow functions
                 if (f instanceof _for) {
@@ -222,15 +226,19 @@ public class Script {
                     if (ch.size() > 1) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
-                    GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val(), null));
-                    StringBuilder b = new StringBuilder();
-                    for (GenericTreeNode<Construct> child : root.getChildren()) {
-                        CString cs = new CString(eval(child, player).val(), 0, null);
-                        if (!cs.val().trim().equals("")) {
-                            b.append(cs.val()).append(" ");
+                    try{
+                        GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val(), null));
+                        StringBuilder b = new StringBuilder();
+                        for (GenericTreeNode<Construct> child : root.getChildren()) {
+                            CString cs = new CString(eval(child, player).val(), 0, null);
+                            if (!cs.val().trim().equals("")) {
+                                b.append(cs.val()).append(" ");
+                            }
                         }
+                        return new CString(b.toString(), 0, null);
+                    } catch(ConfigCompileException e){
+                        
                     }
-                    return new CString(b.toString(), 0, null);
                 } else if (f instanceof _try) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() != 4 && ch.size() != 3) {
@@ -361,15 +369,11 @@ public class Script {
                 });
                 }*/
 
-            } catch (ConfigCompileException ex) {
-                Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
-            }
         } else if (m.getCType() == ConstructType.VARIABLE) {
             return Static.resolveConstruct(m.val(), m.getLineNum(), m.getFile());
         } else {
             return m;
         }
-        return null;
     }
 
     public Construct[] preResolveVariables(Construct[] ca) {

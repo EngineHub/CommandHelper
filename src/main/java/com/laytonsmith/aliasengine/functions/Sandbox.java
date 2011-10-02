@@ -215,6 +215,50 @@ public class Sandbox {
         
     }
     
+    @api public static class npe implements Function{
+
+        public String getName() {
+            return "npe";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public String docs() {
+            return "void {}";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "0.0.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            Object o = null;
+            o.toString();
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
     
         
 }
