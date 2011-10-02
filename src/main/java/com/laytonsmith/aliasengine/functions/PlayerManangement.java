@@ -1156,7 +1156,6 @@ public class PlayerManangement {
         }
     }
 
-    //TODO: proc
     @api public static class set_pinv implements Function {
 
         public String getName() {
@@ -1171,7 +1170,11 @@ public class PlayerManangement {
             return "void {[player], slot, item_id, [qty], [damage]} Sets the index of the slot to the specified item_id, with the specified qty,"
                     + " or 1 by default. If the qty of armor indexes is greater than 1, it is silently ignored, and only 1 is added."
                     + " item_id follows the same notation for items used elsewhere. Damage defaults to 0, and is a percentage from 0-100, of"
-                    + " how damaged an item is.";
+                    + " how damaged an item is. If slot is null, it defaults to the item in hand. The item_id notation gives a shortcut"
+                    + " to setting damage values, for instance, set_pinv(null, '35:15') will give the player black wool. The \"15\""
+                    + " here is an unscaled damage value. This is the same thing as set_pinv(null, 35, 1, 100). 100 is a scaled damage"
+                    + " value.";
+                    
         }
 
         public ExceptionType[] thrown() {
@@ -1204,8 +1207,8 @@ public class PlayerManangement {
             int slot = 0;
             int offset = 0;
             int qty = 1;
-            short damage = 0;
-            if(args[0].val().matches("\\d*")){
+            short damage = -1;
+            if(args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])){
                 //We're using the slot as arg 1
                 if(Static.isNull(args[0])){
                     slot = -1;
@@ -1221,6 +1224,9 @@ public class PlayerManangement {
                 }
                 offset = 1;
             }
+            if(slot < -1 || slot > 35 && slot < 100 || slot > 103){
+                throw new ConfigRuntimeException("Slot number must be from 0-35 or 100-103", ExceptionType.RangeException, line_num, f);
+            }
             if(args.length > 2 + offset){
                 qty = (int)Static.getInt(args[2 + offset]);
             }            
@@ -1229,9 +1235,11 @@ public class PlayerManangement {
             if(args.length > 3 + offset){
                 damage = (short)Static.getInt(args[3 + offset]);
             }
-            damage = (short)java.lang.Math.max(0, java.lang.Math.min(100, damage));
-            short max = is.getType().getMaxDurability();
-            is.setDurability((short)((max * damage) / 100));
+            if(damage != -1){
+                damage = (short)java.lang.Math.max(0, java.lang.Math.min(100, damage));
+                short max = is.getType().getMaxDurability();
+                is.setDurability((short)((max * damage) / 100));            
+            }
             
             if(is.getTypeId() == 0){
                 qty = 0; //Giving the player air crashes their client, so just remove the item
@@ -1239,15 +1247,19 @@ public class PlayerManangement {
             }
             
             if(qty == 0){
-                is.setAmount(0);
-                if(slot == -1){
-                    m.setItemInHand(null);
-                } else {
-                    m.getInventory().setItem(slot, null);
-                }
+                is = null;
+            }
+            if(slot == -1){
+                m.setItemInHand(is);
             } else {
-                if(slot == -1){
-                    m.setItemInHand(is);
+                if(slot == 103){
+                    m.getInventory().setHelmet(is);
+                } else if(slot == 102){
+                    m.getInventory().setChestplate(is);
+                } else if(slot == 101){
+                    m.getInventory().setLeggings(is);
+                } else if(slot == 100){
+                    m.getInventory().setBoots(is);
                 } else {
                     m.getInventory().setItem(slot, is);
                 }

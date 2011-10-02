@@ -457,7 +457,8 @@ public class Static {
         }
         
         is = new ItemStack(type, qty);
-        is.setData(new MaterialData(type, data));
+        is.setDurability(data);
+        //is.setData(new MaterialData(type, data));
         return is;
     }
     
