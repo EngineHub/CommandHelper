@@ -500,6 +500,8 @@ public class MScriptCompilerTest {
     @Test public void testUnicode() throws ConfigCompileException{
         SRun("msg('\\u0037 is win!')", fakePlayer);
         verify(fakePlayer).sendMessage("7 is win!");
+        SRun("msg('\\u20ac')", fakePlayer);
+        verify(fakePlayer).sendMessage("€");
     }
     
     
