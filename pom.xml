@@ -104,6 +104,14 @@
             <artifactId>json-simple</artifactId>
             <version>1.1</version>
         </dependency>
+        
+        <!-- Used for potion effects -->
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>minecraft-server</artifactId>
+            <version>1.8.1</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
