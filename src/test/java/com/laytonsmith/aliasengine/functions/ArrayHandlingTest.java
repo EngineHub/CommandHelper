@@ -89,12 +89,13 @@ public class ArrayHandlingTest {
         verify(fakePlayer).sendMessage("{1, 2}");
     }
     
-    @Test(expected=ConfigRuntimeException.class)
-    public void testArraySetEx() throws CancelCommandException, ConfigCompileException{
-        String script =
-                "assign(@array, array()) array_set(@array, 3, 1) msg(@array)";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
-    }
+    //This is valid behavior now.
+//    @Test(expected=ConfigRuntimeException.class)
+//    public void testArraySetEx() throws CancelCommandException, ConfigCompileException{
+//        String script =
+//                "assign(@array, array()) array_set(@array, 3, 1) msg(@array)";
+//        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+//    }
 
     @Test
     public void testArrayContains() throws CancelCommandException {

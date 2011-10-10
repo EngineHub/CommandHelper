@@ -90,6 +90,13 @@ public class ArrayHandling {
                     index = args[1].val();
                 }
                 if(index.contains("..")){
+                    if(ca.inAssociativeMode()){
+                        if(index.equals("0..-1")){
+                            //Special exception, we want to clone the whole array
+                            //TODO
+                        }
+                        throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, line_num, f);
+                    }
                     //It's a range
                     int start = 0;
                     int finish = 0;
@@ -129,12 +136,16 @@ public class ArrayHandling {
                         throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, line_num, f);
                     }
                 } else {
-                    int iindex = (int)Static.getInt(args[1]);
-                    if(iindex < 0){
-                        //negative index, convert to positive index
-                        iindex = ca.size() + iindex;
+                    if(!ca.inAssociativeMode()){
+                        int iindex = (int)Static.getInt(args[1]);
+                        if(iindex < 0){
+                            //negative index, convert to positive index
+                            iindex = ca.size() + iindex;
+                        }
+                        return ca.get(iindex, line_num);
+                    } else {
+                        return ca.get(args[1], line_num);
                     }
-                    return ca.get(iindex, line_num);
                 }
             } else{
                 throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, line_num, f);
@@ -184,9 +195,9 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[0] instanceof CArray && args[1] instanceof CInt){
+            if(args[0] instanceof CArray){
                 try{
-                ((CArray)args[0]).set((int)((CInt)args[1]).getInt(), args[2]);
+                ((CArray)args[0]).set(args[1], args[2]);
                 } catch(IndexOutOfBoundsException e){
                     throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, line_num, f);
                 }

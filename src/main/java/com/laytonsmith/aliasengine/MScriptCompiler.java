@@ -345,6 +345,8 @@ public class MScriptCompiler {
         for (int i = 0; i < stream.size(); i++) {
             t = stream.get(i);
             Token prev = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
+            Token next = i + 1 < stream.size() ? stream.get(i + 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file); 
+                        
             
             //Array notation handling
             if(t.type.equals(TType.LSQUARE_BRACKET)){                

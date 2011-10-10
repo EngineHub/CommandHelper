@@ -14,7 +14,7 @@ import org.json.simple.JSONValue;
  *
  * @author layton
  */
-public abstract class Construct implements Cloneable {
+public abstract class Construct implements Cloneable, Comparable<Construct> {
 
     public static final long serialVersionUID = 1L;
 
@@ -100,16 +100,22 @@ public abstract class Construct implements Cloneable {
             return "null";
         } else if (c instanceof CArray) {
             CArray ca = (CArray) c;
-            StringBuilder b = new StringBuilder();
-            b.append("[");
-            for (int i = 0; i < ca.size(); i++) {
-                if (i != 0) {
-                    b.append(", ");
+            if (!ca.inAssociativeMode()) {
+                StringBuilder b = new StringBuilder();
+                b.append("[");
+                for (int i = 0; i < ca.size(); i++) {
+                    if (i != 0) {
+                        b.append(", ");
+                    }
+                    b.append(json_encode(ca.get(i, 0)));
                 }
-                b.append(json_encode(ca.get(i, 0)));
+                b.append("]");
+                return b.toString();
+            } else {
+                //We treat it like an object.
+                //TODO
+                return "{}";
             }
-            b.append("]");
-            return b.toString();
         } else {
             throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
         }
@@ -123,6 +129,7 @@ public abstract class Construct implements Cloneable {
     public static Construct json_decode(String s) throws MarshalException {
         if (s.startsWith("{")) {
             //Object, for now throw an exception
+            //TODO
             throw new MarshalException("JSON Objects are not currently supported");
         } else if (s.startsWith("[")) {
             //It's an array
@@ -155,17 +162,27 @@ public abstract class Construct implements Cloneable {
             }
         } else if (o instanceof Boolean) {
             return new CBoolean(((Boolean) o).booleanValue(), 0, null);
-        } else if(o instanceof java.util.List){
-            java.util.List l = (java.util.List)o;
+        } else if (o instanceof java.util.List) {
+            java.util.List l = (java.util.List) o;
             CArray ca = new CArray(0, null);
-            for(int i = 0; i < l.size(); i++){
+            for (int i = 0; i < l.size(); i++) {
                 ca.push(convertJSON(l.get(i)));
             }
             return ca;
-        } else if(o == null){
+        } else if (o == null) {
             return new CNull(0, null);
         } else {
             throw new MarshalException(o.getClass().getSimpleName() + " are not currently supported");
+        }
+    }
+
+    public int compareTo(Construct c) {
+        try {
+            Double d1 = Double.valueOf(this.value);
+            Double d2 = Double.valueOf(c.value);
+            return d1.compareTo(d2);
+        } catch (NumberFormatException e) {
+            return this.value.compareTo(c.value);
         }
     }
 }
