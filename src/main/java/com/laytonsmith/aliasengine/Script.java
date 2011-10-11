@@ -344,11 +344,15 @@ public class Script {
                 Construct[] ca = new Construct[a.length];
                 for (int i = 0; i < a.length; i++) {
                     ca[i] = (Construct) a[i];
-                    //CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry.
+                    //CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
                     if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
                             || ca[i] instanceof CInt || ca[i] instanceof CNull
-                            || ca[i] instanceof CString || ca[i] instanceof CVoid || ca[i] instanceof IVariable || ca[i] instanceof CEntry)) {
-                        throw new ConfigRuntimeException("Invalid Construct being passed as an argument to a function", null, m.getLineNum(), m.getFile());
+                            || ca[i] instanceof CString || ca[i] instanceof CVoid 
+                            || ca[i] instanceof IVariable || ca[i] instanceof CEntry)
+                            && (!f.getName().equals("sconcat") && (ca[i] instanceof CLabel))) {
+                        throw new ConfigRuntimeException("Invalid Construct (" 
+                                + ca[i].getClass() + ") being passed as an argument to a function (" 
+                                + f.getName() + ")", null, m.getLineNum(), m.getFile());
                     }
                 }
                 f.varList(varList);
