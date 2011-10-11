@@ -342,12 +342,20 @@ public class MScriptCompiler {
         parents.push(tree);
         int parens = 0;
         Token t = null;
+        Construct lastIdent = null;
         for (int i = 0; i < stream.size(); i++) {
             t = stream.get(i);
             Token prev = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
             Token next = i + 1 < stream.size() ? stream.get(i + 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file); 
-                        
-            
+                
+            //Associative array handling
+            if(next.type.equals(TType.IDENT)){
+                lastIdent = Static.resolveConstruct(t.val(), t.line_num, t.file);
+                continue;
+            }           
+            if(t.type.equals(TType.IDENT)){
+                continue;
+            }
             //Array notation handling
             if(t.type.equals(TType.LSQUARE_BRACKET)){                
                 arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
@@ -381,10 +389,28 @@ public class MScriptCompiler {
                     || t.type.equals(TType.RSQUARE_BRACKET)) {
                 throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
             } else */if (t.type == TType.LIT) {
-                tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num, t.file)));
+                if(lastIdent != null){
+                    GenericTreeNode<Construct> key = new GenericTreeNode<Construct>(lastIdent);
+                    GenericTreeNode<Construct> array_entry = new GenericTreeNode<Construct>(new CFunction("array_entry", lastIdent.getLineNum(), lastIdent.getFile()));
+                    array_entry.addChild(key);
+                    array_entry.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num, t.file)));
+                    tree.addChild(array_entry);
+                    lastIdent = null;
+                } else {
+                    tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num, t.file)));
+                }
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
-                tree.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.line_num, t.file)));
+                if(lastIdent != null){
+                    GenericTreeNode<Construct> key = new GenericTreeNode<Construct>(lastIdent);
+                    GenericTreeNode<Construct> array_entry = new GenericTreeNode<Construct>(new CFunction("array_entry", lastIdent.getLineNum(), lastIdent.getFile()));
+                    array_entry.addChild(key);
+                    array_entry.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.line_num, t.file)));
+                    tree.addChild(array_entry);
+                    lastIdent = null;
+                } else {
+                    tree.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.line_num, t.file)));
+                }
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.IVARIABLE)) {
                 tree.addChild(new GenericTreeNode<Construct>(new IVariable(t.val(), t.line_num, t.file)));
@@ -403,7 +429,16 @@ public class MScriptCompiler {
                     FunctionList.getFunction(func);
                 }
                 GenericTreeNode<Construct> f = new GenericTreeNode<Construct>(func);
-                tree.addChild(f);
+                if(lastIdent != null){
+                    GenericTreeNode<Construct> key = new GenericTreeNode<Construct>(lastIdent);
+                    GenericTreeNode<Construct> array_entry = new GenericTreeNode<Construct>(new CFunction("array_entry", lastIdent.getLineNum(), lastIdent.getFile()));
+                    array_entry.addChild(key);
+                    array_entry.addChild(f);
+                    tree.addChild(array_entry);
+                    lastIdent = null;
+                } else {
+                    tree.addChild(f);
+                }
                 constructCount.push(new AtomicInteger(0));
                 tree = f;
                 parents.push(f);
@@ -472,7 +507,16 @@ public class MScriptCompiler {
                     } else {
                         tree.removeChildren();
                     }
-                    tree.addChild(c);                   
+                    if(lastIdent != null){
+                        GenericTreeNode<Construct> key = new GenericTreeNode<Construct>(lastIdent);
+                        GenericTreeNode<Construct> array_entry = new GenericTreeNode<Construct>(new CFunction("array_entry", lastIdent.getLineNum(), lastIdent.getFile()));
+                        array_entry.addChild(key);
+                        array_entry.addChild(c);
+                        tree.addChild(array_entry);
+                        lastIdent = null;
+                    } else {
+                        tree.addChild(c);                   
+                    }
                 }
                 constructCount.peek().set(0);
                 continue;

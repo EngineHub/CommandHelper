@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
+import com.laytonsmith.aliasengine.Constructs.CEntry;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
@@ -16,6 +17,9 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.sound.sampled.LineEvent;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -93,7 +97,16 @@ public class ArrayHandling {
                     if(ca.inAssociativeMode()){
                         if(index.equals("0..-1")){
                             //Special exception, we want to clone the whole array
-                            //TODO
+                            CArray na = new CArray(line_num, f);
+                            na.forceAssociativeMode();
+                            for(Construct key : ca.keySet()){                                
+                                try {
+                                    na.set(key, ca.get(key, line_num).clone());
+                                } catch (CloneNotSupportedException ex) {
+                                    na.set(key, ca.get(key, line_num));
+                                }
+                            }
+                            return na;
                         }
                         throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, line_num, f);
                     }
@@ -495,6 +508,152 @@ public class ArrayHandling {
                 ret.push(new CInt(i, line_num, f));
             }
             return ret;
+        }
+        
+    }
+    
+    @api public static class array_keys implements Function{
+
+        public String getName() {
+            return "array_keys";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "array {array} Returns the keys in this array as a normal array. If the array passed in is already a normal array,"
+                    + " the keys will be 0 -> (array_size(array) - 1)";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            if(args[0] instanceof CArray){
+                CArray ca = (CArray)args[0];
+                CArray ca2 = new CArray(line_num, f);
+                for(Construct c : ca.keySet()){
+                    ca2.push(c);
+                }
+                return ca2;
+            } else {
+                throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, line_num, f);
+            }
+        }
+        
+    }
+    
+    @api public static class array_normalize implements Function{
+
+        public String getName() {
+            return "array_normalize";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "array {array} Returns a new normal array, given an associative array. (If the array passed in is not associative, a copy of the "
+                    + " array is returned).";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            if(args[0] instanceof CArray){
+                CArray ca = (CArray)args[0];
+                CArray ca2 = new CArray(line_num, f);
+                for(Construct c : ca.keySet()){
+                    ca2.push(ca.get(c, line_num));
+                }
+                return ca2;
+            } else {
+                throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, line_num, f);
+            }
+        }
+        
+    }
+    
+    @api public static class array_entry implements Function{
+
+        public String getName() {
+            return "array_entry";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "CEntry {key, value} This function is used internally by the compiler, and while possible, shouldn't be used directly.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            return new CEntry(args[0], args[1], line_num, f);
         }
         
     }

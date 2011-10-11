@@ -6,6 +6,8 @@ package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.functions.exceptions.MarshalException;
 import java.io.File;
+import java.util.SortedMap;
+import java.util.TreeMap;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -64,6 +66,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
         return (Construct) super.clone();
     }
 
+    public static String json_encode(Construct c) throws MarshalException{
+        return json_encode(c, false);
+    }
     /**
      * This function takes a Construct, and turns it into a JSON value. If the construct is
      * not one of the following, a MarshalException is thrown: CArray, CBoolean, CDouble, CInt, CNull, 
@@ -81,10 +86,16 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
      * @param c
      * @return 
      */
-    public static String json_encode(Construct c) throws MarshalException {
+    public static String json_encode(Construct c, boolean raw) throws MarshalException {
         if (c instanceof CString || c instanceof Command) {
+            if(raw){
+                return JSONObject.escape(c.getValue());
+            }
             return "\"" + JSONObject.escape(c.getValue()) + "\"";
         } else if (c instanceof CVoid) {
+            if(raw){
+                return JSONObject.escape(c.getValue());
+            }
             return "\"\"";
         } else if (c instanceof CInt) {
             return Long.toString(((CInt) c).getInt());
@@ -113,8 +124,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
                 return b.toString();
             } else {
                 //We treat it like an object.
-                //TODO
-                return "{}";
+                SortedMap<String, String> map = new TreeMap<String, String>();
+                for(Construct key : ca.keySet()){
+                    map.put(json_encode(key, true), json_encode(ca.get(key, 0), true));
+                }
+                return JSONValue.toJSONString(map);
             }
         } else {
             throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
@@ -129,8 +143,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
     public static Construct json_decode(String s) throws MarshalException {
         if (s.startsWith("{")) {
             //Object, for now throw an exception
-            //TODO
-            throw new MarshalException("JSON Objects are not currently supported");
+            JSONObject obj = (JSONObject) JSONValue.parse(s);
+            CArray ca = new CArray(0, null);
+            ca.forceAssociativeMode();
+            for(Object key : obj.keySet()){
+                ca.set(convertJSON(key), convertJSON(obj.get(key)));
+            }
+            return ca;
         } else if (s.startsWith("[")) {
             //It's an array
             JSONArray array = (JSONArray) JSONValue.parse(s);
@@ -171,6 +190,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
             return ca;
         } else if (o == null) {
             return new CNull(0, null);
+        } else if(o instanceof java.util.Map){
+            CArray ca = new CArray(0, null);
+            ca.forceAssociativeMode();
+            for(Object key : ((java.util.Map)o).keySet()){
+                ca.set(convertJSON(key), convertJSON(((java.util.Map)o).get(key)));
+            }
+            return ca;
         } else {
             throw new MarshalException(o.getClass().getSimpleName() + " are not currently supported");
         }

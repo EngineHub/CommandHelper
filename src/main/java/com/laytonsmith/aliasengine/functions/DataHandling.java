@@ -907,6 +907,52 @@ public class DataHandling {
         
     }
     
+    @api public static class is_associative implements Function{
+
+        public String getName() {
+            return "is_associative";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {array} Returns whether or not the array is associative. If the parameter is not an array, throws a CastException.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            if(args[0] instanceof CArray){
+                return new CBoolean(((CArray)args[0]).inAssociativeMode(), line_num, f);
+            } else {
+                throw new ConfigRuntimeException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, line_num, f);
+            }
+        }
+        
+    }
+    
     
     
 }

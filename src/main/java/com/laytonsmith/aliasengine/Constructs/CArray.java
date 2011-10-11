@@ -31,9 +31,27 @@ public class CArray extends Construct {
 
     public CArray(int line_num, File file, Construct... items) {
         super(null, ConstructType.ARRAY, line_num, file);
-        array = new ArrayList<Construct>();
-        array.addAll(Arrays.asList(items));
-        this.next_index = array.size();
+        for(Construct item : items){
+            if(item instanceof CEntry){
+                //it's an associative array
+                associative_mode = true;
+                break;
+            }
+        }
+        if(associative_mode){
+            associative_array = new TreeMap<Construct, Construct>();
+            for(Construct item : items){
+                if(item instanceof CEntry){
+                    associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).cvalue);
+                } else {
+                    associative_array.put(new CInt(next_index++, item.getLineNum(), item.getFile()), item);
+                }
+            }
+        } else {
+            array = new ArrayList<Construct>();
+            array.addAll(Arrays.asList(items));
+            this.next_index = array.size();
+        }
         regenValue();
     }
 
@@ -42,6 +60,17 @@ public class CArray extends Construct {
      */
     public boolean inAssociativeMode() {
         return associative_mode;
+    }
+    
+    /**
+     * This should only be used when copying an array that is already known to be associative, so integer keys will
+     * remain associative.
+     */
+    public void forceAssociativeMode(){
+        if(associative_array == null){
+            associative_array = new TreeMap<Construct, Construct>();
+        }
+        associative_mode = true;
     }
 
     private void regenValue() {
@@ -81,10 +110,10 @@ public class CArray extends Construct {
         } else {
             int max = 0;            
             for (Construct key : associative_array.keySet()) {
-                Integer i = Integer.getInteger(key.val());
-                if (i != null) {
+                try{
+                    int i = Integer.parseInt(key.val());
                     max = java.lang.Math.max(max, i);
-                }
+                } catch(NumberFormatException e){}
             }
             associative_array.put(new CInt(max + 1, 0, null), c);
         }
@@ -98,7 +127,7 @@ public class CArray extends Construct {
      * @return 
      */
     public Set<Construct> keySet(){
-        Set<Construct> set = new HashSet<Construct>(array.size());
+        Set<Construct> set = new HashSet<Construct>(!associative_mode?array.size():associative_array.size());
         if(!associative_mode){
             for(int i = 0; i < array.size(); i++){
                 set.add(new CInt(i, 0, null));

@@ -40,7 +40,7 @@ public class ArrayTest {
     }
     
     @Test public void testAssociativeCreation() throws ConfigCompileException{
-        assertEquals("{0: 0}", SRun("array(0: 0)", fakePlayer));
+        assertEquals("{0: 0, 1: 1}", SRun("array(0: 0, 1: 1)", fakePlayer));
     }
     
     @Test public void testAssociativeCreation2() throws ConfigCompileException{
