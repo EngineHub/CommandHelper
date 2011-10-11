@@ -112,11 +112,11 @@ public class TestStatic {
         Static.getAliasCore();
     }
 
-    @Test(expected=NotInitializedYetException.class)
-    public void testGetPersistance() {
-        System.out.println("getPersistance");
-        Static.getPersistance();
-    }
+//    @Test(expected=NotInitializedYetException.class)
+//    public void testGetPersistance() {
+//        System.out.println("getPersistance");
+//        Static.getPersistance();
+//    }
 
 //    @Test(expected=NotInitializedYetException.class)
 //    public void testGetPermissionsResolverManager() {
