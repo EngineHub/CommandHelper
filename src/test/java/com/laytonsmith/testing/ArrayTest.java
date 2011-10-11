@@ -126,4 +126,9 @@ public class ArrayTest {
         assertEquals("true", SRun("is_associative(array(0: 0))", fakePlayer));
         assertEquals("false", SRun("is_associative(array(0))", fakePlayer));
     }
+    
+    @Test public void testFunctionResultAsAssociativeValue() throws ConfigCompileException{
+        assertEquals("{0: thiswasconcated}", SRun("array(0: concat('this', was, concated))", fakePlayer));
+        assertEquals("{0: this was concated}", SRun("array(0: this was concated)", fakePlayer));
+    }
 }

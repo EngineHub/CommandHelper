@@ -457,6 +457,9 @@ public class MScriptCompiler {
                     //We need to autoconcat some stuff
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
+                    if(lastIdent != null){
+                        replaceAt += 2;
+                    }
                     GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", 0, null));
                     List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
                     for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
