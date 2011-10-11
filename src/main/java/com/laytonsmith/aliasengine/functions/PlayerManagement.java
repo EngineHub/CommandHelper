@@ -26,6 +26,7 @@ import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MobEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -1935,6 +1936,240 @@ public class PlayerManagement {
                 throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, line_num, f);
             }
             m.setHealth(health);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class ponline implements Function{
+
+        public String getName() {
+            return "ponline";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {player} Returns whether or not the specified player is online. Note"
+                    + " that the name must match exactly, but it will not throw a PlayerOfflineException"
+                    + " if the player is not online, or if the player doesn't even exist.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(Static.getServer().getOfflinePlayer(args[0].val()).isOnline(), line_num, f);
+        }
+        
+    }
+    
+    @api public static class pwhitelisted implements Function{
+        
+        public String getName() {
+            return "pwhitelisted";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {player} Returns whether or not this player is whitelisted. Note that"
+                    + " this will work with offline players, but the name must be exact.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {
+            
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
+            return new CBoolean(pl.isWhitelisted(), line_num, f);
+        }
+        
+    }
+    
+    @api public static class set_pwhitelisted implements Function{
+
+        public String getName() {
+            return "set_pwhitelisted";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
+                    + " this will work with offline players, but the name must be exact.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
+            boolean whitelist = Static.getBoolean(args[1]);
+            pl.setWhitelisted(whitelist);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class pbanned implements Function{
+
+        public String getName() {
+            return "pbanned";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {player} Returns whether or not this player is banned. Note that"
+                    + " this will work with offline players, but the name must be exact. At this"
+                    + " time, this function only works with the vanilla ban system. If you use"
+                    + " a third party ban system, you should instead run the command for that"
+                    + " plugin instead.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {
+            
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
+            return new CBoolean(pl.isBanned(), line_num, f);
+        }
+        
+    }
+    
+    @api public static class set_pbanned implements Function{
+
+        public String getName() {
+            return "set_pbanned";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {player, isBanned} Sets the ban flag of the specified player. Note that"
+                    + " this will work with offline players, but the name must be exact. At this"
+                    + " time, this function only works with the vanilla ban system. If you use"
+                    + " a third party ban system, you should instead run the command for that"
+                    + " plugin instead.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+            OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
+            boolean ban = Static.getBoolean(args[1]);
+            pl.setBanned(ban);
             return new CVoid(line_num, f);
         }
         
