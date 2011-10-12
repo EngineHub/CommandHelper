@@ -1178,7 +1178,7 @@ public class PlayerManagement {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -1899,7 +1899,7 @@ public class PlayerManagement {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
         }
 
         public boolean isRestricted() {

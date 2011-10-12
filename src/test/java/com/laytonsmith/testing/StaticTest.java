@@ -49,7 +49,7 @@ public class StaticTest {
      */
     public static void TestBoilerplate(Function f, String name) {
         //For the "quality test code coverage" number, set this to true
-        boolean runQualityTestsOnly = true;
+        boolean runQualityTestsOnly = false;
 
         Player fakePlayer = Mockito.mock(Player.class);
         Server fakeServer = Mockito.mock(Server.class);
