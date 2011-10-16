@@ -27,6 +27,7 @@ import net.minecraft.server.MobEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -171,10 +172,12 @@ public class PlayerManagement {
                 throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
             }
             Location l = m.getLocation();
+            World w = m.getWorld();
             return new CArray(line_num, f, 
                     new CDouble(l.getX(), line_num, f),
                     new CDouble(l.getY() - 1, line_num, f),
-                    new CDouble(l.getZ(), line_num, f));
+                    new CDouble(l.getZ(), line_num, f),
+                    new CString(w.getName(), line_num, f));
         }
 
         public String docs() {
