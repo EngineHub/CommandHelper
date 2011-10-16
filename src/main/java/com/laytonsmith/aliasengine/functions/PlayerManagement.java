@@ -182,7 +182,7 @@ public class PlayerManagement {
 
         public String docs() {
             return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
-                    + " in relation to the player's head, not their feet.";
+                    + " in relation to the player's head, not their feet. The array returned will also include the player's world in index 3 of the array.";
         }
 
         public ExceptionType[] thrown() {

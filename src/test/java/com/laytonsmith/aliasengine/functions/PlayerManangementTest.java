@@ -87,6 +87,7 @@ public class PlayerManangementTest {
         String script = "ploc()";
         World w = GetWorld("world");
         when(fakePlayer.getLocation()).thenReturn(new Location(w, 0, 1, 0));
+        when(fakePlayer.getWorld()).thenReturn(w);
         final StringBuilder done = new StringBuilder();
         Run(script, fakePlayer, new MScriptComplete() {
 
@@ -94,7 +95,7 @@ public class PlayerManangementTest {
                 done.append(output);
             }
         });
-        assertEquals("{0.0, 0.0, 0.0}", done.toString());
+        assertEquals("{0.0, 0.0, 0.0, world}", done.toString());
     }
     
     @Test public void testSetPloc() throws ConfigCompileException{
