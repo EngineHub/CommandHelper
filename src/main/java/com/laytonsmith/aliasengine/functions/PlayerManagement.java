@@ -28,6 +28,7 @@ import net.minecraft.server.MobEffect;
 import org.bukkit.GameMode;
 import org.bukkit.Location;
 import org.bukkit.OfflinePlayer;
+import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -172,15 +173,17 @@ public class PlayerManagement {
                 throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
             }
             Location l = m.getLocation();
+            World w = m.getWorld();
             return new CArray(line_num, f, 
                     new CDouble(l.getX(), line_num, f),
                     new CDouble(l.getY() - 1, line_num, f),
-                    new CDouble(l.getZ(), line_num, f));
+                    new CDouble(l.getZ(), line_num, f),
+                    new CString(w.getName(), line_num, f));
         }
 
         public String docs() {
             return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
-                    + " in relation to the player's head, not their feet.";
+                    + " in relation to the player's head, not their feet. The array returned will also include the player's world in index 3 of the array.";
         }
 
         public ExceptionType[] thrown() {
@@ -1179,7 +1182,7 @@ public class PlayerManagement {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -1900,7 +1903,7 @@ public class PlayerManagement {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
         }
 
         public boolean isRestricted() {

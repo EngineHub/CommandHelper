@@ -121,9 +121,9 @@ public class RandomTests {
         when(fakeServer.getWorld("world")).thenReturn(fakeWorld);
         CommandHelperPlugin.myServer = fakeServer;
         CArray ca1 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3));
-        CArray ca2 = new CArray(0, null, C.onstruct("world"), C.onstruct(1), C.onstruct(2), C.onstruct(3));
+        CArray ca2 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
         CArray ca3 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
-        CArray ca4 = new CArray(0, null, C.onstruct("world"), C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
+        CArray ca4 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
         Location l1 = Static.GetLocation(ca1, fakeWorld, 0, null);
         Location l2 = Static.GetLocation(ca2, fakeWorld, 0, null);
         Location l3 = Static.GetLocation(ca3, fakeWorld, 0, null);

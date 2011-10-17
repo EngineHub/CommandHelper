@@ -502,10 +502,10 @@ public class Static {
             z = Static.getNumber(array.get(2, line_num));
         } else if(array.size() == 4){
             //world, x, y, z
-            world = Static.getServer().getWorld(array.get(0, line_num).val());
-            x = Static.getNumber(array.get(1, line_num));
-            y = Static.getNumber(array.get(2, line_num));
-            z = Static.getNumber(array.get(3, line_num));
+            x = Static.getNumber(array.get(0, line_num));
+            y = Static.getNumber(array.get(1, line_num));
+            z = Static.getNumber(array.get(2, line_num));
+            world = Static.getServer().getWorld(array.get(3, line_num).val());
         } else if(array.size() == 5){
             //x, y, z, yaw, pitch, with given world
             x = Static.getNumber(array.get(0, line_num));
@@ -515,10 +515,10 @@ public class Static {
             pitch = (float)Static.getNumber(array.get(4, line_num));
         } else if(array.size() == 6){
             //All have been given
-            world = Static.getServer().getWorld(array.get(0, line_num).val());
-            x = Static.getNumber(array.get(1, line_num));
-            y = Static.getNumber(array.get(2, line_num));
-            z = Static.getNumber(array.get(3, line_num));
+            x = Static.getNumber(array.get(0, line_num));
+            y = Static.getNumber(array.get(1, line_num));
+            z = Static.getNumber(array.get(2, line_num));
+            world = Static.getServer().getWorld(array.get(3, line_num).val());
             yaw = (float)Static.getNumber(array.get(4, line_num));
             pitch = (float)Static.getNumber(array.get(5, line_num));
         } else {

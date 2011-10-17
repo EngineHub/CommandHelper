@@ -8,7 +8,9 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CEntry;
 import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CLabel;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
@@ -88,13 +90,22 @@ public class StringHandling {
 
         public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
+            boolean centry = false;
             for (int i = 0; i < args.length; i++) {
-                if (i > 0) {
+                if(i == 0 && args[0] instanceof CLabel){
+                    centry = true;
+                    continue;
+                }
+                if (i > 1 || i > 0 && !(args[0] instanceof CLabel)) {
                     b.append(" ");
                 }
                 b.append(args[i].val());
             }
-            return new CString(b.toString(), line_num, f);
+            if(centry){
+                return new CEntry(((CLabel)args[0]).cVal(), Static.resolveConstruct(b.toString(), line_num, f), line_num, f);
+            } else {
+                return new CString(b.toString(), line_num, f);
+            }
         }
 
         public String docs() {

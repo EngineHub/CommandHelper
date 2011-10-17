@@ -44,7 +44,17 @@ public class CArray extends Construct {
                 if(item instanceof CEntry){
                     associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).cvalue);
                 } else {
-                    associative_array.put(new CInt(next_index++, item.getLineNum(), item.getFile()), item);
+                    int max = Integer.MIN_VALUE;            
+                    for (Construct key : associative_array.keySet()) {
+                        try{
+                            int i = Integer.parseInt(key.val());
+                            max = java.lang.Math.max(max, i);
+                        } catch(NumberFormatException e){}
+                    }
+                    if(max == Integer.MIN_VALUE){
+                        max = -1; //Special case, there are no integer indexes in here yet.
+                    }
+                    associative_array.put(new CInt(max + 1, item.getLineNum(), item.getFile()), item);
                 }
             }
         } else {

@@ -45,7 +45,7 @@ public class Regex {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -99,7 +99,7 @@ public class Regex {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -155,7 +155,7 @@ public class Regex {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -205,7 +205,7 @@ public class Regex {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -255,7 +255,7 @@ public class Regex {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
