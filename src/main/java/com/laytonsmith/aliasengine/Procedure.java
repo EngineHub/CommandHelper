@@ -80,7 +80,11 @@ public class Procedure implements Cloneable {
                 if(index != -1){
                     //This variable has not been explicitly set, so we use the default
                     try{
-                        var.setIval(Static.resolveConstruct(variables.get(index).val(), var.getLineNum(), var.getFile()));
+                        Construct resolved = variables.get(index);
+//                        if(!(resolved instanceof CArray)){
+//                            resolved = Static.resolveConstruct(resolved.val(), var.getLineNum(), var.getFile());
+//                        }
+                        var.setIval(resolved);
                     } catch(ArrayIndexOutOfBoundsException e){
                         //var.setIval(new CNull(var.line_num, var.file));
                     }

@@ -181,5 +181,9 @@ public class ArrayTest {
         SRun("assign(@arr, array(-1: -1, 0, 1, 2: 2)) msg(@arr)", fakePlayer);
         verify(fakePlayer).sendMessage("{-1: -1, 0: 0, 1: 1, 2: 2}");
     }
+    
+    @Test public void testArraysReference1() throws ConfigCompileException{
+        assertEquals("3", SRun("proc(_test, @array, return(array_size(@array))) _test(array(1, 2, 3))", fakePlayer));
+    }
 
 }
