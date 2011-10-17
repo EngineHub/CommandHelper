@@ -5,7 +5,7 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.Constructs.CNull;
-import com.laytonsmith.aliasengine.functions.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ClassDiscovery;
 import java.lang.reflect.Constructor;
 import java.util.Arrays;
 import java.util.logging.Level;

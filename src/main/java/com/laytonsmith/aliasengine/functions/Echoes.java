@@ -5,6 +5,7 @@
 
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.Construct;

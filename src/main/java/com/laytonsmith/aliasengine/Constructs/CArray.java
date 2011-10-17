@@ -192,6 +192,27 @@ public class CArray extends Construct {
     public Construct get(int index, int line_num){
         return this.get(new CInt(index, 0, null), line_num);
     }
+    
+    /**
+     * This should only be used when the value in the array is being used internally
+     * @param index
+     * @return 
+     */
+    public Construct get(String index){
+        return this.get(new CString(index, 0, null), 0);
+    }
+    
+    public boolean contains(Construct c){
+        if(associative_mode){
+            return associative_array.containsKey(c);
+        } else {
+            return array.contains(c);
+        }
+    }
+    
+    public boolean contains(String c){
+        return this.contains(new CString(c, 0, null));
+    }
 
     @Override
     public String val() {
