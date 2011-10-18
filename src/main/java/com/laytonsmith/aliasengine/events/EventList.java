@@ -113,5 +113,8 @@ public class EventList {
             event_list.put(e.driver(), new TreeSet<Event>());
         }
         event_list.get(e.driver()).add(e);
+        try{
+            e.hook();
+        } catch(UnsupportedOperationException ex){}
     }
 }

@@ -97,6 +97,19 @@ public class Script {
         this.fullRight = right;
         this.left_vars = new HashMap<String, Variable>();
     }
+    
+    private Script(){}
+    
+    public static Script GenerateScript(GenericTreeNode<Construct> tree){
+        Script s = new Script();
+        
+        s.hasBeenCompiled = true;
+        s.compilerError = false;
+        s.cright = new ArrayList<GenericTreeNode<Construct>>();
+        s.cright.add(tree);
+        
+        return s;
+    }
 
     public boolean uncompilable() {
         return compilerError;

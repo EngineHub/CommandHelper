@@ -5,31 +5,39 @@
 package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
+import com.laytonsmith.aliasengine.GenericTree;
 import com.laytonsmith.aliasengine.GenericTreeNode;
-import com.laytonsmith.aliasengine.functions.IVariableList;
+import com.laytonsmith.aliasengine.GenericTreeTraversalOrderEnum;
+import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.functions.exceptions.EventException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
  * @author layton
  */
 public class BoundEvent implements Comparable<BoundEvent> {
+    String eventName;
     String id;
     String priority;
     Map<String, Construct> prefilter;
-    String eventObjName;
-    List<IVariable> vars;
+    String eventObjName;    
+    Map<String, IVariable> vars;
+    List<String> custom_names = new ArrayList<String>();
     GenericTreeNode<Construct> tree;
     org.bukkit.event.Event.Type driver; //For efficiency sake, cache it here
     
-    public BoundEvent(String name, CArray options, CArray prefilter, List<IVariable> vars,
-            GenericTreeNode<Construct> tree) throws EventException{
-        this.eventObjName = name;
+    public BoundEvent(String name, CArray options, CArray prefilter, String eventObjName, 
+            List<IVariable> vars, GenericTreeNode<Construct> tree) throws EventException{
+        this.eventName = name;
         
         if(options != null && options.contains("id")){
             this.id = options.get("id").val();
@@ -64,10 +72,22 @@ public class BoundEvent implements Comparable<BoundEvent> {
             }
         }
         
-        this.vars = vars;
+        this.vars = new HashMap<String, IVariable>();
+        for(IVariable v : vars){
+            this.vars.put(v.getName(), v);
+        }
         this.tree = tree;      
         
-        this.driver = EventList.getEvent(this.eventObjName).driver();
+        this.driver = EventList.getEvent(this.eventName).driver();
+        this.eventObjName = eventObjName;
+        
+        for(IVariable v : vars){
+            custom_names.add(v.getName());
+        }
+    }
+    
+    public String getEventName(){
+        return eventName;
     }
 
     public String getEventObjName() {
@@ -112,5 +132,36 @@ public class BoundEvent implements Comparable<BoundEvent> {
        } else {
            return 0;
        }
+    }
+    
+    public void trigger(Map<String, Construct> event){
+        GenericTree<Construct> root = new GenericTree<Construct>();
+        root.setRoot(tree);
+        for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
+            Construct c = node.getData();
+            if(c instanceof IVariable){
+                IVariable var = ((IVariable)c);
+                if(custom_names.contains(var.getName())){
+                    try {
+                        //Custom variable
+                        var.setIval(this.vars.get(var.getName()).ival().clone());
+                    } catch (CloneNotSupportedException ex) {
+                        Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                } else if(var.getName().equals(eventObjName)){
+                    //Event object
+                    CArray ca = new CArray(0, null);
+                    for(String key : event.keySet()){
+                        ca.set(new CString(key, 0, null), event.get(key));
+                    }
+                    var.setIval(ca);
+                } else {
+                    //Set the default value
+                    var.setIval(new CString("", 0, null));
+                }
+            }
+        }
+        Script s = Script.GenerateScript(tree);
+        s.run(null, null, null);
     }
 }

@@ -5,6 +5,7 @@
 package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.functions.exceptions.EventException;
 import java.util.Map;
 
 /**
@@ -43,6 +44,24 @@ public interface Event{
     public boolean matches(Map<String, Construct> prefilter, org.bukkit.event.Event e);
     
     /**
+     * This function is called when an event is triggered. It passes the event, and expects
+     * back a Map, which will be converted into a CArray, and passed to the bound event,
+     * as the event object. If an EventException is thrown, it is considered a fatal error,
+     * and will throw an uncatchable CH exception.
+     * @param e
+     * @return 
+     */
+    public Map<String, Construct> evaluate(org.bukkit.event.Event e) throws EventException;
+    
+    /**
+     * This is called if the script attempts to cancel the event, so the bukkit
+     * event can also be cancelled. If the underlying event is not cancellable, this
+     * should throw an EventException, which is caught in the triggering code, and
+     * at this time ignored.
+     */
+    public void cancel(org.bukkit.event.Event e) throws EventException;
+    
+    /**
      * This function returns the "driver" class of the event needed to trigger it.
      * Though not strictly needed, this method helps optimize code. All events may
      * more strictly filter events based on other conditions, but all events must
@@ -53,7 +72,7 @@ public interface Event{
     
     /**
      * This function is called once a script binds to this event, which gives 
-     * this event type a chance to "active" if needed. It may throw an 
+     * this event type a chance to "activate" if needed. It may throw an 
      * UnsupportedOperationException if it is not needed.
      */
     public void bind();

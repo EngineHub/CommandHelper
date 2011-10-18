@@ -4,9 +4,12 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.api;
+import com.laytonsmith.aliasengine.functions.exceptions.EventException;
 import java.util.Map;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.player.PlayerLoginEvent;
 
 /**
@@ -18,7 +21,7 @@ public class PlayerEvents {
         return "Contains events related to a player";
     }
     
-    @api public static class player_login implements Event{
+    @api public static class player_login extends AbstractEvent{
 
         public String getName() {
             return "player_login";
@@ -51,12 +54,15 @@ public class PlayerEvents {
             return false;
         }
 
-        public void bind() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public void hook() {
-            throw new UnsupportedOperationException("Not supported yet.");
+        public Map<String, Construct> evaluate(org.bukkit.event.Event e) throws EventException {
+            if(e instanceof PlayerLoginEvent){
+                PlayerLoginEvent ple = (PlayerLoginEvent) e;
+                Map<String, Construct> map = super.evaluate_helper(e);
+                map.put("name", new CString(ple.getPlayer().getName(), 0, null));
+                return map;
+            } else{
+                throw new EventException("Cannot convert e to PlayerLoginEvent");
+            }
         }
         
     }

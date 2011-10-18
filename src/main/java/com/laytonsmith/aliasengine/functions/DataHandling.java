@@ -26,14 +26,11 @@ import com.laytonsmith.aliasengine.events.EventHandler;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
 import java.io.File;
-import java.net.BindException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -1023,7 +1020,8 @@ public class DataHandling {
                 prefilter = null;
             }
             try {
-                BoundEvent be = new BoundEvent(name.val(), (CArray)options, (CArray)prefilter, vars, tree);
+                BoundEvent be = new BoundEvent(name.val(), (CArray)options, (CArray)prefilter, 
+                        ((IVariable)event_obj).getName(), vars, tree);
                 EventHandler.RegisterEvent(be);
                 id = new CString(be.getId(), line_num, f);
             } catch (EventException ex) {
