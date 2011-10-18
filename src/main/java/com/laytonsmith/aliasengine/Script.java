@@ -15,6 +15,7 @@ import com.laytonsmith.aliasengine.Constructs.Token.TType;
 import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.functions.BasicLogic._if;
 import com.laytonsmith.aliasengine.functions.DataHandling._for;
+import com.laytonsmith.aliasengine.functions.DataHandling.bind;
 import com.laytonsmith.aliasengine.functions.DataHandling.call_proc;
 import com.laytonsmith.aliasengine.functions.DataHandling.foreach;
 import com.laytonsmith.aliasengine.functions.DataHandling.include;
@@ -298,6 +299,24 @@ public class Script {
                     return ((call_proc) f).execs(m.getLineNum(), m.getFile(), player, knownProcs, this.label, ar);
                 } else if (f instanceof include) {
                     return ((include) f).execs(m.getLineNum(), m.getFile(), player, c.getChildren(), this);
+                } else if(f instanceof bind){
+                    if(c.getChildren().size() < 5){
+                        throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
+                    }
+                    Construct name = preResolveVariable(eval(c.getChildAt(0), player));
+                    Construct options = preResolveVariable(eval(c.getChildAt(1), player));
+                    Construct prefilter = preResolveVariable(eval(c.getChildAt(2), player));
+                    Construct event_object = eval(c.getChildAt(3), player);
+                    List<IVariable> custom_params = new ArrayList<IVariable>();
+                    for(int a = 0; a < c.getChildren().size() - 5; a++){
+                        Construct var = eval(c.getChildAt(4 + a), player);
+                        if(!(var instanceof IVariable)){
+                            throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, m.getLineNum(), m.getFile());
+                        }
+                        custom_params.add((IVariable)var);
+                    }
+                    GenericTreeNode<Construct> tree = c.getChildAt(c.getChildren().size() - 1);
+                    return ((bind)f).execs(name, options, prefilter, event_object, tree, custom_params, m.getLineNum(), m.getFile());
                 }
 
 
@@ -379,7 +398,11 @@ public class Script {
             return m;
         }
     }
-
+    public Construct preResolveVariable(Construct ca){
+        Construct[] c = new Construct[1];
+        c[0] = ca;
+        return preResolveVariables(c)[0];
+    }
     public Construct[] preResolveVariables(Construct[] ca) {
         for (int i = 0; i < ca.length; i++) {
             if (ca[i] instanceof IVariable) {

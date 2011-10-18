@@ -185,5 +185,12 @@ public class ArrayTest {
     @Test public void testArraysReference1() throws ConfigCompileException{
         assertEquals("3", SRun("proc(_test, @array, return(array_size(@array))) _test(array(1, 2, 3))", fakePlayer));
     }
+    
+    @Test public void testArraysReturned() throws ConfigCompileException{
+        SRun("proc(_test, return(array(1, 2, 3))) foreach(_test(), @i, msg(@i))", fakePlayer);
+        verify(fakePlayer).sendMessage("1");
+        verify(fakePlayer).sendMessage("2");
+        verify(fakePlayer).sendMessage("3");
+    }
 
 }

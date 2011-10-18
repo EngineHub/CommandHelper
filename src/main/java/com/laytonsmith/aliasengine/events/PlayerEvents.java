@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.api;
 import java.util.Map;
 import org.bukkit.event.player.PlayerLoginEvent;
@@ -32,15 +33,15 @@ public class PlayerEvents {
             return "3.3.0";
         }
         
-        public Class driver(){
-            return PlayerLoginEvent.class;
+        public org.bukkit.event.Event.Type driver(){
+            return org.bukkit.event.Event.Type.PLAYER_LOGIN;
         }
 
-        public boolean matches(Map<String, String> prefilter, org.bukkit.event.Event e) {
+        public boolean matches(Map<String, Construct> prefilter, org.bukkit.event.Event e) {
             if(e instanceof PlayerLoginEvent){
                 PlayerLoginEvent ple = (PlayerLoginEvent) e;
                 if(prefilter.containsKey("player_name")){
-                    if(!ple.getPlayer().getName().equals(prefilter.get("player_name"))){
+                    if(!ple.getPlayer().getName().equals(prefilter.get("player_name").val())){
                         return false;
                     }
                 }

@@ -5,8 +5,6 @@
 package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.GenericTreeNode;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,7 +13,7 @@ import java.util.Map;
  * itself with @api, and it will be included in the EventList.
  * @author layton
  */
-public interface Event {
+public interface Event{
     /**
      * This should return the name of the event.
      * @return 
@@ -42,7 +40,7 @@ public interface Event {
      * This function should return true if the event code should be run, based
      * on this prefilter and triggering event.
      */
-    public boolean matches(Map<String, String> prefilter, org.bukkit.event.Event e);
+    public boolean matches(Map<String, Construct> prefilter, org.bukkit.event.Event e);
     
     /**
      * This function returns the "driver" class of the event needed to trigger it.
@@ -51,7 +49,7 @@ public interface Event {
      * have a single Bukkit event that drives the CH event. This is also the type of
      * the event that will be sent to the matches function.
      */
-    public Class driver();
+    public org.bukkit.event.Event.Type driver();
     
     /**
      * This function is called once a script binds to this event, which gives 

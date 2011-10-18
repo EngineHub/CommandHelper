@@ -94,6 +94,11 @@ public class Exceptions {
          * If a function requests a world, and the world given doesn't exist, this is thrown
          */
         InvalidWorldException,
+        /**
+         * This exception is thrown if an error occurs when trying to bind() an event
+         */
+        BindException,
+        
     }
     @api public static class _try implements Function{      
         
