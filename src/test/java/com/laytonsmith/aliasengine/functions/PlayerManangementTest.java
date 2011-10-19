@@ -123,6 +123,8 @@ public class PlayerManangementTest {
         CommandHelperPlugin.myServer = fakeServer;
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
         when(fakePlayer.getTargetBlock(null, 200)).thenReturn(b);
+        World w = mock(World.class);
+        when(b.getWorld()).thenReturn(w);
         Run("pcursor()", fakePlayer);
         Run("pcursor('" + fakePlayer.getName() + "')", fakePlayer);
         verify(fakePlayer, times(2)).getTargetBlock(null, 200);
