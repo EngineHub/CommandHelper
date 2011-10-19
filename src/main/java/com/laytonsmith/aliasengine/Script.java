@@ -107,6 +107,14 @@ public class Script {
         s.compilerError = false;
         s.cright = new ArrayList<GenericTreeNode<Construct>>();
         s.cright.add(tree);
+        s.varList = new IVariableList();
+        GenericTree<Construct> root = new GenericTree<Construct>();
+        root.setRoot(tree);
+        for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
+            if(node.getData() instanceof IVariable){
+                s.varList.set((IVariable)node.getData());
+            }
+        }
         
         return s;
     }
@@ -163,8 +171,8 @@ public class Script {
                 MScriptCompiler.execute(tree.getRoot(), p, done, this);
             }
         } catch (ConfigRuntimeException e) {
-            p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
             System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
+            p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
         } catch (CancelCommandException e) {
             //p.sendMessage(e.getMessage());
             //The message in the exception is actually empty
@@ -364,7 +372,7 @@ public class Script {
                     } else {
                         perm = true;
                     }
-                    if (player.isOp()) {
+                    if (player == null || player.isOp()) {
                         perm = true;
                     }
                     if (!perm) {

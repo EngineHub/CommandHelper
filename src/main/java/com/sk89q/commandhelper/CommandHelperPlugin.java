@@ -148,7 +148,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      * @param listener
      * @param priority
      */
-    private void registerEvent(Event.Type type, Listener listener, Priority priority) {
+    public void registerEvent(Event.Type type, Listener listener, Priority priority) {
         getServer().getPluginManager().registerEvent(type, listener, priority, this);
     }
 

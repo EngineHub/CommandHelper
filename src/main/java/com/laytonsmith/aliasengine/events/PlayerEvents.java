@@ -4,12 +4,20 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.functions.exceptions.EventException;
 import java.util.Map;
-import org.bukkit.event.Cancellable;
+import org.bukkit.block.Block;
+import org.bukkit.event.Event;
+import org.bukkit.event.Event.Type;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerLoginEvent;
 
 /**
@@ -21,15 +29,15 @@ public class PlayerEvents {
         return "Contains events related to a player";
     }
     
-    @api public static class player_login extends AbstractEvent{
+    @api public static class player_join extends AbstractEvent{
 
         public String getName() {
-            return "player_login";
+            return "player_join";
         }
 
         public String docs() {
-            return "{player_name: <string match>} This event is called when a player logs in "
-                    + "{player_name: The player's name}";
+            return "{player: <string match>} This event is called when a player logs in "
+                    + "{player: The player's name}";
         }
 
         public String since() {
@@ -37,28 +45,27 @@ public class PlayerEvents {
         }
         
         public org.bukkit.event.Event.Type driver(){
-            return org.bukkit.event.Event.Type.PLAYER_LOGIN;
+            return org.bukkit.event.Event.Type.PLAYER_JOIN;
         }
 
         public boolean matches(Map<String, Construct> prefilter, org.bukkit.event.Event e) {
-            if(e instanceof PlayerLoginEvent){
-                PlayerLoginEvent ple = (PlayerLoginEvent) e;
-                if(prefilter.containsKey("player_name")){
+            if(e instanceof PlayerJoinEvent){
+                PlayerJoinEvent ple = (PlayerJoinEvent) e;
+                if(prefilter.containsKey("player")){
                     if(!ple.getPlayer().getName().equals(prefilter.get("player_name").val())){
                         return false;
                     }
-                }
-                
+                }                
                 return true;
             }
             return false;
         }
 
         public Map<String, Construct> evaluate(org.bukkit.event.Event e) throws EventException {
-            if(e instanceof PlayerLoginEvent){
-                PlayerLoginEvent ple = (PlayerLoginEvent) e;
+            if(e instanceof PlayerJoinEvent){
+                PlayerJoinEvent ple = (PlayerJoinEvent) e;
                 Map<String, Construct> map = super.evaluate_helper(e);
-                map.put("name", new CString(ple.getPlayer().getName(), 0, null));
+                map.put("player", new CString(ple.getPlayer().getName(), 0, null));
                 return map;
             } else{
                 throw new EventException("Cannot convert e to PlayerLoginEvent");
@@ -66,4 +73,91 @@ public class PlayerEvents {
         }
         
     }
+    
+    @api public static class player_interact extends AbstractEvent{
+
+        public String getName() {
+            return "player_interact";
+        }
+
+        public String docs() {
+            return "{block: <item match> If the block the player interacts with is this"
+                    + " | button: <string match> left or right. If they left or right clicked |"
+                    + " item: <item match> The item they are holding when they interacted} "
+                    + "Fires when a player left or right clicks a block or the air"
+                    + "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
+                    + "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
+                    + " neither facing or location will be present. |"
+                    + "player: The player associated with this event |"
+                    + "facing: The (lowercase) face of the block they clicked. See <<jd:org.bukkit.block.BlockFace>> for"
+                    + " the possible values |"
+                    + "location: The (x, y, z, world) location of the block they clicked}";
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public boolean matches(Map<String, Construct> prefilter, Event e) {
+            if(e instanceof PlayerInteractEvent){
+                PlayerInteractEvent pie = (PlayerInteractEvent)e;
+                if(((PlayerInteractEvent)e).getAction().equals(Action.PHYSICAL)){
+                    return false;
+                }
+                if(prefilter.containsKey("block") && 
+                        !Static.ItemMatch(prefilter.get("block").val(), Static.ParseItemNotation(pie.getClickedBlock()))){
+                    return false;
+                }
+                if(prefilter.containsKey("button")){
+                    if(pie.getAction().equals(Action.LEFT_CLICK_AIR) || pie.getAction().equals(Action.LEFT_CLICK_BLOCK)){
+                        if(!prefilter.get("button").val().toLowerCase().equals("left")){
+                            return false;
+                        }
+                    }
+                    if(pie.getAction().equals(Action.RIGHT_CLICK_AIR) || pie.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
+                        if(!prefilter.get("button").val().toLowerCase().equals("right")){
+                            return false;
+                        }
+                    }
+                }
+                if(prefilter.containsKey("item")){
+                    if(!Static.ItemMatch(prefilter.get("item").val(), Static.ParseItemNotation(pie.getItem()))){
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+
+        public Map<String, Construct> evaluate(Event e) throws EventException {
+            if(e instanceof PlayerInteractEvent){
+                PlayerInteractEvent pie = (PlayerInteractEvent) e;
+                Map<String, Construct> map = super.evaluate_helper(e);
+                map.put("player", new CString(pie.getPlayer().getName(), 0, null));
+                Action a = pie.getAction();
+                map.put("action", new CString(a.name().toLowerCase(), 0, null));
+                map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), 0, null));
+                if(a == Action.LEFT_CLICK_BLOCK || a == Action.RIGHT_CLICK_BLOCK){
+                    map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), 0, null));
+                    Block b = pie.getClickedBlock();
+                    map.put("location", new CArray(0, null, new CInt(b.getX(), 0, null),
+                            new CInt(b.getY(), 0, null), new CInt(b.getZ(), 0, null), 
+                            new CString(b.getWorld().getName(), 0, null)));
+                }
+                map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), 0, null));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to PlayerInteractEvent");
+            }
+        }
+
+        public Type driver() {
+            return Type.PLAYER_INTERACT;
+        }
+        
+    }
+
+
+    //public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {}
 }

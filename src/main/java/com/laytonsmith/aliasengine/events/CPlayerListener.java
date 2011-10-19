@@ -5,8 +5,9 @@
 package com.laytonsmith.aliasengine.events;
 
 import org.bukkit.event.Event.Type;
+import org.bukkit.event.player.PlayerInteractEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
-import org.bukkit.event.player.PlayerLoginEvent;
 
 /**
  *
@@ -15,7 +16,12 @@ import org.bukkit.event.player.PlayerLoginEvent;
 public class CPlayerListener extends PlayerListener{
     
     @Override
-    public void onPlayerLogin(PlayerLoginEvent e){
-        EventHandler.TriggerListener(Type.PLAYER_LOGIN, "player_login", e);
+    public void onPlayerJoin(PlayerJoinEvent e){
+        EventHandler.TriggerListener(Type.PLAYER_JOIN, "player_join", e);
+    }
+    
+    @Override
+    public void onPlayerInteract(PlayerInteractEvent e){
+        EventHandler.TriggerListener(Type.PLAYER_INTERACT, "player_interact", e);
     }
 }

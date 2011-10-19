@@ -7,6 +7,8 @@ package com.laytonsmith.aliasengine;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.aliasengine.events.EventHandler;
+import com.laytonsmith.aliasengine.events.EventList;
 import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
@@ -191,6 +193,8 @@ public class AliasCore {
     public final boolean reload() throws ConfigCompileException {
         boolean is_loaded = false;
         try {
+            EventHandler.UnregisterAll();
+            EventList.Startup(parent);
             IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
             if (!aliasConfig.exists()) {
                 aliasConfig.getParentFile().mkdirs();

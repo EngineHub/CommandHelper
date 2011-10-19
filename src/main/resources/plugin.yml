@@ -26,3 +26,6 @@ commands:
     commandhelper:
         description: Used to gain meta information about CommandHelper
         usage: /<command> <arguments>
+    runalias:
+        description: If another plugin wants to run a CommandHelper command, it isn't always straightforward to do that, because of the way bukkit works. To get around this, you may use this command. "/runalias /command to run" will fire off the alias "/command to run"
+        usage: /<command> <otherCommand>

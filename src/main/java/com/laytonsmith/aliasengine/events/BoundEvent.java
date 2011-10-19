@@ -161,7 +161,10 @@ public class BoundEvent implements Comparable<BoundEvent> {
                 }
             }
         }
-        Script s = Script.GenerateScript(tree);
-        s.run(null, null, null);
+        GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
+        superRoot.addChild(tree);
+        Script s = Script.GenerateScript(superRoot);
+        Event myDriver = EventList.getEvent(this.getDriver(), this.getEventName());
+        myDriver.execute(s, this);
     }
 }

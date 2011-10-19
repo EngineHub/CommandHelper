@@ -26,6 +26,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.World;
+import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -459,12 +460,40 @@ public class Static {
         return is;
     }
     
+    /**
+     * Works in reverse from the other ParseItemNotation
+     * @param is
+     * @return 
+     */
+    public static String ParseItemNotation(ItemStack is){
+        return is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData());
+    }
+    
+    public static String ParseItemNotation(Block b){
+        if(b == null){
+            return "0";
+        }
+        return b.getTypeId() + (b.getData() == 0 ? "" : ":" + Byte.toString(b.getData()));
+    }
+    
     public static Player GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException{
         Player m = Static.getServer().getPlayer(player);
         if(m == null || !m.isOnline()){
             throw new ConfigRuntimeException("The specified player (player) is not online", ExceptionType.PlayerOfflineException, line_num, f);
         }
         return m;
+    }
+    
+    public static boolean ItemMatch(String item1, String item2){
+        if(item1.contains(":")){
+            String[] split = item1.split(":");
+            item1 = split[0].trim();
+        }
+        if(item2.contains(":")){
+            String[] split = item2.split(":");
+            item2 = split[0].trim();
+        }
+        return item1.trim().equalsIgnoreCase(item2.trim());
     }
     
     /**

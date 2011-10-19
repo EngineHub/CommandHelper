@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.exceptions.EventException;
@@ -82,6 +83,13 @@ public class EventHandler {
     }
     
     /**
+     * This should be used in the case the plugin is disabled, or /reloadalises is run.
+     */
+    public static void UnregisterAll(){
+        event_handles.clear();
+    }
+    
+    /**
      * Returns all events driven by type. O(1).
      * @param type
      * @return 
@@ -105,9 +113,11 @@ public class EventHandler {
         //We must now look through the bound events to see if they are
         //the eventName, and if so, we will also run the prefilter.
         SortedSet<BoundEvent> bounded = GetEvents(type);
-        for(BoundEvent b : bounded){
-            if(driver.getName().equals(eventName) && driver.matches(b.getPrefilter(), e)){
-                toRun.add(b);
+        if(bounded != null){
+            for(BoundEvent b : bounded){
+                if(driver.getName().equals(eventName) && driver.matches(b.getPrefilter(), e)){
+                    toRun.add(b);
+                }
             }
         }
         

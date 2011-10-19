@@ -6,7 +6,9 @@ package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.functions.exceptions.EventException;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.event.Cancellable;
@@ -64,5 +66,9 @@ public abstract class AbstractEvent implements Event {
         }
         map.put("macrotype", new CString(macro, 0, null));
         return map;
+    }
+    
+    public void execute(Script s, BoundEvent b){
+        s.run(null, null, null);
     }
 }

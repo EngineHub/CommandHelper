@@ -1102,7 +1102,7 @@ public class PlayerManagement {
                     ItemStack is = m.getItemInHand();
                     if (is.getTypeId() != 0) {
                         return new CArray(line_num, f,
-                                new CString(is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData()), line_num, f),
+                                new CString(Static.ParseItemNotation(is), line_num, f),
                                 new CInt(is.getAmount(), line_num, f));
                     } else {
                         return new CNull(line_num, f);
@@ -1132,7 +1132,7 @@ public class PlayerManagement {
                     if (inv.getItem(index).getTypeId() == 0) {
                         value = null;
                     } else {
-                        value = inv.getItem(index).getTypeId() + (inv.getItem(index).getData() == null ? "" : ":" + inv.getItem(index).getData().getData());
+                        value = Static.ParseItemNotation(inv.getItem(index));
                     }
                     qty = inv.getItem(index).getAmount();
                 }
@@ -1149,7 +1149,7 @@ public class PlayerManagement {
                     ItemStack is = inv.getItem(i);
                     if (is != null && is.getTypeId() != 0) {
                         ca.push(new CArray(line_num, f,
-                                new CString(is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData()), line_num, f),
+                                new CString(Static.ParseItemNotation(is), line_num, f),
                                 new CInt(is.getAmount(), line_num, f)));
                     } else {
                         ca.push(new CNull(line_num, f));

@@ -5,7 +5,9 @@
 package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.functions.exceptions.EventException;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.Map;
 
 /**
@@ -73,15 +75,24 @@ public interface Event{
     /**
      * This function is called once a script binds to this event, which gives 
      * this event type a chance to "activate" if needed. It may throw an 
-     * UnsupportedOperationException if it is not needed.
+     * UnsupportedOperationException if it is not needed. The listener
+     * is automatically registered, based on the driver returned.
      */
     public void bind();
     
     /**
      * This function is called once when the plugin starts up, to give this
-     * event a chance to make any extra hooks into the server if it needs it.
+     * event a chance to make a hook into the server if it needs it.
      * It may throw an UnsupportedOperationException if it is not needed.
      */
     public void hook();
+    
+    /**
+     * Because an event type knows best how to actually trigger an event, the prebuild,
+     * preconfigured script, and the BoundEvent generating the action are passed to
+     * the Event itself. AbstractEvent's default implementation is to simply run the
+     * script, but an event can choose to override this functionality if needed.
+     */
+    public void execute(Script s, BoundEvent b);
     
 }

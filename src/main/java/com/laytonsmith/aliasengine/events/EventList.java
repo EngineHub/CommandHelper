@@ -6,7 +6,9 @@ package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.api;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -17,6 +19,9 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.event.Event.Category;
+import org.bukkit.event.Event.Priority;
+import org.bukkit.event.Listener;
 
 /**
  *
@@ -40,11 +45,13 @@ public class EventList {
             return getEvent(name);
         }
         SortedSet<Event> set = event_list.get(type);
-        Iterator<Event> i = set.iterator();
-        while(i.hasNext()){
-            Event e = i.next();
-            if(e.getName().equals(name)){
-                return e;
+        if(set != null){
+            Iterator<Event> i = set.iterator();
+            while(i.hasNext()){
+                Event e = i.next();
+                if(e.getName().equals(name)){
+                    return e;
+                }
             }
         }
         return null;
@@ -92,7 +99,7 @@ public class EventList {
                             Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
                         }
                     } else {
-                        System.out.println("@api functions must implement " + EventList.class.getPackage().getName() + ".Event! " + api.getSimpleName() + " cannot be loaded.");
+                        System.out.println("@api events must implement " + EventList.class.getPackage().getName() + ".Event! " + api.getSimpleName() + " cannot be loaded.");
                     }
                 }
             }
@@ -106,7 +113,7 @@ public class EventList {
     public static void registerEvent(Event e, String apiClass) {
         if(!apiClass.equals("Sandbox")){
             if((Boolean)com.laytonsmith.aliasengine.Static.getPreferences().getPreference("debug-mode")){
-                System.out.println("CommandHelper: Loaded function \"" + e.getName() + "\"");
+                System.out.println("CommandHelper: Loaded event \"" + e.getName() + "\"");
             }
         }
         if(!event_list.containsKey(e.driver())){
@@ -116,5 +123,57 @@ public class EventList {
         try{
             e.hook();
         } catch(UnsupportedOperationException ex){}
+    }
+    
+
+    public static final CBlockListener BlockListener = new CBlockListener();
+    public static final CEntityListener EntityListener = new CEntityListener();
+    public static final CInventoryListener InventoryListener = new CInventoryListener();
+    public static final CPlayerListener PlayerListener = new CPlayerListener();
+    public static final CServerListener ServerListener = new CServerListener();
+    public static final CVehicleListener VehicleListener = new CVehicleListener();
+    public static final CWeatherListener WeatherListener = new CWeatherListener();
+    public static final CWorldListener WorldListener = new CWorldListener();
+    
+    /**
+     * This should be called when the plugin starts up. It registeres all bukkit event listeners
+     */
+    public static void Startup(CommandHelperPlugin chp){
+        for(org.bukkit.event.Event.Type type : event_list.keySet()){
+            SortedSet<Event> set = event_list.get(type);
+            Iterator<Event> i = set.iterator();
+            while(i.hasNext()){
+                Event e = i.next();
+                Listener l = null;
+                Category c = e.driver().getCategory();
+                switch(c){
+                    case BLOCK:
+                        l = BlockListener;
+                        break;
+                    case ENTITY:
+                        l = EntityListener;
+                        break;
+                    case INVENTORY:
+                        l = InventoryListener;
+                        break;
+                    case PLAYER:
+                        l = PlayerListener;
+                        break;
+                    case SERVER:
+                        l = ServerListener;
+                        break;
+                    case VEHICLE:
+                        l = VehicleListener;
+                        break;
+                    case WEATHER:
+                        l = WeatherListener;
+                        break;
+                    case WORLD:
+                        l = WorldListener;
+                        break;
+                }
+                chp.registerEvent(e.driver(), l, Priority.Lowest);
+            }
+        }
     }
 }
