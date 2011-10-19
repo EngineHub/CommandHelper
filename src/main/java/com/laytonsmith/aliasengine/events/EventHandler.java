@@ -4,6 +4,9 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CString;
+import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
@@ -19,10 +22,6 @@ import java.util.TreeSet;
  * @author layton
  */
 public class EventHandler {
-    private static int EventID = 0;
-    public static int GetUniqueID(){
-        return ++EventID;
-    }
     
     private static final Map<org.bukkit.event.Event.Type, SortedSet<BoundEvent>> event_handles =
             new EnumMap<org.bukkit.event.Event.Type, SortedSet<BoundEvent>>(org.bukkit.event.Event.Type.class);
@@ -136,5 +135,18 @@ public class EventHandler {
                 throw new ConfigRuntimeException(ex.getMessage(), null, 0, null);
             }
         }
+    }
+
+    public static Construct DumpEvents() {
+        CArray ca = new CArray(0, null);
+        for(org.bukkit.event.Event.Type type : event_handles.keySet()){
+            SortedSet<BoundEvent> set = event_handles.get(type);
+            Iterator<BoundEvent> i = set.iterator();
+            while(i.hasNext()){
+                BoundEvent b = i.next();
+                ca.push(new CString(b.toString(), 0, null));
+            }
+        }
+        return ca;
     }
 }

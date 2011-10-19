@@ -466,6 +466,9 @@ public class Static {
      * @return 
      */
     public static String ParseItemNotation(ItemStack is){
+        if(is == null){
+            return "0";
+        }
         return is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData());
     }
     

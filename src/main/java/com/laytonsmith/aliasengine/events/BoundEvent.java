@@ -25,15 +25,39 @@ import java.util.logging.Logger;
  * @author layton
  */
 public class BoundEvent implements Comparable<BoundEvent> {
-    String eventName;
-    String id;
-    String priority;
-    Map<String, Construct> prefilter;
-    String eventObjName;    
-    Map<String, IVariable> vars;
-    List<String> custom_names = new ArrayList<String>();
-    GenericTreeNode<Construct> tree;
-    org.bukkit.event.Event.Type driver; //For efficiency sake, cache it here
+    private final String eventName;
+    private final String id;
+    private final String priority;
+    private final Map<String, Construct> prefilter;
+    private final String eventObjName;    
+    private final Map<String, IVariable> vars;
+    private final List<String> custom_names = new ArrayList<String>();
+    private final GenericTreeNode<Construct> tree;
+    private final org.bukkit.event.Event.Type driver; //For efficiency sake, cache it here
+    
+    private static int EventID = 0;
+    private static int GetUniqueID(){
+        return ++EventID;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if(obj instanceof BoundEvent){
+            return this.id.equals(((BoundEvent)obj).id);
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+
+    @Override
+    public String toString() {
+        return "(" + eventName + ") " + id;
+    }
     
     public BoundEvent(String name, CArray options, CArray prefilter, String eventObjName, 
             List<IVariable> vars, GenericTreeNode<Construct> tree) throws EventException{
@@ -46,7 +70,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             }
         } else {
             //Generate a new event id
-            id = name + ":" + EventHandler.GetUniqueID();
+            id = name + ":" + GetUniqueID();
         }
         if(options != null && options.contains("priority")){
             this.priority = options.get("priority").val().toUpperCase();
