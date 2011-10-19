@@ -323,7 +323,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "array {[player]} Returns an array with the x, y, z coordinates of the block the player has highlighted"
+            return "array {[player]} Returns an array with the (x, y, z, world) coordinates of the block the player has highlighted"
                     + " in their crosshairs. If player is omitted, the current player is used. If the block is too far, a"
                     + " RangeException is thrown.";
         }
@@ -366,7 +366,10 @@ public class PlayerManagement {
                     throw new ConfigRuntimeException("No block in sight, or block too far", 
                             ExceptionType.RangeException, line_num, f);
                 }
-                return new CArray(line_num, f, new CInt(b.getX(), line_num, f), new CInt(b.getY(), line_num, f), new CInt(b.getZ(), line_num, f));
+                return new CArray(line_num, f, new CInt(b.getX(), line_num, f), 
+                        new CInt(b.getY(), line_num, f), 
+                        new CInt(b.getZ(), line_num, f),
+                        new CString(b.getWorld().getName(), line_num, f));
             } else {
                 throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f); 
             }
