@@ -7,7 +7,7 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.CFunction;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;

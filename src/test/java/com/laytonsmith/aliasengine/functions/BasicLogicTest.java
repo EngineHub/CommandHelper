@@ -5,9 +5,9 @@
 package com.laytonsmith.aliasengine.functions;
 
 import org.bukkit.Server;
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.*;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import org.bukkit.entity.Player;
 import org.junit.After;

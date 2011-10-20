@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.aliasengine.functions.exceptions;
+package com.laytonsmith.aliasengine.exceptions;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
 

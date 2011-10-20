@@ -2,15 +2,15 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.aliasengine.functions.exceptions;
+package com.laytonsmith.aliasengine.exceptions;
 
 /**
  *
  * @author Layton
  */
-public class LoopBreakException extends RuntimeException{
+public class LoopContinueException extends RuntimeException{
     int number;
-    public LoopBreakException(int times){
+    public LoopContinueException(int times){
         number = times;
     }
     public int getTimes(){

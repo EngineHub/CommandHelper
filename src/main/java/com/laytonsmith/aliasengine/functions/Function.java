@@ -6,10 +6,11 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.util.Map;
 import org.bukkit.command.CommandSender;
 
 /**
@@ -63,7 +64,7 @@ public interface Function {
      * this command.
      * @param varList 
      */
-    public void varList(IVariableList varList);
+    //public void varList(IVariableList varList);
     /**
      * If a function doesn't want to have to deal with a variable as a variable, but instead wants to recieve it as
      * an atomic, resolved value, the function can return true from this function. This will signal the interpreter
@@ -107,5 +108,5 @@ public interface Function {
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(int line_num, File f, CommandSender p, Construct ... args) throws ConfigRuntimeException;
+    public Construct exec(int line_num, File f, Map<String, Object> environment, Construct ... args) throws ConfigRuntimeException;
 }

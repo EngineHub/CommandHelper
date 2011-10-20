@@ -6,7 +6,7 @@ package com.laytonsmith.aliasengine.functions;
 
 import java.io.File;
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import java.io.IOException;
 import org.bukkit.entity.Player;
@@ -15,7 +15,7 @@ import com.laytonsmith.aliasengine.Constructs.Variable;
 import java.util.Arrays;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.MScriptCompiler;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

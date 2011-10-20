@@ -4,8 +4,8 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.aliasengine.events.EventHandler;
 import com.laytonsmith.aliasengine.events.EventList;
@@ -15,8 +15,10 @@ import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -67,6 +69,9 @@ public class AliasCore {
      * @return
      */
     public boolean alias(String command, final CommandSender player, ArrayList<Script> playerCommands) {
+        
+        Map<String, Object> env = new HashMap<String, Object>();
+        env.put("user", player);
 
         if (scripts == null) {
             throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", 0, null);
@@ -96,7 +101,7 @@ public class AliasCore {
                             }
                         }
                         try {
-                            s.run(s.getVariables(command), player, new MScriptComplete() {
+                            s.run(s.getVariables(command), env, new MScriptComplete() {
 
                                 public void done(String output) {
                                     try {
@@ -153,7 +158,7 @@ public class AliasCore {
                             if (ac.match(command)) {
                                 Static.getAliasCore().addPlayerReference(player);
                                 try {
-                                    ac.run(ac.getVariables(command), player, new MScriptComplete() {
+                                    ac.run(ac.getVariables(command), env, new MScriptComplete() {
 
                                         public void done(String output) {
                                             if (output != null) {

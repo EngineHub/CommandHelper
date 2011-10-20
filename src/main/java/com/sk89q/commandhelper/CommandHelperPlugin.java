@@ -21,7 +21,7 @@ package com.sk89q.commandhelper;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.aliasengine.AliasCore;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.aliasengine.Installer;
 import com.laytonsmith.aliasengine.Static;

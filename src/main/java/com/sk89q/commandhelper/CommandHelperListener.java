@@ -20,8 +20,8 @@ package com.sk89q.commandhelper;
 
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.DirtyRegisteredListener;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.InternalException;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.Script;

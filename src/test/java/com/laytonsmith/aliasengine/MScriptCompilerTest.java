@@ -9,7 +9,7 @@ import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.aliasengine.Constructs.Variable;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;

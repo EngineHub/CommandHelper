@@ -7,8 +7,7 @@ package com.laytonsmith.aliasengine.events;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Script;
-import com.laytonsmith.aliasengine.functions.exceptions.EventException;
-import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.event.Cancellable;
@@ -27,7 +26,7 @@ import org.bukkit.event.world.WorldEvent;
  * most Events should extend this class.
  * @author layton
  */
-public abstract class AbstractEvent implements Event {
+public abstract class AbstractEvent implements Event, Comparable<Event> {
 
     public void cancel(org.bukkit.event.Event e) {
         if (e instanceof Cancellable) {
@@ -71,4 +70,9 @@ public abstract class AbstractEvent implements Event {
     public void execute(Script s, BoundEvent b){
         s.run(null, null, null);
     }
+
+    public int compareTo(Event o) {
+        return this.getName().compareTo(o.getName());
+    }
+    
 }

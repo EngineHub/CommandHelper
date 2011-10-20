@@ -6,39 +6,25 @@ package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.IVariable;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  *
  * @author Layton
  */
 public class IVariableList {
-    ArrayList<IVariable> varList = new ArrayList<IVariable>();
+    Map<String, IVariable> varList = new HashMap<String, IVariable>();
     
     public void set(IVariable v){
-        boolean set = false;
-        for(int i = 0; i < varList.size(); i++){
-            IVariable l = varList.get(i);
-            if(l.getName().equals(v.getName())){
-                varList.set(i, v);
-                set = true;
-                break;
-            }
-        }
-        if(!set){
-            varList.add(v);
-        }
+        varList.put(v.getName(), v);
     }
     
     public IVariable get(String name){
-        for(int i = 0; i < varList.size(); i++){
-            IVariable l = varList.get(i);
-            if(l.getName().equals(name)){
-                return l;
-            }
+        if(!varList.containsKey(name)){
+            this.set(new IVariable(name, 0, null));
         }
-        IVariable v = new IVariable(name, 0, null);
-        varList.add(v);
-        return v;
+        return varList.get(name);
     }
 
     @Override
@@ -46,7 +32,8 @@ public class IVariableList {
         StringBuilder b = new StringBuilder();
         b.append("[");
         boolean first = true;
-        for(IVariable iv : varList){
+        for(Map.Entry<String, IVariable> entry : varList.entrySet()){
+            IVariable iv = entry.getValue();
             if(first){
                 first = false;
             } else {

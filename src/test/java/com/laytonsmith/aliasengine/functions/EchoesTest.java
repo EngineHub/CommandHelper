@@ -4,8 +4,8 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.lang.reflect.InvocationTargetException;

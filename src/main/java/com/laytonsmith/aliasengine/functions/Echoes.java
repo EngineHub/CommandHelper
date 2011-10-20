@@ -7,15 +7,17 @@ package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
+import com.laytonsmith.aliasengine.EnvHelper;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.util.Map;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
@@ -35,12 +37,12 @@ public class Echoes {
             return new Integer[] {0,1};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException{
+        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException{
             if(args.length == 0){
                 throw new CancelCommandException("");
             } else if(args.length == 1){
                 try{
-                    Static.SendMessage(p, args[0].val(), line_num, f);
+                    Static.SendMessage(EnvHelper.GetCommandSender(env), args[0].val(), line_num, f);
                 } finally{
                     throw new CancelCommandException("");
                 }
@@ -85,12 +87,12 @@ public class Echoes {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for(int i = 0; i < args.length; i++){
                 b.append(args[i].val());
             }
-            Static.SendMessage(p, b.toString(), line_num, f);
+            Static.SendMessage(EnvHelper.GetCommandSender(env), b.toString(), line_num, f);
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){
@@ -137,11 +139,11 @@ public class Echoes {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
                 throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, line_num, f);
             }
-            p = Static.getServer().getPlayer(args[0].val());
+            Player p = Static.getServer().getPlayer(args[0].val());
             if(p == null){
                 throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
@@ -194,7 +196,7 @@ public class Echoes {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String color = ChatColor.WHITE.toString();
             try{
                 color = ChatColor.valueOf(args[0].val().toUpperCase()).toString();
@@ -241,14 +243,14 @@ public class Echoes {
             return new Integer[]{1};
         }
 
-        public Construct exec(final int line_num, final File f, final CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(final int line_num, final File f, final Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
-                    if(!(p instanceof Player)){
+                    if(!(EnvHelper.GetCommandSender(env) instanceof Player)){
                         throw new ConfigRuntimeException("The current player is not online, or this is being run from the console", ExceptionType.PlayerOfflineException, line_num, f);
                     }
-                    ((Player)p).chat(line);
+                    (EnvHelper.GetPlayer(env)).chat(line);
                 }
             }, args[0].val());
 
@@ -314,7 +316,7 @@ public class Echoes {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             final Player player = Static.getServer().getPlayer(args[0].val());
             Static.SendMessage(new LineCallback() {
 
@@ -365,7 +367,7 @@ public class Echoes {
             return "3.0.1";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
                 throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, line_num, f);
             }
@@ -417,7 +419,7 @@ public class Echoes {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mes = args[0].val();
             boolean prefix = true;
             if(args.length > 1){

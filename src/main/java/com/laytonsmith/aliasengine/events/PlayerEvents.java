@@ -10,7 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.api;
-import com.laytonsmith.aliasengine.functions.exceptions.EventException;
+import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.Map;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;

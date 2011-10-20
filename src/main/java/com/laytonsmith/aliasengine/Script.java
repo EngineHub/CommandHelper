@@ -4,11 +4,11 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.functions.exceptions.LoopBreakException;
-import com.laytonsmith.aliasengine.functions.exceptions.LoopContinueException;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.LoopBreakException;
+import com.laytonsmith.aliasengine.exceptions.LoopContinueException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct.ConstructType;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;
@@ -28,7 +28,7 @@ import com.laytonsmith.aliasengine.functions.FunctionList;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
-import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
+import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.File;
 import java.util.ArrayList;
@@ -121,7 +121,7 @@ public class Script {
         return compilerError;
     }
 
-    public void run(final List<Variable> vars, final CommandSender p, final MScriptComplete done) {
+    public void run(final List<Variable> vars, Map<String, Object> env/*final CommandSender p*/, final MScriptComplete done) {
         if (!hasBeenCompiled || compilerError) {
             int line_num = 0;
             if (left.size() >= 1) {
@@ -192,7 +192,7 @@ public class Script {
 //        });
     }
 
-    public Construct eval(GenericTreeNode<Construct> c, final CommandSender player) throws CancelCommandException {
+    public Construct eval(GenericTreeNode<Construct> c, final Map<String, Object> env) throws CancelCommandException {
         final Construct m = c.getData();
         if (m.getCType() == ConstructType.FUNCTION) {
                 if (m.val().matches("^_[^_].*")) {
@@ -203,10 +203,12 @@ public class Script {
                     }
                     List<Construct> variables = new ArrayList<Construct>();
                     for (GenericTreeNode<Construct> child : c.getChildren()) {
-                        variables.add(eval(child, player));
+                        variables.add(eval(child, env));
                     }
                     variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
-                    return p.execute(variables, player, new HashMap<String, Procedure>(knownProcs), this.label);
+                    env.put("knownProcs", new HashMap<String, Procedure>(knownProcs));
+                    env.put("label", this.label);
+                    return p.execute(variables, env);
                 }
                 final Function f;
                 try{
@@ -215,13 +217,13 @@ public class Script {
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
                     throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getLineNum(), m.getFile());
                 }
-                f.varList(varList);
+                env.put("varList", varList);
                 //We have special handling for loop and other control flow functions
                 if (f instanceof _for) {
                     _for fr = (_for) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fr.execs(m.getLineNum(), m.getFile(), player, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
+                        return fr.execs(m.getLineNum(), m.getFile(), env, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
@@ -229,7 +231,7 @@ public class Script {
                     _if fr = (_if) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fr.execs(m.getLineNum(), m.getFile(), player, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
+                        return fr.execs(m.getLineNum(), m.getFile(), env, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
@@ -237,7 +239,7 @@ public class Script {
                     foreach fe = (foreach) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     try {
-                        return fe.execs(m.getLineNum(), m.getFile(), player, this, ch.get(0), ch.get(1), ch.get(2));
+                        return fe.execs(m.getLineNum(), m.getFile(), env, this, ch.get(0), ch.get(1), ch.get(2));
                     } catch (IndexOutOfBoundsException e) {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
@@ -250,7 +252,7 @@ public class Script {
                         GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val(), null));
                         StringBuilder b = new StringBuilder();
                         for (GenericTreeNode<Construct> child : root.getChildren()) {
-                            CString cs = new CString(eval(child, player).val(), 0, null);
+                            CString cs = new CString(eval(child, env).val(), 0, null);
                             if (!cs.val().trim().equals("")) {
                                 b.append(cs.val()).append(" ");
                             }
@@ -268,7 +270,7 @@ public class Script {
                     if (ch.size() == 4) {
                         fourth = ch.get(3);
                     }
-                    return ((_try) f).execs(m.getLineNum(), m.getFile(), player, this, ch.get(0), ch.get(1), ch.get(2), fourth);
+                    return ((_try) f).execs(m.getLineNum(), m.getFile(), env, this, ch.get(0), ch.get(1), ch.get(2), fourth);
                 } else if (f instanceof proc) {
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
                     if (ch.size() <= 1) {
@@ -281,7 +283,7 @@ public class Script {
                         if (i == ch.size() - 1) {
                             tree = ch.get(i);
                         } else {
-                            Construct cons = eval(ch.get(i), player);
+                            Construct cons = eval(ch.get(i), env);
                             if (i == 0 && cons instanceof IVariable) {
                                 //Soon, this will be allowed, so anonymous procedures can be created, but for now
                                 //it's not allowed
@@ -305,30 +307,30 @@ public class Script {
                 } else if (f instanceof is_proc) {
                     Construct[] ar = new Construct[c.getChildren().size()];
                     for (int i = 0; i < c.getChildren().size(); i++) {
-                        ar[i] = eval(c.getChildAt(i), player);
+                        ar[i] = eval(c.getChildAt(i), env);
                     }
                     ar = preResolveVariables(ar);
-                    return ((is_proc) f).execs(m.getLineNum(), m.getFile(), player, getProcList(), ar);
+                    return ((is_proc) f).execs(m.getLineNum(), m.getFile(), env, getProcList(), ar);
                 } else if (f instanceof call_proc) {
                     Construct[] ar = new Construct[c.getChildren().size()];
                     for (int i = 0; i < c.getChildren().size(); i++) {
-                        ar[i] = eval(c.getChildAt(i), player);
+                        ar[i] = eval(c.getChildAt(i), env);
                     }
                     ar = preResolveVariables(ar);
-                    return ((call_proc) f).execs(m.getLineNum(), m.getFile(), player, knownProcs, this.label, ar);
+                    return ((call_proc) f).execs(m.getLineNum(), m.getFile(), env, knownProcs, this.label, ar);
                 } else if (f instanceof include) {
-                    return ((include) f).execs(m.getLineNum(), m.getFile(), player, c.getChildren(), this);
+                    return ((include) f).execs(m.getLineNum(), m.getFile(), env, c.getChildren(), this);
                 } else if(f instanceof bind){
                     if(c.getChildren().size() < 5){
                         throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
-                    Construct name = preResolveVariable(eval(c.getChildAt(0), player));
-                    Construct options = preResolveVariable(eval(c.getChildAt(1), player));
-                    Construct prefilter = preResolveVariable(eval(c.getChildAt(2), player));
-                    Construct event_object = eval(c.getChildAt(3), player);
+                    Construct name = preResolveVariable(eval(c.getChildAt(0), env));
+                    Construct options = preResolveVariable(eval(c.getChildAt(1), env));
+                    Construct prefilter = preResolveVariable(eval(c.getChildAt(2), env));
+                    Construct event_object = eval(c.getChildAt(3), env);
                     List<IVariable> custom_params = new ArrayList<IVariable>();
                     for(int a = 0; a < c.getChildren().size() - 5; a++){
-                        Construct var = eval(c.getChildAt(4 + a), player);
+                        Construct var = eval(c.getChildAt(4 + a), env);
                         if(!(var instanceof IVariable)){
                             throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, m.getLineNum(), m.getFile());
                         }
@@ -341,36 +343,37 @@ public class Script {
 
                 ArrayList<Construct> args = new ArrayList<Construct>();
                 for (GenericTreeNode<Construct> c2 : c.getChildren()) {
-                    args.add(eval(c2, player));
+                    args.add(eval(c2, env));
                 }
                 if (f.isRestricted()) {
                     boolean perm = false;
                     PermissionsResolverManager perms = Static.getPermissionsResolverManager();
                     if (perms != null) {
-                        if(player instanceof Player){
-                            perm = perms.hasPermission(((Player)player).getName(), "ch.func.use." + f.getName())
-                                    || perms.hasPermission(((Player)player).getName(), "commandhelper.func.use." + f.getName());
+                        if(EnvHelper.GetCommandSender(env) instanceof Player){
+                            perm = perms.hasPermission(EnvHelper.GetPlayer(env).getName(), "ch.func.use." + f.getName())
+                                    || perms.hasPermission(EnvHelper.GetPlayer(env).getName(), "commandhelper.func.use." + f.getName());
                             if (label != null && label.startsWith("~")) {
                                 String[] groups = label.substring(1).split("/");
                                 for (String group : groups) {
-                                    if (perms.inGroup(((Player)player).getName(), group)) {
+                                    if (perms.inGroup(EnvHelper.GetPlayer(env).getName(), group)) {
                                         perm = true;
                                         break;
                                     }
                                 }
                             } else {
-                                if (label != null && (perms.hasPermission(((Player)player).getName(), "ch.alias." + label))
-                                        || perms.hasPermission(((Player)player).getName(), "commandhelper.alias." + label)) {
+                                if (label != null && (perms.hasPermission(EnvHelper.GetPlayer(env).getName(), "ch.alias." + label))
+                                        || perms.hasPermission(EnvHelper.GetPlayer(env).getName(), "commandhelper.alias." + label)) {
                                     perm = true;
                                 }
                             }
-                        } else if(player instanceof ConsoleCommandSender){
+                        } else if(EnvHelper.GetCommandSender(env) instanceof ConsoleCommandSender){
                             perm = true;
                         }
                     } else {
                         perm = true;
                     }
-                    if (player == null || player.isOp()) {
+                    if (EnvHelper.GetCommandSender(env) == null || 
+                            EnvHelper.GetCommandSender(env).isOp()) {
                         perm = true;
                     }
                     if (!perm) {
@@ -393,14 +396,13 @@ public class Script {
                                 + f.getName() + ")", null, m.getLineNum(), m.getFile());
                     }
                 }
-                f.varList(varList);
                 if (f.preResolveVariables()) {
                     ca = preResolveVariables(ca);
                 }
                 //TODO: Will revisit this in the future. For now, remove the ability for
                 //functions to run asyncronously.
                 //if(f.runAsync() == true || f.runAsync() == null){
-                Construct ret = f.exec(m.getLineNum(), m.getFile(), player, ca);
+                Construct ret = f.exec(m.getLineNum(), m.getFile(), env, ca);
                 return ret;
                 /*} else {
                 return blockingNonThreadSafe(player, new Callable<Construct>() {

@@ -7,8 +7,8 @@ package com.laytonsmith.aliasengine;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.functions.IVariableList;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.functions.exceptions.FunctionReturnException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
 import com.sk89q.util.StringUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -52,14 +52,14 @@ public class Procedure implements Cloneable {
     }
     
     
-    public Construct execute(List<Construct> variables, CommandSender player, Map<String, Procedure> procStack, String label){
+    public Construct execute(List<Construct> variables, Map<String, Object> env){//CommandSender player, Map<String, Procedure> procStack, String label){
         resetVariables();
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         Script fakeScript = new Script(null, null);
         fakeScript.varList = new IVariableList();
-        fakeScript.knownProcs = procStack;
-        fakeScript.label = label;
+        fakeScript.knownProcs = ((Map<String, Procedure>)env.get("procStack"));//procStack;
+        fakeScript.label = env.get("label").toString();//label;
         CArray array = new CArray(0, null);
         for(Construct d : variables){
             array.push(d);
@@ -94,7 +94,7 @@ public class Procedure implements Cloneable {
         }
         
         try{
-            fakeScript.eval(tree, player);
+            fakeScript.eval(tree, env);
         } catch(FunctionReturnException e){
             return e.getReturn();
         }

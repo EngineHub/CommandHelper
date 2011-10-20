@@ -6,7 +6,7 @@ package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Script;
-import com.laytonsmith.aliasengine.functions.exceptions.EventException;
+import com.laytonsmith.aliasengine.exceptions.EventException;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.Map;
 
@@ -16,7 +16,7 @@ import java.util.Map;
  * itself with @api, and it will be included in the EventList.
  * @author layton
  */
-public interface Event{
+public interface Event extends Comparable<Event>{
     /**
      * This should return the name of the event.
      * @return 

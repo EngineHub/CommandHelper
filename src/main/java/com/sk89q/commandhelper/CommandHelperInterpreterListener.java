@@ -9,8 +9,8 @@ import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.MScriptComplete;
 import com.laytonsmith.aliasengine.Static;
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import java.io.File;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -102,11 +102,13 @@ public class CommandHelperInterpreterListener extends PlayerListener {
     }
 
     public void execute(String script, final Player p) throws ConfigCompileException {
-        List<Token> stream = MScriptCompiler.lex(/*"include('plugins/CommandHelper/auto_include.ms')\n" +*/ script, new File("Interpreter"));
+        List<Token> stream = MScriptCompiler.lex("include('plugins/CommandHelper/auto_include.ms')\n" + script, new File("Interpreter"));
         GenericTreeNode tree = MScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
+        Map<String, Object> env = new HashMap<String, Object>();
+        env.put("user", p);
         try {
-            MScriptCompiler.execute(tree, p, new MScriptComplete() {
+            MScriptCompiler.execute(tree, env, new MScriptComplete() {
 
                 public void done(String output) {
                     output = output.trim();

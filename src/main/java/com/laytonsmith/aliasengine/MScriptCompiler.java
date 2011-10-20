@@ -4,7 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;
 import com.laytonsmith.aliasengine.functions.FunctionList;
@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.List;
+import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.bukkit.command.CommandSender;
@@ -502,14 +503,14 @@ public class MScriptCompiler {
      * @param done
      * @param script 
      */
-    public static void execute(GenericTreeNode<Construct> root, CommandSender p, MScriptComplete done, Script script){
+    public static void execute(GenericTreeNode<Construct> root, Map<String, Object> env, MScriptComplete done, Script script){
         if(script == null){
             script = new Script(null, null);
             script.varList = new IVariableList();
         }
         StringBuilder b = new StringBuilder();
         for (GenericTreeNode<Construct> gg : root.getChildren()) {
-            String ret = script.eval(gg, p).val();
+            String ret = script.eval(gg, env).val();
             if (ret != null && !ret.trim().equals("")) {
                 b.append(ret).append(" ");
             }

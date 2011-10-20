@@ -8,9 +8,9 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.functions.exceptions.EventException;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -39,7 +39,8 @@ public class EventHandler {
         if(!event_handles.containsKey(event.driver())){
             event_handles.put(event.driver(), new TreeSet<BoundEvent>());
         }
-        event_handles.get(event.driver()).add(b);
+        SortedSet<BoundEvent> set = event_handles.get(event.driver());
+        set.add(b);
         try{
             event.bind();
         } catch(UnsupportedOperationException e){}

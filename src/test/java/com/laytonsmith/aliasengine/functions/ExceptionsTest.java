@@ -4,10 +4,10 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import java.io.File;
 import com.laytonsmith.aliasengine.MScriptCompiler;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.testing.StaticTest;

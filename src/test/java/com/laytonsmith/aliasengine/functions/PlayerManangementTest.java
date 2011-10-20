@@ -5,8 +5,8 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.MScriptComplete;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import org.bukkit.Location;
 import org.junit.Test;

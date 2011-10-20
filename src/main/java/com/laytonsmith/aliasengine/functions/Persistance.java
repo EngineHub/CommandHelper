@@ -5,15 +5,15 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.api;
-import com.laytonsmith.aliasengine.functions.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
-import com.laytonsmith.aliasengine.functions.exceptions.MarshalException;
+import com.laytonsmith.aliasengine.exceptions.MarshalException;
 import java.io.File;
 import java.util.logging.Level;
 import java.util.logging.Logger;

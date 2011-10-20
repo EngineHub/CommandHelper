@@ -12,7 +12,7 @@ import com.laytonsmith.aliasengine.GenericTree;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.GenericTreeTraversalOrderEnum;
 import com.laytonsmith.aliasengine.Script;
-import com.laytonsmith.aliasengine.functions.exceptions.EventException;
+import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -134,12 +134,12 @@ public class BoundEvent implements Comparable<BoundEvent> {
         return Priority.valueOf(priority);
     }
     public enum Priority{
-        LOWEST(1),
-        LOW(2),
+        LOWEST(5),
+        LOW(4),
         NORMAL(3),
-        HIGH(4),
-        HIGHEST(5),
-        MONITOR(6);
+        HIGH(2),
+        HIGHEST(1),
+        MONITOR(1000);
         private final int id;
         private Priority(int i){
             this.id = i;
@@ -154,7 +154,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
        } else if(this.getPriority().getId() > o.getPriority().getId()){
            return 1;
        } else {
-           return 0;
+           return this.id.compareTo(o.id);
        }
     }
     

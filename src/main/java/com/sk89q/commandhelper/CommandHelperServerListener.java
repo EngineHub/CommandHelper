@@ -7,7 +7,7 @@ package com.sk89q.commandhelper;
 import com.laytonsmith.aliasengine.InternalException;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import org.bukkit.ChatColor;

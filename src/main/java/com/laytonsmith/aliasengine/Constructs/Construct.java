@@ -4,7 +4,7 @@
  */
 package com.laytonsmith.aliasengine.Constructs;
 
-import com.laytonsmith.aliasengine.functions.exceptions.MarshalException;
+import com.laytonsmith.aliasengine.exceptions.MarshalException;
 import java.io.File;
 import java.util.SortedMap;
 import java.util.TreeMap;

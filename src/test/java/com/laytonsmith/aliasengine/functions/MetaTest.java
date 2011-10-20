@@ -7,7 +7,7 @@ package com.laytonsmith.aliasengine.functions;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.aliasengine.MScriptCompiler;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import java.util.concurrent.atomic.AtomicBoolean;
 import org.bukkit.entity.Player;

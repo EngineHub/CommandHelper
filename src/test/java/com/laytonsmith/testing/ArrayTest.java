@@ -5,8 +5,8 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.functions.exceptions.ConfigRuntimeException;
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import static org.junit.Assert.*;
 import static com.laytonsmith.testing.StaticTest.*;
