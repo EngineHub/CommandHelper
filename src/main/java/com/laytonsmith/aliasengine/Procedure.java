@@ -52,14 +52,14 @@ public class Procedure implements Cloneable {
     }
     
     
-    public Construct execute(List<Construct> variables, Map<String, Object> env){//CommandSender player, Map<String, Procedure> procStack, String label){
+    public Construct execute(List<Construct> variables, Env env){//CommandSender player, Map<String, Procedure> procStack, String label){
         resetVariables();
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         Script fakeScript = new Script(null, null);
         fakeScript.varList = new IVariableList();
-        fakeScript.knownProcs = ((Map<String, Procedure>)env.get("procStack"));//procStack;
-        fakeScript.label = env.get("label").toString();//label;
+        fakeScript.knownProcs = env.GetProcs();//procStack;
+        fakeScript.label = env.GetLabel();//label;
         CArray array = new CArray(0, null);
         for(Construct d : variables){
             array.push(d);

@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -20,12 +21,10 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import net.minecraft.server.EntityPlayer;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
@@ -78,7 +77,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Object o = Static.getAliasCore().parent.getServer().getPluginManager();
             if(o instanceof SimplePluginManager){
                 SimplePluginManager spm = (SimplePluginManager)o;
@@ -96,7 +95,7 @@ public class Sandbox {
 //                            com.execute(p, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
 //                            l.callEvent(new Event() {});
 //                            break;
-                            l.getPlugin().onCommand(p, com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
+                            l.getPlugin().onCommand(env.GetCommandSender(), com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
                         }
                     }
                 } catch (InstantiationException ex) {
@@ -158,14 +157,14 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
 
             Location l = null;
             int qty = 1;
             ItemStack is = null;
             boolean natural = false;
-            if(p instanceof Player){
-                l = ((Player)p).getLocation();
+            if(env.GetCommandSender() instanceof Player){
+                l = env.GetPlayer().getLocation();
             }
             if(args.length == 1){
                 //It is just the item
@@ -252,7 +251,7 @@ public class Sandbox {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Object o = null;
             o.toString();
             return new CVoid(line_num, f);

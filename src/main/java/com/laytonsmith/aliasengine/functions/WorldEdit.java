@@ -6,6 +6,7 @@ package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.*;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Static;
@@ -63,14 +64,14 @@ public class WorldEdit {
                     + " the location is returned, it is returned as a 4 index array:(x, y, z, world)";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player m = null;
             Location l = null;
             boolean setter = false;
             Static.checkPlugin("WorldEdit", line_num, f);
             
-            if(p instanceof Player){
-                m = (Player)p;
+            if(env.GetCommandSender() instanceof Player){
+                m = env.GetPlayer();
             }
             if(args.length == 2){
                 m = Static.GetPlayer(args[0].val(), line_num, f);
@@ -126,14 +127,14 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player m = null;
             Location l = null;
             boolean setter = false;
             Static.checkPlugin("WorldEdit", line_num, f);
 
-            if (p instanceof Player) {
-                m = (Player)p;
+            if (env.GetCommandSender() instanceof Player) {
+                m = env.GetPlayer();
             }
             if (args.length == 2){
                 m = Static.GetPlayer(args[0].val(), line_num, f);
@@ -191,7 +192,7 @@ public class WorldEdit {
 //            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 //        }
 //
-//        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+//        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 //            Static.checkPlugin("WorldEdit", line_num, f);
 //            return new CVoid(line_num, f);
 //        }
@@ -223,7 +224,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
                 String regionName = args[0].val();
                 String worldName = args[1].val();
@@ -319,7 +320,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String region1 = args[1].val();
             List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
             Static.checkPlugin("WorldGuard", line_num, f);
@@ -367,7 +368,7 @@ public class WorldEdit {
             return new ExceptionType[]{};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", line_num, f);
             List<World> checkWorlds = null;
             CArray arr = new CArray(line_num, f);

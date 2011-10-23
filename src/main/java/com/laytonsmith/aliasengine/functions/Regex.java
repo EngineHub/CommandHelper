@@ -9,12 +9,12 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -66,7 +66,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], line_num, f);
             String subject = args[1].val();
             CArray ret = new CArray(line_num, f);
@@ -120,7 +120,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], line_num, f);
             String subject = args[1].val();
             CArray fret = new CArray(line_num, f);
@@ -176,7 +176,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], line_num, f);
             String replacement = args[1].val();
             String subject = args[2].val();
@@ -226,7 +226,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], line_num, f);
             String subject = args[1].val();
             String [] rsplit = pattern.split(subject);
@@ -276,7 +276,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], line_num, f);
             String subject = args[1].val();
             long ret = 0;

@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.events.BoundEvent;
 import com.laytonsmith.aliasengine.events.EventHandler;
@@ -68,12 +69,12 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
         public Construct execs(Construct name, Construct options, Construct prefilter, 
-                Construct event_obj, GenericTreeNode<Construct> tree, List<IVariable> vars, int line_num, File f){
+                Construct event_obj, GenericTreeNode<Construct> tree, Env env, int line_num, File f){
             //Check to see if our arguments are correct
             if(!(options instanceof CNull || options instanceof CArray)){
                 throw new ConfigRuntimeException("The options must be an array or null", ExceptionType.CastException, line_num, f);
@@ -93,7 +94,7 @@ public class EventBinding {
             }
             try {
                 BoundEvent be = new BoundEvent(name.val(), (CArray)options, (CArray)prefilter, 
-                        ((IVariable)event_obj).getName(), vars, tree);
+                        ((IVariable)event_obj).getName(), env, tree);
                 EventHandler.RegisterEvent(be);
                 id = new CString(be.getId(), line_num, f);
             } catch (EventException ex) {
@@ -142,7 +143,7 @@ public class EventBinding {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return EventHandler.DumpEvents();
         }
         

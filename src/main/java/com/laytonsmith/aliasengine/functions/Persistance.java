@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.MarshalException;
@@ -61,7 +62,7 @@ public class Persistance {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String key = args[0].val();
             String value = null;
             try{
@@ -127,7 +128,7 @@ public class Persistance {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
             Object o;
             try {
                 Object obj = Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()});
@@ -187,7 +188,7 @@ public class Persistance {
             return true;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(Static.getPersistance().isKeySet(new String[]{"commandhelper", "function", "storage", args[0].val()}), line_num, f);
         }
         

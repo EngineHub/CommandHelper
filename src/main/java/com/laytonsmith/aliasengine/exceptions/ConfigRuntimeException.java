@@ -33,7 +33,11 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param file The file this code resides in
      */
     public ConfigRuntimeException(String msg, ExceptionType ex, int line_num, File file){
-        super(msg);
+        this(msg, ex, line_num, file, null);
+    }
+    
+    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num, File file, Throwable cause){
+        super(msg, cause);
         this.ex = ex;
         this.line_num = line_num;
         this.file = file;

@@ -14,7 +14,7 @@ import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
-import com.laytonsmith.aliasengine.EnvHelper;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Procedure;
 import com.laytonsmith.aliasengine.exceptions.LoopBreakException;
 import com.laytonsmith.aliasengine.exceptions.LoopContinueException;
@@ -48,7 +48,7 @@ public class DataHandling {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CArray(line_num, f, args);
         }
         
@@ -86,14 +86,14 @@ public class DataHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Construct c = args[1];
             while(c instanceof IVariable){
-                c = EnvHelper.GetVarList(env).get(((IVariable)c).getName()).ival();
+                c = env.GetVarList().get(((IVariable)c).getName()).ival();
             }
             if(args[0] instanceof IVariable){
                 IVariable v = new IVariable(((IVariable)args[0]).getName(), c, line_num, f);
-                EnvHelper.GetVarList(env).set(v);
+                env.GetVarList().set(v);
                 return v;
             }
             throw new ConfigRuntimeException("assign only accepts an ivariable as the first argument", ExceptionType.CastException, line_num, f);
@@ -130,7 +130,7 @@ public class DataHandling {
         public Integer[] numArgs() {
             return new Integer[]{4};
         }
-        public Construct execs(int line_num, File f, Map<String, Object> env, Script parent, GenericTreeNode<Construct> assign, 
+        public Construct execs(int line_num, File f, Env env, Script parent, GenericTreeNode<Construct> assign, 
                 GenericTreeNode<Construct> condition, GenericTreeNode<Construct> expression, 
                 GenericTreeNode<Construct> runnable) throws CancelCommandException{
             Construct counter = parent.eval(assign, env);
@@ -173,7 +173,7 @@ public class DataHandling {
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.CastException};
         }
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return null;
         }
 
@@ -210,11 +210,11 @@ public class DataHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Map<String, Object> env, Script that, GenericTreeNode<Construct> array, 
+        public Construct execs(int line_num, File f, Env env, Script that, GenericTreeNode<Construct> array, 
                 GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code) throws CancelCommandException{
             
             Construct arr = that.eval(array, env);
@@ -320,7 +320,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int num = 1;
             if(args.length == 1){
                 num = (int)Static.getInt(args[0]);
@@ -368,7 +368,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int num = 1;
             if(args.length == 1){
                 num = (int)Static.getInt(args[0]);
@@ -414,7 +414,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(!(args[0] instanceof CArray), line_num, f);
         }
         
@@ -454,7 +454,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CArray, line_num, f);
         }
         
@@ -495,7 +495,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             boolean b = true;
             try{
                 Static.getDouble(args[0]);
@@ -543,7 +543,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             boolean b = true;
             try{
                 Static.getInt(args[0]);
@@ -593,7 +593,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(true, line_num, f);
         }
         
@@ -635,7 +635,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CNull, line_num, f);
         }
         
@@ -676,7 +676,7 @@ public class DataHandling {
             return null;
         }
         
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
@@ -718,7 +718,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Construct ret = (args.length == 1?args[0]:new CVoid(line_num, f));
             throw new FunctionReturnException(ret);
         }
@@ -762,11 +762,11 @@ public class DataHandling {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Map<String, Object> env, List<GenericTreeNode<Construct>> children, Script parent){
+        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> children, Script parent){
             GenericTreeNode<Construct> tree = children.get(0);
             Construct arg = parent.eval(tree, env);
             arg = parent.preResolveVariables(new Construct[]{arg})[0];
@@ -817,12 +817,12 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Map<String, Object> env, Construct ... args){
-            Procedure proc = EnvHelper.GetProcs(env).get(args[0].val());
+        public Construct execs(int line_num, File f, Env env, Construct ... args){
+            Procedure proc = env.GetProcs().get(args[0].val());
             if(proc != null){
                 List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
                 vars.remove(0);                
@@ -872,11 +872,11 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         
-        public Construct execs(int line_num, File f, Map<String, Object> env, List<Procedure> procs, Construct ... args){
+        public Construct execs(int line_num, File f, Env env, List<Procedure> procs, Construct ... args){
             for(Procedure proc : procs){
                 if(proc.getName().equals(args[0].val())){
                     return new CBoolean(true, line_num, f);
@@ -923,7 +923,7 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 return new CBoolean(((CArray)args[0]).inAssociativeMode(), line_num, f);
             } else {

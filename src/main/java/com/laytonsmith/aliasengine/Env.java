@@ -6,8 +6,11 @@ package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.IVariableList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -15,14 +18,38 @@ import org.bukkit.entity.Player;
  *
  * @author Layton
  */
-public class EnvHelper {
+public class Env {
+    
+    /**
+     * This is the underlying map of variables
+     */
+    private Map<String, Object> env = new HashMap<String, Object>();    
+    
+    /**
+     * Use this if you would like to stick a custom variable in the environment.
+     * @param name
+     * @param var 
+     */
+    public void SetCustom(String name, Object var){
+        if(!env.containsKey("custom")){
+            env.put("custom", new HashMap<String, Object>());
+        }
+        ((Map<String, Object>)env.get("custom")).put(name, var);        
+    }
+    
+    public Object GetCustom(String name){
+        if(!env.containsKey("custom")){
+            env.put("custom", new HashMap<String, Object>());
+        }
+        return ((Map<String, Object>)env.get("custom")).get(name);
+    }
     /**
      * Given the environment, this function returns the CommandSender in the
      * environment, which can possibly be null.
      * @param env
      * @return 
      */
-    public static CommandSender GetCommandSender(Map<String, Object> env){
+    public CommandSender GetCommandSender(){
         if(env.containsKey("user")){
             Object userObject = env.get("user");
             if(userObject == null){
@@ -41,7 +68,7 @@ public class EnvHelper {
      * Sets the CommandSender in this environment
      * @param env 
      */
-    public static void SetCommandSender(Map<String, Object> env, CommandSender cs){
+    public void SetCommandSender(CommandSender cs){
         env.put("user", cs);
     }
     
@@ -53,7 +80,7 @@ public class EnvHelper {
      * @param env
      * @return 
      */
-    public static Player GetPlayer(Map<String, Object> env){
+    public Player GetPlayer(){
         if(env.containsKey("user")){
             Object userObject = env.get("user");
             if(userObject == null){
@@ -72,7 +99,7 @@ public class EnvHelper {
      * Sets the Player in this environment
      * @param env 
      */
-    public static void SetPlayer(Map<String, Object> env, Player p){
+    public void SetPlayer(Player p){
         env.put("user", p);
     }
     
@@ -83,7 +110,7 @@ public class EnvHelper {
      * @param env
      * @return 
      */
-    public static IVariableList GetVarList(Map<String, Object> env){
+    public IVariableList GetVarList(){
         IVariableList varList = null;
         if(!env.containsKey("varList")){
             varList = new IVariableList();
@@ -94,6 +121,10 @@ public class EnvHelper {
         return varList;
     }
     
+    public void SetVarList(IVariableList varList){
+        env.put("varList", varList);
+    }
+    
     /**
      * Returns the Map of known procedures in this environment. If the list
      * of procedures is currently empty, a new one is created and stored in
@@ -101,7 +132,7 @@ public class EnvHelper {
      * @param env
      * @return 
      */
-    public static Map<String, Procedure> GetProcs(Map<String, Object> env){
+    public Map<String, Procedure> GetProcs(){
         Map<String, Procedure> procs = null;
         if(!env.containsKey("knownProcs")){
             procs = new HashMap<String, Procedure>();
@@ -110,5 +141,17 @@ public class EnvHelper {
             procs = ((Map<String, Procedure>)env.get("knownProcs"));
         }
         return procs;
+    }
+    
+    public void SetProcs(Map<String, Procedure> procs){
+        env.put("knownProcs", procs);
+    }
+    
+    public String GetLabel(){
+        return env.get("label").toString();
+    }
+    
+    public void SetLabel(String label){
+        env.put("label", label);
     }
 }

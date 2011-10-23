@@ -503,7 +503,7 @@ public class MScriptCompiler {
      * @param done
      * @param script 
      */
-    public static void execute(GenericTreeNode<Construct> root, Map<String, Object> env, MScriptComplete done, Script script){
+    public static void execute(GenericTreeNode<Construct> root, Env env, MScriptComplete done, Script script){
         if(script == null){
             script = new Script(null, null);
             script.varList = new IVariableList();

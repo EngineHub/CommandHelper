@@ -6,6 +6,7 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
@@ -108,5 +109,5 @@ public interface Function {
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(int line_num, File f, Map<String, Object> environment, Construct ... args) throws ConfigRuntimeException;
+    public Construct exec(int line_num, File f, Env environment, Construct ... args) throws ConfigRuntimeException;
 }

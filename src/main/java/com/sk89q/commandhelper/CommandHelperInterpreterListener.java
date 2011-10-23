@@ -5,6 +5,7 @@
 package com.sk89q.commandhelper;
 
 import com.laytonsmith.aliasengine.Constructs.Token;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.MScriptComplete;
@@ -105,8 +106,8 @@ public class CommandHelperInterpreterListener extends PlayerListener {
         List<Token> stream = MScriptCompiler.lex("include('plugins/CommandHelper/auto_include.ms')\n" + script, new File("Interpreter"));
         GenericTreeNode tree = MScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
-        Map<String, Object> env = new HashMap<String, Object>();
-        env.put("user", p);
+        Env env = new Env();
+        env.SetPlayer(p);
         try {
             MScriptCompiler.execute(tree, env, new MScriptComplete() {
 

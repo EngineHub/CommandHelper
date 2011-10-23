@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -65,14 +66,14 @@ public class Environment {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
             World w = null;
             String world = null;
-            if(p instanceof Player){
-                w = ((Player)p).getWorld();
+            if(env.GetPlayer() instanceof Player){
+                w = env.GetPlayer().getWorld();
             }
             if(args.length == 1 || args.length == 2){
                 if(args[0] instanceof CArray){
@@ -153,15 +154,15 @@ public class Environment {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
             String id = null;
             String world = null;
             World w = null;
-            if(p instanceof Player){
-                w = ((Player)p).getWorld();
+            if(env.GetPlayer() instanceof Player){
+                w = env.GetPlayer().getWorld();
             }
             if((args.length == 2 || args.length == 3) && args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];

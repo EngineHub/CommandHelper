@@ -70,8 +70,8 @@ public class AliasCore {
      */
     public boolean alias(String command, final CommandSender player, ArrayList<Script> playerCommands) {
         
-        Map<String, Object> env = new HashMap<String, Object>();
-        env.put("user", player);
+        Env env = new Env();
+        env.SetCommandSender(player);
 
         if (scripts == null) {
             throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", 0, null);

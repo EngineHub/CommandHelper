@@ -98,7 +98,7 @@ public class Script {
     
     private Script(){}
     
-    public static Script GenerateScript(GenericTreeNode<Construct> tree){
+    public static Script GenerateScript(GenericTreeNode<Construct> tree, Env env){
         Script s = new Script();
         
         s.hasBeenCompiled = true;
@@ -121,7 +121,8 @@ public class Script {
         return compilerError;
     }
 
-    public void run(final List<Variable> vars, Map<String, Object> env/*final CommandSender p*/, final MScriptComplete done) {
+    public void run(final List<Variable> vars, Env env/*final CommandSender p*/, final MScriptComplete done) {
+        CommandSender p = env.GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
             int line_num = 0;
             if (left.size() >= 1) {
@@ -164,9 +165,9 @@ public class Script {
                 }
                 File auto_include = new File("plugins/CommandHelper/auto_include.ms");
                 if (auto_include.exists()) {
-                    MScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), p, null, this);
+                    MScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), env, null, this);
                 }
-                MScriptCompiler.execute(tree.getRoot(), p, done, this);
+                MScriptCompiler.execute(tree.getRoot(), env, done, this);
             }
         } catch (ConfigRuntimeException e) {
             System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
@@ -192,7 +193,7 @@ public class Script {
 //        });
     }
 
-    public Construct eval(GenericTreeNode<Construct> c, final Map<String, Object> env) throws CancelCommandException {
+    public Construct eval(GenericTreeNode<Construct> c, final Env env) throws CancelCommandException {
         final Construct m = c.getData();
         if (m.getCType() == ConstructType.FUNCTION) {
                 if (m.val().matches("^_[^_].*")) {
@@ -206,8 +207,8 @@ public class Script {
                         variables.add(eval(child, env));
                     }
                     variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
-                    env.put("knownProcs", new HashMap<String, Procedure>(knownProcs));
-                    env.put("label", this.label);
+                    env.SetProcs(new HashMap<String, Procedure>(knownProcs));
+                    env.SetLabel(this.label);
                     return p.execute(variables, env);
                 }
                 final Function f;
@@ -217,7 +218,7 @@ public class Script {
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
                     throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getLineNum(), m.getFile());
                 }
-                env.put("varList", varList);
+                env.SetVarList(varList);
                 //We have special handling for loop and other control flow functions
                 if (f instanceof _for) {
                     _for fr = (_for) f;
@@ -317,7 +318,7 @@ public class Script {
                         ar[i] = eval(c.getChildAt(i), env);
                     }
                     ar = preResolveVariables(ar);
-                    return ((call_proc) f).execs(m.getLineNum(), m.getFile(), env, knownProcs, this.label, ar);
+                    return ((call_proc) f).execs(m.getLineNum(), m.getFile(), env, ar);
                 } else if (f instanceof include) {
                     return ((include) f).execs(m.getLineNum(), m.getFile(), env, c.getChildren(), this);
                 } else if(f instanceof bind){
@@ -336,6 +337,7 @@ public class Script {
                         }
                         custom_params.add((IVariable)var);
                     }
+                    //TODO meh
                     GenericTreeNode<Construct> tree = c.getChildAt(c.getChildren().size() - 1);
                     return ((bind)f).execs(name, options, prefilter, event_object, tree, custom_params, m.getLineNum(), m.getFile());
                 }
@@ -349,31 +351,31 @@ public class Script {
                     boolean perm = false;
                     PermissionsResolverManager perms = Static.getPermissionsResolverManager();
                     if (perms != null) {
-                        if(EnvHelper.GetCommandSender(env) instanceof Player){
-                            perm = perms.hasPermission(EnvHelper.GetPlayer(env).getName(), "ch.func.use." + f.getName())
-                                    || perms.hasPermission(EnvHelper.GetPlayer(env).getName(), "commandhelper.func.use." + f.getName());
+                        if(env.GetCommandSender() instanceof Player){
+                            perm = perms.hasPermission(env.GetPlayer().getName(), "ch.func.use." + f.getName())
+                                    || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.func.use." + f.getName());
                             if (label != null && label.startsWith("~")) {
                                 String[] groups = label.substring(1).split("/");
                                 for (String group : groups) {
-                                    if (perms.inGroup(EnvHelper.GetPlayer(env).getName(), group)) {
+                                    if (perms.inGroup(env.GetPlayer().getName(), group)) {
                                         perm = true;
                                         break;
                                     }
                                 }
                             } else {
-                                if (label != null && (perms.hasPermission(EnvHelper.GetPlayer(env).getName(), "ch.alias." + label))
-                                        || perms.hasPermission(EnvHelper.GetPlayer(env).getName(), "commandhelper.alias." + label)) {
+                                if (label != null && (perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + label))
+                                        || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.alias." + label)) {
                                     perm = true;
                                 }
                             }
-                        } else if(EnvHelper.GetCommandSender(env) instanceof ConsoleCommandSender){
+                        } else if(env.GetCommandSender() instanceof ConsoleCommandSender){
                             perm = true;
                         }
                     } else {
                         perm = true;
                     }
-                    if (EnvHelper.GetCommandSender(env) == null || 
-                            EnvHelper.GetCommandSender(env).isOp()) {
+                    if (env.GetCommandSender() == null || 
+                            env.GetCommandSender().isOp()) {
                         perm = true;
                     }
                     if (!perm) {

@@ -15,6 +15,7 @@ import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -58,7 +59,8 @@ public class PlayerManagement {
             return new Integer[]{0};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             if(p instanceof Player){
                 return new CString(((Player)p).getName(), line_num, f);            
             } else if(p instanceof ConsoleCommandSender){
@@ -109,7 +111,7 @@ public class PlayerManagement {
             return new Integer[]{0};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Player[] pa = Static.getServer().getOnlinePlayers();
             CString[] sa = new CString[pa.length];
             for (int i = 0; i < pa.length; i++) {
@@ -157,7 +159,8 @@ public class PlayerManagement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if(p instanceof Player){
                 m = (Player)p;
@@ -251,7 +254,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             String player = null;
             double x;
             double y;
@@ -347,7 +351,8 @@ public class PlayerManagement {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if (args.length == 0) {
                 if(p instanceof Player){
@@ -391,7 +396,8 @@ public class PlayerManagement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if (args.length == 1) {
                 m = Static.getServer().getPlayer(args[0].val());
@@ -447,7 +453,8 @@ public class PlayerManagement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if (args.length == 0) {
                 if(p instanceof Player){
@@ -549,7 +556,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender m, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender m = env.GetCommandSender();
             String player = "";
             int index = -1;
             if (args.length == 0) {
@@ -683,7 +691,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if (args.length == 0) {
                 if(p instanceof Player){
@@ -739,7 +748,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             String message = "You have been kicked";
             Player m = null;
             if (args.length == 0) {
@@ -804,7 +814,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player player = null;
             String name;
             if (args.length == 1) {
@@ -864,7 +875,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player player = null;
             if (args.length == 0) {
                 if(p instanceof Player){
@@ -929,7 +941,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             //Getter
             if (args.length == 0 || args.length == 1) {
                 Location l = null;
@@ -1066,7 +1079,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             int index = -1;
             boolean all = false;
             Player m = null;
@@ -1206,7 +1220,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if(p instanceof Player){
                 m = (Player)p;
@@ -1311,7 +1326,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if(p instanceof Player){
                 m = (Player)p;
@@ -1365,7 +1381,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             String mode = "";
             GameMode gm;
@@ -1428,7 +1445,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if(p instanceof Player){
                 m = (Player)p;
@@ -1478,7 +1496,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             int xp = 0;
             if(p instanceof Player){
@@ -1533,7 +1552,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if(p instanceof Player){
                 m = (Player)p;
@@ -1583,7 +1603,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             int xp = 0;
             if(p instanceof Player){
@@ -1638,7 +1659,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if(p instanceof Player){
                 m = (Player)p;
@@ -1689,7 +1711,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             int xp = 0;
             if(p instanceof Player){
@@ -1746,7 +1769,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if(p instanceof Player){
                 m = (Player)p;
@@ -1800,7 +1824,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             int level = 0;
             if(p instanceof Player){
@@ -1857,7 +1882,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Player m = Static.GetPlayer(args[0].val(), line_num, f);
             if(m == null || !m.isOnline()){
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
@@ -1927,7 +1952,8 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = env.GetCommandSender();
             Player m = null;
             if(p instanceof Player){
                 m = (Player)p;
@@ -1986,7 +2012,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(Static.getServer().getOfflinePlayer(args[0].val()).isOnline(), line_num, f);
         }
         
@@ -2031,7 +2057,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
             return new CBoolean(pl.isWhitelisted(), line_num, f);
         }
@@ -2075,7 +2101,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
             boolean whitelist = Static.getBoolean(args[1]);
             pl.setWhitelisted(whitelist);
@@ -2126,7 +2152,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
             return new CBoolean(pl.isBanned(), line_num, f);
         }
@@ -2173,7 +2199,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
             boolean ban = Static.getBoolean(args[1]);
             pl.setBanned(ban);

@@ -14,15 +14,11 @@ import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.sound.sampled.LineEvent;
-import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -43,7 +39,7 @@ public class ArrayHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 return new CInt(((CArray)args[0]).size(), line_num, f);
             }
@@ -88,7 +84,7 @@ public class ArrayHandling {
             return new Integer[]{1, 2};
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
                 String index = "0..-1";
@@ -209,7 +205,7 @@ public class ArrayHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 try{
                 ((CArray)args[0]).set(args[1], args[2]);
@@ -258,7 +254,7 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 ((CArray)args[0]).push(args[1]);
                 return new CVoid(line_num, f);
@@ -302,7 +298,7 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             equals e = new equals();
             if(args[0] instanceof CArray){
                 CArray ca = (CArray) args[0];
@@ -380,7 +376,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 int index = (int)Static.getInt(args[1]);
                 CArray ca = (CArray)args[0];
@@ -431,7 +427,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray && args[1] instanceof CInt){
                 CArray original = (CArray)args[0];
                 int size = (int)((CInt)args[1]).getInt();
@@ -488,7 +484,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             long start = 0;
             long finish = 0;
             long increment = 1;
@@ -551,7 +547,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
                 CArray ca2 = new CArray(line_num, f);
@@ -603,7 +599,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
                 CArray ca2 = new CArray(line_num, f);
@@ -654,7 +650,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Map<String, Object> env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CEntry(args[0], args[1], line_num, f);
         }
         

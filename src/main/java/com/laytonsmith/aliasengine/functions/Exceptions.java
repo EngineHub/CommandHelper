@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.*;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
@@ -147,9 +148,9 @@ public class Exceptions {
         public Boolean runAsync() {
             return null;
         }
-        public Construct execs(int line_num, File f, CommandSender p, Script that, GenericTreeNode<Construct> tryCode,
+        public Construct execs(int line_num, File f, Env env, Script that, GenericTreeNode<Construct> tryCode,
                 GenericTreeNode<Construct> varName, GenericTreeNode<Construct> catchCode, GenericTreeNode<Construct> types) throws CancelCommandException{
-            Construct pivar = that.eval(varName, p);
+            Construct pivar = that.eval(varName, env);
             IVariable ivar;
             if(pivar instanceof IVariable){
                 ivar = (IVariable)pivar;
@@ -158,7 +159,7 @@ public class Exceptions {
             }
             List<String> interest = new ArrayList<String>();
             if(types != null){
-            Construct ptypes = that.eval(types, p);
+            Construct ptypes = that.eval(types, env);
                 if(ptypes instanceof CString){
                     interest.add(ptypes.val());
                 } else if(ptypes instanceof CArray){
@@ -182,7 +183,7 @@ public class Exceptions {
             }
             
             try{
-                that.eval(tryCode, p);
+                that.eval(tryCode, env);
             } catch (ConfigRuntimeException e){
                 if((Boolean)Static.getPreferences().getPreference("debug-mode")){
                     System.out.println("[CommandHelper]: Exception thrown -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
@@ -195,7 +196,7 @@ public class Exceptions {
                     ex.push(new CInt(e.getLineNum(), line_num, f));
                     ivar.setIval(ex);
                     varList.set(ivar);
-                    that.eval(catchCode, p);
+                    that.eval(catchCode, env);
                 } else {
                     throw e;
                 }
@@ -204,7 +205,7 @@ public class Exceptions {
             
             return new CVoid(line_num, f);
         }
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         
@@ -247,7 +248,7 @@ public class Exceptions {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try{
                 ExceptionType c = null;
                 if(!(args[0] instanceof CNull)){

@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTree;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.GenericTreeTraversalOrderEnum;
@@ -60,7 +61,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     }
     
     public BoundEvent(String name, CArray options, CArray prefilter, String eventObjName, 
-            List<IVariable> vars, GenericTreeNode<Construct> tree) throws EventException{
+            Env env, GenericTreeNode<Construct> tree) throws EventException{
         this.eventName = name;
         
         if(options != null && options.contains("id")){

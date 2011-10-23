@@ -12,6 +12,7 @@ import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -63,7 +64,7 @@ public class Minecraft {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0] instanceof CInt) {
                 return new CInt(Static.getInt(args[0]), line_num, f);
             } else {
@@ -139,8 +140,8 @@ public class Minecraft {
             return true;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            List<World> worlds = p.getServer().getWorlds();
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            List<World> worlds = env.GetCommandSender().getServer().getWorlds();
             CArray c = new CArray(line_num, f);
             for (World w : worlds) {
                 c.push(new CString(w.getName(), line_num, f));
@@ -199,7 +200,7 @@ public class Minecraft {
             SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mob = args[0].val();
             String sheepColor = "WHITE";
             if (mob.toUpperCase().startsWith("SHEEP:")) {
@@ -215,20 +216,13 @@ public class Minecraft {
                         ExceptionType.RangeException, line_num, f);
             }
             Location l = null;
-            if (p instanceof Player) {
-                l = ((Player) p).getLocation();
+            if (env.GetCommandSender() instanceof Player) {
+                l = env.GetPlayer().getLocation();
             }
             if (args.length > 2) {
                 if (args[2] instanceof CArray) {
                     CArray ca = (CArray) args[2];
-                    if (ca.size() == 3) {
-                        //l = new Location(p.getWorld(), Static.getNumber(ca.get(0, line_num)),
-                        //        Static.getNumber(ca.get(1, line_num)) + 1, Static.getNumber(ca.get(2, line_num)));
-                        l = Static.GetLocation(ca, (l != null?l.getWorld():null), line_num, f);
-                    } else {
-                        throw new ConfigRuntimeException("Expected argument 3 to be an array with 3 items",
-                                ExceptionType.LengthException, line_num, f);
-                    }
+                    l = Static.GetLocation(ca, (l != null?l.getWorld():null), line_num, f);
                 } else {
                     throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array",
                             ExceptionType.CastException, line_num, f);
@@ -347,8 +341,8 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
-            Location l = Static.GetLocation(args[0], (p instanceof Player?((Player)p).getWorld():null), line_num, f);
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            Location l = Static.GetLocation(args[0], (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
             Effect e = null;
             try{
                 e = Effect.valueOf(args[1].val().toUpperCase());

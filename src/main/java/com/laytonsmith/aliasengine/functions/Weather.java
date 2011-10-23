@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -41,7 +42,7 @@ public class Weather {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int x;
             int y;
             int z;
@@ -53,7 +54,7 @@ public class Weather {
                         throw new ConfigRuntimeException("lightning expects the array to be a location array", 
                                 ExceptionType.LengthException, line_num, f);
                     }
-                    Location l = Static.GetLocation(a, (p instanceof Player?((Player)p).getWorld():null), line_num, f);
+                    Location l = Static.GetLocation(a, (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
                     x = (int)java.lang.Math.floor(l.getX());
                     y = (int)java.lang.Math.floor(l.getY());
                     z = (int)java.lang.Math.floor(l.getZ());
@@ -110,11 +111,11 @@ public class Weather {
             return new Integer[]{1, 2};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             boolean b = Static.getBoolean(args[0]);
             World w = null;
-            if(p instanceof Player){
-                w = ((Player)p).getWorld();
+            if(env.GetCommandSender() instanceof Player){
+                w = env.GetPlayer().getWorld();
             }
             if(args.length == 2){
                 w = Static.getServer().getWorld(args[1].val());

@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -47,7 +48,7 @@ public class Meta {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, final CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, final Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
                         ExceptionType.FormatException, line_num, f);
@@ -56,39 +57,39 @@ public class Meta {
             if (args[0] instanceof CArray) {
                 CArray u = (CArray) args[0];
                 for (int i = 0; i < u.size(); i++) {
-                    exec(line_num, f, p, new Construct[]{new CString(u.get(i, line_num).val(), line_num, f), args[1]});
+                    exec(line_num, f, env, new Construct[]{new CString(u.get(i, line_num).val(), line_num, f), args[1]});
                 }
                 return new CVoid(line_num, f);
             }
             if (args[0].val().equals("~op")) {
-                Boolean isOp = p.isOp();
+                Boolean isOp = env.GetCommandSender().isOp();
 
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                    if (p instanceof Player) {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) p).getName() + ": " + args[1].val().trim());
+                    if (env.GetCommandSender() instanceof Player) {
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[1].val().trim());
                     } else {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[1].val().trim());
                     }
                 }
 
                 if (!isOp) {
-                    this.setOp(p, true);
+                    this.setOp(env.GetCommandSender(), true);
                 }
 
                 try {
-                    Static.getServer().dispatchCommand(this.getOPCommandSender(p), cmd);
+                    Static.getServer().dispatchCommand(this.getOPCommandSender(env.GetCommandSender()), cmd);
                 } finally {
                     //If they just opped themselves, or deopped themselves in the command
                     //don't undo what they just did.
-                    if(!cmd.equalsIgnoreCase("op " + p.getName()) && !cmd.equalsIgnoreCase("deop " + p.getName())){
-                        this.setOp(p, isOp);
+                    if(!cmd.equalsIgnoreCase("op " + env.GetPlayer().getName()) && !cmd.equalsIgnoreCase("deop " + env.GetPlayer().getName())){
+                        this.setOp(env.GetCommandSender(), isOp);
                     }
                 }
             } else {
                 Player m = Static.getServer().getPlayer(args[0].val());
                 if (m != null && m.isOnline()) {
-                    if (p instanceof Player) {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) p).getName() + ": " + args[0].val().trim());
+                    if (env.GetCommandSender() instanceof Player) {
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[0].val().trim());
                     } else {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
                     }
@@ -211,21 +212,21 @@ public class Meta {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
                         ExceptionType.FormatException, line_num, f);
             }
             String cmd = args[0].val().substring(1);
             if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                if (p instanceof Player) {
-                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((Player) p).getName() + ": " + args[0].val().trim());
+                if (env.GetCommandSender() instanceof Player) {
+                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[0].val().trim());
                 } else {
                     Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
                 }
             }
             //p.chat(cmd);
-            Static.getServer().dispatchCommand(p, cmd);
+            Static.getServer().dispatchCommand(env.GetCommandSender(), cmd);
             return new CVoid(line_num, f);
         }
 
@@ -269,7 +270,7 @@ public class Meta {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             for (int i = 0; i < args.length; i++) {
                 args[i].val();
             }
@@ -342,7 +343,7 @@ public class Meta {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return Static.resolveConstruct(args[0].val(), line_num, f);
         }
     }
@@ -382,7 +383,7 @@ public class Meta {
             return "3.1.0";
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CVoid(line_num, f);
         }
         //Doesn't matter, run out of state anyways
@@ -433,10 +434,10 @@ public class Meta {
             return null;
         }
 
-        public Construct exec(int line_num, File f, CommandSender p, Construct... args) throws ConfigRuntimeException {
-            Static.getAliasCore().removePlayerReference(p);
-            Static.getAliasCore().alias(args[0].val(), p, null);
-            Static.getAliasCore().addPlayerReference(p);
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            Static.getAliasCore().removePlayerReference(env.GetCommandSender());
+            Static.getAliasCore().alias(args[0].val(), env.GetCommandSender(), null);
+            Static.getAliasCore().addPlayerReference(env.GetCommandSender());
             return new CVoid(line_num, f);
         }
     }
