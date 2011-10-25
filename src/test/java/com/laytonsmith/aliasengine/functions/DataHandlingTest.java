@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.Env;
 import java.io.File;
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -32,6 +33,7 @@ public class DataHandlingTest {
     
     Server fakeServer;
     Player fakePlayer;
+    Env env = new Env();
 
     public DataHandlingTest() {
     }
@@ -48,6 +50,7 @@ public class DataHandlingTest {
     public void setUp() {
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
+        env.SetPlayer(fakePlayer);
     }
 
     @After
@@ -64,9 +67,9 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{0, 1, 2, 3, 4}");
     }
     
@@ -79,7 +82,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         
     }
     
@@ -91,7 +94,7 @@ public class DataHandlingTest {
                 + "     array_push(@array, @i)\n"
                 + " )\n"
                 + " msg(@array)\n";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         
     }
     
@@ -104,9 +107,9 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{1, 2, 3, 4, 5}");
     }
     
@@ -120,9 +123,9 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{3, 4, 5}");
     }
     
@@ -139,13 +142,14 @@ public class DataHandlingTest {
                 + " )"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{1, 2}");
     }
     
     @Test public void testCallProcIsProc() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(true);
         String config = "/for = >>>\n"
                 + " msg(is_proc(_proc))\n"
                 + " proc(_proc,"
@@ -154,9 +158,9 @@ public class DataHandlingTest {
                 + " msg(is_proc(_proc))"
                 + " call_proc(_proc)"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("false");
         verify(fakePlayer).sendMessage("true");
         verify(fakePlayer).sendMessage("hello world");
@@ -175,9 +179,9 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{0, 1, 3, 4}");
     }
     
@@ -190,9 +194,9 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{0, 1, 4}");
     }
     
@@ -205,9 +209,9 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{0, 1}");
     }
     
@@ -223,9 +227,9 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{j:0, j:1, i:0, j:0, j:1, i:1}");
     }
     
@@ -241,9 +245,9 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(Arrays.asList(new Variable[]{}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{j:0, j:1}");
     }
     
@@ -253,7 +257,7 @@ public class DataHandlingTest {
         //Create the test file
         File test = new File("unit_test_inc.ms");
         FileUtility.write("msg('hello')", test);
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
         //delete the test file
         test.delete();

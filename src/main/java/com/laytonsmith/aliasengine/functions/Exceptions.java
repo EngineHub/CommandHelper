@@ -103,7 +103,6 @@ public class Exceptions {
     }
     @api public static class _try implements Function{      
         
-        IVariableList varList;
         public String getName() {
             
             return "try";
@@ -131,10 +130,6 @@ public class Exceptions {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public void varList(IVariableList varList) {
-            this.varList = varList;
         }
 
         public boolean preResolveVariables() {
@@ -195,7 +190,7 @@ public class Exceptions {
                     ex.push(new CString((e.getFile()!=null?e.getFile().getAbsolutePath():"null"), line_num, f));
                     ex.push(new CInt(e.getLineNum(), line_num, f));
                     ivar.setIval(ex);
-                    varList.set(ivar);
+                    env.GetVarList().set(ivar);
                     that.eval(catchCode, env);
                 } else {
                     throw e;

@@ -296,8 +296,6 @@ public class Math {
     }
     
     @api public static class inc implements Function{
-
-        IVariableList varList;
         
         public String getName() {
             return "inc";
@@ -309,7 +307,7 @@ public class Math {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
-                IVariable v = varList.get(((IVariable)args[0]).getName());
+                IVariable v = env.GetVarList().get(((IVariable)args[0]).getName());
                 Construct newVal;
                 long value = 1;
                 if(args.length == 2){
@@ -321,7 +319,7 @@ public class Math {
                     newVal = new CInt(Static.getInt(v.ival()) + value, line_num, f);
                 }
                 v = new IVariable(v.getName(), newVal, line_num, f);
-                varList.set(v);
+                env.GetVarList().set(v);
                 return v;
             }
             throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", 
@@ -341,10 +339,6 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {
-            this.varList = varList;
-        }
-
         public boolean preResolveVariables() {
             return false;
         }
@@ -357,8 +351,6 @@ public class Math {
     }
     
     @api public static class dec implements Function{
-
-        IVariableList varList;
         
         public String getName() {
             return "dec";
@@ -370,7 +362,7 @@ public class Math {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
-                IVariable v = varList.get(((IVariable)args[0]).getName());
+                IVariable v = env.GetVarList().get(((IVariable)args[0]).getName());
                 long value = 1;
                 if(args.length == 2){
                     value = Static.getInt(args[1]);
@@ -382,7 +374,7 @@ public class Math {
                     newVal = new CInt(Static.getInt(v.ival()) - value, line_num, f);
                 }
                 v = new IVariable(v.getName(), newVal, line_num, f);
-                varList.set(v);
+                env.GetVarList().set(v);
                 return v;
             }
             throw new ConfigRuntimeException("dec expects argument 1 to be an ivar", 
@@ -400,10 +392,6 @@ public class Math {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public void varList(IVariableList varList) {
-            this.varList = varList;
         }
 
         public boolean preResolveVariables() {

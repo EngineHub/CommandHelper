@@ -486,18 +486,7 @@ public class Static {
         }
         return m;
     }
-    
-    public static boolean ItemMatch(String item1, String item2){
-        if(item1.contains(":")){
-            String[] split = item1.split(":");
-            item1 = split[0].trim();
-        }
-        if(item2.contains(":")){
-            String[] split = item2.split(":");
-            item2 = split[0].trim();
-        }
-        return item1.trim().equalsIgnoreCase(item2.trim());
-    }
+        
     
     /**
      * Location "objects" are mscript arrays that represent a location in game. There are 

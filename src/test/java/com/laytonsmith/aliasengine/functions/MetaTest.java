@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.Env;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.aliasengine.MScriptCompiler;
@@ -28,18 +29,16 @@ import static org.mockito.Mockito.*;
  */
 public class MetaTest {
     
-    static Server fakeServer;
-    static Player fakePlayer;
+    Server fakeServer;
+    Player fakePlayer;
+    Env env = new Env();
+    
 
     public MetaTest() {
     }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        fakePlayer = StaticTest.GetOnlinePlayer();
-        fakeServer = StaticTest.GetFakeServer();
-        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
-        CommandHelperPlugin.myServer = fakeServer;
     }
 
     @AfterClass
@@ -48,6 +47,11 @@ public class MetaTest {
 
     @Before
     public void setUp() {
+        fakePlayer = StaticTest.GetOnlinePlayer();
+        fakeServer = StaticTest.GetFakeServer();
+        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+        CommandHelperPlugin.myServer = fakeServer;
+        env.SetPlayer(fakePlayer);
     }
 
     @After
@@ -60,7 +64,7 @@ public class MetaTest {
         Player fakePlayer2 = StaticTest.GetOnlinePlayer("wraithguard02", fakeServer);
         when(fakeServer.getPlayer("wraithguard02")).thenReturn(fakePlayer2);
         when(fakePlayer.isOp()).thenReturn(true);
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         //verify(fakePlayer2).performCommand("cmd yay");
         verify(fakeServer).dispatchCommand(fakePlayer2, "cmd yay");
     }

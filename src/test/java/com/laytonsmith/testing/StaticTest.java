@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.testing;
 
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
 import org.bukkit.command.CommandSender;
 import com.laytonsmith.aliasengine.MScriptCompiler;
@@ -61,7 +62,6 @@ public class StaticTest {
         //are fine
         f.isRestricted();
         f.runAsync();
-        f.varList(null);
         f.preResolveVariables();
         f.thrown();
 
@@ -108,6 +108,8 @@ public class StaticTest {
     }
 
     public static void TestExec(Function f, CommandSender p) {
+        Env env = new Env();
+        env.SetCommandSender(p);
         //See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
         //keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try
         //strings, numbers, arrays, and nulls
@@ -154,7 +156,7 @@ public class StaticTest {
                     }
                 }
                 try {
-                    f.exec(0, null, p, con);
+                    f.exec(0, null, env, con);
                 } catch (CancelCommandException e) {
                 } catch (ConfigRuntimeException e) {
                     if (e.getExceptionType() != null) {
@@ -348,7 +350,9 @@ public class StaticTest {
     }
     
     public static void Run(String script, CommandSender player, MScriptComplete done) throws ConfigCompileException{
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), player, done, null);
+        Env env = new Env();
+        env.SetCommandSender(player);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, done, null);
     }
     
     public static String SRun(String script, CommandSender player) throws ConfigCompileException{

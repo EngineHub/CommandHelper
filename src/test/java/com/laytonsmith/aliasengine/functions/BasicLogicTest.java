@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.Env;
 import org.bukkit.Server;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.*;
@@ -34,6 +35,7 @@ public class BasicLogicTest {
     CInt argn2_1;
     CBoolean _true;
     CBoolean _false;
+    Env env = new Env();
     
     public BasicLogicTest() {
     }
@@ -58,6 +60,7 @@ public class BasicLogicTest {
         _false = C.Boolean(false);
         fakeServer = GetFakeServer();
         fakePlayer = GetOnlinePlayer(fakeServer);
+        env.SetPlayer(fakePlayer);
     }
     
     @After
@@ -73,10 +76,10 @@ public class BasicLogicTest {
     public void testEquals() throws CancelCommandException{
         BasicLogic.equals e = new BasicLogic.equals();
         Construct ret = null;
-        assertCTrue(e.exec(0, null, fakePlayer, arg1_1, arg1_2));
-        assertCFalse(e.exec(0, null, fakePlayer, arg1_1, arg2_1));
-        assertCFalse(e.exec(0, null, fakePlayer, argn1_1, arg1_1));
-        assertCFalse(e.exec(0, null, fakePlayer, C.onstruct(1), C.onstruct("string")));
+        assertCTrue(e.exec(0, null, env, arg1_1, arg1_2));
+        assertCFalse(e.exec(0, null, env, arg1_1, arg2_1));
+        assertCFalse(e.exec(0, null, env, argn1_1, arg1_1));
+        assertCFalse(e.exec(0, null, env, C.onstruct(1), C.onstruct("string")));
     }
     
     public void testEqualsIC() throws ConfigCompileException{
@@ -90,66 +93,66 @@ public class BasicLogicTest {
     
     @Test public void testAnd() throws CancelCommandException{
         BasicLogic.and a = new BasicLogic.and();
-        assertCTrue(a.exec(0, null, fakePlayer, _true, _true, _true));
-        assertCFalse(a.exec(0, null, fakePlayer, _true, _true, _false));
-        assertCTrue(a.exec(0, null, fakePlayer, _true, _true));
-        assertCFalse(a.exec(0, null, fakePlayer, _true, _false));
-        assertCFalse(a.exec(0, null,fakePlayer, _false, _false));
-        assertCTrue(a.exec(0, null, fakePlayer, _true));
-        assertCFalse(a.exec(0, null, fakePlayer, _false));
+        assertCTrue(a.exec(0, null, env, _true, _true, _true));
+        assertCFalse(a.exec(0, null, env, _true, _true, _false));
+        assertCTrue(a.exec(0, null, env, _true, _true));
+        assertCFalse(a.exec(0, null, env, _true, _false));
+        assertCFalse(a.exec(0, null,env, _false, _false));
+        assertCTrue(a.exec(0, null, env, _true));
+        assertCFalse(a.exec(0, null, env, _false));
     }
     
     @Test public void testOr() throws CancelCommandException{
         BasicLogic.or a = new BasicLogic.or();
-        assertCTrue(a.exec(0, null, fakePlayer, _true, _true, _true));
-        assertCTrue(a.exec(0, null, fakePlayer, _true, _true, _false));
-        assertCTrue(a.exec(0, null, fakePlayer, _true, _true));
-        assertCTrue(a.exec(0, null, fakePlayer, _true, _false));
-        assertCFalse(a.exec(0, null, fakePlayer, _false, _false));
-        assertCTrue(a.exec(0, null, fakePlayer, _true));
-        assertCFalse(a.exec(0, null, fakePlayer, _false));
+        assertCTrue(a.exec(0, null, env, _true, _true, _true));
+        assertCTrue(a.exec(0, null, env, _true, _true, _false));
+        assertCTrue(a.exec(0, null, env, _true, _true));
+        assertCTrue(a.exec(0, null, env, _true, _false));
+        assertCFalse(a.exec(0, null, env, _false, _false));
+        assertCTrue(a.exec(0, null, env, _true));
+        assertCFalse(a.exec(0, null, env, _false));
     }
     
     @Test public void testNot() throws CancelCommandException{
         BasicLogic.not a = new BasicLogic.not();
-        assertCFalse(a.exec(0, null, fakePlayer, _true));
-        assertCTrue(a.exec(0, null, fakePlayer, _false));
+        assertCFalse(a.exec(0, null, env, _true));
+        assertCTrue(a.exec(0, null, env, _false));
     }
     
     @Test public void testGt() throws CancelCommandException{
         BasicLogic.gt a = new BasicLogic.gt();
-        assertCFalse(a.exec(0, null, fakePlayer, arg1_1, arg1_2));
-        assertCTrue(a.exec(0, null, fakePlayer, arg2_1, arg1_1));
-        assertCFalse(a.exec(0, null, fakePlayer, arg1_1, arg2_1));
-        assertCFalse(a.exec(0, null, fakePlayer, argn1_1, arg1_1));
-        assertCTrue(a.exec(0, null, fakePlayer, arg1_1, argn1_1));
+        assertCFalse(a.exec(0, null, env, arg1_1, arg1_2));
+        assertCTrue(a.exec(0, null, env, arg2_1, arg1_1));
+        assertCFalse(a.exec(0, null, env, arg1_1, arg2_1));
+        assertCFalse(a.exec(0, null, env, argn1_1, arg1_1));
+        assertCTrue(a.exec(0, null, env, arg1_1, argn1_1));
     }
     
     @Test public void testGte() throws CancelCommandException{
         BasicLogic.gte a = new BasicLogic.gte();
-        assertCTrue(a.exec(0, null, fakePlayer, arg1_1, arg1_2));
-        assertCTrue(a.exec(0, null, fakePlayer, arg2_1, arg1_1));
-        assertCFalse(a.exec(0, null, fakePlayer, arg1_1, arg2_1));
-        assertCFalse(a.exec(0, null, fakePlayer, argn1_1, arg1_1));
-        assertCTrue(a.exec(0, null, fakePlayer, arg1_1, argn1_1));
+        assertCTrue(a.exec(0, null, env, arg1_1, arg1_2));
+        assertCTrue(a.exec(0, null, env, arg2_1, arg1_1));
+        assertCFalse(a.exec(0, null, env, arg1_1, arg2_1));
+        assertCFalse(a.exec(0, null, env, argn1_1, arg1_1));
+        assertCTrue(a.exec(0, null, env, arg1_1, argn1_1));
     }
     
     @Test public void testLt() throws CancelCommandException{
         BasicLogic.lt a = new BasicLogic.lt();
-        assertCFalse(a.exec(0, null, fakePlayer, arg1_1, arg1_2));
-        assertCFalse(a.exec(0, null, fakePlayer, arg2_1, arg1_1));
-        assertCTrue(a.exec(0, null, fakePlayer, arg1_1, arg2_1));
-        assertCTrue(a.exec(0, null, fakePlayer, argn1_1, arg1_1));
-        assertCFalse(a.exec(0, null, fakePlayer, arg1_1, argn1_1));
+        assertCFalse(a.exec(0, null, env, arg1_1, arg1_2));
+        assertCFalse(a.exec(0, null, env, arg2_1, arg1_1));
+        assertCTrue(a.exec(0, null, env, arg1_1, arg2_1));
+        assertCTrue(a.exec(0, null, env, argn1_1, arg1_1));
+        assertCFalse(a.exec(0, null, env, arg1_1, argn1_1));
     }
     
     @Test public void testLte() throws CancelCommandException{
         BasicLogic.lte a = new BasicLogic.lte();
-        assertCTrue(a.exec(0, null, fakePlayer, arg1_1, arg1_2));
-        assertCFalse(a.exec(0, null, fakePlayer, arg2_1, arg1_1));
-        assertCTrue(a.exec(0, null, fakePlayer, arg1_1, arg2_1));
-        assertCTrue(a.exec(0, null, fakePlayer, argn1_1, arg1_1));
-        assertCFalse(a.exec(0, null, fakePlayer, arg1_1, argn1_1));
+        assertCTrue(a.exec(0, null, env, arg1_1, arg1_2));
+        assertCFalse(a.exec(0, null, env, arg2_1, arg1_1));
+        assertCTrue(a.exec(0, null, env, arg1_1, arg2_1));
+        assertCTrue(a.exec(0, null, env, argn1_1, arg1_1));
+        assertCFalse(a.exec(0, null, env, arg1_1, argn1_1));
     }
     
     @Test public void testIf() throws ConfigCompileException{

@@ -201,7 +201,6 @@ public class DataHandling {
     }
     
     @api public static class foreach implements Function{
-        IVariableList varList;
         public String getName() {
             return "foreach";
         }
@@ -219,7 +218,7 @@ public class DataHandling {
             
             Construct arr = that.eval(array, env);
             if(arr instanceof IVariable){
-                arr = varList.get(((IVariable)arr).getName()).ival();
+                arr = env.GetVarList().get(((IVariable)arr).getName()).ival();
             }
             Construct iv = that.eval(ivar, env);
             
@@ -228,7 +227,7 @@ public class DataHandling {
                     CArray one = (CArray)arr;
                     IVariable two = (IVariable)iv;
                     for(int i = 0; i < one.size(); i++){
-                        varList.set(new IVariable(two.getName(), one.get(i, line_num), line_num, f));
+                        env.GetVarList().set(new IVariable(two.getName(), one.get(i, line_num), line_num, f));
                         try{
                             that.eval(code, env);
                         } catch(LoopBreakException e){
@@ -263,10 +262,6 @@ public class DataHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public void varList(IVariableList varList) {
-            this.varList = varList;
         }
 
         public boolean preResolveVariables() {
@@ -871,18 +866,9 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
-
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CVoid(line_num, f);
-        }
         
-        public Construct execs(int line_num, File f, Env env, List<Procedure> procs, Construct ... args){
-            for(Procedure proc : procs){
-                if(proc.getName().equals(args[0].val())){
-                    return new CBoolean(true, line_num, f);
-                }
-            }
-            return new CBoolean(false, line_num, f);
+        public Construct exec(int line_num, File f, Env env, Construct ... args){
+            return new CBoolean(env.GetProcs().get(args[0].val())==null?false:true, line_num, f);
         }
         
     }

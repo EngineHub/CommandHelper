@@ -220,7 +220,7 @@ public class AliasCore {
 
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
             //config = new AliasConfig(alias_config, null, perms);
-            scripts = MScriptCompiler.preprocess(MScriptCompiler.lex(alias_config, aliasConfig));
+            scripts = MScriptCompiler.preprocess(MScriptCompiler.lex(alias_config, aliasConfig), new Env());
             for (Script s : scripts) {
                 try {
                     s.compile();

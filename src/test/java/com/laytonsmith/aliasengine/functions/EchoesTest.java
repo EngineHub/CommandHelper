@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
@@ -27,6 +28,7 @@ public class EchoesTest {
     
     Server fakeServer;
     Player fakePlayer;
+    Env env = new Env();
     
     public EchoesTest() {
     }
@@ -43,6 +45,7 @@ public class EchoesTest {
     public void setUp() {
         fakeServer = GetFakeServer();
         fakePlayer = GetOnlinePlayer(fakeServer);
+        env.SetPlayer(fakePlayer);
     }
     
     @After
@@ -58,7 +61,7 @@ public class EchoesTest {
     @Test public void testChat() throws CancelCommandException{
         Echoes.chat a = new Echoes.chat();     
         TestBoilerplate(a, "chat");
-        a.exec(0, null, fakePlayer, C.onstruct("Hello World!"));
+        a.exec(0, null, env, C.onstruct("Hello World!"));
         verify(fakePlayer).chat("Hello World!");
     }
     
@@ -68,7 +71,7 @@ public class EchoesTest {
         TestBoilerplate(a, "broadcast");
         when(fakePlayer.getServer()).thenReturn(fakeServer);
         CommandHelperPlugin.myServer = fakeServer;
-        a.exec(0, null, fakePlayer, C.onstruct("Hello World!"));
+        a.exec(0, null, env, C.onstruct("Hello World!"));
         verify(fakeServer).broadcastMessage("Hello World!");        
     }
     

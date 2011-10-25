@@ -8,16 +8,13 @@ import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;
 import com.laytonsmith.aliasengine.functions.FunctionList;
-import com.laytonsmith.aliasengine.functions.IVariableList;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.List;
-import java.util.Map;
 import java.util.Stack;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -232,7 +229,7 @@ public class MScriptCompiler {
      * @return
      * @throws ConfigCompileException 
      */
-    public static List<Script> preprocess(List<Token> tokenStream) throws ConfigCompileException {
+    public static List<Script> preprocess(List<Token> tokenStream, Env env) throws ConfigCompileException {
         //First, pull out the duplicate newlines
         ArrayList<Token> temp = new ArrayList<Token>();
         for (int i = 0; i < tokenStream.size(); i++) {
@@ -320,7 +317,7 @@ public class MScriptCompiler {
             } else {
                 if (t.type == TType.NEWLINE) {
                     inLeft = true;
-                    Script s = new Script(left, right);
+                    Script s = new Script(left, right, env);
                     scripts.add(s);
                     left = new ArrayList();
                     right = new ArrayList();
@@ -505,8 +502,7 @@ public class MScriptCompiler {
      */
     public static void execute(GenericTreeNode<Construct> root, Env env, MScriptComplete done, Script script){
         if(script == null){
-            script = new Script(null, null);
-            script.varList = new IVariableList();
+            script = new Script(null, null, env);
         }
         StringBuilder b = new StringBuilder();
         for (GenericTreeNode<Construct> gg : root.getChildren()) {

@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.api;
@@ -16,10 +13,9 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.Map;
-import org.bukkit.command.CommandSender;
 
 /**
- *
+ * 
  * @author Layton
  */
 public class BasicLogic {
@@ -132,6 +128,49 @@ public class BasicLogic {
         public Boolean runAsync() {
             return null;
         }
+    }
+    
+    @api public static class nequals implements Function{
+
+        public String getName() {
+            return "nequals";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {val1, val2} Returns true if the two values are NOT equal, or false"
+                    + " otherwise. Equivalent to not(equals(val1, val2))";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+            equals e = new equals();
+            CBoolean b = (CBoolean) e.exec(line_num, f, env, args);
+            return new CBoolean(!b.getBoolean(), line_num, f);
+        }
+        
     }
     
     @api public static class equals_ic implements Function{

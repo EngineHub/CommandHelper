@@ -20,6 +20,7 @@ package com.sk89q.commandhelper;
 
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.DirtyRegisteredListener;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.InternalException;
@@ -84,7 +85,9 @@ public class CommandHelperListener extends PlayerListener {
             ArrayList<String> aliases = u.getAliasesAsArray();
             ArrayList<Script> scripts = new ArrayList<Script>();
             for (String script : aliases) {
-                scripts.addAll(MScriptCompiler.preprocess(MScriptCompiler.lex(script, new File("Player"))));
+                Env env = new Env();
+                env.SetPlayer(player);
+                scripts.addAll(MScriptCompiler.preprocess(MScriptCompiler.lex(script, new File("Player")), env));
             }
             return CommandHelperPlugin.getCore().alias(command, player, scripts);
             //return globalAliases.get(command.toLowerCase());

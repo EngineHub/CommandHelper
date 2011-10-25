@@ -56,15 +56,12 @@ public class Procedure implements Cloneable {
         resetVariables();
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
-        Script fakeScript = new Script(null, null);
-        fakeScript.varList = new IVariableList();
-        fakeScript.knownProcs = env.GetProcs();//procStack;
-        fakeScript.label = env.GetLabel();//label;
+        Script fakeScript = new Script(null, null, env);
         CArray array = new CArray(0, null);
         for(Construct d : variables){
             array.push(d);
         }
-        fakeScript.varList.set(new IVariable("@arguments", array, 0, null));
+        env.GetVarList().set(new IVariable("@arguments", array, 0, null));
         for(GenericTreeNode<Construct> c : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
             if(c.getData() instanceof IVariable){
 
@@ -74,7 +71,7 @@ public class Procedure implements Cloneable {
                     var = new IVariable(varname, c.getData().getLineNum(), c.getData().getFile());
                 }
                 if(varname.equals("@arguments")){
-                    var.setIval(fakeScript.varList.get("@arguments"));
+                    var.setIval(env.GetVarList().get("@arguments"));
                 }
                 int index = indexOf(varname);
                 if(index != -1){
@@ -89,7 +86,7 @@ public class Procedure implements Cloneable {
                         //var.setIval(new CNull(var.line_num, var.file));
                     }
                 }
-                fakeScript.varList.set(var);
+                env.GetVarList().set(var);
             }
         }
         

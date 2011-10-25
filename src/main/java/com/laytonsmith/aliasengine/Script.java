@@ -61,12 +61,11 @@ public class Script {
     private List<Token> fullRight;
     private List<Construct> cleft;
     private List<GenericTreeNode<Construct>> cright;
-    String label;
     private Map<String, Variable> left_vars;
-    IVariableList varList = new IVariableList();
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
-    Map<String, Procedure> knownProcs = new HashMap<String, Procedure>();
+    private Env OriginalEnv;
+    private Env CurrentEnv;
 
     @Override
     public String toString() {
@@ -79,21 +78,22 @@ public class Script {
     }
 
     private Procedure getProc(String name) {
-        return knownProcs.get(name);
+        return CurrentEnv.GetProcs().get(name);
+    }
+    
+    public Env getCurrentEnv(){
+        return CurrentEnv;
+    }
+    
+    public Env getOriginalEnv(){
+        return OriginalEnv;
     }
 
-    private List<Procedure> getProcList() {
-        List<Procedure> procs = new ArrayList<Procedure>();
-        for (Map.Entry<String, Procedure> m : knownProcs.entrySet()) {
-            procs.add(m.getValue());
-        }
-        return procs;
-    }
-
-    public Script(List<Token> left, List<Token> right) {
+    public Script(List<Token> left, List<Token> right, Env env) {
         this.left = left;
         this.fullRight = right;
         this.left_vars = new HashMap<String, Variable>();
+        this.OriginalEnv = env;
     }
     
     private Script(){}
@@ -105,12 +105,12 @@ public class Script {
         s.compilerError = false;
         s.cright = new ArrayList<GenericTreeNode<Construct>>();
         s.cright.add(tree);
-        s.varList = new IVariableList();
+        s.OriginalEnv = env;
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
             if(node.getData() instanceof IVariable){
-                s.varList.set((IVariable)node.getData());
+                s.OriginalEnv.GetVarList().set((IVariable)node.getData());
             }
         }
         
@@ -121,8 +121,11 @@ public class Script {
         return compilerError;
     }
 
-    public void run(final List<Variable> vars, Env env/*final CommandSender p*/, final MScriptComplete done) {
-        CommandSender p = env.GetCommandSender();
+    public void run(final List<Variable> vars, Env myEnv, final MScriptComplete done) {
+        //Some things, such as the label are determined at compile time
+        this.CurrentEnv = myEnv;
+        this.CurrentEnv.SetLabel(this.OriginalEnv.GetLabel());
+        CommandSender p = myEnv.GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
             int line_num = 0;
             if (left.size() >= 1) {
@@ -132,9 +135,9 @@ public class Script {
                     null, line_num, null);
         }
         if (p instanceof Player) {
-            if (label != null) {
+            if (CurrentEnv.GetLabel() != null) {
                 PermissionsResolverManager perms = Static.getPermissionsResolverManager();
-                String[] groups = label.substring(1).split("/");
+                String[] groups = CurrentEnv.GetLabel().substring(1).split("/");
                 for (String group : groups) {
                     if (group.startsWith("-") && perms.inGroup(((Player)p).getName(), group.substring(1))) {
                         //negative permission
@@ -165,9 +168,9 @@ public class Script {
                 }
                 File auto_include = new File("plugins/CommandHelper/auto_include.ms");
                 if (auto_include.exists()) {
-                    MScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), env, null, this);
+                    MScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), CurrentEnv, null, this);
                 }
-                MScriptCompiler.execute(tree.getRoot(), env, done, this);
+                MScriptCompiler.execute(tree.getRoot(), CurrentEnv, done, this);
             }
         } catch (ConfigRuntimeException e) {
             System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
@@ -195,6 +198,8 @@ public class Script {
 
     public Construct eval(GenericTreeNode<Construct> c, final Env env) throws CancelCommandException {
         final Construct m = c.getData();
+        CurrentEnv = env;
+        CurrentEnv.SetLabel(OriginalEnv.GetLabel());
         if (m.getCType() == ConstructType.FUNCTION) {
                 if (m.val().matches("^_[^_].*")) {
                     //Not really a function, so we can't put it in Function.
@@ -207,9 +212,7 @@ public class Script {
                         variables.add(eval(child, env));
                     }
                     variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
-                    env.SetProcs(new HashMap<String, Procedure>(knownProcs));
-                    env.SetLabel(this.label);
-                    return p.execute(variables, env);
+                    return p.execute(variables, env.clone());
                 }
                 final Function f;
                 try{
@@ -218,7 +221,6 @@ public class Script {
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
                     throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getLineNum(), m.getFile());
                 }
-                env.SetVarList(varList);
                 //We have special handling for loop and other control flow functions
                 if (f instanceof _for) {
                     _for fr = (_for) f;
@@ -303,15 +305,8 @@ public class Script {
                         }
                     }
                     Procedure myProc = new Procedure(name, vars, tree, (CFunction) c.getData());
-                    knownProcs.put(name, myProc);
-                    return new CVoid(m.getLineNum(), m.getFile());
-                } else if (f instanceof is_proc) {
-                    Construct[] ar = new Construct[c.getChildren().size()];
-                    for (int i = 0; i < c.getChildren().size(); i++) {
-                        ar[i] = eval(c.getChildAt(i), env);
-                    }
-                    ar = preResolveVariables(ar);
-                    return ((is_proc) f).execs(m.getLineNum(), m.getFile(), env, getProcList(), ar);
+                    env.GetProcs().put(name, myProc);
+                    return new CVoid(m.getLineNum(), m.getFile());                
                 } else if (f instanceof call_proc) {
                     Construct[] ar = new Construct[c.getChildren().size()];
                     for (int i = 0; i < c.getChildren().size(); i++) {
@@ -329,17 +324,18 @@ public class Script {
                     Construct options = preResolveVariable(eval(c.getChildAt(1), env));
                     Construct prefilter = preResolveVariable(eval(c.getChildAt(2), env));
                     Construct event_object = eval(c.getChildAt(3), env);
-                    List<IVariable> custom_params = new ArrayList<IVariable>();
+                    IVariableList custom_params = new IVariableList();
                     for(int a = 0; a < c.getChildren().size() - 5; a++){
                         Construct var = eval(c.getChildAt(4 + a), env);
                         if(!(var instanceof IVariable)){
                             throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, m.getLineNum(), m.getFile());
                         }
-                        custom_params.add((IVariable)var);
+                        custom_params.set((IVariable)var);
                     }
-                    //TODO meh
+                    Env newEnv = env.clone();
+                    newEnv.SetVarList(custom_params);
                     GenericTreeNode<Construct> tree = c.getChildAt(c.getChildren().size() - 1);
-                    return ((bind)f).execs(name, options, prefilter, event_object, tree, custom_params, m.getLineNum(), m.getFile());
+                    return ((bind)f).execs(name, options, prefilter, event_object, tree, newEnv, m.getLineNum(), m.getFile());
                 }
 
 
@@ -354,8 +350,8 @@ public class Script {
                         if(env.GetCommandSender() instanceof Player){
                             perm = perms.hasPermission(env.GetPlayer().getName(), "ch.func.use." + f.getName())
                                     || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.func.use." + f.getName());
-                            if (label != null && label.startsWith("~")) {
-                                String[] groups = label.substring(1).split("/");
+                            if (env.GetLabel() != null && env.GetLabel().startsWith("~")) {
+                                String[] groups = env.GetLabel().substring(1).split("/");
                                 for (String group : groups) {
                                     if (perms.inGroup(env.GetPlayer().getName(), group)) {
                                         perm = true;
@@ -363,8 +359,8 @@ public class Script {
                                     }
                                 }
                             } else {
-                                if (label != null && (perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + label))
-                                        || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.alias." + label)) {
+                                if (env.GetLabel() != null && (perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
+                                        || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.alias." + env.GetLabel())) {
                                     perm = true;
                                 }
                             }
@@ -397,10 +393,11 @@ public class Script {
                                 + ca[i].getClass() + ") being passed as an argument to a function (" 
                                 + f.getName() + ")", null, m.getLineNum(), m.getFile());
                     }
+                    if(f.preResolveVariables() && ca[i] instanceof IVariable){
+                        ca[i] = env.GetVarList().get(((IVariable)ca[i]).getName()).ival();
+                    }
                 }
-                if (f.preResolveVariables()) {
-                    ca = preResolveVariables(ca);
-                }
+
                 //TODO: Will revisit this in the future. For now, remove the ability for
                 //functions to run asyncronously.
                 //if(f.runAsync() == true || f.runAsync() == null){
@@ -430,7 +427,7 @@ public class Script {
         for (int i = 0; i < ca.length; i++) {
             if (ca[i] instanceof IVariable) {
                 IVariable v = (IVariable) ca[i];
-                ca[i] = varList.get(v.getName()).ival();
+                ca[i] = CurrentEnv.GetVarList().get(v.getName()).ival();
             } else if (ca[i] instanceof CArray) {
 //                CArray ca2 = (CArray) ca[i];
 //                Construct [] ca_raw = new Construct[ca2.size()];
@@ -625,7 +622,7 @@ public class Script {
 
             if (j == 0) {
                 if (next_token.type == TType.IDENT) {
-                    label = t.val();
+                    OriginalEnv.SetLabel(t.val());
                     j--;
                     left.remove(0);
                     left.remove(0);

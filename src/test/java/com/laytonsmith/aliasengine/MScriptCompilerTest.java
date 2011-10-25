@@ -33,6 +33,7 @@ public class MScriptCompilerTest {
 
     Server fakeServer;
     Player fakePlayer;
+    Env env = new Env();
 
     public MScriptCompilerTest() {
     }
@@ -46,9 +47,10 @@ public class MScriptCompilerTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() {        
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
+        env.SetPlayer(fakePlayer);
     }
 
     @After
@@ -92,38 +94,38 @@ public class MScriptCompilerTest {
     @Test
     public void testCompile() throws ConfigCompileException {
         System.out.println("compile");
-        MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)", null)).get(0).compileRight();
+        MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)", null), env).get(0).compileRight();
         try {
             //extra parameter
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function)", null)).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another, oops) function)", null), env).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
         }
         try {
             //missing parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function", null)).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function", null), env).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
         }
         try {
             //extra parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)))))", null)).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)))))", null), env).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
         }
         try {
             //extra parenthesis
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg((this is a string, if(true, and, another) function))", null)).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg((this is a string, if(true, and, another) function))", null), env).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
         }
         try {
             //extra multiline end construct
-            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function) <<<", null)).get(0).compileRight();
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function) <<<", null), env).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
@@ -141,7 +143,7 @@ public class MScriptCompilerTest {
                 + "      _hello(@hello1)";
 
 
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     }
 
@@ -157,7 +159,7 @@ public class MScriptCompilerTest {
                 + "msg(@blah)\n";
 
 
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     }
 
@@ -169,7 +171,7 @@ public class MScriptCompilerTest {
         try {
             String script =
                     "[";
-            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
             fail("Test passed, but wasn't supposed to");
         } catch (ConfigCompileException ex) {
             //Passed
@@ -177,7 +179,7 @@ public class MScriptCompilerTest {
         try {
             String script =
                     "]";
-            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
             fail("Test passed, but wasn't supposed to");
         } catch (ConfigCompileException ex) {
             //Passed
@@ -191,7 +193,7 @@ public class MScriptCompilerTest {
                 + "     return('hello')"
                 + ")"
                 + "msg(_hello())";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     }
 
@@ -202,7 +204,7 @@ public class MScriptCompilerTest {
                 + "     return('hello')"
                 + ")"
                 + "msg(_hello())";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     }
 
@@ -211,7 +213,7 @@ public class MScriptCompilerTest {
         String script =
                 "#This is a comment invalid()'\"'' function\n"
                 + "msg('hello')";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     }
 
@@ -219,7 +221,7 @@ public class MScriptCompilerTest {
     public void testExecute7() throws ConfigCompileException {
         String script =
                 "msg('hello') #This is a comment too invalid()'\"'' function\n";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     }
 
@@ -227,7 +229,7 @@ public class MScriptCompilerTest {
     public void testExecute8() throws ConfigCompileException {
         String script =
                 "msg('hello') //This is no longer a comment too :( invalid()'\"'' function\n";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     }
 
@@ -236,7 +238,7 @@ public class MScriptCompilerTest {
         String script =
                 "msg('hello') /* This is a comment too invalid()'\"'' function\n"
                 + "yup, still a comment. yay() */";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     }
 
@@ -245,14 +247,14 @@ public class MScriptCompilerTest {
         String script =
                 "msg('hello') /* This is a comment too invalid()'\"'' function\n"
                 + "yup, still a comment. yay() This will fail though, because the comment is unended.";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
     }
 
     @Test(expected = ConfigCompileException.class)
     public void testExecute11() throws ConfigCompileException {
         String script =
                 "msg('hello') 'unended string";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
     }
 
     @Test
@@ -260,7 +262,7 @@ public class MScriptCompilerTest {
         String script =
                 "msg('hello') /* This is a comment too invalid()'\"'' function\n"
                 + "yup, still a comment. yay() */";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
     } 
     
@@ -269,7 +271,7 @@ public class MScriptCompilerTest {
         String script =
                 "assign(@a, array(0, 1, 2))"
                 + "msg(@a[0])";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("0");
     }
     
@@ -281,7 +283,7 @@ public class MScriptCompilerTest {
                 + ")"
                 + "msg(_hello('hello'))"
                 + "msg(_hello())";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
         verify(fakePlayer).sendMessage("world");
     }
@@ -296,7 +298,7 @@ public class MScriptCompilerTest {
                 + "_out('hello')\n"
                 + "assign(@j, 'goodbye')\n"
                 + "_out('world')\n";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("@i is currently 0");
         verify(fakePlayer).sendMessage("@i is currently hello and @j is");
         verify(fakePlayer).sendMessage("@i is currently world and @j is");
@@ -310,7 +312,7 @@ public class MScriptCompilerTest {
                 + "_myProc(1, 2)\n"
                 + "_myProc(1, 2, 3)\n"
                 + "_myProc(1, 2, 3, 4)\n";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         //verify(fakePlayer).sendMessage("null null null");
         verify(fakePlayer).sendMessage("1");
         verify(fakePlayer).sendMessage("1 2");
@@ -322,7 +324,7 @@ public class MScriptCompilerTest {
                 "proc(_addition, @i, @j, msg(add(@i, @j)))\n"
                 + "_addition(1, 1)\n"
                 + "_addition(2, 2)";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         //verify(fakePlayer).sendMessage("null null null");
         verify(fakePlayer).sendMessage("2");
         verify(fakePlayer).sendMessage("4");       
@@ -334,7 +336,7 @@ public class MScriptCompilerTest {
                 + "_myProc()\n"
                 + "_myProc(1)\n"
                 + "_myProc(1, 2)";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         //verify(fakePlayer).sendMessage("null null null");
         verify(fakePlayer).sendMessage("{}");
         verify(fakePlayer).sendMessage("{1}");       
@@ -355,7 +357,7 @@ public class MScriptCompilerTest {
                 + "assign(@j, 'goodbye')\n"
                 + "msg(_hello('hello'))"
                 + "msg(_hello())";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
         verify(fakePlayer).sendMessage("world");
     }
@@ -364,7 +366,7 @@ public class MScriptCompilerTest {
         final AtomicBoolean bool = new AtomicBoolean(false);
         String script =
                 "msg('hello') world";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, new MScriptComplete() {
+        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, new MScriptComplete() {
 
             public void done(String output) {
                 assertEquals("world", output.trim());
@@ -379,7 +381,7 @@ public class MScriptCompilerTest {
     public void testCompile1() {
         try {
             String config = "/cmd [$p] $q = msg('')";
-            MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0).compile();
+            MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0).compile();
             fail("Test passed, but wasn't supposed to");
         } catch (ConfigCompileException ex) {
             //Passed
@@ -390,7 +392,7 @@ public class MScriptCompilerTest {
     public void testCompile2() {
         try {
             String config = "/cmd [$p=player()] = msg('')";
-            MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0).compile();
+            MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0).compile();
             fail("Test passed, but wasn't supposed to");
         } catch (ConfigCompileException ex) {
             //Passed
@@ -402,7 +404,7 @@ public class MScriptCompilerTest {
         String config = "/cmd = >>>\n"
                 + "msg('hello') #This is a comment too invalid()'\"'' function\n"
                 + "<<<";
-        MScriptCompiler.preprocess(MScriptCompiler.lex(config, null));
+        MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env);
     }
     
     @Test
@@ -410,9 +412,9 @@ public class MScriptCompilerTest {
         String config = "label:/cmd = >>>\n"
                 + "msg('hello') #This is a comment too invalid()'\"'' function\n"
                 + "<<<";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        assertEquals("label", s.label);
+        assertEquals("label", s.getOriginalEnv().GetLabel());
     }
     
     @Test
@@ -420,9 +422,9 @@ public class MScriptCompilerTest {
         String config = "/cmd = >>>\n"
                 + "msg(hello 'world \\\\ \\' \\n')"
                 + "<<<";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(new ArrayList<Variable>(), fakePlayer, null);
+        s.run(new ArrayList<Variable>(), env, null);
         verify(fakePlayer).sendMessage("hello world \\ ' ".trim());
     }
     
@@ -431,9 +433,9 @@ public class MScriptCompilerTest {
         String config = "/cmd = >>>\n"
                 + "msg(hello) \\ msg(world)"
                 + "<<<";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        s.run(new ArrayList<Variable>(), fakePlayer, null);
+        s.run(new ArrayList<Variable>(), env, null);
         verify(fakePlayer).sendMessage("hello");
         verify(fakePlayer).sendMessage("world");
     }
@@ -443,10 +445,10 @@ public class MScriptCompilerTest {
         String config = "/cmd $one $ = >>>\n"
                 + "msg($one) \\ msg($)"
                 + "<<<";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, 0, null),
-            new Variable("$", "several variables", false, true, 0, null)}), fakePlayer, null);
+            new Variable("$", "several variables", false, true, 0, null)}), env, null);
         verify(fakePlayer).sendMessage("first");
         verify(fakePlayer).sendMessage("several variables");
     }
@@ -456,13 +458,13 @@ public class MScriptCompilerTest {
         String config = "/test [$var=1] = >>>\n"
                 + "msg($var)"
                 + "<<<";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         assertTrue(s.match("/test 2"));
-        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), env, null);
         verify(fakePlayer).sendMessage("2");
         assertTrue(s.match("/test"));
-        s.run(new ArrayList<Variable>(), fakePlayer, null);
+        s.run(new ArrayList<Variable>(), env, null);
         verify(fakePlayer).sendMessage("1");
     }
     
@@ -471,11 +473,11 @@ public class MScriptCompilerTest {
         String config = "/test $var = >>>\n"
                 + "msg($var)"
                 + "<<<";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         assertTrue(s.match("/test 2"));
         assertFalse(s.match("/test"));
-        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), env, null);
     }
     
     @Test public void testCompile11() throws ConfigCompileException{
@@ -488,11 +490,11 @@ public class MScriptCompilerTest {
                 + "all_players()\n"
                 + "msg($var)\n"
                 + "<<<";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null)).get(0);        
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);        
         s.compile();
-        assertEquals("safe", s.label);
+        assertEquals("safe", s.getOriginalEnv().GetLabel());
         assertTrue(s.match("/test 2"));
-        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), fakePlayer, null);
+        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), env, null);
         verify(fakePlayer).sendMessage("2");
         verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
     }

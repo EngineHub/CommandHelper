@@ -31,8 +31,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private final String priority;
     private final Map<String, Construct> prefilter;
     private final String eventObjName;    
-    private final Map<String, IVariable> vars;
-    private final List<String> custom_names = new ArrayList<String>();
+    private final Env env;
     private final GenericTreeNode<Construct> tree;
     private final org.bukkit.event.Event.Type driver; //For efficiency sake, cache it here
     
@@ -97,18 +96,12 @@ public class BoundEvent implements Comparable<BoundEvent> {
             }
         }
         
-        this.vars = new HashMap<String, IVariable>();
-        for(IVariable v : vars){
-            this.vars.put(v.getName(), v);
-        }
+        this.env = env;
         this.tree = tree;      
         
         this.driver = EventList.getEvent(this.eventName).driver();
         this.eventObjName = eventObjName;
         
-        for(IVariable v : vars){
-            custom_names.add(v.getName());
-        }
     }
     
     public String getEventName(){
@@ -162,33 +155,15 @@ public class BoundEvent implements Comparable<BoundEvent> {
     public void trigger(Map<String, Construct> event){
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
-        for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
-            Construct c = node.getData();
-            if(c instanceof IVariable){
-                IVariable var = ((IVariable)c);
-                if(custom_names.contains(var.getName())){
-                    try {
-                        //Custom variable
-                        var.setIval(this.vars.get(var.getName()).ival().clone());
-                    } catch (CloneNotSupportedException ex) {
-                        Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                } else if(var.getName().equals(eventObjName)){
-                    //Event object
-                    CArray ca = new CArray(0, null);
-                    for(String key : event.keySet()){
-                        ca.set(new CString(key, 0, null), event.get(key));
-                    }
-                    var.setIval(ca);
-                } else {
-                    //Set the default value
-                    var.setIval(new CString("", 0, null));
-                }
-            }
+        CArray ca = new CArray(0, null);
+        for(String key : event.keySet()){
+            ca.set(new CString(key, 0, null), event.get(key));
         }
+        env.GetVarList().set(new IVariable(eventObjName, ca, 0, null));
+
         GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
         superRoot.addChild(tree);
-        Script s = Script.GenerateScript(superRoot);
+        Script s = Script.GenerateScript(superRoot, env);
         Event myDriver = EventList.getEvent(this.getDriver(), this.getEventName());
         myDriver.execute(s, this);
     }

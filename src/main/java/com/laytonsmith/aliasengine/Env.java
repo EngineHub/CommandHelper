@@ -6,11 +6,8 @@ package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.IVariableList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -18,7 +15,7 @@ import org.bukkit.entity.Player;
  *
  * @author Layton
  */
-public class Env {
+public class Env implements Cloneable{
     
     /**
      * This is the underlying map of variables
@@ -148,10 +145,17 @@ public class Env {
     }
     
     public String GetLabel(){
-        return env.get("label").toString();
+        return (String)env.get("label");
     }
     
     public void SetLabel(String label){
         env.put("label", label);
+    }
+    
+    @Override
+    public Env clone(){
+        Env clone = new Env();
+        clone.env = new HashMap<String, Object>(this.env);
+        return clone;
     }
 }
