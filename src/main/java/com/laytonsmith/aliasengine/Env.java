@@ -152,6 +152,14 @@ public class Env implements Cloneable{
         env.put("label", label);
     }
     
+    public void SetScript(Script s){
+        env.put("script", s);
+    }
+    
+    public Script GetScript(){
+        return (Script)env.get("script");
+    }
+    
     @Override
     public Env clone(){
         Env clone = new Env();

@@ -16,7 +16,6 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
 /**
@@ -39,7 +38,7 @@ public class Weather {
         }
         
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.FormatException};
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -50,10 +49,6 @@ public class Weather {
             if(args.length == 1){
                 if(args[0] instanceof CArray){
                     CArray a = (CArray)args[0];
-                    if(a.size() != 3){
-                        throw new ConfigRuntimeException("lightning expects the array to be a location array", 
-                                ExceptionType.LengthException, line_num, f);
-                    }
                     Location l = Static.GetLocation(a, (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
                     x = (int)java.lang.Math.floor(l.getX());
                     y = (int)java.lang.Math.floor(l.getY());

@@ -12,6 +12,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Env;
+import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -62,6 +63,7 @@ public class Meta {
                 return new CVoid(line_num, f);
             }
             if (args[0].val().equals("~op")) {
+                //Store their current op status
                 Boolean isOp = env.GetCommandSender().isOp();
 
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
@@ -72,6 +74,7 @@ public class Meta {
                     }
                 }
 
+                //If they aren't op, op them now
                 if (!isOp) {
                     this.setOp(env.GetCommandSender(), true);
                 }
@@ -80,7 +83,8 @@ public class Meta {
                     Static.getServer().dispatchCommand(this.getOPCommandSender(env.GetCommandSender()), cmd);
                 } finally {
                     //If they just opped themselves, or deopped themselves in the command
-                    //don't undo what they just did.
+                    //don't undo what they just did. Otherwise, set their op status back
+                    //to their original status
                     if(!cmd.equalsIgnoreCase("op " + env.GetPlayer().getName()) && !cmd.equalsIgnoreCase("deop " + env.GetPlayer().getName())){
                         this.setOp(env.GetCommandSender(), isOp);
                     }
@@ -440,5 +444,53 @@ public class Meta {
             Static.getAliasCore().addPlayerReference(env.GetCommandSender());
             return new CVoid(line_num, f);
         }
+    }
+    
+    @api public static class scriptas implements Function{
+
+        public String getName() {
+            return "scriptas";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {player, script} Runs the specified script in the context of a given player."
+                    + " A script that runs player() for instance, would return the specified player's name,"
+                    + " not the player running the command.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Player p = Static.GetPlayer(args[0].val(), line_num, f);
+            CommandSender originalPlayer = environment.GetCommandSender();
+            environment.SetPlayer(p);
+            GenericTreeNode<Construct> tree = (GenericTreeNode<Construct>)environment.GetCustom("script_node");
+            environment.GetScript().eval(tree, environment);
+            environment.SetCommandSender(originalPlayer);
+            return new CVoid(line_num, f);
+        }
+        
     }
 }

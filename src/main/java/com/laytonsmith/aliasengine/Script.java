@@ -29,6 +29,7 @@ import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
 import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
+import com.laytonsmith.aliasengine.functions.Meta.scriptas;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.File;
 import java.util.ArrayList;
@@ -201,6 +202,7 @@ public class Script {
         CurrentEnv = env;
         CurrentEnv.SetLabel(OriginalEnv.GetLabel());
         if (m.getCType() == ConstructType.FUNCTION) {
+                env.SetScript(this);
                 if (m.val().matches("^_[^_].*")) {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
@@ -336,6 +338,11 @@ public class Script {
                     newEnv.SetVarList(custom_params);
                     GenericTreeNode<Construct> tree = c.getChildAt(c.getChildren().size() - 1);
                     return ((bind)f).execs(name, options, prefilter, event_object, tree, newEnv, m.getLineNum(), m.getFile());
+                } else if(f instanceof scriptas){
+                    Construct user = eval(c.getChildAt(0), env);
+                    GenericTreeNode<Construct> script = c.getChildAt(1);
+                    env.SetCustom("script_node", script);
+                    return ((scriptas)f).exec(m.getLineNum(), m.getFile(), env, user);
                 }
 
 
