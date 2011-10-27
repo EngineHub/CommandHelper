@@ -10,7 +10,11 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.api;
+import com.laytonsmith.aliasengine.events.AbstractEvent;
+import com.laytonsmith.aliasengine.events.Prefilters;
+import com.laytonsmith.aliasengine.events.Prefilters.PrefilterType;
 import com.laytonsmith.aliasengine.exceptions.EventException;
+import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
 import java.util.Map;
 import org.bukkit.block.Block;
 import org.bukkit.event.Event;
@@ -18,7 +22,6 @@ import org.bukkit.event.Event.Type;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerLoginEvent;
 
 /**
  *
@@ -104,10 +107,6 @@ public class PlayerEvents {
                 if(((PlayerInteractEvent)e).getAction().equals(Action.PHYSICAL)){
                     return false;
                 }
-                if(prefilter.containsKey("block") && 
-                        !Static.ItemMatch(prefilter.get("block").val(), Static.ParseItemNotation(pie.getClickedBlock()))){
-                    return false;
-                }
                 if(prefilter.containsKey("button")){
                     if(pie.getAction().equals(Action.LEFT_CLICK_AIR) || pie.getAction().equals(Action.LEFT_CLICK_BLOCK)){
                         if(!prefilter.get("button").val().toLowerCase().equals("left")){
@@ -120,11 +119,14 @@ public class PlayerEvents {
                         }
                     }
                 }
-                if(prefilter.containsKey("item")){
-                    if(!Static.ItemMatch(prefilter.get("item").val(), Static.ParseItemNotation(pie.getItem()))){
-                        return false;
-                    }
+                
+                try{
+                    Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
+                    Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
+                }catch(PrefilterNonMatchException x){
+                    return false;
                 }
+                
                 return true;
             }
             return false;
