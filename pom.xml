@@ -92,11 +92,13 @@
         </dependency>
         
         <!-- Used for economy stuff -->
+        <!-- Register is now apparently used as a standalone jar -->
+        <!--
         <dependency>
             <groupId>com.nijikokun</groupId>
             <artifactId>register</artifactId>
             <version>1.0</version>
-        </dependency>
+        </dependency>-->
         
         <!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
         <dependency>
