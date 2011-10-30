@@ -88,7 +88,7 @@ public class Env implements Cloneable{
      * Given the environment, this function returns the Player in the
      * environment, which can possibly be null. It is also possible the
      * environment contains a CommandSender object instead, which will
-     * cause an exception.
+     * cause null to be returned.
      * @param env
      * @return 
      */
@@ -101,7 +101,7 @@ public class Env implements Cloneable{
             if(userObject instanceof Player){
                 return ((Player)userObject);
             }
-            throw new ConfigRuntimeException("Expecting environment variable \"user\" to be an instance of Player", 0, null);
+            return null;
         } else {
             throw new ConfigRuntimeException("Expecting environment to contain \"user\", but no such key was found", 0, null);
         }
