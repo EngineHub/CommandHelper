@@ -12,7 +12,6 @@ import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.util.Map;
 
 /**
  * 
@@ -226,6 +225,48 @@ public class BasicLogic {
             } catch (ConfigRuntimeException e){
                 return new CBoolean(false, line_num, f);
             }
+        }
+        
+    }
+    
+    @api public static class nequals_ic implements Function{
+
+        public String getName() {
+            return "nequals_ic";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {val1, val2} Returns true if the two values are NOT equal to each other, while"
+                    + " ignoring case.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            equals_ic e = new equals_ic();
+            return new CBoolean(!((CBoolean)e.exec(line_num, f, environment, args)).getBoolean(), line_num, f);
         }
         
     }
