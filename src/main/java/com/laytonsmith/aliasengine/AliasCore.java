@@ -15,10 +15,8 @@ import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -198,6 +196,7 @@ public class AliasCore {
     public final boolean reload() throws ConfigCompileException {
         boolean is_loaded = false;
         try {
+            Globals.clear();
             EventHandler.UnregisterAll();
             EventList.Startup(parent);
             IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files

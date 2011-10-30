@@ -24,6 +24,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
+import static com.laytonsmith.testing.StaticTest.*;
 
 /**
  *
@@ -261,5 +262,22 @@ public class DataHandlingTest {
         verify(fakePlayer).sendMessage("hello");
         //delete the test file
         test.delete();
+    }
+    
+    @Test public void testExportImportIVariable() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(true);
+        String script1 = 
+                "assign(@var, 10)"
+                + "export(@var)";
+        SRun(script1, null);
+        SRun("import(@var) msg(@var)", fakePlayer);
+        verify(fakePlayer).sendMessage("10");
+    }
+    
+    @Test public void testExportImportStringValue() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("export('hi', 20)", fakePlayer);
+        SRun("msg(import('hi'))", fakePlayer);
+        verify(fakePlayer).sendMessage("20");
     }
 }
