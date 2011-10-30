@@ -59,8 +59,6 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
         public boolean preResolveVariables() {
             return true;
         }

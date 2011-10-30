@@ -4,6 +4,10 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.aliasengine.Constructs.CNull;
+import com.laytonsmith.aliasengine.Constructs.CString;
+import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import java.util.HashMap;
@@ -20,10 +24,21 @@ public class Env implements Cloneable{
     /**
      * This is the underlying map of variables
      */
-    private Map<String, Object> env = new HashMap<String, Object>();    
+    private Map<String, Object> env = new HashMap<String, Object>();   
+    
+    /*
+     * The constructor has relatively little todo, most things are lazy
+     * initialized, but sometimes it's more convenient to pre-initialize
+     * certain things
+     */
+    public Env(){
+       
+    }
     
     /**
      * Use this if you would like to stick a custom variable in the environment.
+     * It should be discouraged to use this for more than one shot transfers. Typically,
+     * an setter and getter should be made to wrap the element.
      * @param name
      * @param var 
      */
@@ -158,7 +173,7 @@ public class Env implements Cloneable{
     
     public Script GetScript(){
         return (Script)env.get("script");
-    }
+    }        
     
     @Override
     public Env clone(){

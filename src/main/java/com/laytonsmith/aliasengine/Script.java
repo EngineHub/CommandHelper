@@ -18,7 +18,6 @@ import com.laytonsmith.aliasengine.functions.DataHandling._for;
 import com.laytonsmith.aliasengine.functions.DataHandling.call_proc;
 import com.laytonsmith.aliasengine.functions.DataHandling.foreach;
 import com.laytonsmith.aliasengine.functions.DataHandling.include;
-import com.laytonsmith.aliasengine.functions.DataHandling.is_proc;
 import com.laytonsmith.aliasengine.functions.DataHandling.proc;
 import com.laytonsmith.aliasengine.functions.EventBinding.bind;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;

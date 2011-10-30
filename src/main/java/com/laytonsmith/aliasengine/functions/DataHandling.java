@@ -15,6 +15,7 @@ import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.Env;
+import com.laytonsmith.aliasengine.Globals;
 import com.laytonsmith.aliasengine.Procedure;
 import com.laytonsmith.aliasengine.exceptions.LoopBreakException;
 import com.laytonsmith.aliasengine.exceptions.LoopContinueException;
@@ -676,7 +677,7 @@ public class DataHandling {
         }
         
     }
-    //TODO: proc
+
     @api public static class _return implements Function{
 
         public String getName() {
@@ -720,7 +721,6 @@ public class DataHandling {
         
     }
     
-    //TODO: proc
     @api public static class include implements Function{
 
         public String getName() {
@@ -773,7 +773,6 @@ public class DataHandling {
         
     }
     
-    //TODO: proc
     @api public static class call_proc implements Function{
 
         public String getName() {
@@ -829,7 +828,6 @@ public class DataHandling {
         
     }
     
-    //TODO: proc
     @api public static class is_proc implements Function{
 
         public String getName() {
@@ -917,6 +915,116 @@ public class DataHandling {
             }
         }
         
-    }    
+    }   
+    
+    @api public static class _import implements Function{
+
+        public String getName() {
+            return "import";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "mixed {ivar | string} This function imports a value from the global value"
+                    + " register. In the first mode, it looks for an ivariable with the specified"
+                    + " name, and stores the value in the variable, and returns void. In the"
+                    + " second mode, it looks for a value stored with the specified key, and"
+                    + " returns that value. Items can be stored with the export function. If"
+                    + " the specified ivar doesn't exist, the ivar will be assigned an empty"
+                    + " string, and if the specified string key doesn't exist, null is returned."
+                    + " See the documentation on [[CommandHelper/import-export|imports/exports]]"
+                    + " for more information.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(args[0] instanceof IVariable){
+                //Mode 1     
+                IVariable var = (IVariable)args[0];
+                environment.GetVarList().set(Globals.GetGlobalIVar(var));
+                return new CVoid(line_num, f);
+            } else {
+                //Mode 2
+                return Globals.GetGlobalConstruct(args[0].val());
+            }
+        }
+        
+    }
+    
+    @api public static class _export implements Function{
+
+        public String getName() {
+            return "export";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {ivar | name, value} Stores a value in the global storage register."
+                    + " When using the first mode, the ivariable is stored so it can be imported"
+                    + " later, and when using the second mode, an arbitrary value is stored with"
+                    + " the give key, and can be retreived using the secode mode of import. If"
+                    + " the value is already stored, it is overwritten. See import() and"
+                    + " [[CommandHelper/import-export|importing/exporting]]";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(args.length == 1){
+                if(args[0] instanceof IVariable){
+                    Globals.SetGlobal(environment.GetVarList().get(((IVariable)args[0]).getName()));
+                } else { 
+                    throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, line_num, f);
+                }
+            } else {
+                Globals.SetGlobal(args[0].val(), args[1]);
+            }         
+            return new CVoid(line_num, f);
+        }
+        
+    }
     
 }
