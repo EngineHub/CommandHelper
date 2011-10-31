@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
@@ -15,8 +16,11 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import net.minecraft.server.Material;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 
 /**
@@ -164,14 +168,11 @@ public class Environment {
                 w = env.GetPlayer().getWorld();
             }
             if((args.length == 2 || args.length == 3) && args[0] instanceof CArray){
-                CArray ca = (CArray)args[0];
-                if(ca.size() != 3){
-                    throw new ConfigRuntimeException("set_block_at expects the parameter 1 to be an array with 3 elements.", ExceptionType.LengthException,
-                            line_num, f);
-                }
-                x = Static.getNumber(ca.get(0, line_num));
-                y = Static.getNumber(ca.get(1, line_num));
-                z = Static.getNumber(ca.get(2, line_num));
+                Location l = Static.GetLocation(args[0], env.GetPlayer().getWorld(), line_num, f);
+                x = l.getBlockX();
+                y = l.getBlockY();
+                z = l.getBlockZ();
+                world = l.getWorld().getName();
                 id = args[1].val();
                 if(args.length == 3){
                     world = args[2].val();
@@ -232,6 +233,186 @@ public class Environment {
         }
         public Boolean runAsync(){
             return false;
+        }
+        
+    }
+    
+    @api public static class set_sign_text implements Function{
+
+        public String getName() {
+            return "set_sign_text";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3, 4, 5};
+        }
+
+        public String docs() {
+            return "void {xyzLocation, lineArray | xyzLocation, line1, [line2, [line3, [line4]]]}"
+                    + " Sets the text of the sign at the given location. If the block at x,y,z isn't a sign,"
+                    + " a RangeException is thrown. If the text on a line overflows 15 characters, it is simply"
+                    + " truncated.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.RangeException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Location l = Static.GetLocation(args[0], environment.GetPlayer()==null?null:environment.GetPlayer().getWorld(), line_num, f);
+            if(l.getBlock().getState() instanceof Sign){
+                String line1 = "";
+                String line2 = "";
+                String line3 = "";
+                String line4 = "";
+                if(args.length == 2 && args[1] instanceof CArray){
+                    CArray ca = (CArray)args[1];
+                    if(ca.size() >= 1){
+                        line1 = ca.get(0, line_num).val();
+                    }
+                    if(ca.size() >= 2){
+                        line2 = ca.get(1, line_num).val();
+                    }
+                    if(ca.size() >= 3){
+                        line3 = ca.get(2, line_num).val();
+                    }
+                    if(ca.size() >= 4){
+                        line4 = ca.get(3, line_num).val();
+                    }
+
+                } else {
+                    if(args.length >= 2){
+                        line1 = args[1].val();
+                    }
+                    if(args.length >= 3){
+                        line2 = args[2].val();
+                    }
+                    if(args.length >= 4){
+                        line3 = args[3].val();
+                    }
+                    if(args.length >= 5){
+                        line4 = args[4].val();
+                    }
+                }
+                Sign s = (Sign)l.getBlock().getState();
+                s.setLine(0, line1);
+                s.setLine(1, line2);
+                s.setLine(2, line3);
+                s.setLine(3, line4);
+                s.update();
+                return new CVoid(line_num, f);
+            } else {
+                throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, line_num, f);
+            }
+        }
+        
+    }
+    
+    @api public static class get_sign_text implements Function{
+
+        public String getName() {
+            return "get_sign_text";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "array {xyzLocation} Given a location array, returns an array of 4 strings of the text in the sign at that"
+                    + " location. If the location given isn't a sign, then a RangeException is thrown.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.RangeException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Location l = Static.GetLocation(args[0], environment.GetPlayer()==null?null:environment.GetPlayer().getWorld(), line_num, f);
+            if(l.getBlock().getState() instanceof Sign){
+                Sign s = (Sign) l.getBlock().getState();
+                CString line1 = new CString(s.getLine(0), line_num, f);
+                CString line2 = new CString(s.getLine(1), line_num, f);
+                CString line3 = new CString(s.getLine(2), line_num, f);
+                CString line4 = new CString(s.getLine(3), line_num, f);
+                return new CArray(line_num, f, line1, line2, line3, line4);
+            } else {
+                throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, line_num, f);
+            }
+        }
+        
+    }
+    
+    @api public static class is_sign_at implements Function{
+
+        public String getName() {
+            return "is_sign_at";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {xyzLocation} Returns true if the block at this location is a sign.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Location l = Static.GetLocation(args[0], environment.GetPlayer()==null?null:environment.GetPlayer().getWorld(), line_num, f);
+            return new CBoolean(l.getBlock().getType().equals(org.bukkit.Material.SIGN_POST) 
+                    ||l.getBlock().getType().equals(org.bukkit.Material.WALL_SIGN), line_num, f);
         }
         
     }

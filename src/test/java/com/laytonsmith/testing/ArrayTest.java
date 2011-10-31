@@ -192,5 +192,19 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("2");
         verify(fakePlayer).sendMessage("3");
     }
+    
+    @Test public void testArrayception1() throws ConfigCompileException{
+        SRun("assign(@t, array("
+                + "     bla: 1, "
+                + "     blo: null, "
+                + "     tro: array('a', 'b')"
+                + " )"
+                + ")"
+                + "foreach(array_keys(@t), @u,"
+                + "     msg(is_array(@t[@u]))"
+                + ")", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("false");
+        verify(fakePlayer).sendMessage("true");
+    }
 
 }

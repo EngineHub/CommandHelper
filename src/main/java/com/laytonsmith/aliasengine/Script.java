@@ -185,7 +185,7 @@ public class Script {
         } catch (FunctionReturnException e) {
             p.sendMessage("The return() function must be used inside a procedure.");
         } catch (Throwable t) {
-            System.out.println("An unexpected exception occured during the execution of a script. Is this it?");
+            System.out.println("An unexpected exception occured during the execution of a script.");
             t.printStackTrace();
             p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
         }

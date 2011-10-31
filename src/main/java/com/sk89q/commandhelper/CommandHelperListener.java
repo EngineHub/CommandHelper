@@ -160,38 +160,6 @@ public class CommandHelperListener extends PlayerListener {
     }
 
     /**
-     * Runs commands.
-     *
-     * @param player
-     * @param split
-     * @return
-     */
-//    private boolean runCommand(Player player, String split) throws InsufficientArgumentsException {
-//        CommandHelperSession session = getSession(player);
-//
-//        if (split[0].equals("/repeat") || split[0].equals("/.")) {
-//            return false;
-//        }
-//
-//        // Catch aliases
-//        session.setLastCommand(CommandHelperPlugin.joinString(split, " "));
-//
-//
-//
-////        String[] commands = getSession(player).findAlias(split[0]);
-////        String[] arguments = new String[split.length - 1];
-////        System.arraycopy(split, 1, arguments, 0, split.length - 1);
-//
-//        if (commands != null) {
-//            execCommands(player, commands, arguments, false);
-//            return true;
-//        } else if (true /*player.canUseCommand(split[0])*/) {
-//            return runAlias(CommandHelperPlugin.joinString(split, " "), player);
-//        }
-//
-//        return false;
-//    }
-    /**
      * Called when a player leaves a server
      *
      * @param event Relevant event details
@@ -201,76 +169,6 @@ public class CommandHelperListener extends PlayerListener {
         Player player = event.getPlayer();
         sessions.remove(player.getName());
     }
-
-    /**
-     * Execute a command.
-     *
-     * @param cmd
-     */
-    private void execScriptableCommand(Player player, String cmd) {
-        if (cmd.charAt(0) != '@') {
-            CommandHelperPlugin.execCommand(player, cmd);
-            return;
-        }
-
-        String[] args = cmd.split(" ");
-
-        if (args[0].equalsIgnoreCase("@read")) {
-            if (args.length >= 2) {
-                try {
-                    String[] newArgs = new String[args.length - 1];
-                    System.arraycopy(args, 1, newArgs, 0, args.length - 1);
-                    FileReader input = new FileReader(CommandHelperPlugin.joinString(newArgs, " "));
-                    BufferedReader reader = new BufferedReader(input);
-                    String line;
-                    while ((line = reader.readLine()) != null) {
-                        player.sendMessage(line);
-                    }
-                } catch (IOException e) {
-                    logger.log(Level.WARNING, "@read: Could not read "
-                            + args[1] + ": " + e.getMessage());
-                }
-            } else {
-                logger.log(Level.WARNING, "@read requires 2 arguments");
-            }
-        } else {
-            logger.log(Level.WARNING, "Unknown CommandHelper instruction: "
-                    + args[0]);
-        }
-    }
-
-    /**
-     * Execute a command.
-     *
-     * @param cmd
-     */
-    private void execCommands(Player player, String[] commands,
-            String[] args, boolean scriptable) {
-        for (String cmd : commands) {
-            String[] parts = cmd.split(" ");
-
-            for (int i = 0; i < parts.length; i++) {
-                if (parts[i].matches("%[0-9]+")) {
-                    int n = Integer.parseInt(parts[i].substring(1)) - 1;
-                    if (n < args.length && n >= 0) {
-                        parts[i] = args[n];
-                    } else {
-                        parts[i] = "";
-                    }
-                }
-            }
-
-            cmd = CommandHelperPlugin.joinString(parts, " ");
-
-            if (scriptable) {
-                execScriptableCommand(player, cmd);
-            } else {
-                CommandHelperPlugin.execCommand(player, cmd);
-            }
-        }
-    }
-
-    
 
     /**
      * Sets up CommandHelper to play-dirty, if the user has specified as such
