@@ -29,6 +29,7 @@ import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
 import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
 import com.laytonsmith.aliasengine.functions.Meta.scriptas;
+import com.laytonsmith.aliasengine.functions.StringHandling.sconcat;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.File;
 import java.util.ArrayList;
@@ -342,6 +343,8 @@ public class Script {
                     GenericTreeNode<Construct> script = c.getChildAt(1);
                     env.SetCustom("script_node", script);
                     return ((scriptas)f).exec(m.getLineNum(), m.getFile(), env, user);
+                } else if(f instanceof sconcat){
+                    return ((sconcat)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 }
 
 

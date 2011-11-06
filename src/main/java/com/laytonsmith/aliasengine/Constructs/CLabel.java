@@ -5,7 +5,6 @@
 package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.Constructs.Construct.ConstructType;
-import java.io.File;
 
 /**
  *

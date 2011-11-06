@@ -24,7 +24,6 @@ public class CArray extends Construct {
 
     private boolean associative_mode = false;
     private long next_index = 0;
-    public static final long serialVersionUID = 1L;
     private List<Construct> array;
     private SortedMap<Construct, Construct> associative_array;
     private String mutVal;
@@ -42,7 +41,7 @@ public class CArray extends Construct {
             associative_array = new TreeMap<Construct, Construct>();
             for(Construct item : items){
                 if(item instanceof CEntry){
-                    associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).cvalue);
+                    associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item));
                 } else {
                     int max = Integer.MIN_VALUE;            
                     for (Construct key : associative_array.keySet()) {
@@ -125,7 +124,11 @@ public class CArray extends Construct {
                     max = java.lang.Math.max(max, i);
                 } catch(NumberFormatException e){}
             }
-            associative_array.put(new CInt(max + 1, 0, null), c);
+            if(c instanceof CEntry){
+                associative_array.put(new CInt(max + 1, 0, null), ((CEntry)c).construct());
+            } else {
+                associative_array.put(new CInt(max + 1, 0, null), c);
+            }
         }
         regenValue();
     }
@@ -192,7 +195,11 @@ public class CArray extends Construct {
             }
         } else {
             if(associative_array.containsKey(normalizeConstruct(index))){
-                return associative_array.get(normalizeConstruct(index));
+                Construct val = associative_array.get(normalizeConstruct(index));
+                if(val instanceof CEntry){
+                    return ((CEntry)val).construct();
+                }
+                return val;
             } else {
                 throw new ConfigRuntimeException("The element at index " + index.val() + " does not exist", ExceptionType.IndexOverflowException, line_num, file);
             }
@@ -268,6 +275,8 @@ public class CArray extends Construct {
             } else {
                 return new CInt(0, c.line_num, c.file);
             }
+        } else if(c instanceof CLabel){
+            return normalizeConstruct(((CLabel)c).cVal());
         } else {
             return new CString(c.val(), c.line_num, c.file);
         }

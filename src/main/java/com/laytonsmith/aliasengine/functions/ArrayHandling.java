@@ -614,45 +614,45 @@ public class ArrayHandling {
         
     }
     
-    @api public static class array_entry implements Function{
-
-        public String getName() {
-            return "array_entry";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2};
-        }
-
-        public String docs() {
-            return "CEntry {key, value} This function is used internally by the compiler, and while possible, shouldn't be used directly.";
-        }
-
-        public ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public String since() {
-            return "3.3.0";
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CEntry(args[0], args[1], line_num, f);
-        }
-        
-    }
+//    @api public static class array_entry implements Function{
+//
+//        public String getName() {
+//            return "array_entry";
+//        }
+//
+//        public Integer[] numArgs() {
+//            return new Integer[]{2};
+//        }
+//
+//        public String docs() {
+//            return "CEntry {key, value} This function is used internally by the compiler, and while possible, shouldn't be used directly.";
+//        }
+//
+//        public ExceptionType[] thrown() {
+//            return null;
+//        }
+//
+//        public boolean isRestricted() {
+//            return false;
+//        }
+//
+//        public void varList(IVariableList varList) {}
+//
+//        public boolean preResolveVariables() {
+//            return true;
+//        }
+//
+//        public String since() {
+//            return "3.3.0";
+//        }
+//
+//        public Boolean runAsync() {
+//            return null;
+//        }
+//
+//        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+//            return new CEntry(args[0], args[1], line_num, f);
+//        }
+//        
+//    }
 }

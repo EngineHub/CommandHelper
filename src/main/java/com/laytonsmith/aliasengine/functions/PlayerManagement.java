@@ -530,7 +530,7 @@ public class PlayerManagement {
                     + " player's name is displayed on screen typically. </li><li>5 - Player's health; Gets the current health of the player, which will be an int"
                     + " from 0-20.</li><li>6 - Item in hand; The value returned by this will be similar to the value returned by get_block_at()</li><li>7 - "
                     + "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - Player groups;"
-                    + " An array of the permissions groups the player is in.</li></ul>";
+                    + " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li></ul>";
         }
 
         public ExceptionType[] thrown() {
@@ -603,8 +603,8 @@ public class PlayerManagement {
                 }
             }
             if (index == 3 || index == -1) {
-                //Player IP
-                retVals.add(new CString(p.getAddress().getHostName(), line_num, f));
+                //Player IP                
+                retVals.add(new CString(p.getAddress().getAddress().getHostAddress(), line_num, f));
             }
             if (index == 4 || index == -1) {
                 //Display name
@@ -640,6 +640,9 @@ public class PlayerManagement {
                 }
                 CArray a = new CArray(line_num, f, ca);
                 retVals.add(a);
+            }
+            if(index == 10 || index == -1){
+                retVals.add(new CString(p.getAddress().getHostName(), line_num, f));
             }
             if (retVals.size() == 1) {
                 return retVals.get(0);

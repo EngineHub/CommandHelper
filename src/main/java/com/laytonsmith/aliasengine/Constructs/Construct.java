@@ -6,6 +6,10 @@ package com.laytonsmith.aliasengine.Constructs;
 
 import com.laytonsmith.aliasengine.exceptions.MarshalException;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
 import org.json.simple.JSONArray;
@@ -86,55 +90,90 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
      * @param c
      * @return 
      */
+//    public static String json_encode(Construct c, boolean raw) throws MarshalException {
+//        if (c instanceof CString || c instanceof Command) {
+//            if(raw){
+//                return JSONObject.escape(c.getValue());
+//            }
+//            return "\"" + JSONObject.escape(c.getValue()) + "\"";
+//        } else if (c instanceof CVoid) {
+//            if(raw){
+//                return JSONObject.escape(c.getValue());
+//            }
+//            return "\"\"";
+//        } else if (c instanceof CInt) {
+//            return Long.toString(((CInt) c).getInt());
+//        } else if (c instanceof CDouble) {
+//            return Double.toString(((CDouble) c).getDouble());
+//        } else if (c instanceof CBoolean) {
+//            if (((CBoolean) c).getBoolean()) {
+//                return "true";
+//            } else {
+//                return "false";
+//            }
+//        } else if (c instanceof CNull) {
+//            return "null";
+//        } else if (c instanceof CArray) {
+//            CArray ca = (CArray) c;
+//            if (!ca.inAssociativeMode()) {
+//                StringBuilder b = new StringBuilder();
+//                b.append("[");
+//                for (int i = 0; i < ca.size(); i++) {
+//                    if (i != 0) {
+//                        b.append(", ");
+//                    }
+//                    b.append(json_encode(ca.get(i, 0)));
+//                }
+//                b.append("]");
+//                return b.toString();
+//            } else {
+//                //We treat it like an object.
+//                SortedMap<String, String> map = new TreeMap<String, String>();
+//                for(Construct key : ca.keySet()){
+//                    map.put(json_encode(key, true), json_encode(ca.get(key, 0), true));
+//                }
+//                return JSONValue.toJSONString(map);
+//            }
+//        } else {
+//            throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
+//        }
+//    }
     public static String json_encode(Construct c, boolean raw) throws MarshalException {
+        return JSONValue.toJSONString(json_encode0(c));
+    }
+    
+    private static Object json_encode0(Construct c) throws MarshalException{
         if (c instanceof CString || c instanceof Command) {
-            if(raw){
-                return JSONObject.escape(c.getValue());
-            }
-            return "\"" + JSONObject.escape(c.getValue()) + "\"";
+            return c.val();
         } else if (c instanceof CVoid) {
-            if(raw){
-                return JSONObject.escape(c.getValue());
-            }
-            return "\"\"";
+            return "";
         } else if (c instanceof CInt) {
-            return Long.toString(((CInt) c).getInt());
+            return ((CInt) c).getInt();
         } else if (c instanceof CDouble) {
-            return Double.toString(((CDouble) c).getDouble());
+            return ((CDouble) c).getDouble();
         } else if (c instanceof CBoolean) {
-            if (((CBoolean) c).getBoolean()) {
-                return "true";
-            } else {
-                return "false";
-            }
+            return ((CBoolean) c).getBoolean();
         } else if (c instanceof CNull) {
-            return "null";
+            return null;
         } else if (c instanceof CArray) {
             CArray ca = (CArray) c;
             if (!ca.inAssociativeMode()) {
-                StringBuilder b = new StringBuilder();
-                b.append("[");
-                for (int i = 0; i < ca.size(); i++) {
-                    if (i != 0) {
-                        b.append(", ");
-                    }
-                    b.append(json_encode(ca.get(i, 0)));
+                List<Object> list = new ArrayList<Object>();
+                for(int i = 0; i < ca.size(); i++){
+                    list.add(json_encode0(ca.get(i, 0)));
                 }
-                b.append("]");
-                return b.toString();
+                return list;
             } else {
-                //We treat it like an object.
-                SortedMap<String, String> map = new TreeMap<String, String>();
+                Map<String, Object> map = new HashMap<String, Object>();
                 for(Construct key : ca.keySet()){
-                    map.put(json_encode(key, true), json_encode(ca.get(key, 0), true));
+                    map.put(key.val(), json_encode0(ca.get(key, 0)));
                 }
-                return JSONValue.toJSONString(map);
+                return map;
             }
         } else {
             throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
         }
     }
-
     /**
      * Takes a string and converts it into a 
      * @param s

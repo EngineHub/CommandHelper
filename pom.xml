@@ -112,6 +112,13 @@
             <version>1.8.1</version>
             <type>jar</type>
         </dependency>
+        
+        <!-- Used for IRC hooks -->
+        <dependency>
+            <groupId>org.jibble</groupId>
+            <artifactId>pircbot</artifactId>
+            <version>1.5.0</version>
+        </dependency>
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

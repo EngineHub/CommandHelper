@@ -196,15 +196,31 @@ public class ArrayTest {
     @Test public void testArrayception1() throws ConfigCompileException{
         SRun("assign(@t, array("
                 + "     bla: 1, "
-                + "     blo: null, "
                 + "     tro: array('a', 'b')"
                 + " )"
                 + ")"
                 + "foreach(array_keys(@t), @u,"
                 + "     msg(is_array(@t[@u]))"
                 + ")", fakePlayer);
-        verify(fakePlayer, times(2)).sendMessage("false");
+        verify(fakePlayer).sendMessage("false");
         verify(fakePlayer).sendMessage("true");
+    }
+    
+    @Test public void testArrayception2() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@t, array(bla: 1))"
+                + "array_set(@t, 'tro', array(a, b))"
+                + "foreach(array_keys(@t), @u,"
+                + " msg(is_array(@t[@u]))"
+                + ")"
+                + "store_value('bugtest_bug4', @t)  "
+                + "assign(@t, null)  "
+                + "assign(@t, get_value('bugtest_bug4'))  "
+                + "foreach(array_keys(@t), @u,    "
+                + " msg(is_array(@t[@u]))"
+                + ")", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("false");
+        verify(fakePlayer, times(2)).sendMessage("true");
     }
 
 }

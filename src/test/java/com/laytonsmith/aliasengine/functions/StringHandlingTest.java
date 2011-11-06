@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
@@ -85,11 +86,11 @@ public class StringHandlingTest {
     }
     
     @Test
-    public void testSconcat(){
+    public void testSconcat() throws ConfigCompileException{
         StringHandling.sconcat a = new StringHandling.sconcat();
         TestBoilerplate(a, "sconcat");
-        assertCEquals(C.onstruct("1 2 3 4"), a.exec(0, null, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(4)));
-        assertCEquals(C.onstruct("a string"), a.exec(0, null, null, C.onstruct("a"), C.onstruct("string")));
+        assertEquals("1 2 3 4", SRun("1 2 3 4", null));
+        assertEquals("a string", SRun("a string", null));
     }
     
     @Test

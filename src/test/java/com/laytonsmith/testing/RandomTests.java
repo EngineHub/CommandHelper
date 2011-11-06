@@ -93,7 +93,8 @@ public class RandomTests {
         ca.push(C.Void());
         ca.push(new Command("/Command", 0, null));
         ca.push(new CArray(0, null, new CInt(1, 0, null)));
-        assertEquals("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Construct.json_encode(ca));
+        //[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
+        assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca));
     }
     
     @Test public void testJSONDecodeString() throws MarshalException{

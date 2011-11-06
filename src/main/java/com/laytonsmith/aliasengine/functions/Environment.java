@@ -255,7 +255,7 @@ public class Environment {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.RangeException};
+            return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -340,7 +340,7 @@ public class Environment {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.RangeException};
+            return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -390,7 +390,7 @@ public class Environment {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
