@@ -5,7 +5,6 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Env;
-import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
@@ -146,6 +145,13 @@ public class ArrayHandlingTest {
         assertCEquals(C.onstruct(2), commonArray.get(1, 0));
         assertCEquals(C.onstruct(3), commonArray.get(2, 0));
         assertCEquals(C.onstruct(4), commonArray.get(3, 0));
+    }
+    
+    @Test public void testArrayPush2() throws ConfigCompileException{
+        SRun("assign(@a, array(1))"
+                + "array_push(@a, 2, 3)"
+                + "msg(@a)", fakePlayer);
+        verify(fakePlayer).sendMessage("{1, 2, 3}");
     }
     
     @Test(expected=Exception.class)

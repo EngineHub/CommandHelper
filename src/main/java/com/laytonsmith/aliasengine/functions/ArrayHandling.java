@@ -251,12 +251,17 @@ public class ArrayHandling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                ((CArray)args[0]).push(args[1]);
+                if(args.length < 2){
+                    throw new ConfigRuntimeException("At least 2 arguments must be provided to array_push", ExceptionType.InsufficientArgumentsException, line_num, f);
+                }
+                for(int i = 1; i < args.length; i++){
+                    ((CArray)args[0]).push(args[i]);
+                }
                 return new CVoid(line_num, f);
             }
             throw new ConfigRuntimeException("Argument 1 of array_push must be an array", ExceptionType.CastException, line_num, f);
@@ -267,7 +272,7 @@ public class ArrayHandling {
         }
 
         public String docs() {
-            return "void {array, value} Pushes the specified value onto the end of the array";
+            return "void {array, value, [value2...]} Pushes the specified value(s) onto the end of the array";
         }
 
         public boolean isRestricted() {

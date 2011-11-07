@@ -100,6 +100,49 @@ public class Minecraft {
             return false;
         }
     }
+    
+    @api public static class data_name implements Function{
+
+        public String getName() {
+            return "data_name";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {int} Performs the reverse functionality as data_values. Given 1, returns 'STONE'. Note that the enum value"
+                    + " given in bukkit's Material class is what is returned.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            int i = (int)Static.getInt(args[0]);
+            Material m = Material.getMaterial(i);
+            return new CString(m.toString(), line_num, f);
+        }
+        
+    }
 
     @api
     public static class get_worlds implements Function {
