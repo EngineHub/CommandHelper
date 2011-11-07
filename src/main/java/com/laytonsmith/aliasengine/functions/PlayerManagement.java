@@ -1235,7 +1235,7 @@ public class PlayerManagement {
             short damage = -1;
             if(args.length == 1 && args[0] instanceof CArray || args.length == 2 && args[1] instanceof CArray){
                 //we are using the set_pinv(pinv()) method
-                CArray ca;
+                CArray ca = null;
                 if(args.length == 1){
                     ca = (CArray)args[0];
                 }
@@ -1243,7 +1243,23 @@ public class PlayerManagement {
                     m = Static.GetPlayer(args[0].val(), line_num, f);
                     ca = (CArray)args[1];
                 }
-                //TODO
+                if(ca.size() != 36){
+                    throw new ConfigRuntimeException("The array accepted by set_pinv should have 36 elements", ExceptionType.RangeException, line_num, f);
+                }
+                for(int i = 0; i < 36; i++){
+                    Construct item = ca.get(i, line_num);
+                    if(item instanceof CNull){
+                        this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
+                                new CInt(i, line_num, f),
+                                new CInt(0, line_num, f));
+                    } else {
+                        this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
+                                new CInt(i, line_num, f),
+                                new CString(ca.get(0, line_num).val(), line_num, f),
+                                new CInt(Static.getInt(ca.get(1, line_num)), line_num, f));
+                    }
+                }
+                return new CVoid(line_num, f);
             }
             if(args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])){
                 //We're using the slot as arg 1
