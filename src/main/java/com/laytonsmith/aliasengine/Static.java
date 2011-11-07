@@ -469,7 +469,13 @@ public class Static {
         if(is == null){
             return "0";
         }
-        return is.getTypeId() + (is.getData() == null ? "" : ":" + is.getData().getData());
+        String append = null;
+        if(is.getData() != null){
+            append = Byte.toString(is.getData().getData());
+        } else if(is.getDurability() != 0){
+            append = Short.toString(is.getDurability());
+        }
+        return is.getTypeId() + (append == null ? "" : ":" + append);
     }
     
     public static String ParseItemNotation(Block b){

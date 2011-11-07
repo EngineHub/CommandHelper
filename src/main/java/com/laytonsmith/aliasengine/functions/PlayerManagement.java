@@ -1053,7 +1053,7 @@ public class PlayerManagement {
         public String docs() {
             return "mixed {[player], [index]} Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
                     + " given will be returned, but in general, the return format is: array(array(data, qty), array(data, qty), ...) where data is the x:y value of the block (or just the"
-                    + " value if it's an item), and"
+                    + " value if it's an item, and y is the damage value for tools), and"
                     + " qty is the number of items. The index of the array in the array is 0 - 35, which corresponds to the slot in the players inventory. To access armor"
                     + " slots, you must specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
                     + " of what slot is selected. If there is no item at the slot specified, null is returned.";
