@@ -1187,7 +1187,7 @@ public class PlayerManagement {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2, 3, 4, 5};
+            return new Integer[]{1, 2, 3, 4, 5};
         }
 
         public String docs() {
@@ -1202,7 +1202,7 @@ public class PlayerManagement {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException, ExceptionType.RangeException};
         }
 
         public boolean isRestricted() {
@@ -1253,10 +1253,15 @@ public class PlayerManagement {
                                 new CInt(i, line_num, f),
                                 new CInt(0, line_num, f));
                     } else {
-                        this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
-                                new CInt(i, line_num, f),
-                                new CString(ca.get(0, line_num).val(), line_num, f),
-                                new CInt(Static.getInt(ca.get(1, line_num)), line_num, f));
+                        if(item instanceof CArray && ((CArray)item).size() == 2){
+                            CArray citem = (CArray)item;
+                            this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
+                                    new CInt(i, line_num, f),
+                                    new CString(citem.get(0, line_num).val(), line_num, f),
+                                    new CInt(Static.getInt(citem.get(1, line_num)), line_num, f));
+                        } else {
+                            throw new ConfigRuntimeException("Expecting internal values of the array to be 2 element arrays", ExceptionType.CastException, line_num, f);
+                        }
                     }
                 }
                 return new CVoid(line_num, f);
