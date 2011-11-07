@@ -241,9 +241,9 @@ public class AliasCore {
             }
             is_loaded = true;
         } catch (ConfigCompileException ex) {
-            logger.log(Level.SEVERE, "CommandHelper: " + ex.toString());
+            logger.log(Level.SEVERE, "[CommandHelper]: " + ex.toString());
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, "CommandHelper: Path to config file is not correct/accessable. Please"
+            logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
                     + " check the location and try loading the plugin again.");
         } catch (Throwable t) {
             t.printStackTrace();
