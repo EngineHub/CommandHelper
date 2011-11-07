@@ -194,4 +194,12 @@ public class ArrayHandlingTest {
         assertEquals("{}", SRun("array(1, 2, 3, 4, 5)[3..0]", null));
         assertEquals("{a, b}", SRun("array_get(array(a, b))", null));
     }
+    
+    @Test public void testArrayMergeNormal() throws ConfigCompileException{
+        assertEquals("{1, 2, 3, 4, 5, {6, 7}}", SRun("array_merge(array(1, 2, 3), array(4, 5, array(6, 7)))", fakePlayer));
+    }
+    
+    @Test public void testArrayMergeAssociative() throws ConfigCompileException{
+        assertEquals("{a: a, b: b, c: c, d: {1, 2}}", SRun("array_merge(array(a: a, b: b), array(c: c, d: array(1, 2)))", fakePlayer));
+    }
 }

@@ -9,7 +9,6 @@ import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
-import com.laytonsmith.aliasengine.Constructs.CEntry;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
@@ -615,6 +614,68 @@ public class ArrayHandling {
             } else {
                 throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, line_num, f);
             }
+        }
+        
+    }
+    
+    @api public static class array_merge implements Function{
+
+        public String getName() {
+            return "array_merge";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "array {array1, array2, [arrayN...]} Merges the specified arrays from left to right, and returns a new array. If the array"
+                    + " merged is associative, it will overwrite the keys from left to right, but if the arrays are normal, the keys are ignored,"
+                    + " and values are simply pushed.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InsufficientArgumentsException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            CArray newArray = new CArray(line_num, f);
+            if(args.length < 2){
+                throw new ConfigRuntimeException("array_merge must be called with at least two parameters", ExceptionType.InsufficientArgumentsException, line_num, f);
+            }
+            for(int i = 0; i < args.length; i++){
+                if(args[i] instanceof CArray){
+                    CArray cur = (CArray)args[i];
+                    if(!cur.inAssociativeMode()){
+                        for(int j = 0; j < cur.size(); j++){
+                            newArray.push(cur.get(j, line_num));
+                        }
+                    } else {
+                        for(Construct key : cur.keySet()){
+                            newArray.set(key, cur.get(key, line_num));
+                        }
+                    }
+                } else {
+                    throw new ConfigRuntimeException("All arguments to array_merge must be arrays", ExceptionType.CastException, line_num, f);
+                }
+            }
+            return newArray;
         }
         
     }

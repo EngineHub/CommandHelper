@@ -1191,7 +1191,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "void {[player], slot, item_id, [qty], [damage]} Sets the index of the slot to the specified item_id, with the specified qty,"
+            return "void {[player], slot, item_id, [qty], [damage] | [player], pinvArray} Sets the index of the slot to the specified item_id, with the specified qty,"
                     + " or 1 by default. If the qty of armor indexes is greater than 1, it is silently ignored, and only 1 is added."
                     + " item_id follows the same notation for items used elsewhere. Damage defaults to 0, and is a percentage from 0-100, of"
                     + " how damaged an item is. If slot is null, it defaults to the item in hand. The item_id notation gives a shortcut"
@@ -1233,6 +1233,18 @@ public class PlayerManagement {
             int offset = 0;
             int qty = 1;
             short damage = -1;
+            if(args.length == 1 && args[0] instanceof CArray || args.length == 2 && args[1] instanceof CArray){
+                //we are using the set_pinv(pinv()) method
+                CArray ca;
+                if(args.length == 1){
+                    ca = (CArray)args[0];
+                }
+                if(args.length == 2){
+                    m = Static.GetPlayer(args[0].val(), line_num, f);
+                    ca = (CArray)args[1];
+                }
+                //TODO
+            }
             if(args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])){
                 //We're using the slot as arg 1
                 if(Static.isNull(args[0])){
