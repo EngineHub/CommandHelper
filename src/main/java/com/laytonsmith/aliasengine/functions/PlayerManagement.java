@@ -578,11 +578,11 @@ public class PlayerManagement {
                 throw new ConfigRuntimeException("The specified player is not online", 
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
-            if (index < -1 || index > 9) {
-                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 8", 
+            if (index < -1 || index > 10) {
+                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 10", 
                         ExceptionType.RangeException, line_num, f);
             }
-            assert index >= -1 && index <= 9;
+            assert index >= -1 && index <= 10;
             ArrayList<Construct> retVals = new ArrayList<Construct>();
             if (index == 0 || index == -1) {
                 //Player name 
