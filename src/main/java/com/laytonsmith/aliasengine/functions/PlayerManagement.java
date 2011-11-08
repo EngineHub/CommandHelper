@@ -1054,8 +1054,8 @@ public class PlayerManagement {
             return "mixed {[player], [index]} Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
                     + " given will be returned, but in general, the return format is: array(array(data, qty), array(data, qty), ...) where data is the x:y value of the block (or just the"
                     + " value if it's an item, and y is the damage value for tools), and"
-                    + " qty is the number of items. The index of the array in the array is 0 - 35, which corresponds to the slot in the players inventory. To access armor"
-                    + " slots, you must specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
+                    + " qty is the number of items. The index of the array in the array is 0 - 35, 100 - 103, which corresponds to the slot in the players inventory. To access armor"
+                    + " slots, you may also specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
                     + " of what slot is selected. If there is no item at the slot specified, null is returned.";
         }
 
@@ -1120,13 +1120,7 @@ public class PlayerManagement {
                 int qty = 0;
                 if (index == -1) {
                     ItemStack is = m.getItemInHand();
-                    if (is.getTypeId() != 0) {
-                        return new CArray(line_num, f,
-                                new CString(Static.ParseItemNotation(is), line_num, f),
-                                new CInt(is.getAmount(), line_num, f));
-                    } else {
-                        return new CNull(line_num, f);
-                    }
+                    return getInvSlot(is, line_num, f);
                 }
                 if (index >= 100 && index <= 103) {
                     qty = 1;
@@ -1167,15 +1161,23 @@ public class PlayerManagement {
                 CArray ca = new CArray(line_num, f);
                 for (int i = 0; i < 36; i++) {
                     ItemStack is = inv.getItem(i);
-                    if (is != null && is.getTypeId() != 0) {
-                        ca.push(new CArray(line_num, f,
-                                new CString(Static.ParseItemNotation(is), line_num, f),
-                                new CInt(is.getAmount(), line_num, f)));
-                    } else {
-                        ca.push(new CNull(line_num, f));
-                    }
+                    ca.push(getInvSlot(is, line_num, f));
                 }
+                ca.set(100, getInvSlot(inv.getBoots(), line_num, f));
+                ca.set(101, getInvSlot(inv.getLeggings(), line_num, f));
+                ca.set(102, getInvSlot(inv.getChestplate(), line_num, f));
+                ca.set(103, getInvSlot(inv.getHelmet(), line_num, f));
                 return ca;
+            }
+        }
+        
+        private Construct getInvSlot(ItemStack is, int line_num, File f){
+            if (is != null && is.getTypeId() != 0) {
+                return new CArray(line_num, f,
+                        new CString(Static.ParseItemNotation(is), line_num, f),
+                        new CInt(is.getAmount(), line_num, f));
+            } else {
+                return new CNull(line_num, f);
             }
         }
     }
@@ -1197,7 +1199,7 @@ public class PlayerManagement {
                     + " how damaged an item is. If slot is null, it defaults to the item in hand. The item_id notation gives a shortcut"
                     + " to setting damage values, for instance, set_pinv(null, '35:15') will give the player black wool. The \"15\""
                     + " here is an unscaled damage value. This is the same thing as set_pinv(null, 35, 1, 100). 100 is a scaled damage"
-                    + " value.";
+                    + " value. When using the second signature, the pinvArray should be an array similar to the array returned by pinv().";
                     
         }
 
@@ -1243,11 +1245,18 @@ public class PlayerManagement {
                     m = Static.GetPlayer(args[0].val(), line_num, f);
                     ca = (CArray)args[1];
                 }
-                if(ca.size() != 36){
-                    throw new ConfigRuntimeException("The array accepted by set_pinv should have 36 elements", ExceptionType.RangeException, line_num, f);
-                }
-                for(int i = 0; i < 36; i++){
-                    Construct item = ca.get(i, line_num);
+                if(ca.size() < 36){
+                    throw new ConfigRuntimeException("The array accepted by set_pinv should have at least 36 elements", ExceptionType.RangeException, line_num, f);
+                } 
+                for(Construct key : ca.keySet()){
+                //for(int i = 0; i < 36; i++){
+                    int i = 0;
+                    if(Integer.valueOf(key.val()) != null){
+                        i = Integer.parseInt(key.val());
+                    } else {
+                        continue; //Ignore this key
+                    }
+                    Construct item = ca.get(key, line_num);
                     if(item instanceof CNull){
                         this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
                                 new CInt(i, line_num, f),
