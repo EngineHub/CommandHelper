@@ -95,7 +95,7 @@
         <dependency>
             <groupId>com.nijikokun</groupId>
             <artifactId>register</artifactId>
-            <version>1.0</version>
+            <version>1.5</version>
         </dependency>
         
         <!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->

@@ -17,8 +17,6 @@ import com.nijikokun.register.payment.Method.MethodAccount;
 import com.nijikokun.register.payment.Method.MethodBankAccount;
 import com.nijikokun.register.payment.Methods;
 import java.io.File;
-import org.bukkit.Bukkit;
-import org.bukkit.command.CommandSender;
 import org.bukkit.plugin.Plugin;
 
 /**
@@ -658,19 +656,20 @@ public class Economy {
     
     public static Method GetMethod(int line_num, File file){
         com.nijikokun.register.payment.Methods m = new Methods();
-        if(!m.hasMethod()){
+        if(!Methods.hasMethod()){
+            Methods.setMethod(Static.getServer().getPluginManager());
             //initialize our plugin if it isn't already
-            Plugin [] plugins = Static.getServer().getPluginManager().getPlugins();
-            for(Plugin plugin : plugins){
-                if(m.setMethod(plugin)){
-                    break;
-                }
-            }
+//            Plugin [] plugins = Static.getServer().getPluginManager().getPlugins();
+//            for(Plugin plugin : plugins){
+//                if(m.setMethod(plugin)){
+//                    break;
+//                }
+//            }
         }
-        if(m.getMethod() == null){
+        if(Methods.getMethod() == null){
             throw new ConfigRuntimeException("No Economy plugins appear to be loaded", ExceptionType.InvalidPluginException, line_num, file);
         } else {
-            return m.getMethod();
+            return Methods.getMethod();
         }
     }
     
