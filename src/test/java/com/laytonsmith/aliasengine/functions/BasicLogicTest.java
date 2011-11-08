@@ -18,6 +18,7 @@ import org.junit.BeforeClass;
 import org.junit.Test;
 import static com.laytonsmith.testing.StaticTest.*;
 import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -160,5 +161,81 @@ public class BasicLogicTest {
         SRun("if(true, msg('correct'), msg('incorrect'))", fakePlayer);
         SRun("if(false, msg('incorrect'), msg('correct'))", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("correct");
+    }
+    
+    @Test public void testXor() throws ConfigCompileException{
+        assertEquals("false", SRun("xor(false, false)", null));
+        assertEquals("true", SRun("xor(false, true)", null));
+        assertEquals("true", SRun("xor(true, false)", null));
+        assertEquals("false", SRun("xor(true, true)", null));
+    }
+    @Test public void testNand() throws ConfigCompileException{
+        assertEquals("true", SRun("nand(false, false)", null));
+        assertEquals("true", SRun("nand(false, true)", null));
+        assertEquals("true", SRun("nand(true, false)", null));
+        assertEquals("false", SRun("nand(true, true)", null));
+    }
+    @Test public void testNor() throws ConfigCompileException{
+        assertEquals("true", SRun("nor(false, false)", null));
+        assertEquals("false", SRun("nor(false, true)", null));
+        assertEquals("false", SRun("nor(true, false)", null));
+        assertEquals("false", SRun("nor(true, true)", null));
+    }
+    @Test public void testXnor() throws ConfigCompileException{
+        assertEquals("true", SRun("xnor(false, false)", null));
+        assertEquals("false", SRun("xnor(false, true)", null));
+        assertEquals("false", SRun("xnor(true, false)", null));
+        assertEquals("true", SRun("xnor(true, true)", null));
+    }
+    
+    @Test public void testBitAnd() throws ConfigCompileException{
+        assertEquals("4", SRun("bit_and(4, 7)", null));
+        assertEquals("5", SRun("bit_and(7, 5)", null));
+        assertEquals("0", SRun("bit_and(1, 4)", null));
+    }
+    @Test public void testBitOr() throws ConfigCompileException{
+        assertEquals("3", SRun("bit_or(1, 3)", null));
+        assertEquals("6", SRun("bit_or(2, 4)", null));
+    }
+    @Test public void testBitNot() throws ConfigCompileException{
+        assertEquals("-5", SRun("bit_not(4)", null));
+    }
+    @Test public void testLshift() throws ConfigCompileException{
+        assertEquals("16", SRun("lshift(4, 2)", null));
+    }
+    @Test public void testRshift() throws ConfigCompileException{
+        assertEquals("-3", SRun("rshift(-10, 2)", null));
+        assertEquals("1", SRun("rshift(3, 1)", null));
+    }
+    @Test public void testUrshift() throws ConfigCompileException{
+        assertEquals("2", SRun("urshift(10, 2)", null));
+        assertEquals("4611686018427387901", SRun("urshift(-10, 2)", null));
+    }
+    
+    @Test public void testIfelse() throws ConfigCompileException{
+        assertEquals("3", SRun("ifelse("
+                + "false, 1,"
+                + "false, 2,"
+                + "true, 3,"
+                + "true, 4,"
+                + "false, 5)", null));
+        assertEquals("4", SRun("ifelse("
+                + "false, 1,"
+                + "false, 2,"
+                + "false, 3,"
+                + "add(2, 2))", null));
+    }
+    
+    @Test public void testSwitch() throws ConfigCompileException{
+        assertEquals("correct", SRun("switch(3,"
+                + "1, wrong,"
+                + "2, wrong,"
+                + "3, correct,"
+                + "4, wrong)", null));
+        assertEquals("correct", SRun("switch(4,"
+                + "1, wrong,"
+                + "2, wrong,"
+                + "3, wrong,"
+                + "correct)", null));
     }
 }

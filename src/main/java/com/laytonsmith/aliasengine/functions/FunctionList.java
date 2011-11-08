@@ -11,6 +11,10 @@ import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.CFunction;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -20,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class FunctionList {
 
-    private static ArrayList<Function> functions = new ArrayList<Function>();
+    private static Map<String, Function> functions = new HashMap<String, Function>();
     static {
         //Initialize all our functions as soon as we start up
         initFunctions();
@@ -95,17 +99,22 @@ public class FunctionList {
                 System.out.println("CommandHelper: Loaded function \"" + f.getName() + "\"");
             }
         }
-        functions.add(f);
+        try{
+            functions.put(f.getName(), f);
+        } catch(UnsupportedOperationException e){
+            //This function isn't done yet, and during production this is a serious problem,
+            //but it will be caught when we test all the functions, so for now just ignore it,
+            //since this function is called during initial initialization
+        }
     }
 
     public static Function getFunction(Construct c) throws ConfigCompileException {
         if (c instanceof CFunction) {
-            for (Function m : functions) {
-                if (m.getName().equals(c.val())) {
-                    return m;
-                }
-            }
-            throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist");
+            if(!functions.containsKey(c.val())){
+                throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist");
+            } else {
+                return functions.get(c.val());
+            }              
         }
         throw new ConfigCompileException("Excpecting CFunction type");
     }
@@ -135,8 +144,12 @@ public class FunctionList {
 //        throw new ConfigCompileException("Function " + name + " is not defined");
 //    }
 
-    public static ArrayList<Function> getFunctionList() {
-        return functions;
+    public static List<Function> getFunctionList() {
+        List<Function> f = new ArrayList<Function>();
+        for(String name : functions.keySet()){
+            f.add(functions.get(name));
+        }
+        return f;
     }
     
 }

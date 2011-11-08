@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void start(String type) {
-        ArrayList<Function> functions = FunctionList.getFunctionList();
+        List<Function> functions = FunctionList.getFunctionList();
         HashMap<Class, ArrayList<Function>> functionlist = new HashMap<Class, ArrayList<Function>>();
         for (int i = 0; i < functions.size(); i++) {
             //Sort the functions into classes

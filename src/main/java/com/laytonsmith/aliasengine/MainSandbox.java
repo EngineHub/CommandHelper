@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class MainSandbox {
     public static void main(String[] args) throws Exception{
-        System.out.println("\u0037");
+        
     }
     
     public static void printPackets(){

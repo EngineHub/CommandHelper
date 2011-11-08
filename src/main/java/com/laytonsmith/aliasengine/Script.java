@@ -12,7 +12,6 @@ import com.laytonsmith.aliasengine.exceptions.LoopContinueException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Constructs.Construct.ConstructType;
 import com.laytonsmith.aliasengine.Constructs.Token.TType;
-import com.laytonsmith.aliasengine.Constructs.Variable;
 import com.laytonsmith.aliasengine.functions.BasicLogic._if;
 import com.laytonsmith.aliasengine.functions.DataHandling._for;
 import com.laytonsmith.aliasengine.functions.DataHandling.call_proc;
@@ -28,6 +27,8 @@ import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
 import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
+import com.laytonsmith.aliasengine.functions.BasicLogic._switch;
+import com.laytonsmith.aliasengine.functions.BasicLogic.ifelse;
 import com.laytonsmith.aliasengine.functions.Meta.scriptas;
 import com.laytonsmith.aliasengine.functions.StringHandling.sconcat;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
@@ -345,6 +346,10 @@ public class Script {
                     return ((scriptas)f).exec(m.getLineNum(), m.getFile(), env, user);
                 } else if(f instanceof sconcat){
                     return ((sconcat)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                } else if(f instanceof ifelse){
+                    return ((ifelse)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                } else if(f instanceof _switch){
+                    return ((_switch)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());                    
                 }
 
 
