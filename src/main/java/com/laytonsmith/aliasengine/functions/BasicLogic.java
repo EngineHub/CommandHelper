@@ -251,6 +251,56 @@ public class BasicLogic {
         }
     }
     
+    @api public static class sequals implements Function{
+
+        public String getName() {
+            return "sequals";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {val1, val2} Uses a strict equals check, which determines if"
+                    + " two values are not only equal, but also the same type. So, while"
+                    + " equals('1', 1) returns true, sequals('1', 1) returns false, because"
+                    + " the first one is a string, and the second one is an int. More often"
+                    + " than not, you want to use plain equals().";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            equals equals = new equals();
+            if(args[1].getClass().equals(args[0].getClass())
+                    && ((CBoolean)equals.exec(line_num, f, environment, args)).getBoolean()){
+                return new CBoolean(true, line_num, f);
+            } else {
+                return new CBoolean(false, line_num, f);
+            }
+        }
+        
+    }
+    
     @api public static class nequals implements Function{
 
         public String getName() {

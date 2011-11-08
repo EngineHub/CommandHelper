@@ -174,6 +174,7 @@ public class CArray extends Construct {
                     associative_array.put(new CInt(i, 0, null), array.get(i));
                 }
                 associative_mode = true;
+                array = null; // null out the original array container so it can be GC'd
             }
         }
         if (associative_mode) {
@@ -242,7 +243,11 @@ public class CArray extends Construct {
     }
 
     public int size() {
-        return array.size();
+        if(associative_mode){
+            return associative_array.size();
+        } else {
+            return array.size();
+        }
     }
 
     @Override

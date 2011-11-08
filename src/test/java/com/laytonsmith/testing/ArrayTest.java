@@ -222,5 +222,11 @@ public class ArrayTest {
         verify(fakePlayer, times(2)).sendMessage("false");
         verify(fakePlayer, times(2)).sendMessage("true");
     }
+    
+    @Test public void testArrayNPE1() throws ConfigCompileException{
+        SRun("assign(@glyphs, array('0': 6, '1': 6,))"
+                + "msg(array_index_exists(@glyphs, '1'))", fakePlayer);
+        verify(fakePlayer).sendMessage("true");
+    }
 
 }

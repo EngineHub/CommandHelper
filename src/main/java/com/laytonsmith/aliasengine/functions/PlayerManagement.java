@@ -1245,11 +1245,8 @@ public class PlayerManagement {
                     m = Static.GetPlayer(args[0].val(), line_num, f);
                     ca = (CArray)args[1];
                 }
-                if(ca.size() < 36){
-                    throw new ConfigRuntimeException("The array accepted by set_pinv should have at least 36 elements", ExceptionType.RangeException, line_num, f);
-                } 
+ 
                 for(Construct key : ca.keySet()){
-                //for(int i = 0; i < 36; i++){
                     int i = 0;
                     if(Integer.valueOf(key.val()) != null){
                         i = Integer.parseInt(key.val());

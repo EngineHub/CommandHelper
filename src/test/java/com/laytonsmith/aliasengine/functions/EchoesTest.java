@@ -75,6 +75,12 @@ public class EchoesTest {
         verify(fakeServer).broadcastMessage("Hello World!");        
     }
     
+    @Test public void testLongStringMsgd() throws ConfigCompileException{
+        //TODO: Put this test back in, and fix it
+//        SRun("msg('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')", fakePlayer);
+//        verify(fakePlayer).sendMessage("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    }
+    
     @Test public void testChatas() throws CancelCommandException, ConfigCompileException{
         //TODO: Can't get this to work right, though it does work in game
 //        String script = "chatas('wraithguard02', 'Hello World!')";

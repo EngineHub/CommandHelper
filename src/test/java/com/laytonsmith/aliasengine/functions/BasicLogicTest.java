@@ -238,4 +238,10 @@ public class BasicLogicTest {
                 + "3, wrong,"
                 + "correct)", null));
     }
+    
+    @Test public void testSequals() throws ConfigCompileException{
+        assertEquals("true", SRun("sequals(1, 1)", null));
+        assertEquals("false", SRun("sequals(1, '1')", null));
+        assertEquals("false", SRun("sequals(1, '2')", null));
+    }
 }
