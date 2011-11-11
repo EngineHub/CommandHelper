@@ -417,7 +417,6 @@ public class ArrayHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
             return true;
@@ -676,6 +675,55 @@ public class ArrayHandling {
                 }
             }
             return newArray;
+        }
+        
+    }
+    
+    @api public static class array_remove implements Function{
+
+        public String getName() {
+            return "array_remove";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {array, index} Removes an index from an array. If the array is a normal"
+                    + " array, all values' indicies are shifted left one. If the array is associative,"
+                    + " the index is simply removed. If the index doesn't exist, the array remains"
+                    + " unchanged.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(args[0] instanceof CArray){
+                CArray ca = (CArray)args[0];
+                ca.remove(args[1]);
+            } else {
+                throw new ConfigRuntimeException("Argument 1 of array_remove should be an array", ExceptionType.CastException, line_num, f);
+            }
+            return new CVoid(line_num, f);
         }
         
     }

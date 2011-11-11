@@ -493,10 +493,8 @@ public class MScriptCompiler {
     
     /**
      * Executes a pre-compiled mscript, given the specified Script environment. Both done and script 
-     * may be null, and if so, reasonable defaults will be provided. Technically, this function doesn't
-     * check to see if p is null either.
+     * may be null, and if so, reasonable defaults will be provided.
      * @param root
-     * @param p
      * @param done
      * @param script 
      */

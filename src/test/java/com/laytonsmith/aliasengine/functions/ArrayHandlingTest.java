@@ -202,4 +202,11 @@ public class ArrayHandlingTest {
     @Test public void testArrayMergeAssociative() throws ConfigCompileException{
         assertEquals("{a: a, b: b, c: c, d: {1, 2}}", SRun("array_merge(array(a: a, b: b), array(c: c, d: array(1, 2)))", fakePlayer));
     }
+    
+    @Test public void testArrayRemove() throws ConfigCompileException{
+        SRun("assign(@a, array(1, 2, 3)) array_remove(@a, 1) msg(@a)", fakePlayer);
+        verify(fakePlayer).sendMessage("{1, 3}");
+        SRun("assign(@a, array(a: a, b: b, c: c)) array_remove(@a, 'b') msg(@a)", fakePlayer);
+        verify(fakePlayer).sendMessage("{a: a, c: c}");
+    }
 }

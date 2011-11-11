@@ -106,7 +106,8 @@ public class CommandHelperPlugin extends JavaPlugin {
             File prefsFile = new File("plugins/CommandHelper/preferences.txt");
             Static.getPreferences().init(prefsFile);
             String script_name = (String) Static.getPreferences().getPreference("script-name");
-            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), prefsFile, perms, this);
+            String main_file = (String) Static.getPreferences().getPreference("main-file");
+            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), prefsFile, new File("plugins/CommandHelper/" + main_file), perms, this);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         } catch (ConfigCompileException ex) {

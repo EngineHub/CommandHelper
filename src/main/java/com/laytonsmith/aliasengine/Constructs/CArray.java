@@ -286,4 +286,14 @@ public class CArray extends Construct {
             return new CString(c.val(), c.line_num, c.file);
         }
     }
+
+    public void remove(Construct construct) {
+        construct = normalizeConstruct(construct);
+        if(!associative_mode){
+            array.remove((int)Static.getInt(construct));
+        } else {
+            associative_array.remove(construct);
+        }
+        regenValue();
+    }
 }

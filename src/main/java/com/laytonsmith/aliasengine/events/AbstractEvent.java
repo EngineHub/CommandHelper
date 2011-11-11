@@ -6,6 +6,7 @@ package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.HashMap;
@@ -68,7 +69,8 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     }
     
     public void execute(Script s, BoundEvent b){
-        s.run(null, null, null);
+        
+        s.run(null, b.getEnv(), null);
     }
 
     public int compareTo(Event o) {

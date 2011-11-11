@@ -11,15 +11,10 @@ import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTree;
 import com.laytonsmith.aliasengine.GenericTreeNode;
-import com.laytonsmith.aliasengine.GenericTreeTraversalOrderEnum;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.exceptions.EventException;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -126,6 +121,10 @@ public class BoundEvent implements Comparable<BoundEvent> {
 
     public Priority getPriority() {
         return Priority.valueOf(priority);
+    }
+
+    public Env getEnv() {
+        return env;
     }
     public enum Priority{
         LOWEST(5),

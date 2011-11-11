@@ -5,6 +5,8 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Env;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.Server;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.*;
@@ -76,11 +78,59 @@ public class BasicLogicTest {
     @Test
     public void testEquals() throws CancelCommandException{
         BasicLogic.equals e = new BasicLogic.equals();
-        Construct ret = null;
-        assertCTrue(e.exec(0, null, env, arg1_1, arg1_2));
-        assertCFalse(e.exec(0, null, env, arg1_1, arg2_1));
-        assertCFalse(e.exec(0, null, env, argn1_1, arg1_1));
-        assertCFalse(e.exec(0, null, env, C.onstruct(1), C.onstruct("string")));
+
+//             T   F   1   0  -1  '1' '0' '-1' N  {} 'CH'  '' 1.0
+//        ---------------------------------------------------
+//        T    T   F   T   F   T   T   T   T   F   F   T   F   T
+//        F    -   T   F   T   F   F   F   F   T   T   F   T   F
+//        1    -   -   T   F   F   T   F   F   F   F   F   F   T
+//        0    -   -   -   T   F   F   T   F   F   F   F   F   F
+//        -1   -   -   -   -   T   F   F   T   F   F   F   F   F
+//        '1'  -   -   -   -   -   T   F   F   F   F   F   F   T
+//        '0'  -   -   -   -   -   -   T   F   F   F   F   F   F
+//        '-1' -   -   -   -   -   -   -   T   F   F   F   F   F
+//        N    -   -   -   -   -   -   -   -   T   F   F   F   F
+//        {}   -   -   -   -   -   -   -   -   -   T   F   F   F
+//        'CH' -   -   -   -   -   -   -   -   -   -   T   F   F
+//        ''   -   -   -   -   -   -   -   -   -   -   -   T   F
+//        1.0  -   -   -   -   -   -   -   -   -   -   -   -   T
+
+        _t("false", "false");
+        _f("false", "1");
+        _t("false", "0");
+        //TODO: Finish
+        
+        _t("true", "true");
+        _f("true", "false");
+        _t("true", "1");
+        _f("true", "0");
+        _t("true", "-1");
+        _t("true", "'1'");
+        _t("true", "'0'");
+        _t("true", "'-1'");
+        _f("true", "null");
+        _f("true", "array()");
+        _t("true", "'CH'");
+        _f("true", "''");
+        _t("true", "1.0");
+        
+        
+    }
+    
+    public void _t(String val1, String val2){
+        try {
+            assertEquals("true", SRun("equals(" + val1 + ", " + val2 + ")", null));
+        } catch (ConfigCompileException ex) {
+            fail(ex.getMessage());
+        }
+    }
+    
+    public void _f(String val1, String val2){
+        try {
+            assertEquals("false", SRun("equals(" + val1 + ", " + val2 + ")", null));
+        } catch (ConfigCompileException ex) {
+            fail(ex.getMessage());
+        }
     }
     
     public void testEqualsIC() throws ConfigCompileException{

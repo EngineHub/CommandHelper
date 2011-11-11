@@ -22,6 +22,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 
 /**
@@ -34,6 +35,7 @@ public class AliasCore {
 
     private File aliasConfig;
     private File prefFile;
+    private File mainFile;
     //AliasConfig config;
     List<Script> scripts;
     static final Logger logger = Logger.getLogger("Minecraft");
@@ -49,11 +51,12 @@ public class AliasCore {
      * @param maxCommands How many commands an alias may contain. Since aliases can be used like a
      * macro, this can help prevent command spamming.
      */
-    public AliasCore(File aliasConfig, File prefFile, PermissionsResolverManager perms, CommandHelperPlugin parent) throws ConfigCompileException {
+    public AliasCore(File aliasConfig, File prefFile, File mainFile, PermissionsResolverManager perms, CommandHelperPlugin parent) throws ConfigCompileException {
         this.aliasConfig = aliasConfig;
         this.prefFile = prefFile;
         this.perms = perms;
         this.parent = parent;
+        this.mainFile = mainFile;
         reload();
     }
 
@@ -213,10 +216,39 @@ public class AliasCore {
                     logger.log(Level.WARNING, "CommandHelper: Could not write sample config file");
                 }
             }
+            
+            if(!mainFile.exists()){
+                mainFile.getParentFile().mkdirs();
+                mainFile.createNewFile();
+                try{
+                    String samp_main = getStringResource(AliasCore.class.getResourceAsStream("/samp_main.txt"));
+                    samp_main = samp_main.replaceAll("\n|\r\n", System.getProperty("line.separator"));
+                    file_put_contents(mainFile, samp_main, "o");
+                } catch(Exception e){
+                    logger.log(Level.WARNING, "CommandHelper: Could not write sample main file");
+                }
+            }
 
             Preferences prefs = Static.getPreferences();
             prefs.init(prefFile);
+            
+            //Run the main file once
+            try{
+                Env main_env = new Env();
+                main_env.SetCommandSender(null);
+                String main = file_get_contents(mainFile.getAbsolutePath());
+                MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(main, mainFile)), main_env, new MScriptComplete() {
 
+                    public void done(String output) {
+                        logger.log(Level.INFO, "[CommandHelper]: Main file processed");
+                    }
+                }, null);
+            } catch(ConfigCompileException e){
+                logger.log(Level.SEVERE, "[CommandHelper]: Main file could not be compiled, due to a compile error: " + e.getMessage());
+            } catch(ConfigRuntimeException e){
+                logger.log(Level.SEVERE, "[CommandHelper]: Main file did not finish running, due to a runtime error: " + e.getMessage() + ":" + e.getExceptionType() + ":" + e.getLineNum());
+            }
+            
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
             //config = new AliasConfig(alias_config, null, perms);
             scripts = MScriptCompiler.preprocess(MScriptCompiler.lex(alias_config, aliasConfig), new Env());

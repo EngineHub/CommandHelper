@@ -110,11 +110,11 @@ public class Script {
         s.OriginalEnv = env;
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
-        for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
-            if(node.getData() instanceof IVariable){
-                s.OriginalEnv.GetVarList().set((IVariable)node.getData());
-            }
-        }
+//        for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
+//            if(node.getData() instanceof IVariable){
+//                s.OriginalEnv.GetVarList().set((IVariable)node.getData());
+//            }
+//        }
         
         return s;
     }
@@ -153,10 +153,6 @@ public class Script {
             }
         }
 
-//        final Plugin self = CommandHelperPlugin.self;
-//        Static.getServer().getScheduler().scheduleAsyncDelayedTask(self, new Runnable() {
-
-//            public void run() {
         try {
             for (GenericTreeNode<Construct> rootNode : cright) {
                 GenericTree<Construct> tree = new GenericTree<Construct>();
@@ -176,16 +172,27 @@ public class Script {
             }
         } catch (ConfigRuntimeException e) {
             System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
-            p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
+            if(p != null){
+                p.sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
+            }
         } catch (CancelCommandException e) {
             //p.sendMessage(e.getMessage());
             //The message in the exception is actually empty
-        } catch (LoopBreakException e) {
-            p.sendMessage("The break() function must be used inside a for() or foreach() loop");
+        } catch (LoopBreakException e) {            
+            if(p != null){
+                p.sendMessage("The break() function must be used inside a for() or foreach() loop");
+            }
+            System.out.println("The break() function must be used inside a for() or foreach() loop");
         } catch (LoopContinueException e) {
-            p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
+            if(p != null){
+                p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
+            }
+            System.out.println("The continue() function must be used inside a for() or foreach() loop");
         } catch (FunctionReturnException e) {
-            p.sendMessage("The return() function must be used inside a procedure.");
+            if(p != null){
+                p.sendMessage("The return() function must be used inside a procedure.");
+            }
+            System.out.println("The return() function must be used inside a procedure.");
         } catch (Throwable t) {
             System.out.println("An unexpected exception occured during the execution of a script.");
             t.printStackTrace();
@@ -194,8 +201,6 @@ public class Script {
         if (done != null) {
             done.done(null);
         }
-//            }
-//        });
     }
 
     public Construct eval(GenericTreeNode<Construct> c, final Env env) throws CancelCommandException {
@@ -412,19 +417,8 @@ public class Script {
                     }
                 }
 
-                //TODO: Will revisit this in the future. For now, remove the ability for
-                //functions to run asyncronously.
-                //if(f.runAsync() == true || f.runAsync() == null){
                 Construct ret = f.exec(m.getLineNum(), m.getFile(), env, ca);
                 return ret;
-                /*} else {
-                return blockingNonThreadSafe(player, new Callable<Construct>() {
-                
-                public Construct call() throws Exception {
-                return f.exec(m.getLineNum(), player, ca);
-                }
-                });
-                }*/
 
         } else if (m.getCType() == ConstructType.VARIABLE) {
             return Static.resolveConstruct(m.val(), m.getLineNum(), m.getFile());
