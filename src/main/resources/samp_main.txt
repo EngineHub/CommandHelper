@@ -18,5 +18,5 @@ console('Welcome to this server, which is running CommandHelper!')
 #@server_name, so we can use it inside the event handler
 bind(player_join, null, null, @event, @server_name,
     #if the player is an op, let's send them a message
-    if(pinfo(@event[player])[8], tmsg(@event[player], 'Welcome to' @server_name))
+    if(pisop(@event[player]), tmsg(@event[player], 'Welcome to' @server_name))
 ) 

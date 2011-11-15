@@ -2250,4 +2250,52 @@ public class PlayerManagement {
         
     }
     
+    @api public static class pisop implements Function{
+
+        public String getName() {
+            return "pisop";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "boolean {[player]} Returns whether or not the specified player (or the current"
+                    + " player if not specified) is op";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Player m = environment.GetPlayer();
+            if(args.length == 1){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+            }
+            if(m == null){
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            return new CBoolean(m.isOp(), line_num, f);
+        }
+        
+    }
+    
 }
