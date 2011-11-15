@@ -7,7 +7,6 @@ package com.laytonsmith.aliasengine.events;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.exceptions.EventException;
-import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.Map;
 
 /**
@@ -41,9 +40,9 @@ public interface Event extends Comparable<Event>{
     public String since();
     /**
      * This function should return true if the event code should be run, based
-     * on this prefilter and triggering event.
+     * on this prefilter and triggering event's parameters.
      */
-    public boolean matches(Map<String, Construct> prefilter, org.bukkit.event.Event e);
+    public boolean matches(Map<String, Construct> prefilter, Object e);
     
     /**
      * This function is called when an event is triggered. It passes the event, and expects
@@ -53,7 +52,7 @@ public interface Event extends Comparable<Event>{
      * @param e
      * @return 
      */
-    public Map<String, Construct> evaluate(org.bukkit.event.Event e) throws EventException;
+    public Map<String, Construct> evaluate(Object e) throws EventException;
     
     /**
      * This is called if the script attempts to cancel the event, so the bukkit
@@ -61,7 +60,7 @@ public interface Event extends Comparable<Event>{
      * should throw an EventException, which is caught in the triggering code, and
      * at this time ignored.
      */
-    public void cancel(org.bukkit.event.Event e) throws EventException;
+    public void cancel(Object e) throws EventException;
     
     /**
      * This function returns the "driver" class of the event needed to trigger it.

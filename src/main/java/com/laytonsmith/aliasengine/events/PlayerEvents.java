@@ -49,7 +49,7 @@ public class PlayerEvents {
             return org.bukkit.event.Event.Type.PLAYER_JOIN;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, org.bukkit.event.Event e) {
+        public boolean matches(Map<String, Construct> prefilter, Object e) {
             if(e instanceof PlayerJoinEvent){
                 PlayerJoinEvent ple = (PlayerJoinEvent) e;
                 if(prefilter.containsKey("player")){
@@ -62,7 +62,7 @@ public class PlayerEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(org.bukkit.event.Event e) throws EventException {
+        public Map<String, Construct> evaluate(Object e) throws EventException {
             if(e instanceof PlayerJoinEvent){
                 PlayerJoinEvent ple = (PlayerJoinEvent) e;
                 Map<String, Construct> map = super.evaluate_helper(e);
@@ -99,7 +99,7 @@ public class PlayerEvents {
             return "3.3.0";
         }
 
-        public boolean matches(Map<String, Construct> prefilter, Event e) {
+        public boolean matches(Map<String, Construct> prefilter, Object e) {
             if(e instanceof PlayerInteractEvent){
                 PlayerInteractEvent pie = (PlayerInteractEvent)e;
                 if(((PlayerInteractEvent)e).getAction().equals(Action.PHYSICAL)){
@@ -130,7 +130,7 @@ public class PlayerEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(Event e) throws EventException {
+        public Map<String, Construct> evaluate(Object e) throws EventException {
             if(e instanceof PlayerInteractEvent){
                 PlayerInteractEvent pie = (PlayerInteractEvent) e;
                 Map<String, Construct> map = super.evaluate_helper(e);

@@ -24,26 +24,49 @@ import org.bukkit.event.world.WorldEvent;
 
 /**
  * This helper class implements a few of the common functions in event, and
- * most Events should extend this class.
+ * most (all?) Events should extend this class.
  * @author layton
  */
 public abstract class AbstractEvent implements Event, Comparable<Event> {
 
-    public void cancel(org.bukkit.event.Event e) {
+    /**
+     * This is what should happen when the event is cancelled. Some events may
+     * do nothing, for instance, a player logout event cannot be cancelled. By
+     * default, if the event is an instance of Cancellable, it is cancelled.
+     * @param e 
+     */
+    public void cancel(Object e) {
         if (e instanceof Cancellable) {
             ((Cancellable) e).setCancelled(true);
         }
     }
 
+    /**
+     * If the event needs to run special code when a player binds the event, it
+     * can be done here. By default, an UnsupportedOperationException is thrown,
+     * but is caught and ignored.
+     */
     public void bind() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
+    /**
+     * If the event needs to run special code at server startup, it can be done
+     * here. By default, an UnsupportedOperationException is thrown, but is caught
+     * and ignored.
+     */
     public void hook() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
     
-    public Map<String, Construct> evaluate_helper(org.bukkit.event.Event e) throws EventException{
+    /**
+     * For Bukkit events, there are a few standard items that get added to the
+     * event object. This function does that for the event.
+     * @param e
+     * @return
+     * @throws EventException 
+     */
+    public Map<String, Construct> evaluate_helper(Object e) throws EventException{
         Map<String, Construct> map = new HashMap<String, Construct>();
         map.put("type", new CString(this.getName(), 0, null));
         String macro = "";
@@ -63,16 +86,30 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
             macro = "weather";
         } else if(e instanceof WorldEvent){
             macro = "world";
+        } else {
+            macro = "custom";
         }
         map.put("macrotype", new CString(macro, 0, null));
         return map;
     }
     
-    public void execute(Script s, BoundEvent b){
-        
+    /**
+     * This function is run when the actual event occurs. By default, the script
+     * is simply run with the BoundEvent's environment, however this could be overridden
+     * if necessary. It should eventually run the script however.
+     * @param s
+     * @param b 
+     */
+    public void execute(Script s, BoundEvent b){     
         s.run(null, b.getEnv(), null);
     }
 
+    /**
+     * For sorting and optimizing events, we need a comparison operation. By default
+     * it is compared by looking at the event name.
+     * @param o
+     * @return 
+     */
     public int compareTo(Event o) {
         return this.getName().compareTo(o.getName());
     }
