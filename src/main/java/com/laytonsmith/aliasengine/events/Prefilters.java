@@ -10,6 +10,7 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
+import com.sk89q.worldedit.expression.Expression;
 import java.util.Map;
 
 /**
@@ -54,6 +55,12 @@ public class Prefilters {
             String actualValue, PrefilterType type) throws PrefilterNonMatchException{
         match(map, key, new CString(actualValue, 0, null), type);
     }
+    
+    /**
+     * Given a prototype and the actual user provided value, determines if it matches.
+     * If it doesn't, it throws an exception. If the value is not provided, or it does
+     * match, it returns void, which means that the test passed, and the event matches.
+     */
     public static void match(Map<String, Construct> map, String key,
             Construct actualValue, PrefilterType type) throws PrefilterNonMatchException{
         if(!map.containsKey(key)){
@@ -118,7 +125,7 @@ public class Prefilters {
     private static void ExpressionMatch(Construct expression, Construct value){
         if(expression.val().matches("\\(.*\\)")){
             String exp = expression.val().substring(1, expression.val().length());
-            //TODO: Finish ExpressionMatch
+            //TODO: Finish ExpressionMatch            
         } else {
             throw new ConfigRuntimeException("Prefilter expecting expression type, and \"" 
                     + expression.val() + "\" does not follow expression format", ExceptionType.FormatException, expression.getLineNum(), expression.getFile());

@@ -146,4 +146,5 @@ public class TestStatic {
         assertTrue(Static.resolveConstruct("1.1", 0, null) instanceof CDouble);
         assertTrue(Static.resolveConstruct("string", 0, null) instanceof CString);
     }
+        
 }
