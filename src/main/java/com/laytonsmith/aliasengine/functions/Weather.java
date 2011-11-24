@@ -34,7 +34,7 @@ public class Weather {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 3};
+            return new Integer[]{1, 2, 3, 4};
         }
         
         public ExceptionType[] thrown() {
@@ -46,37 +46,40 @@ public class Weather {
             int y;
             int z;
             World w = null;
-            if(args.length == 1){
-                if(args[0] instanceof CArray){
-                    CArray a = (CArray)args[0];
-                    Location l = Static.GetLocation(a, (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
-                    x = (int)java.lang.Math.floor(l.getX());
-                    y = (int)java.lang.Math.floor(l.getY());
-                    z = (int)java.lang.Math.floor(l.getZ());
-                    w = l.getWorld();
-                } else {
-                    throw new ConfigRuntimeException("lightning expects an array as the one argument", 
-                            ExceptionType.CastException, line_num, f);
-                }
+            boolean safe = false;
+            int safeIndex = 1;
+            if(args[0] instanceof CArray){
+                CArray a = (CArray)args[0];
+                Location l = Static.GetLocation(a, (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
+                x = (int)java.lang.Math.floor(l.getX());
+                y = (int)java.lang.Math.floor(l.getY());
+                z = (int)java.lang.Math.floor(l.getZ());
+                w = l.getWorld();
             } else {
                 x = (int)java.lang.Math.floor(Static.getNumber(args[0]));
                 y = (int)java.lang.Math.floor(Static.getNumber(args[1]));
                 z = (int)java.lang.Math.floor(Static.getNumber(args[2]));
+                safeIndex = 3;
+            }
+            if(args.length >= safeIndex + 1){
+                safe = Static.getBoolean(args[safeIndex]);
             }
             if(w != null){
-                w.strikeLightning(new Location(w, x, y + 1, z)); 
+                if(!safe){
+                    w.strikeLightning(new Location(w, x, y + 1, z)); 
+                } else {
+                    w.strikeLightningEffect(new Location(w, x, y + 1, z));
+                }
             } else {
                 throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
             }
-//            World w = ((CraftWorld)p.getWorld()).getHandle();
-//            EntityWeatherStorm e = new EntityWeatherStorm(w, x, y, z);
-//            w.a(e);
             
             return new CVoid(line_num, f);
         }
 
         public String docs() {
-            return "void {strikeLocArray | x, y, z} Makes lightning strike at the x y z coordinates specified in the array(x, y, z).";
+            return "void {strikeLocArray, [safe] | x, y, z, [safe]} Makes lightning strike at the x y z coordinates specified in the array(x, y, z). safe"
+                    + " defaults to false, but if true, lightning striking a player will not hurt them.";
         }
 
         public boolean isRestricted() {

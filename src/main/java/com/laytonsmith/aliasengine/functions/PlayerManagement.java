@@ -1462,7 +1462,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "void {[player]} Gets the experience of a player within this level.";
+            return "int {[player]} Gets the experience of a player within this level.";
         }
 
         public ExceptionType[] thrown() {
@@ -1569,7 +1569,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "void {[player]} Gets the experience of a player within this level.";
+            return "int {[player]} Gets the player's level.";
         }
 
         public ExceptionType[] thrown() {
@@ -1676,7 +1676,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "void {[player]} Gets the total experience of a player.";
+            return "int {[player]} Gets the total experience of a player.";
         }
 
         public ExceptionType[] thrown() {
