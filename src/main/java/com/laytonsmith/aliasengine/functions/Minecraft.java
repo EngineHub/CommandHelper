@@ -22,10 +22,12 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.entity.Blaze;
 import org.bukkit.entity.CaveSpider;
 import org.bukkit.entity.Chicken;
 import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
+import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
@@ -38,6 +40,7 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.Spider;
 import org.bukkit.entity.Squid;
+import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.material.MaterialData;
@@ -207,7 +210,7 @@ public class Minecraft {
             return "void {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
                     + " to the location of the player. mobType can be one of: CHICKEN, COW, CREEPER, GHAST,"
                     + " PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER,"
-                    + " ENDERMAN, SILVERFISH. Spelling matters, but capitalization doesn't. At this"
+                    + " ENDERMAN, SILVERFISH, BLAZE, VILLAGER, ENDERDRAGON. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
                     + " specified.";
@@ -239,7 +242,8 @@ public class Minecraft {
         enum MOBS {
 
             CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, 
-            SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH
+            SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH, VILLAGER,
+            BLAZE, ENDERDRAGON
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -320,6 +324,16 @@ public class Minecraft {
                         break;
                     case SILVERFISH:
                         mobType = Silverfish.class;
+                        break;
+                    case BLAZE:
+                        mobType = Blaze.class;
+                        break;
+                    case VILLAGER:
+                        mobType = Villager.class;
+                        break;
+                    case ENDERDRAGON:
+                        mobType = EnderDragon.class;
+                        break;
                 }
             } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("No mob of type " + mob + " exists",
