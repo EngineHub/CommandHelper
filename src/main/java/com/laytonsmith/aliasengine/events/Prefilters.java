@@ -11,6 +11,7 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
 import com.sk89q.worldedit.expression.Expression;
+import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.Map;
 
 /**
@@ -89,8 +90,8 @@ public class Prefilters {
     }
     
     private static void ItemMatch(Construct item1, Construct item2) throws PrefilterNonMatchException{
-        String i1 = null;
-        String i2 = null;
+        String i1 = item1.val();
+        String i2 = item2.val();
         if(item1.val().contains(":")){
             String[] split = item1.val().split(":");
             i1 = split[0].trim();
@@ -122,10 +123,28 @@ public class Prefilters {
         }
     }
     
-    private static void ExpressionMatch(Construct expression, Construct value){
+    private static void ExpressionMatch(Construct expression, Construct dvalue) throws PrefilterNonMatchException{
         if(expression.val().matches("\\(.*\\)")){
-            String exp = expression.val().substring(1, expression.val().length());
-            //TODO: Finish ExpressionMatch            
+            String exp = expression.val().substring(1, expression.val().length() - 1);
+            boolean inequalityMode = false;
+            if(exp.contains("<") || exp.contains(">") || exp.contains("==")){
+                inequalityMode = true;
+            }
+            try{
+                double val = Expression.compile(exp).evaluate();
+                if(inequalityMode){
+                    if(val == 0){
+                        throw new PrefilterNonMatchException();
+                    }
+                } else {
+                    if(val != Static.getDouble(dvalue)){
+                        throw new PrefilterNonMatchException();
+                    }
+                }
+            } catch(ExpressionException e){
+                throw new ConfigRuntimeException("Your expression is invalidly formatted", 
+                        ExceptionType.FormatException, expression.getLineNum(), expression.getFile());
+            }
         } else {
             throw new ConfigRuntimeException("Prefilter expecting expression type, and \"" 
                     + expression.val() + "\" does not follow expression format", ExceptionType.FormatException, expression.getLineNum(), expression.getFile());

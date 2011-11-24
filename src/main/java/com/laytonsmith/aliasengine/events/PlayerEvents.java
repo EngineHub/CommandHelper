@@ -15,7 +15,6 @@ import com.laytonsmith.aliasengine.exceptions.EventException;
 import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
 import java.util.Map;
 import org.bukkit.block.Block;
-import org.bukkit.event.Event;
 import org.bukkit.event.Event.Type;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -84,7 +83,8 @@ public class PlayerEvents {
         public String docs() {
             return "{block: <item match> If the block the player interacts with is this"
                     + " | button: <string match> left or right. If they left or right clicked |"
-                    + " item: <item match> The item they are holding when they interacted} "
+                    + " item: <item match> The item they are holding when they interacted |"
+                    + " player: <string match> The player that triggered the event} "
                     + "Fires when a player left or right clicks a block or the air"
                     + "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
                     + "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
@@ -121,6 +121,7 @@ public class PlayerEvents {
                 try{
                     Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
                     Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
+                    Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
                 }catch(PrefilterNonMatchException x){
                     return false;
                 }
