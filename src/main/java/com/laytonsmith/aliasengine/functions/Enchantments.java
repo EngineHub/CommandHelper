@@ -28,6 +28,78 @@ public class Enchantments {
     public static String docs() {
         return "Provides methods for dealing with enchanted items";
     }
+    
+    /**
+     * Converts the wiki version string to the bukkit version string. If the specified string isn't
+     * in the wiki, the string is returned unchanged.
+     * @param wikiVersion
+     * @return 
+     */
+    public static String ConvertName(String wikiVersion){
+        String lc = wikiVersion.toLowerCase().trim();
+        if(lc.equals("protection")){
+            return "PROTECTION_ENVIRONMENTAL";
+        } else if(lc.equals("fire protection")){
+            return "PROTECTION_FIRE";
+        } else if(lc.equals("feather falling")){
+            return "PROTECTION_FALL";
+        } else if(lc.equals("blast protection")){
+            return "PROTECTION_EXPLOSIONS";
+        } else if(lc.equals("projectile protection")){
+            return "PROTECTION_PROJECTILE";
+        } else if(lc.equals("respiration")){
+            return "OXYGEN";
+        } else if(lc.equals("aqua affinity")){
+            return "WATER_WORKER";
+        } else if(lc.equals("sharpness")){
+            return "DAMAGE_ALL";
+        } else if(lc.equals("smite")){
+            return "DAMAGE_UNDEAD";
+        } else if(lc.equals("bane of arthropods")){
+            return "DAMAGE_ARTHROPODS";
+        } else if(lc.equals("knockback")){
+            return "KNOCKBACK";
+        } else if(lc.equals("fire aspect")){
+            return "FIRE_ASPECT";
+        } else if(lc.equals("looting")){
+            return "LOOT_BONUS_MOBS";
+        } else if(lc.equals("efficiency")){
+            return "DIG_SPEED";
+        } else if(lc.equals("silk touch")){
+            return "SILK_TOUCH";
+        } else if(lc.equals("unbreaking")){
+            return "DURABILITY";
+        } else if(lc.equals("fortune")){
+            return "LOOT_BONUS_BLOCKS";
+        } else {
+            return wikiVersion;
+        }
+    }
+    
+    /**
+     * Converts the roman numeral into an integer (as a string). If the value
+     * passed in is already an integer, it is returned as is.
+     * @param romanNumeral
+     * @return 
+     */
+    public static String ConvertLevel(String romanNumeral){
+        String lc = romanNumeral.toLowerCase().trim();
+        int i = 0;
+        if(lc.equals("i")){
+            i = 1;
+        } else if(lc.equals("ii")){
+            i = 2;
+        } else if(lc.equals("iii")){
+            i = 3;
+        } else if(lc.equals("iv")){
+            i = 4;
+        } else if(lc.equals("v")){
+            i = 5;
+        } else {
+            return romanNumeral;
+        }
+        return Integer.toString(i);
+    }
 
     @api
     public static class enchant_inv implements Function {
@@ -45,7 +117,8 @@ public class Enchantments {
                     + " or an array of enchantment names. If slot is null, the currently selected slot is used. If the enchantment cannot be applied"
                     + " to the specified item, an EnchantmentException is thrown, and if the level specified is not valid, a RangeException is thrown."
                     + " If type is an array, level must also be an array, with equal number of values in it, with each int corresponding to the appropriate"
-                    + " type.";
+                    + " type. You may use either the bukkit names for enchantments, or the name shown on the wiki: [http://www.minecraftwiki.net/wiki/Enchanting#Enchantment_Types],"
+                    + " and level may be a roman numeral as well.";
         }
 
         public ExceptionType[] thrown() {
@@ -96,9 +169,9 @@ public class Enchantments {
                 levelArray = (CArray) args[3 - offset];
             }
             for (Construct key : enchantArray.keySet()) {
-                Enchantment e = Enchantment.getByName(enchantArray.get(key, line_num).val().toUpperCase());
+                Enchantment e = Enchantment.getByName(Enchantments.ConvertName(enchantArray.get(key, line_num).val()).toUpperCase());
                 if (e.canEnchantItem(is)) {
-                    int level = (int) Static.getInt(levelArray.get(key, line_num));
+                    int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num).val()), line_num, f));
                     if (e.getMaxLevel() >= level && level > 0) {
                         is.addEnchantment(e, level);
                     } else {
