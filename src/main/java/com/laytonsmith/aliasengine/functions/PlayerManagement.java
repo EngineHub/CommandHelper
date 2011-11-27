@@ -370,7 +370,7 @@ public class PlayerManagement {
                 if (b == null) {
                     throw new ConfigRuntimeException("No block in sight, or block too far", 
                             ExceptionType.RangeException, line_num, f);
-                }
+                }                
                 return new CArray(line_num, f, new CInt(b.getX(), line_num, f), 
                         new CInt(b.getY(), line_num, f), 
                         new CInt(b.getZ(), line_num, f),

@@ -193,7 +193,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * the script is executed with the driver's execute function.
      * @param event 
      */
-    public void trigger(Map<String, Construct> event) {
+    public void trigger(Map<String, Construct> event) throws EventException {
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         CArray ca = new CArray(0, null);

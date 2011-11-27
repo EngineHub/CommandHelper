@@ -22,6 +22,9 @@ enable-interpreter=false
 #Whether or not to display debug information in the console
 debug-mode=false
 
+#The path to the main file, relative to the CommandHelper folder
+main-file=main.ms
+
 #The path to the config file, relative to the CommandHelper plugin folder
 script-name=config.txt
 

@@ -232,6 +232,46 @@ public class Echoes {
         }
     }
     
+    @api public static class strip_colors implements Function{
+
+        public String getName() {
+            return "strip_colors";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {toStrip} Strips all the color codes from a given string";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CString(ChatColor.stripColor(args[0].val()), line_num, f);
+        }
+        
+    }
+    
     @api public static class chat implements Function{
 
         public String getName() {

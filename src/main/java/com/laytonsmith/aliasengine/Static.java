@@ -22,6 +22,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;
@@ -304,6 +305,7 @@ public class Static {
         }
     }
 
+    
     /**
      * Given a string input, creates and returns a Construct of the appropriate
      * type. This takes into account that null, true, and false are keywords.
@@ -326,6 +328,12 @@ public class Static {
                 return new CInt(Integer.parseInt(val), line_num, file);
             } catch (NumberFormatException e) {
                 try {
+                    if(val.contains(" ") || val.contains("\t")){
+                        //Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
+                        //try to parse them, which is not desireable in our case. So, if the value contains
+                        //any characters other than [\-0-9\.], we want to make it a string instead
+                        return new CString(val, line_num, file);
+                    }
                     return new CDouble(Double.parseDouble(val), line_num, file);
                 } catch (NumberFormatException g) {
                     //It's a literal, but not a keyword. Push it in as a string to standardize everything
