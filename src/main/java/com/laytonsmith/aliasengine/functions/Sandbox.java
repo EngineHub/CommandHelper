@@ -23,7 +23,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -118,7 +117,7 @@ public class Sandbox {
         
     }
     
-    @api public static class pdrop implements Function{
+    @api public static class item_drop implements Function{
 
         public String getName() {
             return "item_drop";

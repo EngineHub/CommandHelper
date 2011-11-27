@@ -228,5 +228,10 @@ public class ArrayTest {
                 + "msg(array_index_exists(@glyphs, '1'))", fakePlayer);
         verify(fakePlayer).sendMessage("true");
     }
+    //TODO
+//    @Test public void testArrayKeys1() throws ConfigCompileException{
+//        SRun("assign(@a, array('1 ': 1, ' 1 ': 3)) msg(@a)", fakePlayer);
+//        verify(fakePlayer).sendMessage("{1 : 1,  1 : 3}");
+//    }
 
 }

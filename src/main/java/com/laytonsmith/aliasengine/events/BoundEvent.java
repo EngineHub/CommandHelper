@@ -151,7 +151,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
        }
     }
     
-    public void trigger(Map<String, Construct> event){
+    public void trigger(Map<String, Construct> event) throws EventException{
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         CArray ca = new CArray(0, null);

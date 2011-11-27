@@ -93,6 +93,6 @@ public interface Event extends Comparable<Event>{
      * the Event itself. AbstractEvent's default implementation is to simply run the
      * script, but an event can choose to override this functionality if needed.
      */
-    public void execute(Script s, BoundEvent b);
+    public void execute(Script s, BoundEvent b) throws EventException;
     
 }

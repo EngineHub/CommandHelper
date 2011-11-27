@@ -99,6 +99,10 @@ public class Exceptions {
          * This exception is thrown if an error occurs when trying to bind() an event
          */
         BindException,
+        /**
+         * If an enchantment is added to an item that isn't supported, this is thrown.
+         */
+        EnchantmentException,
         
     }
     @api public static class _try implements Function{      

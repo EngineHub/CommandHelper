@@ -171,7 +171,7 @@ public class CommandHelperPlugin extends JavaPlugin {
                 System.out.println("An error occured when trying to compile the script. Check the console for more information.");
                 return false;
             }
-        } else if(cmd.getName().equals("commandhelper") && args[0].equalsIgnoreCase("null")){
+        } else if(cmd.getName().equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")){
             return true;
         } else if (sender instanceof Player) {
                 return runCommand((Player)sender, cmd.getName(), args);
