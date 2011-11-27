@@ -201,6 +201,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             ca.set(new CString(key, 0, null), event.get(key));
         }
         env.GetVarList().set(new IVariable(eventObjName, ca, 0, null));
+        env.SetEvent(this);
 
         GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
         superRoot.addChild(tree);

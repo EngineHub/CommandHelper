@@ -173,6 +173,9 @@ public class CommandHelperPlugin extends JavaPlugin {
             }
         } else if(cmd.getName().equals("commandhelper") && args[0].equalsIgnoreCase("null")){
             return true;
+        } else if(cmd.getName().equals("runalias")){
+            //TODO
+            return true;
         } else if (sender instanceof Player) {
                 return runCommand((Player)sender, cmd.getName(), args);
         } else {

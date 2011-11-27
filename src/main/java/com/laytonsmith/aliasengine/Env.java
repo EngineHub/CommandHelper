@@ -4,10 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.Constructs.CNull;
-import com.laytonsmith.aliasengine.Constructs.CString;
-import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.Constructs.IVariable;
+import com.laytonsmith.aliasengine.events.BoundEvent;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import java.util.HashMap;
@@ -174,6 +171,14 @@ public class Env implements Cloneable{
     public Script GetScript(){
         return (Script)env.get("script");
     }        
+    
+    public void SetEvent(BoundEvent e){
+        env.put("event", e);
+    }
+    
+    public BoundEvent GetEvent(){
+        return (BoundEvent)env.get("event");
+    }
     
     @Override
     public Env clone(){

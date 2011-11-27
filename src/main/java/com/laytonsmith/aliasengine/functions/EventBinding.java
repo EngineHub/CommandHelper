@@ -15,6 +15,7 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.events.BoundEvent;
 import com.laytonsmith.aliasengine.events.EventHandler;
+import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.exceptions.EventException;
@@ -145,6 +146,87 @@ public class EventBinding {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return EventHandler.DumpEvents();
+        }
+        
+    }
+    
+    @api public static class unbind implements Function{
+
+        public String getName() {
+            return "unbind";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[eventID]}";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class cancel implements Function{
+
+        public String getName() {
+            return "cancel";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public String docs() {
+            return "void {} Cancels the event (if applicable), and stops this event handler as well.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            throw new CancelCommandException("");
         }
         
     }
