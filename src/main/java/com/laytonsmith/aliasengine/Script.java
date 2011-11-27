@@ -196,7 +196,9 @@ public class Script {
         } catch (Throwable t) {
             System.out.println("An unexpected exception occured during the execution of a script.");
             t.printStackTrace();
-            p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
+            if(p != null){
+                p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
+            }
         }
         if (done != null) {
             done.done(null);
@@ -338,6 +340,7 @@ public class Script {
                         if(!(var instanceof IVariable)){
                             throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, m.getLineNum(), m.getFile());
                         }
+                        ((IVariable)var).setIval(env.GetVarList().get(((IVariable)var).getName()).ival());
                         custom_params.set((IVariable)var);
                     }
                     Env newEnv = env.clone();

@@ -11,11 +11,14 @@ import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import com.sk89q.worldedit.expression.Expression;
+import com.sk89q.worldedit.expression.ExpressionException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import org.bukkit.command.CommandSender;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -1216,6 +1219,81 @@ public class Math {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CDouble(java.lang.Math.round(Static.getNumber(args[0])), line_num, f);
+        }
+        
+    }
+    
+    @api public static class expr implements Function{
+
+        public String getName() {
+            return "expr";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "double {expression, [valueArray]} Sometimes, when you need to calculate an advanced"
+                    + " mathematical expression, it is messy to write out everything in terms of functions."
+                    + " This function will allow you to evaluate a mathematical expression as a string, using"
+                    + " common mathematical notation. For example, (2 + 3) * 4 would return 20. Variables can"
+                    + " also be included, and their values given as an associative array. expr('(x + y) * z',"
+                    + " array(x: 2, y: 3, z: 4)) would be the same thing as the above example.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {            
+            String expr = args[0].val();
+            CArray vars = null;
+            if(args.length == 2 && args[1] instanceof CArray){
+                vars = (CArray)args[1];
+            } else if(args.length == 2 && !(args[1] instanceof CArray)){
+                throw new ConfigRuntimeException("The second argument of expr() should be an array", ExceptionType.CastException, line_num, f);
+            }
+            if(vars != null && !vars.inAssociativeMode()){
+                throw new ConfigRuntimeException("The array provided to expr() must be an associative array", ExceptionType.CastException, line_num, f);
+            }
+            double[] da;
+            String[] varNames;
+            if(vars != null){
+                int i = 0;
+                da = new double[vars.size()];
+                varNames = new String[vars.size()];
+                for(Construct key : vars.keySet()){
+                    varNames[i] = key.val();
+                    da[i] = Static.getDouble(vars.get(key, line_num));
+                    i++;
+                }
+            } else {
+                da = new double[0];
+                varNames = new String[0];
+            }
+            try {
+                Expression e = Expression.compile(expr, varNames);
+                return new CDouble(e.evaluate(da), line_num, f);
+            } catch (ExpressionException ex) {
+                throw new ConfigRuntimeException("Your expression was invalidly formatted", ExceptionType.PluginInternalException, line_num, f, ex);
+            }
         }
         
     }

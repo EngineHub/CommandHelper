@@ -15,7 +15,6 @@ import com.laytonsmith.aliasengine.exceptions.EventException;
 import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
 import java.util.Map;
 import org.bukkit.block.Block;
-import org.bukkit.event.Event;
 import org.bukkit.event.Event.Type;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -49,7 +48,7 @@ public class PlayerEvents {
             return org.bukkit.event.Event.Type.PLAYER_JOIN;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, org.bukkit.event.Event e) {
+        public boolean matches(Map<String, Construct> prefilter, Object e) {
             if(e instanceof PlayerJoinEvent){
                 PlayerJoinEvent ple = (PlayerJoinEvent) e;
                 if(prefilter.containsKey("player")){
@@ -62,7 +61,7 @@ public class PlayerEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(org.bukkit.event.Event e) throws EventException {
+        public Map<String, Construct> evaluate(Object e) throws EventException {
             if(e instanceof PlayerJoinEvent){
                 PlayerJoinEvent ple = (PlayerJoinEvent) e;
                 Map<String, Construct> map = super.evaluate_helper(e);
@@ -84,7 +83,8 @@ public class PlayerEvents {
         public String docs() {
             return "{block: <item match> If the block the player interacts with is this"
                     + " | button: <string match> left or right. If they left or right clicked |"
-                    + " item: <item match> The item they are holding when they interacted} "
+                    + " item: <item match> The item they are holding when they interacted |"
+                    + " player: <string match> The player that triggered the event} "
                     + "Fires when a player left or right clicks a block or the air"
                     + "{action: One of either: left_click_block, right_click_block, left_click_air, or right_click_air |"
                     + "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
@@ -99,7 +99,7 @@ public class PlayerEvents {
             return "3.3.0";
         }
 
-        public boolean matches(Map<String, Construct> prefilter, Event e) {
+        public boolean matches(Map<String, Construct> prefilter, Object e) {
             if(e instanceof PlayerInteractEvent){
                 PlayerInteractEvent pie = (PlayerInteractEvent)e;
                 if(((PlayerInteractEvent)e).getAction().equals(Action.PHYSICAL)){
@@ -121,6 +121,7 @@ public class PlayerEvents {
                 try{
                     Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
                     Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
+                    Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
                 }catch(PrefilterNonMatchException x){
                     return false;
                 }
@@ -130,7 +131,7 @@ public class PlayerEvents {
             return false;
         }
 
-        public Map<String, Construct> evaluate(Event e) throws EventException {
+        public Map<String, Construct> evaluate(Object e) throws EventException {
             if(e instanceof PlayerInteractEvent){
                 PlayerInteractEvent pie = (PlayerInteractEvent) e;
                 Map<String, Construct> map = super.evaluate_helper(e);

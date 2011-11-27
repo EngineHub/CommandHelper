@@ -12,7 +12,9 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -65,8 +67,11 @@ public class Enchantments {
                 offset = 0;
             }
             int slot = (int) Static.getInt(args[1 - offset]);
+            Enchantment e = Enchantment.getByName(args[2 - offset].val());
+            int level = (int) Static.getInt(args[3 - offset]);
             
-            
+            ItemStack is = m.getInventory().getItem(slot);
+            is.addEnchantment(e, level);            
             return new CVoid(line_num, f);
         }
         

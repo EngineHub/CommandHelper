@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.testing;
 
+import com.sk89q.worldedit.expression.ExpressionException;
+import com.sk89q.worldedit.expression.Expression;
 import org.bukkit.Location;
 import org.bukkit.World;
 import com.laytonsmith.aliasengine.Constructs.*;
@@ -155,5 +157,11 @@ public class RandomTests {
         assertEquals(50, l4.getPitch(), 0.0000000000000000001);
         CommandHelperPlugin.myServer = null;
     }        
+    
+    @Test public void expressionTester() throws ExpressionException{
+        //verify basic usage works
+        Expression e = Expression.compile("(x + 2) * y", "x", "y");        
+        assertEquals(16, e.evaluate(2, 4), 0.00001);
+    }
     
 }

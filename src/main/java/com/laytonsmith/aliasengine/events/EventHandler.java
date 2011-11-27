@@ -105,7 +105,7 @@ public class EventHandler {
      * @param type
      * @param e 
      */
-    public static void TriggerListener(org.bukkit.event.Event.Type type, String eventName, org.bukkit.event.Event e){
+    public static void TriggerListener(org.bukkit.event.Event.Type type, String eventName, Object e){
         SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
         //This is the Event driver
         Event driver = EventList.getEvent(type, eventName);

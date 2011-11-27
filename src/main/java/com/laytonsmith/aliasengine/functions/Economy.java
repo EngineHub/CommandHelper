@@ -17,7 +17,6 @@ import com.nijikokun.register.payment.Method.MethodAccount;
 import com.nijikokun.register.payment.Method.MethodBankAccount;
 import com.nijikokun.register.payment.Methods;
 import java.io.File;
-import org.bukkit.plugin.Plugin;
 
 /**
  *
