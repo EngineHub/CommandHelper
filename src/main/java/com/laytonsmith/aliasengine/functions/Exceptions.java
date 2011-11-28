@@ -102,7 +102,10 @@ public class Exceptions {
          * If an enchantment is added to an item that isn't supported, this is thrown.
          */
         EnchantmentException,
-        
+        /**
+         * If an untameable mob is attempted to be tamed, this exception is thrown
+         */
+        UntameableModException,
     }
     @api public static class _try implements Function{      
         

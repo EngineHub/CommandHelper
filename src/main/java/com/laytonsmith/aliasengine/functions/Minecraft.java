@@ -8,7 +8,9 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
@@ -21,8 +23,10 @@ import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.CaveSpider;
 import org.bukkit.entity.Chicken;
@@ -33,6 +37,7 @@ import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Giant;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Pig;
@@ -42,13 +47,16 @@ import org.bukkit.entity.Sheep;
 import org.bukkit.entity.Silverfish;
 import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.Slime;
+import org.bukkit.entity.Snowman;
 import org.bukkit.entity.Spider;
 import org.bukkit.entity.Squid;
+import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.material.MaterialData;
+import org.bukkit.material.Tree;
 
 /**
  *
@@ -215,7 +223,7 @@ public class Minecraft {
             return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
                     + " to the location of the player. mobType can be one of: CHICKEN, COW, CREEPER, GHAST,"
                     + " PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER,"
-                    + " ENDERMAN, SILVERFISH, BLAZE, VILLAGER, ENDERDRAGON, MAGMACUBE, MOOSHROOM. Spelling matters, but capitalization doesn't. At this"
+                    + " ENDERMAN, SILVERFISH, BLAZE, VILLAGER, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
                     + " specified. An array of the entity IDs spawned is returned."
@@ -250,7 +258,7 @@ public class Minecraft {
 
             CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, 
             SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH, VILLAGER,
-            BLAZE, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY, GIANT
+            BLAZE, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY, GIANT, SNOWGOLEM
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -360,7 +368,10 @@ public class Minecraft {
                         net.minecraft.server.Entity giant = new net.minecraft.server.EntityGiantZombie(((CraftWorld)l.getWorld()).getHandle());
                         giant.setLocation(x, y, z, pitch, yaw);
                         ((CraftWorld)l.getWorld()).getHandle().addEntity(giant, SpawnReason.CUSTOM);
-                        return new CVoid(line_num, f);                        
+                        return new CVoid(line_num, f);
+                    case SNOWGOLEM:
+                        mobType = Snowman.class;
+                        break;
                 }
             } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("No mob of type " + mob + " exists",
@@ -390,6 +401,180 @@ public class Minecraft {
                 throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
             }
         }
+    }
+    
+    @api public static class tame_mob implements Function{
+
+        public String getName() {
+            return "tame_mob";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], entityID} Tames the entity specified to the player. Currently only wolves are supported. Offline players"
+                    + " are supported, but this means that partial matches are NOT supported. You must type the players name exactly. Setting"
+                    + " the player to null will untame the mob. If the entity doesn't exist, nothing happens.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.UntameableModException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            String player = environment.GetPlayer().getName();
+            Construct entityID = null;
+            if(args.length == 2){
+                if(args[0] instanceof CNull){
+                    player = null;
+                } else {
+                    player = args[0].val();
+                }
+                entityID = args[1];
+            } else {
+                entityID = args[0];
+            }
+            int id = (int) Static.getInt(entityID);
+            Entity e = Static.getEntity(id);
+            if(e == null){
+                return new CVoid(line_num, f);
+            } else if(e instanceof Tameable){                
+                Tameable t = (Tameable) e;
+                if(player != null){
+                    t.setOwner(Static.getServer().getOfflinePlayer(player));
+                } else {
+                    t.setOwner(null);
+                }
+                return new CVoid(line_num, f);
+            } else {
+                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableModException, line_num, f);
+            }
+        }
+        
+    }
+    
+    @api public static class get_mob_owner implements Function{
+
+        public String getName() {
+            return "get_mob_owner";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {entityID} Returns the owner's name, or null if the mob is unowned. An UntameableMobException is thrown if"
+                    + " mob isn't tameable to begin with.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.UntameableModException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            int id = (int)Static.getInt(args[0]);
+            Entity e = Static.getEntity(id);
+            if(e == null){
+                return new CNull(line_num, f);
+            } else if(e instanceof Tameable){
+                AnimalTamer at = ((Tameable)e).getOwner();
+                if(at instanceof HumanEntity){
+                    return new CString(((HumanEntity)at).getName(), line_num, f);
+                } else if(at instanceof OfflinePlayer){
+                    return new CString(((OfflinePlayer)at).getName(), line_num, f);
+                } else {
+                    return new CNull(line_num, f);
+                }
+            } else {
+                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableModException, line_num, f);
+            }
+        }
+        
+    }
+    
+    @api public static class is_tameable implements Function{
+
+        public String getName() {
+            return "is_tameable";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {entityID} Returns true or false if the specified entity is tameable";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            int id = (int)Static.getInt(args[0]);
+            Entity e = Static.getEntity(id);
+            boolean ret = false;
+            if(e == null){
+                ret = false;
+            } else if(e instanceof Tameable){
+                ret = true;
+            } else {
+                ret = false;
+            }
+            return new CBoolean(ret, line_num, f);
+        }
+        
     }
     
     @api public static class make_effect implements Function{

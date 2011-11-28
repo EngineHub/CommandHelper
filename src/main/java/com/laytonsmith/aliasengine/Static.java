@@ -29,6 +29,7 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -280,23 +281,22 @@ public class Static {
     }
 
     public static WorldEditPlugin getWorldEditPlugin() {
-        if(CommandHelperPlugin.wep == null){
+        if (CommandHelperPlugin.wep == null) {
             Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
-            if(pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin){
-                CommandHelperPlugin.wep = (WorldEditPlugin)pwep;
+            if (pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin) {
+                CommandHelperPlugin.wep = (WorldEditPlugin) pwep;
             }
         }
         return CommandHelperPlugin.wep;
     }
-    
+
     public static WorldGuardPlugin getWorldGuardPlugin() {
         Plugin pwgp = getServer().getPluginManager().getPlugin("WorldGuard");
-        if(pwgp != null && pwgp.isEnabled() && pwgp instanceof WorldGuardPlugin){
+        if (pwgp != null && pwgp.isEnabled() && pwgp instanceof WorldGuardPlugin) {
             return (WorldGuardPlugin) pwgp;
         }
         return null;
     }
-    
 
     public static void checkPlugin(String name, int line_number, File f) throws ConfigRuntimeException {
         if (Bukkit.getServer().getPluginManager().getPlugin(name) == null) {
@@ -305,7 +305,6 @@ public class Static {
         }
     }
 
-    
     /**
      * Given a string input, creates and returns a Construct of the appropriate
      * type. This takes into account that null, true, and false are keywords.
@@ -328,7 +327,7 @@ public class Static {
                 return new CInt(Integer.parseInt(val), line_num, file);
             } catch (NumberFormatException e) {
                 try {
-                    if(val.contains(" ") || val.contains("\t")){
+                    if (val.contains(" ") || val.contains("\t")) {
                         //Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
                         //try to parse them, which is not desireable in our case. So, if the value contains
                         //any characters other than [\-0-9\.], we want to make it a string instead
@@ -351,7 +350,7 @@ public class Static {
                     return Static.resolveConstruct(var.val(), var.getLineNum(), var.getFile());
                 }
             }
-            return Static.resolveConstruct(((Variable)variable).getDefault(), variable.getLineNum(), variable.getFile());
+            return Static.resolveConstruct(((Variable) variable).getDefault(), variable.getLineNum(), variable.getFile());
         } else {
             return variable;
         }
@@ -385,14 +384,14 @@ public class Static {
 
             public void run(String line) {
                 Player p = null;
-                if(m instanceof Player){
-                    p = (Player)m;
+                if (m instanceof Player) {
+                    p = (Player) m;
                     if (p == null || !p.isOnline()) {
                         throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
                     }
                     p.sendMessage(line);
                 } else {
-                    if(m != null){
+                    if (m != null) {
                         m.sendMessage(line);
                     }
                 }
@@ -405,13 +404,13 @@ public class Static {
 
             public void run(String line) {
                 Player p = null;
-                if(m instanceof Player){
-                    p = (Player)m;
+                if (m instanceof Player) {
+                    p = (Player) m;
                     if (p != null && p.isOnline()) {
                         p.sendMessage(line);
                     }
                 } else {
-                    if(m != null){
+                    if (m != null) {
                         m.sendMessage(line);
                     }
                 }
@@ -453,7 +452,7 @@ public class Static {
             String[] sData = notation.split(":");
             try {
                 type = (int) Integer.parseInt(sData[0]);
-                if(sData.length > 1){
+                if (sData.length > 1) {
                     data = (byte) Integer.parseInt(sData[1]);
                 }
             } catch (NumberFormatException e) {
@@ -462,47 +461,46 @@ public class Static {
         } else {
             type = (int) Static.getInt(Static.resolveConstruct(notation, line_num, f));
         }
-        
+
         is = new ItemStack(type, qty);
         is.setDurability(data);
         //is.setData(new MaterialData(type, data));
         return is;
     }
-    
+
     /**
      * Works in reverse from the other ParseItemNotation
      * @param is
      * @return 
      */
-    public static String ParseItemNotation(ItemStack is){
-        if(is == null){
+    public static String ParseItemNotation(ItemStack is) {
+        if (is == null) {
             return "0";
         }
         String append = null;
-        if(is.getData() != null){
+        if (is.getData() != null) {
             append = Byte.toString(is.getData().getData());
-        } else if(is.getDurability() != 0){
+        } else if (is.getDurability() != 0) {
             append = Short.toString(is.getDurability());
         }
         return is.getTypeId() + (append == null ? "" : ":" + append);
     }
-    
-    public static String ParseItemNotation(Block b){
-        if(b == null){
+
+    public static String ParseItemNotation(Block b) {
+        if (b == null) {
             return "0";
         }
         return b.getTypeId() + (b.getData() == 0 ? "" : ":" + Byte.toString(b.getData()));
     }
-    
-    public static Player GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException{
+
+    public static Player GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException {
         Player m = Static.getServer().getPlayer(player);
-        if(m == null || !m.isOnline()){
+        if (m == null || !m.isOnline()) {
             throw new ConfigRuntimeException("The specified player (player) is not online", ExceptionType.PlayerOfflineException, line_num, f);
         }
         return m;
     }
-        
-    
+
     /**
      * Location "objects" are mscript arrays that represent a location in game. There are 
      * 4 usages:
@@ -520,43 +518,43 @@ public class Static {
      * @param f
      * @return 
      */
-    public static Location GetLocation(Construct c, World w, int line_num, File f){
-        if(!(c instanceof CArray)){
+    public static Location GetLocation(Construct c, World w, int line_num, File f) {
+        if (!(c instanceof CArray)) {
             throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, line_num, f);
         }
-        CArray array = (CArray)c;
+        CArray array = (CArray) c;
         World world = w;
         double x = 0;
         double y = 0;
         double z = 0;
         float yaw = 0;
         float pitch = 0;
-        if(array.size() == 3){
+        if (array.size() == 3) {
             //Just the xyz, with default yaw and pitch, and given world
             x = Static.getNumber(array.get(0, line_num));
             y = Static.getNumber(array.get(1, line_num));
             z = Static.getNumber(array.get(2, line_num));
-        } else if(array.size() == 4){
+        } else if (array.size() == 4) {
             //world, x, y, z
             x = Static.getNumber(array.get(0, line_num));
             y = Static.getNumber(array.get(1, line_num));
             z = Static.getNumber(array.get(2, line_num));
             world = Static.getServer().getWorld(array.get(3, line_num).val());
-        } else if(array.size() == 5){
+        } else if (array.size() == 5) {
             //x, y, z, yaw, pitch, with given world
             x = Static.getNumber(array.get(0, line_num));
             y = Static.getNumber(array.get(1, line_num));
             z = Static.getNumber(array.get(2, line_num));
-            yaw = (float)Static.getNumber(array.get(3, line_num));
-            pitch = (float)Static.getNumber(array.get(4, line_num));
-        } else if(array.size() == 6){
+            yaw = (float) Static.getNumber(array.get(3, line_num));
+            pitch = (float) Static.getNumber(array.get(4, line_num));
+        } else if (array.size() == 6) {
             //All have been given
             x = Static.getNumber(array.get(0, line_num));
             y = Static.getNumber(array.get(1, line_num));
             z = Static.getNumber(array.get(2, line_num));
             world = Static.getServer().getWorld(array.get(3, line_num).val());
-            yaw = (float)Static.getNumber(array.get(4, line_num));
-            pitch = (float)Static.getNumber(array.get(5, line_num));
+            yaw = (float) Static.getNumber(array.get(4, line_num));
+            pitch = (float) Static.getNumber(array.get(5, line_num));
         } else {
             throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, line_num, f);
         }
@@ -566,8 +564,24 @@ public class Static {
     public static boolean isNull(Construct construct) {
         return construct instanceof CNull;
     }
-    
-    public static int Normalize(int i, int min, int max){
+
+    public static int Normalize(int i, int min, int max) {
         return java.lang.Math.min(max, java.lang.Math.max(min, i));
+    }
+
+    /**
+     * Returns the specified id, or null if it doesn't exist.
+     * @param id
+     * @return 
+     */
+    public static Entity getEntity(int id) {
+        for (World w : Static.getServer().getWorlds()) {
+            for (Entity e : w.getLivingEntities()) {
+                if (e.getEntityId() == id) {
+                    return e;
+                }
+            }
+        }
+        return null;
     }
 }
