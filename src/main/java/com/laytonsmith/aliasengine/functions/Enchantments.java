@@ -5,6 +5,8 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CBoolean;
+import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
@@ -15,7 +17,12 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.enchantments.EnchantmentTarget;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 
@@ -253,5 +260,267 @@ public class Enchantments {
             }
             return new CVoid(line_num, f);
         }
+    }
+    
+    @api public static class get_enchant_inv implements Function{
+
+        public String getName() {
+            return "get_enchant_inv";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "array {[player], slot} Returns an array of arrays of the enchantments and their levels on the given"
+                    + " item. For example: array(array(DAMAGE_ALL, DAMAGE_UNDEAD), array(1, 2))";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Player m = environment.GetPlayer();
+            Construct slot;
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                slot = args[1];
+            } else {
+                slot = args[0];
+            }            
+            ItemStack is;
+            if(slot instanceof CNull){
+                is = m.getItemInHand();
+            } else {
+                int slotID = (int) Static.getInt(slot);
+                is = m.getInventory().getItem(slotID);
+            }
+            CArray enchants = new CArray(line_num, f);
+            CArray levels = new CArray(line_num, f);
+            for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
+                Enchantment e = entry.getKey();
+                Integer l = entry.getValue();
+                enchants.push(new CString(e.getName(), line_num, f));
+                levels.push(new CInt(l, line_num, f));
+            }
+            
+            return new CArray(line_num, f, enchants, levels);
+        }
+        
+    }
+    
+    @api public static class can_enchant_target implements Function{
+
+        public String getName() {
+            return "can_enchant_target";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {name, targetItem} Given an enchantment name, and target item id,"
+                    + " returns wether or not that item can be enchanted with that enchantment."
+                    + " Throws an EnchantmentException if the name is not a valid enchantment"
+                    + " type.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.EnchantmentException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            String name = Enchantments.ConvertName(args[0].val().toUpperCase());
+            Enchantment e = Enchantment.getByName(name);
+            ItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, line_num, f);
+            return new CBoolean(e.canEnchantItem(is), line_num, f);
+        }
+        
+    }
+    
+    @api public static class get_enchant_max implements Function{
+
+        public String getName() {
+            return "get_enchant_max";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "int {name} Given an enchantment name, returns the max level it can be."
+                    + " If name is not a valid enchantment, an EnchantException is thrown.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.EnchantmentException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            String name = Enchantments.ConvertName(args[0].val().toUpperCase());
+            Enchantment e = Enchantment.getByName(name);
+            return new CInt(e.getMaxLevel(), line_num, f);
+        }
+        
+    }
+    
+    @api public static class get_enchants implements Function{
+        
+        private static Map<String, CArray> cache = new HashMap<String, CArray>();
+
+        public String getName() {
+            return "get_enchants";
+        }
+
+        public Integer[] numArgs() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String docs() {
+            return "array {item} Given an item id, returns the enchantments that can"
+                    + " be validly added to this item. This may return an empty array.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            ItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, line_num, f);
+            /**
+             * Because enchantment types won't change from run to run, we can
+             * cache here, and save time on duplicate lookups.
+             */
+            if(cache.containsKey(args[0].val())){
+                try {
+                    return cache.get(args[0].val()).clone();
+                } catch (CloneNotSupportedException ex) {
+                    throw new ConfigRuntimeException(ex.getMessage(), null, line_num, f, ex);
+                }
+            }
+            CArray ca = new CArray(line_num, f);
+            for(Enchantment e : Enchantment.values()){
+                if(e.canEnchantItem(is)){
+                    ca.push(new CString(e.getName(), line_num, f));
+                }
+            }
+            cache.put(args[0].val(), ca);
+            try {
+                return ca.clone();
+            } catch (CloneNotSupportedException ex) {
+                throw new ConfigRuntimeException(ex.getMessage(), null, line_num, f, ex);
+            }
+        }
+        
+    }
+    
+    @api public static class is_enchantment implements Function{
+
+        public String getName() {
+            return "is_enchantment";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {name} Returns true if this name is a valid enchantment type. Note"
+                    + " that either the bukkit names or the wiki names are valid.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Enchantment e = Enchantment.getByName(args[0].val());
+            return new CBoolean(e != null, line_num, f);
+        }
+        
     }
 }

@@ -21,6 +21,7 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minecraft.server.EntityLiving;
@@ -34,6 +35,7 @@ import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
+import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -1052,9 +1054,12 @@ public class PlayerManagement {
 
         public String docs() {
             return "mixed {[player], [index]} Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
-                    + " given will be returned, but in general, the return format is: array(array(data, qty), array(data, qty), ...) where data is the x:y value of the block (or just the"
+                    + " given will be returned, but in general, the return format is: array(array(data, qty, enchantArray, enchantLevel), array(data, qty, enchantArray, enchantLevel), ...)"
+                    + " where data is the x:y value of the block (or just the"
                     + " value if it's an item, and y is the damage value for tools), and"
-                    + " qty is the number of items. The index of the array in the array is 0 - 35, 100 - 103, which corresponds to the slot in the players inventory. To access armor"
+                    + " qty is the number of items. EnchantArray and enchantLevel are an array of enchantments (and their corresponding level)"
+                    + " applied to the item. It will always be an array, but it may be empty, or contain just one element."
+                    + " The index of the array in the array is 0 - 35, 100 - 103, which corresponds to the slot in the players inventory. To access armor"
                     + " slots, you may also specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
                     + " of what slot is selected. If there is no item at the slot specified, null is returned.";
         }
@@ -1120,7 +1125,7 @@ public class PlayerManagement {
                 int qty = 0;
                 if (index == -1) {
                     ItemStack is = m.getItemInHand();
-                    return getInvSlot(is, line_num, f);
+                    return getInvSlot(is, line_num, f, env);
                 }
                 if (index >= 100 && index <= 103) {
                     qty = 1;
@@ -1161,21 +1166,29 @@ public class PlayerManagement {
                 CArray ca = new CArray(line_num, f);
                 for (int i = 0; i < 36; i++) {
                     ItemStack is = inv.getItem(i);
-                    ca.push(getInvSlot(is, line_num, f));
+                    ca.push(getInvSlot(is, line_num, f, env));
                 }
-                ca.set(100, getInvSlot(inv.getBoots(), line_num, f));
-                ca.set(101, getInvSlot(inv.getLeggings(), line_num, f));
-                ca.set(102, getInvSlot(inv.getChestplate(), line_num, f));
-                ca.set(103, getInvSlot(inv.getHelmet(), line_num, f));
+                ca.set(100, getInvSlot(inv.getBoots(), line_num, f, env));
+                ca.set(101, getInvSlot(inv.getLeggings(), line_num, f, env));
+                ca.set(102, getInvSlot(inv.getChestplate(), line_num, f, env));
+                ca.set(103, getInvSlot(inv.getHelmet(), line_num, f, env));
                 return ca;
             }
         }
         
-        private Construct getInvSlot(ItemStack is, int line_num, File f){
+        private Construct getInvSlot(ItemStack is, int line_num, File f, Env env){
             if (is != null && is.getTypeId() != 0) {
+                CArray enchants = new CArray(line_num, f);
+                CArray levels = new CArray(line_num, f);
+                for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
+                    Enchantment e = entry.getKey();
+                    Integer l = entry.getValue();
+                    enchants.push(new CString(e.getName(), line_num, f));
+                    levels.push(new CInt(l, line_num, f));
+                }
                 return new CArray(line_num, f,
                         new CString(Static.ParseItemNotation(is), line_num, f),
-                        new CInt(is.getAmount(), line_num, f));
+                        new CInt(is.getAmount(), line_num, f), enchants, levels);
             } else {
                 return new CNull(line_num, f);
             }
@@ -1189,17 +1202,19 @@ public class PlayerManagement {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3, 4, 5};
+            return new Integer[]{1, 2, 3, 4, 5, 7};
         }
 
         public String docs() {
-            return "void {[player], slot, item_id, [qty], [damage] | [player], pinvArray} Sets the index of the slot to the specified item_id, with the specified qty,"
+            return "void {[player], slot, item_id, [qty], [damage], [enchantArray, levelArray] | [player], pinvArray} Sets the index of the slot to the specified item_id, with the specified qty,"
                     + " or 1 by default. If the qty of armor indexes is greater than 1, it is silently ignored, and only 1 is added."
                     + " item_id follows the same notation for items used elsewhere. Damage defaults to 0, and is a percentage from 0-100, of"
                     + " how damaged an item is. If slot is null, it defaults to the item in hand. The item_id notation gives a shortcut"
                     + " to setting damage values, for instance, set_pinv(null, '35:15') will give the player black wool. The \"15\""
                     + " here is an unscaled damage value. This is the same thing as set_pinv(null, 35, 1, 100). 100 is a scaled damage"
-                    + " value. When using the second signature, the pinvArray should be an array similar to the array returned by pinv().";
+                    + " value. When using the second signature, the pinvArray should be an array similar to the array returned by pinv()."
+                    + " enchantArray and levelArray may also be specified, which is a shortcut to using enchant_inv. In addition, pinvArray"
+                    + " may contain instead of 2 elements, 4 elements, of which the last two are the enchantArray and levelArray, per item.";
                     
         }
 
@@ -1253,20 +1268,30 @@ public class PlayerManagement {
                     } else {
                         continue; //Ignore this key
                     }
+                    if(!ca.contains(key)){                        
+                        continue; //Ignore this key too
+                    }
                     Construct item = ca.get(key, line_num);
                     if(item instanceof CNull){
                         this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
                                 new CInt(i, line_num, f),
                                 new CInt(0, line_num, f));
                     } else {
-                        if(item instanceof CArray && ((CArray)item).size() == 2){
-                            CArray citem = (CArray)item;
+                        if(item instanceof CArray && (((CArray)item).size() == 2) || ((CArray)item).size() == 4){
+                            CArray citem = (CArray)item;   
+                            Construct enchantArray = new CArray(line_num, f);
+                            Construct levelArray = new CArray(line_num, f);
+                            if(citem.size() == 4){
+                                enchantArray = citem.get(2, line_num);
+                                levelArray = citem.get(3, line_num);
+                            }
                             this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
                                     new CInt(i, line_num, f),
                                     new CString(citem.get(0, line_num).val(), line_num, f),
-                                    new CInt(Static.getInt(citem.get(1, line_num)), line_num, f));
+                                    new CInt(Static.getInt(citem.get(1, line_num)), line_num, f),
+                                    enchantArray, levelArray);
                         } else {
-                            throw new ConfigRuntimeException("Expecting internal values of the array to be 2 element arrays", ExceptionType.CastException, line_num, f);
+                            throw new ConfigRuntimeException("Expecting internal values of the array to be 2 or 4 element arrays", ExceptionType.CastException, line_num, f);
                         }
                     }
                 }
@@ -1299,6 +1324,8 @@ public class PlayerManagement {
             if(args.length > 3 + offset){
                 damage = (short)Static.getInt(args[3 + offset]);
             }
+            
+            
             if(damage != -1){
                 damage = (short)java.lang.Math.max(0, java.lang.Math.min(100, damage));
                 short max = is.getType().getMaxDurability();
@@ -1327,6 +1354,14 @@ public class PlayerManagement {
                 } else {
                     m.getInventory().setItem(slot, is);
                 }
+            }
+            if(args.length > 4 + offset){
+                //We want to enchant this item also
+                Enchantments.enchant_inv ei = new Enchantments.enchant_inv();
+                ei.exec(line_num, f, env, new CString(m.getName(), line_num, f),
+                        new CInt(slot, line_num, f),
+                        args[4 + offset],
+                        args[5 + offset]);
             }
             return new CVoid(line_num, f);
         }
