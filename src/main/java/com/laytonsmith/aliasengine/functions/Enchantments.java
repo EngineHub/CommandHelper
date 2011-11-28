@@ -345,7 +345,7 @@ public class Enchantments {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.EnchantmentException};
+            return new ExceptionType[]{ExceptionType.EnchantmentException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -425,7 +425,7 @@ public class Enchantments {
         }
 
         public Integer[] numArgs() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return new Integer[]{1};
         }
 
         public String docs() {
@@ -434,7 +434,7 @@ public class Enchantments {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {

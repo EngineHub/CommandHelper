@@ -22,6 +22,7 @@ import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.CaveSpider;
 import org.bukkit.entity.Chicken;
@@ -31,6 +32,9 @@ import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Enderman;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
+import org.bukkit.entity.Giant;
+import org.bukkit.entity.MagmaCube;
+import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Pig;
 import org.bukkit.entity.PigZombie;
 import org.bukkit.entity.Player;
@@ -43,6 +47,7 @@ import org.bukkit.entity.Squid;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
+import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.material.MaterialData;
 
 /**
@@ -207,13 +212,15 @@ public class Minecraft {
         }
 
         public String docs() {
-            return "void {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
+            return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
                     + " to the location of the player. mobType can be one of: CHICKEN, COW, CREEPER, GHAST,"
                     + " PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER,"
-                    + " ENDERMAN, SILVERFISH, BLAZE, VILLAGER, ENDERDRAGON. Spelling matters, but capitalization doesn't. At this"
+                    + " ENDERMAN, SILVERFISH, BLAZE, VILLAGER, ENDERDRAGON, MAGMACUBE, MOOSHROOM. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
-                    + " specified.";
+                    + " specified. An array of the entity IDs spawned is returned."
+                    + ""
+                    + " <p><small>GIANTs can also be spawned, if you are running craftbukkit. This is an experimental feature. Only one GIANT can be spawned at a time</small></p>";
         }
 
         public ExceptionType[] thrown() {
@@ -243,7 +250,7 @@ public class Minecraft {
 
             CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, 
             SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH, VILLAGER,
-            BLAZE, ENDERDRAGON
+            BLAZE, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY, GIANT
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -275,6 +282,7 @@ public class Minecraft {
                 }
             }
             Class mobType = null;
+            CArray ids = new CArray(line_num, f);
             try {
                 switch (MOBS.valueOf(mob.toUpperCase())) {
                     case CHICKEN:
@@ -334,6 +342,25 @@ public class Minecraft {
                     case ENDERDRAGON:
                         mobType = EnderDragon.class;
                         break;
+                    case MAGMACUBE:
+                        mobType = MagmaCube.class;
+                        break;
+                    case MOOSHROOM:
+                        mobType = MushroomCow.class;
+                        break;
+                    case SPIDERJOCKEY:
+                        mobType = Spider.class;
+                        break;
+                    case GIANT:
+                        double x = l.getX();
+                        double y = l.getY();
+                        double z = l.getZ();
+                        float pitch = l.getPitch();
+                        float yaw = l.getYaw();
+                        net.minecraft.server.Entity giant = new net.minecraft.server.EntityGiantZombie(((CraftWorld)l.getWorld()).getHandle());
+                        giant.setLocation(x, y, z, pitch, yaw);
+                        ((CraftWorld)l.getWorld()).getHandle().addEntity(giant, SpawnReason.CUSTOM);
+                        return new CVoid(line_num, f);                        
                 }
             } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("No mob of type " + mob + " exists",
@@ -342,6 +369,11 @@ public class Minecraft {
             if (l.getWorld() != null) {
                 for (int i = 0; i < qty; i++) {
                     Entity e = l.getWorld().spawn(l, mobType);
+                    if(MOBS.valueOf(mob.toUpperCase()) == MOBS.SPIDERJOCKEY){
+                        Spider s = (Spider) e;
+                        Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
+                        s.setPassenger(sk);
+                    }
                     if (e instanceof Sheep) {
                         Sheep s = (Sheep) e;
                         try {
@@ -351,11 +383,12 @@ public class Minecraft {
                                     ExceptionType.FormatException, line_num, f);
                         }
                     }
+                    ids.push(new CInt(e.getEntityId(), line_num, f));
                 }
+                return ids;
             } else {
                 throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
             }
-            return new CVoid(line_num, f);
         }
     }
     
