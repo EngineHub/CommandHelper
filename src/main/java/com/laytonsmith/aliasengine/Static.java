@@ -506,9 +506,9 @@ public class Static {
      * 4 usages:
      * <ul>
      * <li>(x, y, z)</li>
-     * <li>(world, x, y, z)</li>
+     * <li>(x, y, z, world)</li>
      * <li>(x, y, z, yaw, pitch)</li>
-     * <li>(world, x, y, z, yaw, pitch)</li>
+     * <li>(x, y, z, world, yaw, pitch)</li>
      * </ul>
      * In all cases, the pitch and yaw default to 0, and the world defaults to the specified world.
      * <em>More conveniently: ([world], x, y, z, [yaw, pitch])</em> 
@@ -535,7 +535,7 @@ public class Static {
             y = Static.getNumber(array.get(1, line_num));
             z = Static.getNumber(array.get(2, line_num));
         } else if (array.size() == 4) {
-            //world, x, y, z
+            //x, y, z, world
             x = Static.getNumber(array.get(0, line_num));
             y = Static.getNumber(array.get(1, line_num));
             z = Static.getNumber(array.get(2, line_num));

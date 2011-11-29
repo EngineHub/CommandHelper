@@ -38,6 +38,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.Giant;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.MagmaCube;
 import org.bukkit.entity.MushroomCow;
 import org.bukkit.entity.Pig;
@@ -221,9 +222,8 @@ public class Minecraft {
 
         public String docs() {
             return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
-                    + " to the location of the player. mobType can be one of: CHICKEN, COW, CREEPER, GHAST,"
-                    + " PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER,"
-                    + " ENDERMAN, SILVERFISH, BLAZE, VILLAGER, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY. Spelling matters, but capitalization doesn't. At this"
+                    + " to the location of the player. mobType can be one of: BLAZE, CAVESPIDER, CHICKEN, COW, CREEPER, ENDERDRAGON, ENDERMAN, GHAST,"
+                    + " MAGMACUBE, MOOSHROOM, PIG, PIGZOMBIE, SHEEP, SILVERFISH, SKELETON, SLIME, SPIDER, SPIDERJOCKEY, SQUID, VILLAGER, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
                     + " specified. An array of the entity IDs spawned is returned."
@@ -292,7 +292,7 @@ public class Minecraft {
             Class mobType = null;
             CArray ids = new CArray(line_num, f);
             try {
-                switch (MOBS.valueOf(mob.toUpperCase())) {
+                switch (MOBS.valueOf(mob.toUpperCase().replaceAll(" ", ""))) {
                     case CHICKEN:
                         mobType = Chicken.class;
                         break;
@@ -633,6 +633,103 @@ public class Minecraft {
             }
             l.getWorld().playEffect(l, e, data, radius);
             return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class set_entity_health implements Function{
+
+        public String getName() {
+            return "set_entity_health";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {entityID, healthPercent} Sets the specified entity's health (0 kills it), or ignores this call if the entityID doesn't exist or isn't"
+                    + "a LivingEntity.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Entity e = Static.getEntity((int)Static.getInt(args[0]));
+            if(e instanceof LivingEntity){
+                int health = (int)((double)Static.getInt(args[1])/100.0*(double)((LivingEntity)e).getMaxHealth());
+                if(health != 0){
+                    ((LivingEntity)e).setHealth(health);
+                } else {
+                    ((LivingEntity)e).damage(9001); //His power level is over 9000!
+                }
+            }
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class get_entity_health implements Function{
+
+        public String getName() {
+            return "get_entity_health";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "int {entityID} Returns the entity's health, as a percentage. If the specified entity doesn't exist, or is not"
+                    + " a LivingEntity, a format exception is thrown.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Entity e = Static.getEntity((int)Static.getInt(args[0]));
+            if(e instanceof LivingEntity){
+                int h = (int)(((double)((LivingEntity)e).getHealth()/(double)((LivingEntity)e).getMaxHealth())*100);
+                return new CInt(h, line_num, f);
+            } else {
+                throw new ConfigRuntimeException("Not a valid entity id", ExceptionType.FormatException, line_num, f);
+            }
         }
         
     }
