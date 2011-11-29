@@ -288,5 +288,20 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("{outer: {middle: {inner: value}}}");
         verify(fakePlayer).sendMessage("value");
     }
+    
+    @Test public void testArrayAssign6() throws ConfigCompileException{
+        SRun("assign(@array, array(1))\n"
+                + "assign(@array[1], 2)\n"
+                + "msg(@array)", fakePlayer);
+        verify(fakePlayer).sendMessage("{1, 2}");
+    }
+    
+    @Test public void testArrayAssign7() throws ConfigCompileException{
+        SRun("assign(@array, array(1: 1))\n"
+                + "assign(@array[0], array(1))\n"
+                + "assign(@array[0][1], 2)\n"
+                + "msg(@array)", fakePlayer);
+        verify(fakePlayer).sendMessage("{0: {1, 2}, 1: 1}");
+    }
 
 }
