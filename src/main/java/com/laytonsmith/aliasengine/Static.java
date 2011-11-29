@@ -22,7 +22,6 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import java.util.regex.Pattern;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Server;

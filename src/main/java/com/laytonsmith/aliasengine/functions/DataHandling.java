@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CArrayReference;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
@@ -26,10 +27,7 @@ import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -97,7 +95,54 @@ public class DataHandling {
                 env.GetVarList().set(v);
                 return v;
             }
-            throw new ConfigRuntimeException("assign only accepts an ivariable as the first argument", ExceptionType.CastException, line_num, f);
+            throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, line_num, f);
+        }
+        private static class Chain {
+            ArrayList<Construct> indexChain = new ArrayList<Construct>();
+        }
+        private void prepare(CArrayReference container, Chain c){
+            if(container.array instanceof CArrayReference){
+                prepare((CArrayReference)container.array, c);
+                c.indexChain.add(container.index);
+            } else {
+                c.indexChain.add(container.index);               
+            }
+        }
+        
+        public Construct array_assign(int line_num, File f, Env env, Construct arrayAndIndex, Construct toSet){
+            Construct ival = toSet;
+            while(ival instanceof IVariable){
+                ival = env.GetVarList().get(((IVariable)ival).getName()).ival();
+            }
+            Chain c = new Chain();
+            prepare((CArrayReference)arrayAndIndex, c);
+            CArray inner = (CArray)((CArrayReference)arrayAndIndex).getInternalArray();
+            for(int i = 0; i < c.indexChain.size(); i++){
+                if(i == c.indexChain.size() - 1){
+                    //Last one, set it
+                    inner.set(c.indexChain.get(i), ival);
+                } else {
+                    boolean makeIt = false;
+                    Construct t = null;
+                    if(!inner.contains(c.indexChain.get(i))){
+                        makeIt = true;
+                    } else {
+                        t = inner.get(c.indexChain.get(i), line_num);
+                        if(!(t instanceof CArray)){
+                            makeIt = true;
+                        }
+                    }
+                    if(makeIt){
+                        Construct newArray = new CArray(line_num, f);
+                        inner.set(c.indexChain.get(i), newArray);
+                        t = newArray;
+                    }
+                    inner = (CArray)t;
+                }
+            }
+            String name = ((CArrayReference)arrayAndIndex).name.getName();
+            env.GetVarList().set(new IVariable(name, (CArray)((CArrayReference)arrayAndIndex).getInternalArray(), line_num, f));
+            return new IVariable("=anon", ival, line_num, f);
         }
         
         public ExceptionType[] thrown(){

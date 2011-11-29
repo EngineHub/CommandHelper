@@ -27,8 +27,10 @@ import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
 import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
+import com.laytonsmith.aliasengine.functions.ArrayHandling.array_get;
 import com.laytonsmith.aliasengine.functions.BasicLogic._switch;
 import com.laytonsmith.aliasengine.functions.BasicLogic.ifelse;
+import com.laytonsmith.aliasengine.functions.DataHandling.assign;
 import com.laytonsmith.aliasengine.functions.Meta.scriptas;
 import com.laytonsmith.aliasengine.functions.StringHandling.sconcat;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
@@ -232,6 +234,17 @@ public class Script {
                     throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getLineNum(), m.getFile());
                 }
                 //We have special handling for loop and other control flow functions
+                if(f instanceof assign){
+                    if(c.getChildAt(0).getData() instanceof CFunction){
+                        CFunction test = (CFunction)c.getChildAt(0).getData();
+                        if(test.val().equals("array_get")){
+                            env.SetFlag("array_get_alt_mode", true);
+                            Construct arrayAndIndex = eval(c.getChildAt(0), env);
+                            env.ClearFlag("array_get_alt_mode");
+                            return ((assign)f).array_assign(m.getLineNum(), m.getFile(), env, arrayAndIndex, eval(c.getChildAt(1), env));
+                        }
+                    }
+                }
                 if (f instanceof _for) {
                     _for fr = (_for) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
@@ -392,6 +405,9 @@ public class Script {
                     } else {
                         perm = true;
                     }
+                    if(env.GetLabel() != null && env.GetLabel().equals("*")){
+                        perm = true;
+                    }
                     if (env.GetCommandSender() == null || 
                             env.GetCommandSender().isOp()) {
                         perm = true;
@@ -414,6 +430,9 @@ public class Script {
                         throw new ConfigRuntimeException("Invalid Construct (" 
                                 + ca[i].getClass() + ") being passed as an argument to a function (" 
                                 + f.getName() + ")", null, m.getLineNum(), m.getFile());
+                    }
+                    if(env.GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
+                        continue;
                     }
                     if(f.preResolveVariables() && ca[i] instanceof IVariable){
                         ca[i] = env.GetVarList().get(((IVariable)ca[i]).getName()).ival();

@@ -8,9 +8,11 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CArrayReference;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CNull;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Env;
@@ -84,12 +86,15 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String index = "0..-1";
+            if(args.length == 2){
+                index = args[1].val();
+            }
+            if(env.GetFlag("array_get_alt_mode") == Boolean.TRUE){                
+                return new CArrayReference(args[0], new CString(index, line_num, f), env);
+            }
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
-                String index = "0..-1";
-                if(args.length == 2){
-                    index = args[1].val();
-                }
                 if(index.contains("..")){
                     if(ca.inAssociativeMode()){
                         if(index.equals("0..-1")){

@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.SortedMap;
-import java.util.TreeMap;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -242,6 +240,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
     }
 
     public int compareTo(Construct c) {
+        if(this.value.contains(" ") || this.value.contains("\t") 
+                || c.value.contains(" ") || c.value.contains("\t")){
+            return this.value.compareTo(c.value);
+        }
         try {
             Double d1 = Double.valueOf(this.value);
             Double d2 = Double.valueOf(c.value);

@@ -22,6 +22,7 @@ public class Env implements Cloneable{
      * This is the underlying map of variables
      */
     private Map<String, Object> env = new HashMap<String, Object>();   
+    private Map<String, Boolean> flags = new HashMap<String, Boolean>();
     
     /*
      * The constructor has relatively little todo, most things are lazy
@@ -30,6 +31,36 @@ public class Env implements Cloneable{
      */
     public Env(){
        
+    }
+    
+    /**
+     * Sets the value of a flag
+     * @param name
+     * @param value 
+     */
+    public void SetFlag(String name, boolean value){
+        flags.put(name, value);
+    }
+    
+    /**
+     * Returns the value of a flag. Null if unset.
+     * @param name
+     * @return 
+     */
+    public Boolean GetFlag(String name){
+        if(!flags.containsKey(name)){
+            return null;
+        } else {
+            return flags.get(name);
+        }
+    }
+    
+    /**
+     * Clears the value of a flag from the flag list, causing further calls to GetFlag(name) to return null.
+     * @param name 
+     */
+    public void ClearFlag(String name){
+        flags.remove(name);
     }
     
     /**

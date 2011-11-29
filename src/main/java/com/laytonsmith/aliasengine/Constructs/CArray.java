@@ -9,7 +9,6 @@ import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +26,7 @@ public class CArray extends Construct {
     private List<Construct> array;
     private SortedMap<Construct, Construct> associative_array;
     private String mutVal;
+    CArray parent = null;
 
     public CArray(int line_num, File file, Construct... items) {
         super(null, ConstructType.ARRAY, line_num, file);
@@ -41,7 +41,7 @@ public class CArray extends Construct {
             associative_array = new TreeMap<Construct, Construct>();
             for(Construct item : items){
                 if(item instanceof CEntry){
-                    associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item));
+                    associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).construct);
                 } else {
                     int max = Integer.MIN_VALUE;            
                     for (Construct key : associative_array.keySet()) {
@@ -54,11 +54,19 @@ public class CArray extends Construct {
                         max = -1; //Special case, there are no integer indexes in here yet.
                     }
                     associative_array.put(new CInt(max + 1, item.getLineNum(), item.getFile()), item);
+                    if(item instanceof CArray){
+                        ((CArray)item).parent = this;
+                    }
                 }
             }
         } else {
             array = new ArrayList<Construct>();
-            array.addAll(Arrays.asList(items));
+            for(Construct item : items){
+                array.add(item);
+                if(item instanceof CArray){
+                    ((CArray)item).parent = this;
+                }
+            }
             this.next_index = array.size();
         }
         regenValue();
@@ -106,6 +114,9 @@ public class CArray extends Construct {
         }
         b.append("}");
         mutVal = b.toString();
+        if(parent != null){
+            parent.regenValue();
+        }
     }
 
     /**
@@ -129,6 +140,9 @@ public class CArray extends Construct {
             } else {
                 associative_array.put(new CInt(max + 1, 0, null), c);
             }
+        }
+        if(c instanceof CArray){
+            ((CArray)c).parent = this;
         }
         regenValue();
     }
@@ -179,6 +193,9 @@ public class CArray extends Construct {
         }
         if (associative_mode) {
             associative_array.put(normalizeConstruct(index), c);
+        }
+        if(c instanceof CArray){
+            ((CArray)c).parent = this;
         }
         regenValue();
     }

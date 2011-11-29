@@ -228,10 +228,65 @@ public class ArrayTest {
                 + "msg(array_index_exists(@glyphs, '1'))", fakePlayer);
         verify(fakePlayer).sendMessage("true");
     }
-    //TODO
-//    @Test public void testArrayKeys1() throws ConfigCompileException{
-//        SRun("assign(@a, array('1 ': 1, ' 1 ': 3)) msg(@a)", fakePlayer);
-//        verify(fakePlayer).sendMessage("{1 : 1,  1 : 3}");
-//    }
+    
+    @Test public void testArrayKeys1() throws ConfigCompileException{
+        SRun("assign(@a, array('1 ': 1, ' 1 ': 3)) msg(@a)", fakePlayer);
+        verify(fakePlayer).sendMessage("{ 1 : 3, 1 : 1}");
+    }
+    
+    @Test public void testArrayAssign1() throws ConfigCompileException{
+        SRun("assign(@array, array())\n"
+                + "assign(@array[0], 'value')\n"
+                + "msg(@array[0])", fakePlayer);
+        verify(fakePlayer).sendMessage("value");
+    }
+    
+    @Test public void testArrayAssign2() throws ConfigCompileException{
+        //Essentially, we want to replicate the behavior of java
+        String value = "value";
+        String[] array = new String[1];
+        array[0] = value;
+        value = "failure";
+        
+        SRun("assign(@value, 'value')\n"
+                + "assign(@array, array())\n"
+                + "assign(@array[0], @value)\n"
+                + "assign(@value, 'failure')\n"
+                + "msg(@array[0])", fakePlayer);
+        verify(fakePlayer).sendMessage(array[0]);
+    }
+    
+    @Test public void testArrayAssign3() throws ConfigCompileException{
+        String value = "value";
+        String[][] arrayOut = new String[1][1];
+        String[] arrayIn = new String[1];
+        arrayOut[0] = arrayIn;
+        arrayIn[0] = value;
+        value = "failure";
+        
+        SRun("assign(@value, 'value')\n"
+                + "assign(@arrayOut, array())\n"
+                + "assign(@arrayIn, array())\n"
+                + "assign(@arrayOut[0], @arrayIn)\n"
+                + "assign(@arrayIn[0], @value)\n"
+                + "msg(@arrayOut[0][0])", fakePlayer);
+        
+        verify(fakePlayer).sendMessage(arrayOut[0][0]);
+    }
+    
+    @Test public void testArrayAssign4() throws ConfigCompileException{
+        SRun("assign(@array, array(outer: array(middle: array(inner: failure))))"
+                + "assign(@array['outer']['middle']['inner'], 'value')\n"
+                + "msg(@array['outer']['middle']['inner'])", fakePlayer);
+        verify(fakePlayer).sendMessage("value");
+    }
+    
+    @Test public void testArrayAssign5() throws ConfigCompileException{
+        SRun("assign(@array['outer']['middle']['inner'], 'value')\n"
+                + "msg(@array)\n"
+                + "msg(@array['outer']['middle']['inner'])", fakePlayer);
+        verify(fakePlayer).sendMessage("{outer: {middle: {inner: value}}}");
+        verify(fakePlayer).sendMessage("value");
+    }
 
 }
