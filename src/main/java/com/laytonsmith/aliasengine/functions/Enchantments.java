@@ -177,6 +177,9 @@ public class Enchantments {
             }
             for (Construct key : enchantArray.keySet()) {
                 Enchantment e = Enchantment.getByName(Enchantments.ConvertName(enchantArray.get(key, line_num).val()).toUpperCase());
+                if(e == null){
+                    throw new ConfigRuntimeException(enchantArray.get(key, line_num).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, line_num, f);
+                }
                 if (e.canEnchantItem(is)) {
                     int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num).val()), line_num, f));
                     if (e.getMaxLevel() >= level && level > 0) {
