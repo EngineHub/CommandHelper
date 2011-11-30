@@ -18,7 +18,7 @@ import java.util.logging.Logger;
  */
 public class MainSandbox {
     public static void main(String[] args) throws Exception{
-        System.out.println(hashClass.GetHashCode(-1, 128, 1));
+        System.out.println(Static.debugLogFile().getAbsolutePath());
     }
     
     public static class hashClass{

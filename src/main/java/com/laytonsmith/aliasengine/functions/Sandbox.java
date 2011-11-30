@@ -4,11 +4,8 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.CArray;
-import com.laytonsmith.aliasengine.Constructs.CNull;
-import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
@@ -17,12 +14,9 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
 import java.util.List;
 import java.util.SortedSet;
 import java.util.logging.Level;
@@ -269,74 +263,5 @@ public class Sandbox {
         }
     }
 
-    @api
-    public static class dump_listeners implements Function {
-
-        public String getName() {
-            return "dump_listeners";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0, 1};
-        }
-
-        public String docs() {
-            return " {} ";
-        }
-
-        public ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public String since() {
-            return "0.0.0";
-        }
-
-        public Boolean runAsync() {
-            return false;
-        }
-
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            StringBuilder b = new StringBuilder();
-            if(args.length == 1 && args[0] instanceof CNull){
-                b.append("You can sort the listeners further by specifying one of the options:\n");
-                for(Event.Type t : Event.Type.values()){
-                    b.append(t.name()).append("\n");
-                }
-                return new CString(b.toString(), 0, null);
-            }
-            try {
-                SimplePluginManager pm = (SimplePluginManager) AliasCore.parent.getServer().getPluginManager();
-                Field fListener = SimplePluginManager.class.getDeclaredField("listeners");
-                //set it to public
-                fListener.setAccessible(true);
-                EnumMap<Event.Type, SortedSet<RegisteredListener>> listeners =
-                        (EnumMap<Event.Type, SortedSet<RegisteredListener>>) fListener.get(pm);
-                ArrayList<SortedSet<RegisteredListener>> lists = new ArrayList<SortedSet<RegisteredListener>>();
-                if(args.length == 1){
-                    for(RegisteredListener l : listeners.get(Event.Type.valueOf(args[0].val().toUpperCase()))){                    
-                        b.append("Plugin: ").append(l.getPlugin().getClass().getSimpleName()).append("; Priority: ").append(l.getPriority().toString()).append("\n");                            
-                    }
-                } else {
-                    for(Event.Type type : listeners.keySet()){
-                        b.append("Type: ").append(type.name()).append("\n");
-                        for(RegisteredListener l : listeners.get(type)){
-                                b.append("Plugin: ").append(l.getPlugin().getClass().getSimpleName()).append("; Priority: ").append(l.getPriority().toString()).append("\n");                            
-                        }
-                    }
-                }
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            return new CString(b.toString(), 0, null);
-        }
-    }
+    
 }
