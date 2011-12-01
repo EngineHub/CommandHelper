@@ -41,10 +41,13 @@ import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.event.Event.Priority;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -174,7 +177,18 @@ public class CommandHelperPlugin extends JavaPlugin {
         } else if(cmd.getName().equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")){
             return true;
         } else if(cmd.getName().equals("runalias")){
-            //TODO
+            //Hardcoded alias rebroadcast
+            if(sender instanceof Player){
+                PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player)sender, Static.strJoin(args, " "));
+                playerListener.onPlayerCommandPreprocess(pcpe);
+            } else if(sender instanceof ConsoleCommandSender){
+                String cmd2 = Static.strJoin(args, " ");
+                if(cmd2.startsWith("/")){
+                    cmd2 = cmd2.substring(1);
+                }
+                ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender)sender, cmd2);
+                serverListener.onServerCommand(sce);                
+            }
             return true;
         } else if (sender instanceof Player) {
                 return runCommand((Player)sender, cmd.getName(), args);
