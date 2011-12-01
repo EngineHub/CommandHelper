@@ -227,8 +227,8 @@ public class DirtyRegisteredListener extends RegisteredListener {
             stopWatch = new StopWatch(
                     "CommandHelper.profiler." //CommandHelper Prefix
                     + this.plugin.getClass().getSimpleName() + "."//Plugin name
-                    + this.listener.getClass().getCanonicalName() //File event is being called from
-                    + (event.getType()==Event.Type.CUSTOM_EVENT?"CUSTOM_EVENT."+event.getEventName():event.getType().name()) + "." //Event name
+                    + this.listener.getClass().getCanonicalName() + "." //File event is being called from
+                    + (event.getType()==Event.Type.CUSTOM_EVENT?"CUSTOM_EVENT."+event.getEventName():event.getType().name()) //Event name
                     );
         }   
         executor.execute(listener, event);
