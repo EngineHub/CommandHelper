@@ -5,11 +5,11 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.functions.Debug;
+import com.laytonsmith.aliasengine.functions.Performance;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Comparator;
-import java.util.Date;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -29,6 +29,7 @@ import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.SimplePluginManager;
+import org.perf4j.StopWatch;
 
 /**
  *
@@ -178,7 +179,7 @@ public class DirtyRegisteredListener extends RegisteredListener {
     }
 
     private void callEvent0(Event event) {
-        long timestamp = 0;
+        StopWatch stopWatch = null;
         if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
                 && Debug.EVENT_LOGGING_FILTER.contains(event.getType())) {
             if (Debug.EVENT_LOGGING_LEVEL >= 1) {
@@ -220,15 +221,25 @@ public class DirtyRegisteredListener extends RegisteredListener {
                 }
                 Debug.DoLog(event.getType(), 5, b.toString());
             }
-            if (Debug.EVENT_LOGGING_LEVEL >= 2) {
-                timestamp = System.currentTimeMillis();
-            }
         }
+        if ((Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
+                && Debug.EVENT_LOGGING_FILTER.contains(event.getType()) && Debug.EVENT_LOGGING_LEVEL >= 2) || Performance.PERFORMANCE_LOGGING) {
+            stopWatch = new StopWatch(
+                    "CommandHelper.profiler." //CommandHelper Prefix
+                    + this.plugin.getClass().getSimpleName() + "."//Plugin name
+                    + this.listener.getClass().getCanonicalName() //File event is being called from
+                    + (event.getType()==Event.Type.CUSTOM_EVENT?"CUSTOM_EVENT."+event.getEventName():event.getType().name()) + "." //Event name
+                    );
+        }   
         executor.execute(listener, event);
-        if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
-                && Debug.EVENT_LOGGING_FILTER.contains(event.getType()) && Debug.EVENT_LOGGING_LEVEL >= 2) {
-            timestamp = System.currentTimeMillis() - timestamp;
-            Debug.DoLog(event.getType(), 2, "\t\t\tEvent completed in " + timestamp + " milliseconds");
+        if (stopWatch != null) {
+            stopWatch.stop();
+            if(Debug.EVENT_LOGGING){
+                Debug.DoLog(event.getType(), 2, "\t\t\tEvent completed in " + stopWatch.getElapsedTime() + " milliseconds");
+            }
+            if(Performance.PERFORMANCE_LOGGING){
+                Performance.DoLog(stopWatch);
+            }
         }
         if(Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)){
             Debug.DoLog(event.getType(), 1, "--------------------------------------------------------------\n");

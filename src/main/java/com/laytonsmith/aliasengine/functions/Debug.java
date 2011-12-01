@@ -43,6 +43,7 @@ public class Debug {
     public static int EVENT_LOGGING_LEVEL = 1;
     public static final Set<Event.Type> EVENT_LOGGING_FILTER = new HashSet<Event.Type>();
     public static final Set<String> EVENT_PLUGIN_FILTER = new HashSet<String>();
+    public static boolean LOG_TO_SCREEN = false;
 
     public static void DoLog(Event.Type filter, int verbosity, String message) {
         synchronized (EVENT_LOGGING_FILTER) {
@@ -256,19 +257,20 @@ public class Debug {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
-            return "void {boolean, level} Turns the event logging on or off. Event logging may be useful in determining the problem if CommandHelper isn't"
+            return "void {boolean, level, [logToScreen]} Turns the event logging on or off. Event logging may be useful in determining the problem if CommandHelper isn't"
                     + " able to receive events, you can track what's actually happening. play-dirty mode must be enabled for this to work properly however."
                     + " This feature may also be useful in diagnosing other problems with other plugins as well. Level varies from 1-5, and shows more"
                     + " information as it increases. You must also set at least one filter with the set_debug_event_filter function before anything"
-                    + " will happen.";
+                    + " will happen. logToScreen defaults to false, as even on a server with one person, very verbose logging can completely lag out"
+                    + " the server. This should only be turned on when you are testing, or have very strict filters set.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.SecurityException};
         }
 
         public boolean isRestricted() {
@@ -295,6 +297,9 @@ public class Debug {
             int level = Static.Normalize((int) Static.getInt(args[1]), 1, 5);
             Debug.EVENT_LOGGING = on;
             Debug.EVENT_LOGGING_LEVEL = level;
+            if(args.length == 3){
+                Debug.LOG_TO_SCREEN = Static.getBoolean(args[2]);
+            }
             return new CVoid(line_num, f);
         }
     }
@@ -316,7 +321,7 @@ public class Debug {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.SecurityException};
         }
 
         public boolean isRestricted() {
@@ -393,7 +398,7 @@ public class Debug {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.SecurityException};
         }
 
         public boolean isRestricted() {

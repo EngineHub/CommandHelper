@@ -12,6 +12,7 @@ import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.Preferences.Type;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.PureUtilities.rParser;
+import com.laytonsmith.aliasengine.functions.Debug;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
@@ -24,11 +25,8 @@ import java.util.logging.Logger;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.sql.Timestamp;
-import java.text.DateFormat;
 import java.util.Calendar;
 import java.util.Collection;
-import java.util.Date;
 import java.util.logging.Level;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
@@ -282,32 +280,67 @@ public class Static {
             a.add(new Preference("play-dirty", "false", Type.BOOLEAN, "Makes CommandHelper play dirty and break all sorts of programming rules, so that other plugins can't interfere with the operations that you defined. Note that doing this essentially makes CommandHelper have absolute say over commands. Use this setting only if you can't get another plugin to cooperate with CH, because it is a global setting."));
             a.add(new Preference("case-sensitive", "true", Type.BOOLEAN, "Makes command matching be case sensitive. If set to false, if your config defines /cmd, but the user runs /CMD, it will trigger the command anyways."));
             a.add(new Preference("main-file", "main.ms", Type.STRING, "The path to the main file, relative to the CommandHelper folder"));
-            a.add(new Preference("allow-debug-logging", "false", Type.STRING, "If set to false, the Debug class of functions will do nothing."));
-            a.add(new Preference("debug-log-file", "logs/%Y-%M-%D-debug.log", Type.STRING, "The path to the debug output log file. Six variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current year, month, day, hour, minute and second respectively. It is highly recommended that you use at least year, month, and day if you are for whatever reason leaving logging on, otherwise the file size would get excessively large. The path is relative to the CommandHelper directory and is not bound by the base-dir restriction."));
+            a.add(new Preference("allow-debug-logging", "false", Type.BOOLEAN, "If set to false, the Debug class of functions will do nothing."));
+            a.add(new Preference("debug-log-file", "logs/debug/%Y-%M-%D-debug.log", Type.STRING, "The path to the debug output log file. Six variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current year, month, day, hour, minute and second respectively. It is highly recommended that you use at least year, month, and day if you are for whatever reason leaving logging on, otherwise the file size would get excessively large. The path is relative to the CommandHelper directory and is not bound by the base-dir restriction."));
             a.add(new Preference("standard-log-file", "logs/%Y-%M-%D-commandhelper.log", Type.STRING, "The path the standard log files that the log() function writes to. Six variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current year, month, day, hour, minute and second respectively. It is highly recommended that you use at least year, month, and day if you are actively logging things, otherwise the file size would get excessively large. The path is relative to the CommandHelper directory and is not bound by the base-dir restriction."));
             a.add(new Preference("allow-profiling", "false", Type.BOOLEAN, "If set to false, the Profiling class of functions will do nothing."));
-            a.add(new Preference("profiling-file", "logs/%Y-%M-%D-profiling.log", Type.STRING, "The path to the profiling logs. These logs are perf4j formatted logs. Consult the documentation for more information."));
+            a.add(new Preference("profiling-file", "logs/profiling/%Y-%M-%D-profiling.log", Type.STRING, "The path to the profiling logs. These logs are perf4j formatted logs. Consult the documentation for more information."));
             com.sk89q.commandhelper.CommandHelperPlugin.prefs = new Preferences("CommandHelper", getLogger(), a);
         }
         return com.sk89q.commandhelper.CommandHelperPlugin.prefs;
     }
     
+    private static String debugLogFileCurrent = null;
+    private static FileWriter debugLogFileHandle = null;
     /**
      * Returns a file that is most likely ready to write to. The timestamp variables have already been replaced, and parent directories
      * are all created.
      * @return 
      */
-    public static File debugLogFile(){
-        File file = new File("plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String)getPreferences().getPreference("debug-log-file")));
-        file.getParentFile().mkdirs();
-        return file;
+    public static FileWriter debugLogFile() throws IOException{
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String)getPreferences().getPreference("debug-log-file"));
+        if(!currentFileName.equals(debugLogFileCurrent)){
+            if(debugLogFileHandle != null){
+                //We're done with the old one, close it.
+                debugLogFileHandle.close();
+            }
+            debugLogFileCurrent = currentFileName;
+            new File(debugLogFileCurrent).getParentFile().mkdirs();
+            debugLogFileHandle = new FileWriter(currentFileName);
+        }
+        return debugLogFileHandle;
     }
     
+    private static String standardLogFileCurrent = null;
+    private static FileWriter standardLogFileHandle = null;
+    public static FileWriter standardLogFile() throws IOException{
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String)getPreferences().getPreference("standard-log-file"));
+        if(!currentFileName.equals(standardLogFileCurrent)){
+            if(standardLogFileHandle != null){
+                //We're done with the old one, close it.
+                standardLogFileHandle.close();
+            }
+            standardLogFileCurrent = currentFileName;
+            new File(standardLogFileCurrent).getParentFile().mkdirs();
+            standardLogFileHandle = new FileWriter(currentFileName);
+        }
+        return standardLogFileHandle;
+    }
     
-    public static File standardLogFile(){
-        File file = new File("plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String)getPreferences().getPreference("standard-log-file")));
-        file.getParentFile().mkdirs();
-        return file;
+    private static String profilingLogFileCurrent = null;
+    private static FileWriter profilingLogFileHandle = null;
+    public static FileWriter profilingLogFile() throws IOException{
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String)getPreferences().getPreference("profiling-file"));
+        if(!currentFileName.equals(profilingLogFileCurrent)){
+            if(profilingLogFileHandle != null){
+                //We're done with the old one, close it.
+                profilingLogFileHandle.close();
+            }
+            profilingLogFileCurrent = currentFileName;
+            new File(profilingLogFileCurrent).getParentFile().mkdirs();
+            profilingLogFileHandle = new FileWriter(currentFileName);
+        }
+        return profilingLogFileHandle;
     }
 
     public static String ParseCalendarNotation(String name){
@@ -319,7 +352,7 @@ public class Static {
             c = Calendar.getInstance();
         }
         String year = String.format("%04d", c.get(Calendar.YEAR));
-        String month = String.format("%02d", c.get(Calendar.MONTH));
+        String month = String.format("%02d", 1 + c.get(Calendar.MONTH)); //January is 0
         String day = String.format("%02d", c.get(Calendar.DAY_OF_MONTH));
         String hour = String.format("%02d", c.get(Calendar.HOUR));
         String minute = String.format("%02d", c.get(Calendar.MINUTE));
@@ -661,10 +694,15 @@ public class Static {
     }
     
     public static synchronized void LogDebug(String message) throws IOException {
-        Static.getLogger().log(Level.INFO, message);
-        FileWriter file = new FileWriter(Static.debugLogFile(), true);
+        if(Debug.LOG_TO_SCREEN){
+            Static.getLogger().log(Level.INFO, message);
+        }
         String timestamp = Static.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
-        file.write(timestamp + message + Static.LF());
-        file.close();
+        QuickAppend(Static.debugLogFile(), timestamp + message + Static.LF());
+    }
+    
+    public static void QuickAppend(FileWriter f, String message) throws IOException{
+        f.append(message);
+        f.flush();        
     }
 }
