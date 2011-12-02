@@ -641,6 +641,22 @@ public class Static {
         }
         return new Location(world, x, y, z, yaw, pitch);
     }
+    
+    /**
+     * Works the opposite of GetLocation
+     * @param l
+     * @return 
+     */
+    public static CArray GetLocationArray(Location l){
+        CArray ca = new CArray(0, null);
+        ca.push(new CDouble(l.getX(), 0, null));
+        ca.push(new CDouble(l.getY(), 0, null));
+        ca.push(new CDouble(l.getZ(), 0, null));
+        ca.push(new CString(l.getWorld().getName(), 0, null));
+        ca.push(new CDouble(l.getYaw(), 0, null));
+        ca.push(new CDouble(l.getPitch(), 0, null));
+        return ca;
+    }
 
     public static boolean isNull(Construct construct) {
         return construct instanceof CNull;
