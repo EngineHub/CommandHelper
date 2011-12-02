@@ -28,7 +28,7 @@ public class World {
     @api public static class get_spawn implements Function{
 
         public String getName() {
-            return "array {[world]} Returns a location array for the specified world, or the current player's world, if not specified.";
+            return "get_spawn";
         }
 
         public Integer[] numArgs() {
@@ -36,11 +36,11 @@ public class World {
         }
 
         public String docs() {
-            return "";
+            return "array {[world]} Returns a location array for the specified world, or the current player's world, if not specified.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -87,7 +87,7 @@ public class World {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
         }
 
         public boolean isRestricted() {
