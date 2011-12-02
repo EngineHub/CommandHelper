@@ -257,16 +257,15 @@ public class Debug {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2, 3};
+            return new Integer[]{1, 2, 3};
         }
 
         public String docs() {
-            return "void {boolean, level, [logToScreen]} Turns the event logging on or off. Event logging may be useful in determining the problem if CommandHelper isn't"
+            return "void {boolean, [level, [logToScreen]]} Turns the event logging on or off. Event logging may be useful in determining the problem if CommandHelper isn't"
                     + " able to receive events, you can track what's actually happening. play-dirty mode must be enabled for this to work properly however."
                     + " This feature may also be useful in diagnosing other problems with other plugins as well. Level varies from 1-5, and shows more"
                     + " information as it increases. You must also set at least one filter with the set_debug_event_filter function before anything"
-                    + " will happen. logToScreen defaults to false, as even on a server with one person, very verbose logging can completely lag out"
-                    + " the server. This should only be turned on when you are testing, or have very strict filters set.";
+                    + " will happen. logToScreen defaults to false. This should only be turned on when you are testing, or have very strict filters set.";
         }
 
         public ExceptionType[] thrown() {
@@ -294,7 +293,10 @@ public class Debug {
                 throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, line_num, f);
             }
             boolean on = Static.getBoolean(args[0]);
-            int level = Static.Normalize((int) Static.getInt(args[1]), 1, 5);
+            int level = 1;
+            if(args.length == 2){
+                level = Static.Normalize((int) Static.getInt(args[1]), 1, 5);
+            }
             Debug.EVENT_LOGGING = on;
             Debug.EVENT_LOGGING_LEVEL = level;
             if(args.length == 3){

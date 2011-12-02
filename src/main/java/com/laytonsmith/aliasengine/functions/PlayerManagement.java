@@ -63,9 +63,9 @@ public class PlayerManagement {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
-            if(p instanceof Player){
-                return new CString(((Player)p).getName(), line_num, f);            
-            } else if(p instanceof ConsoleCommandSender){
+            if (p instanceof Player) {
+                return new CString(((Player) p).getName(), line_num, f);
+            } else if (p instanceof ConsoleCommandSender) {
                 return new CString("~console", line_num, f);
             } else {
                 return new CNull(line_num, f);
@@ -164,22 +164,22 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
             if (args.length == 1) {
                 m = Static.getServer().getPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
-                    throw new ConfigRuntimeException("The player is not online", 
+                    throw new ConfigRuntimeException("The player is not online",
                             ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
-            if(m == null){
+            if (m == null) {
                 throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
             }
             Location l = m.getLocation();
             World w = m.getWorld();
-            return new CArray(line_num, f, 
+            return new CArray(line_num, f,
                     new CDouble(l.getX(), line_num, f),
                     new CDouble(l.getY() - 1, line_num, f),
                     new CDouble(l.getZ(), line_num, f),
@@ -267,16 +267,16 @@ public class PlayerManagement {
             if (args.length == 1) {
                 if (args[0] instanceof CArray) {
                     CArray ca = (CArray) args[0];
-                    l = Static.GetLocation(ca, (p instanceof Player?((Player)p).getWorld():null), line_num, f);                                       
+                    l = Static.GetLocation(ca, (p instanceof Player ? ((Player) p).getWorld() : null), line_num, f);
                     x = Static.getNumber(ca.get(0, line_num));
                     y = Static.getNumber(ca.get(1, line_num));
                     z = Static.getNumber(ca.get(2, line_num));
-                    if(p instanceof Player){
-                        m = ((Player)p);
+                    if (p instanceof Player) {
+                        m = ((Player) p);
                     }
 
                 } else {
-                    throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_ploc", 
+                    throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_ploc",
                             ExceptionType.CastException, line_num, f);
                 }
             } else if (args.length == 2) {
@@ -288,12 +288,12 @@ public class PlayerManagement {
                     y = l.getY();
                     z = l.getZ();
                 } else {
-                    throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc", 
+                    throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc",
                             ExceptionType.CastException, line_num, f);
                 }
             } else if (args.length == 3) {
-                if(p instanceof Player){
-                    m = (Player)p;
+                if (p instanceof Player) {
+                    m = (Player) p;
                 }
                 x = Static.getNumber(args[0]);
                 y = Static.getNumber(args[1]);
@@ -310,7 +310,7 @@ public class PlayerManagement {
                 m = Static.getServer().getPlayer(player);
             }
             if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online", 
+                throw new ConfigRuntimeException("That player is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
             return new CBoolean(m.teleport(new Location(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), line_num, f);
@@ -357,28 +357,28 @@ public class PlayerManagement {
             CommandSender p = env.GetCommandSender();
             Player m = null;
             if (args.length == 0) {
-                if(p instanceof Player){
-                    m = (Player)p;
+                if (p instanceof Player) {
+                    m = (Player) p;
                 }
             } else {
                 m = Static.getServer().getPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
-                    throw new ConfigRuntimeException("That player is not online", 
+                    throw new ConfigRuntimeException("That player is not online",
                             ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
-            if(m != null){
+            if (m != null) {
                 Block b = m.getTargetBlock(null, 200);
                 if (b == null) {
-                    throw new ConfigRuntimeException("No block in sight, or block too far", 
+                    throw new ConfigRuntimeException("No block in sight, or block too far",
                             ExceptionType.RangeException, line_num, f);
-                }                
-                return new CArray(line_num, f, new CInt(b.getX(), line_num, f), 
-                        new CInt(b.getY(), line_num, f), 
+                }
+                return new CArray(line_num, f, new CInt(b.getX(), line_num, f),
+                        new CInt(b.getY(), line_num, f),
                         new CInt(b.getZ(), line_num, f),
                         new CString(b.getWorld().getName(), line_num, f));
             } else {
-                throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f); 
+                throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
             }
         }
 
@@ -404,12 +404,12 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.getServer().getPlayer(args[0].val());
             } else {
-                if(p instanceof Player){
-                    m = (Player)p;
+                if (p instanceof Player) {
+                    m = (Player) p;
                 }
             }
             if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The player is not online", 
+                throw new ConfigRuntimeException("The player is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
             m.setHealth(0);
@@ -459,18 +459,18 @@ public class PlayerManagement {
             CommandSender p = env.GetCommandSender();
             Player m = null;
             if (args.length == 0) {
-                if(p instanceof Player){
-                    m = (Player)p;
+                if (p instanceof Player) {
+                    m = (Player) p;
                 }
             } else {
                 m = Static.getServer().getPlayer(args[0].val());
             }
-            
-            if(m == null){
+
+            if (m == null) {
                 throw new ConfigRuntimeException("Player was not specified, or is offline", ExceptionType.PlayerOfflineException, line_num, f);
             }
             if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online.", 
+                throw new ConfigRuntimeException("That player is not online.",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
             String[] sa = Static.getPermissionsResolverManager().getGroups(m.getName());
@@ -563,7 +563,7 @@ public class PlayerManagement {
             String player = "";
             int index = -1;
             if (args.length == 0) {
-                player = (m instanceof Player?((Player)m).getName():null);
+                player = (m instanceof Player ? ((Player) m).getName() : null);
                 index = -1;
             } else if (args.length == 1) {
                 player = args[0].val();
@@ -572,16 +572,16 @@ public class PlayerManagement {
                 player = args[0].val();
                 index = (int) Static.getInt(args[1]);
             }
-            if(player == null){
+            if (player == null) {
                 throw new ConfigRuntimeException("Player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
             }
             Player p = Static.getServer().getPlayer(player);
             if (p == null || !p.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", 
+                throw new ConfigRuntimeException("The specified player is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
             if (index < -1 || index > 10) {
-                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 10", 
+                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 10",
                         ExceptionType.RangeException, line_num, f);
             }
             assert index >= -1 && index <= 10;
@@ -643,7 +643,7 @@ public class PlayerManagement {
                 CArray a = new CArray(line_num, f, ca);
                 retVals.add(a);
             }
-            if(index == 10 || index == -1){
+            if (index == 10 || index == -1) {
                 retVals.add(new CString(p.getAddress().getHostName(), line_num, f));
             }
             if (retVals.size() == 1) {
@@ -700,13 +700,13 @@ public class PlayerManagement {
             CommandSender p = env.GetCommandSender();
             Player m = null;
             if (args.length == 0) {
-                if(p instanceof Player){
-                    m = (Player)p;
+                if (p instanceof Player) {
+                    m = (Player) p;
                 }
             } else {
                 m = Static.getServer().getPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
-                    throw new ConfigRuntimeException("That player is not online", 
+                    throw new ConfigRuntimeException("That player is not online",
                             ExceptionType.PlayerOfflineException, line_num, f);
                 }
             }
@@ -758,8 +758,8 @@ public class PlayerManagement {
             String message = "You have been kicked";
             Player m = null;
             if (args.length == 0) {
-                if(p instanceof Player){
-                    m = (Player)p;
+                if (p instanceof Player) {
+                    m = (Player) p;
                 }
             }
             if (args.length >= 1) {
@@ -773,7 +773,7 @@ public class PlayerManagement {
                 ptok.kickPlayer(message);
                 return new CVoid(line_num, f);
             } else {
-                throw new ConfigRuntimeException("The specified player does not seem to be online", 
+                throw new ConfigRuntimeException("The specified player does not seem to be online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
         }
@@ -824,8 +824,8 @@ public class PlayerManagement {
             Player player = null;
             String name;
             if (args.length == 1) {
-                if(p instanceof Player){
-                    player = (Player)p;
+                if (p instanceof Player) {
+                    player = (Player) p;
                 }
                 name = args[0].val();
             } else {
@@ -833,7 +833,7 @@ public class PlayerManagement {
                 name = args[1].val();
             }
             if (player == null || !player.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online", 
+                throw new ConfigRuntimeException("That player is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
             player.setDisplayName(name);
@@ -884,14 +884,14 @@ public class PlayerManagement {
             CommandSender p = env.GetCommandSender();
             Player player = null;
             if (args.length == 0) {
-                if(p instanceof Player){
-                    player = (Player)p;
+                if (p instanceof Player) {
+                    player = (Player) p;
                 }
             } else {
                 player = p.getServer().getPlayer(args[0].val());
             }
             if (player == null || !player.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online", 
+                throw new ConfigRuntimeException("That player is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
             player.setDisplayName(player.getName());
@@ -952,8 +952,8 @@ public class PlayerManagement {
             if (args.length == 0 || args.length == 1) {
                 Location l = null;
                 if (args.length == 0) {
-                    if(p instanceof Player){
-                        l = ((Player)p).getLocation();
+                    if (p instanceof Player) {
+                        l = ((Player) p).getLocation();
                     }
                 } else if (args.length == 1) {
                     //if it's a number, we are setting F. Otherwise, it's a getter for the player specified.
@@ -962,7 +962,7 @@ public class PlayerManagement {
                     } catch (NumberFormatException e) {
                         Player p2 = p.getServer().getPlayer(args[0].val());
                         if (p2 == null || !p2.isOnline()) {
-                            throw new ConfigRuntimeException("The specified player is offline", 
+                            throw new ConfigRuntimeException("The specified player is offline",
                                     ExceptionType.PlayerOfflineException, line_num, f);
                         } else {
                             l = p2.getLocation();
@@ -985,13 +985,13 @@ public class PlayerManagement {
             float pitch = 0;
             if (args.length == 1) {
                 //We are setting F for this player
-                if(p instanceof Player){
-                    toSet = (Player)p;
+                if (p instanceof Player) {
+                    toSet = (Player) p;
                     pitch = toSet.getLocation().getPitch();
                 }
                 int g = (int) Static.getInt(args[0]);
                 if (g < 0 || g > 3) {
-                    throw new ConfigRuntimeException("The F specifed must be from 0 to 3", 
+                    throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
                             ExceptionType.RangeException, line_num, f);
                 }
                 yaw = g * 90;
@@ -1001,8 +1001,8 @@ public class PlayerManagement {
                 try {
                     Float.parseFloat(args[0].val());
                     //It's the yaw, pitch variation
-                    if(p instanceof Player){
-                        toSet = (Player)p;
+                    if (p instanceof Player) {
+                        toSet = (Player) p;
                     }
                     yaw = (float) Static.getNumber(args[0]);
                     pitch = (float) Static.getNumber(args[1]);
@@ -1012,7 +1012,7 @@ public class PlayerManagement {
                     pitch = toSet.getLocation().getPitch();
                     int g = (int) Static.getInt(args[1]);
                     if (g < 0 || g > 3) {
-                        throw new ConfigRuntimeException("The F specifed must be from 0 to 3", 
+                        throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
                                 ExceptionType.RangeException, line_num, f);
                     }
                     yaw = g * 90;
@@ -1026,11 +1026,11 @@ public class PlayerManagement {
 
             //Error check our data
             if (toSet == null || !toSet.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", 
+                throw new ConfigRuntimeException("The specified player is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
             if (pitch > 90 || pitch < -90) {
-                throw new ConfigRuntimeException("pitch must be between -90 and 90", 
+                throw new ConfigRuntimeException("pitch must be between -90 and 90",
                         ExceptionType.RangeException, line_num, f);
             }
             Location l = toSet.getLocation().clone();
@@ -1094,8 +1094,8 @@ public class PlayerManagement {
             Player m = null;
             if (args.length == 0) {
                 all = true;
-                if(p instanceof Player){
-                    m = (Player)p;
+                if (p instanceof Player) {
+                    m = (Player) p;
                 }
             } else if (args.length == 1) {
                 all = true;
@@ -1110,12 +1110,12 @@ public class PlayerManagement {
                 m = p.getServer().getPlayer(args[0].val());
             }
             if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", 
+                throw new ConfigRuntimeException("The specified player is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
             if (!all) {
                 if ((index < 0 || index > 35) && (index < 100 || index > 103) && index != -1) {
-                    throw new ConfigRuntimeException("The index specified must be between 0-35, or 100-103", 
+                    throw new ConfigRuntimeException("The index specified must be between 0-35, or 100-103",
                             ExceptionType.RangeException, line_num, f);
                 }
             }
@@ -1175,12 +1175,12 @@ public class PlayerManagement {
                 return ca;
             }
         }
-        
-        private Construct getInvSlot(ItemStack is, int line_num, File f, Env env){
+
+        private Construct getInvSlot(ItemStack is, int line_num, File f, Env env) {
             if (is != null && is.getTypeId() != 0) {
                 CArray enchants = new CArray(line_num, f);
                 CArray levels = new CArray(line_num, f);
-                for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
+                for (Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()) {
                     Enchantment e = entry.getKey();
                     Integer l = entry.getValue();
                     enchants.push(new CString(e.getName(), line_num, f));
@@ -1195,7 +1195,8 @@ public class PlayerManagement {
         }
     }
 
-    @api public static class set_pinv implements Function {
+    @api
+    public static class set_pinv implements Function {
 
         public String getName() {
             return "set_pinv";
@@ -1215,7 +1216,7 @@ public class PlayerManagement {
                     + " value. When using the second signature, the pinvArray should be an array similar to the array returned by pinv()."
                     + " enchantArray and levelArray may also be specified, which is a shortcut to using enchant_inv. In addition, pinvArray"
                     + " may contain instead of 2 elements, 4 elements, of which the last two are the enchantArray and levelArray, per item.";
-                    
+
         }
 
         public ExceptionType[] thrown() {
@@ -1226,7 +1227,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1243,45 +1245,45 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
             int slot = 0;
             int offset = 0;
             int qty = 1;
             short damage = -1;
-            if(args.length == 1 && args[0] instanceof CArray || args.length == 2 && args[1] instanceof CArray){
+            if (args.length == 1 && args[0] instanceof CArray || args.length == 2 && args[1] instanceof CArray) {
                 //we are using the set_pinv(pinv()) method
                 CArray ca = null;
-                if(args.length == 1){
-                    ca = (CArray)args[0];
+                if (args.length == 1) {
+                    ca = (CArray) args[0];
                 }
-                if(args.length == 2){
+                if (args.length == 2) {
                     m = Static.GetPlayer(args[0].val(), line_num, f);
-                    ca = (CArray)args[1];
+                    ca = (CArray) args[1];
                 }
- 
-                for(Construct key : ca.keySet()){
+
+                for (Construct key : ca.keySet()) {
                     int i = 0;
-                    if(Integer.valueOf(key.val()) != null){
+                    if (Integer.valueOf(key.val()) != null) {
                         i = Integer.parseInt(key.val());
                     } else {
                         continue; //Ignore this key
                     }
-                    if(!ca.contains(key)){                        
+                    if (!ca.contains(key)) {
                         continue; //Ignore this key too
                     }
                     Construct item = ca.get(key, line_num);
-                    if(item instanceof CNull){
+                    if (item instanceof CNull) {
                         this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
                                 new CInt(i, line_num, f),
                                 new CInt(0, line_num, f));
                     } else {
-                        if(item instanceof CArray && (((CArray)item).size() == 2) || ((CArray)item).size() == 4){
-                            CArray citem = (CArray)item;   
+                        if (item instanceof CArray && (((CArray) item).size() == 2) || ((CArray) item).size() == 4) {
+                            CArray citem = (CArray) item;
                             Construct enchantArray = new CArray(line_num, f);
                             Construct levelArray = new CArray(line_num, f);
-                            if(citem.size() == 4){
+                            if (citem.size() == 4) {
                                 enchantArray = citem.get(2, line_num);
                                 levelArray = citem.get(3, line_num);
                             }
@@ -1297,65 +1299,65 @@ public class PlayerManagement {
                 }
                 return new CVoid(line_num, f);
             }
-            if(args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])){
+            if (args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])) {
                 //We're using the slot as arg 1
-                if(Static.isNull(args[0])){
+                if (Static.isNull(args[0])) {
                     slot = -1;
                 } else {
-                    slot = (int)Static.getInt(args[0]);
+                    slot = (int) Static.getInt(args[0]);
                 }
             } else {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                if(Static.isNull(args[1])){
+                if (Static.isNull(args[1])) {
                     slot = -1;
                 } else {
-                    slot = (int)Static.getInt(args[1]);
+                    slot = (int) Static.getInt(args[1]);
                 }
                 offset = 1;
             }
-            if(slot < -1 || slot > 35 && slot < 100 || slot > 103){
+            if (slot < -1 || slot > 35 && slot < 100 || slot > 103) {
                 throw new ConfigRuntimeException("Slot number must be from 0-35 or 100-103", ExceptionType.RangeException, line_num, f);
             }
-            if(args.length > 2 + offset){
-                qty = (int)Static.getInt(args[2 + offset]);
-            }            
+            if (args.length > 2 + offset) {
+                qty = (int) Static.getInt(args[2 + offset]);
+            }
             qty = Static.Normalize(qty, 0, Integer.MAX_VALUE);
             ItemStack is = Static.ParseItemNotation(this.getName(), args[1 + offset].val(), qty, line_num, f);
-            if(args.length > 3 + offset){
-                damage = (short)Static.getInt(args[3 + offset]);
+            if (args.length > 3 + offset) {
+                damage = (short) Static.getInt(args[3 + offset]);
             }
-            
-            
-            if(damage != -1){
-                damage = (short)java.lang.Math.max(0, java.lang.Math.min(100, damage));
+
+
+            if (damage != -1) {
+                damage = (short) java.lang.Math.max(0, java.lang.Math.min(100, damage));
                 short max = is.getType().getMaxDurability();
-                is.setDurability((short)((max * damage) / 100));            
+                is.setDurability((short) ((max * damage) / 100));
             }
-            
-            if(is.getTypeId() == 0){
+
+            if (is.getTypeId() == 0) {
                 qty = 0; //Giving the player air crashes their client, so just remove the item
                 is.setTypeId(1);
             }
-            
-            if(qty == 0){
+
+            if (qty == 0) {
                 is = null;
             }
-            if(slot == -1){
+            if (slot == -1) {
                 m.setItemInHand(is);
             } else {
-                if(slot == 103){
+                if (slot == 103) {
                     m.getInventory().setHelmet(is);
-                } else if(slot == 102){
+                } else if (slot == 102) {
                     m.getInventory().setChestplate(is);
-                } else if(slot == 101){
+                } else if (slot == 101) {
                     m.getInventory().setLeggings(is);
-                } else if(slot == 100){
+                } else if (slot == 100) {
                     m.getInventory().setBoots(is);
                 } else {
                     m.getInventory().setItem(slot, is);
                 }
             }
-            if(args.length > 4 + offset){
+            if (args.length > 4 + offset) {
                 //We want to enchant this item also
                 Enchantments.enchant_inv ei = new Enchantments.enchant_inv();
                 ei.exec(line_num, f, env, new CString(m.getName(), line_num, f),
@@ -1366,8 +1368,9 @@ public class PlayerManagement {
             return new CVoid(line_num, f);
         }
     }
-    
-    @api public static class pmode implements Function{
+
+    @api
+    public static class pmode implements Function {
 
         public String getName() {
             return "pmode";
@@ -1389,7 +1392,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1406,22 +1410,22 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 1){
+            if (args.length == 1) {
                 m = Static.getServer().getPlayer(args[0].val());
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is offline", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            String mode = m.getGameMode().name();            
+            String mode = m.getGameMode().name();
             return new CString(mode, line_num, f);
         }
-        
     }
-    
-    @api public static class set_pmode implements Function {
+
+    @api
+    public static class set_pmode implements Function {
 
         public String getName() {
             return "set_pmode";
@@ -1444,7 +1448,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1463,31 +1468,32 @@ public class PlayerManagement {
             Player m = null;
             String mode = "";
             GameMode gm;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 2){
+            if (args.length == 2) {
                 m = Static.getServer().getPlayer(args[0].val());
                 mode = args[1].val();
             } else {
                 mode = args[0].val();
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            
-            try{
+
+            try {
                 gm = GameMode.valueOf(mode.toUpperCase());
-            } catch(IllegalArgumentException e){
+            } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("Mode must be either 'CREATIVE' or 'SURVIVAL'", ExceptionType.FormatException, line_num, f);
             }
             m.setGameMode(gm);
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class pexp implements Function{
+
+    @api
+    public static class pexp implements Function {
+
         public String getName() {
             return "pexp";
         }
@@ -1497,7 +1503,8 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "int {[player]} Gets the experience of a player within this level.";
+            return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99. (100 would be next level,"
+                    + " therefore, 0.)";
         }
 
         public ExceptionType[] thrown() {
@@ -1508,7 +1515,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1525,20 +1533,22 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 1){
+            if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            return new CInt(m.getExperience(), line_num, f);
+            return new CInt((int) (m.getExp() * 100), line_num, f);
         }
     }
-    
-    @api public static class set_pexp implements Function{
+
+    @api
+    public static class set_pexp implements Function {
+
         public String getName() {
             return "set_pexp";
         }
@@ -1548,7 +1558,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "void {[player], xp} Sets the experience of a player within the current level.";
+            return "void {[player], xp} Sets the experience of a player within the current level, as a percentage, from 0 to 100.";
         }
 
         public ExceptionType[] thrown() {
@@ -1559,7 +1569,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1577,24 +1588,84 @@ public class PlayerManagement {
             CommandSender p = env.GetCommandSender();
             Player m = null;
             int xp = 0;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 2){
+            if (args.length == 2) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                xp = (int)Static.getInt(args[1]);
+                xp = (int) Static.getInt(args[1]);
             } else {
-                xp = (int)Static.getInt(args[0]);
+                xp = (int) Static.getInt(args[0]);
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            m.setExperience(xp);
+            m.setExp(((float) xp) / 100.0F);
             return new CVoid(line_num, f);
         }
     }
-        
-    @api public static class plevel implements Function{
+
+    @api
+    public static class give_pexp implements Function {
+
+        public String getName() {
+            return "give_pexp";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], exp} Gives the player the specified amount of xp.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return true;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            CommandSender p = environment.GetCommandSender();
+            Player m = null;
+            int xp = 0;
+            if (p instanceof Player) {
+                m = (Player) p;
+            }
+            if (args.length == 2) {
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                xp = (int) Static.getInt(args[1]);
+            } else {
+                xp = (int) Static.getInt(args[0]);
+            }
+            if (m == null || !m.isOnline()) {
+                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+
+            m.giveExp(xp);
+
+            return new CVoid(line_num, f);
+        }
+    }
+
+    @api
+    public static class plevel implements Function {
+
         public String getName() {
             return "plevel";
         }
@@ -1615,7 +1686,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1632,20 +1704,22 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 1){
+            if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             return new CInt(m.getLevel(), line_num, f);
         }
     }
-    
-    @api public static class set_plevel implements Function{
+
+    @api
+    public static class set_plevel implements Function {
+
         public String getName() {
             return "set_plevel";
         }
@@ -1666,7 +1740,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1683,25 +1758,32 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            int xp = 0;
-            if(p instanceof Player){
-                m = (Player)p;
+            int level = 0;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 2){
+            if (args.length == 2) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                xp = (int)Static.getInt(args[1]);
+                level = (int) Static.getInt(args[1]);
             } else {
-                xp = (int)Static.getInt(args[0]);
+                level = (int) Static.getInt(args[0]);
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            m.setLevel(xp);
+            m.setLevel(level);
+//            float portion = m.getExp();
+//            m.setLevel(0);
+//            m.setExp(0);
+//            m.setTotalExperience(0);
+//            m.giveExp(7 + (level * 7 >> 1));
             return new CVoid(line_num, f);
         }
     }
-    
-    @api public static class ptexp implements Function{
+
+    @api
+    public static class ptexp implements Function {
+
         public String getName() {
             return "ptexp";
         }
@@ -1722,7 +1804,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1739,20 +1822,21 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 1){
+            if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             return new CInt(m.getTotalExperience(), line_num, f);
         }
     }
-    
-    @api public static class set_ptexp implements Function{
+
+    @api
+    public static class set_ptexp implements Function {
 
         public String getName() {
             return "set_ptexp";
@@ -1774,7 +1858,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1792,25 +1877,29 @@ public class PlayerManagement {
             CommandSender p = env.GetCommandSender();
             Player m = null;
             int xp = 0;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 2){
+            if (args.length == 2) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                xp = (int)Static.getInt(args[1]);
+                xp = (int) Static.getInt(args[1]);
             } else {
-                xp = (int)Static.getInt(args[0]);
+                xp = (int) Static.getInt(args[0]);
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             m.setTotalExperience(xp);
+//            m.setLevel(0);
+//            m.setExp(0);
+//            m.setTotalExperience(0);
+//            m.giveExp(xp);
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class pfood implements Function{
+
+    @api
+    public static class pfood implements Function {
 
         public String getName() {
             return "pfood";
@@ -1832,7 +1921,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1849,21 +1939,21 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 1){
+            if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             return new CInt(m.getFoodLevel(), line_num, f);
         }
-        
     }
-    
-    @api public static class set_pfood implements Function{
+
+    @api
+    public static class set_pfood implements Function {
 
         public String getName() {
             return "set_pfood";
@@ -1886,7 +1976,6 @@ public class PlayerManagement {
         }
 
         public void varList(IVariableList varList) {
-            
         }
 
         public boolean preResolveVariables() {
@@ -1905,25 +1994,25 @@ public class PlayerManagement {
             CommandSender p = env.GetCommandSender();
             Player m = null;
             int level = 0;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
-            if(args.length == 2){
+            if (args.length == 2) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                level = (int)Static.getInt(args[1]);
+                level = (int) Static.getInt(args[1]);
             } else {
-                level = (int)Static.getInt(args[0]);
+                level = (int) Static.getInt(args[0]);
             }
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             m.setFoodLevel(level);
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class set_peffect implements Function{
+
+    @api
+    public static class set_peffect implements Function {
 
         public String getName() {
             return "set_peffect";
@@ -1945,7 +2034,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1961,24 +2051,24 @@ public class PlayerManagement {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             Player m = Static.GetPlayer(args[0].val(), line_num, f);
-            if(m == null || !m.isOnline()){
+            if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            int effect = (int)Static.getInt(args[1]);
-            int strength = (int)Static.getInt(args[2]);
+            int effect = (int) Static.getInt(args[1]);
+            int strength = (int) Static.getInt(args[2]);
             int seconds = 30;
-            if(args.length == 4){
-                seconds = (int)Static.getInt(args[3]);
+            if (args.length == 4) {
+                seconds = (int) Static.getInt(args[3]);
             }
-            EntityPlayer ep = ((CraftPlayer)m).getHandle();
+            EntityPlayer ep = ((CraftPlayer) m).getHandle();
             Class epc = EntityLiving.class;
             MobEffect me = new MobEffect(effect, seconds * 20, strength);
-            try{
+            try {
                 Method meth = epc.getDeclaredMethod("d", net.minecraft.server.MobEffect.class);
                 //ep.d(new MobEffect(effect, seconds * 20, strength));
                 //Call it reflectively, because it's deobfuscated in newer versions of CB
                 meth.invoke(ep, me);
-            } catch(Exception e){
+            } catch (Exception e) {
                 try {
                     //Look for the addEffect version                
                     Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
@@ -1990,10 +2080,10 @@ public class PlayerManagement {
             }
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class set_phealth implements Function{
+
+    @api
+    public static class set_phealth implements Function {
 
         public String getName() {
             return "set_phealth";
@@ -2015,7 +2105,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -2032,26 +2123,26 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
             Player m = null;
-            if(p instanceof Player){
-                m = (Player)p;
+            if (p instanceof Player) {
+                m = (Player) p;
             }
             int health = 0;
-            if(args.length == 2){
+            if (args.length == 2) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                health = (int)Static.getInt(args[1]);
+                health = (int) Static.getInt(args[1]);
             } else {
-                health = (int)Static.getInt(args[0]);
+                health = (int) Static.getInt(args[0]);
             }
-            if(health < 0 || health > 20){
+            if (health < 0 || health > 20) {
                 throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, line_num, f);
             }
             m.setHealth(health);
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class ponline implements Function{
+
+    @api
+    public static class ponline implements Function {
 
         public String getName() {
             return "ponline";
@@ -2075,7 +2166,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -2092,11 +2184,11 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(Static.getServer().getOfflinePlayer(args[0].val()).isOnline(), line_num, f);
         }
-        
     }
-    
-    @api public static class pwhitelisted implements Function{
-        
+
+    @api
+    public static class pwhitelisted implements Function {
+
         public String getName() {
             return "pwhitelisted";
         }
@@ -2119,7 +2211,6 @@ public class PlayerManagement {
         }
 
         public void varList(IVariableList varList) {
-            
         }
 
         public boolean preResolveVariables() {
@@ -2138,10 +2229,10 @@ public class PlayerManagement {
             OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
             return new CBoolean(pl.isWhitelisted(), line_num, f);
         }
-        
     }
-    
-    @api public static class set_pwhitelisted implements Function{
+
+    @api
+    public static class set_pwhitelisted implements Function {
 
         public String getName() {
             return "set_pwhitelisted";
@@ -2164,7 +2255,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -2184,10 +2276,10 @@ public class PlayerManagement {
             pl.setWhitelisted(whitelist);
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class pbanned implements Function{
+
+    @api
+    public static class pbanned implements Function {
 
         public String getName() {
             return "pbanned";
@@ -2214,7 +2306,6 @@ public class PlayerManagement {
         }
 
         public void varList(IVariableList varList) {
-            
         }
 
         public boolean preResolveVariables() {
@@ -2233,10 +2324,10 @@ public class PlayerManagement {
             OfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
             return new CBoolean(pl.isBanned(), line_num, f);
         }
-        
     }
-    
-    @api public static class set_pbanned implements Function{
+
+    @api
+    public static class set_pbanned implements Function {
 
         public String getName() {
             return "set_pbanned";
@@ -2262,7 +2353,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -2282,10 +2374,10 @@ public class PlayerManagement {
             pl.setBanned(ban);
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class pisop implements Function{
+
+    @api
+    public static class pisop implements Function {
 
         public String getName() {
             return "pisop";
@@ -2322,15 +2414,13 @@ public class PlayerManagement {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             Player m = environment.GetPlayer();
-            if(args.length == 1){
+            if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if(m == null){
+            if (m == null) {
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             return new CBoolean(m.isOp(), line_num, f);
         }
-        
     }
-    
 }
