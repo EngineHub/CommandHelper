@@ -2423,4 +2423,104 @@ public class PlayerManagement {
             return new CBoolean(m.isOp(), line_num, f);
         }
     }
+    
+    @api public static class set_compass_target implements Function{
+
+        public String getName() {
+            return "set_compass_target";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "array {[player], locationArray} Sets the player's compass target, and returns the old location.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Player m = null;
+            Location l;
+            if(args.length == 1){
+                l = Static.GetLocation(args[0], null, line_num, f);
+            } else {
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                l = Static.GetLocation(args[1], null, line_num, f);
+            }
+            if (m == null) {
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            Location old = m.getCompassTarget();
+            m.setCompassTarget(l);
+            return Static.GetLocationArray(old);
+        }
+        
+    }
+    
+    @api public static class get_compass_target implements Function{
+
+        public String getName() {
+            return "get_compass_target";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "array {[player]} Gets the compass target of the specified player";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Player m = environment.GetPlayer();
+            if(args.length == 1){
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+            }
+            if (m == null) {
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            return Static.GetLocationArray(m.getCompassTarget());
+        }
+        
+    }
 }
