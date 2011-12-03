@@ -158,7 +158,11 @@ public class SerializedPersistance implements Persistance{
         }
         key = "plugin." + user.getClass().getCanonicalName() + "." + key;
         Serializable oldVal = data.get(key);
-        data.put(key, value);
+        if(value == null){
+            data.remove(key);
+        } else {
+            data.put(key, value);
+        }
         return oldVal;
     }
 

@@ -192,4 +192,45 @@ public class Persistance {
         }
         
     }
+    
+    @api public static class clear_value implements Function{
+
+        public String getName() {
+            return "clear_value";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "void {key} Completely removes a value from storage. Calling has_value(key) after this call will return false.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Static.getPersistance().setValue(new String[]{"commandhelper", "function", "storage", args[0].val()}, null);
+            return new CVoid(line_num, f);
+        }
+        
+    }
 }
