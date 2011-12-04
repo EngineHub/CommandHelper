@@ -18,6 +18,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
+import com.laytonsmith.aliasengine.functions.BasicLogic.equals_ic;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 
@@ -345,6 +346,57 @@ public class ArrayHandling {
         
         public Boolean runAsync() {
             return null;
+        }
+        
+    }
+    
+    @api public static class array_contains_ic implements Function{
+
+        public String getName() {
+            return "array_contains_ic";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {array, testValue} Works like array_contains, except the comparison ignores case.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            equals_ic e = new equals_ic();
+            if(args[0] instanceof CArray){
+                CArray ca = (CArray) args[0];
+                for(int i = 0; i < ca.size(); i++){
+                    if(((CBoolean)e.exec(line_num, f, environment, ca.get(i, line_num), args[1])).getBoolean()){
+                        return new CBoolean(true, line_num, f);
+                    }
+                }
+                return new CBoolean(false, line_num, f);
+            } else {
+                throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, line_num, f);
+            }
         }
         
     }
