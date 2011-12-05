@@ -9,8 +9,10 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.DirtyRegisteredListener;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.events.BoundEvent;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -25,6 +27,7 @@ import org.bukkit.Location;
 import org.bukkit.command.Command;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
@@ -261,6 +264,60 @@ public class Sandbox {
             o.toString();
             return new CVoid(line_num, f);
         }
+    }
+    
+    @api public static class super_cancel implements Function{
+
+        public String getName() {
+            return "super_cancel";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public String docs() {
+            return "void {} \"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
+                    + " super cancelled, not only is the cancelled flag set to true, the event stops propagating down, so"
+                    + " no other plugins will receive the event at all (other than monitor level). This is useful for overridding"
+                    + " event handlers for plugins that don't respect the cancelled flag. This function hooks into the play-dirty"
+                    + " framework that injects custom event handlers into bukkit.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.BindException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            BoundEvent.ActiveEvent original = environment.GetEvent();
+            if(original == null){
+                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
+            }
+            if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable 
+                    && original.getUnderlyingEvent() instanceof org.bukkit.event.Event){
+                ((Cancellable)original.getUnderlyingEvent()).setCancelled(true);
+                DirtyRegisteredListener.setCancelled((org.bukkit.event.Event)original.getUnderlyingEvent());
+            }
+            environment.GetEvent().setCancelled(true);
+            return new CVoid(line_num, f);
+        }
+        
     }
 
     

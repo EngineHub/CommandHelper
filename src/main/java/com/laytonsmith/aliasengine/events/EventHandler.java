@@ -7,7 +7,6 @@ package com.laytonsmith.aliasengine.events;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.exceptions.EventException;
@@ -123,15 +122,8 @@ public class EventHandler {
         
         for(BoundEvent b : toRun){
             //TODO: Priorities
-            try{
-                b.trigger(driver.evaluate(e));
-            } catch(CancelCommandException ex){
-                try{
-                    driver.cancel(e);
-                } catch(EventException eex){
-                    //Ignore, but still break.
-                }
-                break;
+            try{                
+                b.trigger(e, driver.evaluate(e));            
             } catch(EventException ex){
                 throw new ConfigRuntimeException(ex.getMessage(), null, 0, null);
             }

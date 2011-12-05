@@ -27,7 +27,6 @@ import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
 import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
-import com.laytonsmith.aliasengine.functions.ArrayHandling.array_get;
 import com.laytonsmith.aliasengine.functions.BasicLogic._switch;
 import com.laytonsmith.aliasengine.functions.BasicLogic.ifelse;
 import com.laytonsmith.aliasengine.functions.DataHandling.assign;

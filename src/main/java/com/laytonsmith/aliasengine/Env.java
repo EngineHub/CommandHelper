@@ -203,12 +203,12 @@ public class Env implements Cloneable{
         return (Script)env.get("script");
     }        
     
-    public void SetEvent(BoundEvent e){
+    public void SetEvent(BoundEvent.ActiveEvent e){
         env.put("event", e);
     }
     
-    public BoundEvent GetEvent(){
-        return (BoundEvent)env.get("event");
+    public BoundEvent.ActiveEvent GetEvent(){
+        return (BoundEvent.ActiveEvent)env.get("event");
     }
     
     @Override

@@ -27,6 +27,7 @@ import com.laytonsmith.aliasengine.Installer;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
 import com.laytonsmith.aliasengine.Version;
+import com.laytonsmith.aliasengine.events.EventList;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.bukkit.migration.PermissionsResolverServerListener;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
@@ -116,7 +117,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
-        playerListener.playDirty();
+        Static.PlayDirty();
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Lowest);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
         
@@ -125,7 +126,11 @@ public class CommandHelperPlugin extends JavaPlugin {
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, interpreterListener, Priority.Lowest);
         registerEvent(Event.Type.PLAYER_QUIT, interpreterListener, Priority.Normal);
         registerEvent(Event.Type.SERVER_COMMAND, serverListener, Priority.Lowest);
-        (new PermissionsResolverServerListener(perms)).register(this);
+        
+        //Script events
+        EventList.Startup(this);
+        
+        (new PermissionsResolverServerListener(perms, this)).register(this);
         
         playerListener.loadGlobalAliases();
         interpreterListener.reload();

@@ -432,7 +432,7 @@ public class Minecraft {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.UntameableModException, ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -477,7 +477,7 @@ public class Minecraft {
                 }
                 return new CVoid(line_num, f);
             } else {
-                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableModException, line_num, f);
+                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, line_num, f);
             }
         }
         
@@ -499,7 +499,7 @@ public class Minecraft {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.UntameableModException, ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -533,7 +533,7 @@ public class Minecraft {
                     return new CNull(line_num, f);
                 }
             } else {
-                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableModException, line_num, f);
+                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, line_num, f);
             }
         }
         

@@ -95,7 +95,8 @@ public class Exceptions {
          */
         InvalidWorldException,
         /**
-         * This exception is thrown if an error occurs when trying to bind() an event
+         * This exception is thrown if an error occurs when trying to bind() an event, or if a event framework
+         * related error occurs.
          */
         BindException,
         /**
@@ -105,7 +106,7 @@ public class Exceptions {
         /**
          * If an untameable mob is attempted to be tamed, this exception is thrown
          */
-        UntameableModException,
+        UntameableMobException,
     }
     @api public static class _try implements Function{      
         

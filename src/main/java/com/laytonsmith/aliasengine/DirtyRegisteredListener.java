@@ -52,6 +52,65 @@ public class DirtyRegisteredListener extends RegisteredListener {
         executor = eventExecutor;
     }
 
+    public static class DirtyEnumMap<K extends Enum<K>, V> extends EnumMap<K, V> {
+
+        public DirtyEnumMap(Class<K> keyType) {
+            super(keyType);
+        }
+
+        public DirtyEnumMap(EnumMap<K, ? extends V> m) {
+            super(m);
+        }
+
+        public DirtyEnumMap(Map<K, ? extends V> m) {
+            super(m);
+        }
+
+        @Override
+        public V put(K key, V value) {
+            if (!(value instanceof DirtyTreeSet) && value instanceof TreeSet) {
+                return super.put(key, (V) DirtyTreeSet.GenerateDirtyTreeSet((TreeSet) value));
+            } else {
+                return super.put(key, value);
+            }
+            //return null;
+        }
+    }
+
+    public static class DirtyTreeSet<E> extends TreeSet {
+
+        public static DirtyTreeSet GenerateDirtyTreeSet(TreeSet ts) {
+            DirtyTreeSet dts = new DirtyTreeSet(ts.comparator());            
+            for (Object o : ts) {
+                dts.add(o);
+            }
+            return dts;
+        }
+        
+        public DirtyTreeSet(Comparator<? super E> comparator) {
+            super(comparator);
+        }
+
+        @Override
+        public boolean add(Object e) {
+            if(!(e instanceof DirtyRegisteredListener) && e instanceof RegisteredListener){
+                try {
+                    return super.add(Generate((RegisteredListener)e));
+                } catch (NoSuchFieldException ex) {
+                    Logger.getLogger(DirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(DirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(DirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else {
+                return super.add(e);
+            }
+            return false;
+        }
+                
+    }
+
     public static void Repopulate() throws NoSuchFieldException, ClassCastException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException {
         //Go through the list of registered listeners, and inject our
         //our own poisoned DirtyRegisteredListeners in instead
@@ -62,13 +121,17 @@ public class DirtyRegisteredListener extends RegisteredListener {
         EnumMap<Event.Type, SortedSet<RegisteredListener>> listeners =
                 (EnumMap<Event.Type, SortedSet<RegisteredListener>>) fListener.get(pm);
 
+        if (listeners instanceof DirtyEnumMap) {
+            return; //We don't need to bother with it, we've already injected our poisoned EnumMap,
+            //so further additions will go through that instead.
+        }
+        
         //Remove final from the listeners, so we can modify it
         Field modifiersField = Field.class.getDeclaredField("modifiers");
         modifiersField.setAccessible(true);
         modifiersField.setInt(fListener, fListener.getModifiers() & ~Modifier.FINAL);
 
-        Map<Event.Type, SortedSet<RegisteredListener>> newListeners = new EnumMap<Event.Type, SortedSet<RegisteredListener>>(Event.Type.class);
-
+        Map<Event.Type, SortedSet<RegisteredListener>> newListeners = new DirtyEnumMap<Event.Type, SortedSet<RegisteredListener>>(Event.Type.class);
 
         //We need the comparator, so we can create a new listener map
         Field fComparator = SimplePluginManager.class.getDeclaredField("comparer");
@@ -86,7 +149,7 @@ public class DirtyRegisteredListener extends RegisteredListener {
         while (i.hasNext()) {
             final Map.Entry<Event.Type, SortedSet<RegisteredListener>> mySet = (Map.Entry<Event.Type, SortedSet<RegisteredListener>>) i.next();
             Iterator k = mySet.getValue().iterator();
-            SortedSet<RegisteredListener> rls = new TreeSet<RegisteredListener>(comparator);
+            SortedSet<RegisteredListener> rls = new DirtyTreeSet<RegisteredListener>(comparator);
             newListeners.put(mySet.getKey(), rls);
             while (k.hasNext()) {
                 final RegisteredListener rl = (RegisteredListener) k.next();
@@ -104,11 +167,11 @@ public class DirtyRegisteredListener extends RegisteredListener {
 
     }
 
-    public static class MyEntry {
-
-        public Type key;
-        public DirtyRegisteredListener value;
-    }
+//    public static class MyEntry {
+//
+//        public Type key;
+//        public DirtyRegisteredListener value;
+//    }
 
     public static void setCancelled(Event superCancelledEvent) {
         if (cancelledEvents.size() >= queueCapacity) {
@@ -227,20 +290,20 @@ public class DirtyRegisteredListener extends RegisteredListener {
             stopWatch = new StopWatch(
                     this.plugin.getClass().getSimpleName() + "."//Plugin name
                     + this.listener.getClass().getCanonicalName().replaceAll("\\.", "/") + "." //File event is being called from
-                    + (event.getType()==Event.Type.CUSTOM_EVENT?"CUSTOM_EVENT/"+event.getEventName():event.getType().name()) //Event name
+                    + (event.getType() == Event.Type.CUSTOM_EVENT ? "CUSTOM_EVENT/" + event.getEventName() : event.getType().name()) //Event name
                     );
-        }   
+        }
         executor.execute(listener, event);
         if (stopWatch != null) {
             stopWatch.stop();
-            if(Debug.EVENT_LOGGING){
+            if (Debug.EVENT_LOGGING) {
                 Debug.DoLog(event.getType(), 2, "\t\t\tEvent completed in " + stopWatch.getElapsedTime() + " milliseconds");
             }
-            if(Performance.PERFORMANCE_LOGGING){
+            if (Performance.PERFORMANCE_LOGGING) {
                 Performance.DoLog(stopWatch);
             }
         }
-        if(Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)){
+        if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)) {
             Debug.DoLog(event.getType(), 1, "--------------------------------------------------------------\n");
         }
     }

@@ -721,4 +721,26 @@ public class Static {
         f.append(message);
         f.flush();        
     }
+    
+    /**
+     * Sets up CommandHelper to play-dirty, if the user has specified as such
+     */
+    public static void PlayDirty() {
+        if ((Boolean) Static.getPreferences().getPreference("play-dirty")) {
+            try {
+                    //Set up our "proxy"
+                    DirtyRegisteredListener.Repopulate();                
+            } catch (NoSuchMethodException ex) {
+                Logger.getLogger(Static.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (NoSuchFieldException ex) {
+                AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+            } catch (ClassCastException ex) {
+                AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+            } catch (IllegalArgumentException ex) {
+                AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+            } catch (IllegalAccessException ex) {
+                AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
+            }
+        } //else play nice :(
+    }
 }

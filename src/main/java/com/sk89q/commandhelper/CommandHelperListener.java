@@ -124,7 +124,7 @@ public class CommandHelperListener extends PlayerListener {
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {        
         String cmd = event.getMessage();        
         Player player = event.getPlayer();
-        playDirty();
+        Static.PlayDirty();
         if (cmd.equals("/.") || cmd.equals("/repeat")) {
             return;
         }
@@ -169,27 +169,6 @@ public class CommandHelperListener extends PlayerListener {
         Player player = event.getPlayer();
         sessions.remove(player.getName());
     }
-
-    /**
-     * Sets up CommandHelper to play-dirty, if the user has specified as such
-     */
-    public void playDirty() {
-        if ((Boolean) Static.getPreferences().getPreference("play-dirty")) {
-            try {
-                    //Set up our "proxy"
-                    DirtyRegisteredListener.Repopulate();                
-            } catch (NoSuchMethodException ex) {
-                Logger.getLogger(CommandHelperListener.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchFieldException ex) {
-                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-            } catch (ClassCastException ex) {
-                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-            } catch (IllegalArgumentException ex) {
-                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-            } catch (IllegalAccessException ex) {
-                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-            }
-        } //else play nice :(
-    }
+    
 
 }

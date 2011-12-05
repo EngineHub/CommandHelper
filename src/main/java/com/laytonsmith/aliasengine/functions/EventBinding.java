@@ -6,6 +6,7 @@ package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
@@ -22,6 +23,7 @@ import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.io.File;
 import java.util.List;
 import org.bukkit.command.CommandSender;
+import org.bukkit.event.Cancellable;
 
 /**
  *
@@ -202,11 +204,12 @@ public class EventBinding {
         }
 
         public String docs() {
-            return "void {} Cancels the event (if applicable), and stops this event handler as well.";
+            return "void {} Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
+                    + " If called from outside an event handler, a BindException is thrown.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.BindException};
         }
 
         public boolean isRestricted() {
@@ -226,7 +229,64 @@ public class EventBinding {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            throw new CancelCommandException("");
+            BoundEvent.ActiveEvent original = environment.GetEvent();
+            if(original == null){
+                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
+            }
+            if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable){
+                ((Cancellable)original.getUnderlyingEvent()).setCancelled(true);
+            }
+            environment.GetEvent().setCancelled(true);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class is_cancelled implements Function{
+
+        public String getName() {
+            return "is_cancelled";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public String docs() {
+            return "boolean {} Returns whether or not the underlying event is cancelled or not. If the event is not cancellable in the first place,"
+                    + " false is returned. If called from outside an event, a BindException is thrown";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.BindException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            BoundEvent.ActiveEvent original = environment.GetEvent();
+            if(original == null){
+                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
+            }
+            boolean result = false;
+            if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable){
+                result = ((Cancellable)original.getUnderlyingEvent()).isCancelled();
+            }
+            return new CBoolean(result, line_num, f);
         }
         
     }

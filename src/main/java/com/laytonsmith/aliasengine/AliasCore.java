@@ -199,8 +199,7 @@ public class AliasCore {
         boolean is_loaded = false;
         try {
             Globals.clear();
-            EventHandler.UnregisterAll();
-            EventList.Startup(parent);
+            EventHandler.UnregisterAll();            
             IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
             if (!aliasConfig.exists()) {
                 aliasConfig.getParentFile().mkdirs();
