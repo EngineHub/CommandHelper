@@ -439,9 +439,17 @@ public class Meta {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Static.getAliasCore().removePlayerReference(env.GetCommandSender());
+            boolean doRemoval = true;
+            if(!Static.getAliasCore().hasPlayerReference(env.GetCommandSender())){
+                doRemoval = false;
+            }
+            if(doRemoval){
+                Static.getAliasCore().removePlayerReference(env.GetCommandSender());
+            }
             Static.getAliasCore().alias(args[0].val(), env.GetCommandSender(), null);
-            Static.getAliasCore().addPlayerReference(env.GetCommandSender());
+            if(doRemoval){
+                Static.getAliasCore().addPlayerReference(env.GetCommandSender());
+            }
             return new CVoid(line_num, f);
         }
     }
