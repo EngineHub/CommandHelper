@@ -85,7 +85,7 @@ public class Meta {
                     //If they just opped themselves, or deopped themselves in the command
                     //don't undo what they just did. Otherwise, set their op status back
                     //to their original status
-                    if(!cmd.equalsIgnoreCase("op " + env.GetPlayer().getName()) && !cmd.equalsIgnoreCase("deop " + env.GetPlayer().getName())){
+                    if(env.GetPlayer() != null && !cmd.equalsIgnoreCase("op " + env.GetPlayer().getName()) && !cmd.equalsIgnoreCase("deop " + env.GetPlayer().getName())){
                         this.setOp(env.GetCommandSender(), isOp);
                     }
                 }
