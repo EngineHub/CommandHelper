@@ -154,7 +154,19 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            int i = (int)Static.getInt(args[0]);
+            int i = -1;
+            if(args[0] instanceof CString){
+                //We also accept item notation
+                if(args[0].val().contains(":")){
+                    String[] split = args[0].val().split(":");
+                    try{
+                        i = Integer.parseInt(split[0]);
+                    } catch(NumberFormatException e){}
+                }
+            }
+            if(i == -1){
+                i = (int)Static.getInt(args[0]);
+            }
             Material m = Material.getMaterial(i);
             return new CString(m.toString(), line_num, f);
         }
