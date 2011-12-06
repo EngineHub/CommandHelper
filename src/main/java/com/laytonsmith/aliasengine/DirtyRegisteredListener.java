@@ -262,7 +262,7 @@ public class DirtyRegisteredListener extends RegisteredListener {
             if (Debug.EVENT_LOGGING_LEVEL >= 4) {
                 //Let's just dump the fields
                 StringBuilder b = new StringBuilder("\n\tFields in this event:\n");
-                for (Field f : event.getClass().getDeclaredFields()) {
+                for (Field f : event.getClass().getSuperclass().getDeclaredFields()) {
                     b.append("\t\t").append(f.getType().getSimpleName()).append(" ").append(f.getName());
                     f.setAccessible(true);
                     try {
@@ -279,7 +279,7 @@ public class DirtyRegisteredListener extends RegisteredListener {
             if (Debug.EVENT_LOGGING_LEVEL == 5) {
                 //dump ALL the things
                 StringBuilder b = new StringBuilder("\n\tMethods in this event:\n");
-                for (Method m : event.getClass().getDeclaredMethods()) {
+                for (Method m : event.getClass().getSuperclass().getDeclaredMethods()) {
                     b.append("\t\t").append(m.getReturnType().getSimpleName()).append(" ").append(m.getName()).append("(").append(Static.strJoin(m.getParameterTypes(), ", ")).append(");\n");
                 }
                 Debug.DoLog(event.getType(), 5, b.toString());

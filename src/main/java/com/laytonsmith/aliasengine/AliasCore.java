@@ -384,6 +384,10 @@ public class AliasCore {
     }
     
     public boolean hasPlayerReference(CommandSender p){
-        return echoCommand.contains(p);
+        if(p instanceof Player){
+            return echoCommand.contains(((Player)p).getName());
+        } else {
+            return false;
+        }
     }
 }
