@@ -294,12 +294,12 @@ public class Debug {
             }
             boolean on = Static.getBoolean(args[0]);
             int level = 1;
-            if(args.length == 2){
+            if(args.length >= 2){
                 level = Static.Normalize((int) Static.getInt(args[1]), 1, 5);
             }
             Debug.EVENT_LOGGING = on;
             Debug.EVENT_LOGGING_LEVEL = level;
-            if(args.length == 3){
+            if(args.length >= 3){
                 Debug.LOG_TO_SCREEN = Static.getBoolean(args[2]);
             }
             return new CVoid(line_num, f);

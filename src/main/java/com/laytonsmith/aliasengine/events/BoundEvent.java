@@ -194,9 +194,6 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * @param event 
      */
     public void trigger(Object originalEvent, Map<String, Construct> event) throws EventException {
-        if(env.GetEvent().isCancelled()){
-            return;
-        }
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         CArray ca = new CArray(0, null);
