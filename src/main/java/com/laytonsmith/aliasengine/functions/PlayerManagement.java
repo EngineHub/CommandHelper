@@ -1008,7 +1008,7 @@ public class PlayerManagement {
                     pitch = (float) Static.getNumber(args[1]);
                 } catch (NumberFormatException e) {
                     //It's the player, F variation
-                    toSet = p.getServer().getPlayer(args[0].val());
+                    toSet = Static.getServer().getPlayer(args[0].val());
                     pitch = toSet.getLocation().getPitch();
                     int g = (int) Static.getInt(args[1]);
                     if (g < 0 || g > 3) {
@@ -1019,7 +1019,7 @@ public class PlayerManagement {
                 }
             } else if (args.length == 3) {
                 //It's the player, yaw, pitch variation
-                toSet = p.getServer().getPlayer(args[0].val());
+                toSet = Static.getServer().getPlayer(args[0].val());
                 yaw = (float) Static.getNumber(args[1]);
                 pitch = (float) Static.getNumber(args[2]);
             }
