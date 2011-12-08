@@ -58,11 +58,16 @@ public class PlayerManagement {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{0};
+            return new Integer[]{0, 1};
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             CommandSender p = env.GetCommandSender();
+            
+            if (args.length == 1) {
+                p = Static.getServer().getPlayer(args[0].val());
+            }
+            
             if (p instanceof Player) {
                 return new CString(((Player) p).getName(), line_num, f);
             } else if (p instanceof ConsoleCommandSender) {
@@ -73,9 +78,10 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "string {} Returns the name of the player running the command. If the command is being run from the console, then the string '~console'"
-                    + " is returned. If the command is coming from elsewhere, null is returned, and the behavior is undefined. Note that most functions"
-                    + " won't support the user '~console' (they'll throw a PlayerOfflineException), but you can use this to determine where a command is being run from.";
+            return "string {[playerName]} Returns the full name of the partial player name specified or the player running the command otherwise. If the command is being run from"
+                    + " the console, then the string '~console' is returned. If the command is coming from elsewhere, null is returned, and the behavior is undefined."
+                    + " Note that most functions won't support the user '~console' (they'll throw a PlayerOfflineException), but you can use this to determine"
+                    + " where a command is being run from.";
         }
 
         public ExceptionType[] thrown() {
