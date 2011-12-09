@@ -54,13 +54,11 @@ public class EchoesTest {
 
     @Test
     public void testDocs() {
-        System.out.println("docs");
         TestClassDocs(Echoes.docs(), Echoes.class);
     }
     
     @Test public void testChat() throws CancelCommandException{
         Echoes.chat a = new Echoes.chat();     
-        TestBoilerplate(a, "chat");
         a.exec(0, null, env, C.onstruct("Hello World!"));
         verify(fakePlayer).chat("Hello World!");
     }
@@ -68,7 +66,6 @@ public class EchoesTest {
     @Test public void testBroadcast() throws NoSuchFieldException, InstantiationException, 
             IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, CancelCommandException{
         Echoes.broadcast a = new Echoes.broadcast();
-        TestBoilerplate(a, "broadcast");
         when(fakePlayer.getServer()).thenReturn(fakeServer);
         CommandHelperPlugin.myServer = fakeServer;
         a.exec(0, null, env, C.onstruct("Hello World!"));

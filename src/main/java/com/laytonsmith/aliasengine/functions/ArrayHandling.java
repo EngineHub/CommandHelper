@@ -136,7 +136,7 @@ public class ArrayHandling {
                             finish = ca.size() + finish;
                         }
                         CArray na = new CArray(line_num, f);
-                        if(finish <= start){
+                        if(finish < start){
                             //return an empty array in cases where the indexes don't make sense
                             return na;
                         }
