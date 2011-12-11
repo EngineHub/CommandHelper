@@ -31,6 +31,8 @@ import com.laytonsmith.aliasengine.functions.BasicLogic._switch;
 import com.laytonsmith.aliasengine.functions.BasicLogic.and;
 import com.laytonsmith.aliasengine.functions.BasicLogic.ifelse;
 import com.laytonsmith.aliasengine.functions.BasicLogic.nand;
+import com.laytonsmith.aliasengine.functions.BasicLogic.nor;
+import com.laytonsmith.aliasengine.functions.BasicLogic.or;
 import com.laytonsmith.aliasengine.functions.DataHandling.assign;
 import com.laytonsmith.aliasengine.functions.Meta.scriptas;
 import com.laytonsmith.aliasengine.functions.StringHandling.sconcat;
@@ -376,6 +378,10 @@ public class Script {
                     return ((and)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 } else if(f instanceof nand){
                     return ((nand)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                } else if(f instanceof or){
+                    return ((or)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                } else if(f instanceof nor){
+                    return ((nor)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 }
 
 
