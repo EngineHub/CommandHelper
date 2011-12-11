@@ -617,9 +617,12 @@ public class BasicLogic {
         public Integer[] numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
-
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            for(Construct c : args){
+        public Construct exec(int line_num, File f, Env env, Construct ... args){
+            return new CNull(line_num, f);
+        }
+        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> args) throws CancelCommandException, ConfigRuntimeException {
+            for(GenericTreeNode<Construct> tree : args){
+                Construct c = env.GetScript().eval(tree, env);
                 boolean b = Static.getBoolean(c);
                 if(b == false){
                     return new CBoolean(false, line_num, f);
@@ -813,10 +816,12 @@ public class BasicLogic {
         public Boolean runAsync() {
             return null;
         }
-
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(int line_num, File f, Env environment, Construct... args){
+            return new CNull(line_num, f);
+        }
+        public Construct execs(int line_num, File f, Env environment, List<GenericTreeNode<Construct>> args) throws ConfigRuntimeException {
             and and = new and();
-            boolean val = ((CBoolean)and.exec(line_num, f, environment, args)).getBoolean();
+            boolean val = ((CBoolean)and.execs(line_num, f, environment, args)).getBoolean();
             return new CBoolean(!val, line_num, f);
         }
         

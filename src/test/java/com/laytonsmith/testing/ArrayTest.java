@@ -304,10 +304,10 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("{0: {1, 2}, 1: 1}");
     }
     
-    @Test public void testArraySlice1() throws ConfigCompileException{
-        assertEquals("{2, 3}", SRun("array(1, 2, 3)[1..-1]", null));
-        assertEquals("{2}", SRun("array(1, 2)[1..-1]", null));
-        assertEquals("{}", SRun("array(1)[1..-1]", null));
+    @Test public void testInnerArrayIsArray() throws ConfigCompileException{
+        SRun("assign(@pdata, array(value: array(1)))\n"
+                + "msg(array_size(@pdata[value]))", fakePlayer);
+        verify(fakePlayer).sendMessage("1");
     }
 
 }

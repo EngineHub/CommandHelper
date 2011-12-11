@@ -189,6 +189,9 @@ public class ArrayHandlingTest {
         assertEquals("{c, d, e}", SRun("array(a, b, c, d, e)[2..]", null));
         assertEquals("{}", SRun("array(1, 2, 3, 4, 5)[3..0]", null));
         assertEquals("{a, b}", SRun("array_get(array(a, b))", null));
+        assertEquals("{2, 3}", SRun("array(1, 2, 3)[1..-1]", null));
+        assertEquals("{2}", SRun("array(1, 2)[1..-1]", null));
+        assertEquals("{}", SRun("array(1)[1..-1]", null));
     }
     
     @Test public void testArrayMergeNormal() throws ConfigCompileException{

@@ -93,12 +93,14 @@ public class AliasCore {
                     if (s.match(command)) {
                         this.addPlayerReference(player);
                         if ((Boolean) Static.getPreferences().getPreference("console-log-commands")) {
-                            Static.getLogger().log(Level.INFO, "CH: Running original command ----> " + command);
+                            StringBuilder b = new StringBuilder("CH: Running original command ");
                             if (player instanceof Player) {
-                                Static.getLogger().log(Level.INFO, "on player " + ((Player) player).getName());
+                                b.append("on player ").append(((Player) player).getName());
                             } else {
-                                Static.getLogger().log(Level.INFO, "from a CommandSender");
+                                b.append("from a CommandSender");
                             }
+                            b.append(" ----> ").append(command);
+                            Static.getLogger().log(Level.INFO, b.toString());
                         }
                         try {
                             s.run(s.getVariables(command), env, new MScriptComplete() {

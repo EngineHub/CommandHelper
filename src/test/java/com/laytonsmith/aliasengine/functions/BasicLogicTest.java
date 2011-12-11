@@ -142,15 +142,26 @@ public class BasicLogicTest {
         verify(fakePlayer, times(5)).sendMessage("pass");
     }
     
-    @Test public void testAnd() throws CancelCommandException{
+    @Test public void testAnd1() throws CancelCommandException, ConfigCompileException{
         BasicLogic.and a = new BasicLogic.and();
-        assertCTrue(a.exec(0, null, env, _true, _true, _true));
-        assertCFalse(a.exec(0, null, env, _true, _true, _false));
-        assertCTrue(a.exec(0, null, env, _true, _true));
-        assertCFalse(a.exec(0, null, env, _true, _false));
-        assertCFalse(a.exec(0, null,env, _false, _false));
-        assertCTrue(a.exec(0, null, env, _true));
-        assertCFalse(a.exec(0, null, env, _false));
+        SRun("if(and(true, true, true), msg(pass))", fakePlayer);
+        SRun("if(and(true, true, false), '', msg(pass))", fakePlayer);
+        SRun("if(and(true, true), msg(pass))", fakePlayer);
+        SRun("if(and(true, false), '', msg(pass))", fakePlayer);
+        SRun("if(and(false, false), '', msg(pass))", fakePlayer);
+        SRun("if(and(true), msg(pass))", fakePlayer);
+        SRun("if(and(false), '', msg(pass))", fakePlayer);
+        verify(fakePlayer, times(7)).sendMessage("pass");
+    }
+    
+    /**
+     * Tests lazy evaluation
+     * @return
+     * @throws ConfigCompileException 
+     */
+    @Test public void testAnd2() throws ConfigCompileException{
+        SRun("and(false, msg(lol))", fakePlayer);
+        verify(fakePlayer, times(0)).sendMessage("lol");
     }
     
     @Test public void testOr() throws CancelCommandException{

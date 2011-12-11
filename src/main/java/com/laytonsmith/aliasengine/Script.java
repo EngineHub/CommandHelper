@@ -28,7 +28,9 @@ import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
 import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
 import com.laytonsmith.aliasengine.functions.BasicLogic._switch;
+import com.laytonsmith.aliasengine.functions.BasicLogic.and;
 import com.laytonsmith.aliasengine.functions.BasicLogic.ifelse;
+import com.laytonsmith.aliasengine.functions.BasicLogic.nand;
 import com.laytonsmith.aliasengine.functions.DataHandling.assign;
 import com.laytonsmith.aliasengine.functions.Meta.scriptas;
 import com.laytonsmith.aliasengine.functions.StringHandling.sconcat;
@@ -370,6 +372,10 @@ public class Script {
                     return ((ifelse)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 } else if(f instanceof _switch){
                     return ((_switch)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());                    
+                } else if(f instanceof and){
+                    return ((and)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                } else if(f instanceof nand){
+                    return ((nand)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 }
 
 
