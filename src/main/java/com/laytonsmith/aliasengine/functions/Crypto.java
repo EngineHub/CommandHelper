@@ -14,8 +14,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import com.laytonsmith.aliasengine.api;
 import java.math.BigInteger;
-import java.nio.charset.Charset;
-import sun.misc.CharacterEncoder;
 
 /**
  * @author Layton

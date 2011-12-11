@@ -16,13 +16,10 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.events.BoundEvent;
 import com.laytonsmith.aliasengine.events.EventHandler;
-import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.io.File;
-import java.util.List;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.Cancellable;
 
 /**
@@ -163,11 +160,12 @@ public class EventBinding {
         }
 
         public String docs() {
-            return "void {[eventID]}";
+            return "void {[eventID]} Unbinds an event, which causes it to not run anymore. If called from within an event handler, eventID is"
+                    + " optional, and defaults to the current event id.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.BindException};
         }
 
         public boolean isRestricted() {
@@ -187,7 +185,18 @@ public class EventBinding {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            
+            String id = null;
+            if(args.length == 1){
+                //We are cancelling an arbitrary event
+                id = args[0].val();
+            } else {
+                //We are cancelling this event. If we are not in an event, throw an exception
+                if(environment.GetEvent() == null){
+                    throw new ConfigRuntimeException("No event ID specified, and not running inside an event", ExceptionType.BindException, line_num, f);
+                }
+                id = environment.GetEvent().getBoundEvent().getId();
+            }
+            EventHandler.UnregisterEvent(id);
             return new CVoid(line_num, f);
         }
         

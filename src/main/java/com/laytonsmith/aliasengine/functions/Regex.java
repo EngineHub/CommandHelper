@@ -7,9 +7,11 @@ package com.laytonsmith.aliasengine.functions;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Env;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import java.io.File;
@@ -75,7 +77,11 @@ public class Regex {
                 ret.push(new CString(m.group(0), line_num, f));
 
                 for(int i = 1; i <= m.groupCount(); i++){
-                    ret.push(new CString(m.group(i), line_num, f));
+                    if(m.group(i) == null){
+                        ret.push(new CNull(line_num, f));
+                    } else {
+                        ret.push(Static.resolveConstruct(m.group(i), line_num, f));
+                    }
                 }
             }
             return ret;
