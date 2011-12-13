@@ -97,6 +97,31 @@ public class EventHandler {
         return event_handles.get(type);
     }
     
+    public static void ManualTrigger(String eventName, CArray object){
+        //TODO: Hmm, this is the wrong approach, I think. Needs work.
+//        SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
+//        for(org.bukkit.event.Event.Type type : event_handles.keySet()){
+//            SortedSet<BoundEvent> bounded = GetEvents(type);
+//            if(bounded != null){
+//                for(BoundEvent b : bounded){
+//                    Event driver = EventList.getEvent(type, eventName);
+//                    if(b.getEventName().equalsIgnoreCase(eventName) && driver.matches(b.getPrefilter(), object)){
+//                        toRun.add(b);
+//                    }
+//                }
+//            }
+//        }
+//        for(BoundEvent b : toRun){
+//            //TODO: Priorities
+//            try{       
+//                b.t
+//                b.trigger(e, driver.evaluate(e));            
+//            } catch(EventException ex){
+//                throw new ConfigRuntimeException(ex.getMessage(), null, 0, null);
+//            }
+//        }
+    }
+    
     /**
      * Triggers an event by name. The event name is the primary filter for this event, but
      * to increase event lookup efficiency, the driver is required. This will run in O(n),

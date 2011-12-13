@@ -317,7 +317,11 @@ public class MScriptCompiler {
             } else {
                 if (t.type == TType.NEWLINE) {
                     inLeft = true;
-                    Script s = new Script(left, right, env.clone());
+                    Env newEnv = env;
+                    try{
+                        newEnv = env.clone();
+                    } catch(Exception e){}
+                    Script s = new Script(left, right, newEnv);
                     scripts.add(s);
                     left = new ArrayList();
                     right = new ArrayList();

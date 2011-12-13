@@ -5,7 +5,6 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.events.BoundEvent;
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import java.util.HashMap;
 import java.util.Map;
@@ -21,8 +20,14 @@ public class Env implements Cloneable{
     /**
      * This is the underlying map of variables
      */
-    private Map<String, Object> env = new HashMap<String, Object>();   
+    private Map<String, Object> custom = new HashMap<String, Object>();   
     private Map<String, Boolean> flags = new HashMap<String, Boolean>();
+    private CommandSender commandSender = null;
+    private IVariableList iVariableList = null;
+    private Map<String, Procedure> procs = null;
+    private String label = null;
+    private Script script = null;
+    private BoundEvent.ActiveEvent event = null;
     
     /*
      * The constructor has relatively little todo, most things are lazy
@@ -71,17 +76,17 @@ public class Env implements Cloneable{
      * @param var 
      */
     public void SetCustom(String name, Object var){
-        if(!env.containsKey("custom")){
-            env.put("custom", new HashMap<String, Object>());
+        if(!custom.containsKey("custom")){
+            custom.put("custom", new HashMap<String, Object>());
         }
-        ((Map<String, Object>)env.get("custom")).put(name, var);        
+        ((Map<String, Object>)custom.get("custom")).put(name, var);        
     }
     
     public Object GetCustom(String name){
-        if(!env.containsKey("custom")){
-            env.put("custom", new HashMap<String, Object>());
+        if(!custom.containsKey("custom")){
+            custom.put("custom", new HashMap<String, Object>());
         }
-        return ((Map<String, Object>)env.get("custom")).get(name);
+        return ((Map<String, Object>)custom.get("custom")).get(name);
     }
     /**
      * Given the environment, this function returns the CommandSender in the
@@ -90,18 +95,7 @@ public class Env implements Cloneable{
      * @return 
      */
     public CommandSender GetCommandSender(){
-        if(env.containsKey("user")){
-            Object userObject = env.get("user");
-            if(userObject == null){
-                return null;
-            }
-            if(userObject instanceof CommandSender){
-                return ((CommandSender)userObject);
-            }
-            throw new ConfigRuntimeException("Expecting environment variable \"user\" to be an instance of CommandSender", 0, null);
-        } else {
-            throw new ConfigRuntimeException("Expecting environment to contain \"user\", but no such key was found", 0, null);
-        }
+        return commandSender;
     }
     
     /**
@@ -109,7 +103,7 @@ public class Env implements Cloneable{
      * @param env 
      */
     public void SetCommandSender(CommandSender cs){
-        env.put("user", cs);
+        commandSender = cs;
     }
     
     /**
@@ -121,17 +115,10 @@ public class Env implements Cloneable{
      * @return 
      */
     public Player GetPlayer(){
-        if(env.containsKey("user")){
-            Object userObject = env.get("user");
-            if(userObject == null){
-                return null;
-            }
-            if(userObject instanceof Player){
-                return ((Player)userObject);
-            }
-            return null;
+        if(commandSender instanceof Player){
+            return (Player)commandSender;
         } else {
-            throw new ConfigRuntimeException("Expecting environment to contain \"user\", but no such key was found", 0, null);
+            return null;
         }
     }
     
@@ -140,7 +127,7 @@ public class Env implements Cloneable{
      * @param env 
      */
     public void SetPlayer(Player p){
-        env.put("user", p);
+        commandSender = p;
     }
     
     /**
@@ -151,18 +138,14 @@ public class Env implements Cloneable{
      * @return 
      */
     public IVariableList GetVarList(){
-        IVariableList varList = null;
-        if(!env.containsKey("varList")){
-            varList = new IVariableList();
-            env.put("varList", varList);
-        } else {
-            varList = ((IVariableList)env.get("varList"));
+        if(iVariableList == null){
+            iVariableList = new IVariableList();
         }
-        return varList;
+        return iVariableList;
     }
     
     public void SetVarList(IVariableList varList){
-        env.put("varList", varList);
+        iVariableList = varList;
     }
     
     /**
@@ -173,48 +156,51 @@ public class Env implements Cloneable{
      * @return 
      */
     public Map<String, Procedure> GetProcs(){
-        Map<String, Procedure> procs = null;
-        if(!env.containsKey("knownProcs")){
+        if(procs == null){
             procs = new HashMap<String, Procedure>();
-            env.put("knownProcs", procs);
-        } else {
-            procs = ((Map<String, Procedure>)env.get("knownProcs"));
         }
         return procs;
     }
     
     public void SetProcs(Map<String, Procedure> procs){
-        env.put("knownProcs", procs);
+        this.procs = procs;
     }
     
     public String GetLabel(){
-        return (String)env.get("label");
+        return label;
     }
     
     public void SetLabel(String label){
-        env.put("label", label);
+        this.label = label;
     }
     
     public void SetScript(Script s){
-        env.put("script", s);
+        this.script = s;
     }
     
     public Script GetScript(){
-        return (Script)env.get("script");
+        return script;
     }        
     
     public void SetEvent(BoundEvent.ActiveEvent e){
-        env.put("event", e);
+        event = e;
     }
     
     public BoundEvent.ActiveEvent GetEvent(){
-        return (BoundEvent.ActiveEvent)env.get("event");
+        return event;
     }
     
     @Override
-    public Env clone(){
+    public Env clone() throws CloneNotSupportedException{
         Env clone = new Env();
-        clone.env = new HashMap<String, Object>(this.env);
+        clone.custom = new HashMap<String, Object>(this.custom);
+        clone.commandSender = commandSender;
+        clone.event = event;
+        clone.flags = new HashMap<String, Boolean>(flags);
+        clone.label = label;
+        clone.procs = new HashMap<String, Procedure>(procs);
+        clone.script = script;
+        clone.iVariableList = (IVariableList) iVariableList.clone();
         return clone;
     }
 }

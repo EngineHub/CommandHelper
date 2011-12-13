@@ -6,15 +6,14 @@ package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
-import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
+import com.laytonsmith.aliasengine.functions.IVariableList;
 import com.sk89q.util.StringUtil;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.command.CommandSender;
 
 /**
  *
@@ -51,44 +50,66 @@ public class Procedure implements Cloneable {
         return name + "(" + StringUtil.joinString(varList.keySet(), ", ", 0) + ")";
     }
     
-    
-    public Construct execute(List<Construct> variables, Env env){//CommandSender player, Map<String, Procedure> procStack, String label){
-        resetVariables();
+    public Construct cexecute(List<GenericTreeNode<Construct>> args, Env env){
+        List<Construct> list = new ArrayList<Construct>();
+        for(GenericTreeNode<Construct> arg : args){
+            list.add(env.GetScript().seval(arg, env));
+        }
+        return execute(list, env);
+    }
+    public Construct execute(List<Construct> args, Env env){//CommandSender player, Map<String, Procedure> procStack, String label){
+        env.SetVarList(new IVariableList());
+        CArray array = new CArray(0, null);        
+        for(String key : originals.keySet()){
+            Construct c = originals.get(key);
+            env.GetVarList().set(new IVariable(key, c, 0, null));
+            array.push(c);
+        }
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         Script fakeScript = new Script(null, null, env);
-        CArray array = new CArray(0, null);
-        for(Construct d : variables){
-            array.push(d);
-        }
-        env.GetVarList().set(new IVariable("@arguments", array, 0, null));
-        for(GenericTreeNode<Construct> c : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
-            if(c.getData() instanceof IVariable){
-
-                String varname = ((IVariable)c.getData()).getName();
-                IVariable var = varList.get(((IVariable)c.getData()).getName());
-                if(var == null){
-                    var = new IVariable(varname, c.getData().getLineNum(), c.getData().getFile());
-                }
-                if(varname.equals("@arguments")){
-                    var.setIval(env.GetVarList().get("@arguments"));
-                }
-                int index = indexOf(varname);
-                if(index != -1){
-                    //This variable has not been explicitly set, so we use the default
-                    try{
-                        Construct resolved = variables.get(index);
-//                        if(!(resolved instanceof CArray)){
-//                            resolved = Static.resolveConstruct(resolved.val(), var.getLineNum(), var.getFile());
-//                        }
-                        var.setIval(resolved);
-                    } catch(ArrayIndexOutOfBoundsException e){
-                        //var.setIval(new CNull(var.line_num, var.file));
-                    }
-                }
-                env.GetVarList().set(var);
+        for(int i = 0; i < args.size(); i++){
+//            GenericTreeNode<Construct> node = args.get(i);
+//            Construct c = env.GetScript().eval(node, env);
+            Construct c = args.get(i);
+            array.set(i, c);
+            if(varIndex.size() > i){
+                String varname = varIndex.get(i).getName();
+                env.GetVarList().set(new IVariable(varname, c, c.getLineNum(), c.getFile()));
             }
         }
+        env.GetVarList().set(new IVariable("@arguments", array, 0, null));
+//        for(Construct d : variables){
+//            array.push(d);
+//        }
+//        env.GetVarList().set(new IVariable("@arguments", array, 0, null));
+//        for(GenericTreeNode<Construct> c : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
+//            if(c.getData() instanceof IVariable){
+//
+//                String varname = ((IVariable)c.getData()).getName();
+//                IVariable var = varList.get(((IVariable)c.getData()).getName());
+//                if(var == null){
+//                    var = new IVariable(varname, c.getData().getLineNum(), c.getData().getFile());
+//                }
+//                if(varname.equals("@arguments")){
+//                    var.setIval(env.GetVarList().get("@arguments"));
+//                }
+//                int index = indexOf(varname);
+//                if(index != -1){
+//                    //This variable has not been explicitly set, so we use the default
+//                    try{
+//                        Construct resolved = variables.get(index);
+////                        if(!(resolved instanceof CArray)){
+////                            resolved = Static.resolveConstruct(resolved.val(), var.getLineNum(), var.getFile());
+////                        }
+//                        var.setIval(resolved);
+//                    } catch(ArrayIndexOutOfBoundsException e){
+//                        //var.setIval(new CNull(var.line_num, var.file));
+//                    }
+//                }
+//                env.GetVarList().set(var);
+//            }
+//        }
         
         try{
             fakeScript.eval(tree, env);
@@ -105,12 +126,6 @@ public class Procedure implements Cloneable {
             }
         }
         return -1;
-    }
-    
-    private void resetVariables(){
-        for(Map.Entry<String, IVariable> varEntry : varList.entrySet()){
-            varEntry.getValue().setIval(originals.get(varEntry.getKey()));
-        }
     }
     
     @Override

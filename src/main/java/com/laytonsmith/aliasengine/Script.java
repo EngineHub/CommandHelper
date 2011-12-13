@@ -209,6 +209,14 @@ public class Script {
             done.done(null);
         }
     }
+    
+    public Construct seval(GenericTreeNode<Construct> c, final Env env){
+        Construct ret = eval(c, env);
+        if(ret instanceof IVariable){
+            return env.GetVarList().get(((IVariable)ret).getName()).ival();
+        }
+        return ret;
+    }
 
     public Construct eval(GenericTreeNode<Construct> c, final Env env) throws CancelCommandException {
         final Construct m = c.getData();
@@ -222,12 +230,16 @@ public class Script {
                     if (p == null) {
                         throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
                     }
-                    List<Construct> variables = new ArrayList<Construct>();
-                    for (GenericTreeNode<Construct> child : c.getChildren()) {
-                        variables.add(eval(child, env));
-                    }
-                    variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
-                    return p.execute(variables, env.clone());
+//                    List<Construct> variables = new ArrayList<Construct>();
+//                    for (GenericTreeNode<Construct> child : c.getChildren()) {
+//                        variables.add(eval(child, env));
+//                    }
+//                    variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
+                    Env newEnv = env;
+                    try{
+                        newEnv = env.clone();
+                    } catch(Exception e){}
+                    return p.cexecute(c.getChildren(), newEnv);
                 }
                 final Function f;
                 try{
@@ -359,15 +371,19 @@ public class Script {
                         ((IVariable)var).setIval(env.GetVarList().get(((IVariable)var).getName()).ival());
                         custom_params.set((IVariable)var);
                     }
-                    Env newEnv = env.clone();
+                    Env newEnv = env;
+                    try{
+                        newEnv = env.clone();
+                    } catch(Exception e){}
                     newEnv.SetVarList(custom_params);
                     GenericTreeNode<Construct> tree = c.getChildAt(c.getChildren().size() - 1);
                     return ((bind)f).execs(name, options, prefilter, event_object, tree, newEnv, m.getLineNum(), m.getFile());
                 } else if(f instanceof scriptas){
-                    Construct user = eval(c.getChildAt(0), env);
-                    GenericTreeNode<Construct> script = c.getChildAt(1);
-                    env.SetCustom("script_node", script);
-                    return ((scriptas)f).exec(m.getLineNum(), m.getFile(), env, user);
+                    return ((scriptas)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+//                    Construct user = eval(c.getChildAt(0), env);
+//                    GenericTreeNode<Construct> script = c.getChildAt(1);
+//                    env.SetCustom("script_node", script);
+//                    return ((scriptas)f).exec(m.getLineNum(), m.getFile(), env, user);
                 } else if(f instanceof sconcat){
                     return ((sconcat)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 } else if(f instanceof ifelse){

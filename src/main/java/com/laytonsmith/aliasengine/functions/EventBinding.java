@@ -300,4 +300,46 @@ public class EventBinding {
         
     }
     
+    @api public static class trigger implements Function{
+
+        public String getName() {
+            return "trigger";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {eventName, eventObject} Manually triggers bound events. The event object passed to this function is "
+                    + " sent directly as-is to the bound events. Check the documentation for each event to see what is required."
+                    + " No checks will be done on the data here, but it is not recommended to fail to send all parameters required.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        
+    }
+    
 }

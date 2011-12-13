@@ -20,6 +20,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
 import net.minecraft.server.ServerConfigurationManager;
@@ -461,13 +462,14 @@ public class Meta {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
-            return "void {player, script} Runs the specified script in the context of a given player."
+            return "void {player, [label], script} Runs the specified script in the context of a given player."
                     + " A script that runs player() for instance, would return the specified player's name,"
-                    + " not the player running the command.";
+                    + " not the player running the command. Setting the label allows you to dynamically set the label"
+                    + " this script is run under as well (in regards to permission checking)";
         }
 
         public ExceptionType[] thrown() {
@@ -489,14 +491,26 @@ public class Meta {
         public Boolean runAsync() {
             return null;
         }
+        
+        public Construct exec(int line_num, File f, Env environment, Construct... args){
+            return null;
+        }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Player p = Static.GetPlayer(args[0].val(), line_num, f);
+        public Construct execs(int line_num, File f, Env environment, List<GenericTreeNode<Construct>> args) throws ConfigRuntimeException {
+            Player p = Static.GetPlayer(environment.GetScript().seval(args.get(0), environment).val(), line_num, f);
             CommandSender originalPlayer = environment.GetCommandSender();
+            int offset = 0;
+            String originalLabel = environment.GetLabel();
+            if(args.size() == 3){
+                offset++;
+                String label = environment.GetScript().seval(args.get(1), environment).val();
+                environment.SetLabel(label);
+            }
             environment.SetPlayer(p);
-            GenericTreeNode<Construct> tree = (GenericTreeNode<Construct>)environment.GetCustom("script_node");
+            GenericTreeNode<Construct> tree = args.get(1 + offset);
             environment.GetScript().eval(tree, environment);
             environment.SetCommandSender(originalPlayer);
+            environment.SetLabel(originalLabel);
             return new CVoid(line_num, f);
         }
         
