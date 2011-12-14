@@ -14,11 +14,15 @@ import com.laytonsmith.aliasengine.events.Prefilters.PrefilterType;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
 import java.util.Map;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Event.Type;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -36,8 +40,9 @@ public class PlayerEvents {
         }
 
         public String docs() {
-            return "{player: <string match>} This event is called when a player logs in "
-                    + "{player: The player's name}";
+            return "{player: <string match> |"
+                    + "join_message: <regex match>} This event is called when a player logs in "
+                    + "{player: The player's name | join_message: The default join message}";
         }
 
         public String since() {
@@ -48,7 +53,7 @@ public class PlayerEvents {
             return org.bukkit.event.Event.Type.PLAYER_JOIN;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, Object e) {
+        public boolean matches(Map<String, Construct> prefilter, Object e) throws PrefilterNonMatchException {
             if(e instanceof PlayerJoinEvent){
                 PlayerJoinEvent ple = (PlayerJoinEvent) e;
                 if(prefilter.containsKey("player")){
@@ -56,6 +61,7 @@ public class PlayerEvents {
                         return false;
                     }
                 }                
+                Prefilters.match(prefilter, "join_message", ple.getJoinMessage(), PrefilterType.REGEX);
                 return true;
             }
             return false;
@@ -66,10 +72,17 @@ public class PlayerEvents {
                 PlayerJoinEvent ple = (PlayerJoinEvent) e;
                 Map<String, Construct> map = super.evaluate_helper(e);
                 map.put("player", new CString(ple.getPlayer().getName(), 0, null));
+                map.put("join_message", new CString(ple.getJoinMessage(), 0, null));
                 return map;
             } else{
                 throw new EventException("Cannot convert e to PlayerLoginEvent");
             }
+        }
+        
+        @Override
+        public Object convert(CArray manual){
+            PlayerJoinEvent e = new PlayerJoinEvent(Static.GetPlayer(manual.get("player").val(), 0, null), manual.get("join_message").val());
+            return e;
         }
         
     }
@@ -157,8 +170,16 @@ public class PlayerEvents {
             return Type.PLAYER_INTERACT;
         }
         
+        @Override
+        public Object convert(CArray manual){
+            Player p = Static.GetPlayer(manual.get("player"), 0, null);
+            Action a = Action.valueOf(manual.get("action").val().toUpperCase());
+            ItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item").val(), 1, 0, null);                                   
+            Block b = Static.GetLocation(manual.get("location"), null, 0, null).getBlock();
+            BlockFace bf = BlockFace.valueOf(manual.get("facing").val());
+            PlayerInteractEvent e = new PlayerInteractEvent(p, a, is, b, bf);            
+            return e;
+        }
+        
     }
-
-
-    //public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {}
 }

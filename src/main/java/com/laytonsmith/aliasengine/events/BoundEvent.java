@@ -202,7 +202,25 @@ public class BoundEvent implements Comparable<BoundEvent> {
         }
         env.GetVarList().set(new IVariable(eventObjName, ca, 0, null));
         env.SetEvent(new ActiveEvent(originalEvent, event, this));
-
+        this.execute();
+    }
+    
+    /**
+     * Used to manually trigger an event, the underlying event is set to null.
+     * @param event
+     * @throws EventException 
+     */
+    public void manual_trigger(CArray event) throws EventException{
+        env.GetVarList().set(new IVariable(eventObjName, event, 0, null));
+        Map<String, Construct> map = new HashMap<String, Construct>();
+        for(Construct key : event.keySet()){
+            map.put(key.val(), event.get(key, 0));
+        }
+        env.SetEvent(new ActiveEvent(null, map, this));
+        this.execute();
+    }
+    
+    private void execute() throws EventException{
         GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
         superRoot.addChild(tree);
         Script s = Script.GenerateScript(superRoot, env);

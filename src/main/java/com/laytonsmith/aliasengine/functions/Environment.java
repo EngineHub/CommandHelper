@@ -9,6 +9,7 @@ import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
+import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
@@ -17,10 +18,13 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import net.minecraft.server.Material;
+import net.minecraft.server.Packet0KeepAlive;
 import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.craftbukkit.CraftServer;
+import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.Player;
 
 /**
@@ -28,11 +32,13 @@ import org.bukkit.entity.Player;
  * @author Layton
  */
 public class Environment {
-    public static String docs(){
+
+    public static String docs() {
         return "Allows you to manipulate the environment around the player";
     }
-    
-    @api public static class get_block_at implements Function{
+
+    @api
+    public static class get_block_at implements Function {
 
         public String getName() {
             return "get_block_at";
@@ -50,8 +56,8 @@ public class Environment {
                     + " that don't have meta data normally will return 0 in y. If world isn't specified, the current"
                     + " player's world is used.";
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
         }
 
@@ -59,7 +65,8 @@ public class Environment {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -75,13 +82,13 @@ public class Environment {
             double z = 0;
             World w = null;
             String world = null;
-            if(env.GetPlayer() instanceof Player){
+            if (env.GetPlayer() instanceof Player) {
                 w = env.GetPlayer().getWorld();
             }
-            if(args.length == 1 || args.length == 2){
-                if(args[0] instanceof CArray){
-                    CArray ca = (CArray)args[0];
-                    if(ca.size() == 3){
+            if (args.length == 1 || args.length == 2) {
+                if (args[0] instanceof CArray) {
+                    CArray ca = (CArray) args[0];
+                    if (ca.size() == 3) {
                         x = Static.getDouble(ca.get(0, line_num));
                         y = Static.getDouble(ca.get(1, line_num));
                         z = Static.getDouble(ca.get(2, line_num));
@@ -92,36 +99,37 @@ public class Environment {
                 } else {
                     throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, line_num, f);
                 }
-                if(args.length == 2){
+                if (args.length == 2) {
                     world = args[1].val();
                 }
-            } else if(args.length == 3 || args.length == 4){
+            } else if (args.length == 3 || args.length == 4) {
                 x = Static.getDouble(args[0]);
                 y = Static.getDouble(args[1]);
                 z = Static.getDouble(args[2]);
-                if(args.length == 4){
+                if (args.length == 4) {
                     world = args[3].val();
                 }
             }
-            if(world != null){
+            if (world != null) {
                 w = Static.getServer().getWorld(world);
             }
-            if(w == null){
+            if (w == null) {
                 throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
             }
             x = java.lang.Math.floor(x);
             y = java.lang.Math.floor(y);
             z = java.lang.Math.floor(z);
-            Block b = w.getBlockAt((int)x, (int)y, (int)z);
+            Block b = w.getBlockAt((int) x, (int) y, (int) z);
             return new CString(b.getTypeId() + ":" + b.getData(), line_num, f);
         }
-        public Boolean runAsync(){
+
+        public Boolean runAsync() {
             return false;
         }
-        
     }
-    
-    @api public static class set_block_at implements Function{
+
+    @api
+    public static class set_block_at implements Function {
 
         public String getName() {
             return "set_block_at";
@@ -138,8 +146,8 @@ public class Environment {
                     + " value is not specified, 0 is used. If world isn't specified, the current player's world"
                     + " is used.";
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
         }
 
@@ -147,7 +155,8 @@ public class Environment {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -164,54 +173,54 @@ public class Environment {
             String id = null;
             String world = null;
             World w = null;
-            if(env.GetPlayer() instanceof Player){
+            if (env.GetPlayer() instanceof Player) {
                 w = env.GetPlayer().getWorld();
             }
-            if((args.length == 2 || args.length == 3) && args[0] instanceof CArray){
+            if ((args.length == 2 || args.length == 3) && args[0] instanceof CArray) {
                 Location l = Static.GetLocation(args[0], env.GetPlayer().getWorld(), line_num, f);
                 x = l.getBlockX();
                 y = l.getBlockY();
                 z = l.getBlockZ();
                 world = l.getWorld().getName();
                 id = args[1].val();
-                if(args.length == 3){
+                if (args.length == 3) {
                     world = args[2].val();
                 }
-                
+
             } else {
                 x = Static.getNumber(args[0]);
                 y = Static.getNumber(args[1]);
                 z = Static.getNumber(args[2]);
                 id = args[3].val();
-                if(args.length == 5){
+                if (args.length == 5) {
                     world = args[4].val();
                 }
             }
-            if(world != null){
+            if (world != null) {
                 w = Static.getServer().getWorld(world);
             }
-            if(w == null){
+            if (w == null) {
                 throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
             }
             x = java.lang.Math.floor(x);
             y = java.lang.Math.floor(y);
             z = java.lang.Math.floor(z);
-            int ix = (int)x;
-            int iy = (int)y;
-            int iz = (int)z;
+            int ix = (int) x;
+            int iy = (int) y;
+            int iz = (int) z;
             System.out.println("Setting block at " + ix + "," + iy + "," + iz);
             Block b = w.getBlockAt(ix, iy, iz);
             StringBuilder data = new StringBuilder();
             StringBuilder meta = new StringBuilder();
             boolean inMeta = false;
-            for(int i = 0; i < id.length(); i++){
+            for (int i = 0; i < id.length(); i++) {
                 Character c = id.charAt(i);
-                if(!inMeta){
-                    if(!Character.isDigit(c) && c != ':'){
+                if (!inMeta) {
+                    if (!Character.isDigit(c) && c != ':') {
                         throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers", ExceptionType.FormatException,
                                 line_num, f);
                     }
-                    if(c == ':'){
+                    if (c == ':') {
                         inMeta = true;
                         continue;
                     }
@@ -220,24 +229,25 @@ public class Environment {
                     meta.append(c);
                 }
             }
-            if(meta.length() == 0){
+            if (meta.length() == 0) {
                 meta.append("0");
             }
-            
+
             int idata = Integer.parseInt(data.toString());
             byte imeta = Byte.parseByte(meta.toString());
             b.setTypeId(idata);
             b.setData(imeta);
-            
+
             return new CVoid(line_num, f);
         }
-        public Boolean runAsync(){
+
+        public Boolean runAsync() {
             return false;
         }
-        
     }
-    
-    @api public static class set_sign_text implements Function{
+
+    @api
+    public static class set_sign_text implements Function {
 
         public String getName() {
             return "set_sign_text";
@@ -275,42 +285,42 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Location l = Static.GetLocation(args[0], environment.GetPlayer()==null?null:environment.GetPlayer().getWorld(), line_num, f);
-            if(l.getBlock().getState() instanceof Sign){
+            Location l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            if (l.getBlock().getState() instanceof Sign) {
                 String line1 = "";
                 String line2 = "";
                 String line3 = "";
                 String line4 = "";
-                if(args.length == 2 && args[1] instanceof CArray){
-                    CArray ca = (CArray)args[1];
-                    if(ca.size() >= 1){
+                if (args.length == 2 && args[1] instanceof CArray) {
+                    CArray ca = (CArray) args[1];
+                    if (ca.size() >= 1) {
                         line1 = ca.get(0, line_num).val();
                     }
-                    if(ca.size() >= 2){
+                    if (ca.size() >= 2) {
                         line2 = ca.get(1, line_num).val();
                     }
-                    if(ca.size() >= 3){
+                    if (ca.size() >= 3) {
                         line3 = ca.get(2, line_num).val();
                     }
-                    if(ca.size() >= 4){
+                    if (ca.size() >= 4) {
                         line4 = ca.get(3, line_num).val();
                     }
 
                 } else {
-                    if(args.length >= 2){
+                    if (args.length >= 2) {
                         line1 = args[1].val();
                     }
-                    if(args.length >= 3){
+                    if (args.length >= 3) {
                         line2 = args[2].val();
                     }
-                    if(args.length >= 4){
+                    if (args.length >= 4) {
                         line3 = args[3].val();
                     }
-                    if(args.length >= 5){
+                    if (args.length >= 5) {
                         line4 = args[4].val();
                     }
                 }
-                Sign s = (Sign)l.getBlock().getState();
+                Sign s = (Sign) l.getBlock().getState();
                 s.setLine(0, line1);
                 s.setLine(1, line2);
                 s.setLine(2, line3);
@@ -321,10 +331,10 @@ public class Environment {
                 throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, line_num, f);
             }
         }
-        
     }
-    
-    @api public static class get_sign_text implements Function{
+
+    @api
+    public static class get_sign_text implements Function {
 
         public String getName() {
             return "get_sign_text";
@@ -360,8 +370,8 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Location l = Static.GetLocation(args[0], environment.GetPlayer()==null?null:environment.GetPlayer().getWorld(), line_num, f);
-            if(l.getBlock().getState() instanceof Sign){
+            Location l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            if (l.getBlock().getState() instanceof Sign) {
                 Sign s = (Sign) l.getBlock().getState();
                 CString line1 = new CString(s.getLine(0), line_num, f);
                 CString line2 = new CString(s.getLine(1), line_num, f);
@@ -372,10 +382,10 @@ public class Environment {
                 throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, line_num, f);
             }
         }
-        
     }
-    
-    @api public static class is_sign_at implements Function{
+
+    @api
+    public static class is_sign_at implements Function {
 
         public String getName() {
             return "is_sign_at";
@@ -410,11 +420,62 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Location l = Static.GetLocation(args[0], environment.GetPlayer()==null?null:environment.GetPlayer().getWorld(), line_num, f);
-            return new CBoolean(l.getBlock().getType().equals(org.bukkit.Material.SIGN_POST) 
-                    ||l.getBlock().getType().equals(org.bukkit.Material.WALL_SIGN), line_num, f);
+            Location l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            return new CBoolean(l.getBlock().getType().equals(org.bukkit.Material.SIGN_POST)
+                    || l.getBlock().getType().equals(org.bukkit.Material.WALL_SIGN), line_num, f);
         }
-        
     }
-    
+
+    @api
+    public static class break_block implements Function {
+
+        public String getName() {
+            return "break_block";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "void {locationObject} Mostly simulates a block break at a location. (Does not trigger an event)";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            Location l;
+            Player p;
+            p = environment.GetPlayer();
+            World w = (p != null ? p.getWorld() : null);
+            l = Static.GetLocation(args[0], w, line_num, f);
+            if (l.getWorld() instanceof CraftWorld) {
+                CraftWorld cw = (CraftWorld) l.getWorld();
+                net.minecraft.server.Block.byId[l.getBlock().getTypeId()].dropNaturally(cw.getHandle(), l.getBlockX(), l.getBlockY(), l.getBlockZ(), l.getBlock().getData(), 1.0f, 0);
+            }
+            l.getBlock().setTypeId(0);
+            CraftServer cs = (CraftServer)Static.getServer();
+            cs.getHandle().a(new Packet0KeepAlive(), 0);
+            return new CVoid(line_num, f);
+            
+        }
+    }
 }

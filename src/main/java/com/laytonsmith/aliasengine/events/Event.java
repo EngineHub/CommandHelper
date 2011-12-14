@@ -4,9 +4,11 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.exceptions.EventException;
+import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
 import java.util.Map;
 
 /**
@@ -42,7 +44,15 @@ public interface Event extends Comparable<Event>{
      * This function should return true if the event code should be run, based
      * on this prefilter and triggering event's parameters.
      */
-    public boolean matches(Map<String, Construct> prefilter, Object e);
+    public boolean matches(Map<String, Construct> prefilter, Object e) throws PrefilterNonMatchException;
+    
+    /**
+     * If an event is manually triggered, then it may be required for an event
+     * object to be faked, so the rest of the event will work properly.
+     * @param manualObject
+     * @return 
+     */
+    public Object convert(CArray manualObject);
     
     /**
      * This function is called when an event is triggered. It passes the event, and expects
@@ -93,5 +103,21 @@ public interface Event extends Comparable<Event>{
      * script, but an event can choose to override this functionality if needed.
      */
     public void execute(Script s, BoundEvent b) throws EventException;
+    
+    /**
+     * If it is required to do something extra for server wide events, this can be
+     * done here. This is called when the EventHandler is instructed to manually trigger
+     * this event server-wide.
+     * @param e 
+     */
+    public void manualTrigger(Object e);
+    
+    /**
+     * If the event is an external event, and there is no reason to attempt a serverwide manual
+     * triggering, this function should return false, in which case the serverWide variable
+     * is ignored, and it is only piped through CH specific handlers.
+     * @return 
+     */
+    public boolean supportsExternal();
     
 }

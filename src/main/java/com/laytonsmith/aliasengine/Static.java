@@ -581,6 +581,18 @@ public class Static {
         }
         return m;
     }
+    
+    public static Player GetPlayer(Construct player, int line_num, File f) throws ConfigRuntimeException{
+        return GetPlayer(player.val(), line_num, f);
+    }
+    
+    public static Player GetPlayer(String player){
+        return GetPlayer(player, 0, null);
+    }
+    
+    public static Player GetPlayer(Construct player){
+        return GetPlayer(player, 0, null);
+    }
 
     /**
      * Location "objects" are mscript arrays that represent a location in game. There are 

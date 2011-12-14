@@ -4,10 +4,12 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Script;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.HashMap;
 import java.util.Map;
@@ -112,6 +114,40 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      */
     public int compareTo(Event o) {
         return this.getName().compareTo(o.getName());
+    }
+    
+    /**
+     * By default, if Object is a bukkit event, we trigger it. Otherwise, nothing
+     * is done.
+     * @param e 
+     */
+    public void manualTrigger(Object e){
+        if(e instanceof org.bukkit.event.Event){
+            Static.getServer().getPluginManager().callEvent((org.bukkit.event.Event)e);
+        }
+    }
+    
+    /**
+     * Since most events are bukkit events, we return true by default.
+     * @return 
+     */
+    public boolean supportsExternal(){
+        return true;
+    }
+    
+    /**
+     * If it is ok to by default do a simple conversion from a CArray to a
+     * Map, this method can do it for you. Likely this is not acceptable,
+     * so hard-coding the conversion will be necessary.
+     * @param manualObject
+     * @return 
+     */
+    public static Object DoConvert(CArray manualObject){
+        Map<String, Construct> map = new HashMap<String, Construct>();
+        for(Construct key : manualObject.keySet()){
+            map.put(key.val(), manualObject.get(key, 0));
+        }
+        return map;        
     }
     
 }

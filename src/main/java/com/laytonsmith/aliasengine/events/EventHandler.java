@@ -7,9 +7,9 @@ package com.laytonsmith.aliasengine.events;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.exceptions.EventException;
+import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -97,29 +97,32 @@ public class EventHandler {
         return event_handles.get(type);
     }
     
-    public static void ManualTrigger(String eventName, CArray object){
-        //TODO: Hmm, this is the wrong approach, I think. Needs work.
-//        SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
-//        for(org.bukkit.event.Event.Type type : event_handles.keySet()){
-//            SortedSet<BoundEvent> bounded = GetEvents(type);
-//            if(bounded != null){
-//                for(BoundEvent b : bounded){
-//                    Event driver = EventList.getEvent(type, eventName);
-//                    if(b.getEventName().equalsIgnoreCase(eventName) && driver.matches(b.getPrefilter(), object)){
-//                        toRun.add(b);
-//                    }
-//                }
-//            }
-//        }
-//        for(BoundEvent b : toRun){
-//            //TODO: Priorities
-//            try{       
-//                b.t
-//                b.trigger(e, driver.evaluate(e));            
-//            } catch(EventException ex){
-//                throw new ConfigRuntimeException(ex.getMessage(), null, 0, null);
-//            }
-//        }
+    public static void ManualTrigger(String eventName, CArray object, boolean serverWide){
+            for(org.bukkit.event.Event.Type type : event_handles.keySet()){
+                SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
+                SortedSet<BoundEvent> bounded = GetEvents(type);
+                Event driver = EventList.getEvent(type, eventName);
+                if(bounded != null){
+                    for(BoundEvent b : bounded){
+                        try {
+                            if(b.getEventName().equalsIgnoreCase(eventName) && driver.matches(b.getPrefilter(), driver.convert(object))){
+                                toRun.add(b);
+                            }
+                        } catch (PrefilterNonMatchException ex) {
+                            //Not running this one
+                        }
+                    }
+                }
+                //If it's not a serverwide event, or this event doesn't support external events.
+                if(!toRun.isEmpty()){
+                    if(!serverWide || !driver.supportsExternal()){
+                        FireListeners(toRun, driver, driver.convert(object));
+                    } else {
+                        //It's serverwide, so we can just trigger it normally with bukkit, and it should trickle back down to us
+                        driver.manualTrigger(driver.convert(object));
+                    }
+                }
+            }
     }
     
     /**
@@ -139,12 +142,20 @@ public class EventHandler {
         SortedSet<BoundEvent> bounded = GetEvents(type);
         if(bounded != null){
             for(BoundEvent b : bounded){
-                if(driver.getName().equals(eventName) && driver.matches(b.getPrefilter(), e)){
-                    toRun.add(b);
+                try {
+                    if(driver.getName().equals(eventName) && driver.matches(b.getPrefilter(), e)){
+                        toRun.add(b);
+                    }
+                } catch (PrefilterNonMatchException ex) {
+                    //Not running this one
                 }
             }
         }
         
+        FireListeners(toRun, driver, e);
+    }
+    
+    private static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, Object e){
         for(BoundEvent b : toRun){
             //TODO: Priorities
             try{                

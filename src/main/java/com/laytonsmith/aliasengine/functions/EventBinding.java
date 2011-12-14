@@ -14,6 +14,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.events.BoundEvent;
 import com.laytonsmith.aliasengine.events.EventHandler;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
@@ -307,13 +308,16 @@ public class EventBinding {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
-            return "void {eventName, eventObject} Manually triggers bound events. The event object passed to this function is "
+            return "void {eventName, eventObject, [serverWide]} Manually triggers bound events. The event object passed to this function is "
                     + " sent directly as-is to the bound events. Check the documentation for each event to see what is required."
-                    + " No checks will be done on the data here, but it is not recommended to fail to send all parameters required.";
+                    + " No checks will be done on the data here, but it is not recommended to fail to send all parameters required."
+                    + " If serverWide is true, the event is triggered directly in the server, unless it is a CommandHelper specific"
+                    + " event, in which case, serverWide is irrelevant. Defaults to false, which means that only CommandHelper code"
+                    + " will receive the event.";
         }
 
         public ExceptionType[] thrown() {
@@ -337,7 +341,20 @@ public class EventBinding {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            CArray obj = null;
+            if(args[1] instanceof CNull){
+                obj = new CArray(line_num, f);
+            } else if(args[1] instanceof CArray){
+                obj = (CArray)args[1];
+            } else {
+                throw new ConfigRuntimeException("The eventObject must be null, or an array", ExceptionType.CastException, line_num, f);
+            }
+            boolean serverWide = false;
+            if(args.length == 3){
+                serverWide = Static.getBoolean(args[2]);
+            }
+            EventHandler.ManualTrigger(args[0].val(), obj, serverWide);
+            return new CVoid(line_num, f);
         }
         
     }

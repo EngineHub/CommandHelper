@@ -692,7 +692,7 @@ public class Script {
             }
 
             if (t.type.equals(TType.FINAL_VAR) && left.size() - j >= 5) {
-                throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num);
+                throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num, t.file);
             }
             if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                 Variable v = new Variable(t.val(), null, t.line_num, t.file);
@@ -708,19 +708,19 @@ public class Script {
             if (j == 0 && !t.type.equals(TType.COMMAND)) {
                 if (!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)) {
                     throw new ConfigCompileException("Expected command (/command) at start of alias."
-                            + " Instead, found " + t.type + " (" + t.val() + ")", t.line_num);
+                            + " Instead, found " + t.type + " (" + t.val() + ")", t.line_num, t.file);
                 }
             }
             if (last_token.type.equals(TType.LSQUARE_BRACKET)) {
                 inside_opt_var = true;
                 if (!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))) {
-                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num);
+                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num, t.file);
                 }
             }
             if (after_no_def_opt_var && !inside_opt_var) {
                 if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                     throw new ConfigCompileException("You cannot have anything other than optional arguments after your"
-                            + " first optional argument, other that other optional arguments with no default", t.line_num);
+                            + " first optional argument, other that other optional arguments with no default", t.line_num, t.file);
                 }
             }
             if (!t.type.equals(TType.LSQUARE_BRACKET)
@@ -731,26 +731,26 @@ public class Script {
                     && !t.type.equals(TType.COMMAND)
                     && !t.type.equals(TType.FINAL_VAR)) {
                 if (!(t.type.equals(TType.STRING) && j - 1 > 0 && left.get(j - 1).type.equals(TType.OPT_VAR_ASSIGN))) {
-                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.line_num);
+                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.line_num, t.file);
                 }
             }
             if (last_token.type.equals(TType.COMMAND)) {
                 if (!(t.type.equals(TType.VARIABLE) || t.type.equals(TType.LSQUARE_BRACKET) || t.type.equals(TType.FINAL_VAR)
                         || t.type.equals(TType.LIT))) {
-                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.line_num);
+                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.line_num, t.file);
                 }
             }
             if (inside_opt_var && t.type.equals(TType.OPT_VAR_ASSIGN)) {
                 if (!((next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) && after_token.type.equals(TType.RSQUARE_BRACKET)
                         || (next_token.type.equals(TType.RSQUARE_BRACKET)))) {
-                    throw new ConfigCompileException("Unexpected token in optional variable", t.line_num);
+                    throw new ConfigCompileException("Unexpected token in optional variable", t.line_num, t.file);
                 } else if (next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) {
                     left_vars.get(lastVar).setDefault(next_token.val());
                 }
             }
             if (t.type.equals(TType.RSQUARE_BRACKET)) {
                 if (!inside_opt_var) {
-                    throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
+                    throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num, t.file);
                 }
                 inside_opt_var = false;
 //                if (last_token.type.equals(TType.VARIABLE)
@@ -888,7 +888,7 @@ public class Script {
                 scripts.get(j).compilerError = true;
                 this.compilerError = true;
                 throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
-                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getLineNum());
+                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getLineNum(), thisCommand.get(0).getFile());
             }
         }
 
