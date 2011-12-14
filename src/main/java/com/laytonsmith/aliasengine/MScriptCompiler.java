@@ -317,11 +317,11 @@ public class MScriptCompiler {
             } else {
                 if (t.type == TType.NEWLINE) {
                     inLeft = true;
-                    Env newEnv = env;
-                    try{
-                        newEnv = env.clone();
-                    } catch(Exception e){}
-                    Script s = new Script(left, right, newEnv);
+                    //Env newEnv = new Env();//env;
+//                    try{
+//                        newEnv = env.clone();
+//                    } catch(Exception e){}
+                    Script s = new Script(left, right);
                     scripts.add(s);
                     left = new ArrayList();
                     right = new ArrayList();
@@ -505,7 +505,7 @@ public class MScriptCompiler {
      */
     public static void execute(GenericTreeNode<Construct> root, Env env, MScriptComplete done, Script script){
         if(script == null){
-            script = new Script(null, null, env);
+            script = new Script(null, null);
         }
         StringBuilder b = new StringBuilder();
         for (GenericTreeNode<Construct> gg : root.getChildren()) {

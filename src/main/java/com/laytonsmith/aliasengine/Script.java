@@ -71,7 +71,7 @@ public class Script {
     private Map<String, Variable> left_vars;
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
-    private Env OriginalEnv;
+    private String label;
     private Env CurrentEnv;
 
     @Override
@@ -92,27 +92,31 @@ public class Script {
         return CurrentEnv;
     }
     
-    public Env getOriginalEnv(){
-        return OriginalEnv;
+    public String getLabel(){
+        return label;
     }
+//    public Env getOriginalEnv(){
+//        return OriginalEnv;
+//    }
 
-    public Script(List<Token> left, List<Token> right, Env env) {
+    public Script(List<Token> left, List<Token> right) {
         this.left = left;
         this.fullRight = right;
-        this.left_vars = new HashMap<String, Variable>();
-        this.OriginalEnv = env;
+        this.left_vars = new HashMap<String, Variable>();        
+        //this.OriginalEnv = env;
     }
     
     private Script(){}
     
-    public static Script GenerateScript(GenericTreeNode<Construct> tree, Env env){
+    public static Script GenerateScript(GenericTreeNode<Construct> tree, String label){
         Script s = new Script();
         
         s.hasBeenCompiled = true;
         s.compilerError = false;
         s.cright = new ArrayList<GenericTreeNode<Construct>>();
         s.cright.add(tree);
-        s.OriginalEnv = env;
+        s.label = label;
+        //s.OriginalEnv = env;
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
 //        for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
@@ -131,7 +135,7 @@ public class Script {
     public void run(final List<Variable> vars, Env myEnv, final MScriptComplete done) {
         //Some things, such as the label are determined at compile time
         this.CurrentEnv = myEnv;
-        this.CurrentEnv.SetLabel(this.OriginalEnv.GetLabel());
+        this.CurrentEnv.SetLabel(this.label);
         CommandSender p = myEnv.GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
             int line_num = 0;
@@ -221,7 +225,7 @@ public class Script {
     public Construct eval(GenericTreeNode<Construct> c, final Env env) throws CancelCommandException {
         final Construct m = c.getData();
         CurrentEnv = env;
-        CurrentEnv.SetLabel(OriginalEnv.GetLabel());
+        CurrentEnv.SetLabel(this.label);
         if (m.getCType() == ConstructType.FUNCTION) {
                 env.SetScript(this);
                 if (m.val().matches("^_[^_].*")) {
@@ -679,7 +683,7 @@ public class Script {
 
             if (j == 0) {
                 if (next_token.type == TType.IDENT) {
-                    OriginalEnv.SetLabel(t.val());
+                    this.label = t.val();
                     j--;
                     left.remove(0);
                     left.remove(0);

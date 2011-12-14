@@ -231,7 +231,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private void execute() throws EventException{
         GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
         superRoot.addChild(tree);
-        Script s = Script.GenerateScript(superRoot, env);
+        Script s = Script.GenerateScript(superRoot, env.GetLabel());
         Event myDriver = EventList.getEvent(this.getDriver(), this.getEventName());
         myDriver.execute(s, this);
     }

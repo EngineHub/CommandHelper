@@ -67,7 +67,7 @@ public class Procedure implements Cloneable {
         }
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
-        Script fakeScript = new Script(null, null, env);
+        Script fakeScript = new Script(null, null);
         for(int i = 0; i < args.size(); i++){
             Construct c = args.get(i);
             array.set(i, c);
