@@ -28,6 +28,8 @@ import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
+import com.sk89q.worldguard.bukkit.WorldGuardPlayerListener;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Map;
@@ -124,6 +126,11 @@ public class CommandHelperListener extends PlayerListener {
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
         if((Boolean)Static.getPreferences().getPreference("debug-mode")){
             System.out.println("CommandHelper: (>'.')> Recieved event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
+        }
+        WorldGuardPlugin wgp = Static.getWorldGuardPlugin();
+        if(wgp != null){
+            WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
+            wgpl.onPlayerCommandPreprocess(event);
         }
         String cmd = event.getMessage();        
         Player player = event.getPlayer();

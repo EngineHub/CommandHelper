@@ -96,10 +96,6 @@ public class Script {
         return label;
     }
     
-//    public Env getOriginalEnv(){
-//        return OriginalEnv;
-//    }
-
     public Script(List<Token> left, List<Token> right) {
         this.left = left;
         this.fullRight = right;

@@ -380,7 +380,7 @@ public class Static {
     }
 
     public static void checkPlugin(String name, int line_number, File f) throws ConfigRuntimeException {
-        if (Bukkit.getServer().getPluginManager().getPlugin(name) == null) {
+        if (Static.getServer().getPluginManager().getPlugin(name) == null) {
             throw new ConfigRuntimeException("Needed plugin " + name + " not found!",
                     ExceptionType.InvalidPluginException, line_number, f);
         }
