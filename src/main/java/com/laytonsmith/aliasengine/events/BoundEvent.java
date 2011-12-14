@@ -196,8 +196,8 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * @param event 
      */
     public void trigger(Object originalEvent, Map<String, Construct> event) throws EventException {
-        GenericTree<Construct> root = new GenericTree<Construct>();
-        root.setRoot(tree);
+//        GenericTree<Construct> root = new GenericTree<Construct>();
+//        root.setRoot(tree);
         CArray ca = new CArray(0, null);
         for (String key : event.keySet()) {
             ca.set(new CString(key, 0, null), event.get(key));
@@ -205,7 +205,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         if(event.containsKey("player")){
             Player p = Static.getServer().getPlayer(event.get("player").val());
             if(p != null && p.isOnline()){
-                env.SetPlayer(p);
+                env.SetPlayer(p);                
             }
         }
         env.GetVarList().set(new IVariable(eventObjName, ca, 0, null));
@@ -231,7 +231,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private void execute() throws EventException{
         GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
         superRoot.addChild(tree);
-        Script s = Script.GenerateScript(superRoot, env.GetLabel());
+        Script s = Script.GenerateScript(superRoot, "*");        
         Event myDriver = EventList.getEvent(this.getDriver(), this.getEventName());
         myDriver.execute(s, this);
     }
