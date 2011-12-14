@@ -1,9 +1,6 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -25,10 +22,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
@@ -49,7 +50,7 @@ public class Sandbox {
     public static class plugin_cmd implements Function {
 
         public String getName() {
-            return "__plugin_cmd__";
+            return "plugin_cmd";
         }
 
         public Integer[] numArgs() {
@@ -84,23 +85,32 @@ public class Sandbox {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Object o = Static.getAliasCore().parent.getServer().getPluginManager();
+            Object o = AliasCore.parent.getServer().getPluginManager();
             if (o instanceof SimplePluginManager) {
                 SimplePluginManager spm = (SimplePluginManager) o;
                 try {
                     Method m = spm.getClass().getDeclaredMethod("getEventListeners", Event.Type.class);
                     m.setAccessible(true);
+                    SortedSet<RegisteredListener> sl = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.SERVER_COMMAND);
+                    for(RegisteredListener l : sl){
+                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
+                            if(env.GetCommandSender() instanceof ConsoleCommandSender){
+                                l.callEvent(new ServerCommandEvent((ConsoleCommandSender)env.GetCommandSender(), args[1].val()));
+                            }
+                        }
+                    }
                     SortedSet<RegisteredListener> ss = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.PLAYER_COMMAND_PREPROCESS);
+
                     for (RegisteredListener l : ss) {
-                        if (l.getPlugin().getDescription().getName().equals(args[0].val())) {
+                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
+                            if(env.GetCommandSender() instanceof Player){
+                                l.callEvent(new PlayerCommandPreprocessEvent(env.GetPlayer(), args[1].val()));
+                            }
                             PluginCommand.class.getDeclaredMethods();
                             Constructor c = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
                             c.setAccessible(true);
-                            Command com = (Command) c.newInstance(l.getPlugin().getDescription().getName(), l.getPlugin());
                             List<String> argList = Arrays.asList(args[1].val().split(" "));
-//                            com.execute(p, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
-//                            l.callEvent(new Event() {});
-//                            break;
+                            Command com = (Command) c.newInstance(argList.get(0).substring(1), l.getPlugin());
                             l.getPlugin().onCommand(env.GetCommandSender(), com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
                         }
                     }

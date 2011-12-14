@@ -12,9 +12,11 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTree;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.Script;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.entity.Player;
 
 /**
  * This class represents an actually bound event. When the script runs bind(), a
@@ -199,6 +201,12 @@ public class BoundEvent implements Comparable<BoundEvent> {
         CArray ca = new CArray(0, null);
         for (String key : event.keySet()) {
             ca.set(new CString(key, 0, null), event.get(key));
+        }
+        if(event.containsKey("player")){
+            Player p = Static.getServer().getPlayer(event.get("player").val());
+            if(p != null && p.isOnline()){
+                env.SetPlayer(p);
+            }
         }
         env.GetVarList().set(new IVariable(eventObjName, ca, 0, null));
         env.SetEvent(new ActiveEvent(originalEvent, event, this));
