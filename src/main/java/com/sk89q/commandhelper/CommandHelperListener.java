@@ -121,7 +121,10 @@ public class CommandHelperListener extends PlayerListener {
      * @param event Relevant event details
      */
     @Override
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {        
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
+        if((Boolean)Static.getPreferences().getPreference("debug-mode")){
+            System.out.println("CommandHelper: (>'.')> Recieved event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
+        }
         String cmd = event.getMessage();        
         Player player = event.getPlayer();
         Static.PlayDirty();
