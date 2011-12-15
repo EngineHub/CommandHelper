@@ -538,7 +538,8 @@ public class PlayerManagement {
                     + " player's name is displayed on screen typically. </li><li>5 - Player's health; Gets the current health of the player, which will be an int"
                     + " from 0-20.</li><li>6 - Item in hand; The value returned by this will be similar to the value returned by get_block_at()</li><li>7 - "
                     + "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - Player groups;"
-                    + " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li></ul>";
+                    + " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
+                    + " <li>11 - Is sneaking?</li></ul>";
         }
 
         public ExceptionType[] thrown() {
@@ -586,11 +587,11 @@ public class PlayerManagement {
                 throw new ConfigRuntimeException("The specified player is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
-            if (index < -1 || index > 10) {
-                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 10",
+            if (index < -1 || index > 11) {
+                throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 11",
                         ExceptionType.RangeException, line_num, f);
             }
-            assert index >= -1 && index <= 10;
+            assert index >= -1 && index <= 11;
             ArrayList<Construct> retVals = new ArrayList<Construct>();
             if (index == 0 || index == -1) {
                 //Player name 
@@ -651,6 +652,9 @@ public class PlayerManagement {
             }
             if (index == 10 || index == -1) {
                 retVals.add(new CString(p.getAddress().getHostName(), line_num, f));
+            }
+            if(index == 11 || index == -1){
+                retVals.add(new CBoolean(p.isSneaking(), line_num, f));
             }
             if (retVals.size() == 1) {
                 return retVals.get(0);
