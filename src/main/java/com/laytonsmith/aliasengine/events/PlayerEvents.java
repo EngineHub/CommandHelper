@@ -42,7 +42,9 @@ public class PlayerEvents {
         public String docs() {
             return "{player: <string match> |"
                     + "join_message: <regex match>} This event is called when a player logs in "
-                    + "{player: The player's name | join_message: The default join message}";
+                    + "{player: The player's name | join_message: The default join message}"
+                    + "{player|join_message}"
+                    + "{join_message}";
         }
 
         public String since() {
@@ -84,6 +86,15 @@ public class PlayerEvents {
             PlayerJoinEvent e = new PlayerJoinEvent(Static.GetPlayer(manual.get("player").val(), 0, null), manual.get("join_message").val());
             return e;
         }
+
+        public void modifyEvent(String key, Construct value, Object event) {
+            if(event instanceof PlayerJoinEvent){
+                PlayerJoinEvent pje = (PlayerJoinEvent)event;
+                if(key.equals("join_message")){
+                    pje.setJoinMessage(value.val());
+                }
+            }
+        }
         
     }
     
@@ -103,9 +114,11 @@ public class PlayerEvents {
                     + "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
                     + " neither facing or location will be present. |"
                     + "player: The player associated with this event |"
-                    + "facing: The (lowercase) face of the block they clicked. See <<jd:org.bukkit.block.BlockFace>> for"
+                    + "facing: The (lowercase) face of the block they clicked. See <<jd:[bukkit]org.bukkit.block.BlockFace>> for"
                     + " the possible values |"
-                    + "location: The (x, y, z, world) location of the block they clicked}";
+                    + "location: The (x, y, z, world) location of the block they clicked}"
+                    + "{player|action|item|location|facing}"
+                    + "{}";
         }
 
         public String since() {
@@ -179,6 +192,10 @@ public class PlayerEvents {
             BlockFace bf = BlockFace.valueOf(manual.get("facing").val());
             PlayerInteractEvent e = new PlayerInteractEvent(p, a, is, b, bf);            
             return e;
+        }
+
+        public void modifyEvent(String key, Construct value, Object event) {
+            
         }
         
     }

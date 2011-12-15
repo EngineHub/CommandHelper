@@ -439,9 +439,14 @@ public class ArrayHandling {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                int index = (int)Static.getInt(args[1]);
-                CArray ca = (CArray)args[0];
-                return new CBoolean(index <= ca.size() - 1, line_num, f);
+                if(!((CArray)args[0]).inAssociativeMode()){
+                    int index = (int)Static.getInt(args[1]);
+                    CArray ca = (CArray)args[0];
+                    return new CBoolean(index <= ca.size() - 1, line_num, f);
+                } else {
+                    CArray ca = (CArray)args[0];
+                    return new CBoolean(ca.contains(args[1]), line_num, f);
+                }
             } else {
                 throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num, f);
             }

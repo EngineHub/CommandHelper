@@ -128,6 +128,7 @@ public class CommandHelperListener extends PlayerListener {
             System.out.println("CommandHelper: (>'.')> Recieved event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
         }
         WorldGuardPlugin wgp = Static.getWorldGuardPlugin();
+        //This will cancel the command if the player isn't supposed to run it in this region
         if(wgp != null){
             WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
             wgpl.onPlayerCommandPreprocess(event);

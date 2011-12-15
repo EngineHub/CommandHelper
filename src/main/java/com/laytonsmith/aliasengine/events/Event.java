@@ -120,4 +120,10 @@ public interface Event extends Comparable<Event>{
      */
     public boolean supportsExternal();
     
+    /**
+     * Called when a script wishes to modify an event specific parameter, this function
+     * takes a key, a construct, and the underlying event.
+     */
+    public void modifyEvent(String key, Construct value, Object event);
+    
 }
