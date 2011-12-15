@@ -8,7 +8,7 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.exceptions.EventException;
-import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import java.util.Map;
 
 /**

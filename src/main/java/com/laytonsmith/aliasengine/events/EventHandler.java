@@ -9,7 +9,7 @@ import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.exceptions.EventException;
-import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;

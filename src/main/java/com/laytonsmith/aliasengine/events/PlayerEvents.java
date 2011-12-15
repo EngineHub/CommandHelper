@@ -12,7 +12,7 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.events.Prefilters.PrefilterType;
 import com.laytonsmith.aliasengine.exceptions.EventException;
-import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import java.util.Map;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
