@@ -165,6 +165,11 @@ public class PlayerEvents {
                 Action a = pie.getAction();
                 map.put("action", new CString(a.name().toLowerCase(), 0, null));
                 map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), 0, null));
+                if(a == Action.LEFT_CLICK_AIR || a == Action.LEFT_CLICK_BLOCK){
+                    map.put("button", new CString("left", 0, null));
+                } else {
+                    map.put("button", new CString("right", 0, null));
+                }
                 if(a == Action.LEFT_CLICK_BLOCK || a == Action.RIGHT_CLICK_BLOCK){
                     map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), 0, null));
                     Block b = pie.getClickedBlock();
