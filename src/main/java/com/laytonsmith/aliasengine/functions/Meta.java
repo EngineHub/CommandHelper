@@ -8,6 +8,7 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
@@ -15,6 +16,7 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
+import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -28,6 +30,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import sun.security.pkcs11.P11TlsKeyMaterialGenerator;
 
 /**
  * I'm So Meta, Even This Acronym
@@ -512,6 +515,58 @@ public class Meta {
             environment.SetCommandSender(originalPlayer);
             environment.SetLabel(originalLabel);
             return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class has_permission implements Function{
+
+        public String getName() {
+            return "has_permission";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "boolean {[player], permissionName} Using the built in permissions system, checks to see if the player has a particular permission."
+                    + " This is simply passed through to the permissions system. This function does not throw a PlayerOfflineException, because"
+                    + " it works with offline players, but that means that names must be an exact match.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            String player = null;
+            String permission = null;
+            if(args.length == 1){
+                player = environment.GetPlayer().getName();
+                permission = args[0].val();
+            } else {
+                player = args[0].val();
+                permission = args[1].val();
+            }
+            PermissionsResolverManager perms = Static.getPermissionsResolverManager();
+            return new CBoolean(perms.hasPermission(player, permission), line_num, f);
         }
         
     }
