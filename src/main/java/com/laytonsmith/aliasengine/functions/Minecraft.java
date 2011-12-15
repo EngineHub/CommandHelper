@@ -18,7 +18,14 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.io.IOException;
+import java.util.Enumeration;
 import java.util.List;
+import java.util.Properties;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -66,7 +73,20 @@ public class Minecraft {
     public static String docs() {
         return "These functions provide a hook into game functionality.";
     }
-
+    private static final SortedMap<String, Construct> DataLookup = new TreeMap<String, Construct>();
+    static{
+        Properties p = new Properties();
+        try {
+            p.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
+            Enumeration e = p.propertyNames();
+            while(e.hasMoreElements()){
+                String name = e.nextElement().toString();
+                DataLookup.put(name, new CString(p.getProperty(name).toString(), 0, null));
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
     @api
     public static class data_values implements Function {
 
@@ -83,6 +103,24 @@ public class Minecraft {
                 return new CInt(Static.getInt(args[0]), line_num, f);
             } else {
                 String c = args[0].val();
+                String changed = c;
+                if(changed.contains(":")){
+                    //Split on that, and reverse. Change wool:red to redwool
+                    String split[] = changed.split(":");
+                    if(split.length == 2){
+                        changed = split[1] + split[0];
+                    }
+                }
+                //Remove anything that isn't a letter or a number
+                changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+                //Do a lookup in the DataLookup table
+                if(DataLookup.containsKey(changed)){
+                    String split[] = DataLookup.get(changed).toString().split(":");
+                    if(split[1].equals("0")){
+                        return new CInt(split[0], line_num, f);
+                    }
+                    return new CString(split[0] + ":" + split[1], line_num, f);
+                }
                 return new CInt(new MaterialData(Material.matchMaterial(c)).getItemTypeId(), line_num, f);
             }
         }

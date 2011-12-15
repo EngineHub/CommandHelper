@@ -34,6 +34,7 @@ import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.block.Block;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -289,18 +290,18 @@ public class Static {
         }
         return com.sk89q.commandhelper.CommandHelperPlugin.prefs;
     }
-    
     private static String debugLogFileCurrent = null;
     private static FileWriter debugLogFileHandle = null;
+
     /**
      * Returns a file that is most likely ready to write to. The timestamp variables have already been replaced, and parent directories
      * are all created.
      * @return 
      */
-    public static FileWriter debugLogFile() throws IOException{
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String)getPreferences().getPreference("debug-log-file"));
-        if(!currentFileName.equals(debugLogFileCurrent)){
-            if(debugLogFileHandle != null){
+    public static FileWriter debugLogFile() throws IOException {
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String) getPreferences().getPreference("debug-log-file"));
+        if (!currentFileName.equals(debugLogFileCurrent)) {
+            if (debugLogFileHandle != null) {
                 //We're done with the old one, close it.
                 debugLogFileHandle.close();
             }
@@ -310,13 +311,13 @@ public class Static {
         }
         return debugLogFileHandle;
     }
-    
     private static String standardLogFileCurrent = null;
     private static FileWriter standardLogFileHandle = null;
-    public static FileWriter standardLogFile() throws IOException{
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String)getPreferences().getPreference("standard-log-file"));
-        if(!currentFileName.equals(standardLogFileCurrent)){
-            if(standardLogFileHandle != null){
+
+    public static FileWriter standardLogFile() throws IOException {
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String) getPreferences().getPreference("standard-log-file"));
+        if (!currentFileName.equals(standardLogFileCurrent)) {
+            if (standardLogFileHandle != null) {
                 //We're done with the old one, close it.
                 standardLogFileHandle.close();
             }
@@ -326,13 +327,13 @@ public class Static {
         }
         return standardLogFileHandle;
     }
-    
     private static String profilingLogFileCurrent = null;
     private static FileWriter profilingLogFileHandle = null;
-    public static FileWriter profilingLogFile() throws IOException{
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String)getPreferences().getPreference("profiling-file"));
-        if(!currentFileName.equals(profilingLogFileCurrent)){
-            if(profilingLogFileHandle != null){
+
+    public static FileWriter profilingLogFile() throws IOException {
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String) getPreferences().getPreference("profiling-file"));
+        if (!currentFileName.equals(profilingLogFileCurrent)) {
+            if (profilingLogFileHandle != null) {
                 //We're done with the old one, close it.
                 profilingLogFileHandle.close();
             }
@@ -343,12 +344,12 @@ public class Static {
         return profilingLogFileHandle;
     }
 
-    public static String ParseCalendarNotation(String name){
+    public static String ParseCalendarNotation(String name) {
         return ParseCalendarNotation(name, null);
     }
-    
-    public static String ParseCalendarNotation(String name, Calendar c){
-        if(c == null){
+
+    public static String ParseCalendarNotation(String name, Calendar c) {
+        if (c == null) {
             c = Calendar.getInstance();
         }
         String year = String.format("%04d", c.get(Calendar.YEAR));
@@ -357,10 +358,9 @@ public class Static {
         String hour = String.format("%02d", c.get(Calendar.HOUR));
         String minute = String.format("%02d", c.get(Calendar.MINUTE));
         String second = String.format("%02d", c.get(Calendar.SECOND));
-        return name.replaceAll("%Y", year).replaceAll("%M", month).replaceAll("%D", day).replaceAll("%h", hour)
-                .replaceAll("%m", minute).replaceAll("%s", second);
+        return name.replaceAll("%Y", year).replaceAll("%M", month).replaceAll("%D", day).replaceAll("%h", hour).replaceAll("%m", minute).replaceAll("%s", second);
     }
-    
+
     public static WorldEditPlugin getWorldEditPlugin() {
         if (CommandHelperPlugin.wep == null) {
             Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
@@ -581,16 +581,16 @@ public class Static {
         }
         return m;
     }
-    
-    public static Player GetPlayer(Construct player, int line_num, File f) throws ConfigRuntimeException{
+
+    public static Player GetPlayer(Construct player, int line_num, File f) throws ConfigRuntimeException {
         return GetPlayer(player.val(), line_num, f);
     }
-    
-    public static Player GetPlayer(String player){
+
+    public static Player GetPlayer(String player) {
         return GetPlayer(player, 0, null);
     }
-    
-    public static Player GetPlayer(Construct player){
+
+    public static Player GetPlayer(Construct player) {
         return GetPlayer(player, 0, null);
     }
 
@@ -653,13 +653,13 @@ public class Static {
         }
         return new Location(world, x, y, z, yaw, pitch);
     }
-    
+
     /**
      * Works the opposite of GetLocation
      * @param l
      * @return 
      */
-    public static CArray GetLocationArray(Location l){
+    public static CArray GetLocationArray(Location l) {
         CArray ca = new CArray(0, null);
         ca.push(new CDouble(l.getX(), 0, null));
         ca.push(new CDouble(l.getY(), 0, null));
@@ -693,23 +693,23 @@ public class Static {
         }
         return null;
     }
-    
-    public static String strJoin(Collection c, String inner){
+
+    public static String strJoin(Collection c, String inner) {
         StringBuilder b = new StringBuilder();
         Object[] o = c.toArray();
-        for(int i = 0; i < o.length; i++){
-            if(i != 0){
+        for (int i = 0; i < o.length; i++) {
+            if (i != 0) {
                 b.append(inner);
             }
             b.append(o[i]);
         }
         return b.toString();
     }
-    
-    public static String strJoin(Object [] o, String inner){
+
+    public static String strJoin(Object[] o, String inner) {
         StringBuilder b = new StringBuilder();
-        for(int i = 0; i < o.length; i++){
-            if(i != 0){
+        for (int i = 0; i < o.length; i++) {
+            if (i != 0) {
                 b.append(inner);
             }
             b.append(o[i]);
@@ -720,28 +720,28 @@ public class Static {
     public static String LF() {
         return System.getProperty("line.separator");
     }
-    
+
     public static synchronized void LogDebug(String message) throws IOException {
-        if(Debug.LOG_TO_SCREEN){
+        if (Debug.LOG_TO_SCREEN) {
             Static.getLogger().log(Level.INFO, message);
         }
         String timestamp = Static.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
         QuickAppend(Static.debugLogFile(), timestamp + message + Static.LF());
     }
-    
-    public static void QuickAppend(FileWriter f, String message) throws IOException{
+
+    public static void QuickAppend(FileWriter f, String message) throws IOException {
         f.append(message);
-        f.flush();        
+        f.flush();
     }
-    
+
     /**
      * Sets up CommandHelper to play-dirty, if the user has specified as such
      */
     public static void PlayDirty() {
         if ((Boolean) Static.getPreferences().getPreference("play-dirty")) {
             try {
-                    //Set up our "proxy"
-                    DirtyRegisteredListener.Repopulate();                
+                //Set up our "proxy"
+                DirtyRegisteredListener.Repopulate();
             } catch (NoSuchMethodException ex) {
                 Logger.getLogger(Static.class.getName()).log(Level.SEVERE, null, ex);
             } catch (NoSuchFieldException ex) {
@@ -754,5 +754,42 @@ public class Static {
                 AliasCore.logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
             }
         } //else play nice :(
+    }
+
+    public static boolean hasCHPermission(String functionName, Env env) {
+        boolean perm = false;
+        PermissionsResolverManager perms = Static.getPermissionsResolverManager();
+        if (perms != null) {
+            if (env.GetCommandSender() instanceof Player) {
+                perm = perms.hasPermission(env.GetPlayer().getName(), "ch.func.use." + functionName)
+                        || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.func.use." + functionName);
+                if (env.GetLabel() != null && env.GetLabel().startsWith("~")) {
+                    String[] groups = env.GetLabel().substring(1).split("/");
+                    for (String group : groups) {
+                        if (perms.inGroup(env.GetPlayer().getName(), group)) {
+                            perm = true;
+                            break;
+                        }
+                    }
+                } else {
+                    if (env.GetLabel() != null && (perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
+                            || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.alias." + env.GetLabel())) {
+                        perm = true;
+                    }
+                }
+            } else if (env.GetCommandSender() instanceof ConsoleCommandSender) {
+                perm = true;
+            }
+        } else {
+            perm = true;
+        }
+        if (env.GetLabel() != null && env.GetLabel().equals("*")) {
+            perm = true;
+        }
+        if (env.GetCommandSender() == null
+                || env.GetCommandSender().isOp()) {
+            perm = true;
+        }
+        return perm;
     }
 }

@@ -407,39 +407,7 @@ public class Script {
                     args.add(eval(c2, env));
                 }
                 if (f.isRestricted()) {
-                    boolean perm = false;
-                    PermissionsResolverManager perms = Static.getPermissionsResolverManager();
-                    if (perms != null) {
-                        if(env.GetCommandSender() instanceof Player){
-                            perm = perms.hasPermission(env.GetPlayer().getName(), "ch.func.use." + f.getName())
-                                    || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.func.use." + f.getName());
-                            if (env.GetLabel() != null && env.GetLabel().startsWith("~")) {
-                                String[] groups = env.GetLabel().substring(1).split("/");
-                                for (String group : groups) {
-                                    if (perms.inGroup(env.GetPlayer().getName(), group)) {
-                                        perm = true;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                if (env.GetLabel() != null && (perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
-                                        || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.alias." + env.GetLabel())) {
-                                    perm = true;
-                                }
-                            }
-                        } else if(env.GetCommandSender() instanceof ConsoleCommandSender){
-                            perm = true;
-                        }
-                    } else {
-                        perm = true;
-                    }
-                    if(env.GetLabel() != null && env.GetLabel().equals("*")){
-                        perm = true;
-                    }
-                    if (env.GetCommandSender() == null || 
-                            env.GetCommandSender().isOp()) {
-                        perm = true;
-                    }
+                    boolean perm = Static.hasCHPermission(f.getName(), env);
                     if (!perm) {
                         throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
                                 ExceptionType.InsufficientPermissionException, m.getLineNum(), m.getFile());

@@ -177,4 +177,13 @@ public class RandomTests {
         verify(fakePlayer).sendMessage("1");
     }
     
+    @Test public void testDataLookup() throws ConfigCompileException{
+        assertEquals("1", SRun("data_values(stone)", fakePlayer));
+        assertEquals("4", SRun("data_values(cstone)", fakePlayer));
+        assertEquals("6:2", SRun("data_values(birchsapling)", fakePlayer));
+        assertEquals("35:14", SRun("data_values(redwool)", fakePlayer));
+        assertEquals("35:14", SRun("data_values('wool:red')", fakePlayer));
+        assertEquals("35:14", SRun("data_values(REDWOOL)", fakePlayer));
+    }
+    
 }
