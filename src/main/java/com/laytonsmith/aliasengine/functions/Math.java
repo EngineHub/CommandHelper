@@ -17,8 +17,6 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -312,6 +310,9 @@ public class Math {
                 Construct newVal;
                 long value = 1;
                 if(args.length == 2){
+                    if(args[1] instanceof IVariable){
+                        args[1] = env.GetVarList().get(((IVariable)args[1]).getName());
+                    }
                     value = Static.getInt(args[1]);
                 }
                 if(Static.anyDoubles(v.ival())){
@@ -366,6 +367,9 @@ public class Math {
                 IVariable v = env.GetVarList().get(((IVariable)args[0]).getName());
                 long value = 1;
                 if(args.length == 2){
+                    if(args[1] instanceof IVariable){
+                        args[1] = env.GetVarList().get(((IVariable)args[1]).getName());
+                    }
                     value = Static.getInt(args[1]);
                 }
                 Construct newVal;

@@ -33,6 +33,48 @@ public class StringHandling {
     public static String docs() {
         return "These class provides functions that allow strings to be manipulated";
     }
+    
+    //@api
+    public static class cc implements Function{
+
+        public String getName() {
+            return "cc";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "string {args...} The cousin to <strong>c</strong>on<strong>c</strong>at, this function does some magic under the covers"
+                    + " to remove the auto-concatenation effect in bare strings. Take the following examples.";
+        }
+
+        public ExceptionType[] thrown() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean isRestricted() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean preResolveVariables() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String since() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Boolean runAsync() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        
+    }
 
     @api
     public static class concat implements Function {

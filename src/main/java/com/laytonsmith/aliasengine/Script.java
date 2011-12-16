@@ -28,7 +28,12 @@ import com.laytonsmith.aliasengine.functions.IncludeCache;
 import com.laytonsmith.aliasengine.functions.Meta.eval;
 import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
 import com.laytonsmith.aliasengine.functions.BasicLogic._switch;
+import com.laytonsmith.aliasengine.functions.BasicLogic.and;
 import com.laytonsmith.aliasengine.functions.BasicLogic.ifelse;
+import com.laytonsmith.aliasengine.functions.BasicLogic.nand;
+import com.laytonsmith.aliasengine.functions.BasicLogic.nor;
+import com.laytonsmith.aliasengine.functions.BasicLogic.or;
+import com.laytonsmith.aliasengine.functions.DataHandling.assign;
 import com.laytonsmith.aliasengine.functions.Meta.scriptas;
 import com.laytonsmith.aliasengine.functions.StringHandling.sconcat;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
@@ -66,7 +71,7 @@ public class Script {
     private Map<String, Variable> left_vars;
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
-    private Env OriginalEnv;
+    private String label;
     private Env CurrentEnv;
 
     @Override
@@ -87,27 +92,28 @@ public class Script {
         return CurrentEnv;
     }
     
-    public Env getOriginalEnv(){
-        return OriginalEnv;
+    public String getLabel(){
+        return label;
     }
-
-    public Script(List<Token> left, List<Token> right, Env env) {
+    
+    public Script(List<Token> left, List<Token> right) {
         this.left = left;
         this.fullRight = right;
-        this.left_vars = new HashMap<String, Variable>();
-        this.OriginalEnv = env;
+        this.left_vars = new HashMap<String, Variable>();        
+        //this.OriginalEnv = env;
     }
     
     private Script(){}
     
-    public static Script GenerateScript(GenericTreeNode<Construct> tree, Env env){
+    public static Script GenerateScript(GenericTreeNode<Construct> tree, String label){
         Script s = new Script();
         
         s.hasBeenCompiled = true;
         s.compilerError = false;
         s.cright = new ArrayList<GenericTreeNode<Construct>>();
         s.cright.add(tree);
-        s.OriginalEnv = env;
+        s.label = label;
+        //s.OriginalEnv = env;
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
 //        for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
@@ -126,7 +132,7 @@ public class Script {
     public void run(final List<Variable> vars, Env myEnv, final MScriptComplete done) {
         //Some things, such as the label are determined at compile time
         this.CurrentEnv = myEnv;
-        this.CurrentEnv.SetLabel(this.OriginalEnv.GetLabel());
+        this.CurrentEnv.SetLabel(this.label);
         CommandSender p = myEnv.GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
             int line_num = 0;
@@ -204,11 +210,19 @@ public class Script {
             done.done(null);
         }
     }
+    
+    public Construct seval(GenericTreeNode<Construct> c, final Env env){
+        Construct ret = eval(c, env);
+        if(ret instanceof IVariable){
+            return env.GetVarList().get(((IVariable)ret).getName()).ival();
+        }
+        return ret;
+    }
 
     public Construct eval(GenericTreeNode<Construct> c, final Env env) throws CancelCommandException {
         final Construct m = c.getData();
         CurrentEnv = env;
-        CurrentEnv.SetLabel(OriginalEnv.GetLabel());
+        CurrentEnv.SetLabel(this.label);
         if (m.getCType() == ConstructType.FUNCTION) {
                 env.SetScript(this);
                 if (m.val().matches("^_[^_].*")) {
@@ -217,12 +231,16 @@ public class Script {
                     if (p == null) {
                         throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
                     }
-                    List<Construct> variables = new ArrayList<Construct>();
-                    for (GenericTreeNode<Construct> child : c.getChildren()) {
-                        variables.add(eval(child, env));
-                    }
-                    variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
-                    return p.execute(variables, env.clone());
+//                    List<Construct> variables = new ArrayList<Construct>();
+//                    for (GenericTreeNode<Construct> child : c.getChildren()) {
+//                        variables.add(eval(child, env));
+//                    }
+//                    variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
+                    Env newEnv = env;
+                    try{
+                        newEnv = env.clone();
+                    } catch(Exception e){}
+                    return p.cexecute(c.getChildren(), newEnv);
                 }
                 final Function f;
                 try{
@@ -232,6 +250,17 @@ public class Script {
                     throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getLineNum(), m.getFile());
                 }
                 //We have special handling for loop and other control flow functions
+                if(f instanceof assign){
+                    if(c.getChildAt(0).getData() instanceof CFunction){
+                        CFunction test = (CFunction)c.getChildAt(0).getData();
+                        if(test.val().equals("array_get")){
+                            env.SetFlag("array_get_alt_mode", true);
+                            Construct arrayAndIndex = eval(c.getChildAt(0), env);
+                            env.ClearFlag("array_get_alt_mode");
+                            return ((assign)f).array_assign(m.getLineNum(), m.getFile(), env, arrayAndIndex, eval(c.getChildAt(1), env));
+                        }
+                    }
+                }
                 if (f instanceof _for) {
                     _for fr = (_for) f;
                     List<GenericTreeNode<Construct>> ch = c.getChildren();
@@ -343,21 +372,33 @@ public class Script {
                         ((IVariable)var).setIval(env.GetVarList().get(((IVariable)var).getName()).ival());
                         custom_params.set((IVariable)var);
                     }
-                    Env newEnv = env.clone();
+                    Env newEnv = env;
+                    try{
+                        newEnv = env.clone();
+                    } catch(Exception e){}
                     newEnv.SetVarList(custom_params);
                     GenericTreeNode<Construct> tree = c.getChildAt(c.getChildren().size() - 1);
                     return ((bind)f).execs(name, options, prefilter, event_object, tree, newEnv, m.getLineNum(), m.getFile());
                 } else if(f instanceof scriptas){
-                    Construct user = eval(c.getChildAt(0), env);
-                    GenericTreeNode<Construct> script = c.getChildAt(1);
-                    env.SetCustom("script_node", script);
-                    return ((scriptas)f).exec(m.getLineNum(), m.getFile(), env, user);
+                    return ((scriptas)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+//                    Construct user = eval(c.getChildAt(0), env);
+//                    GenericTreeNode<Construct> script = c.getChildAt(1);
+//                    env.SetCustom("script_node", script);
+//                    return ((scriptas)f).exec(m.getLineNum(), m.getFile(), env, user);
                 } else if(f instanceof sconcat){
                     return ((sconcat)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 } else if(f instanceof ifelse){
                     return ((ifelse)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 } else if(f instanceof _switch){
                     return ((_switch)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());                    
+                } else if(f instanceof and){
+                    return ((and)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                } else if(f instanceof nand){
+                    return ((nand)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                } else if(f instanceof or){
+                    return ((or)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                } else if(f instanceof nor){
+                    return ((nor)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
                 }
 
 
@@ -366,36 +407,7 @@ public class Script {
                     args.add(eval(c2, env));
                 }
                 if (f.isRestricted()) {
-                    boolean perm = false;
-                    PermissionsResolverManager perms = Static.getPermissionsResolverManager();
-                    if (perms != null) {
-                        if(env.GetCommandSender() instanceof Player){
-                            perm = perms.hasPermission(env.GetPlayer().getName(), "ch.func.use." + f.getName())
-                                    || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.func.use." + f.getName());
-                            if (env.GetLabel() != null && env.GetLabel().startsWith("~")) {
-                                String[] groups = env.GetLabel().substring(1).split("/");
-                                for (String group : groups) {
-                                    if (perms.inGroup(env.GetPlayer().getName(), group)) {
-                                        perm = true;
-                                        break;
-                                    }
-                                }
-                            } else {
-                                if (env.GetLabel() != null && (perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
-                                        || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.alias." + env.GetLabel())) {
-                                    perm = true;
-                                }
-                            }
-                        } else if(env.GetCommandSender() instanceof ConsoleCommandSender){
-                            perm = true;
-                        }
-                    } else {
-                        perm = true;
-                    }
-                    if (env.GetCommandSender() == null || 
-                            env.GetCommandSender().isOp()) {
-                        perm = true;
-                    }
+                    boolean perm = Static.hasCHPermission(f.getName(), env);
                     if (!perm) {
                         throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
                                 ExceptionType.InsufficientPermissionException, m.getLineNum(), m.getFile());
@@ -414,6 +426,9 @@ public class Script {
                         throw new ConfigRuntimeException("Invalid Construct (" 
                                 + ca[i].getClass() + ") being passed as an argument to a function (" 
                                 + f.getName() + ")", null, m.getLineNum(), m.getFile());
+                    }
+                    if(env.GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
+                        continue;
                     }
                     if(f.preResolveVariables() && ca[i] instanceof IVariable){
                         ca[i] = env.GetVarList().get(((IVariable)ca[i]).getName()).ival();
@@ -633,7 +648,7 @@ public class Script {
 
             if (j == 0) {
                 if (next_token.type == TType.IDENT) {
-                    OriginalEnv.SetLabel(t.val());
+                    this.label = t.val();
                     j--;
                     left.remove(0);
                     left.remove(0);
@@ -646,7 +661,7 @@ public class Script {
             }
 
             if (t.type.equals(TType.FINAL_VAR) && left.size() - j >= 5) {
-                throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num);
+                throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num, t.file);
             }
             if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                 Variable v = new Variable(t.val(), null, t.line_num, t.file);
@@ -662,19 +677,19 @@ public class Script {
             if (j == 0 && !t.type.equals(TType.COMMAND)) {
                 if (!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)) {
                     throw new ConfigCompileException("Expected command (/command) at start of alias."
-                            + " Instead, found " + t.type + " (" + t.val() + ")", t.line_num);
+                            + " Instead, found " + t.type + " (" + t.val() + ")", t.line_num, t.file);
                 }
             }
             if (last_token.type.equals(TType.LSQUARE_BRACKET)) {
                 inside_opt_var = true;
                 if (!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))) {
-                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num);
+                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num, t.file);
                 }
             }
             if (after_no_def_opt_var && !inside_opt_var) {
                 if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                     throw new ConfigCompileException("You cannot have anything other than optional arguments after your"
-                            + " first optional argument, other that other optional arguments with no default", t.line_num);
+                            + " first optional argument, other that other optional arguments with no default", t.line_num, t.file);
                 }
             }
             if (!t.type.equals(TType.LSQUARE_BRACKET)
@@ -685,26 +700,26 @@ public class Script {
                     && !t.type.equals(TType.COMMAND)
                     && !t.type.equals(TType.FINAL_VAR)) {
                 if (!(t.type.equals(TType.STRING) && j - 1 > 0 && left.get(j - 1).type.equals(TType.OPT_VAR_ASSIGN))) {
-                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.line_num);
+                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.line_num, t.file);
                 }
             }
             if (last_token.type.equals(TType.COMMAND)) {
                 if (!(t.type.equals(TType.VARIABLE) || t.type.equals(TType.LSQUARE_BRACKET) || t.type.equals(TType.FINAL_VAR)
                         || t.type.equals(TType.LIT))) {
-                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.line_num);
+                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.line_num, t.file);
                 }
             }
             if (inside_opt_var && t.type.equals(TType.OPT_VAR_ASSIGN)) {
                 if (!((next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) && after_token.type.equals(TType.RSQUARE_BRACKET)
                         || (next_token.type.equals(TType.RSQUARE_BRACKET)))) {
-                    throw new ConfigCompileException("Unexpected token in optional variable", t.line_num);
+                    throw new ConfigCompileException("Unexpected token in optional variable", t.line_num, t.file);
                 } else if (next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) {
                     left_vars.get(lastVar).setDefault(next_token.val());
                 }
             }
             if (t.type.equals(TType.RSQUARE_BRACKET)) {
                 if (!inside_opt_var) {
-                    throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
+                    throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num, t.file);
                 }
                 inside_opt_var = false;
 //                if (last_token.type.equals(TType.VARIABLE)
@@ -842,7 +857,7 @@ public class Script {
                 scripts.get(j).compilerError = true;
                 this.compilerError = true;
                 throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
-                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getLineNum());
+                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getLineNum(), thisCommand.get(0).getFile());
             }
         }
 

@@ -9,7 +9,7 @@ import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.Map;

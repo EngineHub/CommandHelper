@@ -6,7 +6,7 @@ package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.events.Prefilters.PrefilterType;
-import com.laytonsmith.aliasengine.functions.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.testing.C;
 import java.util.HashMap;
 import java.util.Map;

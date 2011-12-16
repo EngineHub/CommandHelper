@@ -8,14 +8,17 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CArrayReference;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CNull;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
+import com.laytonsmith.aliasengine.functions.BasicLogic.equals_ic;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 
@@ -84,12 +87,15 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String index = "0..-1";
+            if(args.length == 2){
+                index = args[1].val();
+            }
+            if(env.GetFlag("array_get_alt_mode") == Boolean.TRUE){                
+                return new CArrayReference(args[0], new CString(index, line_num, f), env);
+            }
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
-                String index = "0..-1";
-                if(args.length == 2){
-                    index = args[1].val();
-                }
                 if(index.contains("..")){
                     if(ca.inAssociativeMode()){
                         if(index.equals("0..-1")){
@@ -130,7 +136,7 @@ public class ArrayHandling {
                             finish = ca.size() + finish;
                         }
                         CArray na = new CArray(line_num, f);
-                        if(finish <= start){
+                        if(finish < start){
                             //return an empty array in cases where the indexes don't make sense
                             return na;
                         }
@@ -344,6 +350,57 @@ public class ArrayHandling {
         
     }
     
+    @api public static class array_contains_ic implements Function{
+
+        public String getName() {
+            return "array_contains_ic";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {array, testValue} Works like array_contains, except the comparison ignores case.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            equals_ic e = new equals_ic();
+            if(args[0] instanceof CArray){
+                CArray ca = (CArray) args[0];
+                for(int i = 0; i < ca.size(); i++){
+                    if(((CBoolean)e.exec(line_num, f, environment, ca.get(i, line_num), args[1])).getBoolean()){
+                        return new CBoolean(true, line_num, f);
+                    }
+                }
+                return new CBoolean(false, line_num, f);
+            } else {
+                throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, line_num, f);
+            }
+        }
+        
+    }
+    
     @api public static class array_index_exists implements Function{
 
         public String getName() {
@@ -382,9 +439,14 @@ public class ArrayHandling {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                int index = (int)Static.getInt(args[1]);
-                CArray ca = (CArray)args[0];
-                return new CBoolean(index <= ca.size() - 1, line_num, f);
+                if(!((CArray)args[0]).inAssociativeMode()){
+                    int index = (int)Static.getInt(args[1]);
+                    CArray ca = (CArray)args[0];
+                    return new CBoolean(index <= ca.size() - 1, line_num, f);
+                } else {
+                    CArray ca = (CArray)args[0];
+                    return new CBoolean(ca.contains(args[1]), line_num, f);
+                }
             } else {
                 throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num, f);
             }

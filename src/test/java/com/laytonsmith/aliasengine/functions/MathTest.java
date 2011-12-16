@@ -57,17 +57,10 @@ public class MathTest {
     @After
     public void tearDown() {
     }
-
-    @Test
-    public void testDocs() {
-        System.out.println("docs");
-        StaticTest.TestClassDocs(Math.docs(), Math.class);
-    }
     
     @Test
     public void testAbs(){
         Math.abs a = new Math.abs();
-        TestBoilerplate(a, "abs");
         assertCEquals(C.onstruct(5), a.exec(0, null, env, C.onstruct(5)));
         assertCEquals(C.onstruct(3), a.exec(0, null, env, C.onstruct(-3)));
         assertCEquals(C.onstruct(0), a.exec(0, null, env, C.onstruct(0)));
@@ -76,7 +69,6 @@ public class MathTest {
     @Test
     public void testAdd(){
         Math.add a = new Math.add();
-        TestBoilerplate(a, "add");
         assertCEquals(C.onstruct(7), a.exec(0, null, env, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(6), a.exec(0, null, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(-4), a.exec(0, null, env, C.onstruct(-3), C.onstruct(-1)));
@@ -87,7 +79,6 @@ public class MathTest {
     @Test
     public void testDec() throws ConfigCompileException{
         Math.dec a = new Math.dec();
-        TestBoilerplate(a, "dec");
         IVariable v = (IVariable)a.exec(0, null, env, new IVariable("var", C.onstruct(1), 0, null));
         IVariable v2 = (IVariable)a.exec(0, null, env,new IVariable("var2", C.onstruct(2.5), 0, null));
         assertCEquals(C.onstruct(0), v.ival());
@@ -99,7 +90,6 @@ public class MathTest {
     @Test
     public void testDivide(){
         Math.divide a = new Math.divide();
-        TestBoilerplate(a, "divide");
         assertCEquals(C.onstruct(2.5), a.exec(0, null, env, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(1), a.exec(0, null, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(3), a.exec(0, null, env, C.onstruct(-3), C.onstruct(-1)));
@@ -109,7 +99,6 @@ public class MathTest {
     @Test
     public void testInc() throws ConfigCompileException{
         Math.inc a = new Math.inc();
-        TestBoilerplate(a, "inc");
         IVariable v = (IVariable)a.exec(0, null, env, new IVariable("var", C.onstruct(1), 0, null));
         IVariable v2 = (IVariable)a.exec(0, null, env,new IVariable("var2", C.onstruct(2.5), 0, null));
         assertCEquals(C.onstruct(2), v.ival());
@@ -121,7 +110,6 @@ public class MathTest {
     @Test
     public void testMod(){
         Math.mod a = new Math.mod();
-        TestBoilerplate(a, "mod");
         assertCEquals(C.onstruct(1), a.exec(0, null, env, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(0), a.exec(0, null, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(-1), a.exec(0, null, env, C.onstruct(-3), C.onstruct(-2)));
@@ -130,7 +118,6 @@ public class MathTest {
     @Test
     public void testMultiply(){
         Math.multiply a = new Math.multiply();
-        TestBoilerplate(a, "multiply");
         assertCEquals(C.onstruct(10), a.exec(0, null, env, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(9), a.exec(0, null, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(6), a.exec(0, null, env, C.onstruct(-3), C.onstruct(-2)));
@@ -140,7 +127,6 @@ public class MathTest {
     @Test
     public void testPow(){
         Math.pow a = new Math.pow();
-        TestBoilerplate(a, "pow");
         assertCEquals(C.onstruct(25), a.exec(0, null, env, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(27), a.exec(0, null, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(1), a.exec(0, null, env, C.onstruct(-1), C.onstruct(-2)));
@@ -149,7 +135,6 @@ public class MathTest {
     @Test
     public void testRand(){
         Math.rand a = new Math.rand();
-        TestBoilerplate(a, "rand");
         for(int i = 0; i < 1000; i++){
             long j = Static.getInt(a.exec(0, null, env, C.onstruct(10)));
             if(!(j < 10 && j >= 0)){
@@ -177,7 +162,6 @@ public class MathTest {
     @Test
     public void testSubtract(){
         Math.subtract a = new Math.subtract();
-        TestBoilerplate(a, "subtract");
         assertCEquals(C.onstruct(3), a.exec(0, null, env, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(0), a.exec(0, null, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(-1), a.exec(0, null, env, C.onstruct(-3), C.onstruct(-2)));
@@ -187,14 +171,12 @@ public class MathTest {
     @Test
     public void testFloor(){
         Math.floor a = new Math.floor();
-        TestBoilerplate(a, "floor");
         assertCEquals(C.onstruct(3), a.exec(0, null, env, C.onstruct(3.8415)));
         assertCEquals(C.onstruct(-4), a.exec(0, null, env, C.onstruct(-3.1415)));
     }
     
     @Test public void testCeil(){
         Math.ceil a = new Math.ceil();
-        TestBoilerplate(a, "ceil");
         assertCEquals(C.onstruct(4), a.exec(0, null, env, C.onstruct(3.1415)));
         assertCEquals(C.onstruct(-3), a.exec(0, null, env, C.onstruct(-3.1415)));
     }

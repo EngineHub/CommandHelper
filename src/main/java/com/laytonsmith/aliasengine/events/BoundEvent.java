@@ -12,9 +12,11 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTree;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.Script;
+import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.entity.Player;
 
 /**
  * This class represents an actually bound event. When the script runs bind(), a
@@ -193,20 +195,86 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * the script is executed with the driver's execute function.
      * @param event 
      */
-    public void trigger(Map<String, Construct> event) throws EventException {
-        GenericTree<Construct> root = new GenericTree<Construct>();
-        root.setRoot(tree);
+    public void trigger(Object originalEvent, Map<String, Construct> event) throws EventException {
+//        GenericTree<Construct> root = new GenericTree<Construct>();
+//        root.setRoot(tree);
         CArray ca = new CArray(0, null);
         for (String key : event.keySet()) {
             ca.set(new CString(key, 0, null), event.get(key));
         }
+        if(event.containsKey("player")){
+            Player p = Static.getServer().getPlayer(event.get("player").val());
+            if(p != null && p.isOnline()){
+                env.SetPlayer(p);                
+            }
+        }
         env.GetVarList().set(new IVariable(eventObjName, ca, 0, null));
-        env.SetEvent(this);
-
+        env.SetEvent(new ActiveEvent(originalEvent, event, this));
+        this.execute();
+    }
+    
+    /**
+     * Used to manually trigger an event, the underlying event is set to null.
+     * @param event
+     * @throws EventException 
+     */
+    public void manual_trigger(CArray event) throws EventException{
+        env.GetVarList().set(new IVariable(eventObjName, event, 0, null));
+        Map<String, Construct> map = new HashMap<String, Construct>();
+        for(Construct key : event.keySet()){
+            map.put(key.val(), event.get(key, 0));
+        }
+        env.SetEvent(new ActiveEvent(null, map, this));
+        this.execute();
+    }
+    
+    private void execute() throws EventException{
         GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
         superRoot.addChild(tree);
-        Script s = Script.GenerateScript(superRoot, env);
+        Script s = Script.GenerateScript(superRoot, "*");        
         Event myDriver = EventList.getEvent(this.getDriver(), this.getEventName());
         myDriver.execute(s, this);
+    }
+    
+    /**
+     * The bound event is essentially an ActiveEvent generator. Because bound events don't change from run to run, it doesn't
+     * make sense to store triggered event specific information with the bound event itself. Instead, when the event is triggered,
+     * an ActiveEvent is generated, stored in the environment, and then the script is triggered. This ActiveEvent contains both
+     * the underlying event (if needed for things like cancellation or other event manipulation) and the BoundEvent object itself
+     * (which can be used to get the event id and other information as needed). For convenience, the parsed event information
+     * is also cached here.
+     */
+    public class ActiveEvent{
+        private Object underlyingEvent;
+        private Map<String, Construct> parsedEvent;
+        private BoundEvent boundEvent;
+        private boolean cancelled;
+        public ActiveEvent(Object underlyingEvent, Map<String, Construct> parsedEvent, BoundEvent boundEvent){
+            this.underlyingEvent = underlyingEvent;
+            this.parsedEvent = parsedEvent;
+            this.boundEvent = boundEvent;
+            this.cancelled = false;
+        }
+
+        public Map<String, Construct> getParsedEvent() {
+            return parsedEvent;
+        }
+
+        public Object getUnderlyingEvent() {
+            return underlyingEvent;
+        }
+
+        public BoundEvent getBoundEvent() {
+            return boundEvent;
+        }
+
+        public boolean isCancelled() {
+            return cancelled;
+        }
+
+        public void setCancelled(boolean cancelled) {
+            this.cancelled = cancelled;
+        }                
+        
     }
 }

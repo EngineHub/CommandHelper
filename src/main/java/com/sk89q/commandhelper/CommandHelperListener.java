@@ -28,6 +28,8 @@ import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.User;
+import com.sk89q.worldguard.bukkit.WorldGuardPlayerListener;
+import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.Map;
@@ -121,10 +123,19 @@ public class CommandHelperListener extends PlayerListener {
      * @param event Relevant event details
      */
     @Override
-    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {        
+    public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
+        if((Boolean)Static.getPreferences().getPreference("debug-mode")){
+            System.out.println("CommandHelper: (>'.')> Recieved event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
+        }
+        WorldGuardPlugin wgp = Static.getWorldGuardPlugin();
+        //This will cancel the command if the player isn't supposed to run it in this region
+        if(wgp != null){
+            WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
+            wgpl.onPlayerCommandPreprocess(event);
+        }
         String cmd = event.getMessage();        
         Player player = event.getPlayer();
-        playDirty();
+        Static.PlayDirty();
         if (cmd.equals("/.") || cmd.equals("/repeat")) {
             return;
         }
@@ -169,27 +180,6 @@ public class CommandHelperListener extends PlayerListener {
         Player player = event.getPlayer();
         sessions.remove(player.getName());
     }
-
-    /**
-     * Sets up CommandHelper to play-dirty, if the user has specified as such
-     */
-    public void playDirty() {
-        if ((Boolean) Static.getPreferences().getPreference("play-dirty")) {
-            try {
-                    //Set up our "proxy"
-                    DirtyRegisteredListener.Repopulate();                
-            } catch (NoSuchMethodException ex) {
-                Logger.getLogger(CommandHelperListener.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (NoSuchFieldException ex) {
-                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-            } catch (ClassCastException ex) {
-                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-            } catch (IllegalArgumentException ex) {
-                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-            } catch (IllegalAccessException ex) {
-                logger.log(Level.SEVERE, "Uh oh, play dirty mode isn't working.", ex);
-            }
-        } //else play nice :(
-    }
+    
 
 }

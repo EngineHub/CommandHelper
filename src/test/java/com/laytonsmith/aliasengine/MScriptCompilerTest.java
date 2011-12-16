@@ -414,7 +414,7 @@ public class MScriptCompilerTest {
                 + "<<<";
         Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        assertEquals("label", s.getOriginalEnv().GetLabel());
+        assertEquals("label", s.getLabel());
     }
     
     @Test
@@ -492,7 +492,7 @@ public class MScriptCompilerTest {
                 + "<<<";
         Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);        
         s.compile();
-        assertEquals("safe", s.getOriginalEnv().GetLabel());
+        assertEquals("safe", s.getLabel());
         assertTrue(s.match("/test 2"));
         s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), env, null);
         verify(fakePlayer).sendMessage("2");

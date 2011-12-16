@@ -45,5 +45,12 @@ public class IVariableList {
         return b.toString();
     }
     
+    @Override
+    public IVariableList clone(){
+        IVariableList clone = new IVariableList();
+        clone.varList = new HashMap<String, IVariable>(varList);
+        return clone;
+    }
+    
     
 }

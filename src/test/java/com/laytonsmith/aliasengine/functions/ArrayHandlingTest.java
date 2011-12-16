@@ -51,7 +51,6 @@ public class ArrayHandlingTest {
     @Test
     public void testArraySize() throws ConfigCompileException, CancelCommandException {
         ArrayHandling.array_size a = new ArrayHandling.array_size();
-        TestBoilerplate(a, "array_size");
         CArray arr = commonArray;
         Construct ret = a.exec(0, null, env, arr);
         assertReturn(ret, C.Int);
@@ -106,7 +105,6 @@ public class ArrayHandlingTest {
     @Test
     public void testArrayContains() throws CancelCommandException {
         ArrayHandling.array_contains a = new ArrayHandling.array_contains();
-        TestBoilerplate(a, "array_contains");
         assertCEquals(C.onstruct(true), a.exec(0, null, env, commonArray, C.onstruct(1)));
         assertCEquals(C.onstruct(false), a.exec(0, null, env, commonArray, C.onstruct(55)));
     }
@@ -120,7 +118,6 @@ public class ArrayHandlingTest {
     @Test
     public void testArrayGet() throws CancelCommandException {
         ArrayHandling.array_get a = new ArrayHandling.array_get();
-        TestBoilerplate(a, "array_get");
         assertCEquals(C.onstruct(1), a.exec(0, null, env, commonArray, C.onstruct(0)));
     }
     
@@ -139,7 +136,6 @@ public class ArrayHandlingTest {
     @Test
     public void testArrayPush() throws CancelCommandException {
         ArrayHandling.array_push a = new ArrayHandling.array_push();
-        TestBoilerplate(a, "array_push");
         assertReturn(a.exec(0, null, env, commonArray, C.onstruct(4)), C.Void);
         assertCEquals(C.onstruct(1), commonArray.get(0, 0));
         assertCEquals(C.onstruct(2), commonArray.get(1, 0));
@@ -193,6 +189,9 @@ public class ArrayHandlingTest {
         assertEquals("{c, d, e}", SRun("array(a, b, c, d, e)[2..]", null));
         assertEquals("{}", SRun("array(1, 2, 3, 4, 5)[3..0]", null));
         assertEquals("{a, b}", SRun("array_get(array(a, b))", null));
+        assertEquals("{2, 3}", SRun("array(1, 2, 3)[1..-1]", null));
+        assertEquals("{2}", SRun("array(1, 2)[1..-1]", null));
+        assertEquals("{}", SRun("array(1)[1..-1]", null));
     }
     
     @Test public void testArrayMergeNormal() throws ConfigCompileException{

@@ -18,7 +18,29 @@ import java.util.logging.Logger;
  */
 public class MainSandbox {
     public static void main(String[] args) throws Exception{
-        
+        System.out.println(Static.debugLogFile());
+    }
+    
+    public static class hashClass{
+        int x;
+        int y;
+        int z;
+        String world;
+
+        private static long top = (long)(Math.pow(2, 63) - Math.pow(2, 56));
+        private static long middle = (long)(Math.pow(2, 55) - Math.pow(2, 28));
+        private static long bottom = (long)Math.pow(2, 27) - 1;
+        public static long GetHashCode(int x, int y, int z) {
+            System.out.println(top);
+            System.out.println(middle);
+            System.out.println(bottom);
+            long hash = 0;
+            hash |= ((long)y << 55) & top;
+            hash |= ((long)x << 27) & middle;
+            hash |= (long)z & bottom;            
+            return hash;
+        }
+                
     }
     
     public static void printPackets(){

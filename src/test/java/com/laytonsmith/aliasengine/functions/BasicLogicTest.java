@@ -142,26 +142,41 @@ public class BasicLogicTest {
         verify(fakePlayer, times(5)).sendMessage("pass");
     }
     
-    @Test public void testAnd() throws CancelCommandException{
-        BasicLogic.and a = new BasicLogic.and();
-        assertCTrue(a.exec(0, null, env, _true, _true, _true));
-        assertCFalse(a.exec(0, null, env, _true, _true, _false));
-        assertCTrue(a.exec(0, null, env, _true, _true));
-        assertCFalse(a.exec(0, null, env, _true, _false));
-        assertCFalse(a.exec(0, null,env, _false, _false));
-        assertCTrue(a.exec(0, null, env, _true));
-        assertCFalse(a.exec(0, null, env, _false));
+    @Test public void testAnd1() throws CancelCommandException, ConfigCompileException{
+        SRun("if(and(true, true, true), msg(pass))", fakePlayer);
+        SRun("if(and(true, true, false), '', msg(pass))", fakePlayer);
+        SRun("if(and(true, true), msg(pass))", fakePlayer);
+        SRun("if(and(true, false), '', msg(pass))", fakePlayer);
+        SRun("if(and(false, false), '', msg(pass))", fakePlayer);
+        SRun("if(and(true), msg(pass))", fakePlayer);
+        SRun("if(and(false), '', msg(pass))", fakePlayer);
+        verify(fakePlayer, times(7)).sendMessage("pass");
     }
     
-    @Test public void testOr() throws CancelCommandException{
-        BasicLogic.or a = new BasicLogic.or();
-        assertCTrue(a.exec(0, null, env, _true, _true, _true));
-        assertCTrue(a.exec(0, null, env, _true, _true, _false));
-        assertCTrue(a.exec(0, null, env, _true, _true));
-        assertCTrue(a.exec(0, null, env, _true, _false));
-        assertCFalse(a.exec(0, null, env, _false, _false));
-        assertCTrue(a.exec(0, null, env, _true));
-        assertCFalse(a.exec(0, null, env, _false));
+    /**
+     * Tests lazy evaluation
+     * @return
+     * @throws ConfigCompileException 
+     */
+    @Test public void testAnd2() throws ConfigCompileException{
+        SRun("and(false, msg(lol))", fakePlayer);
+        verify(fakePlayer, times(0)).sendMessage("lol");
+    }
+    
+    @Test public void testOr1() throws CancelCommandException, ConfigCompileException{
+        SRun("if(or(true, true, true), msg(pass))", fakePlayer);
+        SRun("if(or(true, true, false), msg(pass))", fakePlayer);
+        SRun("if(or(true, true), msg(pass))", fakePlayer);
+        SRun("if(or(true, false), msg(pass))", fakePlayer);
+        SRun("if(or(false, false), '', msg(pass))", fakePlayer);
+        SRun("if(or(true), msg(pass))", fakePlayer);
+        SRun("if(or(false), '', msg(pass))", fakePlayer);
+        verify(fakePlayer, times(7)).sendMessage("pass");
+    }
+    
+    @Test public void testOr2() throws ConfigCompileException{
+        SRun("or(true, msg(lol))", fakePlayer);
+        verify(fakePlayer, times(0)).sendMessage("lol");
     }
     
     @Test public void testNot() throws CancelCommandException{

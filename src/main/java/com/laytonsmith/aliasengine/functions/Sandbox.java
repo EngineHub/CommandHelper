@@ -1,16 +1,15 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.DirtyRegisteredListener;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.aliasengine.events.BoundEvent;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.lang.reflect.Constructor;
@@ -23,9 +22,14 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
+import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
@@ -35,15 +39,18 @@ import org.bukkit.plugin.SimplePluginManager;
  * @author Layton
  */
 public class Sandbox {
-    public static String docs(){
+
+    public static String docs() {
         return "This class is for functions that are experimental. They don't actually get added"
                 + " to the documentation, and are subject to removal at any point in time, nor are they"
                 + " likely to have good documentation.";
     }
-    @api public static class plugin_cmd implements Function{
+
+    @api
+    public static class plugin_cmd implements Function {
 
         public String getName() {
-            return "__plugin_cmd__";
+            return "plugin_cmd";
         }
 
         public Integer[] numArgs() {
@@ -62,7 +69,8 @@ public class Sandbox {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -77,23 +85,32 @@ public class Sandbox {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Object o = Static.getAliasCore().parent.getServer().getPluginManager();
-            if(o instanceof SimplePluginManager){
-                SimplePluginManager spm = (SimplePluginManager)o;
+            Object o = AliasCore.parent.getServer().getPluginManager();
+            if (o instanceof SimplePluginManager) {
+                SimplePluginManager spm = (SimplePluginManager) o;
                 try {
                     Method m = spm.getClass().getDeclaredMethod("getEventListeners", Event.Type.class);
                     m.setAccessible(true);
+                    SortedSet<RegisteredListener> sl = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.SERVER_COMMAND);
+                    for(RegisteredListener l : sl){
+                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
+                            if(env.GetCommandSender() instanceof ConsoleCommandSender){
+                                l.callEvent(new ServerCommandEvent((ConsoleCommandSender)env.GetCommandSender(), args[1].val()));
+                            }
+                        }
+                    }
                     SortedSet<RegisteredListener> ss = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.PLAYER_COMMAND_PREPROCESS);
-                    for(RegisteredListener l : ss){
-                        if(l.getPlugin().getDescription().getName().equals(args[0].val())){
+
+                    for (RegisteredListener l : ss) {
+                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
+                            if(env.GetCommandSender() instanceof Player){
+                                l.callEvent(new PlayerCommandPreprocessEvent(env.GetPlayer(), args[1].val()));
+                            }
                             PluginCommand.class.getDeclaredMethods();
                             Constructor c = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
                             c.setAccessible(true);
-                            Command com = (Command)c.newInstance(l.getPlugin().getDescription().getName(), l.getPlugin()); 
                             List<String> argList = Arrays.asList(args[1].val().split(" "));
-//                            com.execute(p, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
-//                            l.callEvent(new Event() {});
-//                            break;
+                            Command com = (Command) c.newInstance(argList.get(0).substring(1), l.getPlugin());
                             l.getPlugin().onCommand(env.GetCommandSender(), com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
                         }
                     }
@@ -111,13 +128,13 @@ public class Sandbox {
                     Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            
+
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class item_drop implements Function{
+
+    @api
+    public static class item_drop implements Function {
 
         public String getName() {
             return "item_drop";
@@ -142,7 +159,8 @@ public class Sandbox {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -162,45 +180,45 @@ public class Sandbox {
             int qty = 1;
             ItemStack is = null;
             boolean natural = false;
-            if(env.GetCommandSender() instanceof Player){
+            if (env.GetCommandSender() instanceof Player) {
                 l = env.GetPlayer().getLocation();
             }
-            if(args.length == 1){
+            if (args.length == 1) {
                 //It is just the item
                 is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, line_num, f);
                 natural = true;
-            } else if(args.length == 2){
+            } else if (args.length == 2) {
                 //If args[0] starts with a number, it's the (item, qty) version, otherwise it's
                 //(player, item)
-                if(args[0].val().matches("\\d.*")){
-                    qty = (int)Static.getInt(args[1]);
+                if (args[0].val().matches("\\d.*")) {
+                    qty = (int) Static.getInt(args[1]);
                     is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, line_num, f);
                     natural = true;
                 } else {
-                    if(args[0] instanceof CArray){
-                        l = Static.GetLocation(args[0], (l != null?l.getWorld():null), line_num, f);
+                    if (args[0] instanceof CArray) {
+                        l = Static.GetLocation(args[0], (l != null ? l.getWorld() : null), line_num, f);
                         natural = false;
                     } else {
                         l = Static.GetPlayer(args[0].val(), line_num, f).getLocation();
                         natural = true;
                     }
                     is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, line_num, f);
-                    
+
                 }
-            } else if(args.length == 3){
+            } else if (args.length == 3) {
                 //We are specifying all 3
-                if(args[0] instanceof CArray){
-                    l = Static.GetLocation(args[0], (l != null?l.getWorld():null), line_num, f);
+                if (args[0] instanceof CArray) {
+                    l = Static.GetLocation(args[0], (l != null ? l.getWorld() : null), line_num, f);
                     natural = false;
                 } else {
                     l = Static.GetPlayer(args[0].val(), line_num, f).getLocation();
                     natural = true;
                 }
-                qty = (int)Static.getInt(args[2]);
+                qty = (int) Static.getInt(args[2]);
                 is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, line_num, f);
-            }      
-            if(l.getWorld() != null){
-                if(natural){
+            }
+            if (l.getWorld() != null) {
+                if (natural) {
                     l.getWorld().dropItemNaturally(l, is);
                 } else {
                     l.getWorld().dropItem(l, is);
@@ -211,10 +229,10 @@ public class Sandbox {
 
             return new CVoid(line_num, f);
         }
-        
     }
-    
-    @api public static class npe implements Function{
+
+    @api
+    public static class npe implements Function {
 
         public String getName() {
             return "npe";
@@ -236,7 +254,8 @@ public class Sandbox {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -255,9 +274,61 @@ public class Sandbox {
             o.toString();
             return new CVoid(line_num, f);
         }
-        
     }
     
-    
+    @api public static class super_cancel implements Function{
+
+        public String getName() {
+            return "super_cancel";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public String docs() {
+            return "void {} \"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
+                    + " super cancelled, not only is the cancelled flag set to true, the event stops propagating down, so"
+                    + " no other plugins will receive the event at all (other than monitor level). This is useful for overridding"
+                    + " event handlers for plugins that don't respect the cancelled flag. This function hooks into the play-dirty"
+                    + " framework that injects custom event handlers into bukkit.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.BindException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            BoundEvent.ActiveEvent original = environment.GetEvent();
+            if(original == null){
+                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
+            }
+            if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable 
+                    && original.getUnderlyingEvent() instanceof org.bukkit.event.Event){
+                ((Cancellable)original.getUnderlyingEvent()).setCancelled(true);
+                DirtyRegisteredListener.setCancelled((org.bukkit.event.Event)original.getUnderlyingEvent());
+            }
+            environment.GetEvent().setCancelled(true);
+            return new CVoid(line_num, f);
+        }
         
+    }
+
+    
 }

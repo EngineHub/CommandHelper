@@ -163,14 +163,14 @@ public class MScriptCompiler {
                         try{
                             Integer.parseInt(unicode.toString(), 16);
                         } catch(NumberFormatException e){
-                            throw new ConfigCompileException("Unrecognized unicode escape sequence", line_num);
+                            throw new ConfigCompileException("Unrecognized unicode escape sequence", line_num, file);
                         }
                         buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));                        
                         i += 4;
                     } else {
                         //Since we might expand this list later, don't let them
                         //use unescaped backslashes
-                        throw new ConfigCompileException("The escape sequence \\" + c2 + " is not a recognized escape sequence", line_num);
+                        throw new ConfigCompileException("The escape sequence \\" + c2 + " is not a recognized escape sequence", line_num, file);
                     }
 
                     i++;
@@ -197,10 +197,10 @@ public class MScriptCompiler {
             }
         } //end lexing
         if(state_in_quote){
-            throw new ConfigCompileException("Unended string literal", line_num);
+            throw new ConfigCompileException("Unended string literal", line_num, file);
         }
         if(in_comment || comment_is_block){
-            throw new ConfigCompileException("Unended comment", line_num);
+            throw new ConfigCompileException("Unended comment", line_num, file);
         }
                 //look at the tokens, and get meaning from them
         for (Token t : token_list) {
@@ -268,13 +268,13 @@ public class MScriptCompiler {
             if (thisToken.val().equals("<<<")) {
                 if (!inside_multiline) {
                     throw new ConfigCompileException("Found multiline end symbol, and no multiline start found",
-                            thisToken.line_num);
+                            thisToken.line_num, thisToken.file);
                 }
                 inside_multiline = false;
                 continue;
             }
             if (thisToken.val().equals(">>>") && !prevToken.type.equals(TType.ALIAS_END)) {
-                throw new ConfigCompileException("Multiline symbol must follow the alias_end token", thisToken.line_num);
+                throw new ConfigCompileException("Multiline symbol must follow the alias_end token", thisToken.line_num, thisToken.file);
             }
 
             //If we're not in a multiline construct, or we are in it and it's not a newline, add
@@ -317,7 +317,11 @@ public class MScriptCompiler {
             } else {
                 if (t.type == TType.NEWLINE) {
                     inLeft = true;
-                    Script s = new Script(left, right, env.clone());
+                    //Env newEnv = new Env();//env;
+//                    try{
+//                        newEnv = env.clone();
+//                    } catch(Exception e){}
+                    Script s = new Script(left, right);
                     scripts.add(s);
                     left = new ArrayList();
                     right = new ArrayList();
@@ -363,7 +367,7 @@ public class MScriptCompiler {
                     emptyArray = true;
                 }
                 if(arrayStack.size() == 1){
-                    throw new ConfigCompileException("Mismatched square bracket", t.line_num);
+                    throw new ConfigCompileException("Mismatched square bracket", t.line_num, t.file);
                 }
                 int array = arrayStack.pop().get();
                 int index = array + 1;
@@ -413,12 +417,12 @@ public class MScriptCompiler {
                 parents.push(f);
             } else if (t.type.equals(TType.FUNC_START)) {
                 if (!prev.type.equals(TType.FUNC_NAME)) {
-                    throw new ConfigCompileException("Unexpected parenthesis", t.line_num);
+                    throw new ConfigCompileException("Unexpected parenthesis", t.line_num, t.file);
                 }
                 parens++;
             } else if (t.type.equals(TType.FUNC_END)) {
                 if (parens < 0) {
-                    throw new ConfigCompileException("Unexpected parenthesis", t.line_num);
+                    throw new ConfigCompileException("Unexpected parenthesis", t.line_num, t.file);
                 }
                 parens--;
                 parents.pop();
@@ -447,7 +451,8 @@ public class MScriptCompiler {
                 if(!tree.getData().val().matches("^_[^_].*")){
                     Integer [] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
                     if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())){
-                        throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().getLineNum());
+                        throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().getLineNum(),
+                                tree.getData().getFile());
                     }
                 }
                 constructCount.pop();
@@ -455,7 +460,7 @@ public class MScriptCompiler {
                 try{
                     tree = parents.peek();
                 } catch(EmptyStackException e){
-                    throw new ConfigCompileException("Unexpected end parenthesis", t.line_num);
+                    throw new ConfigCompileException("Unexpected end parenthesis", t.line_num, t.file);
                 }
             } else if (t.type.equals(TType.COMMA)) {
                 if(constructCount.peek().get() > 1){
@@ -483,10 +488,10 @@ public class MScriptCompiler {
             } 
         }
         if(arrayStack.size() != 1){
-            throw new ConfigCompileException("Mismatched square brackets", t.line_num);
+            throw new ConfigCompileException("Mismatched square brackets", t.line_num, t.file);
         }
         if (parens != 0) {
-            throw new ConfigCompileException("Mismatched parenthesis", t.line_num);
+            throw new ConfigCompileException("Mismatched parenthesis", t.line_num, t.file);
         }
         return tree;
     }      
@@ -500,7 +505,7 @@ public class MScriptCompiler {
      */
     public static void execute(GenericTreeNode<Construct> root, Env env, MScriptComplete done, Script script){
         if(script == null){
-            script = new Script(null, null, env);
+            script = new Script(null, null);
         }
         StringBuilder b = new StringBuilder();
         for (GenericTreeNode<Construct> gg : root.getChildren()) {

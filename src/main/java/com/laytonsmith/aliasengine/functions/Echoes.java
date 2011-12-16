@@ -197,9 +197,28 @@ public class Echoes {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String color = ChatColor.WHITE.toString();
+            
             try{
                 color = ChatColor.valueOf(args[0].val().toUpperCase()).toString();
             } catch(IllegalArgumentException e){}
+            String a = args[0].val().toUpperCase();
+            if(a.equals("A")){
+                a = "10";
+            } else if(a.equals("B")){
+                a = "11";
+            } else if(a.equals("C")){
+                a = "12";
+            } else if(a.equals("D")){
+                a = "13";
+            } else if(a.equals("E")){
+                a = "14";
+            } else if(a.equals("F")){
+                a = "15";
+            }
+            try{
+                Integer p = Integer.parseInt(a);
+                color = ChatColor.getByCode(p).toString();
+            } catch(NumberFormatException e){}
             
             return new CString(color, line_num, f);
         }
@@ -208,7 +227,7 @@ public class Echoes {
             return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
                     + " The list of valid color names can be found in the ChatColor class, and case doesn't matter. For your reference,"
                     + " here is the list of valid colors: BLACK, DARK_BLUE, DARK_GREEN, DARK_AQUA, DARK_RED, DARK_PURPLE, GOLD GRAY, DARK_GRAY,"
-                    + " BLUE, GREEN, AQUA, RED, LIGHT_PURPLE, YELLOW, WHITE";
+                    + " BLUE, GREEN, AQUA, RED, LIGHT_PURPLE, YELLOW, WHITE, in addition the integers 0-15 will work, or the hex numbers from 0-F.";
         }
         
         public ExceptionType[] thrown(){

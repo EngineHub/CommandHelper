@@ -6,6 +6,21 @@
     <version>3.2.1-SNAPSHOT</version>
     <name>CommandHelper</name>
     <description>CommandHelper adds powerful command related utility functions</description>
+    <issueManagement>
+        <system>BukkitDev</system>
+        <url>http://dev.bukkit.org/server-mods/commandhelper/create-ticket/</url>
+    </issueManagement>
+    <ciManagement>
+        <system>Jenkins</system>
+        <url>http://build.sk89q.com/job/CommandHelper/</url>
+    </ciManagement>
+    <licenses>
+        <license>
+            <name>GNU Lesser General Public License, Version 3</name>
+            <url>http://www.gnu.org/licenses/lgpl.html</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
   
     <scm>
         <connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
@@ -105,6 +120,22 @@
             <groupId>org.jibble</groupId>
             <artifactId>pircbot</artifactId>
             <version>1.5.0</version>
+            <scope>compile</scope>
+        </dependency>
+        
+        <!-- Profiling library -->
+        <dependency>
+            <groupId>org.perf4j</groupId>
+            <artifactId>perf4j</artifactId>
+            <version>0.9.16</version>
+            <scope>compile</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>log4j</groupId>
+            <artifactId>log4j</artifactId>
+            <version>1.2.16</version>
+            <scope>compile</scope>
         </dependency>
         
         <!-- Test libraries -->
@@ -215,6 +246,8 @@
                                 <includes>
                                     <include>com.sk89q:worldedit:jar:*</include>
                                     <include>com.nijikokun:register:jar:*</include>
+                                    <include>org.perf4j:perf4j:jar:*</include>
+                                    <include>log4j:log4j:jar:*</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -233,12 +266,28 @@
                                         <exclude>com/google/**</exclude>
                                     </excludes>
                                 </filter>
+                                <!-- Profiler -->
+                                <filter>
+                                    <artifact>org.perf4j:perf4j:jar:*</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                                <filter>
+                                    <artifact>log4j:log4j:jar:*</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                                
+                                <!-- Register -->
                                 <filter>
                                     <artifact>com.nijikokun:register:jar:*</artifact>
                                     <includes>
                                         <include>**</include>
                                     </includes>
                                 </filter>
+                                
                             </filters>
                         </configuration>
                     </execution>

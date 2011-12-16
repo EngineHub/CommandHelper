@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.testing;
 
+import org.junit.Before;
+import org.bukkit.entity.Player;
 import com.sk89q.worldedit.expression.ExpressionException;
 import com.sk89q.worldedit.expression.Expression;
 import org.bukkit.Location;
@@ -30,6 +32,12 @@ import static org.mockito.Mockito.*;
  * @author Layton
  */
 public class RandomTests {
+    Player fakePlayer;
+    
+    @Before
+    public void setUp(){
+        fakePlayer = StaticTest.GetOnlinePlayer();
+    }
     /**
      * This function automatically tests all the boilerplate portions of all functions. Note that
      * this can be disabled in the StaticTest class, so that high quality test coverage can be measured.
@@ -162,6 +170,20 @@ public class RandomTests {
         //verify basic usage works
         Expression e = Expression.compile("(x + 2) * y", "x", "y");        
         assertEquals(16, e.evaluate(2, 4), 0.00001);
+    }
+    
+    @Test public void testProcScope() throws ConfigCompileException{
+        SRun("proc(_b, assign(@a, 2)) assign(@a, 1) _b() msg(@a)", fakePlayer);
+        verify(fakePlayer).sendMessage("1");
+    }
+    
+    @Test public void testDataLookup() throws ConfigCompileException{
+        assertEquals("1", SRun("data_values(stone)", fakePlayer));
+        assertEquals("4", SRun("data_values(cstone)", fakePlayer));
+        assertEquals("6:2", SRun("data_values(birchsapling)", fakePlayer));
+        assertEquals("35:14", SRun("data_values(redwool)", fakePlayer));
+        assertEquals("35:14", SRun("data_values('wool:red')", fakePlayer));
+        assertEquals("35:14", SRun("data_values(REDWOOL)", fakePlayer));
     }
     
 }

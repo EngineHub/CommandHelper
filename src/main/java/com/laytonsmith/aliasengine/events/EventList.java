@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
@@ -144,7 +145,8 @@ public class EventList {
     public static final CWorldListener WorldListener = new CWorldListener();
     
     /**
-     * This should be called when the plugin starts up. It registeres all bukkit event listeners
+     * This should be called when the plugin starts up. It registeres all bukkit event listeners.
+     * This should only be called once, in onEnable from the main plugin.
      */
     public static void Startup(CommandHelperPlugin chp){
         for(org.bukkit.event.Event.Type type : event_list.keySet()){
