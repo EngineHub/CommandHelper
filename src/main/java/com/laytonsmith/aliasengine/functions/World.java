@@ -5,6 +5,8 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Env;
@@ -13,6 +15,15 @@ import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Properties;
+import java.util.SortedMap;
+import java.util.TreeMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.bukkit.Location;
 import org.bukkit.entity.Player;
 
@@ -140,6 +151,170 @@ public class World {
             }
             world.refreshChunk(x, z);
             return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
+    static{
+        Properties p = new Properties();
+        try {
+            p.load(Minecraft.class.getResourceAsStream("/time_names.txt"));
+            Enumeration e = p.propertyNames();
+            while(e.hasMoreElements()){
+                String name = e.nextElement().toString();
+                TimeLookup.put(name, new CString(p.getProperty(name).toString(), 0, null));
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @api public static class set_world_time implements Function{
+
+        public String getName() {
+            return "set_world_time";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            StringBuilder doc = new StringBuilder();
+            doc.append("void {[world], time} Sets the time of a given world. Should be a number from 0 to"
+                    + " 24000, if not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am)"
+                    + " is acceptable, and convenient english mappings also exist:"
+                    );
+            doc.append("<ul>");
+            for(String key : TimeLookup.keySet()){
+                doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>\n");
+            }
+            doc.append("</ul>");
+            return doc.toString();
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            org.bukkit.World w = null;
+            if(environment.GetPlayer() != null){
+                w = environment.GetPlayer().getWorld();
+            }
+            if(args.length == 2){
+                w = Static.getServer().getWorld(args[0].val());                
+            }
+            if(w == null){
+                throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, line_num, f);
+            }
+            long time = 0;
+            String stime = (args.length == 1?args[0]:args[1]).val().toLowerCase();
+            if(TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))){
+                stime = TimeLookup.get(stime.replaceAll("[^a-z]", "")).val();
+            }
+            if(stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")){
+                Pattern p = Pattern.compile("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$");
+                Matcher m = p.matcher(stime);
+                m.find();
+                int hour = Integer.parseInt(m.group(1));
+                int minute = Integer.parseInt(m.group(2));
+                String offset = "a";
+                if(m.group(3) != null){
+                    offset = m.group(3);
+                }
+                if(offset.equals("p")){
+                    hour += 12;
+                }
+                if(hour == 24) hour = 0;
+                if(hour > 24){
+                    throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, line_num, f);
+                }
+                if(minute > 59){
+                    throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, line_num, f);                    
+                }
+                hour -= 6;
+                hour = hour % 24;
+                long ttime = hour * 1000;
+                ttime += ((minute / 60.0) * 1000);
+                stime = Long.toString(ttime);
+            }
+            try{
+                Long.valueOf(stime);
+            } catch(NumberFormatException e){
+                throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, line_num, f);
+            }
+            time = Long.parseLong(stime);
+            w.setTime(time);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class get_world_time implements Function{
+
+        public String getName() {
+            return "get_world_time";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "int {[world]} Returns the time of the specified world, as an integer from"
+                    + " 0 to 24000-1";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            org.bukkit.World w = null;
+            if(environment.GetPlayer() != null){
+                w = environment.GetPlayer().getWorld();
+            }
+            if(args.length == 1){
+                w = Static.getServer().getWorld(args[0].val());                
+            }
+            if(w == null){
+                throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, line_num, f);
+            }
+            return new CInt(w.getTime(), line_num, f);
         }
         
     }
