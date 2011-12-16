@@ -186,6 +186,10 @@ public class Env implements Cloneable{
         event = e;
     }
     
+    /**
+     * Returns the active event, or null if not in scope.
+     * @return 
+     */
     public BoundEvent.ActiveEvent GetEvent(){
         return event;
     }

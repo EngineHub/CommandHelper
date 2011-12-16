@@ -16,6 +16,7 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.events.BoundEvent;
+import com.laytonsmith.aliasengine.events.Event;
 import com.laytonsmith.aliasengine.events.EventHandler;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -354,6 +355,58 @@ public class EventBinding {
                 serverWide = Static.getBoolean(args[2]);
             }
             EventHandler.ManualTrigger(args[0].val(), obj, serverWide);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
+    @api public static class modify_event implements Function{
+
+        public String getName() {
+            return "modify_event";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {parameter, value} Modifies the underlying event object, if applicable."
+                    + " The documentation for each event will explain what parameters can be modified,"
+                    + " and what their expected values are. If an invalid parameter name is passed in,"
+                    + " nothing will happen. If this function is called from outside an event"
+                    + " handler, a BindException is thrown. Note that modifying the underlying event"
+                    + " will NOT update the event object passed in to the event handler.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BindException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            String parameter = args[0].val();
+            Construct value = args[1];
+            if(environment.GetEvent() == null){
+                throw new ConfigRuntimeException(this.getName() + " must be called from within an event handler", ExceptionType.BindException, line_num, f);
+            }
+            Event e = environment.GetEvent().getEventDriver();
+            e.modifyEvent(parameter, value, environment.GetEvent().getUnderlyingEvent());
             return new CVoid(line_num, f);
         }
         

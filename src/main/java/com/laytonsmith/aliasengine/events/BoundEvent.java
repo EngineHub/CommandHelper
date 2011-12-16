@@ -232,8 +232,16 @@ public class BoundEvent implements Comparable<BoundEvent> {
         GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
         superRoot.addChild(tree);
         Script s = Script.GenerateScript(superRoot, "*");        
-        Event myDriver = EventList.getEvent(this.getDriver(), this.getEventName());
+        Event myDriver = this.getEventDriver();
         myDriver.execute(s, this);
+    }
+    
+    /**
+     * Returns the Event driver that knows how to handle this event.
+     * @return 
+     */
+    public Event getEventDriver(){
+        return EventList.getEvent(this.getDriver(), this.getEventName());
     }
     
     /**
@@ -274,7 +282,11 @@ public class BoundEvent implements Comparable<BoundEvent> {
 
         public void setCancelled(boolean cancelled) {
             this.cancelled = cancelled;
-        }                
+        }         
+        
+        public Event getEventDriver(){
+            return this.boundEvent.getEventDriver();
+        }
         
     }
 }

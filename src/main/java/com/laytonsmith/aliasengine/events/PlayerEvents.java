@@ -14,10 +14,10 @@ import com.laytonsmith.aliasengine.events.Prefilters.PrefilterType;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import java.util.Map;
-import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event.Result;
 import org.bukkit.event.Event.Type;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -200,7 +200,10 @@ public class PlayerEvents {
         }
 
         public void modifyEvent(String key, Construct value, Object event) {
-            
+            if(event instanceof PlayerInteractEvent){
+                PlayerInteractEvent pie = (PlayerInteractEvent)event;
+                
+            }
         }
         
     }
