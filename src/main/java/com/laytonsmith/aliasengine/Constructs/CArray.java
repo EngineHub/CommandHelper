@@ -9,11 +9,14 @@ import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 /**
  *
@@ -160,7 +163,7 @@ public class CArray extends Construct {
                 set.add(new CInt(i, 0, null));
             }
         } else {
-            set = associative_array.keySet();
+            set = new TreeSet(associative_array.keySet());
         }        
         return set;
     }

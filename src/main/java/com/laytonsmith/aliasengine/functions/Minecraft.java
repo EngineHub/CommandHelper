@@ -103,6 +103,9 @@ public class Minecraft {
                 return new CInt(Static.getInt(args[0]), line_num, f);
             } else {
                 String c = args[0].val();
+                if(Material.matchMaterial(c) != null){
+                    return new CInt(new MaterialData(Material.matchMaterial(c)).getItemTypeId(), line_num, f);
+                }
                 String changed = c;
                 if(changed.contains(":")){
                     //Split on that, and reverse. Change wool:red to redwool
@@ -121,17 +124,17 @@ public class Minecraft {
                     }
                     return new CString(split[0] + ":" + split[1], line_num, f);
                 }
-                return new CInt(new MaterialData(Material.matchMaterial(c)).getItemTypeId(), line_num, f);
+                return new CNull(line_num, f);
             }
         }
 
         public String docs() {
             return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
-                    + " simply returns that number";
+                    + " simply returns that number. If the data value cannot be found, null is returned.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{};
         }
 
         public boolean isRestricted() {
