@@ -162,8 +162,9 @@ public class CArray extends Construct {
             for(int i = 0; i < array.size(); i++){
                 set.add(new CInt(i, 0, null));
             }
+            set = new TreeSet(set);
         } else {
-            set = new TreeSet(associative_array.keySet());
+            set = associative_array.keySet();
         }        
         return set;
     }

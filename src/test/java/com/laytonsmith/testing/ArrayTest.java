@@ -15,7 +15,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import static org.mockito.Mockito.*;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
+import org.mockito.InOrder;
 
 /**
  *
@@ -26,6 +28,11 @@ public class ArrayTest {
     public ArrayTest() {
     }
 
+    @BeforeClass
+    public static void setUpClass(){
+        Plugin fakePlugin = mock(Plugin.class);        
+        CommandHelperPlugin.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), fakePlugin);
+    }
     @Before
     public void setUp() {
         fakePlayer = StaticTest.GetOnlinePlayer();
@@ -104,9 +111,7 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("-1");
     }
     
-    @Test public void testAssociativeArraySerialization() throws ConfigCompileException{
-        Plugin fakePlugin = mock(Plugin.class);        
-        CommandHelperPlugin.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), fakePlugin);
+    @Test public void testAssociativeArraySerialization() throws ConfigCompileException{        
         when(fakePlayer.isOp()).thenReturn(true);
         SRun("assign(@arr, array(0: 0, 1: 1, potato: potato))"
                 + "store_value(potato, @arr)"
@@ -308,6 +313,38 @@ public class ArrayTest {
         SRun("assign(@pdata, array(value: array(1)))\n"
                 + "msg(array_size(@pdata[value]))", fakePlayer);
         verify(fakePlayer).sendMessage("1");
+    }
+    
+    @Test public void testArrayKeysSortOrder() throws ConfigCompileException{
+        for(int i = 0; i < 5; i++){
+            SRun("assign(@array, array())"
+                    + "array_push(@array, array(1))"
+                    + "array_push(@array, array(2))"
+                    + "array_push(@array, array(3))"
+                    + "foreach(array_keys(@array), @key, msg(@key))", fakePlayer);
+            verify(fakePlayer).sendMessage("0");
+            verify(fakePlayer).sendMessage("1");
+            verify(fakePlayer).sendMessage("2");
+            setUp();
+        }
+    }
+    
+    @Test public void testArrayKeysSortOrderWithPersistance() throws ConfigCompileException{
+        for(int i = 0; i < 5; i++){
+            InOrder inOrder = inOrder(fakePlayer);
+            when(fakePlayer.isOp()).thenReturn(true);
+            SRun("assign(@array, array())"
+                    + "array_push(@array, array(1))"
+                    + "array_push(@array, array(2))"
+                    + "array_push(@array, array(3))"
+                    + "store_value('array', @array)"
+                    + "assign(@array2, get_value('array'))"
+                    + "foreach(array_keys(@array2), @key, msg(@key))", fakePlayer);
+            inOrder.verify(fakePlayer).sendMessage("0");
+            inOrder.verify(fakePlayer).sendMessage("1");
+            inOrder.verify(fakePlayer).sendMessage("2");
+            setUp();
+        }
     }
 
 }
