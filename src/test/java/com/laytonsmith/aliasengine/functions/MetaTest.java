@@ -4,23 +4,20 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.aliasengine.Env;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import java.util.concurrent.atomic.AtomicBoolean;
 import org.bukkit.entity.Player;
-import org.bukkit.Server;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
 /**
@@ -29,8 +26,8 @@ import static org.mockito.Mockito.*;
  */
 public class MetaTest {
     
-    Server fakeServer;
-    Player fakePlayer;
+    MCServer fakeServer;
+    MCPlayer fakePlayer;
     Env env = new Env();
     
 
@@ -61,7 +58,7 @@ public class MetaTest {
     @Test public void testRunas1() throws ConfigCompileException{
         String script = 
                 "runas('wraithguard02', '/cmd yay')";
-        Player fakePlayer2 = StaticTest.GetOnlinePlayer("wraithguard02", fakeServer);
+        MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("wraithguard02", fakeServer);
         when(fakeServer.getPlayer("wraithguard02")).thenReturn(fakePlayer2);
         when(fakePlayer.isOp()).thenReturn(true);
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);

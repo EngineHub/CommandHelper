@@ -2,7 +2,7 @@ package com.laytonsmith.PureUtilities;
 
 import java.util.ArrayList;
 
-import org.bukkit.ChatColor;
+import com.laytonsmith.abstraction.MCChatColor;
 
 /**
  * This class provides a method for working around the not so pretty line breaks
@@ -103,14 +103,14 @@ public class rParser {
     //Function:	msgLength
     //Input:	String str: The string to find the length of
     //Output:	int: The length on the screen of a string
-    //Use:		Finds the length on the screen of a string. Ignores ChatColor.
+    //Use:		Finds the length on the screen of a string. Ignores MCChatColor.
     //=====================================================================
     public static int msgLength(String str) {
         int length = 0;
         //Loop through all the characters, skipping any color characters
         //and their following color codes
         for (int x = 0; x < str.length(); x++) {
-            if (str.charAt(x) == '?' /*|| str.charAt(x) == ChatColor.White.charAt(0)*/) {
+            if (str.charAt(x) == '?' /*|| str.charAt(x) == MCChatColor.White.charAt(0)*/) {
                 if (x + 1 != str.length()) {
                     if (colorChange(str.charAt(x + 1)) != null) {
                         x++;
@@ -188,73 +188,73 @@ public class rParser {
     //Use:		Finds a color giving a color code
     //=====================================================================
     public static String colorChange(char colour) {
-        ChatColor color;
+        MCChatColor color;
         switch (colour) {
             case '0':
-                color = ChatColor.BLACK;
+                color = MCChatColor.BLACK;
                 break;
             case '1':
-                color = ChatColor.DARK_BLUE;
+                color = MCChatColor.DARK_BLUE;
                 break;
             case '2':
-                color = ChatColor.DARK_GREEN;
+                color = MCChatColor.DARK_GREEN;
                 break;
             case '3':
-                color = ChatColor.DARK_AQUA;
+                color = MCChatColor.DARK_AQUA;
                 break;
             case '4':
-                color = ChatColor.DARK_RED;
+                color = MCChatColor.DARK_RED;
                 break;
             case '5':
-                color = ChatColor.DARK_PURPLE;
+                color = MCChatColor.DARK_PURPLE;
                 break;
             case '6':
-                color = ChatColor.GOLD;
+                color = MCChatColor.GOLD;
                 break;
             case '7':
-                color = ChatColor.GRAY;
+                color = MCChatColor.GRAY;
                 break;
             case '8':
-                color = ChatColor.DARK_GRAY;
+                color = MCChatColor.DARK_GRAY;
                 break;
             case '9':
-                color = ChatColor.BLUE;
+                color = MCChatColor.BLUE;
                 break;
             case 'a':
-                color = ChatColor.GREEN;
+                color = MCChatColor.GREEN;
                 break;
             case 'b':
-                color = ChatColor.AQUA;
+                color = MCChatColor.AQUA;
                 break;
             case 'c':
-                color = ChatColor.RED;
+                color = MCChatColor.RED;
                 break;
             case 'd':
-                color = ChatColor.LIGHT_PURPLE;
+                color = MCChatColor.LIGHT_PURPLE;
                 break;
             case 'e':
-                color = ChatColor.YELLOW;
+                color = MCChatColor.YELLOW;
                 break;
             case 'f':
-                color = ChatColor.WHITE;
+                color = MCChatColor.WHITE;
                 break;
             case 'A':
-                color = ChatColor.GREEN;
+                color = MCChatColor.GREEN;
                 break;
             case 'B':
-                color = ChatColor.AQUA;
+                color = MCChatColor.AQUA;
                 break;
             case 'C':
-                color = ChatColor.RED;
+                color = MCChatColor.RED;
                 break;
             case 'D':
-                color = ChatColor.LIGHT_PURPLE;
+                color = MCChatColor.LIGHT_PURPLE;
                 break;
             case 'E':
-                color = ChatColor.YELLOW;
+                color = MCChatColor.YELLOW;
                 break;
             case 'F':
-                color = ChatColor.WHITE;
+                color = MCChatColor.WHITE;
                 break;
             default:
                 return null;

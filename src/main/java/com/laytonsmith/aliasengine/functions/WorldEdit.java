@@ -4,6 +4,11 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.Env;
@@ -64,8 +69,8 @@ public class WorldEdit {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Player m = null;
-            Location l = null;
+            MCPlayer m = null;
+            MCLocation l = null;
             boolean setter = false;
             Static.checkPlugin("WorldEdit", line_num, f);
             
@@ -89,12 +94,12 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld()));
+            RegionSelector sel = Static.getWorldEditPlugin().getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
             if (!(sel instanceof CuboidRegionSelector)) {
                 throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
             }
             if(setter){
-                sel.selectPrimary(BukkitUtil.toVector(l));
+                sel.selectPrimary(BukkitUtil.toVector(((BukkitMCLocation)l)._Location()));
                 return new CVoid(line_num, f);
             } else {
                 Vector pt = ((CuboidRegion) sel.getIncompleteRegion()).getPos1();
@@ -127,8 +132,8 @@ public class WorldEdit {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Player m = null;
-            Location l = null;
+            MCPlayer m = null;
+            MCLocation l = null;
             boolean setter = false;
             Static.checkPlugin("WorldEdit", line_num, f);
 
@@ -152,13 +157,13 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin().getSession(m).getRegionSelector(BukkitUtil.getLocalWorld(m.getWorld()));
+            RegionSelector sel = Static.getWorldEditPlugin().getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
             if (!(sel instanceof CuboidRegionSelector)) {
                 throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
             }
 
             if(setter){
-                sel.selectSecondary(BukkitUtil.toVector(l));
+                sel.selectSecondary(BukkitUtil.toVector(((BukkitMCLocation)l)._Location()));
                 return new CVoid(line_num, f);
             } else {
                 Vector pt = ((CuboidRegion)sel.getIncompleteRegion()).getPos2();

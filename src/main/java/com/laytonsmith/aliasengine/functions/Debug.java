@@ -34,7 +34,7 @@ import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.SimplePluginManager;
 
 /**
- *
+ * TODO: Remove bukkit references
  * @author Layton
  */
 public class Debug {

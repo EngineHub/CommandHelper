@@ -4,12 +4,12 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.aliasengine.events.BoundEvent;
 import com.laytonsmith.aliasengine.functions.IVariableList;
 import java.util.HashMap;
 import java.util.Map;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -22,7 +22,7 @@ public class Env implements Cloneable{
      */
     private Map<String, Object> custom = new HashMap<String, Object>();   
     private Map<String, Boolean> flags = new HashMap<String, Boolean>();
-    private CommandSender commandSender = null;
+    private MCCommandSender commandSender = null;
     private IVariableList iVariableList = null;
     private Map<String, Procedure> procs = null;
     private String label = null;
@@ -94,7 +94,7 @@ public class Env implements Cloneable{
      * @param env
      * @return 
      */
-    public CommandSender GetCommandSender(){
+    public MCCommandSender GetCommandSender(){
         return commandSender;
     }
     
@@ -102,7 +102,7 @@ public class Env implements Cloneable{
      * Sets the CommandSender in this environment
      * @param env 
      */
-    public void SetCommandSender(CommandSender cs){
+    public void SetCommandSender(MCCommandSender cs){
         commandSender = cs;
     }
     
@@ -114,9 +114,9 @@ public class Env implements Cloneable{
      * @param env
      * @return 
      */
-    public Player GetPlayer(){
-        if(commandSender instanceof Player){
-            return (Player)commandSender;
+    public MCPlayer GetPlayer(){
+        if(commandSender instanceof MCPlayer){
+            return (MCPlayer)commandSender;
         } else {
             return null;
         }
@@ -126,7 +126,7 @@ public class Env implements Cloneable{
      * Sets the Player in this environment
      * @param env 
      */
-    public void SetPlayer(Player p){
+    public void SetPlayer(MCPlayer p){
         commandSender = p;
     }
     

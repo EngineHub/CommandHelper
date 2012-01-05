@@ -22,5 +22,8 @@ CommandHelper on GitHub, add your changes, and then submit a pull request.
 We'll look at it, make comments, and merge it into CommandHelper if
 everything works out.
 
-By submitting code, you agree to place to license your code under the 
-irrevocable GNU General Public License v3.
+By submitting code, you agree to dual license your code under the 
+irrevocable GNU General Public License v3, and the MIT License.
+
+Portions of CommandHelper are copyright: wraithguard01, sk89q, Deaygo, 
+t3hk0d3, zml2008, and albatrossen

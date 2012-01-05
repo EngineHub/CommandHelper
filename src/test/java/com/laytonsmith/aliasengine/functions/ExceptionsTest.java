@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import java.io.File;
@@ -28,8 +30,8 @@ import static org.mockito.Mockito.*;
  */
 public class ExceptionsTest {
     
-    Server fakeServer;
-    Player fakePlayer;
+    MCServer fakeServer;
+    MCPlayer fakePlayer;
     Env env = new Env();
 
     public ExceptionsTest() {

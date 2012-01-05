@@ -4,6 +4,10 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
 import com.laytonsmith.aliasengine.Constructs.CInt;
@@ -19,12 +23,6 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.enchantments.EnchantmentTarget;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -149,13 +147,13 @@ public class Enchantments {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Player m = environment.GetPlayer();
+            MCPlayer m = environment.GetPlayer();
             int offset = 1;
             if (args.length == 4) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
                 offset = 0;
             }
-            ItemStack is = null;
+            MCItemStack is = null;
             if (args[1 - offset] instanceof CNull) {
                 is = m.getItemInHand();
             } else {
@@ -176,7 +174,7 @@ public class Enchantments {
                 levelArray = (CArray) args[3 - offset];
             }
             for (Construct key : enchantArray.keySet()) {
-                Enchantment e = Enchantment.getByName(Enchantments.ConvertName(enchantArray.get(key, line_num).val()).toUpperCase());
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, line_num).val()).toUpperCase());
                 if(e == null){
                     throw new ConfigRuntimeException(enchantArray.get(key, line_num).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, line_num, f);
                 }
@@ -233,13 +231,13 @@ public class Enchantments {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Player m = environment.GetPlayer();
+            MCPlayer m = environment.GetPlayer();
             int offset = 1;
             if (args.length == 3) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
                 offset = 0;
             }
-            ItemStack is = null;
+            MCItemStack is = null;
             if (args[1 - offset] instanceof CNull) {
                 is = m.getItemInHand();
             } else {
@@ -251,14 +249,14 @@ public class Enchantments {
             if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
                 enchantArray.push(args[2 - offset]);
             } else if (args[2 - offset] instanceof CNull) {
-                for (Enchantment e : is.getEnchantments().keySet()) {
+                for (MCEnchantment e : is.getEnchantments().keySet()) {
                     is.removeEnchantment(e);
                 }
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
             for (Construct key : enchantArray.keySet()) {
-                Enchantment e = Enchantment.getByName(enchantArray.get(key, line_num).val().toUpperCase());
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(enchantArray.get(key, line_num).val().toUpperCase());
                 is.removeEnchantment(e);
             }
             return new CVoid(line_num, f);
@@ -301,7 +299,7 @@ public class Enchantments {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Player m = environment.GetPlayer();
+            MCPlayer m = environment.GetPlayer();
             Construct slot;
             if(args.length == 2){
                 m = Static.GetPlayer(args[0].val(), line_num, f);
@@ -309,7 +307,7 @@ public class Enchantments {
             } else {
                 slot = args[0];
             }            
-            ItemStack is;
+            MCItemStack is;
             if(slot instanceof CNull){
                 is = m.getItemInHand();
             } else {
@@ -318,8 +316,8 @@ public class Enchantments {
             }
             CArray enchants = new CArray(line_num, f);
             CArray levels = new CArray(line_num, f);
-            for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
-                Enchantment e = entry.getKey();
+            for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()){
+                MCEnchantment e = entry.getKey();
                 Integer l = entry.getValue();
                 enchants.push(new CString(e.getName(), line_num, f));
                 levels.push(new CInt(l, line_num, f));
@@ -369,8 +367,8 @@ public class Enchantments {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             String name = Enchantments.ConvertName(args[0].val().toUpperCase());
-            Enchantment e = Enchantment.getByName(name);
-            ItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, line_num, f);
+            MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
+            MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, line_num, f);
             return new CBoolean(e.canEnchantItem(is), line_num, f);
         }
         
@@ -413,7 +411,7 @@ public class Enchantments {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             String name = Enchantments.ConvertName(args[0].val().toUpperCase());
-            Enchantment e = Enchantment.getByName(name);
+            MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
             return new CInt(e.getMaxLevel(), line_num, f);
         }
         
@@ -457,7 +455,7 @@ public class Enchantments {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            ItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, line_num, f);
+            MCItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, line_num, f);
             /**
              * Because enchantment types won't change from run to run, we can
              * cache here, and save time on duplicate lookups.
@@ -470,7 +468,7 @@ public class Enchantments {
                 }
             }
             CArray ca = new CArray(line_num, f);
-            for(Enchantment e : Enchantment.values()){
+            for(MCEnchantment e : StaticLayer.GetEnchantmentValues()){
                 if(e.canEnchantItem(is)){
                     ca.push(new CString(e.getName(), line_num, f));
                 }
@@ -521,7 +519,7 @@ public class Enchantments {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Enchantment e = Enchantment.getByName(args[0].val());
+            MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
             return new CBoolean(e != null, line_num, f);
         }
         

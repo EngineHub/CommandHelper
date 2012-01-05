@@ -4,25 +4,15 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.aliasengine.Constructs.CArray;
-import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.exceptions.EventException;
+import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import java.util.HashMap;
 import java.util.Map;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.block.BlockEvent;
-import org.bukkit.event.entity.EntityEvent;
-import org.bukkit.event.inventory.FurnaceBurnEvent;
-import org.bukkit.event.inventory.FurnaceSmeltEvent;
-import org.bukkit.event.player.PlayerEvent;
-import org.bukkit.event.server.ServerEvent;
-import org.bukkit.event.vehicle.VehicleEvent;
-import org.bukkit.event.weather.WeatherEvent;
-import org.bukkit.event.world.WorldEvent;
 
 /**
  * This helper class implements a few of the common functions in event, and
@@ -30,17 +20,13 @@ import org.bukkit.event.world.WorldEvent;
  * @author layton
  */
 public abstract class AbstractEvent implements Event, Comparable<Event> {
-
-    /**
-     * This is what should happen when the event is cancelled. Some events may
-     * do nothing, for instance, a player logout event cannot be cancelled. By
-     * default, if the event is an instance of Cancellable, it is cancelled.
-     * @param e 
-     */
-    public void cancel(Object e) {
-        if (e instanceof Cancellable) {
-            ((Cancellable) e).setCancelled(true);
-        }
+    
+    protected AbstractEventMixin mixin;
+    protected AbstractEventHandler handler;
+    
+    protected AbstractEvent(AbstractEventMixin mixin, AbstractEventHandler handler){
+        this.mixin = mixin;
+        this.handler = handler;
     }
 
     /**
@@ -60,40 +46,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     public void hook() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
-    
-    /**
-     * For Bukkit events, there are a few standard items that get added to the
-     * event object. This function does that for the event.
-     * @param e
-     * @return
-     * @throws EventException 
-     */
-    public Map<String, Construct> evaluate_helper(Object e) throws EventException{
-        Map<String, Construct> map = new HashMap<String, Construct>();
-        map.put("type", new CString(this.getName(), 0, null));
-        String macro = "";
-        if(e instanceof BlockEvent){
-            macro = "block";
-        } else if(e instanceof EntityEvent){
-            macro = "entity";
-        } else if(e instanceof FurnaceBurnEvent || e instanceof FurnaceSmeltEvent){
-            macro = "inventory";
-        } else if(e instanceof PlayerEvent){
-            macro = "player";
-        } else if(e instanceof ServerEvent){
-            macro = "server";
-        } else if(e instanceof VehicleEvent){
-            macro = "vehicle";
-        } else if(e instanceof WeatherEvent){
-            macro = "weather";
-        } else if(e instanceof WorldEvent){
-            macro = "world";
-        } else {
-            macro = "custom";
-        }
-        map.put("macrotype", new CString(macro, 0, null));
-        return map;
-    }
+
     
     /**
      * This function is run when the actual event occurs. By default, the script
@@ -117,23 +70,19 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     }
     
     /**
-     * By default, if Object is a bukkit event, we trigger it. Otherwise, nothing
-     * is done.
-     * @param e 
-     */
-    public void manualTrigger(Object e){
-        if(e instanceof org.bukkit.event.Event){
-            Static.getServer().getPluginManager().callEvent((org.bukkit.event.Event)e);
-        }
-    }
-    
-    /**
-     * Since most events are bukkit events, we return true by default.
+     * Since most events are minecraft events, we return true by default.
      * @return 
      */
     public boolean supportsExternal(){
         return true;
     }
+    
+    /**
+     * The same event handler needs to sometimes implement things differently based on the
+     * current server implementation.
+     * @return 
+     */
+    public abstract Implementation.Type implementationType();
     
     /**
      * If it is ok to by default do a simple conversion from a CArray to a
@@ -148,6 +97,22 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
             map.put(key.val(), manualObject.get(key, 0));
         }
         return map;        
+    }
+    
+    public boolean matches(Map<String, Construct> prefilter, Object e) throws PrefilterNonMatchException{
+        return handler.matches(prefilter, e);
+    }
+    
+    public Map<String, Construct> evaluate(Object e) throws EventException{
+        return handler.evaluate(e, this.mixin);
+    }
+    
+    public Object convert(CArray manual){
+        return handler.convert(manual);
+    }
+    
+    public void modifyEvent(String key, Construct value, Object event){
+        modifyEvent(key, value, event);
     }
     
 }

@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.bukkit.BukkitMCPluginManager;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.CDouble;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
@@ -656,7 +657,8 @@ public class Economy {
     public static Method GetMethod(int line_num, File file){
         com.nijikokun.register.payment.Methods m = new Methods();
         if(!Methods.hasMethod()){
-            Methods.setMethod(Static.getServer().getPluginManager());
+            //Register only works with Bukkit for now anyways.
+            Methods.setMethod(((BukkitMCPluginManager)Static.getServer().getPluginManager()).__PluginManager());
             //initialize our plugin if it isn't already
 //            Plugin [] plugins = Static.getServer().getPluginManager().getPlugins();
 //            for(Plugin plugin : plugins){

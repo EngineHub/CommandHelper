@@ -10,19 +10,19 @@ import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.ChatColor;
-import org.bukkit.entity.Player;
+import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCPlayer;
 
 /**
  *
  * @author layton
  */
 public class User {
-    Player player;
+    MCPlayer player;
     SerializedPersistance persist;
     
 
-    public User(Player player, SerializedPersistance persist){
+    public User(MCPlayer player, SerializedPersistance persist){
         //(new PermissionsResolverServerListener(perms)).register(this);
         this.player = player;
         this.persist = persist;
@@ -59,7 +59,7 @@ public class User {
         System.out.println(al);
         for(Map.Entry e : al){
             String [] key = e.getKey().toString().split("\\.");
-            b.append(ChatColor.AQUA)
+            b.append(MCChatColor.AQUA)
                     .append(key[key.length - 1])
                     .append(":")
                     .append(e.getValue().toString().substring(0, Math.min(e.getValue().toString().length(), 45)))
@@ -67,7 +67,7 @@ public class User {
                     .append("\n");
         }
         if(al.isEmpty()){
-            b.append(ChatColor.AQUA).append("You have no aliases defined");
+            b.append(MCChatColor.AQUA).append("You have no aliases defined");
         }
         return b.toString();
     }
@@ -90,7 +90,7 @@ public class User {
     }
 
     public void removeAlias(int id){
-        try {
+        try {            
             persist.setValue(new String[]{player.getName(), "aliases", Integer.toString(id)}, null);
             persist.save();
         } catch (Exception ex) {

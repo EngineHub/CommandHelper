@@ -5,7 +5,6 @@
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.IVariable;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 

@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -133,7 +134,7 @@ public class Script {
         //Some things, such as the label are determined at compile time
         this.CurrentEnv = myEnv;
         this.CurrentEnv.SetLabel(this.label);
-        CommandSender p = myEnv.GetCommandSender();
+        MCCommandSender p = myEnv.GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
             int line_num = 0;
             if (left.size() >= 1) {

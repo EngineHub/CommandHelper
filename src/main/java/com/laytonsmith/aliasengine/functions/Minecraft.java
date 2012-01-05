@@ -4,6 +4,13 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCAnimalTamer;
+import com.laytonsmith.abstraction.MCEffect;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCTameable;
+import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -27,13 +34,9 @@ import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.DyeColor;
-import org.bukkit.Effect;
-import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.World;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.Blaze;
 import org.bukkit.entity.CaveSpider;
 import org.bukkit.entity.Chicken;
@@ -41,7 +44,6 @@ import org.bukkit.entity.Cow;
 import org.bukkit.entity.Creeper;
 import org.bukkit.entity.EnderDragon;
 import org.bukkit.entity.Enderman;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Ghast;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -57,7 +59,6 @@ import org.bukkit.entity.Slime;
 import org.bukkit.entity.Snowman;
 import org.bukkit.entity.Spider;
 import org.bukkit.entity.Squid;
-import org.bukkit.entity.Tameable;
 import org.bukkit.entity.Villager;
 import org.bukkit.entity.Wolf;
 import org.bukkit.entity.Zombie;
@@ -251,9 +252,9 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            List<World> worlds = env.GetCommandSender().getServer().getWorlds();
+            List<MCWorld> worlds = env.GetCommandSender().getServer().getWorlds();
             CArray c = new CArray(line_num, f);
-            for (World w : worlds) {
+            for (MCWorld w : worlds) {
                 c.push(new CString(w.getName(), line_num, f));
             }
             return c;
@@ -272,7 +273,7 @@ public class Minecraft {
         }
 
         public String docs() {
-            return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
+            return "array {mobType, [qty], [location]} (Currently only works with Bukkit) Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
                     + " to the location of the player. mobType can be one of: BLAZE, CAVESPIDER, CHICKEN, COW, CREEPER, ENDERDRAGON, ENDERMAN, GHAST,"
                     + " MAGMACUBE, MOOSHROOM, PIG, PIGZOMBIE, SHEEP, SILVERFISH, SKELETON, SLIME, SPIDER, SPIDERJOCKEY, SQUID, VILLAGER, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
@@ -327,7 +328,7 @@ public class Minecraft {
                 throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
                         ExceptionType.RangeException, line_num, f);
             }
-            Location l = null;
+            MCLocation l = null;
             if (env.GetCommandSender() instanceof Player) {
                 l = env.GetPlayer().getLocation();
             }
@@ -430,7 +431,7 @@ public class Minecraft {
             }
             if (l.getWorld() != null) {
                 for (int i = 0; i < qty; i++) {
-                    Entity e = l.getWorld().spawn(l, mobType);
+                    MCEntity e = l.getWorld().spawn(l, mobType);
                     if(MOBS.valueOf(mob.toUpperCase()) == MOBS.SPIDERJOCKEY){
                         Spider s = (Spider) e;
                         Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
@@ -504,11 +505,11 @@ public class Minecraft {
                 entityID = args[0];
             }
             int id = (int) Static.getInt(entityID);
-            Entity e = Static.getEntity(id);
+            MCEntity e = Static.getEntity(id);
             if(e == null){
                 return new CVoid(line_num, f);
-            } else if(e instanceof Tameable){                
-                Tameable t = (Tameable) e;
+            } else if(e instanceof MCTameable){                
+                MCTameable t = (MCTameable) e;
                 if(player != null){
                     t.setOwner(Static.getServer().getOfflinePlayer(player));
                 } else {
@@ -559,11 +560,11 @@ public class Minecraft {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             int id = (int)Static.getInt(args[0]);
-            Entity e = Static.getEntity(id);
+            MCEntity e = Static.getEntity(id);
             if(e == null){
                 return new CNull(line_num, f);
-            } else if(e instanceof Tameable){
-                AnimalTamer at = ((Tameable)e).getOwner();
+            } else if(e instanceof MCTameable){
+                MCAnimalTamer at = ((MCTameable)e).getOwner();
                 if(at instanceof HumanEntity){
                     return new CString(((HumanEntity)at).getName(), line_num, f);
                 } else if(at instanceof OfflinePlayer){
@@ -614,11 +615,11 @@ public class Minecraft {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             int id = (int)Static.getInt(args[0]);
-            Entity e = Static.getEntity(id);
+            MCEntity e = Static.getEntity(id);
             boolean ret = false;
             if(e == null){
                 ret = false;
-            } else if(e instanceof Tameable){
+            } else if(e instanceof MCTameable){
                 ret = true;
             } else {
                 ret = false;
@@ -667,11 +668,11 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Location l = Static.GetLocation(args[0], (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
-            Effect e = null;
+            MCLocation l = Static.GetLocation(args[0], (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
+            MCEffect e = null;
             try{
-                e = Effect.valueOf(args[1].val().toUpperCase());
-                if(e.equals(Effect.RECORD_PLAY) || e.equals(Effect.SMOKE) || e.equals(Effect.STEP_SOUND)){
+                e = MCEffect.valueOf(args[1].val().toUpperCase());
+                if(e.equals(MCEffect.RECORD_PLAY) || e.equals(MCEffect.SMOKE) || e.equals(MCEffect.STEP_SOUND)){
                     throw new IllegalArgumentException();
                 }
             } catch(IllegalArgumentException ex){
@@ -724,13 +725,13 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Entity e = Static.getEntity((int)Static.getInt(args[0]));
-            if(e instanceof LivingEntity){
+            MCEntity e = Static.getEntity((int)Static.getInt(args[0]));
+            if(e instanceof MCLivingEntity){
                 int health = (int)((double)Static.getInt(args[1])/100.0*(double)((LivingEntity)e).getMaxHealth());
                 if(health != 0){
-                    ((LivingEntity)e).setHealth(health);
+                    ((MCLivingEntity)e).setHealth(health);
                 } else {
-                    ((LivingEntity)e).damage(9001); //His power level is over 9000!
+                    ((MCLivingEntity)e).damage(9001); //His power level is over 9000!
                 }
             }
             return new CVoid(line_num, f);
@@ -774,9 +775,9 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Entity e = Static.getEntity((int)Static.getInt(args[0]));
-            if(e instanceof LivingEntity){
-                int h = (int)(((double)((LivingEntity)e).getHealth()/(double)((LivingEntity)e).getMaxHealth())*100);
+            MCEntity e = Static.getEntity((int)Static.getInt(args[0]));
+            if(e instanceof MCLivingEntity){
+                int h = (int)(((double)((MCLivingEntity)e).getHealth()/(double)((MCLivingEntity)e).getMaxHealth())*100);
                 return new CInt(h, line_num, f);
             } else {
                 throw new ConfigRuntimeException("Not a valid entity id", ExceptionType.FormatException, line_num, f);

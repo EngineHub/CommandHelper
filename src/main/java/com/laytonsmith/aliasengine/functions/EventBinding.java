@@ -22,7 +22,6 @@ import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.io.File;
-import org.bukkit.event.Cancellable;
 
 /**
  *
@@ -244,8 +243,8 @@ public class EventBinding {
             if(original == null){
                 throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
             }
-            if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable){
-                ((Cancellable)original.getUnderlyingEvent()).setCancelled(true);
+            if(original.getUnderlyingEvent() != null && original.isCancellable()){
+                original.setCancelled(true);
             }
             environment.GetEvent().setCancelled(true);
             return new CVoid(line_num, f);
@@ -294,8 +293,8 @@ public class EventBinding {
                 throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
             }
             boolean result = false;
-            if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable){
-                result = ((Cancellable)original.getUnderlyingEvent()).isCancelled();
+            if(original.getUnderlyingEvent() != null && original.isCancellable()){
+                result = original.isCancelled();
             }
             return new CBoolean(result, line_num, f);
         }

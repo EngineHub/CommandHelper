@@ -17,11 +17,10 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.util.Map;
 import java.util.logging.Level;
-import org.bukkit.ChatColor;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
+import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
 
 /**
  *
@@ -142,7 +141,7 @@ public class Echoes {
             if(args.length < 2){
                 throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, line_num, f);
             }
-            Player p = Static.getServer().getPlayer(args[0].val());
+            MCPlayer p = Static.getServer().getPlayer(args[0].val());
             if(p == null){
                 throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
@@ -196,10 +195,10 @@ public class Echoes {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            String color = ChatColor.WHITE.toString();
+            String color = MCChatColor.WHITE.toString();
             
             try{
-                color = ChatColor.valueOf(args[0].val().toUpperCase()).toString();
+                color = MCChatColor.valueOf(args[0].val().toUpperCase()).toString();
             } catch(IllegalArgumentException e){}
             String a = args[0].val().toUpperCase();
             if(a.equals("A")){
@@ -217,7 +216,7 @@ public class Echoes {
             }
             try{
                 Integer p = Integer.parseInt(a);
-                color = ChatColor.getByCode(p).toString();
+                color = MCChatColor.getByCode(p).toString();
             } catch(NumberFormatException e){}
             
             return new CString(color, line_num, f);
@@ -225,7 +224,7 @@ public class Echoes {
 
         public String docs() {
             return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
-                    + " The list of valid color names can be found in the ChatColor class, and case doesn't matter. For your reference,"
+                    + " The list of valid color names can be found in the MCChatColor class, and case doesn't matter. For your reference,"
                     + " here is the list of valid colors: BLACK, DARK_BLUE, DARK_GREEN, DARK_AQUA, DARK_RED, DARK_PURPLE, GOLD GRAY, DARK_GRAY,"
                     + " BLUE, GREEN, AQUA, RED, LIGHT_PURPLE, YELLOW, WHITE, in addition the integers 0-15 will work, or the hex numbers from 0-F.";
         }
@@ -286,7 +285,7 @@ public class Echoes {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CString(ChatColor.stripColor(args[0].val()), line_num, f);
+            return new CString(MCChatColor.stripColor(args[0].val()), line_num, f);
         }
         
     }
@@ -305,7 +304,7 @@ public class Echoes {
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
-                    if(!(env.GetCommandSender() instanceof Player)){
+                    if(!(env.GetCommandSender() instanceof MCPlayer)){
                         throw new ConfigRuntimeException("The current player is not online, or this is being run from the console", ExceptionType.PlayerOfflineException, line_num, f);
                     }
                     (env.GetPlayer()).chat(line);
@@ -375,7 +374,7 @@ public class Echoes {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            final Player player = Static.getServer().getPlayer(args[0].val());
+            final MCPlayer player = Static.getServer().getPlayer(args[0].val());
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
@@ -429,7 +428,7 @@ public class Echoes {
             if(args[0] instanceof CNull){
                 throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, line_num, f);
             }
-            final Server server = Static.getServer();
+            final MCServer server = Static.getServer();
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {

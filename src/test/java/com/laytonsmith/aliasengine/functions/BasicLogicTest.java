@@ -4,15 +4,13 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.aliasengine.Env;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.Server;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.Constructs.*;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
-import org.bukkit.entity.Player;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -28,8 +26,8 @@ import static org.junit.Assert.*;
  */
 public class BasicLogicTest {
     
-    Player fakePlayer;
-    Server fakeServer;
+    MCPlayer fakePlayer;
+    MCServer fakeServer;
     CArray commonArray;
     CInt arg1_1;
     CInt arg1_2;

@@ -12,6 +12,18 @@ import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.Preferences.Type;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.PureUtilities.rParser;
+import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLivingEntity;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCPlugin;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.aliasengine.functions.Debug;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
@@ -28,17 +40,7 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.logging.Level;
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Server;
-import org.bukkit.World;
-import org.bukkit.block.Block;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.Player;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.plugin.Plugin;
+
 
 /**
  * This class contains several static methods to get various objects that really should be static in the first
@@ -199,8 +201,8 @@ public class Static {
      * @return
      * @throws NotInitializedYetException 
      */
-    public static Server getServer() throws NotInitializedYetException {
-        Server s = com.sk89q.commandhelper.CommandHelperPlugin.myServer;
+    public static MCServer getServer() throws NotInitializedYetException {
+        MCServer s = com.sk89q.commandhelper.CommandHelperPlugin.myServer;
         if (s == null) {
             throw new NotInitializedYetException("The server has not been initialized yet");
         }
@@ -363,7 +365,7 @@ public class Static {
 
     public static WorldEditPlugin getWorldEditPlugin() {
         if (CommandHelperPlugin.wep == null) {
-            Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
+            MCPlugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
             if (pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin) {
                 CommandHelperPlugin.wep = (WorldEditPlugin) pwep;
             }
@@ -372,7 +374,7 @@ public class Static {
     }
 
     public static WorldGuardPlugin getWorldGuardPlugin() {
-        Plugin pwgp = getServer().getPluginManager().getPlugin("WorldGuard");
+        MCPlugin pwgp = getServer().getPluginManager().getPlugin("WorldGuard");
         if (pwgp != null && pwgp.isEnabled() && pwgp instanceof WorldGuardPlugin) {
             return (WorldGuardPlugin) pwgp;
         }
@@ -460,13 +462,13 @@ public class Static {
      * @param p
      * @param msg 
      */
-    public static void SendMessage(final CommandSender m, String msg, final int line_num, final File f) {
+    public static void SendMessage(final MCCommandSender m, String msg, final int line_num, final File f) {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
-                Player p = null;
-                if (m instanceof Player) {
-                    p = (Player) m;
+                MCPlayer p = null;
+                if (m instanceof MCPlayer) {
+                    p = (MCPlayer) m;
                     if (p == null || !p.isOnline()) {
                         throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
                     }
@@ -480,13 +482,13 @@ public class Static {
         }, msg);
     }
 
-    public static void SendMessage(final CommandSender m, String msg) {
+    public static void SendMessage(final MCCommandSender m, String msg) {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
-                Player p = null;
-                if (m instanceof Player) {
-                    p = (Player) m;
+                MCPlayer p = null;
+                if (m instanceof MCPlayer) {
+                    p = (MCPlayer) m;
                     if (p != null && p.isOnline()) {
                         p.sendMessage(line);
                     }
@@ -525,10 +527,10 @@ public class Static {
         return false;
     }
 
-    public static ItemStack ParseItemNotation(String functionName, String notation, int qty, int line_num, File f) {
+    public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, int line_num, File f) {
         int type = 0;
         byte data = 0;
-        ItemStack is = null;
+        MCItemStack is = null;
         if (notation.matches("\\d*:\\d*")) {
             String[] sData = notation.split(":");
             try {
@@ -543,7 +545,7 @@ public class Static {
             type = (int) Static.getInt(Static.resolveConstruct(notation, line_num, f));
         }
 
-        is = new ItemStack(type, qty);
+        is = StaticLayer.GetItemStack(type, qty);
         is.setDurability(data);
         //is.setData(new MaterialData(type, data));
         return is;
@@ -554,7 +556,7 @@ public class Static {
      * @param is
      * @return 
      */
-    public static String ParseItemNotation(ItemStack is) {
+    public static String ParseItemNotation(MCItemStack is) {
         if (is == null) {
             return "0";
         }
@@ -567,30 +569,30 @@ public class Static {
         return is.getTypeId() + (append == null ? "" : ":" + append);
     }
 
-    public static String ParseItemNotation(Block b) {
+    public static String ParseItemNotation(MCBlock b) {
         if (b == null) {
             return "0";
         }
         return b.getTypeId() + (b.getData() == 0 ? "" : ":" + Byte.toString(b.getData()));
     }
 
-    public static Player GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException {
-        Player m = Static.getServer().getPlayer(player);
+    public static MCPlayer GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException {
+        MCPlayer m = Static.getServer().getPlayer(player);
         if (m == null || !m.isOnline()) {
             throw new ConfigRuntimeException("The specified player (player) is not online", ExceptionType.PlayerOfflineException, line_num, f);
         }
         return m;
     }
 
-    public static Player GetPlayer(Construct player, int line_num, File f) throws ConfigRuntimeException {
+    public static MCPlayer GetPlayer(Construct player, int line_num, File f) throws ConfigRuntimeException {
         return GetPlayer(player.val(), line_num, f);
     }
 
-    public static Player GetPlayer(String player) {
+    public static MCPlayer GetPlayer(String player) {
         return GetPlayer(player, 0, null);
     }
 
-    public static Player GetPlayer(Construct player) {
+    public static MCPlayer GetPlayer(Construct player) {
         return GetPlayer(player, 0, null);
     }
 
@@ -611,12 +613,12 @@ public class Static {
      * @param f
      * @return 
      */
-    public static Location GetLocation(Construct c, World w, int line_num, File f) {
+    public static MCLocation GetLocation(Construct c, MCWorld w, int line_num, File f) {
         if (!(c instanceof CArray)) {
             throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, line_num, f);
         }
         CArray array = (CArray) c;
-        World world = w;
+        MCWorld world = w;
         double x = 0;
         double y = 0;
         double z = 0;
@@ -651,7 +653,7 @@ public class Static {
         } else {
             throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, line_num, f);
         }
-        return new Location(world, x, y, z, yaw, pitch);
+        return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
     }
 
     /**
@@ -659,7 +661,7 @@ public class Static {
      * @param l
      * @return 
      */
-    public static CArray GetLocationArray(Location l) {
+    public static CArray GetLocationArray(MCLocation l) {
         CArray ca = new CArray(0, null);
         ca.push(new CDouble(l.getX(), 0, null));
         ca.push(new CDouble(l.getY(), 0, null));
@@ -683,9 +685,9 @@ public class Static {
      * @param id
      * @return 
      */
-    public static Entity getEntity(int id) {
-        for (World w : Static.getServer().getWorlds()) {
-            for (Entity e : w.getLivingEntities()) {
+    public static MCEntity getEntity(int id) {
+        for (MCWorld w : Static.getServer().getWorlds()) {
+            for (MCLivingEntity e : w.getLivingEntities()) {
                 if (e.getEntityId() == id) {
                     return e;
                 }
@@ -760,7 +762,7 @@ public class Static {
         boolean perm = false;
         PermissionsResolverManager perms = Static.getPermissionsResolverManager();
         if (perms != null) {
-            if (env.GetCommandSender() instanceof Player) {
+            if (env.GetCommandSender() instanceof MCPlayer) {
                 perm = perms.hasPermission(env.GetPlayer().getName(), "ch.func.use." + functionName)
                         || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.func.use." + functionName);
                 if (env.GetLabel() != null && env.GetLabel().startsWith("~")) {
@@ -777,7 +779,7 @@ public class Static {
                         perm = true;
                     }
                 }
-            } else if (env.GetCommandSender() instanceof ConsoleCommandSender) {
+            } else if (env.GetCommandSender() instanceof MCConsoleCommandSender) {
                 perm = true;
             }
         } else {

@@ -1,0 +1,75 @@
+/*
+ * To change this template, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package com.laytonsmith.abstraction.bukkit;
+
+import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCMaterialData;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import java.util.HashMap;
+import java.util.Map;
+import org.bukkit.enchantments.Enchantment;
+import org.bukkit.inventory.ItemStack;
+
+/**
+ *
+ * @author layton
+ */
+public class BukkitMCItemStack implements MCItemStack{
+    ItemStack is;
+    public BukkitMCItemStack(ItemStack is){
+        this.is = is;
+    }
+    
+    public MCMaterialData getData(){
+        if(is.getData() == null){
+            return null;
+        }
+        return new BukkitMCMaterialData(is.getData());
+    }
+    
+    public short getDurability(){
+        return is.getDurability();
+    }
+    
+    public int getTypeId(){
+        return is.getTypeId();
+    }
+
+    public void setDurability(short data) {
+        is.setDurability(data);
+    }
+
+    public void addEnchantment(MCEnchantment e, int level) {
+        is.addEnchantment(((BukkitMCEnchantment)e).__Enchantment(), level);
+    }
+    
+    public Map<MCEnchantment, Integer> getEnchantments(){
+        if(is.getEnchantments() == null){
+            return null;
+        }
+        Map<MCEnchantment, Integer> map = new HashMap<MCEnchantment, Integer>();
+        for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
+            map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
+        }
+        return map;
+    }
+    
+    public void removeEnchantment(MCEnchantment e){
+        is.removeEnchantment(((BukkitMCEnchantment)e).__Enchantment());
+    }
+
+    public MCMaterial getType() {
+        return new BukkitMCMaterial(is.getType());
+    }
+
+    public void setTypeId(int type) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    public int getAmount() {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+}

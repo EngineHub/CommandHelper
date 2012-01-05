@@ -11,8 +11,6 @@ import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.util.Map;
-import org.bukkit.command.CommandSender;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation

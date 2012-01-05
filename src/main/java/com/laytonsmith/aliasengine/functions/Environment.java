@@ -4,12 +4,18 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
-import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
@@ -17,15 +23,10 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import net.minecraft.server.Material;
 import net.minecraft.server.Packet0KeepAlive;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -80,9 +81,9 @@ public class Environment {
             double x = 0;
             double y = 0;
             double z = 0;
-            World w = null;
+            MCWorld w = null;
             String world = null;
-            if (env.GetPlayer() instanceof Player) {
+            if (env.GetPlayer() instanceof MCPlayer) {
                 w = env.GetPlayer().getWorld();
             }
             if (args.length == 1 || args.length == 2) {
@@ -119,7 +120,7 @@ public class Environment {
             x = java.lang.Math.floor(x);
             y = java.lang.Math.floor(y);
             z = java.lang.Math.floor(z);
-            Block b = w.getBlockAt((int) x, (int) y, (int) z);
+            MCBlock b = w.getBlockAt((int) x, (int) y, (int) z);
             return new CString(b.getTypeId() + ":" + b.getData(), line_num, f);
         }
 
@@ -172,12 +173,12 @@ public class Environment {
             double z = 0;
             String id = null;
             String world = null;
-            World w = null;
-            if (env.GetPlayer() instanceof Player) {
+            MCWorld w = null;
+            if (env.GetPlayer() instanceof MCPlayer) {
                 w = env.GetPlayer().getWorld();
             }
             if ((args.length == 2 || args.length == 3) && args[0] instanceof CArray) {
-                Location l = Static.GetLocation(args[0], env.GetPlayer().getWorld(), line_num, f);
+                MCLocation l = Static.GetLocation(args[0], env.GetPlayer().getWorld(), line_num, f);
                 x = l.getBlockX();
                 y = l.getBlockY();
                 z = l.getBlockZ();
@@ -209,7 +210,7 @@ public class Environment {
             int iy = (int) y;
             int iz = (int) z;
             System.out.println("Setting block at " + ix + "," + iy + "," + iz);
-            Block b = w.getBlockAt(ix, iy, iz);
+            MCBlock b = w.getBlockAt(ix, iy, iz);
             StringBuilder data = new StringBuilder();
             StringBuilder meta = new StringBuilder();
             boolean inMeta = false;
@@ -285,8 +286,8 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Location l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
-            if (l.getBlock().getState() instanceof Sign) {
+            MCLocation l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            if (l.getBlock().getState() instanceof MCSign) {
                 String line1 = "";
                 String line2 = "";
                 String line3 = "";
@@ -320,7 +321,10 @@ public class Environment {
                         line4 = args[4].val();
                     }
                 }
-                Sign s = (Sign) l.getBlock().getState();
+                /**
+                 * TODO: Remove this bukkit reference
+                 */
+                Sign s = (Sign) ((BukkitMCLocation)l)._Location().getBlock().getState();
                 s.setLine(0, line1);
                 s.setLine(1, line2);
                 s.setLine(2, line3);
@@ -370,7 +374,7 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Location l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            MCLocation l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
             if (l.getBlock().getState() instanceof Sign) {
                 Sign s = (Sign) l.getBlock().getState();
                 CString line1 = new CString(s.getLine(0), line_num, f);
@@ -420,7 +424,7 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Location l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            MCLocation l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
             return new CBoolean(l.getBlock().getType().equals(org.bukkit.Material.SIGN_POST)
                     || l.getBlock().getType().equals(org.bukkit.Material.WALL_SIGN), line_num, f);
         }
@@ -462,17 +466,17 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Location l;
-            Player p;
+            MCLocation l;
+            MCPlayer p;
             p = environment.GetPlayer();
-            World w = (p != null ? p.getWorld() : null);
+            MCWorld w = (p != null ? p.getWorld() : null);
             l = Static.GetLocation(args[0], w, line_num, f);
             if (l.getWorld() instanceof CraftWorld) {
                 CraftWorld cw = (CraftWorld) l.getWorld();
                 net.minecraft.server.Block.byId[l.getBlock().getTypeId()].dropNaturally(cw.getHandle(), l.getBlockX(), l.getBlockY(), l.getBlockZ(), l.getBlock().getData(), 1.0f, 0);
             }
             l.getBlock().setTypeId(0);
-            CraftServer cs = (CraftServer)Static.getServer();
+            CraftServer cs = (CraftServer)((BukkitMCServer)Static.getServer()).__Server();
             cs.getHandle().a(new Packet0KeepAlive(), 0);
             return new CVoid(line_num, f);
             

@@ -4,14 +4,14 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.lang.reflect.InvocationTargetException;
-import org.bukkit.entity.Player;
-import org.bukkit.Server;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -26,8 +26,8 @@ import static com.laytonsmith.testing.StaticTest.*;
  */
 public class EchoesTest {
     
-    Server fakeServer;
-    Player fakePlayer;
+    MCServer fakeServer;
+    MCPlayer fakePlayer;
     Env env = new Env();
     
     public EchoesTest() {

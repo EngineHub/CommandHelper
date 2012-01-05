@@ -14,7 +14,6 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import org.bukkit.command.CommandSender;
 
 /**
  *

@@ -4,14 +4,14 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.aliasengine.Env;
 import java.io.File;
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import java.io.IOException;
-import org.bukkit.entity.Player;
-import org.bukkit.Server;
 import com.laytonsmith.aliasengine.Constructs.Variable;
 import java.util.Arrays;
 import com.laytonsmith.aliasengine.Script;
@@ -22,7 +22,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 import static com.laytonsmith.testing.StaticTest.*;
 
@@ -32,8 +31,8 @@ import static com.laytonsmith.testing.StaticTest.*;
  */
 public class DataHandlingTest {
     
-    Server fakeServer;
-    Player fakePlayer;
+    MCServer fakeServer;
+    MCPlayer fakePlayer;
     Env env = new Env();
 
     public DataHandlingTest() {

@@ -18,6 +18,9 @@
  */
 package com.sk89q.commandhelper;
 
+import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.DirtyRegisteredListener;
 import com.laytonsmith.aliasengine.Env;
@@ -36,7 +39,6 @@ import java.util.Map;
 import java.util.HashMap;
 import java.io.*;
 import java.util.ArrayList;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerListener;
@@ -81,7 +83,7 @@ public class CommandHelperListener extends PlayerListener {
      * @param command
      * @return
      */
-    public boolean runAlias(String command, Player player) {
+    public boolean runAlias(String command, MCPlayer player) {
         try {
             User u = new User(player, plugin.persist);
             ArrayList<String> aliases = u.getAliasesAsArray();
@@ -106,7 +108,7 @@ public class CommandHelperListener extends PlayerListener {
      * @param player
      * @return
      */
-    public CommandHelperSession getSession(Player player) {
+    public CommandHelperSession getSession(MCPlayer player) {
         if (sessions.containsKey(player.getName())) {
             return sessions.get(player.getName());
         } else {
@@ -134,7 +136,7 @@ public class CommandHelperListener extends PlayerListener {
             wgpl.onPlayerCommandPreprocess(event);
         }
         String cmd = event.getMessage();        
-        Player player = event.getPlayer();
+        MCPlayer player = new BukkitMCPlayer(event.getPlayer());
         Static.PlayDirty();
         if (cmd.equals("/.") || cmd.equals("/repeat")) {
             return;
@@ -162,7 +164,7 @@ public class CommandHelperListener extends PlayerListener {
         } catch (ConfigRuntimeException e) {
             logger.log(Level.WARNING, e.getMessage());
         } catch (Throwable e) {
-            player.sendMessage(ChatColor.RED + "Command failed with following reason: " + e.getMessage());
+            player.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
             //Obviously the command is registered, but it somehow failed. Cancel the event.
             event.setCancelled(true);
             e.printStackTrace();

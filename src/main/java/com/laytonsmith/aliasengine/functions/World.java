@@ -4,6 +4,9 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
@@ -24,8 +27,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.bukkit.Location;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -118,13 +119,13 @@ public class World {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Player m = environment.GetPlayer();
-            org.bukkit.World world;
+            MCPlayer m = environment.GetPlayer();
+            MCWorld world;
             int x;
             int z;
             if(args.length == 1){
                 //Location array provided                
-                Location l = Static.GetLocation(args[0], m!=null?m.getWorld():null, line_num, f);
+                MCLocation l = Static.GetLocation(args[0], m!=null?m.getWorld():null, line_num, f);
                 world = l.getWorld();
                 x = l.getBlockX();
                 z = l.getBlockZ();
@@ -132,7 +133,7 @@ public class World {
                 //Either location array and world provided, or x and z. Test for array at pos 2
                 if(args[1] instanceof CArray){
                     world = Static.getServer().getWorld(args[0].val());
-                    Location l = Static.GetLocation(args[1], null, line_num, f);
+                    MCLocation l = Static.GetLocation(args[1], null, line_num, f);
                     x = l.getBlockX();
                     z = l.getBlockZ();
                 } else {
@@ -215,7 +216,7 @@ public class World {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            org.bukkit.World w = null;
+            MCWorld w = null;
             if(environment.GetPlayer() != null){
                 w = environment.GetPlayer().getWorld();
             }
@@ -304,7 +305,7 @@ public class World {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            org.bukkit.World w = null;
+            MCWorld w = null;
             if(environment.GetPlayer() != null){
                 w = environment.GetPlayer().getWorld();
             }

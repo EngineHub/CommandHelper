@@ -4,14 +4,14 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.IVariable;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.testing.C;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -27,8 +27,8 @@ import static org.mockito.Mockito.*;
  * @author Layton
  */
 public class MathTest {
-    Server fakeServer;
-    Player fakePlayer;
+    MCServer fakeServer;
+    MCPlayer fakePlayer;
     IVariableList varList;
     Env env = new Env();
     public MathTest() {

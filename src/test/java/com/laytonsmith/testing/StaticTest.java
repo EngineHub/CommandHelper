@@ -4,16 +4,25 @@
  */
 package com.laytonsmith.testing;
 
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
+import org.junit.runner.RunWith;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
-import org.bukkit.command.CommandSender;
 import com.laytonsmith.aliasengine.MScriptCompiler;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import java.lang.reflect.Field;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import java.util.List;
 import java.util.ArrayList;
-import org.bukkit.entity.Player;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CBoolean;
@@ -29,9 +38,7 @@ import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.Arrays;
 import java.util.Random;
-import org.bukkit.Server;
 import org.bukkit.World;
-import org.bukkit.command.ConsoleCommandSender;
 import org.mockito.Mockito;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -40,6 +47,9 @@ import static org.mockito.Mockito.*;
  * 
  * @author Layton
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest( { Static.class })
+
 public class StaticTest {
 
     /**
@@ -51,9 +61,9 @@ public class StaticTest {
         //For the "quality test code coverage" number, set this to true
         boolean runQualityTestsOnly = false;
 
-        Player fakePlayer = Mockito.mock(Player.class);
-        Server fakeServer = Mockito.mock(Server.class);
-        World fakeWorld = Mockito.mock(World.class);
+        MCPlayer fakePlayer = Mockito.mock(MCPlayer.class);
+        MCServer fakeServer = Mockito.mock(MCServer.class);
+        MCWorld fakeWorld = Mockito.mock(MCWorld.class);
         Mockito.when(fakePlayer.getServer()).thenReturn(fakeServer);
         Mockito.when(fakePlayer.getWorld()).thenReturn(fakeWorld);
         System.out.println(name);
@@ -106,7 +116,7 @@ public class StaticTest {
         //TODO
     }
 
-    public static void TestExec(Function f, CommandSender p) {
+    public static void TestExec(Function f, MCCommandSender p) {
         Env env = new Env();
         env.SetCommandSender(p);
         //See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
@@ -279,24 +289,24 @@ public class StaticTest {
         return tokens;
     }
     
-    public static Player GetOnlinePlayer(){
-        Server s = GetFakeServer();
+    public static MCPlayer GetOnlinePlayer(){
+        MCServer s = GetFakeServer();
         return GetOnlinePlayer("wraithguard01", s);
     }
     
-    public static Player GetOnlinePlayer(Server s){
+    public static MCPlayer GetOnlinePlayer(MCServer s){
         return GetOnlinePlayer("wraithguard01", s);
     }
     
-    public static Player GetOnlinePlayer(String name, Server s){
-        Player p = mock(Player.class);
+    public static MCPlayer GetOnlinePlayer(String name, MCServer s){
+        MCPlayer p = mock(MCPlayer.class);
         when(p.isOnline()).thenReturn(true);
         when(p.getName()).thenReturn(name);        
         when(p.getServer()).thenReturn(s); 
         if(s != null && s.getOnlinePlayers() != null){
-            List<Player> online = new ArrayList<Player>(Arrays.asList(s.getOnlinePlayers()));
+            List<MCPlayer> online = new ArrayList<MCPlayer>(Arrays.asList(s.getOnlinePlayers()));
             boolean alreadyOnline = false;
-            for(Player o : online){
+            for(MCPlayer o : online){
                 if(o.getName().equals(name)){
                     alreadyOnline = true;
                     break;
@@ -304,29 +314,36 @@ public class StaticTest {
             }
             if(!alreadyOnline){
                 online.add(p);
-                when(s.getOnlinePlayers()).thenReturn(online.toArray(new Player[]{}));
+                when(s.getOnlinePlayers()).thenReturn(online.toArray(new MCPlayer[]{}));
             }            
         }
         return p;
     }
     
-    public static Player GetOp(String name, Server s){
-        Player p = GetOnlinePlayer(name, s);
+    public static MCPlayer GetOp(String name, MCServer s){
+        MCPlayer p = GetOnlinePlayer(name, s);
         when(p.isOp()).thenReturn(true);
         return p;
     }
     
-    public static World GetWorld(String name){
-        World w = mock(World.class);
+    public static BukkitMCWorld GetWorld(String name){
+        BukkitMCWorld w = mock(BukkitMCWorld.class);
         when(w.getName()).thenReturn(name);
         return w;
     }
     
-    public static ConsoleCommandSender GetFakeConsoleCommandSender(){
-        ConsoleCommandSender c = mock(ConsoleCommandSender.class);
-        Server s = GetFakeServer();
+    public static MCConsoleCommandSender GetFakeConsoleCommandSender(){
+        MCConsoleCommandSender c = mock(MCConsoleCommandSender.class);
+        MCServer s = GetFakeServer();
         when(c.getServer()).thenReturn(s);
         return c;
+    }
+    
+    public static MCLocation GetFakeLocation(MCWorld w, int x, int y, int z){
+        MCLocation loc = mock(BukkitMCLocation.class);
+        World bukkitWorld = mock(World.class);
+        when(loc.getWorld()).thenReturn(w);
+        return loc;
     }
     
     public static Object GetVariable(Object instance, String var) throws Exception{
@@ -344,17 +361,17 @@ public class StaticTest {
      * @param player
      * @throws ConfigCompileException 
      */
-    public static void Run(String script, CommandSender player) throws ConfigCompileException{
+    public static void Run(String script, MCCommandSender player) throws ConfigCompileException{
         Run(script, player, null);
     }
     
-    public static void Run(String script, CommandSender player, MScriptComplete done) throws ConfigCompileException{
+    public static void Run(String script, MCCommandSender player, MScriptComplete done) throws ConfigCompileException{
         Env env = new Env();
         env.SetCommandSender(player);
         MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, done, null);
     }
     
-    public static String SRun(String script, CommandSender player) throws ConfigCompileException{
+    public static String SRun(String script, MCCommandSender player) throws ConfigCompileException{
         final StringBuffer b = new StringBuffer();
         Run(script, player, new MScriptComplete() {
 
@@ -368,15 +385,15 @@ public class StaticTest {
     /**
      * Creates an entire fake server environment, adding players and everything.
      */
-    public static Server GetFakeServer(){
-        Server fakeServer = mock(Server.class);
+    public static MCServer GetFakeServer(){
+        MCServer fakeServer = mock(MCServer.class);
         String [] pnames = new String[]{"wraithguard01", "wraithguard02", "wraithguard03"};
-        ArrayList<Player> pps = new ArrayList<Player>();
+        ArrayList<MCPlayer> pps = new ArrayList<MCPlayer>();
         for(String p : pnames){
-            Player pp = GetOnlinePlayer(p, fakeServer);
+            MCPlayer pp = GetOnlinePlayer(p, fakeServer);
             pps.add(pp);
         }
-        when(fakeServer.getOnlinePlayers()).thenReturn(pps.toArray(new Player[]{}));  
+        when(fakeServer.getOnlinePlayers()).thenReturn(pps.toArray(new MCPlayer[]{}));  
         CommandHelperPlugin.myServer = fakeServer;  
         CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
         return fakeServer;

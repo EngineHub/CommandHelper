@@ -4,8 +4,11 @@
  */
 package com.laytonsmith.testing;
 
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCPlayer;
 import org.junit.Before;
-import org.bukkit.entity.Player;
 import com.sk89q.worldedit.expression.ExpressionException;
 import com.sk89q.worldedit.expression.Expression;
 import org.bukkit.Location;
@@ -32,7 +35,7 @@ import static org.mockito.Mockito.*;
  * @author Layton
  */
 public class RandomTests {
-    Player fakePlayer;
+    MCPlayer fakePlayer;
     
     @Before
     public void setUp(){
@@ -127,18 +130,18 @@ public class RandomTests {
     }
     
     @Test public void testStaticGetLocation(){
-        World fakeWorld = mock(World.class);
-        Server fakeServer = mock(Server.class);
+        MCWorld fakeWorld = mock(MCWorld.class);
+        MCServer fakeServer = mock(MCServer.class);
         when(fakeServer.getWorld("world")).thenReturn(fakeWorld);
         CommandHelperPlugin.myServer = fakeServer;
         CArray ca1 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3));
         CArray ca2 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
         CArray ca3 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
         CArray ca4 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
-        Location l1 = Static.GetLocation(ca1, fakeWorld, 0, null);
-        Location l2 = Static.GetLocation(ca2, fakeWorld, 0, null);
-        Location l3 = Static.GetLocation(ca3, fakeWorld, 0, null);
-        Location l4 = Static.GetLocation(ca4, fakeWorld, 0, null);
+        MCLocation l1 = Static.GetLocation(ca1, fakeWorld, 0, null);
+        MCLocation l2 = Static.GetLocation(ca2, fakeWorld, 0, null);
+        MCLocation l3 = Static.GetLocation(ca3, fakeWorld, 0, null);
+        MCLocation l4 = Static.GetLocation(ca4, fakeWorld, 0, null);
         assertEquals(fakeWorld, l1.getWorld());
         assertEquals(fakeWorld, l2.getWorld());
         assertEquals(fakeWorld, l3.getWorld());

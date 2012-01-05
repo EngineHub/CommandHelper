@@ -1,5 +1,9 @@
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.aliasengine.AliasCore;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.Constructs.CArray;
@@ -20,9 +24,7 @@ import java.util.List;
 import java.util.SortedSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Location;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.entity.Player;
@@ -30,7 +32,6 @@ import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
 import org.bukkit.plugin.SimplePluginManager;
@@ -104,14 +105,14 @@ public class Sandbox {
                     for (RegisteredListener l : ss) {
                         if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
                             if(env.GetCommandSender() instanceof Player){
-                                l.callEvent(new PlayerCommandPreprocessEvent(env.GetPlayer(), args[1].val()));
+                                l.callEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)env.GetPlayer())._Player(), args[1].val()));
                             }
                             PluginCommand.class.getDeclaredMethods();
                             Constructor c = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
                             c.setAccessible(true);
                             List<String> argList = Arrays.asList(args[1].val().split(" "));
                             Command com = (Command) c.newInstance(argList.get(0).substring(1), l.getPlugin());
-                            l.getPlugin().onCommand(env.GetCommandSender(), com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
+                            l.getPlugin().onCommand(((BukkitMCCommandSender)env.GetCommandSender())._CommandSender(), com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
                         }
                     }
                 } catch (InstantiationException ex) {
@@ -176,9 +177,9 @@ public class Sandbox {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
 
-            Location l = null;
+            MCLocation l = null;
             int qty = 1;
-            ItemStack is = null;
+            MCItemStack is = null;
             boolean natural = false;
             if (env.GetCommandSender() instanceof Player) {
                 l = env.GetPlayer().getLocation();

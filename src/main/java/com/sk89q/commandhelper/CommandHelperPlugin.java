@@ -38,7 +38,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.ChatColor;
+import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -60,7 +64,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 public class CommandHelperPlugin extends JavaPlugin {
     public static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
     private static AliasCore ac;
-    public static Server myServer;
+    public static MCServer myServer;
     public static SerializedPersistance persist;
     public static PermissionsResolverManager perms;
     public static Version version;
@@ -84,7 +88,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     final CommandHelperServerListener serverListener =
             new CommandHelperServerListener();
 
-    final Set<Player> commandRunning = new HashSet<Player>();
+    final Set<MCPlayer> commandRunning = new HashSet<MCPlayer>();
     
     
     @Override
@@ -96,7 +100,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     public void onEnable() {
         self = this;
-        myServer = getServer();
+        myServer = StaticLayer.GetServer();
         persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), this);
         logger.info("CommandHelper " + getDescription().getVersion() + " enabled");
         version = new Version(getDescription().getVersion());
@@ -196,7 +200,7 @@ public class CommandHelperPlugin extends JavaPlugin {
             }
             return true;
         } else if (sender instanceof Player) {
-                return runCommand((Player)sender, cmd.getName(), args);
+                return runCommand(new BukkitMCPlayer((Player)sender), cmd.getName(), args);
         } else {
             return false;
         }
@@ -209,7 +213,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      * @param split
      * @return
      */
-    private boolean runCommand(final Player player, String cmd, String[] args) {
+    private boolean runCommand(final MCPlayer player, String cmd, String[] args) {
         CommandHelperSession session = playerListener.getSession(player);
         if(commandRunning.contains(player)){
             return true;
@@ -225,14 +229,14 @@ public class CommandHelperPlugin extends JavaPlugin {
                 //an infinite loop though, because the preprocessor won't try to fire off a repeat command
                 commandRunning.remove(player);
                 if (session.getLastCommand() != null) {
-                    Static.SendMessage(player, ChatColor.GRAY + session.getLastCommand());
+                    Static.SendMessage(player, MCChatColor.GRAY + session.getLastCommand());
                     execCommand(player, session.getLastCommand());
                 } else {
-                    Static.SendMessage(player, ChatColor.RED + "No previous command.");
+                    Static.SendMessage(player, MCChatColor.RED + "No previous command.");
                 }
                 return true;
             } else {
-                Static.SendMessage(player, ChatColor.RED + "You do not have permission to access the repeat command");
+                Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the repeat command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -241,7 +245,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         } else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper")
                 /*&& player.canUseCommand("/alias")*/) {
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                Static.SendMessage(player, ChatColor.RED + "You do not have permission to access the alias command");
+                Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the alias command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -255,17 +259,17 @@ public class CommandHelperPlugin extends JavaPlugin {
                     //TODO: Finish this
                     int id = u.addAlias(alias);
                     if(id > -1){
-                        Static.SendMessage(player, ChatColor.YELLOW + "Alias added with id '" + id + "'");
+                        Static.SendMessage(player, MCChatColor.YELLOW + "Alias added with id '" + id + "'");
                     }
                 } catch (/*ConfigCompile*/Exception ex) {
-                    Static.SendMessage(player, ChatColor.RED + ex.getMessage());
+                    Static.SendMessage(player, MCChatColor.RED + ex.getMessage());
                 }
             } else{
                 //Display a help message
-                Static.SendMessage(player, ChatColor.GREEN + "Command usage: \n"
-                        + ChatColor.GREEN + "/alias <alias> - adds an alias to your user defined list\n"
-                        + ChatColor.GREEN + "/delalias <id> - deletes alias with id <id> from your user defined list\n"
-                        + ChatColor.GREEN + "/viewalias - shows you all of your aliases");
+                Static.SendMessage(player, MCChatColor.GREEN + "Command usage: \n"
+                        + MCChatColor.GREEN + "/alias <alias> - adds an alias to your user defined list\n"
+                        + MCChatColor.GREEN + "/delalias <id> - deletes alias with id <id> from your user defined list\n"
+                        + MCChatColor.GREEN + "/viewalias - shows you all of your aliases");
             }
 
             commandRunning.remove(player);
@@ -273,7 +277,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         //View all aliases for this user
         } else if(cmd.equalsIgnoreCase("viewalias")){
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                Static.SendMessage(player, ChatColor.RED + "You do not have permission to access the viewalias command");
+                Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the viewalias command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -284,7 +288,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         // Delete alias
         } else if (cmd.equalsIgnoreCase("delalias")) {
             if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
-                Static.SendMessage(player, ChatColor.RED + "You do not have permission to access the delalias command");
+                Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the delalias command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -296,16 +300,16 @@ public class CommandHelperPlugin extends JavaPlugin {
                     deleted.add("#" + args[i]);
                 }
                 if(args.length > 1){
-                    String s = ChatColor.YELLOW + "Aliases " + deleted.toString() + " were deleted";
+                    String s = MCChatColor.YELLOW + "Aliases " + deleted.toString() + " were deleted";
                     Static.SendMessage(player, s);
 
                 } else{
-                    Static.SendMessage(player, ChatColor.YELLOW + "Alias #" + args[0] + "was deleted");
+                    Static.SendMessage(player, MCChatColor.YELLOW + "Alias #" + args[0] + "was deleted");
                 }
             } catch(NumberFormatException e){
-                Static.SendMessage(player, ChatColor.RED + "The id must be a number");
+                Static.SendMessage(player, MCChatColor.RED + "The id must be a number");
             } catch(ArrayIndexOutOfBoundsException e){
-                Static.SendMessage(player, ChatColor.RED + "Usage: /delalias <id> <id> ...");
+                Static.SendMessage(player, MCChatColor.RED + "Usage: /delalias <id> <id> ...");
             }
             commandRunning.remove(player);
             return true;
@@ -313,7 +317,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         // Reload global aliases
         } else if (cmd.equalsIgnoreCase("reloadaliases")) {
             if(!perms.hasPermission(player.getName(), "commandhelper.reloadaliases") && !perms.hasPermission(player.getName(), "ch.reloadaliases")){
-                Static.SendMessage(player, ChatColor.DARK_RED + "You do not have permission to use that command");
+                Static.SendMessage(player, MCChatColor.DARK_RED + "You do not have permission to use that command");
                 commandRunning.remove(player);
                 return true;
             }
@@ -333,13 +337,13 @@ public class CommandHelperPlugin extends JavaPlugin {
             if(perms.hasPermission(player.getName(), "commandhelper.interpreter")){
                 if((Boolean)Static.getPreferences().getPreference("enable-interpreter")){
                     interpreterListener.startInterpret(player.getName());
-                    Static.SendMessage(player, ChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
+                    Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
                             + " multiline mode.");
                 } else {
-                    Static.SendMessage(player, ChatColor.RED + "The interpreter is currently disabled. Check your preferences file.");
+                    Static.SendMessage(player, MCChatColor.RED + "The interpreter is currently disabled. Check your preferences file.");
                 }
             } else {
-                Static.SendMessage(player, ChatColor.RED + "You do not have permission to run that command");
+                Static.SendMessage(player, MCChatColor.RED + "You do not have permission to run that command");
             }
             commandRunning.remove(player);
             return true;
@@ -372,7 +376,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      *
      * @param cmd
      */
-    public static void execCommand(Player player, String cmd) {
+    public static void execCommand(MCPlayer player, String cmd) {
         player.chat(cmd);
     }
 }

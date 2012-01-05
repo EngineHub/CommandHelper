@@ -4,11 +4,11 @@
  */
 package com.laytonsmith.aliasengine;
 
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.testing.StaticTest;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.aliasengine.Constructs.Variable;
-import org.bukkit.Server;
-import org.bukkit.entity.Player;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import com.sk89q.commandhelper.CommandHelperPlugin;
@@ -31,8 +31,8 @@ import static com.laytonsmith.testing.StaticTest.*;
  */
 public class MScriptCompilerTest {
 
-    Server fakeServer;
-    Player fakePlayer;
+    MCServer fakeServer;
+    MCPlayer fakePlayer;
     Env env = new Env();
 
     public MScriptCompilerTest() {
@@ -485,7 +485,7 @@ public class MScriptCompilerTest {
         CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
         when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
         CommandHelperPlugin.myServer = fakeServer;
-        when(fakeServer.getOnlinePlayers()).thenReturn(new Player[]{fakePlayer});
+        when(fakeServer.getOnlinePlayers()).thenReturn(new MCPlayer[]{fakePlayer});
         String config = "safe:/test $var = >>>\n"
                 + "all_players()\n"
                 + "msg($var)\n"

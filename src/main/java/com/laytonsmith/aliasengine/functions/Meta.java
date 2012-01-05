@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -18,19 +20,11 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.File;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.List;
-import java.util.Set;
 import java.util.logging.Level;
-import net.minecraft.server.ServerConfigurationManager;
-import org.bukkit.Bukkit;
-import org.bukkit.Server;
-import org.bukkit.command.CommandSender;
-import org.bukkit.entity.Player;
-import sun.security.pkcs11.P11TlsKeyMaterialGenerator;
 
 /**
  * I'm So Meta, Even This Acronym
@@ -71,7 +65,7 @@ public class Meta {
                 Boolean isOp = env.GetCommandSender().isOp();
 
                 if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                    if (env.GetCommandSender() instanceof Player) {
+                    if (env.GetCommandSender() instanceof MCPlayer) {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[1].val().trim());
                     } else {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[1].val().trim());
@@ -94,9 +88,9 @@ public class Meta {
                     }
                 }
             } else {
-                Player m = Static.getServer().getPlayer(args[0].val());
+                MCPlayer m = Static.getServer().getPlayer(args[0].val());
                 if (m != null && m.isOnline()) {
-                    if (env.GetCommandSender() instanceof Player) {
+                    if (env.GetCommandSender() instanceof MCPlayer) {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[0].val().trim());
                     } else {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
@@ -146,42 +140,13 @@ public class Meta {
          * @param player
          * @param value 
          */
-        protected void setOp(CommandSender player, Boolean value) {
-            if (!(player instanceof Player) || player.isOp() == value) {
+        protected void setOp(MCCommandSender player, Boolean value) {
+            if (!(player instanceof MCPlayer) || player.isOp() == value) {
                 return;
             }
-
+            
             try {
-                Server server = Bukkit.getServer();
-
-                Class serverClass = Class.forName("org.bukkit.craftbukkit.CraftServer", true, server.getClass().getClassLoader());
-
-                if (!server.getClass().isAssignableFrom(serverClass)) {
-                    throw new IllegalStateException("Running server isn't CraftBukkit");
-                }
-
-                Field opSetField;
-
-                try {
-                    opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
-                } catch (NoSuchFieldException e){
-                    opSetField = ServerConfigurationManager.class.getDeclaredField("h");
-                }
-
-                opSetField.setAccessible(true); // make field accessible for reflection 
-
-                // Reflection magic
-                Set opSet = (Set) opSetField.get((ServerConfigurationManager) serverClass.getMethod("getHandle").invoke(server));
-
-                // since all Java objects pass by reference, we don't need to set field back to object
-                if (value) {
-                    opSet.add(player.getName().toLowerCase());
-                } else {
-                    opSet.remove(player.getName().toLowerCase());
-                }
-
-                player.recalculatePermissions();
-                
+                ((MCPlayer)player).setTempOp(value);                                                
             } catch (ClassNotFoundException e) {
             } catch (IllegalStateException e) {
             } catch (Throwable e) {
@@ -189,13 +154,13 @@ public class Meta {
             }
         }
 
-        protected CommandSender getOPCommandSender(final CommandSender sender) {
+        protected MCCommandSender getOPCommandSender(final MCCommandSender sender) {
             if (sender.isOp()) {
                 return sender;
             }
 
-            return (CommandSender) Proxy.newProxyInstance(sender.getClass().getClassLoader(),
-                    new Class[] { (sender instanceof Player) ? Player.class : CommandSender.class },
+            return (MCCommandSender) Proxy.newProxyInstance(sender.getClass().getClassLoader(),
+                    new Class[] { (sender instanceof MCPlayer) ? MCPlayer.class : MCCommandSender.class },
                     new InvocationHandler() {
                         public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                             String methodName = method.getName();
@@ -227,7 +192,7 @@ public class Meta {
             }
             String cmd = args[0].val().substring(1);
             if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                if (env.GetCommandSender() instanceof Player) {
+                if (env.GetCommandSender() instanceof MCPlayer) {
                     Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[0].val().trim());
                 } else {
                     Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
@@ -500,8 +465,8 @@ public class Meta {
         }
 
         public Construct execs(int line_num, File f, Env environment, List<GenericTreeNode<Construct>> args) throws ConfigRuntimeException {
-            Player p = Static.GetPlayer(environment.GetScript().seval(args.get(0), environment).val(), line_num, f);
-            CommandSender originalPlayer = environment.GetCommandSender();
+            MCPlayer p = Static.GetPlayer(environment.GetScript().seval(args.get(0), environment).val(), line_num, f);
+            MCCommandSender originalPlayer = environment.GetCommandSender();
             int offset = 0;
             String originalLabel = environment.GetLabel();
             if(args.size() == 3){

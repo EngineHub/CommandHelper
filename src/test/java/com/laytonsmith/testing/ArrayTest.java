@@ -5,13 +5,13 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.sk89q.commandhelper.CommandHelperPlugin;
 import static org.junit.Assert.*;
 import static com.laytonsmith.testing.StaticTest.*;
 import java.io.File;
-import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import static org.mockito.Mockito.*;
 import org.junit.Before;
@@ -24,7 +24,7 @@ import org.mockito.InOrder;
  * @author Layton
  */
 public class ArrayTest {
-    Player fakePlayer;
+    MCPlayer fakePlayer;
     public ArrayTest() {
     }
 

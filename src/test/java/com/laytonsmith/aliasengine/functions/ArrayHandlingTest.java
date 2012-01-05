@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
@@ -13,7 +14,6 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
-import org.bukkit.entity.Player;
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
  */
 public class ArrayHandlingTest {
 
-    Player fakePlayer;
+    MCPlayer fakePlayer;
     CArray commonArray;
     Env env = new Env();
 

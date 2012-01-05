@@ -4,6 +4,9 @@
  */
 package com.sk89q.commandhelper;
 
+import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.aliasengine.Constructs.Token;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.GenericTreeNode;
@@ -18,7 +21,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
@@ -37,7 +39,7 @@ public class CommandHelperInterpreterListener extends PlayerListener {
     @Override
     public void onPlayerChat(PlayerChatEvent event) {
         if (interpreterMode.contains(event.getPlayer().getName())) {
-            Player p = event.getPlayer();
+            MCPlayer p = new BukkitMCPlayer(event.getPlayer());
             textLine(p, event.getMessage());
             event.setCancelled(true);
         }
@@ -53,47 +55,47 @@ public class CommandHelperInterpreterListener extends PlayerListener {
     @Override
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         if (interpreterMode.contains(event.getPlayer().getName())) {
-            Player p = event.getPlayer();
+            MCPlayer p = new BukkitMCPlayer(event.getPlayer());
             textLine(p, event.getMessage());
             event.setCancelled(true);
         }
     }
 
-    public void textLine(Player p, String line) {
+    public void textLine(MCPlayer p, String line) {
         if (line.equals("-")) {
             //Exit interpreter mode
             interpreterMode.remove(p.getName());
-            Static.SendMessage(p, ChatColor.YELLOW + "Now exiting interpreter mode");
+            Static.SendMessage(p, MCChatColor.YELLOW + "Now exiting interpreter mode");
         } else if (line.equals(">>>")) {
             //Start multiline mode
             if (multilineMode.containsKey(p.getName())) {
-                Static.SendMessage(p, ChatColor.RED + "You are already in multiline mode!");
+                Static.SendMessage(p, MCChatColor.RED + "You are already in multiline mode!");
             } else {
                 multilineMode.put(p.getName(), "");
-                Static.SendMessage(p, ChatColor.YELLOW + "You are now in multiline mode. Type <<< on a line by itself to execute.");
-                Static.SendMessage(p, ":" + ChatColor.GRAY + ">>>");
+                Static.SendMessage(p, MCChatColor.YELLOW + "You are now in multiline mode. Type <<< on a line by itself to execute.");
+                Static.SendMessage(p, ":" + MCChatColor.GRAY + ">>>");
             }
         } else if (line.equals("<<<")) {
             //Execute multiline
-            Static.SendMessage(p, ":" + ChatColor.GRAY + "<<<");
+            Static.SendMessage(p, ":" + MCChatColor.GRAY + "<<<");
             String script = multilineMode.get(p.getName());
             multilineMode.remove(p.getName());
             try {
                 execute(script, p);
             } catch (ConfigCompileException e) {
-                Static.SendMessage(p, ChatColor.RED + e.getMessage() + ":" + e.getLineNum());
+                Static.SendMessage(p, MCChatColor.RED + e.getMessage() + ":" + e.getLineNum());
             }
         } else {
             if (multilineMode.containsKey(p.getName())) {
                 //Queue multiline
                 multilineMode.put(p.getName(), multilineMode.get(p.getName()) + line + "\n");
-                Static.SendMessage(p, ":" + ChatColor.GRAY + line);
+                Static.SendMessage(p, ":" + MCChatColor.GRAY + line);
             } else {
                 try {
                     //Execute single line
                     execute(line, p);
                 } catch (ConfigCompileException ex) {
-                    Static.SendMessage(p, ChatColor.RED + ex.getMessage());
+                    Static.SendMessage(p, MCChatColor.RED + ex.getMessage());
                 }
             }
         }
@@ -102,7 +104,7 @@ public class CommandHelperInterpreterListener extends PlayerListener {
     public void reload() {
     }
 
-    public void execute(String script, final Player p) throws ConfigCompileException {
+    public void execute(String script, final MCPlayer p) throws ConfigCompileException {
         List<Token> stream = MScriptCompiler.lex("include('plugins/CommandHelper/auto_include.ms')\n" + script, new File("Interpreter"));
         GenericTreeNode tree = MScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
@@ -118,11 +120,11 @@ public class CommandHelperInterpreterListener extends PlayerListener {
                     } else {
                         if (output.startsWith("/")) {
                             //Run the command
-                            Static.SendMessage(p, ":" + ChatColor.YELLOW + output);
+                            Static.SendMessage(p, ":" + MCChatColor.YELLOW + output);
                             p.chat(output);
                         } else {
                             //output the results
-                            Static.SendMessage(p, ":" + ChatColor.GREEN + output);
+                            Static.SendMessage(p, ":" + MCChatColor.GREEN + output);
                         }
                     }
                     interpreterMode.add(p.getName());
@@ -131,7 +133,7 @@ public class CommandHelperInterpreterListener extends PlayerListener {
         } catch (CancelCommandException e) {
             interpreterMode.add(p.getName());
         } catch(Exception e){
-            Static.SendMessage(p, ChatColor.RED + e.toString());
+            Static.SendMessage(p, MCChatColor.RED + e.toString());
             e.printStackTrace();
             interpreterMode.add(p.getName());
         }

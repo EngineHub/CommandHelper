@@ -1,6 +1,4 @@
 package com.laytonsmith.aliasengine.functions;
-import java.net.*;
-import java.io.*;
 
 /**
  * This class handles loading the modules classes. Most of this code was copy-pasted,

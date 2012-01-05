@@ -10,7 +10,9 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.logging.Level;
-import org.bukkit.ChatColor;
+import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import org.bukkit.command.CommandSender;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListener;
@@ -23,7 +25,7 @@ public class CommandHelperServerListener extends ServerListener{
     
     @Override
     public void onServerCommand(ServerCommandEvent event){
-        CommandSender player = event.getSender();
+        MCCommandSender player = new BukkitMCCommandSender(event.getSender());
         boolean match = false;
         try {
             match = Static.getAliasCore().alias("/" + event.getCommand(), player, new ArrayList<Script>());
@@ -32,7 +34,7 @@ public class CommandHelperServerListener extends ServerListener{
         } catch (ConfigRuntimeException e) {
             Static.getLogger().log(Level.WARNING, e.getMessage());
         } catch (Throwable e) {
-            player.sendMessage(ChatColor.RED + "Command failed with following reason: " + e.getMessage());
+            player.sendMessage(MCChatColor.RED + "Command failed with following reason: " + e.getMessage());
             //Obviously the command is registered, but it somehow failed. Cancel the event.
             e.printStackTrace();
             return;

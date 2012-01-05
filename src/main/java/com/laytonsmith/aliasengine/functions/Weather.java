@@ -4,6 +4,10 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -14,9 +18,6 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import org.bukkit.Location;
-import org.bukkit.World;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -45,12 +46,12 @@ public class Weather {
             int x;
             int y;
             int z;
-            World w = null;
+            MCWorld w = null;
             boolean safe = false;
             int safeIndex = 1;
             if(args[0] instanceof CArray){
                 CArray a = (CArray)args[0];
-                Location l = Static.GetLocation(a, (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
+                MCLocation l = Static.GetLocation(a, (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), line_num, f);
                 x = (int)java.lang.Math.floor(l.getX());
                 y = (int)java.lang.Math.floor(l.getY());
                 z = (int)java.lang.Math.floor(l.getZ());
@@ -66,9 +67,9 @@ public class Weather {
             }
             if(w != null){
                 if(!safe){
-                    w.strikeLightning(new Location(w, x, y + 1, z)); 
+                    w.strikeLightning(StaticLayer.GetLocation(w, x, y + 1, z)); 
                 } else {
-                    w.strikeLightningEffect(new Location(w, x, y + 1, z));
+                    w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z));
                 }
             } else {
                 throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
@@ -111,8 +112,8 @@ public class Weather {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             boolean b = Static.getBoolean(args[0]);
-            World w = null;
-            if(env.GetCommandSender() instanceof Player){
+            MCWorld w = null;
+            if(env.GetCommandSender() instanceof MCPlayer){
                 w = env.GetPlayer().getWorld();
             }
             if(args.length == 2){

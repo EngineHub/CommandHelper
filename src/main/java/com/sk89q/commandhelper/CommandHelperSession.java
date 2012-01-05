@@ -19,6 +19,7 @@
 
 package com.sk89q.commandhelper;
 
+import com.laytonsmith.abstraction.MCPlayer;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import java.util.List;
@@ -50,10 +51,10 @@ public class CommandHelperSession {
     /**
      * List of aliases.
      */
-    private Map<Player,String[]> aliases =
-            new HashMap<Player,String[]>();
+    private Map<MCPlayer,String[]> aliases =
+            new HashMap<MCPlayer,String[]>();
 
-    Map<Player, String[]> getAliases(){
+    Map<MCPlayer, String[]> getAliases(){
         return aliases;
     }
 
@@ -97,7 +98,7 @@ public class CommandHelperSession {
      * @param command
      * @param commands 
      */
-    public void setAlias(Player player, String[] commands) {
+    public void setAlias(MCPlayer player, String[] commands) {
         aliases.put(player, commands);
     }
 
@@ -147,7 +148,7 @@ public class CommandHelperSession {
      * @param path
      * @return
      */
-    public static Map<Player,String[]> readAliases(String path) {
+    public static Map<MCPlayer,String[]> readAliases(String path) {
         File file = new File(path);
         FileReader input = null;
         Map<String,List<String>> aliases = new HashMap<String,List<String>>();
@@ -191,7 +192,7 @@ public class CommandHelperSession {
                 }
             }
 
-            Map<Player,String[]> outAliases = new HashMap<Player,String[]>();
+            Map<MCPlayer,String[]> outAliases = new HashMap<MCPlayer,String[]>();
 
             for (Map.Entry<String,List<String>> entry : aliases.entrySet()) {
                 outAliases.put(CommandHelperPlugin.myServer.getPlayer(entry.getKey()), entry.getValue().toArray(new String[]{}));
@@ -199,11 +200,11 @@ public class CommandHelperSession {
 
             return outAliases;
         } catch (FileNotFoundException e) {
-            return new HashMap<Player, String[]>();
+            return new HashMap<MCPlayer, String[]>();
         } catch (IOException e) {
             logger.log(Level.WARNING, "Failed to load aliases: "
                     + e.getMessage());
-            return new HashMap<Player, String[]>();
+            return new HashMap<MCPlayer, String[]>();
         } finally {
             try {
                 if (input != null) {
@@ -220,7 +221,7 @@ public class CommandHelperSession {
      * @param path
      * @param aliases
      */
-    public static void writeAliases(String path, Map<Player,String[]> aliases) {
+    public static void writeAliases(String path, Map<MCPlayer,String[]> aliases) {
         File file = new File(path);
         FileWriter output = null;
 
@@ -236,7 +237,7 @@ public class CommandHelperSession {
             buff.write("# Generated automatically\r\n");
             buff.write("# Manual changes will likely be overwritten\r\n");
 
-            for (Map.Entry<Player,String[]> entry : aliases.entrySet()) {
+            for (Map.Entry<MCPlayer,String[]> entry : aliases.entrySet()) {
                 buff.write(":" + entry.getKey() + "\r\n");
 
                 for (String command : entry.getValue()) {
