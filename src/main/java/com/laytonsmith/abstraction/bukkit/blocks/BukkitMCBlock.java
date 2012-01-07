@@ -8,8 +8,10 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 
 /**
  *
@@ -65,6 +67,18 @@ public class BukkitMCBlock implements MCBlock{
 
     public int getZ() {
         return b.getZ();
+    }
+
+    public Block __Block() {
+        return b;
+    }
+
+    public MCSign getSign() {
+        return new BukkitMCSign((Sign)b);
+    }
+
+    public boolean isSign() {
+        return (b instanceof Sign);
     }
     
     

@@ -278,7 +278,7 @@ public class Static {
             a.add(new Preference("script-name", "config.txt", Type.STRING, "The path to the config file, relative to the CommandHelper plugin folder"));
             a.add(new Preference("enable-interpreter", "false", Type.BOOLEAN, "Whether or not to enable the /interpreter command. Note that even with this enabled, a player must still have the commandhelper.interpreter permission, but"
                     + " setting it to false prevents all players from accessing the interpreter regardless of their permissions."));
-            a.add(new Preference("base-dir", "", Type.STRING, "The base directory that scripts can read and write to. If left blank, then the default of the Bukkit directory will be used. "
+            a.add(new Preference("base-dir", "", Type.STRING, "The base directory that scripts can read and write to. If left blank, then the default of the server directory will be used. "
                     + "This setting affects functions like include and read."));
             a.add(new Preference("play-dirty", "false", Type.BOOLEAN, "Makes CommandHelper play dirty and break all sorts of programming rules, so that other plugins can't interfere with the operations that you defined. Note that doing this essentially makes CommandHelper have absolute say over commands. Use this setting only if you can't get another plugin to cooperate with CH, because it is a global setting."));
             a.add(new Preference("case-sensitive", "true", Type.BOOLEAN, "Makes command matching be case sensitive. If set to false, if your config defines /cmd, but the user runs /CMD, it will trigger the command anyways."));
@@ -743,7 +743,7 @@ public class Static {
         if ((Boolean) Static.getPreferences().getPreference("play-dirty")) {
             try {
                 //Set up our "proxy"
-                DirtyRegisteredListener.Repopulate();
+                BukkitDirtyRegisteredListener.Repopulate();
             } catch (NoSuchMethodException ex) {
                 Logger.getLogger(Static.class.getName()).log(Level.SEVERE, null, ex);
             } catch (NoSuchFieldException ex) {

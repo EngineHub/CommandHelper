@@ -15,7 +15,6 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.plugin.Plugin;
 
 /**
  * This file allows for simple data storage across many different data sources. In general, the
@@ -38,17 +37,7 @@ public class SerializedPersistance implements Persistance{
 
     Object user;
     
-    public SerializedPersistance(File database, Plugin user){
-        storageLocation = database;
-        this.user = user;
-    }
-
-    /**
-     * Private constructor, used for testing this class
-     * @param database
-     * @param user
-     */
-    private SerializedPersistance(File database, Object user){
+    public SerializedPersistance(File database, Object user){
         storageLocation = database;
         this.user = user;
     }

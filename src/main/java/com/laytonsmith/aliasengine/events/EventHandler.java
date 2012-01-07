@@ -22,8 +22,8 @@ import java.util.TreeSet;
  */
 public class EventHandler {
     
-    private static final Map<org.bukkit.event.Event.Type, SortedSet<BoundEvent>> event_handles =
-            new EnumMap<org.bukkit.event.Event.Type, SortedSet<BoundEvent>>(org.bukkit.event.Event.Type.class);
+    private static final Map<Type, SortedSet<BoundEvent>> event_handles =
+            new EnumMap<Type, SortedSet<BoundEvent>>(Type.class);
     
     /**
      * Registers a BoundEvent.
@@ -51,7 +51,7 @@ public class EventHandler {
      * @param id 
      */
     public static void UnregisterEvent(String id){
-        for(org.bukkit.event.Event.Type type : event_handles.keySet()){
+        for(Type type : event_handles.keySet()){
             SortedSet<BoundEvent> set = event_handles.get(type);
             Iterator<BoundEvent> i = set.iterator();
             while(i.hasNext()){
@@ -68,7 +68,7 @@ public class EventHandler {
      * Unregisters all event handlers. Runs in O(n)
      */
     public static void UnregisterAll(String name){
-        for(org.bukkit.event.Event.Type type : event_handles.keySet()){
+        for(Type type : event_handles.keySet()){
             SortedSet<BoundEvent> set = event_handles.get(type);
             Iterator<BoundEvent> i = set.iterator();
             while(i.hasNext()){
@@ -93,12 +93,12 @@ public class EventHandler {
      * @param type
      * @return 
      */
-    public static SortedSet<BoundEvent> GetEvents(org.bukkit.event.Event.Type type){
+    public static SortedSet<BoundEvent> GetEvents(Type type){
         return event_handles.get(type);
     }
     
     public static void ManualTrigger(String eventName, CArray object, boolean serverWide){
-            for(org.bukkit.event.Event.Type type : event_handles.keySet()){
+            for(Type type : event_handles.keySet()){
                 SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
                 SortedSet<BoundEvent> bounded = GetEvents(type);
                 Event driver = EventList.getEvent(type, eventName);
@@ -118,7 +118,7 @@ public class EventHandler {
                     if(!serverWide || !driver.supportsExternal()){
                         FireListeners(toRun, driver, driver.convert(object));
                     } else {
-                        //It's serverwide, so we can just trigger it normally with bukkit, and it should trickle back down to us
+                        //It's serverwide, so we can just trigger it normally with the driver, and it should trickle back down to us
                         driver.manualTrigger(driver.convert(object));
                     }
                 }
@@ -132,7 +132,7 @@ public class EventHandler {
      * @param type
      * @param e 
      */
-    public static void TriggerListener(org.bukkit.event.Event.Type type, String eventName, Object e){
+    public static void TriggerListener(Type type, String eventName, Object e){
         SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
         //This is the Event driver
         Event driver = EventList.getEvent(type, eventName);
@@ -168,7 +168,7 @@ public class EventHandler {
 
     public static Construct DumpEvents() {
         CArray ca = new CArray(0, null);
-        for(org.bukkit.event.Event.Type type : event_handles.keySet()){
+        for(Type type : event_handles.keySet()){
             SortedSet<BoundEvent> set = event_handles.get(type);
             Iterator<BoundEvent> i = set.iterator();
             while(i.hasNext()){

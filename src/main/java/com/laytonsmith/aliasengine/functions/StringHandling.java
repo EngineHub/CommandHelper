@@ -253,7 +253,7 @@ public class StringHandling {
 
         public String docs() {
             return "string {file} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
-                    + " CraftBukkit, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
+                    + " the server, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
                     + " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
                     + " The line endings for the string returned will always be \\n, even if they originally were \\r\\n.";
         }

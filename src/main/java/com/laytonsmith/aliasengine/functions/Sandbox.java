@@ -10,7 +10,7 @@ import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
 import com.laytonsmith.aliasengine.Constructs.CVoid;
 import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.DirtyRegisteredListener;
+import com.laytonsmith.aliasengine.BukkitDirtyRegisteredListener;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.events.BoundEvent;
@@ -323,7 +323,7 @@ public class Sandbox {
             if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable 
                     && original.getUnderlyingEvent() instanceof org.bukkit.event.Event){
                 ((Cancellable)original.getUnderlyingEvent()).setCancelled(true);
-                DirtyRegisteredListener.setCancelled((org.bukkit.event.Event)original.getUnderlyingEvent());
+                BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event)original.getUnderlyingEvent());
             }
             environment.GetEvent().setCancelled(true);
             return new CVoid(line_num, f);

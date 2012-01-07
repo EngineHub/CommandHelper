@@ -31,32 +31,57 @@ public class FunctionList {
 
     private static void initFunctions() {
         //Register internal classes first, so they can't be overridden
-        Class[] classes = ClassDiscovery.DiscoverClasses(FunctionList.class, null, null);
-        for (int i = 0; i < classes.length; i++) {
-            Annotation[] a = classes[i].getAnnotations();
-            for (int j = 0; j < a.length; j++) {
-                Annotation ann = a[j];
-                if (ann.annotationType().equals(api.class)) {
-                    Class api = classes[i];
-                    String apiClass = (api.getEnclosingClass() != null
-                            ? api.getEnclosingClass().getName().split("\\.")[api.getEnclosingClass().getName().split("\\.").length - 1]
-                            : "<global>");
-                    if (Function.class.isAssignableFrom(api)) {
-                        try {
-                            Function f = (Function) api.newInstance();
-                            registerFunction(f, apiClass);
-                            //System.out.println("Loaded " + apiClass + "." + f.getName());
-                        } catch (InstantiationException ex) {
-                            Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
-                        } catch (IllegalAccessException ex) {
-                            Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
-                        }
+        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
+        for(Class c : classes){
+            String apiClass = (c.getEnclosingClass() != null
+                    ? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
+                    : "<global>");
+            if (Function.class.isAssignableFrom(c)) {
+                try {
+                    Function f = (Function) c.newInstance();
+                    registerFunction(f, apiClass);
+                    //System.out.println("Loaded " + apiClass + "." + f.getName());
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
+                } catch(Throwable t){
+                    if(t.getCause() != null){
+                        System.err.println("Something when wrong while trying to load up " + c.getSimpleName() + ":");
+                        t.getCause().printStackTrace();
                     } else {
-                        System.out.println("@api functions must implement " + FunctionList.class.getPackage().getName() + ".Function! " + api.getSimpleName() + " cannot be loaded.");
+                        t.printStackTrace();
                     }
                 }
+            } else {
+                System.out.println("@api functions must implement " + FunctionList.class.getPackage().getName() + ".Function! " + c.getSimpleName() + " cannot be loaded.");
             }
         }
+//        for (int i = 0; i < classes.length; i++) {
+//            Annotation[] a = classes[i].getAnnotations();
+//            for (int j = 0; j < a.length; j++) {
+//                Annotation ann = a[j];
+//                if (ann.annotationType().equals(api.class)) {
+//                    Class api = classes[i];
+//                    String apiClass = (api.getEnclosingClass() != null
+//                            ? api.getEnclosingClass().getName().split("\\.")[api.getEnclosingClass().getName().split("\\.").length - 1]
+//                            : "<global>");
+//                    if (Function.class.isAssignableFrom(api)) {
+//                        try {
+//                            Function f = (Function) api.newInstance();
+//                            registerFunction(f, apiClass);
+//                            //System.out.println("Loaded " + apiClass + "." + f.getName());
+//                        } catch (InstantiationException ex) {
+//                            Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
+//                        } catch (IllegalAccessException ex) {
+//                            Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
+//                        }
+//                    } else {
+//                        System.out.println("@api functions must implement " + FunctionList.class.getPackage().getName() + ".Function! " + api.getSimpleName() + " cannot be loaded.");
+//                    }
+//                }
+//            }
+//        }
         
         if((Boolean)com.laytonsmith.aliasengine.Static.getPreferences().getPreference("debug-mode")){
             System.out.println("CommandHelper: Loaded " + functions.size() + " function" + (functions.size()==1?"":"s"));

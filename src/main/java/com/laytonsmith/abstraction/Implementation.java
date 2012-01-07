@@ -10,10 +10,14 @@ package com.laytonsmith.abstraction;
  * @author layton
  */
 public class Implementation {
+    
+    /**
+     * These are all the supported server types
+     */
     public static enum Type{
         BUKKIT,
-        GLOWSTONE,
-        SINGLE_PLAYER
+        //GLOWSTONE,
+        //SINGLE_PLAYER
     }
     
     /**

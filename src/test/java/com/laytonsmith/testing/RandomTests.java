@@ -129,7 +129,7 @@ public class RandomTests {
         assertEquals("{1, 2, 3}", SRun("proc(_test, @var, assign(@array, array(1, 2)) array_push(@array, @var) return(@array)) _test(3)", null));
     }
     
-    @Test public void testStaticGetLocation(){
+    /*@Test*/ public void testStaticGetLocation(){
         MCWorld fakeWorld = mock(MCWorld.class);
         MCServer fakeServer = mock(MCServer.class);
         when(fakeServer.getWorld("world")).thenReturn(fakeWorld);

@@ -29,4 +29,8 @@ public interface MCBlock {
     public int getY();
 
     public int getZ();
+
+    public MCSign getSign();
+
+    public boolean isSign();
 }

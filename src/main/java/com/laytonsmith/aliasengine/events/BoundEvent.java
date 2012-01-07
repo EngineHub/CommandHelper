@@ -16,7 +16,6 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import java.util.HashMap;
 import java.util.Map;
-import org.bukkit.event.Cancellable;
 
 /**
  * This class represents an actually bound event. When the script runs bind(), a
@@ -32,7 +31,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private final String eventObjName;
     private final Env env;
     private final GenericTreeNode<Construct> tree; //The code closure for this event
-    private final org.bukkit.event.Event.Type driver; //For efficiency sake, cache it here
+    private final Type driver; //For efficiency sake, cache it here
     private static int EventID = 0;
 
     /**
@@ -153,7 +152,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         return eventObjName;
     }
 
-    public org.bukkit.event.Event.Type getDriver() {
+    public Type getDriver() {
         return driver;
     }
 
@@ -289,7 +288,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         }
 
         public boolean isCancellable() {
-            return (this.underlyingEvent instanceof Cancellable);
+            return boundEvent.getEventDriver().isCancellable(this.underlyingEvent);
         }
         
     }

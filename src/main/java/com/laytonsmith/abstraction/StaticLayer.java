@@ -4,14 +4,8 @@
  */
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.bukkit.BukkitMCEnchantment;
-import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
-import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
-import org.bukkit.Location;
-import org.bukkit.enchantments.Enchantment;
-import org.bukkit.inventory.ItemStack;
+import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.sk89q.commandhelper.CommandHelperPlugin;
 
 
 /**
@@ -19,13 +13,52 @@ import org.bukkit.inventory.ItemStack;
  * @author layton
  */
 public class StaticLayer {
+    
+    private static Convertor convertor = null;
+    static{
+        InitConvertor();
+    }
+    
+    private static void InitConvertor(){
+        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(convert.class);
+        for(Class c : classes){
+            Class[] implemented = c.getInterfaces();
+            boolean doesImplement = false;
+            for(Class inter : implemented){
+                if(inter.equals(Convertor.class)){                    
+                    doesImplement = true;         
+                    break;
+                }
+            }
+            if(!doesImplement){
+                System.out.println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
+            }
+            convert convert = (convert)c.getAnnotation(convert.class);
+            if(convert.type() == Implementation.GetServerType()){
+                //This is what we're looking for, instatiate it.
+                try{
+                    if(convertor != null){
+                        //Uh... There are more than one implementations for this server type
+                        System.out.println("More than one Convertor for this server type was detected!");
+                    }
+                    convertor = (Convertor) c.newInstance();                    
+                    //At this point we are all set
+                } catch(Exception e){
+                    System.out.println("Tried to instantiate the Convertor, but couldn't!");
+                }
+            }
+        }
+        if(convertor == null){
+            System.out.println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
+        }
+    }
 
     public static MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
-        switch(backendType){
-            case BUKKIT:
-                return new BukkitMCLocation(new Location(((BukkitMCWorld)w).__World(), x, y, z, yaw, pitch));
-        }
-        return null;
+        return convertor.GetLocation(w, x, y, z, yaw, pitch);
+    }
+    
+    public static Class GetServerEventMixin() {
+        return convertor.GetServerEventMixin();
     }
     
     public static MCLocation GetLocation(MCWorld w, double x, double y, double z){
@@ -33,44 +66,23 @@ public class StaticLayer {
     }
 
     public static MCItemStack GetItemStack(int type, int qty) {
-        switch(backendType){
-            case BUKKIT:
-                return new BukkitMCItemStack(new ItemStack(type, qty));
-        }
-        return null;
+        return convertor.GetItemStack(type, qty);
     }
     
     public static MCServer GetServer(){
-        switch(backendType){
-            case BUKKIT:
-                return BukkitMCServer.Get();
-        }
-        return null;
+        return convertor.GetServer();
     }
     
     public static MCEnchantment GetEnchantmentByName(String name){
-        switch(backendType){
-            case BUKKIT:
-                return new BukkitMCEnchantment(Enchantment.getByName(name));
-        }
-        return null;
+        return convertor.GetEnchantmentByName(name);
     }
     
     public static MCEnchantment[] GetEnchantmentValues(){
-        switch(backendType){
-            case BUKKIT:
-                MCEnchantment[] ea = new MCEnchantment[Enchantment.values().length];
-                Enchantment [] oea = Enchantment.values();
-                for(int i = 0; i < ea.length; i++){
-                    ea[i] = new BukkitMCEnchantment(oea[i]);
-                }
-                return ea;
-        }
-        return null;
+        return convertor.GetEnchantmentValues();
+    }
+
+    public static void Startup(CommandHelperPlugin chp) {
+        convertor.Startup(chp);
     }
     
-    static Implementation.Type backendType = null;
-    static{
-        backendType = Implementation.GetServerType();
-    }
 }

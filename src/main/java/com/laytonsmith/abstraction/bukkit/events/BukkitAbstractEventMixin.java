@@ -29,11 +29,11 @@ import org.bukkit.event.world.WorldEvent;
  *
  * @author layton
  */
-public class BukkitAbstractEvent implements AbstractEventMixin{
+public class BukkitAbstractEventMixin implements AbstractEventMixin{
     
     AbstractEvent mySuper;
     
-    public BukkitAbstractEvent(AbstractEvent mySuper){
+    public BukkitAbstractEventMixin(AbstractEvent mySuper){
         this.mySuper = mySuper;
     }
 
@@ -76,9 +76,9 @@ public class BukkitAbstractEvent implements AbstractEventMixin{
             ((BukkitMCServer)Static.getServer()).__Server().getPluginManager().callEvent((org.bukkit.event.Event)e);
         }
     }
-    
-    public Implementation.Type implementationType(){
-        return Implementation.Type.BUKKIT;
+
+    public boolean isCancellable(Object o) {
+        return (o instanceof Cancellable);
     }
     
 }

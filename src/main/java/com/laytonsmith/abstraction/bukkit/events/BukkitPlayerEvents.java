@@ -5,12 +5,17 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.CInt;
 import com.laytonsmith.aliasengine.Constructs.CString;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Static;
-import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.events.AbstractEventHandler;
 import com.laytonsmith.aliasengine.events.AbstractEventMixin;
 import com.laytonsmith.aliasengine.events.Prefilters;
@@ -19,14 +24,19 @@ import com.laytonsmith.aliasengine.events.abstraction;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import java.util.Map;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Player;
+import org.bukkit.event.block.Action;
+import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author layton
  */
 public class BukkitPlayerEvents {
-    @api
     @abstraction(load=com.laytonsmith.aliasengine.events.PlayerEvents.player_join.class,
             type=Implementation.Type.BUKKIT)
     public static class player_join implements AbstractEventHandler{
@@ -67,6 +77,85 @@ public class BukkitPlayerEvents {
                 if(key.equals("join_message")){
                     pje.setJoinMessage(value.val());
                 }
+            }
+        }
+    }
+    
+    public static class player_interact implements AbstractEventHandler{
+        public boolean matches(Map<String, Construct> prefilter, Object e) {
+            if(e instanceof PlayerInteractEvent){
+                PlayerInteractEvent pie = (PlayerInteractEvent)e;
+                if(((PlayerInteractEvent)e).getAction().equals(Action.PHYSICAL)){
+                    return false;
+                }
+                if(prefilter.containsKey("button")){
+                    if(pie.getAction().equals(Action.LEFT_CLICK_AIR) || pie.getAction().equals(Action.LEFT_CLICK_BLOCK)){
+                        if(!prefilter.get("button").val().toLowerCase().equals("left")){
+                            return false;
+                        }
+                    }
+                    if(pie.getAction().equals(Action.RIGHT_CLICK_AIR) || pie.getAction().equals(Action.RIGHT_CLICK_BLOCK)){
+                        if(!prefilter.get("button").val().toLowerCase().equals("right")){
+                            return false;
+                        }
+                    }
+                }
+                
+                try{
+                    Prefilters.match(prefilter, "item", Static.ParseItemNotation(new BukkitMCItemStack(pie.getItem())), PrefilterType.ITEM_MATCH);
+                    Prefilters.match(prefilter, "block", Static.ParseItemNotation(new BukkitMCBlock(pie.getClickedBlock())), PrefilterType.ITEM_MATCH);
+                    Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
+                }catch(PrefilterNonMatchException x){
+                    return false;
+                }
+                
+                return true;
+            }
+            return false;
+        }
+
+        public Map<String, Construct> evaluate(Object e, AbstractEventMixin mixin) throws EventException {
+            if(e instanceof PlayerInteractEvent){
+                PlayerInteractEvent pie = (PlayerInteractEvent) e;
+                Map<String, Construct> map = mixin.evaluate_helper(e);
+                map.put("player", new CString(pie.getPlayer().getName(), 0, null));
+                Action a = pie.getAction();
+                map.put("action", new CString(a.name().toLowerCase(), 0, null));
+                map.put("block", new CString(Static.ParseItemNotation(new BukkitMCBlock(pie.getClickedBlock())), 0, null));
+                if(a == Action.LEFT_CLICK_AIR || a == Action.LEFT_CLICK_BLOCK){
+                    map.put("button", new CString("left", 0, null));
+                } else {
+                    map.put("button", new CString("right", 0, null));
+                }
+                if(a == Action.LEFT_CLICK_BLOCK || a == Action.RIGHT_CLICK_BLOCK){
+                    map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), 0, null));
+                    Block b = pie.getClickedBlock();
+                    map.put("location", new CArray(0, null, new CInt(b.getX(), 0, null),
+                            new CInt(b.getY(), 0, null), new CInt(b.getZ(), 0, null), 
+                            new CString(b.getWorld().getName(), 0, null)));
+                }
+                map.put("item", new CString(Static.ParseItemNotation(new BukkitMCItemStack(pie.getItem())), 0, null));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to PlayerInteractEvent");
+            }
+        }
+        
+        @Override
+        public Object convert(CArray manual){
+            Player p = ((BukkitMCPlayer)Static.GetPlayer(manual.get("player"), 0, null))._Player();
+            Action a = Action.valueOf(manual.get("action").val().toUpperCase());
+            ItemStack is = ((BukkitMCItemStack)Static.ParseItemNotation("player_interact event", manual.get("item").val(), 1, 0, null)).__ItemStack();
+            Block b = ((BukkitMCBlock)Static.GetLocation(manual.get("location"), null, 0, null).getBlock()).__Block();
+            BlockFace bf = BlockFace.valueOf(manual.get("facing").val());
+            PlayerInteractEvent e = new PlayerInteractEvent(p, a, is, b, bf);            
+            return e;
+        }
+
+        public void modifyEvent(String key, Construct value, Object event) {
+            if(event instanceof PlayerInteractEvent){
+                PlayerInteractEvent pie = (PlayerInteractEvent)event;
+                
             }
         }
     }

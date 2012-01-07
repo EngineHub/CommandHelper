@@ -48,8 +48,7 @@ public class Main {
                         + "     edit your live config file. If you don't provide a file, the default config file is used.\n"
                         + "     Regardless, the program will look in ./CommandHelper/ for the file.\n"
                         + "--copyright - Displays the copyright notice and exits\n"
-                        //broken :(
-                        //+ "--print-db - Prints out the built in database in a human readable form, then exits."
+                        + "--print-db - Prints out the built in database in a human readable form, then exits."
                         );
             }
             if (l.contains("--version")) {

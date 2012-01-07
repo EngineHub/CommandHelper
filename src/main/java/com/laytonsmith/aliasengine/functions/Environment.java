@@ -9,7 +9,6 @@ import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCSign;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
@@ -24,7 +23,6 @@ import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
 import net.minecraft.server.Packet0KeepAlive;
-import org.bukkit.block.Sign;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.CraftWorld;
 
@@ -287,7 +285,7 @@ public class Environment {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             MCLocation l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
-            if (l.getBlock().getState() instanceof MCSign) {
+            if (l.getBlock().isSign()) {
                 String line1 = "";
                 String line2 = "";
                 String line3 = "";
@@ -323,13 +321,12 @@ public class Environment {
                 }
                 /**
                  * TODO: Remove this bukkit reference
-                 */
-                Sign s = (Sign) ((BukkitMCLocation)l)._Location().getBlock().getState();
+                 */                
+                MCSign s = l.getBlock().getSign();
                 s.setLine(0, line1);
                 s.setLine(1, line2);
                 s.setLine(2, line3);
                 s.setLine(3, line4);
-                s.update();
                 return new CVoid(line_num, f);
             } else {
                 throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, line_num, f);
@@ -375,8 +372,8 @@ public class Environment {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             MCLocation l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
-            if (l.getBlock().getState() instanceof Sign) {
-                Sign s = (Sign) l.getBlock().getState();
+            if (l.getBlock().isSign()) {
+                MCSign s = l.getBlock().getSign();
                 CString line1 = new CString(s.getLine(0), line_num, f);
                 CString line2 = new CString(s.getLine(1), line_num, f);
                 CString line3 = new CString(s.getLine(2), line_num, f);

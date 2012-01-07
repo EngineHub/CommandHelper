@@ -210,7 +210,8 @@
                         <manifest>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <mainClass>com.laytonsmith.aliasengine.Main</mainClass>
+                            <!--<mainClass>com.laytonsmith.aliasengine.Main</mainClass>-->
+                            <mainClass>com.laytonsmith.aliasengine.MainSandbox</mainClass>
                         </manifest>
                         <manifestEntries>
                             <Class-Path>WorldEdit.jar CommandHelper/WorldEdit.jar lib/WorldEdit.jar ../lib/WorldEdit.jar ../WorldEdit.jar ../craftbukkit-0.0.1-SNAPSHOT.jar ../bukkit.jar CommandHelper/bukkit.jar</Class-Path>

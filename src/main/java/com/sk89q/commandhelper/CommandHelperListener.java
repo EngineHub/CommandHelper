@@ -22,7 +22,7 @@ import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.aliasengine.AliasCore;
-import com.laytonsmith.aliasengine.DirtyRegisteredListener;
+import com.laytonsmith.aliasengine.BukkitDirtyRegisteredListener;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -154,7 +154,7 @@ public class CommandHelperListener extends PlayerListener {
                 event.setCancelled(true);
                 if((Boolean) Static.getPreferences().getPreference("play-dirty")){
                     //Super cancel the event
-                    DirtyRegisteredListener.setCancelled(event);
+                    BukkitDirtyRegisteredListener.setCancelled(event);
                 }
                 //System.out.println("Command Cancelled: " + cmd);
                 return;

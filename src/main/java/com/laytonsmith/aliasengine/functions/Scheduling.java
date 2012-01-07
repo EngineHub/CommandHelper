@@ -21,7 +21,7 @@ import java.io.File;
  */
 public class Scheduling {
     public static String docs(){
-        return "This class contains methods for dealing with time and bukkit scheduling.";
+        return "This class contains methods for dealing with time and server scheduling.";
     }
     @api public static class time implements Function{
 

@@ -65,21 +65,27 @@ public interface Event extends Comparable<Event>{
     public Map<String, Construct> evaluate(Object e) throws EventException;
     
     /**
-     * This is called if the script attempts to cancel the event, so the bukkit
+     * This is called to determine if an event is cancellable in the first place
+     */
+    public boolean isCancellable(Object e);
+    
+    /**
+     * This is called if the script attempts to cancel the event, so the underlying
      * event can also be cancelled. If the underlying event is not cancellable, this
      * should throw an EventException, which is caught in the triggering code, and
      * at this time ignored.
      */
     public void cancel(Object e) throws EventException;
     
+    
     /**
      * This function returns the "driver" class of the event needed to trigger it.
      * Though not strictly needed, this method helps optimize code. All events may
      * more strictly filter events based on other conditions, but all events must
-     * have a single Bukkit event that drives the CH event. This is also the type of
+     * have a single Type of event that drives the CH event. This is also the type of
      * the event that will be sent to the matches function.
      */
-    public org.bukkit.event.Event.Type driver();
+    public Type driver();
     
     /**
      * This function is called once a script binds to this event, which gives 

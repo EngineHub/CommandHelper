@@ -5,6 +5,7 @@
 package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -44,9 +45,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.ConsoleCommandSender;
-import org.bukkit.entity.Player;
 
 /**
  * A script is a section of code that has been preprocessed and split into separate 
@@ -143,16 +141,16 @@ public class Script {
             throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.",
                     null, line_num, null);
         }
-        if (p instanceof Player) {
+        if (p instanceof MCPlayer) {
             if (CurrentEnv.GetLabel() != null) {
                 PermissionsResolverManager perms = Static.getPermissionsResolverManager();
                 String[] groups = CurrentEnv.GetLabel().substring(1).split("/");
                 for (String group : groups) {
-                    if (group.startsWith("-") && perms.inGroup(((Player)p).getName(), group.substring(1))) {
+                    if (group.startsWith("-") && perms.inGroup(((MCPlayer)p).getName(), group.substring(1))) {
                         //negative permission
                         throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
                                 0, null);
-                    } else if (perms.inGroup(((Player)p).getName(), group)) {
+                    } else if (perms.inGroup(((MCPlayer)p).getName(), group)) {
                         //They do have permission.
                         break;
                     }

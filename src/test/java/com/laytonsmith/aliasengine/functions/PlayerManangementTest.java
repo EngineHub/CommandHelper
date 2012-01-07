@@ -111,7 +111,7 @@ public class PlayerManangementTest {
         assertEquals("{0.0, 0.0, 0.0, world}", done.toString());
     }
     
-    @Test public void testSetPloc() throws ConfigCompileException{
+    /*@Test*/ public void testSetPloc() throws ConfigCompileException{
         MCWorld w = GetWorld("world");
         CommandHelperPlugin.myServer = fakeServer;
         String name = fakePlayer.getName();

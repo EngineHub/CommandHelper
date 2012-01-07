@@ -66,10 +66,14 @@ public class BukkitMCItemStack implements MCItemStack{
     }
 
     public void setTypeId(int type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        is.setTypeId(type);
     }
 
     public int getAmount() {
-        throw new UnsupportedOperationException("Not supported yet.");
+        return is.getAmount();
+    }
+
+    public ItemStack __ItemStack() {
+        return is;
     }
 }

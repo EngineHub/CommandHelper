@@ -6,10 +6,21 @@ package com.laytonsmith.aliasengine;
 
 import com.laytonsmith.aliasengine.Constructs.CNull;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.aliasengine.functions.Regex;
+import com.sun.java.swing.plaf.windows.WindowsTreeUI.CollapsedIcon;
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
+import java.net.URL;
+import java.security.CodeSource;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 //import net.minecraft.server.Packet;
 
 /**
@@ -18,8 +29,11 @@ import java.util.logging.Logger;
  */
 public class MainSandbox {
     public static void main(String[] args) throws Exception{
-        System.out.println(Static.debugLogFile());
+        
     }
+    
+    
+
     
     public static class hashClass{
         int x;

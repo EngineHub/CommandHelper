@@ -5,6 +5,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCSign;
 
 /**
  *

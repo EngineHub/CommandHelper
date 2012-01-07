@@ -4,11 +4,9 @@
  */
 package com.laytonsmith.aliasengine.events;
 
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.Construct;
 import com.laytonsmith.aliasengine.Script;
-import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
 import java.util.HashMap;
@@ -24,10 +22,14 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     protected AbstractEventMixin mixin;
     protected AbstractEventHandler handler;
     
-    protected AbstractEvent(AbstractEventMixin mixin, AbstractEventHandler handler){
-        this.mixin = mixin;
+    protected AbstractEvent(AbstractEventHandler handler){
         this.handler = handler;
     }
+    
+    public final void setAbstractEventMixin(AbstractEventMixin mixin){
+        this.mixin = mixin;
+    }
+    
 
     /**
      * If the event needs to run special code when a player binds the event, it
@@ -78,13 +80,6 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     }
     
     /**
-     * The same event handler needs to sometimes implement things differently based on the
-     * current server implementation.
-     * @return 
-     */
-    public abstract Implementation.Type implementationType();
-    
-    /**
      * If it is ok to by default do a simple conversion from a CArray to a
      * Map, this method can do it for you. Likely this is not acceptable,
      * so hard-coding the conversion will be necessary.
@@ -112,7 +107,26 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     }
     
     public void modifyEvent(String key, Construct value, Object event){
-        modifyEvent(key, value, event);
+        handler.modifyEvent(key, value, event);
     }
+    
+    /**
+     * By default, this function triggers the event by calling the mixin
+     * handler. If this is not the desired behavior, this method can be overridden
+     * in the actual event (if it's an external event, for instance)
+     * @param o 
+     */
+    public void manualTrigger(Object o){
+        mixin.manualTrigger(o);
+    }
+    
+    public void cancel(Object o){
+        mixin.cancel(o);
+    }
+    
+    public boolean isCancellable(Object o){
+        return mixin.isCancellable(o);
+    }
+    
     
 }

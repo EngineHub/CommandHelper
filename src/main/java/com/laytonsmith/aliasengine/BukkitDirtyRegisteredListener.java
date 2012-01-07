@@ -23,7 +23,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.Event;
-import org.bukkit.event.Event.Type;
 import org.bukkit.event.Listener;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
@@ -35,7 +34,7 @@ import org.perf4j.StopWatch;
  *
  * @author Layton
  */
-public class DirtyRegisteredListener extends RegisteredListener {
+public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
     private final Listener listener;
     private final Event.Priority priority;
@@ -44,7 +43,7 @@ public class DirtyRegisteredListener extends RegisteredListener {
     private static final int queueCapacity = 20;
     private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(queueCapacity);
 
-    public DirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor, final Event.Priority eventPriority, final Plugin registeredPlugin) {
+    public BukkitDirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor, final Event.Priority eventPriority, final Plugin registeredPlugin) {
         super(pluginListener, eventExecutor, eventPriority, registeredPlugin);
         listener = pluginListener;
         priority = eventPriority;
@@ -93,15 +92,15 @@ public class DirtyRegisteredListener extends RegisteredListener {
 
         @Override
         public boolean add(Object e) {
-            if(!(e instanceof DirtyRegisteredListener) && e instanceof RegisteredListener){
+            if(!(e instanceof BukkitDirtyRegisteredListener) && e instanceof RegisteredListener){
                 try {
                     return super.add(Generate((RegisteredListener)e));
                 } catch (NoSuchFieldException ex) {
-                    Logger.getLogger(DirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(DirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IllegalAccessException ex) {
-                    Logger.getLogger(DirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
+                    Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
                 return super.add(e);
@@ -153,10 +152,10 @@ public class DirtyRegisteredListener extends RegisteredListener {
             newListeners.put(mySet.getKey(), rls);
             while (k.hasNext()) {
                 final RegisteredListener rl = (RegisteredListener) k.next();
-                if (!(rl instanceof DirtyRegisteredListener)) {
+                if (!(rl instanceof BukkitDirtyRegisteredListener)) {
                     doReplace = true;
                 }
-                rls.add(DirtyRegisteredListener.Generate(rl));
+                rls.add(BukkitDirtyRegisteredListener.Generate(rl));
             }
         }
 
@@ -180,9 +179,9 @@ public class DirtyRegisteredListener extends RegisteredListener {
         cancelledEvents.offer(superCancelledEvent);
     }
 
-    public static DirtyRegisteredListener Generate(RegisteredListener real) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-        if (real instanceof DirtyRegisteredListener) {
-            return (DirtyRegisteredListener) real;
+    public static BukkitDirtyRegisteredListener Generate(RegisteredListener real) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        if (real instanceof BukkitDirtyRegisteredListener) {
+            return (BukkitDirtyRegisteredListener) real;
         }
         Field rListener = real.getClass().getDeclaredField("listener");
         rListener.setAccessible(true);
@@ -200,7 +199,7 @@ public class DirtyRegisteredListener extends RegisteredListener {
         rExecutor.setAccessible(true);
         EventExecutor nExecutor = (EventExecutor) rExecutor.get(real);
 
-        return new DirtyRegisteredListener(nListener, nExecutor, nPriority, nPlugin);
+        return new BukkitDirtyRegisteredListener(nListener, nExecutor, nPriority, nPlugin);
     }
 
     /**
@@ -215,7 +214,7 @@ public class DirtyRegisteredListener extends RegisteredListener {
             Debug.DoLog(event.getType(), 1, "Bukkit Event received: " + event.getType().name());
         }
         //If it isn't super cancelled, call it, even if it is cancelled
-        if (!DirtyRegisteredListener.cancelledEvents.contains(event)) {
+        if (!BukkitDirtyRegisteredListener.cancelledEvents.contains(event)) {
             if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
                     && Debug.EVENT_LOGGING_FILTER.contains(event.getType())) {
                 Debug.DoLog(event.getType(), 3, "\tEvent is not super cancelled, so triggering now");
@@ -269,9 +268,9 @@ public class DirtyRegisteredListener extends RegisteredListener {
                         Object o = f.get(event);
                         b.append(" = (actual type: ").append(o.getClass().getSimpleName()).append(") ").append(o.toString()).append("\n");
                     } catch (IllegalArgumentException ex) {
-                        Logger.getLogger(DirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
                     } catch (IllegalAccessException ex) {
-                        Logger.getLogger(DirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
+                        Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
                 Debug.DoLog(event.getType(), 4, b.toString());
