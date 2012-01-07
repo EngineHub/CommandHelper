@@ -346,5 +346,14 @@ public class ArrayTest {
             setUp();
         }
     }
+    
+    @Test public void testArrayForeachWithConstructorInitialization() throws ConfigCompileException{
+        SRun("assign(@pdata, array('some': 'thing', 'is': 67890, 'over': 'there'))"
+                + " msg(@pdata['some'])"
+                + " foreach(@pdata, @thing, msg(@thing))", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("thing");
+        verify(fakePlayer).sendMessage("67890");
+        verify(fakePlayer).sendMessage("there");
+    }
 
 }

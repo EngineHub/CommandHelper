@@ -272,20 +272,40 @@ public class DataHandling {
                 if(iv instanceof IVariable){
                     CArray one = (CArray)arr;
                     IVariable two = (IVariable)iv;
-                    for(int i = 0; i < one.size(); i++){
-                        env.GetVarList().set(new IVariable(two.getName(), one.get(i, line_num), line_num, f));
-                        try{
-                            that.eval(code, env);
-                        } catch(LoopBreakException e){
-                            int num = e.getTimes();
-                            if(num > 1){
-                                e.setTimes(--num);
-                                throw e;
+                    if(!one.inAssociativeMode()){
+                        for(int i = 0; i < one.size(); i++){
+                            env.GetVarList().set(new IVariable(two.getName(), one.get(i, line_num), line_num, f));
+                            try{
+                                that.eval(code, env);
+                            } catch(LoopBreakException e){
+                                int num = e.getTimes();
+                                if(num > 1){
+                                    e.setTimes(--num);
+                                    throw e;
+                                }
+                                return new CVoid(line_num, f);
+                            } catch(LoopContinueException e){
+                                i += e.getTimes() - 1;
+                                continue;
                             }
-                            return new CVoid(line_num, f);
-                        } catch(LoopContinueException e){
-                            i += e.getTimes() - 1;
-                            continue;
+                        }
+                    } else {
+                        for(int i = 0; i < one.size(); i++){
+                            Construct index = one.keySet().toArray(new Construct[]{})[i];
+                            env.GetVarList().set(new IVariable(two.getName(), one.get(index, line_num), line_num, f));
+                            try{
+                                that.eval(code, env);
+                            } catch(LoopBreakException e){
+                                int num = e.getTimes();
+                                if(num > 1){
+                                    e.setTimes(--num);
+                                    throw e;
+                                }
+                                return new CVoid(line_num, f);
+                            } catch(LoopContinueException e){
+                                i += e.getTimes() - 1;
+                                continue;
+                            }
                         }
                     }
                 } else {
