@@ -61,8 +61,7 @@ public interface MCPlayer extends MCCommandSender, MCOfflinePlayer{
     public MCLocation getCompassTarget();
 
     public void setCompassTarget(MCLocation l);
-    
-    
-    
-    
+
+    public int getRemainingFireTicks();
+    public void setRemainingFireTicks(int i);   
 }

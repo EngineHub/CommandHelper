@@ -2540,4 +2540,110 @@ public class PlayerManagement {
         
     }
     
+    @api public static class ponfire implements Function{
+
+        public String getName() {
+            return "ponfire";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "int {[player]} Returns the number of ticks remaining that this player will"
+                    + " be on fire for. If the player is not on fire, 0 is returned, which incidentally"
+                    + " is false.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            if(args.length == 1){
+                p = Static.GetPlayer(args[0]);
+            }
+            int left = p.getRemainingFireTicks();
+            return new CInt(left, line_num, f);
+        }
+        
+    }
+    
+    @api public static class set_ponfire implements Function{
+
+        public String getName() {
+            return "set_ponfire";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], ticks} Sets the player on fire for the specified number of"
+                    + " ticks. If a boolean is given for ticks, false is 0, and true is 20.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            Construct ticks;
+            if(args.length == 2){
+                p = Static.GetPlayer(args[0]);
+                ticks = args[1];
+            } else {
+                ticks = args[0];
+            }
+            int tick = 0;
+            if(ticks instanceof CBoolean){
+                boolean value = ((CBoolean)ticks).getBoolean();
+                if(value){
+                    tick = 20;
+                }
+            } else {
+                tick = (int) Static.getInt(ticks);
+            }
+            p.setRemainingFireTicks(tick);
+            return new CVoid(line_num, f);
+        }
+        
+    }
+    
 }

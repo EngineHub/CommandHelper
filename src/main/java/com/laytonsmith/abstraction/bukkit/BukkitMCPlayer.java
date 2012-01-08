@@ -236,4 +236,12 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
     public MCPlayer getPlayer() {
         return new BukkitMCPlayer(p);
     }
+
+    public int getRemainingFireTicks() {
+        return p.getFireTicks();
+    }
+    
+    public void setRemainingFireTicks(int i){
+        p.setFireTicks(i);
+    }
 }
