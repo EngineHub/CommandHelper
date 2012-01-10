@@ -2,10 +2,10 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 package com.laytonsmith.aliasengine.functions;
 
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Documentation;
 import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -17,7 +17,8 @@ import java.io.File;
  * to it.
  * @author layton
  */
-public interface Function {
+public interface Function extends Documentation {
+
     /**
      * The name of this function, exactly as should be used in a script. Note that the name of
      * the function must match the regex:
@@ -29,6 +30,7 @@ public interface Function {
      * @return 
      */
     public String getName();
+
     /**
      * The number of arguments this function can accept. Some functions may be able to accept multiple numbers
      * of arguments, so this function returns an array. If you return Integer.MAX_VALUE as one of the
@@ -36,6 +38,7 @@ public interface Function {
      * @return 
      */
     public Integer[] numArgs();
+
     /**
      * If a user asks for information about a particular function, this method is called to obtain the functions
      * usage. The returned string must follow the following format:
@@ -43,12 +46,13 @@ public interface Function {
      * is no documentation for this function yet.
      */
     public String docs();
-    
+
     /**
      * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
      * @return An array of the exception enums, or null, if the function throws no catchable exceptions.
      */
     public ExceptionType[] thrown();
+
     /**
      * Whether or not a function needs to be checked against the permissions file, if there are possible security concerns
      * with a user compiling, or running this function. If this function returns true, the permissions file will be checked for
@@ -57,6 +61,7 @@ public interface Function {
      * @return 
      */
     public boolean isRestricted();
+
     /**
      * Most functions don't care that a construct is a variable, they simply care about the value stored in the variable.
      * If the function is concerned with the variable listing however, then it has direct access to the variable list for
@@ -72,14 +77,7 @@ public interface Function {
      * @return 
      */
     public boolean preResolveVariables();
-    
-    /**
-     * The version this function was added to CommandHelper. Used in documentation, so users know what version they must have
-     * in order to use this function.
-     * @return 
-     */
-    public String since();
-    
+
     /**
      * Whether or not to run this function asynchronously from the main server thread. If you 
      * return true, you may NOT have any interaction with the bukkit api, other than
@@ -89,6 +87,7 @@ public interface Function {
      * @return 
      */
     public Boolean runAsync();
+
     /**
      * This function is invoked when the alias is run. The line number is provided so that if there is an error,
      * the function can provide a more specific error message for the user. The function can throw a CancelCommandException
@@ -107,5 +106,5 @@ public interface Function {
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(int line_num, File f, Env environment, Construct ... args) throws ConfigRuntimeException;
+    public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException;
 }

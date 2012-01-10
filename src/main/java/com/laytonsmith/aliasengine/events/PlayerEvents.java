@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.aliasengine.docs;
+
 
 /**
  *
@@ -14,6 +16,7 @@ public class PlayerEvents {
         return "Contains events related to a player";
     }
     
+    @docs(type= docs.type.EVENT)
     public static class player_join extends AbstractEvent{
         
         public player_join(AbstractEventHandler handler){
@@ -26,7 +29,7 @@ public class PlayerEvents {
 
         public String docs() {
             return "{player: <string match> |"
-                    + "join_message: <regex match>} This event is called when a player logs in "
+                    + "join_message: <regex>} This event is called when a player logs in "
                     + "{player: The player's name | join_message: The default join message}"
                     + "{player|join_message}"
                     + "{join_message}";
@@ -44,6 +47,7 @@ public class PlayerEvents {
         
     }
     
+    @docs(type= docs.type.EVENT)
     public static class player_interact extends AbstractEvent{
         
         public player_interact(AbstractEventHandler handler){

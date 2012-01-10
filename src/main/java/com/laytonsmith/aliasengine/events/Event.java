@@ -6,6 +6,7 @@ package com.laytonsmith.aliasengine.events;
 
 import com.laytonsmith.aliasengine.Constructs.CArray;
 import com.laytonsmith.aliasengine.Constructs.Construct;
+import com.laytonsmith.aliasengine.Documentation;
 import com.laytonsmith.aliasengine.Script;
 import com.laytonsmith.aliasengine.exceptions.EventException;
 import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
@@ -17,7 +18,7 @@ import java.util.Map;
  * itself with @api, and it will be included in the EventList.
  * @author layton
  */
-public interface Event extends Comparable<Event>{
+public interface Event extends Comparable<Event>, Documentation{
     /**
      * This should return the name of the event.
      * @return 
@@ -34,12 +35,7 @@ public interface Event extends Comparable<Event>{
      * @return 
      */
     public String docs();
-    /**
-     * The version this event was added to CommandHelper. It should follow the 
-     * format 0.0.0.
-     * @return 
-     */
-    public String since();
+
     /**
      * This function should return true if the event code should be run, based
      * on this prefilter and triggering event's parameters.

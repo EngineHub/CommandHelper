@@ -10,9 +10,15 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marks a function as an API function, which includes it in the list of functions.
- * @author Layton
+ * Used to tag the documentation portion of a certain method type. The annotated
+ * code must implement the Documentation interface.
+ * @author layton
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface api {}
+public @interface docs {
+    public enum type{
+        EVENT, FUNCTION
+    }
+    public type type();
+}

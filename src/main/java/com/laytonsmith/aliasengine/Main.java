@@ -92,7 +92,7 @@ public class Main {
                         return;
                     }
                     System.out.println("Creating " + type + " documentation.");
-                    DocGen.start(type);
+                    DocGen.functions(type);
                 } else if (s.matches("--test-compile")) {
                     System.out.println("This functionality is not currently implemented!");
 //                    File f = new File(".");
