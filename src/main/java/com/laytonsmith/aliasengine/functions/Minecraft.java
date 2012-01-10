@@ -9,8 +9,10 @@ import com.laytonsmith.abstraction.MCEffect;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.aliasengine.api;
 import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
 import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
@@ -33,37 +35,9 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.DyeColor;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.craftbukkit.CraftWorld;
-import org.bukkit.entity.Blaze;
-import org.bukkit.entity.CaveSpider;
-import org.bukkit.entity.Chicken;
-import org.bukkit.entity.Cow;
-import org.bukkit.entity.Creeper;
-import org.bukkit.entity.EnderDragon;
-import org.bukkit.entity.Enderman;
-import org.bukkit.entity.Ghast;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.MagmaCube;
-import org.bukkit.entity.MushroomCow;
-import org.bukkit.entity.Pig;
-import org.bukkit.entity.PigZombie;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Sheep;
-import org.bukkit.entity.Silverfish;
-import org.bukkit.entity.Skeleton;
-import org.bukkit.entity.Slime;
-import org.bukkit.entity.Snowman;
-import org.bukkit.entity.Spider;
-import org.bukkit.entity.Squid;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.Wolf;
-import org.bukkit.entity.Zombie;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
-import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -104,8 +78,9 @@ public class Minecraft {
                 return new CInt(Static.getInt(args[0]), line_num, f);
             } else {
                 String c = args[0].val();
-                if(Material.matchMaterial(c) != null){
-                    return new CInt(new MaterialData(Material.matchMaterial(c)).getItemTypeId(), line_num, f);
+                int number = StaticLayer.LookupItemId(c);
+                if(number != -1){
+                    return new CInt(number, line_num, f);
                 }
                 String changed = c;
                 if(changed.contains(":")){
@@ -206,9 +181,8 @@ public class Minecraft {
             }
             if(i == -1){
                 i = (int)Static.getInt(args[0]);
-            }
-            Material m = Material.getMaterial(i);
-            return new CString(m.toString(), line_num, f);
+            }            
+            return new CString(StaticLayer.LookupMaterialName(i), line_num, f);
         }
         
     }
@@ -306,12 +280,7 @@ public class Minecraft {
             return false;
         }
 
-        enum MOBS {
-
-            CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME, 
-            SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH, VILLAGER,
-            BLAZE, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY, GIANT, SNOWGOLEM
-        }
+        
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mob = args[0].val();
@@ -329,7 +298,7 @@ public class Minecraft {
                         ExceptionType.RangeException, line_num, f);
             }
             MCLocation l = null;
-            if (env.GetCommandSender() instanceof Player) {
+            if (env.GetCommandSender() instanceof MCPlayer) {
                 l = env.GetPlayer().getLocation();
             }
             if (args.length > 2) {
@@ -341,114 +310,8 @@ public class Minecraft {
                             ExceptionType.CastException, line_num, f);
                 }
             }
-            Class mobType = null;
-            CArray ids = new CArray(line_num, f);
-            try {
-                switch (MOBS.valueOf(mob.toUpperCase().replaceAll(" ", ""))) {
-                    case CHICKEN:
-                        mobType = Chicken.class;
-                        break;
-                    case COW:
-                        mobType = Cow.class;
-                        break;
-                    case CREEPER:
-                        mobType = Creeper.class;
-                        break;
-                    case GHAST:
-                        mobType = Ghast.class;
-                        break;
-                    case PIG:
-                        mobType = Pig.class;
-                        break;
-                    case PIGZOMBIE:
-                        mobType = PigZombie.class;
-                        break;
-                    case SHEEP:
-                        mobType = Sheep.class;
-                        break;
-                    case SKELETON:
-                        mobType = Skeleton.class;
-                        break;
-                    case SLIME:
-                        mobType = Slime.class;
-                        break;
-                    case SPIDER:
-                        mobType = Spider.class;
-                        break;
-                    case SQUID:
-                        mobType = Squid.class;
-                        break;
-                    case WOLF:
-                        mobType = Wolf.class;
-                        break;
-                    case ZOMBIE:
-                        mobType = Zombie.class;
-                        break;
-                    case CAVESPIDER:
-                        mobType = CaveSpider.class;
-                        break;
-                    case ENDERMAN:
-                        mobType = Enderman.class;
-                        break;
-                    case SILVERFISH:
-                        mobType = Silverfish.class;
-                        break;
-                    case BLAZE:
-                        mobType = Blaze.class;
-                        break;
-                    case VILLAGER:
-                        mobType = Villager.class;
-                        break;
-                    case ENDERDRAGON:
-                        mobType = EnderDragon.class;
-                        break;
-                    case MAGMACUBE:
-                        mobType = MagmaCube.class;
-                        break;
-                    case MOOSHROOM:
-                        mobType = MushroomCow.class;
-                        break;
-                    case SPIDERJOCKEY:
-                        mobType = Spider.class;
-                        break;
-                    case GIANT:
-                        double x = l.getX();
-                        double y = l.getY();
-                        double z = l.getZ();
-                        float pitch = l.getPitch();
-                        float yaw = l.getYaw();
-                        net.minecraft.server.Entity giant = new net.minecraft.server.EntityGiantZombie(((CraftWorld)l.getWorld()).getHandle());
-                        giant.setLocation(x, y, z, pitch, yaw);
-                        ((CraftWorld)l.getWorld()).getHandle().addEntity(giant, SpawnReason.CUSTOM);
-                        return new CVoid(line_num, f);
-                    case SNOWGOLEM:
-                        mobType = Snowman.class;
-                        break;
-                }
-            } catch (IllegalArgumentException e) {
-                throw new ConfigRuntimeException("No mob of type " + mob + " exists",
-                        ExceptionType.FormatException, line_num, f);
-            }
-            if (l.getWorld() != null) {
-                for (int i = 0; i < qty; i++) {
-                    MCEntity e = l.getWorld().spawn(l, mobType);
-                    if(MOBS.valueOf(mob.toUpperCase()) == MOBS.SPIDERJOCKEY){
-                        Spider s = (Spider) e;
-                        Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
-                        s.setPassenger(sk);
-                    }
-                    if (e instanceof Sheep) {
-                        Sheep s = (Sheep) e;
-                        try {
-                            s.setColor(DyeColor.valueOf(sheepColor.toUpperCase()));
-                        } catch (IllegalArgumentException ex) {
-                            throw new ConfigRuntimeException(sheepColor.toUpperCase() + " is not a valid color",
-                                    ExceptionType.FormatException, line_num, f);
-                        }
-                    }
-                    ids.push(new CInt(e.getEntityId(), line_num, f));
-                }
-                return ids;
+            if(l.getWorld() != null){
+                return l.getWorld().spawnMob(mob, sheepColor, qty, l, line_num, f);
             } else {
                 throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
             }
@@ -668,7 +531,7 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = Static.GetLocation(args[0], (env.GetCommandSender() instanceof Player?env.GetPlayer().getWorld():null), line_num, f);
+            MCLocation l = Static.GetLocation(args[0], (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), line_num, f);
             MCEffect e = null;
             try{
                 e = MCEffect.valueOf(args[1].val().toUpperCase());

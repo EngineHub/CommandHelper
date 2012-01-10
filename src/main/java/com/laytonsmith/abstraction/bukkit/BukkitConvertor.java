@@ -21,12 +21,15 @@ import com.sk89q.commandhelper.CommandHelperPlugin;
 import java.util.Iterator;
 import java.util.SortedSet;
 import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Event;
 import org.bukkit.event.Event.Category;
 import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -36,7 +39,11 @@ import org.bukkit.inventory.ItemStack;
 public class BukkitConvertor implements Convertor {
 
     public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
-        return new BukkitMCLocation(new Location(((BukkitMCWorld) w).__World(), x, y, z, yaw, pitch));
+        World w2 = null;
+        if(w != null){
+            w2 = ((BukkitMCWorld)w).__World();
+        }
+        return new BukkitMCLocation(new Location(w2, x, y, z, yaw, pitch));
     }
 
     public Class GetServerEventMixin() {
@@ -146,5 +153,17 @@ public class BukkitConvertor implements Convertor {
             throw new ConfigRuntimeException("Incompatible event! " + t, null, 0, null);
         }
         return t;
+    }
+
+    public int LookupItemId(String materialName) {
+        if(Material.matchMaterial(materialName) != null){
+            return new MaterialData(Material.matchMaterial(materialName)).getItemTypeId();
+        } else {
+            return -1;
+        }
+    }
+
+    public String LookupMaterialName(int id) {
+        return Material.getMaterial(id).toString();
     }
 }

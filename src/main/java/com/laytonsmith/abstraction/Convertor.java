@@ -25,4 +25,8 @@ public interface Convertor {
 
     public void Startup(CommandHelperPlugin chp);
     
+    public int LookupItemId(String materialName);
+
+    public String LookupMaterialName(int id);
+    
 }

@@ -5,6 +5,9 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.aliasengine.Constructs.CArray;
+import com.laytonsmith.aliasengine.Constructs.Construct;
+import java.io.File;
 import java.util.List;
 
 /**
@@ -37,4 +40,6 @@ public interface MCWorld {
     public void setTime(long time);
     
     public long getTime();
+    
+    public Construct spawnMob(String name, String subClass, int qty, MCLocation location, int line_num, File file);
 }

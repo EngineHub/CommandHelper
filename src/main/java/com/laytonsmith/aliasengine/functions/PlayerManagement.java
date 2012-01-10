@@ -31,19 +31,12 @@ import com.laytonsmith.aliasengine.Env;
 import com.laytonsmith.aliasengine.Static;
 import com.laytonsmith.aliasengine.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MobEffect;
 
 /**
  * Specially used in set_peffect
  */
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 
 
 /**
@@ -2068,7 +2061,7 @@ public class PlayerManagement {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = Static.GetPlayer(args[0].val(), line_num, f);
             if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("That MCPlayer is not online", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             int effect = (int) Static.getInt(args[1]);
             int strength = (int) Static.getInt(args[2]);
@@ -2076,24 +2069,7 @@ public class PlayerManagement {
             if (args.length == 4) {
                 seconds = (int) Static.getInt(args[3]);
             }
-            EntityPlayer ep = ((CraftPlayer) m).getHandle();
-            Class epc = EntityLiving.class;
-            MobEffect me = new MobEffect(effect, seconds * 20, strength);
-            try {
-                Method meth = epc.getDeclaredMethod("d", net.minecraft.server.MobEffect.class);
-                //ep.d(new MobEffect(effect, seconds * 20, strength));
-                //Call it reflectively, because it's deobfuscated in newer versions of CB
-                meth.invoke(ep, me);
-            } catch (Exception e) {
-                try {
-                    //Look for the addEffect version                
-                    Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
-                    //ep.addEffect(me);
-                    meth.invoke(ep, me);
-                } catch (Exception ex) {
-                    Logger.getLogger(PlayerManagement.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
+            m.addEffect(effect, strength, seconds);
             return new CVoid(line_num, f);
         }
     }
