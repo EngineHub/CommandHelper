@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.aliasengine.events;
 
+import com.laytonsmith.puls3.core.events.Prefilters;
 import com.laytonsmith.puls3.core.constructs.Construct;
 import com.laytonsmith.puls3.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.puls3.core.exceptions.PrefilterNonMatchException;
