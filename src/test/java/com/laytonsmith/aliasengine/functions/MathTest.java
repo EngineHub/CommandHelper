@@ -4,13 +4,15 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.aliasengine.Env;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.Constructs.IVariable;
-import com.laytonsmith.aliasengine.Static;
+import com.laytonsmith.puls3.core.functions.IVariableList;
+import com.laytonsmith.puls3.core.functions.Math;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.abstraction.MCServer;
+import com.laytonsmith.puls3.core.Env;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.puls3.core.constructs.IVariable;
+import com.laytonsmith.puls3.core.Static;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;

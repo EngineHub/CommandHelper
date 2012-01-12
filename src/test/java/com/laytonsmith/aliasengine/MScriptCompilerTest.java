@@ -4,14 +4,18 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.puls3.core.Script;
+import com.laytonsmith.puls3.core.MScriptCompiler;
+import com.laytonsmith.puls3.core.MScriptComplete;
+import com.laytonsmith.puls3.core.Env;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.abstraction.MCServer;
 import com.laytonsmith.testing.StaticTest;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
-import com.laytonsmith.aliasengine.Constructs.Variable;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.Constructs.Token;
-import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.puls3.core.constructs.Variable;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.constructs.Token;
+import com.laytonsmith.puls3.Puls3Plugin;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -482,9 +486,9 @@ public class MScriptCompilerTest {
     
     @Test public void testCompile11() throws ConfigCompileException{
         
-        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
-        when(CommandHelperPlugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
-        CommandHelperPlugin.myServer = fakeServer;
+        Puls3Plugin.perms = mock(PermissionsResolverManager.class);
+        when(Puls3Plugin.perms.hasPermission(fakePlayer.getName(), "ch.alias.safe")).thenReturn(true);
+        Puls3Plugin.myServer = fakeServer;
         when(fakeServer.getOnlinePlayers()).thenReturn(new MCPlayer[]{fakePlayer});
         String config = "safe:/test $var = >>>\n"
                 + "all_players()\n"
@@ -496,7 +500,7 @@ public class MScriptCompilerTest {
         assertTrue(s.match("/test 2"));
         s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), env, null);
         verify(fakePlayer).sendMessage("2");
-        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
+        verify(Puls3Plugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
     }
     
     @Test public void testUnicode() throws ConfigCompileException{

@@ -4,13 +4,14 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.aliasengine.Env;
-import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.functions.Echoes;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.abstraction.MCServer;
+import com.laytonsmith.puls3.core.Env;
+import com.laytonsmith.puls3.core.exceptions.CancelCommandException;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
-import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.puls3.Puls3Plugin;
 import java.lang.reflect.InvocationTargetException;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -67,7 +68,7 @@ public class EchoesTest {
             IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, CancelCommandException{
         Echoes.broadcast a = new Echoes.broadcast();
         when(fakePlayer.getServer()).thenReturn(fakeServer);
-        CommandHelperPlugin.myServer = fakeServer;
+        Puls3Plugin.myServer = fakeServer;
         a.exec(0, null, env, C.onstruct("Hello World!"));
         verify(fakeServer).broadcastMessage("Hello World!");        
     }

@@ -4,8 +4,10 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.Constructs.*;
+import com.laytonsmith.puls3.core.NotInitializedYetException;
+import com.laytonsmith.puls3.core.Static;
+import com.laytonsmith.puls3.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.puls3.core.constructs.*;
 import com.laytonsmith.testing.C;
 import org.junit.AfterClass;
 import org.junit.Before;

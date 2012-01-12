@@ -4,9 +4,9 @@
  */
 package com.laytonsmith.aliasengine.events;
 
-import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.events.Prefilters.PrefilterType;
-import com.laytonsmith.aliasengine.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.puls3.core.constructs.Construct;
+import com.laytonsmith.puls3.core.events.Prefilters.PrefilterType;
+import com.laytonsmith.puls3.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.testing.C;
 import java.util.HashMap;
 import java.util.Map;

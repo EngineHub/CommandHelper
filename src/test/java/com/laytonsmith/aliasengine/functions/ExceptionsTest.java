@@ -4,14 +4,14 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.aliasengine.Env;
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.abstraction.MCServer;
+import com.laytonsmith.puls3.core.Env;
+import com.laytonsmith.puls3.core.exceptions.ConfigRuntimeException;
 import java.io.File;
-import com.laytonsmith.aliasengine.MScriptCompiler;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
-import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.puls3.core.MScriptCompiler;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.Puls3Plugin;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import com.laytonsmith.testing.StaticTest;
 import org.bukkit.entity.Player;
@@ -47,8 +47,8 @@ public class ExceptionsTest {
 
     @Before
     public void setUp() {
-        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
-        CommandHelperPlugin.myServer = fakeServer;
+        Puls3Plugin.perms = mock(PermissionsResolverManager.class);
+        Puls3Plugin.myServer = fakeServer;
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
         env.SetPlayer(fakePlayer);

@@ -4,14 +4,15 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.aliasengine.Env;
-import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.Constructs.CArray;
-import com.laytonsmith.aliasengine.Constructs.CInt;
+import com.laytonsmith.puls3.core.functions.ArrayHandling;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.core.Env;
+import com.laytonsmith.puls3.core.constructs.Construct;
+import com.laytonsmith.puls3.core.exceptions.CancelCommandException;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.puls3.core.constructs.CArray;
+import com.laytonsmith.puls3.core.constructs.CInt;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.Before;

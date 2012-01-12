@@ -5,10 +5,10 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
-import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.puls3.Puls3Plugin;
 import static org.junit.Assert.*;
 import static com.laytonsmith.testing.StaticTest.*;
 import java.io.File;
@@ -31,7 +31,7 @@ public class ArrayTest {
     @BeforeClass
     public static void setUpClass(){
         Plugin fakePlugin = mock(Plugin.class);        
-        CommandHelperPlugin.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), fakePlugin);
+        Puls3Plugin.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), fakePlugin);
     }
     @Before
     public void setUp() {

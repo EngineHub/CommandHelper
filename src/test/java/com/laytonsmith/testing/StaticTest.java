@@ -4,38 +4,38 @@
  */
 package com.laytonsmith.testing;
 
-import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
+import com.laytonsmith.puls3.abstraction.bukkit.BukkitMCLocation;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.junit.runner.RunWith;
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
-import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.aliasengine.Env;
-import com.laytonsmith.aliasengine.functions.BasicLogic.equals;
-import com.laytonsmith.aliasengine.MScriptCompiler;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.abstraction.MCLocation;
+import com.laytonsmith.puls3.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.puls3.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.puls3.abstraction.MCWorld;
+import com.laytonsmith.puls3.abstraction.MCCommandSender;
+import com.laytonsmith.puls3.abstraction.MCServer;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.core.Env;
+import com.laytonsmith.puls3.core.functions.BasicLogic.equals;
+import com.laytonsmith.puls3.core.MScriptCompiler;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
 import java.lang.reflect.Field;
-import com.laytonsmith.aliasengine.Constructs.Token;
+import com.laytonsmith.puls3.core.constructs.Token;
 import java.util.List;
 import java.util.ArrayList;
-import com.laytonsmith.aliasengine.exceptions.CancelCommandException;
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
-import com.laytonsmith.aliasengine.Constructs.CBoolean;
-import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.MScriptComplete;
-import com.laytonsmith.aliasengine.Static;
-import com.laytonsmith.aliasengine.Version;
-import com.laytonsmith.aliasengine.functions.Function;
-import com.laytonsmith.aliasengine.exceptions.FunctionReturnException;
-import com.laytonsmith.aliasengine.exceptions.LoopBreakException;
-import com.laytonsmith.aliasengine.exceptions.LoopContinueException;
+import com.laytonsmith.puls3.core.exceptions.CancelCommandException;
+import com.laytonsmith.puls3.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.puls3.core.constructs.CBoolean;
+import com.laytonsmith.puls3.core.constructs.Construct;
+import com.laytonsmith.puls3.core.MScriptComplete;
+import com.laytonsmith.puls3.core.Static;
+import com.laytonsmith.puls3.core.Version;
+import com.laytonsmith.puls3.core.functions.Function;
+import com.laytonsmith.puls3.core.exceptions.FunctionReturnException;
+import com.laytonsmith.puls3.core.exceptions.LoopBreakException;
+import com.laytonsmith.puls3.core.exceptions.LoopContinueException;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
-import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.puls3.Puls3Plugin;
 import java.util.Arrays;
 import java.util.Random;
 import org.bukkit.World;
@@ -394,8 +394,8 @@ public class StaticTest {
             pps.add(pp);
         }
         when(fakeServer.getOnlinePlayers()).thenReturn(pps.toArray(new MCPlayer[]{}));  
-        CommandHelperPlugin.myServer = fakeServer;  
-        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+        Puls3Plugin.myServer = fakeServer;  
+        Puls3Plugin.perms = mock(PermissionsResolverManager.class);
         return fakeServer;
     }
     

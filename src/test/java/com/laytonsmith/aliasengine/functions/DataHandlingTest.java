@@ -4,19 +4,19 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.aliasengine.Env;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.abstraction.MCServer;
+import com.laytonsmith.puls3.core.Env;
 import java.io.File;
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
+import com.laytonsmith.puls3.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import java.io.IOException;
-import com.laytonsmith.aliasengine.Constructs.Variable;
+import com.laytonsmith.puls3.core.constructs.Variable;
 import java.util.Arrays;
-import com.laytonsmith.aliasengine.Script;
-import com.laytonsmith.aliasengine.MScriptCompiler;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.Script;
+import com.laytonsmith.puls3.core.MScriptCompiler;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

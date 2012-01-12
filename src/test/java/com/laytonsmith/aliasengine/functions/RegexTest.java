@@ -4,8 +4,8 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.exceptions.ConfigRuntimeException;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.exceptions.ConfigRuntimeException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;

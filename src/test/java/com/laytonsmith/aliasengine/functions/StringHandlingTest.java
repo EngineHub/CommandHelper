@@ -4,7 +4,8 @@
  */
 package com.laytonsmith.aliasengine.functions;
 
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.functions.StringHandling;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.After;

@@ -4,24 +4,24 @@
  */
 package com.laytonsmith.testing;
 
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.puls3.abstraction.MCLocation;
+import com.laytonsmith.puls3.abstraction.MCServer;
+import com.laytonsmith.puls3.abstraction.MCWorld;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
 import org.junit.Before;
 import com.sk89q.worldedit.expression.ExpressionException;
 import com.sk89q.worldedit.expression.Expression;
 import org.bukkit.Location;
 import org.bukkit.World;
-import com.laytonsmith.aliasengine.Constructs.*;
-import com.laytonsmith.aliasengine.Static;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
-import com.laytonsmith.aliasengine.exceptions.MarshalException;
+import com.laytonsmith.puls3.core.constructs.*;
+import com.laytonsmith.puls3.core.Static;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.core.exceptions.MarshalException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import com.laytonsmith.aliasengine.functions.Function;
-import com.laytonsmith.aliasengine.functions.FunctionList;
-import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.puls3.core.functions.Function;
+import com.laytonsmith.puls3.core.functions.FunctionList;
+import com.laytonsmith.puls3.Puls3Plugin;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Server;
@@ -133,7 +133,7 @@ public class RandomTests {
         MCWorld fakeWorld = mock(MCWorld.class);
         MCServer fakeServer = mock(MCServer.class);
         when(fakeServer.getWorld("world")).thenReturn(fakeWorld);
-        CommandHelperPlugin.myServer = fakeServer;
+        Puls3Plugin.myServer = fakeServer;
         CArray ca1 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3));
         CArray ca2 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
         CArray ca3 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
@@ -166,7 +166,7 @@ public class RandomTests {
         assertEquals(0, l2.getPitch(), 0.0000000000000000001);
         assertEquals(50, l3.getPitch(), 0.0000000000000000001);
         assertEquals(50, l4.getPitch(), 0.0000000000000000001);
-        CommandHelperPlugin.myServer = null;
+        Puls3Plugin.myServer = null;
     }        
     
     @Test public void expressionTester() throws ExpressionException{

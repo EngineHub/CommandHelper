@@ -4,8 +4,8 @@
  */
 package com.laytonsmith.aliasengine;
 
-import com.laytonsmith.aliasengine.Constructs.Construct;
-import com.laytonsmith.aliasengine.Constructs.Variable;
+import com.laytonsmith.puls3.core.constructs.Construct;
+import com.laytonsmith.puls3.core.constructs.Variable;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.entity.Player;

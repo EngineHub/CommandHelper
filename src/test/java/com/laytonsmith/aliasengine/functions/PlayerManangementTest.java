@@ -7,18 +7,18 @@ package com.laytonsmith.aliasengine.functions;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.junit.runner.RunWith;
 import com.laytonsmith.testing.StaticTest;
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
-import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.aliasengine.MScriptComplete;
-import com.laytonsmith.aliasengine.exceptions.ConfigCompileException;
-import com.sk89q.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.puls3.abstraction.MCLocation;
+import com.laytonsmith.puls3.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.puls3.abstraction.blocks.MCBlock;
+import com.laytonsmith.puls3.abstraction.MCWorld;
+import com.laytonsmith.puls3.abstraction.MCCommandSender;
+import com.laytonsmith.puls3.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.puls3.abstraction.MCServer;
+import com.laytonsmith.puls3.abstraction.StaticLayer;
+import com.laytonsmith.puls3.core.MScriptComplete;
+import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
+import com.laytonsmith.puls3.Puls3Plugin;
 import org.junit.Test;
 import org.junit.After;
 import org.junit.AfterClass;
@@ -60,7 +60,7 @@ public class PlayerManangementTest {
         fakeServer = GetFakeServer();
         fakePlayer = GetOp("wraithguard01", fakeServer);
         when(fakePlayer.getServer()).thenReturn(fakeServer);
-        CommandHelperPlugin.myServer = fakeServer;
+        Puls3Plugin.myServer = fakeServer;
         String name = fakePlayer.getName();
         when(fakeServer.getPlayer(name)).thenReturn(fakePlayer);
     }
@@ -113,7 +113,7 @@ public class PlayerManangementTest {
     
     /*@Test*/ public void testSetPloc() throws ConfigCompileException{
         MCWorld w = GetWorld("world");
-        CommandHelperPlugin.myServer = fakeServer;
+        Puls3Plugin.myServer = fakeServer;
         String name = fakePlayer.getName();
         when(fakeServer.getPlayer(name)).thenReturn(fakePlayer);
         when(fakePlayer.getWorld()).thenReturn(w);
@@ -137,7 +137,7 @@ public class PlayerManangementTest {
     
     @Test public void testPcursor() throws ConfigCompileException{  
         MCBlock b = mock(MCBlock.class);
-        CommandHelperPlugin.myServer = fakeServer;
+        Puls3Plugin.myServer = fakeServer;
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
         when(fakePlayer.getTargetBlock(null, 200)).thenReturn(b);
         MCWorld w = mock(MCWorld.class);
