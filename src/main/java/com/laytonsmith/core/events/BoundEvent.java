@@ -154,7 +154,10 @@ public class BoundEvent implements Comparable<BoundEvent> {
 
         this.originalEnv = env;
         this.tree = tree;
-
+        
+        if(EventList.getEvent(this.eventName) == null){
+            throw new EventException("No event named \"" + this.eventName + "\" is registered!");
+        }
         this.driver = EventList.getEvent(this.eventName).driver();
         this.eventObjName = eventObjName;
         

@@ -83,6 +83,9 @@ public class BukkitPlayerEvents {
         }
     }
     
+    
+    @abstraction(load=com.laytonsmith.core.events.drivers.PlayerEvents.player_interact.class,
+            type=Implementation.Type.BUKKIT)
     public static class player_interact implements EventHandlerInterface{
         public boolean matches(Map<String, Construct> prefilter, Object e) {
             if(e instanceof PlayerInteractEvent){
