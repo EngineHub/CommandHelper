@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
@@ -17,7 +18,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
-import com.sun.tools.javac.util.Pair;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
