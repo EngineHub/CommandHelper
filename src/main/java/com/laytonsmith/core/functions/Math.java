@@ -1222,7 +1222,7 @@ public class Math {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CDouble(java.lang.Math.round(Static.getNumber(args[0])), line_num, f);
+            return new CInt(java.lang.Math.round(Static.getNumber(args[0])), line_num, f);
         }
         
     }
