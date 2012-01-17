@@ -7,7 +7,6 @@ package com.laytonsmith.core.exceptions;
 
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.sun.jndi.toolkit.ctx.Continuation;
 import java.io.File;
 
 

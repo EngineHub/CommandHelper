@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.functions.IVariableList;
-import com.sun.tools.apt.main.CommandLine;
 import java.util.HashMap;
 import java.util.Map;
 
