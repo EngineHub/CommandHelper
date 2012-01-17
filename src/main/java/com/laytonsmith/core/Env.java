@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.functions.IVariableList;
+import com.sun.tools.apt.main.CommandLine;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -28,6 +29,7 @@ public final class Env implements Cloneable{
     private String label = null;
     private Script script = null;
     private BoundEvent.ActiveEvent event = null;
+    private String command = null;
     
     /*
      * The constructor has relatively little to do, most things are lazy
@@ -215,6 +217,15 @@ public final class Env implements Cloneable{
         if(iVariableList != null){
             clone.iVariableList = (IVariableList) iVariableList.clone();
         }
+        clone.command = command;
         return clone;
+    }
+
+    public void SetCommand(String command) {
+        this.command = command;
+    }
+    
+    public String GetCommand(){
+        return this.command;
     }
 }

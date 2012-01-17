@@ -795,9 +795,17 @@ public class Static {
                         }
                     }
                 } else {
-                    if (env.GetLabel() != null && (perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
+                    if (env.GetLabel() != null){
+                        if(env.GetLabel().contains(".")){
+                            //We are using a non-standard permission. Don't automatically
+                            //add CH's prefix
+                            if(perms.hasPermission(env.GetPlayer().getName(), env.GetLabel())){
+                                perm = true;
+                            }
+                        } else if((perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
                             || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.alias." + env.GetLabel())) {
-                        perm = true;
+                            perm = true;
+                        }
                     }
                 }
             } else if (env.GetCommandSender() instanceof MCConsoleCommandSender) {

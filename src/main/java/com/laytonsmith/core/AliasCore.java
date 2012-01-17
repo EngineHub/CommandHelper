@@ -102,6 +102,7 @@ public class AliasCore {
                             Static.getLogger().log(Level.INFO, b.toString());
                         }
                         try {
+                            env.SetCommand(command);
                             s.run(s.getVariables(command), env, new MScriptComplete() {
 
                                 public void done(String output) {
@@ -115,14 +116,12 @@ public class AliasCore {
                                                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + output.trim());
                                                     }
                                                 }
-                                                //Sometimes bukkit works with one version of this, sometimes with the other. performCommand would be prefered, but
-                                                //chat works more often, because chat actually triggers a CommandPreprocessEvent, unlike performCommand.
+                                                
                                                 if (player instanceof MCPlayer) {
                                                     ((MCPlayer) player).chat(output.trim());
                                                 } else {
                                                     Static.getServer().dispatchCommand(player, output.trim().substring(1));
                                                 }
-                                                //player.performCommand(output.trim().substring(1));
                                             }
                                         }
                                     } catch (Throwable e) {

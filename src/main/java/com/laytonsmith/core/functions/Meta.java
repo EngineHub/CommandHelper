@@ -17,6 +17,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.io.File;
@@ -539,6 +540,52 @@ public class Meta {
             }
             PermissionsResolverManager perms = Static.getPermissionsResolverManager();
             return new CBoolean(perms.hasPermission(player, permission), line_num, f);
+        }
+        
+    }
+    
+    @api public static class get_cmd implements Function{
+
+        public String getName() {
+            return "get_cmd";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public String docs() {
+            return "mixed {} Gets the command (as a string) that ended up triggering this script, exactly"
+                    + " how it was entered by the player. This could be null, if for instance"
+                    + " it is called from within an event.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(environment.GetCommand() == null){
+                return new CNull(line_num, f);
+            } else {
+                return new CString(environment.GetCommand(), line_num, f);
+            }
+        }
+
+        public String since() {
+            return "3.3.0";
         }
         
     }

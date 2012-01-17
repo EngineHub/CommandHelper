@@ -790,45 +790,64 @@ public class ArrayHandling {
         
     }
     
-//    @api public static class array_entry implements Function{
-//
-//        public String getName() {
-//            return "array_entry";
-//        }
-//
-//        public Integer[] numArgs() {
-//            return new Integer[]{2};
-//        }
-//
-//        public String docs() {
-//            return "CEntry {key, value} This function is used internally by the compiler, and while possible, shouldn't be used directly.";
-//        }
-//
-//        public ExceptionType[] thrown() {
-//            return null;
-//        }
-//
-//        public boolean isRestricted() {
-//            return false;
-//        }
-//
-//        public void varList(IVariableList varList) {}
-//
-//        public boolean preResolveVariables() {
-//            return true;
-//        }
-//
-//        public String since() {
-//            return "3.3.0";
-//        }
-//
-//        public Boolean runAsync() {
-//            return null;
-//        }
-//
-//        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-//            return new CEntry(args[0], args[1], line_num, f);
-//        }
-//        
-//    }
+    @api public static class array_implode implements Function{
+
+        public String getName() {
+            return "array_implode";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "string {array, [glue]} Given an array and glue, to-strings all the elements"
+                    + " in the array (just the values, not the keys), and joins them with the glue, defaulting to a space. For instance"
+                    + " array_implode(array(1, 2, 3), '-') will return \"1-2-3\".";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(!(args[0] instanceof CArray)){
+                throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num, f);
+            }
+            StringBuilder b = new StringBuilder();
+            CArray ca = (CArray)args[0];
+            String glue = " ";
+            if(args.length == 2){
+                glue = args[1].val();
+            }
+            boolean first = true;
+            for(Construct key : ca.keySet()){
+                Construct value = ca.get(key, line_num);
+                if(!first){
+                    b.append(glue).append(value.val());
+                } else {
+                    b.append(value.val());
+                    first = false;
+                }
+            }
+            return new CString(b.toString(), line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
 }
