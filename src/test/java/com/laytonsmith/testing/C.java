@@ -4,8 +4,8 @@
  */
 package com.laytonsmith.testing;
 
-import com.laytonsmith.puls3.core.constructs.*;
-import com.laytonsmith.puls3.core.Static;
+import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.Static;
 
 /**
  * This class provides methods for more easily creating different Constructs for testing purposes.

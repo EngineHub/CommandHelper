@@ -4,24 +4,24 @@
  */
 package com.laytonsmith.testing;
 
-import com.laytonsmith.puls3.abstraction.MCLocation;
-import com.laytonsmith.puls3.abstraction.MCServer;
-import com.laytonsmith.puls3.abstraction.MCWorld;
-import com.laytonsmith.puls3.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCPlayer;
 import org.junit.Before;
 import com.sk89q.worldedit.expression.ExpressionException;
 import com.sk89q.worldedit.expression.Expression;
 import org.bukkit.Location;
 import org.bukkit.World;
-import com.laytonsmith.puls3.core.constructs.*;
-import com.laytonsmith.puls3.core.Static;
-import com.laytonsmith.puls3.core.exceptions.ConfigCompileException;
-import com.laytonsmith.puls3.core.exceptions.MarshalException;
+import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.MarshalException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import com.laytonsmith.puls3.core.functions.Function;
-import com.laytonsmith.puls3.core.functions.FunctionList;
-import com.laytonsmith.puls3.Puls3Plugin;
+import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Server;
@@ -82,7 +82,7 @@ public class RandomTests {
     @Test public void testClone() throws CloneNotSupportedException{
         CArray c1 = C.Array(C.Void(), C.Void()).clone();
         CBoolean c2 = C.Boolean(true).clone();
-        CClosure c3 = new CClosure("", null, 0, null).clone();
+        CClosure c3 = new CClosure("", null, null, 0, null).clone();
         CDouble c4 = C.Double(1).clone();
         CFunction c5 = new CFunction("", 0, null).clone();
         CInt c6 = C.Int(1).clone();
@@ -107,7 +107,7 @@ public class RandomTests {
         ca.push(new Command("/Command", 0, null));
         ca.push(new CArray(0, null, new CInt(1, 0, null)));
         //[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
-        assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca));
+        assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, 0, null));
     }
     
     @Test public void testJSONDecodeString() throws MarshalException{
@@ -122,7 +122,7 @@ public class RandomTests {
         ca.push(C.Void());
         ca.push(new Command("/Command", 0, null));
         ca.push(new CArray(0, null, new CInt(1, 0, null)));
-        StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]"));
+        StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", 0, null));
     }
     
     @Test public void testReturnArrayFromProc() throws ConfigCompileException{
@@ -133,7 +133,7 @@ public class RandomTests {
         MCWorld fakeWorld = mock(MCWorld.class);
         MCServer fakeServer = mock(MCServer.class);
         when(fakeServer.getWorld("world")).thenReturn(fakeWorld);
-        Puls3Plugin.myServer = fakeServer;
+        CommandHelperPlugin.myServer = fakeServer;
         CArray ca1 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3));
         CArray ca2 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
         CArray ca3 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
@@ -166,7 +166,7 @@ public class RandomTests {
         assertEquals(0, l2.getPitch(), 0.0000000000000000001);
         assertEquals(50, l3.getPitch(), 0.0000000000000000001);
         assertEquals(50, l4.getPitch(), 0.0000000000000000001);
-        Puls3Plugin.myServer = null;
+        CommandHelperPlugin.myServer = null;
     }        
     
     @Test public void expressionTester() throws ExpressionException{

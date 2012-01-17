@@ -1,5 +1,5 @@
 name: CommandHelper
-main: com.sk89q.commandhelper.CommandHelperPlugin
+main: com.laytonsmith.commandhelper.CommandHelperPlugin
 version: "${project.version}"
 commands:
     repeat:
