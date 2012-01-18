@@ -4,11 +4,14 @@
  */
 package com.laytonsmith.PureUtilities.fileutility;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.Scanner;
 
 /**
@@ -43,7 +46,7 @@ public class FileUtility {
      * @return a string with the contents of the file
      * @throws FileNotFoundException 
      */
-    public static String read(File f) throws FileNotFoundException{
+    public static String read(File f) throws FileNotFoundException {
         StringBuilder t = new StringBuilder();
         String NL = System.getProperty("line.separator");
         Scanner scanner = new Scanner(new FileInputStream(f));
@@ -65,9 +68,9 @@ public class FileUtility {
      * @param mode Either OVERWRITE or APPEND
      * @throws IOException If the File f cannot be written to
      */
-    public static void write(String s, File f, int mode) throws IOException{
+    public static void write(String s, File f, int mode) throws IOException {
         boolean append;
-        if(mode == OVERWRITE){
+        if (mode == OVERWRITE) {
             append = false;
         } else {
             append = true;
@@ -84,7 +87,91 @@ public class FileUtility {
      * @param f The File to write to
      * @throws IOException If the File f cannot be written to
      */
-    public static void write(String s, File f) throws IOException{
+    public static void write(String s, File f) throws IOException {
         write(s, f, OVERWRITE);
+    }
+
+    public static void copy(File fromFile, File toFile)
+            throws IOException {
+
+        if (!fromFile.exists()) {
+            throw new IOException("FileCopy: " + "no such source file: "
+                    + fromFile.getName());
+        }
+        if (!fromFile.isFile()) {
+            throw new IOException("FileCopy: " + "can't copy directory: "
+                    + fromFile.getName());
+        }
+        if (!fromFile.canRead()) {
+            throw new IOException("FileCopy: " + "source file is unreadable: "
+                    + fromFile.getName());
+        }
+
+        if (toFile.isDirectory()) {
+            toFile = new File(toFile, fromFile.getName());
+        }
+
+        if (toFile.exists()) {
+            if (!toFile.canWrite()) {
+                throw new IOException("FileCopy: "
+                        + "destination file is unwriteable: " + toFile.getName());
+            }
+            System.out.print("Overwrite existing file " + toFile.getName()
+                    + "? (Y/N): ");
+            System.out.flush();
+            BufferedReader in = new BufferedReader(new InputStreamReader(
+                    System.in));
+            String response = in.readLine();
+            if (!response.equals("Y") && !response.equals("y")) {
+                throw new IOException("FileCopy: "
+                        + "existing file was not overwritten.");
+            }
+        } else {
+            String parent = toFile.getParent();
+            if (parent == null) {
+                parent = System.getProperty("user.dir");
+            }
+            File dir = new File(parent);
+            if (!dir.exists()) {
+                throw new IOException("FileCopy: "
+                        + "destination directory doesn't exist: " + parent);
+            }
+            if (dir.isFile()) {
+                throw new IOException("FileCopy: "
+                        + "destination is not a directory: " + parent);
+            }
+            if (!dir.canWrite()) {
+                throw new IOException("FileCopy: "
+                        + "destination directory is unwriteable: " + parent);
+            }
+        }
+
+        FileInputStream from = null;
+        FileOutputStream to = null;
+        try {
+            from = new FileInputStream(fromFile);
+            to = new FileOutputStream(toFile);
+            byte[] buffer = new byte[4096];
+            int bytesRead;
+
+            while ((bytesRead = from.read(buffer)) != -1) {
+                to.write(buffer, 0, bytesRead); // write
+            }
+        } finally {
+            if (from != null) {
+                try {
+                    from.close();
+                } catch (IOException e) {
+                    ;
+                }
+            }
+            if (to != null) {
+                try {
+                    to.close();
+                } catch (IOException e) {
+                    ;
+                }
+            }
+        }
     }
 }

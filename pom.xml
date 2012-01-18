@@ -59,7 +59,7 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldedit</artifactId>
-            <version>4.8-SNAPSHOT</version>
+            <version>5.1</version>
         </dependency>
     
         <!-- Bukkit -->
@@ -210,8 +210,8 @@
                         <manifest>
                             <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
                             <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <!--<mainClass>com.laytonsmith.aliasengine.Main</mainClass>-->
-                            <mainClass>com.laytonsmith.aliasengine.MainSandbox</mainClass>
+                            <mainClass>com.laytonsmith.core.Main</mainClass>
+                            <!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
                         </manifest>
                         <manifestEntries>
                             <Class-Path>WorldEdit.jar CommandHelper/WorldEdit.jar lib/WorldEdit.jar ../lib/WorldEdit.jar ../WorldEdit.jar ../craftbukkit-0.0.1-SNAPSHOT.jar ../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
@@ -269,6 +269,7 @@
                                     <includes>
                                         <!-- Permissions Items -->
                                         <include>com/sk89q/bukkit/migration/**</include> 
+                                        <include>com/sk89q/wepif/**</include> 
                                         <include>com/sk89q/util/**</include>
                                         <include>com/sk89q/worldedit/Vector.*</include>
                                         <!-- Expression Parser -->

@@ -41,6 +41,23 @@ public class SerializedPersistance implements Persistance{
         storageLocation = database;
         this.user = user;
     }
+    
+    /**
+     * Unless you're the data manager, don't use this method.
+     * @return 
+     */
+    public HashMap<String, Serializable> rawData(){
+        return data;
+    }
+    
+    /**
+     * Unless you're the data manager, and you <em>really</em> want to clear
+     * out the entire database, don't use this method. You must manually call
+     * save after this, if you wish the changes to be written out to disk.
+     */
+    public void clearAllData(){
+        data = new HashMap<String, Serializable>();
+    }
 
     /**
      * Loads the database from disk. This is automatically called when setValue or getValue is called.
@@ -138,18 +155,17 @@ public class SerializedPersistance implements Persistance{
     private synchronized Object setValue(String key, Serializable value) {
         //defer loading until we actually try and use the data structure
         if (isLoaded == false) {
-            System.out.println("Loading values for " + user.getClass().getCanonicalName());
             try {
                 load();
             } catch (Exception ex) {
                 Logger.getLogger("Minecraft").log(Level.SEVERE, null, ex);
             }
         }
-        key = "plugin." + user.getClass().getCanonicalName() + "." + key;
         Serializable oldVal = data.get(key);
         if(value == null){
             data.remove(key);
         } else {
+            System.out.println("Putting in " + key);
             data.put(key, value);
         }
         return oldVal;

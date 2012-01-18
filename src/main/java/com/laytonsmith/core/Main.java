@@ -34,6 +34,10 @@ public class Main {
             if (args.length == 0) {
                 l.add("-help");
             }
+            if(l.contains("--manager")){
+                Manager.start();
+                System.exit(0);
+            }
             if (l.contains("-help") || l.contains("-h") || l.contains("--help") || l.contains("/?")) {
                 System.out.println("CommandHelper can be run as a standalone jar with the command:\n\n"
                         + "     java -jar CommandHelper.jar <options>\n\n"
@@ -122,7 +126,7 @@ public class Main {
         }
     }
     
-    private static PluginDescriptionFile loadSelf() throws InvalidPluginException, IOException, InvalidDescriptionException{
+    private static PluginDescriptionFile loadSelf() throws Exception{
         PluginDescriptionFile description = null;
         System.out.println(new File(".").getAbsolutePath());
         File file = new File("./target/commandhelper-3.1.2-ShadedBundle.jar");
