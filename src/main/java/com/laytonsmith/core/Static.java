@@ -12,18 +12,9 @@ import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.Preferences.Type;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.PureUtilities.rParser;
+import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCPlugin;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlugin;
 import com.laytonsmith.core.functions.Debug;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
@@ -384,20 +375,26 @@ public class Static {
                 .replaceAll("%m", minute).replaceAll("%s", second);
     }
 
-    public static WorldEditPlugin getWorldEditPlugin() {
+    public static WorldEditPlugin getWorldEditPlugin(int line_num, File file) {
+        if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
+            throw new ConfigRuntimeException("Trying to use WorldEdit on non-bukkit server.", ExceptionType.InvalidPluginException, line_num, file);
+        }
         if (CommandHelperPlugin.wep == null) {
             MCPlugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
-            if (pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin) {
-                CommandHelperPlugin.wep = (WorldEditPlugin) pwep;
+            if (pwep != null && pwep.isEnabled() && pwep.isInstanceOf(WorldEditPlugin.class) && pwep instanceof BukkitMCPlugin) {
+                CommandHelperPlugin.wep = (WorldEditPlugin) ((BukkitMCPlugin)pwep).getPlugin();
             }
         }
         return CommandHelperPlugin.wep;
     }
 
-    public static WorldGuardPlugin getWorldGuardPlugin() {
+    public static WorldGuardPlugin getWorldGuardPlugin(int line_num, File file) {
+        if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
+            throw new ConfigRuntimeException("Trying to use WorldGuard on non-bukkit server.", ExceptionType.InvalidPluginException, line_num, file);
+        }
         MCPlugin pwgp = getServer().getPluginManager().getPlugin("WorldGuard");
-        if (pwgp != null && pwgp.isEnabled() && pwgp instanceof WorldGuardPlugin) {
-            return (WorldGuardPlugin) pwgp;
+        if (pwgp != null && pwgp.isEnabled() && pwgp.isInstanceOf(WorldGuardPlugin.class) && pwgp instanceof BukkitMCPlugin) {
+            return (WorldGuardPlugin) ((BukkitMCPlugin)pwgp).getPlugin();
         }
         return null;
     }
