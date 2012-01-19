@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 
@@ -77,11 +78,11 @@ public class BukkitMCBlock implements MCBlock{
     }
 
     public MCSign getSign() {
-        return new BukkitMCSign((Sign)b);
+        return new BukkitMCSign((Sign)b.getState());
     }
 
     public boolean isSign() {
-        return (b instanceof Sign);
+        return (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN);
     }
     
     
