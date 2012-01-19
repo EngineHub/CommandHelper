@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.AliasCore;
@@ -104,7 +105,7 @@ public class Sandbox {
 
                     for (RegisteredListener l : ss) {
                         if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
-                            if(env.GetCommandSender() instanceof Player){
+                            if(env.GetCommandSender() instanceof MCPlayer){
                                 l.callEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)env.GetPlayer())._Player(), args[1].val()));
                             }
                             PluginCommand.class.getDeclaredMethods();
@@ -181,7 +182,7 @@ public class Sandbox {
             int qty = 1;
             MCItemStack is = null;
             boolean natural = false;
-            if (env.GetCommandSender() instanceof Player) {
+            if (env.GetCommandSender() instanceof MCPlayer) {
                 l = env.GetPlayer().getLocation();
             }
             if (args.length == 1) {
