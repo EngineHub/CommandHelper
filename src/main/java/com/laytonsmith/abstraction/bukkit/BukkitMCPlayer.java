@@ -179,8 +179,10 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
         switch(mode){
             case SURVIVAL:
                 p.setGameMode(GameMode.SURVIVAL);
+                break;
             case CREATIVE:
                 p.setGameMode(GameMode.CREATIVE);
+                break;
         }
     }
 
