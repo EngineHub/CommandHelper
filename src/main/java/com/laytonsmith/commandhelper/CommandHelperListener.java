@@ -18,6 +18,7 @@
  */
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
@@ -129,11 +130,14 @@ public class CommandHelperListener extends PlayerListener {
 //        if((Boolean)Static.getPreferences().getPreference("debug-mode")){
 //            System.out.println("CommandHelper: (>'.')> Recieved event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
 //        }
-        WorldGuardPlugin wgp = Static.getWorldGuardPlugin();
-        //This will cancel the command if the player isn't supposed to run it in this region
-        if(wgp != null){
-            WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
-            wgpl.onPlayerCommandPreprocess(event);
+        
+        if (Implementation.GetServerType() == Implementation.Type.BUKKIT) {
+            WorldGuardPlugin wgp = Static.getWorldGuardPlugin(0, null);
+            //This will cancel the command if the player isn't supposed to run it in this region
+            if(wgp != null){
+                WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);
+                wgpl.onPlayerCommandPreprocess(event);
+            }
         }
         String cmd = event.getMessage();        
         MCPlayer player = new BukkitMCPlayer(event.getPlayer());

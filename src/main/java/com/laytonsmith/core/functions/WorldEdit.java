@@ -24,6 +24,7 @@ import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionSelector;
+import com.sk89q.worldguard.protection.ApplicableRegionSet;
 
 import java.util.*;
 
@@ -94,7 +95,7 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin().getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
+            RegionSelector sel = Static.getWorldEditPlugin(line_num, f).getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
             if (!(sel instanceof CuboidRegionSelector)) {
                 throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
             }
@@ -157,7 +158,7 @@ public class WorldEdit {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin().getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
+            RegionSelector sel = Static.getWorldEditPlugin(line_num, f).getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
             if (!(sel instanceof CuboidRegionSelector)) {
                 throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
             }
@@ -241,7 +242,7 @@ public class WorldEdit {
                 float volume = -1;
                 World world = Bukkit.getServer().getWorld(worldName);
                 if (world == null) throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, line_num, f);
-                RegionManager mgr = Static.getWorldGuardPlugin().getGlobalRegionManager().get(world);
+                RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
                 ProtectedRegion region = mgr.getRegion(regionName);
                 if (region == null) throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, line_num, f);
                 
@@ -330,7 +331,7 @@ public class WorldEdit {
             Static.checkPlugin("WorldGuard", line_num, f);
             World world = Bukkit.getServer().getWorld(args[0].val());
             if (world == null) throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, line_num, f);
-            RegionManager mgr = Static.getWorldGuardPlugin().getGlobalRegionManager().get(world);
+            RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
             if (args[2] instanceof CArray) {
                 CArray arg = (CArray)args[2];
                 for (int i = 0; i < arg.size(); i++) {
@@ -383,12 +384,119 @@ public class WorldEdit {
             if (checkWorlds == null) {
                 checkWorlds = Bukkit.getServer().getWorlds();
             }
-            GlobalRegionManager mgr = Static.getWorldGuardPlugin().getGlobalRegionManager();
+            GlobalRegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager();
             for (World world : checkWorlds) {
                 for (String region : mgr.get(world).getRegions().keySet()) arr.push(new CString(region, line_num, f));
             }
             return arr;
             
+        }
+    }
+    
+        
+    @api public static class sk_current_regions extends SKFunction {
+        public String getName() {
+            return "sk_current_regions";
+        }
+        
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+        
+        public String docs() {
+            return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
+                    + " If region is found, an array of region names are returned, else null is returned";
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.PluginInternalException};
+        }
+        
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", line_num, f);
+            World world;
+            
+            MCPlayer m = null;
+            
+            if(env.GetCommandSender() instanceof Player){
+                m = env.GetPlayer();
+            }
+            if (args.length == 1) {
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+            }
+            
+            if (m == null) {
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
+            }
+            
+            world = Bukkit.getServer().getWorld(m.getWorld().getName());
+            
+            RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
+            Vector pt = new Vector(m.getLocation().getBlockX(), m.getLocation().getBlockY(), m.getLocation().getBlockZ());
+            ApplicableRegionSet set = mgr.getApplicableRegions(pt);
+            
+            CArray regions = new CArray(line_num, f);
+            
+            List<ProtectedRegion> sortedRegions = new ArrayList<ProtectedRegion>();
+            
+            for (ProtectedRegion r : set) {
+                boolean placed = false;
+                for (int i = 0; i < sortedRegions.size(); i++) {
+                    if (sortedRegions.get(i).volume() < r.volume()) {
+                        sortedRegions.add(i, r);
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    sortedRegions.add(r);
+                }
+            }
+            
+            for (ProtectedRegion region : sortedRegions) {
+                regions.push(new CString(region.getId(), line_num, f));
+            }
+            
+            if (regions.size() > 0) {
+                return regions;
+            }
+            
+            return new CNull(line_num, f);
+        }
+    }
+    
+    @api public static class sk_region_volume extends SKFunction {
+        public String getName() {
+            return "sk_region_volume";
+        }
+        
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+        
+        public String docs() {
+            return "int {region, world} Returns the volume of the given region in the given world.";
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        }
+        
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", line_num, f);
+            World world;
+            
+            world = Bukkit.getServer().getWorld(args[1].val());
+            
+            RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
+            
+            ProtectedRegion region = mgr.getRegion(args[0].val());
+            
+            if (region == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", args[0].val(), args[1].val()), ExceptionType.PluginInternalException, line_num, f);
+            }
+            
+            return new CInt(region.volume(), line_num, f);
         }
     }
 
