@@ -509,14 +509,22 @@ public class MScriptCompiler {
             script = new Script(null, null);
         }
         StringBuilder b = new StringBuilder();
+        Construct returnable = null;
         for (GenericTreeNode<Construct> gg : root.getChildren()) {
-            String ret = script.eval(gg, env).val();
+            Construct retc = script.eval(gg, env);
+            if(root.getNumberOfChildren() == 1){
+                returnable = retc;
+            }
+            String ret = retc.val();
             if (ret != null && !ret.trim().equals("")) {
                 b.append(ret).append(" ");
             }
         }
         if(done != null){
             done.done(b.toString().trim());
+        }
+        if(returnable != null){
+            return returnable;
         }
         return Static.resolveConstruct(b.toString().trim(), 0, null);
     }

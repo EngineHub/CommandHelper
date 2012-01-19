@@ -81,4 +81,9 @@ public interface Persistance {
      * Prints all of the stored values to the specified stream.
      */
     public void printValues(PrintStream out);
+    
+    /**
+     * Clears out all of the data from this persistance object
+     */
+    public void clearAllData();
 }

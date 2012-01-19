@@ -68,9 +68,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
         return (Construct) super.clone();
     }
 
-    public static String json_encode(Construct c, int line_num, File f) throws MarshalException{
-        return json_encode(c, false, line_num, f);
-    }
     /**
      * This function takes a Construct, and turns it into a JSON value. If the construct is
      * not one of the following, a MarshalException is thrown: CArray, CBoolean, CDouble, CInt, CNull, 
@@ -82,60 +79,27 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
      * <tr><td>number</td><td>CInt, CDouble, and it is decoded intelligently</td></tr>
      * <tr><td>boolean</td><td>CBoolean</td></tr>
      * <tr><td>null</td><td>CNull</td></tr>
-     * <tr><td>array</td><td>CArray</td></tr>
-     * <tr><td>object</td><td>A MarshalException is currently thrown, but this will eventually return a CArray</td></tr>
+     * <tr><td>array/object</td><td>CArray</td></tr>
      * </table>
      * @param c
      * @return 
      */
-//    public static String json_encode(Construct c, boolean raw) throws MarshalException {
-//        if (c instanceof CString || c instanceof Command) {
-//            if(raw){
-//                return JSONObject.escape(c.getValue());
-//            }
-//            return "\"" + JSONObject.escape(c.getValue()) + "\"";
-//        } else if (c instanceof CVoid) {
-//            if(raw){
-//                return JSONObject.escape(c.getValue());
-//            }
-//            return "\"\"";
-//        } else if (c instanceof CInt) {
-//            return Long.toString(((CInt) c).getInt());
-//        } else if (c instanceof CDouble) {
-//            return Double.toString(((CDouble) c).getDouble());
-//        } else if (c instanceof CBoolean) {
-//            if (((CBoolean) c).getBoolean()) {
-//                return "true";
-//            } else {
-//                return "false";
-//            }
-//        } else if (c instanceof CNull) {
-//            return "null";
-//        } else if (c instanceof CArray) {
-//            CArray ca = (CArray) c;
-//            if (!ca.inAssociativeMode()) {
-//                StringBuilder b = new StringBuilder();
-//                b.append("[");
-//                for (int i = 0; i < ca.size(); i++) {
-//                    if (i != 0) {
-//                        b.append(", ");
-//                    }
-//                    b.append(json_encode(ca.get(i, 0)));
-//                }
-//                b.append("]");
-//                return b.toString();
-//            } else {
-//                //We treat it like an object.
-//                SortedMap<String, String> map = new TreeMap<String, String>();
-//                for(Construct key : ca.keySet()){
-//                    map.put(json_encode(key, true), json_encode(ca.get(key, 0), true));
-//                }
-//                return JSONValue.toJSONString(map);
-//            }
-//        } else {
-//            throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
-//        }
-//    }
+    public static String json_encode(Construct c, int line_num, File f) throws MarshalException{
+        return json_encode(c, false, line_num, f);
+    }
+
+    /**
+     * Use the other one.
+     * @deprecated 
+     * @param c
+     * @param raw
+     * @param line_num
+     * @param f
+     * @return
+     * @throws MarshalException
+     * @deprecated
+     */
+    @Deprecated
     public static String json_encode(Construct c, boolean raw, int line_num, File f) throws MarshalException {
         return JSONValue.toJSONString(json_encode0(c, line_num, f));
     }
@@ -173,13 +137,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
         }
     }
     /**
-     * Takes a string and converts it into a 
+     * Takes a string and converts it into a Construct
      * @param s
      * @return 
      */
     public static Construct json_decode(String s, int line_num, File f) throws MarshalException {
         if (s.startsWith("{")) {
-            //Object, for now throw an exception
+            //Object
             JSONObject obj = (JSONObject) JSONValue.parse(s);
             CArray ca = new CArray(line_num, f);
             ca.forceAssociativeMode();

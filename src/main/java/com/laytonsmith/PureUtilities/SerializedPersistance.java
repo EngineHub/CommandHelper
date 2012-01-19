@@ -30,16 +30,21 @@ public class SerializedPersistance implements Persistance{
     private HashMap<String, Serializable> data = new HashMap<String, Serializable>();
     private boolean isLoaded = false;
     /**
-     * The storage location of the persistance database. Note that it is package private,
-     * so it can be changed.
+     * The storage location of the persistance database. 
      */
-    File storageLocation;
-
-    Object user;
+    private File storageLocation;
     
+    /**
+     * @deprecated 
+     * @param database
+     * @param user 
+     */
     public SerializedPersistance(File database, Object user){
         storageLocation = database;
-        this.user = user;
+    }
+    
+    public SerializedPersistance(File database){
+        storageLocation = database;
     }
     
     /**
@@ -65,37 +70,15 @@ public class SerializedPersistance implements Persistance{
      */
     public synchronized void load() throws Exception {
         try {
-            FileInputStream fis = null;
-            ObjectInputStream in = null;
-            fis = new FileInputStream(storageLocation);
-            in = new ObjectInputStream(fis);
-            HashMap<String, Serializable> tempData = (HashMap<String, Serializable>) in.readObject();
-            String[] myNamespace;
-            if(user != null){
-                myNamespace = ("plugin." + user.getClass().getCanonicalName()).split("\\.");
-            } else {
-                //We're running from the command line
-                data = tempData;
-                return;
-            }
-            Iterator i = tempData.entrySet().iterator();
-            while (i.hasNext()) {
-                String[] key = ((Map.Entry)i.next()).getKey().toString().split("\\.");
-                boolean match = true;
-                for(int j = 0; j < myNamespace.length; j++){
-                    if(key.length > myNamespace.length){
-                        if(!key[j].equals(myNamespace[j])){
-                            match = false;
-                            break;
-                        }
-                    }
-                }
-                if(match){
-                    data.put(getNamespace(key), tempData.get(getNamespace(key)));
-                }
-            }
-            in.close();
-            isLoaded = true;
+            if(!isLoaded){
+                FileInputStream fis = null;
+                ObjectInputStream in = null;
+                fis = new FileInputStream(storageLocation);
+                in = new ObjectInputStream(fis);
+                data = (HashMap<String, Serializable>) in.readObject();
+                in.close();
+                isLoaded = true;
+            }            
         } catch (FileNotFoundException ex){
             //ignore this one
         } catch (Exception ex) {
@@ -108,31 +91,7 @@ public class SerializedPersistance implements Persistance{
      * @throws IOException
      */
     public synchronized void save() throws Exception {
-        try {
-            HashMap<String, Serializable> tempData;
-            try{
-                FileInputStream fis = null;
-                ObjectInputStream in = null;
-                fis = new FileInputStream(storageLocation);
-                in = new ObjectInputStream(fis);
-                tempData = (HashMap<String, Serializable>) in.readObject();
-            } catch(FileNotFoundException ex){
-                tempData = new HashMap<String, Serializable>();
-            }
-            Iterator i = data.entrySet().iterator();
-            ArrayList<String> toRemove = new ArrayList<String>();
-            while (i.hasNext()) {
-                String key = ((Map.Entry)i.next()).getKey().toString();
-                if(data.get(key) == null){
-                    tempData.remove(key);
-                    toRemove.add(key);
-                } else{
-                    tempData.put(key, data.get(key));
-                }
-            }
-            for(String s : toRemove){
-                data.remove(s);
-            }
+        try {            
             FileOutputStream fos = null;
             ObjectOutputStream out = null;
             storageLocation.getParentFile().mkdirs();
@@ -140,9 +99,8 @@ public class SerializedPersistance implements Persistance{
                 storageLocation.createNewFile();
             fos = new FileOutputStream(storageLocation);
             out = new ObjectOutputStream(fos);
-            out.writeObject(tempData);
+            out.writeObject(data);
             out.close();
-            System.out.println("Persistance saved into " + this.hashCode());
         } catch (Exception ex) {
             throw ex;
         }
@@ -165,7 +123,6 @@ public class SerializedPersistance implements Persistance{
         if(value == null){
             data.remove(key);
         } else {
-            System.out.println("Putting in " + key);
             data.put(key, value);
         }
         return oldVal;
@@ -175,14 +132,12 @@ public class SerializedPersistance implements Persistance{
     private synchronized Object getValue(String key) {
         //defer loading until we actually try and use the data structure
         if (isLoaded == false) {
-            System.out.println("Loading values for " + user.getClass().getCanonicalName());
             try {
                 load();
             } catch (Exception ex) {
                 Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        key = "plugin." + user.getClass().getCanonicalName() + "." + key;
         if(data == null){
             return null;
         }
@@ -228,7 +183,6 @@ public class SerializedPersistance implements Persistance{
      */
     public synchronized boolean isKeySet(String[] key) {
         String k = getNamespace(key);
-        k = "plugin." + user.getClass().getCanonicalName() + "." + k;
         return data.containsKey(k);
     }
 
@@ -242,7 +196,6 @@ public class SerializedPersistance implements Persistance{
      */
     public synchronized boolean isNamespaceSet(String[] partialKey) {
         String m = getNamespace(partialKey);
-        m = "plugin." + user.getClass().getCanonicalName() + "." + m;
         partialKey = m.split("\\.");
         Iterator i = data.entrySet().iterator();
         while (i.hasNext()) {
@@ -275,7 +228,6 @@ public class SerializedPersistance implements Persistance{
 
         ArrayList<Map.Entry> matches = new ArrayList<Map.Entry>();
         String m = getNamespace(partialKey);
-        m = "plugin." + user.getClass().getCanonicalName() + "." + m;
         partialKey = m.split("\\.");
         if(!isLoaded){
             try {

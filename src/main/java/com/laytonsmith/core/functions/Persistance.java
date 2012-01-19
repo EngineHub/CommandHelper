@@ -76,12 +76,12 @@ public class Persistance {
                             ExceptionType.FormatException, line_num, f);
                 }
             }
-            Static.getPersistance().setValue(new String[]{"commandhelper", "function", "storage", key}, value);
-            Static.getPersistance().setValue(new String[]{}, null);
+            Static.getPersistance().setValue(new String[]{"storage", key}, value);
             try {
-                com.laytonsmith.core.Static.getPersistance().save();
+                Static.getPersistance().save();
             } catch (Exception ex) {
                 Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
+                throw new ConfigRuntimeException(ex.getMessage(), null, line_num, f, ex);
             }
             return new CVoid(line_num, f);
         }
@@ -130,7 +130,7 @@ public class Persistance {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
             Object o;
             try {
-                Object obj = Static.getPersistance().getValue(new String[]{"commandhelper", "function", "storage", args[0].val()});
+                Object obj = Static.getPersistance().getValue(new String[]{"storage", args[0].val()});
                 if(obj == null){
                     return new CNull(line_num, f);
                 }
@@ -188,7 +188,7 @@ public class Persistance {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(Static.getPersistance().isKeySet(new String[]{"commandhelper", "function", "storage", args[0].val()}), line_num, f);
+            return new CBoolean(Static.getPersistance().isKeySet(new String[]{"storage", args[0].val()}), line_num, f);
         }
         
     }
@@ -228,7 +228,7 @@ public class Persistance {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Static.getPersistance().setValue(new String[]{"commandhelper", "function", "storage", args[0].val()}, null);
+            Static.getPersistance().setValue(new String[]{"storage", args[0].val()}, null);
             return new CVoid(line_num, f);
         }
         
