@@ -10,4 +10,5 @@ package com.laytonsmith.abstraction;
  */
 public interface MCPlugin {
     public boolean isEnabled();
+    public boolean isInstanceOf(Class c);
 }

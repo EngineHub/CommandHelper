@@ -11,7 +11,7 @@ import org.bukkit.plugin.Plugin;
  *
  * @author layton
  */
-class BukkitMCPlugin implements MCPlugin {
+public class BukkitMCPlugin implements MCPlugin {
 
     Plugin p;
     public BukkitMCPlugin(Plugin plugin) {
@@ -20,6 +20,18 @@ class BukkitMCPlugin implements MCPlugin {
 
     public boolean isEnabled() {
         return p.isEnabled();
+    }
+    
+    public boolean isInstanceOf(Class c) {
+        if (c.isInstance(p)) {
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public Plugin getPlugin() {
+        return p;
     }
     
 }
