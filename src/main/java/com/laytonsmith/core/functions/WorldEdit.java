@@ -75,7 +75,7 @@ public class WorldEdit {
             boolean setter = false;
             Static.checkPlugin("WorldEdit", line_num, f);
             
-            if(env.GetCommandSender() instanceof Player){
+            if(env.GetCommandSender() instanceof MCPlayer){
                 m = env.GetPlayer();
             }
             if(args.length == 2){
@@ -138,7 +138,7 @@ public class WorldEdit {
             boolean setter = false;
             Static.checkPlugin("WorldEdit", line_num, f);
 
-            if (env.GetCommandSender() instanceof Player) {
+            if (env.GetCommandSender() instanceof MCPlayer) {
                 m = env.GetPlayer();
             }
             if (args.length == 2){
@@ -418,7 +418,7 @@ public class WorldEdit {
             
             MCPlayer m = null;
             
-            if(env.GetCommandSender() instanceof Player){
+            if(env.GetCommandSender() instanceof MCPlayer){
                 m = env.GetPlayer();
             }
             if (args.length == 1) {
