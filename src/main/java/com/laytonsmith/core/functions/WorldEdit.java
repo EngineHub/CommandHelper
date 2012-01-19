@@ -394,9 +394,9 @@ public class WorldEdit {
     }
     
         
-    @api public static class sk_current_region extends SKFunction {
+    @api public static class sk_current_regions extends SKFunction {
         public String getName() {
-            return "sk_current_region";
+            return "sk_current_regions";
         }
         
         public Integer[] numArgs() {
@@ -404,8 +404,8 @@ public class WorldEdit {
         }
         
         public String docs() {
-            return "mixed {[player]} Returns the region that player is in. If no player specified, then the current player is used."
-                    + " If a region is found, the name of the region is returned, else null if returned";
+            return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
+                    + " If region is found, an array of region names are returned, else null is returned";
         }
         
         public ExceptionType[] thrown() {
@@ -430,35 +430,73 @@ public class WorldEdit {
             }
             
             world = Bukkit.getServer().getWorld(m.getWorld().getName());
-            if (world == null) {
-                throw new ConfigRuntimeException(this.getName() + " world is null.", ExceptionType.PluginInternalException, line_num, f);
-            }
-            
-            if (Static.getWorldGuardPlugin(line_num, f) == null) {
-                throw new ConfigRuntimeException(this.getName() + " worldguard is null.", ExceptionType.PluginInternalException, line_num, f);
-            }
-            
-            if (Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager() == null) {
-                throw new ConfigRuntimeException(this.getName() + " worldguard grm is null.", ExceptionType.PluginInternalException, line_num, f);
-            }
             
             RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
             Vector pt = new Vector(m.getLocation().getBlockX(), m.getLocation().getBlockY(), m.getLocation().getBlockZ());
             ApplicableRegionSet set = mgr.getApplicableRegions(pt);
             
-            ProtectedRegion r = null;
+            CArray regions = new CArray(line_num, f);
             
-            for (ProtectedRegion region : set) {
-                if ( r == null || r.volume() > region.volume() ) {
-                    r = region;
+            List<ProtectedRegion> sortedRegions = new ArrayList<ProtectedRegion>();
+            
+            for (ProtectedRegion r : set) {
+                boolean placed = false;
+                for (int i = 0; i < sortedRegions.size(); i++) {
+                    if (sortedRegions.get(i).volume() < r.volume()) {
+                        sortedRegions.add(i, r);
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    sortedRegions.add(r);
                 }
             }
             
-            if (r != null) {
-                return new CString(r.getId(), line_num, f);
+            for (ProtectedRegion region : sortedRegions) {
+                regions.push(new CString(region.getId(), line_num, f));
+            }
+            
+            if (regions.size() > 0) {
+                return regions;
             }
             
             return new CNull(line_num, f);
+        }
+    }
+    
+    @api public static class sk_region_volume extends SKFunction {
+        public String getName() {
+            return "sk_region_volume";
+        }
+        
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+        
+        public String docs() {
+            return "int {region, world} Returns the volume of the given region in the given world.";
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        }
+        
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", line_num, f);
+            World world;
+            
+            world = Bukkit.getServer().getWorld(args[1].val());
+            
+            RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
+            
+            ProtectedRegion region = mgr.getRegion(args[0].val());
+            
+            if (region == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", args[0].val(), args[1].val()), ExceptionType.PluginInternalException, line_num, f);
+            }
+            
+            return new CInt(region.volume(), line_num, f);
         }
     }
 
