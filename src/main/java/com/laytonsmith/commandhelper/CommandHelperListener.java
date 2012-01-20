@@ -128,7 +128,7 @@ public class CommandHelperListener extends PlayerListener {
     @Override
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
 //        if((Boolean)Static.getPreferences().getPreference("debug-mode")){
-//            System.out.println("CommandHelper: (>'.')> Recieved event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
+//            System.out.println("CommandHelper: (>'.')> Received event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
 //        }
         
         if (Implementation.GetServerType() == Implementation.Type.BUKKIT) {

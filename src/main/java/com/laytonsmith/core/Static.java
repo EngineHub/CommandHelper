@@ -69,7 +69,7 @@ public class Static {
                         ExceptionType.CastException, c.getLineNum(), c.getFile());
             }
         } else {
-            throw new ConfigRuntimeException("Expecting a number, but recieved " + c.val() + " instead",
+            throw new ConfigRuntimeException("Expecting a number, but received " + c.val() + " instead",
                     ExceptionType.CastException, c.getLineNum(), c.getFile());
         }
         return d;
@@ -84,7 +84,7 @@ public class Static {
         try {
             return getNumber(c);
         } catch (ConfigRuntimeException e) {
-            throw new ConfigRuntimeException("Expecting a double, but recieved " + c.val() + " instead",
+            throw new ConfigRuntimeException("Expecting a double, but received " + c.val() + " instead",
                     ExceptionType.CastException, c.getLineNum(), c.getFile());
         }
     }
@@ -106,7 +106,7 @@ public class Static {
             try {
                 i = Integer.parseInt(c.val());
             } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Expecting an integer, but recieved " + c.val() + " instead",
+                throw new ConfigRuntimeException("Expecting an integer, but received " + c.val() + " instead",
                         ExceptionType.CastException, c.getLineNum(), c.getFile());
             }
         }
