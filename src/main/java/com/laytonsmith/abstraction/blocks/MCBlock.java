@@ -33,4 +33,5 @@ public interface MCBlock {
     public MCSign getSign();
 
     public boolean isSign();
+    public boolean isNull();
 }

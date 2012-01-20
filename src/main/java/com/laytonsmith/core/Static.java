@@ -590,7 +590,7 @@ public class Static {
     }
 
     public static String ParseItemNotation(MCBlock b) {
-        if (b == null) {
+        if (b == null || b.isNull()) {
             return "0";
         }
         return b.getTypeId() + (b.getData() == 0 ? "" : ":" + Byte.toString(b.getData()));

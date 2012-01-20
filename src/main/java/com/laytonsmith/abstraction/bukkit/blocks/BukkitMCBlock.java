@@ -84,6 +84,10 @@ public class BukkitMCBlock implements MCBlock{
     public boolean isSign() {
         return (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN);
     }
+
+    public boolean isNull() {
+        return b == null;
+    }
     
     
 }
