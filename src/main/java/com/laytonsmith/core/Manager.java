@@ -9,14 +9,16 @@ import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import java.awt.Color;
+//import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.fusesource.jansi.AnsiConsole;
+
+import static org.fusesource.jansi.Ansi.*;
+import static org.fusesource.jansi.Ansi.Color.*;
 
 /**
  *
@@ -25,11 +27,13 @@ import java.util.logging.Logger;
 public class Manager {
 
     private static Scanner scanner;
-    private static Persistance currentDB = GetDB();
 
     public static void start() {
-        scanner = new Scanner(System.in);
         cls();
+        AnsiConsole.systemInstall();
+        pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
+        scanner = new Scanner(System.in);
+        
         pl("Starting the Data Manager...");
         try {
             MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex("player()", null)), new Env(), null, null);
@@ -243,7 +247,7 @@ public class Manager {
     
     public static void print() {
         Map data = null;
-        if (currentDB instanceof SerializedPersistance) {
+        if (GetDB() instanceof SerializedPersistance) {
             File db = new File("CommandHelper/persistance.ser");
             if (!db.exists()) {
                 pl("Looks like you haven't used your persistance file yet.");
@@ -351,6 +355,7 @@ public class Manager {
     
     public static String prompt(){
         p(">" + magenta);
+        System.out.flush();
         String ret = scanner.nextLine();
         p(white);
         return ret;
@@ -413,7 +418,8 @@ public class Manager {
     }
 
     private static CharSequence color(Color c) {
-        if (system.equals(sys.WINDOWS)) {
+        return ansi().fg(c).toString();
+        /*if (system.equals(sys.WINDOWS)) {
             return "";
         }
 
@@ -435,6 +441,6 @@ public class Manager {
         } else if (c.equals(Color.WHITE)) {
             color = "37";
         }
-        return "\033[" + color + "m";
+        return "\033[" + color + "m";*/
     }
 }

@@ -43,6 +43,8 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.core.Env;
+import com.laytonsmith.core.MScriptCompiler;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -99,6 +101,7 @@ public class CommandHelperPlugin extends JavaPlugin {
      * Called on plugin enable.
      */
     public void onEnable() {
+        System.out.println("\n\n" + Static.Logo());
         self = this;
         myServer = StaticLayer.GetServer();
         persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), this);
@@ -255,7 +258,7 @@ public class CommandHelperPlugin extends JavaPlugin {
                 try {
                     User u = new User(player, persist);
                     //AliasConfig uac = new AliasConfig(alias, u, perms);
-                    //MScriptCompiler.compile(MScriptCompiler.preprocess(MScriptCompiler.lex(alias)));
+                    MScriptCompiler.compile(MScriptCompiler.lex(alias, null));
                     //TODO: Finish this
                     int id = u.addAlias(alias);
                     if(id > -1){

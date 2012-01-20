@@ -38,14 +38,14 @@
         
         <repository>
             <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/artifactory/repo</url>
+            <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
         
         <repository>
             <id>bukkit-maven</id>
             <url>http://ci.bukkit.org/plugin/repository/project/dev-Bukkit/LastSuccessful/repository/</url>
             <snapshots>
-                <enabled>true</enabled>
+                <enabled>false</enabled>
             </snapshots>
         </repository>
         <repository>
@@ -135,6 +135,12 @@
             <groupId>log4j</groupId>
             <artifactId>log4j</artifactId>
             <version>1.2.16</version>
+            <scope>compile</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.fusesource.jansi</groupId>
+            <artifactId>jansi</artifactId>
+            <version>1.7</version>
             <scope>compile</scope>
         </dependency>
         
@@ -261,6 +267,7 @@
                                     <include>com.nijikokun:register:jar:*</include>
                                     <include>org.perf4j:perf4j:jar:*</include>
                                     <include>log4j:log4j:jar:*</include>
+                                    <include>org.fusesource.jansi:jansi:jar:*</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -297,6 +304,13 @@
                                 <!-- Register -->
                                 <filter>
                                     <artifact>com.nijikokun:register:jar:*</artifact>
+                                    <includes>
+                                        <include>**</include>
+                                    </includes>
+                                </filter>
+                                
+                                <filter>
+                                    <artifact>org.fusesource.jansi:jansi:jar:*</artifact>
                                     <includes>
                                         <include>**</include>
                                     </includes>

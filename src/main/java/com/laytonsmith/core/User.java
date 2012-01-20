@@ -37,7 +37,6 @@ public class User {
                 String[] x = e.getKey().toString().split("\\.");
                 Integer thisX = Integer.parseInt(x[x.length - 1]);
                 nextValue = Math.max(thisX + 1, nextValue + 1);
-                System.out.println("Next Value is: " + nextValue);
             }
             persist.setValue(new String[]{player.getName(), "aliases", nextValue.toString()}, alias);
             persist.save();

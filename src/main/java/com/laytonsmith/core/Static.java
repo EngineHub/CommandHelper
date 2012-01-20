@@ -31,6 +31,8 @@ import java.io.IOException;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.logging.Level;
+import org.fusesource.jansi.Ansi;
+import org.fusesource.jansi.AnsiConsole;
 
 
 /**
@@ -819,5 +821,23 @@ public class Static {
             perm = true;
         }
         return perm;
+    }
+    
+    public static String Logo(){
+        String logo = Installer.parseISToString(Static.class.getResourceAsStream("/mainlogo"));
+        AnsiConsole.systemInstall();
+        logo = logo.replaceAll(" ", Ansi.ansi().bg(Ansi.Color.BLACK).a(" ").toString());
+        logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.RED).fg(Ansi.Color.RED).a("_").toString());
+        logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
+        return logo;
+    }
+    
+    public static String DataManagerLogo(){
+        String logo = Installer.parseISToString(Static.class.getResourceAsStream("/datamanagerlogo"));
+        AnsiConsole.systemInstall();
+        logo = logo.replaceAll(" ", Ansi.ansi().bg(Ansi.Color.BLACK).a(" ").toString());
+        logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.CYAN).fg(Ansi.Color.CYAN).a("_").toString());
+        logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
+        return logo;
     }
 }
