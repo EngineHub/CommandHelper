@@ -4,7 +4,9 @@
  */
 package com.laytonsmith.core;
 
+import com.laytonsmith.datamanager.Manager;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
+import com.laytonsmith.datamanager.Interpreter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -36,6 +38,10 @@ public class Main {
             }
             if(l.contains("--manager")){
                 Manager.start();
+                System.exit(0);
+            }
+            if(l.contains("--interpreter")){
+                Interpreter.start();
                 System.exit(0);
             }
             if (l.contains("-help") || l.contains("-h") || l.contains("--help") || l.contains("/?")) {

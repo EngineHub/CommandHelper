@@ -31,10 +31,16 @@ public class BukkitMCItemStack implements MCItemStack{
     }
     
     public short getDurability(){
+        if(is == null){
+            return 0;
+        }
         return is.getDurability();
     }
     
     public int getTypeId(){
+        if(is == null){
+            return 0;
+        }
         return is.getTypeId();
     }
 

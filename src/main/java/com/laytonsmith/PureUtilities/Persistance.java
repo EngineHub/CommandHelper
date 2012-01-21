@@ -83,7 +83,8 @@ public interface Persistance {
     public void printValues(PrintStream out);
     
     /**
-     * Clears out all of the data from this persistance object
+     * Clears out all of the data from this persistance object. For the love
+     * of God, don't call this from anywhere but the data manager!
      */
     public void clearAllData();
 }

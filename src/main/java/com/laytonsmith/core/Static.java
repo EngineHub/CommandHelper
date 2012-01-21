@@ -496,6 +496,8 @@ public class Static {
                 } else {
                     if (m != null) {
                         m.sendMessage(line);
+                    } else {
+                        System.out.println(line);
                     }
                 }
             }
@@ -515,6 +517,8 @@ public class Static {
                 } else {
                     if (m != null) {
                         m.sendMessage(line);
+                    } else {
+                        System.out.println(line);
                     }
                 }
             }
@@ -779,6 +783,10 @@ public class Static {
     }
 
     public static boolean hasCHPermission(String functionName, Env env) {
+        //The * label completely overrides everything
+        if("*".equals(env.GetLabel())){
+            return true;
+        }
         boolean perm = false;
         PermissionsResolverManager perms = Static.getPermissionsResolverManager();
         if (perms != null) {

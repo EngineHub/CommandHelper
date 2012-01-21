@@ -2,11 +2,14 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.core;
+package com.laytonsmith.datamanager;
 
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
+import com.laytonsmith.core.Env;
+import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 //import java.awt.Color;
@@ -15,6 +18,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.fusesource.jansi.AnsiConsole;
 
 import static org.fusesource.jansi.Ansi.*;
@@ -46,12 +51,12 @@ public class Manager {
             pl(yellow + "What function would you like to run? Type \"help\" for a full list of options.");
             String input = prompt();
             pl();
-            if (input.equalsIgnoreCase("help")) {
-                help();
+            if (input.toLowerCase().startsWith("help")) {
+                help(input.replaceFirst("help ?", "").toLowerCase().split(" "));
             } else if (input.equalsIgnoreCase("refactor")) {
                 pl("refactor - That feature isn't implemented yet :(");
-            } else if (input.equalsIgnoreCase("print")) {
-                print();
+            } else if (input.toLowerCase().startsWith("print")) {                
+                print(input.replaceFirst("print ?", "").toLowerCase().split(" "));
             } else if (input.equalsIgnoreCase("cleardb")) {
                 cleardb();
             } else if(input.equalsIgnoreCase("import")){                
@@ -62,12 +67,14 @@ public class Manager {
                 edit();
             } else if (input.equalsIgnoreCase("upgrade")) {
                 upgrade();
+            } else if(input.equalsIgnoreCase("interpreter")){
+                Interpreter.start();
             } else if (input.equalsIgnoreCase("exit")) {
                 pl("Thanks for using the " + cyan + "Data Manager!");
                 finished = true;
             } else {
                 pl("I'm sorry, that's not a valid command. Here's the help:");
-                help();
+                help(new String[]{});
             }
         } while (finished == false);
     }
@@ -142,18 +149,59 @@ public class Manager {
         }
     }
     
-    public static void help(){
-        pl("Currently, your options are:\n"
-                        + "\t" + blue + "refactor" + white + " - Options for refactoring your persisted data from one backend to another\n"
-                        + "\t" + green + "upgrade" + white + " - Runs upgrade scripts on your persisted data\n"
-                        + "\t" + green + "print" + white + " - Prints out the information from your persisted data\n"
-                        + "\t" + green + "cleardb" + white + " - Clears out your database of persisted data\n"
-                        + "\t" + blue + "import" + white + " - Imports a text based file into the persistance database\n"
-                        + "\t" + blue + "export" + white + " - Exports your persisted data to a text based file\n"
-                        + "\t" + green + "edit" + white + " - Allows you to edit individual fields\n"
-                        + "\n\t" + red + "exit" + white + " - Quits the Data Manager\n");
-        if(system.equals(sys.UNIX)){
-            pl(blue + "Blue" + white + " entries are not yet working.");
+    public static void help(String [] args){
+        if(args[0].equals("")){
+            pl("Currently, your options are:\n"
+                            + "\t" + blue + "refactor" + white + " - Options for refactoring your persisted data from one backend to another\n"
+                            + "\t" + green + "upgrade" + white + " - Runs upgrade scripts on your persisted data\n"
+                            + "\t" + green + "print" + white + " - Prints out the information from your persisted data\n"
+                            + "\t" + green + "cleardb" + white + " - Clears out your database of persisted data\n"
+                            + "\t" + blue + "import" + white + " - Imports a text based file into the persistance database\n"
+                            + "\t" + blue + "export" + white + " - Exports your persisted data to a text based file\n"
+                            + "\t" + green + "edit" + white + " - Allows you to edit individual fields\n"
+                            + "\t" + green + "interpreter" + white + " - Command Line Interpreter mode. Most minecraft related functions don't work.\n"
+                            + "\n\t" + red + "exit" + white + " - Quits the Data Manager\n");
+            
+            pl("Type " + magenta + "help <command>" + white + " for more details about a specific command");
+            if(system.equals(sys.UNIX)){
+                pl(blue + "Blue" + white + " entries are not yet working.");
+            }
+        } else {
+            if(args[0].equals("refactor")){
+                pl("Not implemented yet");
+            } else if(args[0].equals("upgrade")){
+                pl("Converts any old formatted data into the new format. Any data that doesn't explicitely"
+                        + " match the old format is not touched.");
+            } else if(args[0].equals("print")){
+                pl("Prints out the information in your persistance file. Entries may be narrowed down by"
+                        + " specifying the namespace (for instance " + magenta + "print user.username" + white
+                        + " will only show that particular users's aliases.) This is namespace based, so you"
+                        + " must provide the entire namespace that your are trying to narrow down."
+                        + "(" + magenta + "print storage" + white + " is valid, but " + magenta + "print stor"
+                        + white + " is not)");
+            } else if(args[0].equals("cleardb")){
+                pl("Wipes your database clean of CommandHelper's persistance entries, but not other data. This"
+                        + " includes any data that CommandHelper would have inserted into the database, or data"
+                        + " that CommandHelper otherwise knows how to use. If using SerializedPersistance, this"
+                        + " means the entire file. For other data backends, this may vary slightly, for instance,"
+                        + " an SQL backend would only have the CH specific tables truncated, but the rest of the"
+                        + " database would remain untouched.");
+            } else if(args[0].equals("import")){
+                pl("Not implemented yet");
+            } else if(args[0].equals("export")){
+                pl("Not implemented yet");
+            } else if(args[0].equals("edit")){
+                pl("Allows you to manually edit the values in the database. You have the option to add or edit an existing"
+                        + " value, delete a single value, or view the value of an individual key.");
+            } else if(args[0].equals("exit")){
+                pl("Exits the data manager");
+            } else if(args[0].equals("interpreter")){
+                pl("Generally speaking, works the same as the in game interpreter mode, but none"
+                        + " of the minecraft related functions will work. You should not"
+                        + " run this while the server is operational.");
+            } else {
+                pl("That's not a recognized command: '" + args[0] + "'");
+            }
         }
     }
 
@@ -245,7 +293,7 @@ public class Manager {
         }
     }
     
-    public static void print() {
+    public static void print(String [] args) {
         Map data = null;
         if (GetDB() instanceof SerializedPersistance) {
             File db = new File("CommandHelper/persistance.ser");
@@ -263,9 +311,18 @@ public class Manager {
         }
         pl();
         if (data != null) {
+            int count = 0;
             for (Object key : data.keySet()) {
+                if(!args[0].equals("")){
+                    //We are splitting by namespace
+                    if(!key.toString().toLowerCase().startsWith(args[0] + ".")){
+                        continue;
+                    }
+                }
                 pl(cyan + key.toString() + ": " + white + data.get(key).toString());
+                count++;
             }
+            pl(blue + count + " items found");
         }
     }
 
@@ -314,11 +371,30 @@ public class Manager {
                         if(c == ((double)counter / 20.0)){
                             p(color(colors[c % 6]) + ".");
                         }
-                        if (key.contains("plugin.com.sk89q.commandhelper.CommandHelperPlugin.commandhelper.function.storage.")) {
+                        if (key.matches("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.commandhelper\\.function\\.storage\\..*")) {
                             //We're in version 1, and we need to upgrade to version 2
                             String newKey = "storage." + key.replaceFirst("plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.commandhelper\\.function\\.storage\\.", "");
                             sp.rawData().put(newKey, data.get(key));
                             changes++;
+                        } else if(key.matches("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\..*?\\.aliases\\.\\d+$")){
+                            //Pull out the parts we need
+                            Pattern p = Pattern.compile("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.(.*?)\\.aliases\\.(\\d+)$");
+                            Matcher m = p.matcher(key);
+                            String newKey = null;
+                            if(m.find()){
+                                String username = m.group(1);
+                                String id = m.group(2);
+                                newKey = "user." + username + ".aliases." + id;
+                            }
+                            //If something went wrong, just put the old one back in
+                            if(newKey == null){
+                                sp.rawData().put(key, data.get(key));
+                            } else {
+                                sp.rawData().put(newKey, data.get(key));
+                                changes++;
+                            }
+                        } else {
+                            sp.rawData().put(key, data.get(key));
                         }
                     }
                     try {
@@ -347,6 +423,7 @@ public class Manager {
 
     public static void p(CharSequence c) {
         System.out.print(c);
+        System.out.flush();
     }
 
     public static void pl() {

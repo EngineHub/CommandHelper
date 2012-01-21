@@ -38,7 +38,7 @@ public class User {
                 Integer thisX = Integer.parseInt(x[x.length - 1]);
                 nextValue = Math.max(thisX + 1, nextValue + 1);
             }
-            persist.setValue(new String[]{player.getName(), "aliases", nextValue.toString()}, alias);
+            persist.setValue(new String[]{"user", player.getName(), "aliases", nextValue.toString()}, alias);
             persist.save();
             return nextValue;
         } catch (Exception ex) {
@@ -72,7 +72,7 @@ public class User {
     }
 
     public ArrayList<String> getAliasesAsArray(){
-        ArrayList<Map.Entry> al = persist.getNamespaceValues(new String[]{player.getName(), "aliases"});
+        ArrayList<Map.Entry> al = persist.getNamespaceValues(new String[]{"user", player.getName(), "aliases"});
         StringBuilder b = new StringBuilder();
         ArrayList<String> commands = new ArrayList<String>();
         for(Map.Entry e : al){
@@ -85,12 +85,12 @@ public class User {
     }
 
     public int getTotalAliases(){
-        return persist.getNamespaceValues(new String[]{player.getName(), "aliases"}).size();
+        return persist.getNamespaceValues(new String[]{"user", player.getName(), "aliases"}).size();
     }
 
     public void removeAlias(int id){
         try {            
-            persist.setValue(new String[]{player.getName(), "aliases", Integer.toString(id)}, null);
+            persist.setValue(new String[]{"user", player.getName(), "aliases", Integer.toString(id)}, null);
             persist.save();
         } catch (Exception ex) {
             Logger.getLogger(User.class.getName()).log(Level.SEVERE, null, ex);

@@ -13,9 +13,13 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.exceptions.MarshalException;
 import java.io.File;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -40,7 +44,8 @@ public class Persistance {
 
         public String docs() {
             return "void {key, value} Allows you to store a value, which can then be retrieved later. key must be a string containing"
-                    + " only letters, numbers, underscores.";
+                    + " only letters, numbers, underscores. Periods may also be used, but they form a namespace, and have special meaning."
+                    + " (See get_values())";
         }
         
         public ExceptionType[] thrown(){
@@ -69,9 +74,13 @@ public class Persistance {
             } catch(MarshalException e){
                 throw new ConfigRuntimeException(e.getMessage(), line_num, f);
             }
+            char pc = '.';
             for(int i = 0; i < key.length(); i++){
                 Character c = key.charAt(i);
-                if(c != '_' && !Character.isLetterOrDigit(c)){
+                if((i == 0 || i == key.length() - 1 || pc == '.') && c == '.'){
+                    throw new ConfigRuntimeException("Periods may only be used as seperators between namespaces.", ExceptionType.FormatException, line_num, f);
+                }
+                if(c != '_' && c != '.' && !Character.isLetterOrDigit(c)){
                     throw new ConfigRuntimeException("Param 1 in store_value must only contain letters, digits, or underscores.",
                             ExceptionType.FormatException, line_num, f);
                 }
@@ -151,7 +160,64 @@ public class Persistance {
         
     }
     
-    public static class has_value implements Function{
+    @api public static class get_values implements Function{
+
+        public String getName() {
+            return "get_values";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "array {name.space} Returns all the values in a particular namespace"
+                    + " as an associative"
+                    + " array(key: value, key: value). Only full namespace matches are considered,"
+                    + " so if the key 'users.data.username.hi' existed in the database, and you tried"
+                    + " get_values('users.data.user'), nothing would be returned. The last segment in"
+                    + " a key is also considered a namespace, so 'users.data.username.hi' would return"
+                    + " a single value (in this case).";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return true;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            com.laytonsmith.PureUtilities.Persistance p = Static.getPersistance();
+            List<Map.Entry> list = p.getNamespaceValues(args[0].val().split("\\."));
+            CArray ca = new CArray(line_num, f);
+            for(Map.Entry e : list){
+                try {
+                    ca.set(new CString(e.getKey().toString(), line_num, f), 
+                            Construct.json_decode(e.getValue().toString(), line_num, f));
+                } catch (MarshalException ex) {
+                    Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            return ca;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class has_value implements Function{
 
         public String getName() {
             return "has_value";
