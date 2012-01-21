@@ -24,7 +24,7 @@ public class BukkitMCItemStack implements MCItemStack{
     }
     
     public MCMaterialData getData(){
-        if(is.getData() == null){
+        if(is == null || is.getData() == null){
             return null;
         }
         return new BukkitMCMaterialData(is.getData());
@@ -47,7 +47,7 @@ public class BukkitMCItemStack implements MCItemStack{
     }
     
     public Map<MCEnchantment, Integer> getEnchantments(){
-        if(is.getEnchantments() == null){
+        if(is == null || is.getEnchantments() == null){
             return null;
         }
         Map<MCEnchantment, Integer> map = new HashMap<MCEnchantment, Integer>();

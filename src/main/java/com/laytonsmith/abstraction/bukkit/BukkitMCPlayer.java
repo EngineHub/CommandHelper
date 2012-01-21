@@ -63,21 +63,21 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
     }
 
     public MCItemStack getItemInHand() {
-        if (p.getItemInHand() == null) {
+        if (p == null || p.getItemInHand() == null) {
             return null;
         }
         return new BukkitMCItemStack(p.getItemInHand());
     }
 
     public MCInventory getInventory() {
-        if (p.getInventory() == null) {
+        if (p == null || p.getInventory() == null) {
             return null;
         }
         return new BukkitMCInventory(p.getInventory());
     }
 
     public MCWorld getWorld() {
-        if (p.getWorld() == null) {
+        if (p == null || p.getWorld() == null) {
             return null;
         }
         return new BukkitMCWorld(p.getWorld());
