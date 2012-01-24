@@ -48,7 +48,7 @@ public class SyntaxHighlighters {
         return "File for the following syntax highlighters are currently available:\n"
                 + "\tNotepad++ - Use type \"npp\". You may also select a theme, either \"default\" or \"obsidian\"\n"
                 + "\tTextWrangler - Use type \"textwrangler\". Only the default theme is available.\n"
-                + "\tGeSHi - Use type\"geshi\". Only the default theme is available.\n"
+                + "\tGeSHi - Use type \"geshi\". Only the default theme is available.\n"
                 + "\n\n"
                 + "Know how to write a syntax highlighter file for your favorite text editor? Let me know, and we\n"
                 + "can work to get it included in CommandHelper!";
@@ -68,7 +68,11 @@ public class SyntaxHighlighters {
                        .replaceAll("%%EVENTS_QUOTED_COMMA_SEPARATED%%", getEventsQuotedCommaSeparated())
                        .replaceAll("%%FUNCTIONS_XML_LIST_STRING%%", getAllFunctionsXML("string"))
                        .replaceAll("%%EVENTS_XML_LIST_STRING%%", getEventsXML("string"))
-                       .replaceAll("%%COLOR_LIST_QUOTED_COMMA_SEPARATED%%", getColorListQuotedCommaSeparated());
+                       .replaceAll("%%COLOR_LIST_QUOTED_COMMA_SEPARATED%%", getColorListQuotedCommaSeparated())
+                       .replaceAll("%%FUNCTIONS_BAR_SEPARATED_RESTRICTED%%", getFunctionsBarSeparatedRestricted())
+                       .replaceAll("%%FUNCTIONS_BAR_SEPARATED_UNRESTRICTED%%", getFunctionsBarSeparatedUnrestricted())
+                       .replaceAll("%%EVENTS_BAR_SEPARATED%%", getEventsBarSeparated())
+                       .replaceAll("%%COLOR_LIST_BAR_SEPARATED%%", getColorListBarSeparated());
     }
 
     private static String getAllFunctionsSpaceSeparated() {
@@ -190,6 +194,42 @@ public class SyntaxHighlighters {
             }
         }
         return b.toString();
+    }
+
+    private static String getFunctionsBarSeparatedRestricted() {
+        List<String> l = new ArrayList<String>();
+        for(Function d : GetFunctions()){
+            if(d.isRestricted()){
+                l.add(d.getName());
+            }
+        }
+        return Join(l, "|");
+    }
+
+    private static String getFunctionsBarSeparatedUnrestricted() {
+        List<String> l = new ArrayList<String>();
+        for(Function d : GetFunctions()){
+            if(!d.isRestricted()){
+                l.add(d.getName());
+            }
+        }
+        return Join(l, "|");
+    }
+
+    private static String getEventsBarSeparated() {
+        List<String> l = new ArrayList<String>();
+        for(Documentation d : GetEvents()){
+            l.add(d.getName());
+        }
+        return Join(l, "|");
+    }
+
+    private static String getColorListBarSeparated() {
+        List<String> l = new ArrayList<String>();
+        for(MCChatColor c : MCChatColor.values()){
+            l.add(c.name());
+        }
+        return Join(l, "|");
     }
     
 }
