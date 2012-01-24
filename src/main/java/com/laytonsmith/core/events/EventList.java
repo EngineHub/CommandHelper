@@ -105,7 +105,7 @@ public class EventList {
                     Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else {
-                System.out.println("@api events must implement " + EventList.class.getPackage().getName() + ".Event! " + c.getSimpleName() + " cannot be loaded.");
+                System.out.println("@abstraction events must implement " + EventList.class.getPackage().getName() + ".Event! " + c.getSimpleName() + " cannot be loaded.");
             }            
         }
         

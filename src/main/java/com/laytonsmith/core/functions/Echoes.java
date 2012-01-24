@@ -21,6 +21,7 @@ import java.util.logging.Level;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.sk89q.util.StringUtil;
 
 /**
  *
@@ -225,8 +226,7 @@ public class Echoes {
         public String docs() {
             return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
                     + " The list of valid color names can be found in the MCChatColor class, and case doesn't matter. For your reference,"
-                    + " here is the list of valid colors: BLACK, DARK_BLUE, DARK_GREEN, DARK_AQUA, DARK_RED, DARK_PURPLE, GOLD GRAY, DARK_GRAY,"
-                    + " BLUE, GREEN, AQUA, RED, LIGHT_PURPLE, YELLOW, WHITE, in addition the integers 0-15 will work, or the hex numbers from 0-F.";
+                    + " here is the list of valid colors: " + StringUtil.joinString(MCChatColor.values(), ", ", 0) + ", in addition the integers 0-15 will work, or the hex numbers from 0-F.";
         }
         
         public ExceptionType[] thrown(){

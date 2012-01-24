@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.datamanager;
+package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.SerializedPersistance;

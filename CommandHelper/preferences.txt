@@ -37,7 +37,7 @@ debug-log-file=logs/debug/%Y-%M-%D-debug.log
 #Whether or not to enable the /interpreter command. Note that even with this enabled, a player must still have the commandhelper.interpreter permission, but setting it to false prevents all players from accessing the interpreter regardless of their permissions.
 enable-interpreter=false
 
-#The base directory that scripts can read and write to. If left blank, then the default of the Bukkit directory will be used. This setting affects functions like include and read.
+#The base directory that scripts can read and write to. If left blank, then the default of the server directory will be used. This setting affects functions like include and read.
 base-dir=
 
 #The path to the config file, relative to the CommandHelper plugin folder

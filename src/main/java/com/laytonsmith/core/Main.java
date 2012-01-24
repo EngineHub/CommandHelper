@@ -4,9 +4,11 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.datamanager.Manager;
+import com.laytonsmith.tools.DocGen;
+import com.laytonsmith.tools.Manager;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
-import com.laytonsmith.datamanager.Interpreter;
+import com.laytonsmith.tools.Interpreter;
+import com.laytonsmith.tools.SyntaxHighlighters;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -16,7 +18,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
-import org.bukkit.plugin.InvalidDescriptionException;
 import org.bukkit.plugin.InvalidPluginException;
 import org.bukkit.plugin.PluginDescriptionFile;
 
@@ -58,7 +59,11 @@ public class Main {
                         + "     edit your live config file. If you don't provide a file, the default config file is used.\n"
                         + "     Regardless, the program will look in ./CommandHelper/ for the file.\n"
                         + "--copyright - Displays the copyright notice and exits\n"
-                        + "--print-db - Prints out the built in database in a human readable form, then exits."
+                        + "--print-db - Prints out the built in database in a human readable form, then exits.\n"
+                        + "--manager - Launcher the built in data manager\n"
+                        + "--interpreter - Lauches the minimal cmdline interpreter\n"
+                        + "--syntax [type] - Generates the syntax highlighter for the specified editor (if available).\n"
+                        + "     Don't specify a type to see the available options.\n"
                         );
             }
             if (l.contains("--version")) {
@@ -121,6 +126,10 @@ public class Main {
 //                    String file = (i + 1 <= l.size() - 1 ? l.get(i + 1).toString().toLowerCase() : null);
 //                    
 //                    return;
+                } else if(s.matches("--syntax")){
+                    String type = (i + 1 <= l.size() - 1 ? l.get(i + 1).toString().toLowerCase() : null);
+                    String theme = (i + 2 <= l.size() - 1 ? l.get(i + 2).toString().toLowerCase() : null);
+                    System.out.println(SyntaxHighlighters.generate(type, theme));
                 }
             }
         } catch (NoClassDefFoundError error) {
@@ -128,7 +137,8 @@ public class Main {
                     + " this message, you have two options. First, it seems you have renamed your craftbukkit jar, or"
                     + " you are altogether not using craftbukkit. If this is the case, you can download craftbukkit and place"
                     + " it in the correct directory (one above this one) or you can download bukkit, rename it to bukkit.jar,"
-                    + " and put it in the CommandHelper directory.");
+                    + " and put it in the CommandHelper directory. If you're dying for more details, here:");
+            error.printStackTrace();
         }
     }
     

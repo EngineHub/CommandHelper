@@ -28,6 +28,7 @@ import java.util.logging.Logger;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.logging.Level;
@@ -104,7 +105,7 @@ public class Static {
             i = ((CInt) c).getInt();
         } else {
             try {
-                i = Integer.parseInt(c.val());
+                i = Long.parseLong(c.val());
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting an integer, but received " + c.val() + " instead",
                         ExceptionType.CastException, c.getLineNum(), c.getFile());
@@ -847,5 +848,13 @@ public class Static {
         logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.CYAN).fg(Ansi.Color.CYAN).a("_").toString());
         logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
         return logo;
+    }
+    
+    public static String GetStringResource(String name){
+        return GetStringResource(Static.class, name);
+    }
+    
+    public static String GetStringResource(Class path, String name){
+        return Installer.parseISToString(path.getResourceAsStream(name));
     }
 }

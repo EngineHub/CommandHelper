@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.datamanager;
+package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -17,7 +17,7 @@ import java.util.List;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.constructs.Token;
-import static com.laytonsmith.datamanager.Manager.*;
+import static com.laytonsmith.tools.Manager.*;
 
 /**
  * This is a command line implementation of the in game interpreter mode.

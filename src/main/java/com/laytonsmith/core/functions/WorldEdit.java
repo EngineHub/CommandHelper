@@ -32,13 +32,11 @@ import com.sk89q.worldguard.protection.GlobalRegionManager;
 import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
-import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;
-import org.bukkit.entity.Player;
 
 /**
  *
@@ -350,7 +348,7 @@ public class WorldEdit {
             
             try {
                 if (!region.getIntersectingRegions(checkRegions).isEmpty()) return new CBoolean(true, line_num, f);
-            } catch (UnsupportedIntersectionException e) {}
+            } catch (Exception e) {}
             return new CBoolean(false, line_num, f);
         }
     }

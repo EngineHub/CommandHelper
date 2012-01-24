@@ -2,9 +2,11 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.core;
+package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.docs;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.EventHandlerInterface;
 import com.laytonsmith.core.events.Event;
