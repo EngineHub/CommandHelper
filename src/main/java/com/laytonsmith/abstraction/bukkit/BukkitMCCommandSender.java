@@ -7,6 +7,8 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCServer;
 import org.bukkit.command.CommandSender;
+import org.bukkit.command.ConsoleCommandSender;
+import org.bukkit.entity.Player;
 
 /**
  *
@@ -39,6 +41,14 @@ public class BukkitMCCommandSender implements MCCommandSender{
 
     public CommandSender _CommandSender() {
         return c;
+    }
+
+    public boolean instanceofPlayer() {
+        return c instanceof Player;
+    }
+
+    public boolean instanceofMCConsoleCommandSender() {
+        return c instanceof ConsoleCommandSender;
     }
     
 }

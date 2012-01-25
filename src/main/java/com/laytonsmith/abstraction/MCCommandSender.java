@@ -16,4 +16,8 @@ public interface MCCommandSender {
     public String getName();
     
     public boolean isOp();
+
+    public boolean instanceofPlayer();
+
+    public boolean instanceofMCConsoleCommandSender();
 }
