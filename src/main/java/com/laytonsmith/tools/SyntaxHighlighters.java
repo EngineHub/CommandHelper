@@ -46,11 +46,19 @@ public class SyntaxHighlighters {
         if("geshi".equals(type)){
             return template("/syntax-templates/geshi/default.php");
         }
+        if("vim".equals(type)){
+            return template("/syntax-templates/vim/default.vim");
+        }
 
         return "File for the following syntax highlighters are currently available:\n"
                 + "\tNotepad++ - Use type \"npp\". You may also select a theme, either \"default\" or \"obsidian\"\n"
                 + "\tTextWrangler - Use type \"textwrangler\". Only the default theme is available.\n"
                 + "\tGeSHi - Use type \"geshi\". Only the default theme is available.\n"
+                + "\tViM - Use type \"vim\". Only the default theme is available.\n"
+                + "\t\tTo install: put in ~/.vim/syntax/commandhelper.vim then edit\n"
+                + "\t\t~/.vim/ftdetect/commandhelper.vim and add the line \n"
+                + "\t\tau BufRead,BufNewFile *.ms set filetype=commandhelper\n"
+                + "\t\t(Create directories and files as needed)\n"
                 + "\n\n"
                 + "Know how to write a syntax highlighter file for your favorite text editor? Let me know, and we\n"
                 + "can work to get it included in CommandHelper!";
@@ -84,6 +92,10 @@ public class SyntaxHighlighters {
             for(MCChatColor c : MCChatColor.values()){
                 base.add(c.name());
             }
+        } else if(datalist.equalsIgnoreCase("keywords")){
+            base.add("null");
+            base.add("false");
+            base.add("true");
         } else if(datalist.equalsIgnoreCase("functions")){
             for(Function f : GetFunctions()){
                 if(params.contains("restricted") || params.contains("unrestricted")){

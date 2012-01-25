@@ -30,7 +30,7 @@ public class Main {
     static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
 
     public static void main(String[] args) throws Exception {
-        System.out.println("Running with arguments: " + Arrays.asList(args));
+        System.err.println("Running with arguments: " + Arrays.asList(args));
         try {
             Static.getPreferences().init(new File("CommandHelper/preferences.txt"));
             List l = Arrays.asList(args);
