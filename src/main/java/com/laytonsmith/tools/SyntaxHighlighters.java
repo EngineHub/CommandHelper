@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -59,81 +61,89 @@ public class SyntaxHighlighters {
      * @param location
      * @return 
      */
-    private static String template(String location) {
+    private static String template(String location) {        
         String template = Static.GetStringResource(location);
-        return template.replaceAll("%%FUNCTIONS_SPACE_SEPARATED%%", getAllFunctionsSpaceSeparated())
-                       .replaceAll("%%EVENTS_SPACE_SEPARATED", getEventsSpaceSeparated())
-                       .replaceAll("%%FUNCTIONS_QUOTED_COMMA_SEPARATED_UNRESTRICTED%%", getFunctionsQuotedCommaSeparatedUnrestricted())
-                       .replaceAll("%%FUNCTIONS_QUOTED_COMMA_SEPARATED_RESTRICTED%%", getFunctionsQuotedCommaSeparatedRestricted())
-                       .replaceAll("%%EVENTS_QUOTED_COMMA_SEPARATED%%", getEventsQuotedCommaSeparated())
-                       .replaceAll("%%FUNCTIONS_XML_LIST_STRING%%", getAllFunctionsXML("string"))
-                       .replaceAll("%%EVENTS_XML_LIST_STRING%%", getEventsXML("string"))
-                       .replaceAll("%%COLOR_LIST_QUOTED_COMMA_SEPARATED%%", getColorListQuotedCommaSeparated())
-                       .replaceAll("%%FUNCTIONS_BAR_SEPARATED_RESTRICTED%%", getFunctionsBarSeparatedRestricted())
-                       .replaceAll("%%FUNCTIONS_BAR_SEPARATED_UNRESTRICTED%%", getFunctionsBarSeparatedUnrestricted())
-                       .replaceAll("%%EVENTS_BAR_SEPARATED%%", getEventsBarSeparated())
-                       .replaceAll("%%COLOR_LIST_BAR_SEPARATED%%", getColorListBarSeparated());
-    }
-
-    private static String getAllFunctionsSpaceSeparated() {
-        List<String> l = new ArrayList<String>();
-        for(Function f : GetFunctions()){
-            l.add(f.getName());
+        Pattern p = Pattern.compile("%%(.*?)%%");
+        Matcher m = p.matcher(template);
+        while(m.find()){
+            template = template.replaceAll("%%" + m.group(1) + "%%", macro(m.group(1)));
         }
-        return Join(l, " ");
+        return template;
     }
     
-    private static String getAllFunctionsXML(String element){
-        List<String> l = new ArrayList<String>();
-        for(Documentation f : GetFunctions()){
-            l.add("<" + element + ">" + f.getName() + "</" + element + ">");
+    private static String macro(String macroName){
+        String[] split = macroName.split(":");
+        String type = split[0];
+        String datalist = split[1];
+        List<String> params = new ArrayList<String>();
+        for(int i = 2; i < split.length; i++){
+            params.add(split[i].toLowerCase());
         }
-        return Join(l, "\n");
-    }
-    
-    private static String getEventsXML(String element){
-        List<String> l = new ArrayList<String>();
-        for(Documentation f : GetEvents()){
-            l.add("<" + element + ">" + f.getName() + "</" + element + ">");
-        }
-        return Join(l, "\n");
-    }
-    
-    private static String getFunctionsQuotedCommaSeparatedUnrestricted(){
-        List<String> l = new ArrayList<String>();
-        for(Function f : GetFunctions()){
-            if(!f.isRestricted()){
-                l.add("'" + f.getName() + "'");
+        List<String> base = new ArrayList<String>();
+        if(datalist.equalsIgnoreCase("colors")){
+            for(MCChatColor c : MCChatColor.values()){
+                base.add(c.name());
+            }
+        } else if(datalist.equalsIgnoreCase("functions")){
+            for(Function f : GetFunctions()){
+                if(params.contains("restricted") || params.contains("unrestricted")){
+                    if(params.contains("restricted") && f.isRestricted()){
+                        base.add(f.getName());
+                    } else if(params.contains("unrestricted") && !f.isRestricted()){
+                        base.add(f.getName());
+                    }
+                } else {
+                    base.add(f.getName());
+                }
+            }
+        } else if(datalist.equalsIgnoreCase("events")){
+            for(Documentation d : GetEvents()){
+                base.add(d.getName());
             }
         }
-        return Join(l, ", ");
-    }
-    
-    private static String getFunctionsQuotedCommaSeparatedRestricted(){
-        List<String> l = new ArrayList<String>();
-        for(Function f : GetFunctions()){
-            if(f.isRestricted()){
-                l.add("'" + f.getName() + "'");
+        String header = "";
+        String spliter = "IMPROPER FORMATTING";
+        String footer = "";
+        if(type.equalsIgnoreCase("space")){
+            if(params.contains("quoted")){
+                header = "'";
+                spliter = "' '";
+                footer = "'";
+            } else {
+                spliter = " ";
+            }
+        } else if(type.equalsIgnoreCase("comma")){
+            if(params.contains("quoted")){
+                header = "'";
+                spliter = "', '";
+                footer = "'";
+            } else {
+                spliter = ", ";
+            }
+        } else if(type.equalsIgnoreCase("xml")){
+            String tag = "PLEASE INCLUDE THE TAG NAME USING tag=tagname AS A PARAMETER";
+            for(String param : params){
+                //Find the tag name
+                if(param.matches("tag=.*")){
+                    tag = param.substring(4);
+                    break;
+                }
+            }
+            if(params.contains("quoted")){
+                header = "<" + tag + ">'";
+                spliter = "'</" + tag + "><" + tag + ">'";
+                footer = "'</" + tag + ">";
+            } else {
+                header = "<" + tag + ">";
+                spliter = "</" + tag + "><" + tag + ">";
+                footer = "</" + tag + ">";
             }
         }
-        return Join(l, ", ");
-    }
-    
-    private static String getEventsQuotedCommaSeparated(){
-        List<String> l = new ArrayList<String>();
-        for(Documentation e : GetEvents()){
-            l.add("'" + e.getName() + "'");
-        }
-        return Join(l, ", ");
+        return header + Join(base, spliter) + footer;
+        
     }
 
-    private static String getEventsSpaceSeparated() {
-        List<String> l = new ArrayList<String>();
-        for(Documentation e : GetEvents()){
-            l.add(e.getName());
-        }
-        return Join(l, " ");
-    }
+    
     
     private static List<Documentation> GetEvents(){
         List<Documentation> l = new ArrayList<Documentation>();
@@ -176,13 +186,6 @@ public class SyntaxHighlighters {
         return fl;
     }
     
-    private static String getColorListQuotedCommaSeparated(){
-        List<String> l = new ArrayList<String>();
-        for(MCChatColor c : MCChatColor.values()){
-            l.add("'" + c.name() + "'");
-        }
-        return Join(l, ", ");
-    }
     
     private static String Join(List l, String joiner){
         StringBuilder b = new StringBuilder();
@@ -194,42 +197,6 @@ public class SyntaxHighlighters {
             }
         }
         return b.toString();
-    }
-
-    private static String getFunctionsBarSeparatedRestricted() {
-        List<String> l = new ArrayList<String>();
-        for(Function d : GetFunctions()){
-            if(d.isRestricted()){
-                l.add(d.getName());
-            }
-        }
-        return Join(l, "|");
-    }
-
-    private static String getFunctionsBarSeparatedUnrestricted() {
-        List<String> l = new ArrayList<String>();
-        for(Function d : GetFunctions()){
-            if(!d.isRestricted()){
-                l.add(d.getName());
-            }
-        }
-        return Join(l, "|");
-    }
-
-    private static String getEventsBarSeparated() {
-        List<String> l = new ArrayList<String>();
-        for(Documentation d : GetEvents()){
-            l.add(d.getName());
-        }
-        return Join(l, "|");
-    }
-
-    private static String getColorListBarSeparated() {
-        List<String> l = new ArrayList<String>();
-        for(MCChatColor c : MCChatColor.values()){
-            l.add(c.name());
-        }
-        return Join(l, "|");
     }
     
 }

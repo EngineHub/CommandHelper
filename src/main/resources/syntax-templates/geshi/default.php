@@ -27,17 +27,17 @@ $language_data = array(
     'KEYWORDS' => array(
         // Non-Restricted
         1 => array(
-            %%FUNCTIONS_QUOTED_COMMA_SEPARATED_UNRESTRICTED%%
+            %%comma:functions:quoted:unrestricted%%
         ),
         // Restricted
         2 => array(
-             %%FUNCTIONS_QUOTED_COMMA_SEPARATED_RESTRICTED%%
+             %%comma:functions:quoted:restricted%%
         ),
         3 => array(
-             %%EVENTS_QUOTED_COMMA_SEPARATED%%
+             %%comma:events:quoted%%
         ),
         4 => array(
-            %%COLOR_LIST_QUOTED_COMMA_SEPARATED%%
+            %%comma:colors:quoted%%
         )
     ),
     'SYMBOLS' => array (

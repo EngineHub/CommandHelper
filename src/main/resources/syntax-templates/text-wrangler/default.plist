@@ -12,8 +12,8 @@
 	<string>CH</string>
 	<key>BBLMKeywordList</key>
 	<array>
-		%%FUNCTIONS_XML_LIST_STRING%%
-                %%EVENTS_XML_LIST_STRING%%
+		%%xml:functions:tag=string%%
+                %%xml:events:tag=string%%
 	</array>
 	<key>BBLMLanguageDisplayName</key>
 	<string>CommandHelper</string>

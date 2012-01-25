@@ -11,7 +11,7 @@
             <Keywords name="Folder-">&lt;&lt;&lt;</Keywords>
             <Keywords name="Operators">( ) , : [ \ ] =</Keywords>
             <Keywords name="Comment">1/* 2*/ 0#</Keywords>
-            <Keywords name="Words1">%%FUNCTIONS_SPACE_SEPARATED%%</Keywords>
+            <Keywords name="Words1">%%space:functions%%</Keywords>
             <Keywords name="Words2">_</Keywords>
             <Keywords name="Words3">@</Keywords>
             <Keywords name="Words4">$</Keywords>
