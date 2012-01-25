@@ -303,6 +303,7 @@ public class StaticTest {
         when(p.isOnline()).thenReturn(true);
         when(p.getName()).thenReturn(name);        
         when(p.getServer()).thenReturn(s); 
+        when(p.instanceofPlayer()).thenReturn(true);
         if(s != null && s.getOnlinePlayers() != null){
             List<MCPlayer> online = new ArrayList<MCPlayer>(Arrays.asList(s.getOnlinePlayers()));
             boolean alreadyOnline = false;
@@ -336,6 +337,7 @@ public class StaticTest {
         MCConsoleCommandSender c = mock(MCConsoleCommandSender.class);
         MCServer s = GetFakeServer();
         when(c.getServer()).thenReturn(s);
+        when(c.instanceofMCConsoleCommandSender()).thenReturn(true);
         return c;
     }
     

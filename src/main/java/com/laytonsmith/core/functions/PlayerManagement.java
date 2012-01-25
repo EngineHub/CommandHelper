@@ -62,6 +62,9 @@ public class PlayerManagement {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
+            if(p == null){
+                return new CNull(line_num, f);
+            }
             
             if (args.length == 1) {
                 p = Static.getServer().getPlayer(args[0].val());
