@@ -16,6 +16,9 @@ import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.events.AbstractEvent;
+import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventHandlerInterface;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.events.Prefilters;
@@ -75,11 +78,20 @@ public class BukkitPlayerEvents {
             if(event instanceof PlayerJoinEvent){
                 PlayerJoinEvent pje = (PlayerJoinEvent)event;
                 if(key.equals("join_message")){
-                    pje.setJoinMessage(value.val());
-                    return pje.getJoinMessage().equals(value.val());
+                    if(value instanceof CNull){
+                        pje.setJoinMessage(null);
+                        return pje.getJoinMessage() == null;
+                    } else {
+                        pje.setJoinMessage(value.val());
+                        return pje.getJoinMessage().equals(value.val());
+                    }
                 }
             }
             return false;
+        }
+
+        public EventMixinInterface customMixin(AbstractEvent e) {
+            return null;
         }
     }
     
@@ -163,6 +175,10 @@ public class BukkitPlayerEvents {
                 
             }
             return false;
+        }
+
+        public EventMixinInterface customMixin(AbstractEvent e) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
 }

@@ -32,7 +32,9 @@ public class PlayerEvents {
 
         public String docs() {
             return "{player: <string match> |"
-                    + "join_message: <regex>} This event is called when a player logs in "
+                    + "join_message: <regex>} This event is called when a player logs in. "
+                    + "Setting join_message to null causes it to not be displayed at all. Cancelling "
+                    + "the event does not prevent them from logging in. Instead, you should just kick() them."
                     + "{player: The player's name | join_message: The default join message}"
                     + "{player|join_message}"
                     + "{join_message}";

@@ -49,4 +49,12 @@ public interface EventHandlerInterface {
      * @param event 
      */
     public boolean modifyEvent(String key, Construct value, Object event);
+    
+    /**
+     * If a custom mixin is needed, this event may specify it here. Null should be
+     * returned if a custom mixin isn't needed. A UnsupportedOperationException will
+     * also be caught and ignored.
+     * @return 
+     */
+    public EventMixinInterface customMixin(AbstractEvent e);
 }

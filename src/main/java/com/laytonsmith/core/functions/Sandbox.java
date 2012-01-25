@@ -291,7 +291,8 @@ public class Sandbox {
         public String docs() {
             return "void {} \"Super Cancels\" an event. This only will work if play-dirty is set to true. If an event is"
                     + " super cancelled, not only is the cancelled flag set to true, the event stops propagating down, so"
-                    + " no other plugins will receive the event at all (other than monitor level). This is useful for overridding"
+                    + " no other plugins (as in other server plugins, not just CH scripts) will receive the event at all "
+                    + " (other than monitor level plugins). This is useful for overridding"
                     + " event handlers for plugins that don't respect the cancelled flag. This function hooks into the play-dirty"
                     + " framework that injects custom event handlers into bukkit.";
         }

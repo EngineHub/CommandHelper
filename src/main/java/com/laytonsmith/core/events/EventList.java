@@ -128,6 +128,13 @@ public class EventList {
                     Class mixinClass = StaticLayer.GetServerEventMixin();
                     Constructor mixinConstructor = mixinClass.getConstructor(AbstractEvent.class);
                     EventMixinInterface mixin = (EventMixinInterface) mixinConstructor.newInstance(e);
+                    try{
+                        if(handler.customMixin(e) != null){
+                            mixin = handler.customMixin(e);
+                        }
+                    } catch(UnsupportedOperationException ex){
+                        //Oh well
+                    }
                     e.setAbstractEventMixin(mixin);
                     if(!apiClass.equals("Sandbox")){
                         if((Boolean)com.laytonsmith.core.Static.getPreferences().getPreference("debug-mode")){
