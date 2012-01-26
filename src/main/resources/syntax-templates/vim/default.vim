@@ -23,8 +23,8 @@ highlight unrestrictedFunctions ctermfg=DarkGreen guifg=#B35900
 highlight events ctermfg=LightMagenta guifg=#B30059
 highlight colors ctermfg=yellow guifg=#5900B3
 highlight unsymboledkeywords ctermfg=LightBlue guifg=LightBlue
-highlight linecomment ctermfg=LightBlue guifg=LightBlue
-highlight blockcomment ctermfg=LightBlue guifg=LightBlue
+highlight linecomment ctermfg=LightGray guifg=LightGray
+highlight blockcomment ctermfg=LightGray guifg=LightGray
 highlight stringlit ctermfg=3 guifg=orange
 highlight smartstring ctermfg=white ctermbg=red guifg=white guibg=red
 highlight ivariable ctermfg=green guifg=green

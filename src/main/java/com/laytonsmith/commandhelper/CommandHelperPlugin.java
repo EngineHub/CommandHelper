@@ -101,7 +101,6 @@ public class CommandHelperPlugin extends JavaPlugin {
      * Called on plugin enable.
      */
     public void onEnable() {
-        System.out.println("\n\n" + Static.Logo());
         self = this;
         myServer = StaticLayer.GetServer();
         persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), this);
@@ -118,6 +117,10 @@ public class CommandHelperPlugin extends JavaPlugin {
             Static.getPreferences().init(prefsFile);
             String script_name = (String) Static.getPreferences().getPreference("script-name");
             String main_file = (String) Static.getPreferences().getPreference("main-file");
+            boolean showSplashScreen = ((Boolean)Static.getPreferences().getPreference("show-splash-screen")).booleanValue();
+            if(showSplashScreen){
+                System.out.println("\n\n" + Static.Logo());
+            }
             ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), prefsFile, new File("plugins/CommandHelper/" + main_file), perms, this);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);

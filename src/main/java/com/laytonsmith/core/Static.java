@@ -282,6 +282,7 @@ public class Static {
             a.add(new Preference("standard-log-file", "logs/%Y-%M-%D-commandhelper.log", Type.STRING, "The path the standard log files that the log() function writes to. Six variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current year, month, day, hour, minute and second respectively. It is highly recommended that you use at least year, month, and day if you are actively logging things, otherwise the file size would get excessively large. The path is relative to the CommandHelper directory and is not bound by the base-dir restriction."));
             a.add(new Preference("allow-profiling", "false", Type.BOOLEAN, "If set to false, the Profiling class of functions will do nothing."));
             a.add(new Preference("profiling-file", "logs/profiling/%Y-%M-%D-profiling.log", Type.STRING, "The path to the profiling logs. These logs are perf4j formatted logs. Consult the documentation for more information."));
+            a.add(new Preference("show-splash-screen", "true", Type.BOOLEAN, "Whether or not to show the splash screen at server startup"));
             com.laytonsmith.commandhelper.CommandHelperPlugin.prefs = new Preferences("CommandHelper", getLogger(), a);
         }
         return com.laytonsmith.commandhelper.CommandHelperPlugin.prefs;
@@ -838,7 +839,7 @@ public class Static {
         logo = logo.replaceAll(" ", Ansi.ansi().bg(Ansi.Color.BLACK).a(" ").toString());
         logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.RED).fg(Ansi.Color.RED).a("_").toString());
         logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
-        return logo;
+        return logo + Ansi.ansi().a(Ansi.Attribute.RESET);
     }
     
     public static String DataManagerLogo(){
@@ -847,7 +848,7 @@ public class Static {
         logo = logo.replaceAll(" ", Ansi.ansi().bg(Ansi.Color.BLACK).a(" ").toString());
         logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.CYAN).fg(Ansi.Color.CYAN).a("_").toString());
         logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
-        return logo;
+        return logo + Ansi.ansi().a(Ansi.Attribute.RESET);
     }
     
     public static String GetStringResource(String name){
