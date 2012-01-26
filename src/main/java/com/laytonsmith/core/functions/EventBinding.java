@@ -214,12 +214,13 @@ public class EventBinding {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{0};
+            return new Integer[]{0, 1};
         }
 
         public String docs() {
-            return "void {} Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
-                    + " If called from outside an event handler, a BindException is thrown.";
+            return "void {[state]} Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
+                    + " If called from outside an event handler, a BindException is thrown. By default, state is true, but you can"
+                    + " uncancel an event (if possible) by calling cancel(false)";
         }
 
         public ExceptionType[] thrown() {
@@ -245,10 +246,14 @@ public class EventBinding {
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.GetEvent();
             if(original == null){
-                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
             }
             if(original.getUnderlyingEvent() != null && original.isCancellable()){
-                original.setCancelled(true);
+                if(args.length == 1){
+                    original.setCancelled(Static.getBoolean(args[0]));
+                } else {
+                    original.setCancelled(true);
+                }
             }
             environment.GetEvent().setCancelled(true);
             return new CVoid(line_num, f);
