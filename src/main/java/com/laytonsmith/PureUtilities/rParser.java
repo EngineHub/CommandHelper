@@ -82,7 +82,7 @@ public class rParser {
 
                 //If the word is not too long to fit
                 len += wordLength;
-                if (len < lineLength) {
+                if (len <= lineLength) {
                     words.add(split.remove(0));
                 }
             }
@@ -91,8 +91,11 @@ public class rParser {
             if (!out.isEmpty()) {
                 lastColor = lastColor(out.get(out.size() - 1));
             }
-            out.add(lastColor
-                    + combineSplit(0, words.toArray(new String[words.size()]), " ") + " ");
+            String[] stringArray = words.toArray(new String[words.size()]);
+            //if(stringArray.length != 0){
+                out.add(lastColor
+                        + combineSplit(0, stringArray, " ") + " ");
+            //}
         }
 
         //Convert to an array and return

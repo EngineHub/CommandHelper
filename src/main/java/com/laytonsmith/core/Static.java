@@ -471,7 +471,7 @@ public class Static {
         String[] newlines = msg.split("\n");
         for (String line : newlines) {
             String[] arr = rParser.wordWrap(line);
-            for (String toMsg : arr) {
+            for (String toMsg : arr) {                
                 c.run(toMsg.trim());
             }
         }

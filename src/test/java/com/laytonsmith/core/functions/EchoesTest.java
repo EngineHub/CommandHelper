@@ -74,9 +74,8 @@ public class EchoesTest {
     }
     
     @Test public void testLongStringMsgd() throws ConfigCompileException{
-        //TODO: Put this test back in, and fix it
-//        SRun("msg('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')", fakePlayer);
-//        verify(fakePlayer).sendMessage("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+        SRun("msg('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')", fakePlayer);
+        verify(fakePlayer).sendMessage("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
     
     @Test public void testChatas() throws CancelCommandException, ConfigCompileException{
