@@ -839,7 +839,9 @@ public class Static {
         logo = logo.replaceAll(" ", Ansi.ansi().bg(Ansi.Color.BLACK).a(" ").toString());
         logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.RED).fg(Ansi.Color.RED).a("_").toString());
         logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
-        return logo + Ansi.ansi().a(Ansi.Attribute.RESET);
+        String s = logo + Ansi.ansi().a(Ansi.Attribute.RESET);
+        AnsiConsole.systemUninstall();
+        return s;
     }
     
     public static String DataManagerLogo(){
@@ -848,7 +850,9 @@ public class Static {
         logo = logo.replaceAll(" ", Ansi.ansi().bg(Ansi.Color.BLACK).a(" ").toString());
         logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.CYAN).fg(Ansi.Color.CYAN).a("_").toString());
         logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
-        return logo + Ansi.ansi().a(Ansi.Attribute.RESET);
+        String s = logo + Ansi.ansi().a(Ansi.Attribute.RESET);
+        AnsiConsole.systemUninstall();
+        return s;
     }
     
     public static String GetStringResource(String name){
