@@ -833,7 +833,7 @@ public class Static {
     
     public static String Logo(){
         String logo = Installer.parseISToString(Static.class.getResourceAsStream("/mainlogo"));
-        logo = logo.replaceAll(" ", TermColors.BG_BLACK + " ");
+        logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
         logo = logo.replaceAll("_", TermColors.BG_RED + TermColors.RED + "_");
         logo = logo.replaceAll("/", TermColors.BG_BRIGHT_WHITE + TermColors.WHITE + "/");
         String s = logo + TermColors.reset();
@@ -842,7 +842,7 @@ public class Static {
     
     public static String DataManagerLogo(){
         String logo = Installer.parseISToString(Static.class.getResourceAsStream("/datamanagerlogo"));
-        logo = logo.replaceAll(" ", TermColors.BG_BLACK + " ");
+        logo = logo.replaceAll("( +)", TermColors.BG_BLACK + "$1");
         logo = logo.replaceAll("_", TermColors.CYAN + TermColors.BG_CYAN + "_");
         logo = logo.replaceAll("/", TermColors.BG_WHITE + TermColors.WHITE + "/");
         String s = logo + TermColors.reset();
@@ -855,5 +855,33 @@ public class Static {
     
     public static String GetStringResource(Class path, String name){
         return Installer.parseISToString(path.getResourceAsStream(name));
+    }
+
+    /**
+     * Pulls out the MCChatColors from the string, and replaces them
+     * with the nearest match ANSI terminal color.
+     * @param mes
+     * @return 
+     */
+    public static String MCToANSIColors(String mes) {
+        //Pull out the MC colors
+        return mes
+                .replaceAll("§0", TermColors.BLACK + TermColors.BG_WHITE)
+                .replaceAll("§1", TermColors.BLUE)
+                .replaceAll("§2", TermColors.GREEN)
+                .replaceAll("§3", TermColors.CYAN)
+                .replaceAll("§4", TermColors.RED)
+                .replaceAll("§5", TermColors.MAGENTA)
+                .replaceAll("§6", TermColors.YELLOW)
+                .replaceAll("§7", TermColors.WHITE)
+                .replaceAll("§8", TermColors.BRIGHT_BLACK + TermColors.BG_BRIGHT_WHITE)
+                .replaceAll("§9", TermColors.BRIGHT_BLUE)
+                .replaceAll("§a", TermColors.BRIGHT_GREEN)
+                .replaceAll("§b", TermColors.BRIGHT_CYAN)
+                .replaceAll("§c", TermColors.BRIGHT_RED)
+                .replaceAll("§d", TermColors.BRIGHT_MAGENTA)
+                .replaceAll("§e", TermColors.BRIGHT_YELLOW)
+                .replaceAll("§f", TermColors.BRIGHT_WHITE) + TermColors.reset();
+                
     }
 }

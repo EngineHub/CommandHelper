@@ -482,6 +482,7 @@ public class Echoes {
             if(args.length > 1){
                 prefix = Static.getBoolean(args[1]);
             }
+            mes = Static.MCToANSIColors(mes);
             com.laytonsmith.core.Static.getLogger().log(Level.INFO, (prefix?"CommandHelper: ":"") + mes);
             return new CVoid(line_num, f);
         }
