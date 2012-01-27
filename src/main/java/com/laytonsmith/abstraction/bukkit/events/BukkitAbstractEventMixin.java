@@ -37,9 +37,9 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
         this.mySuper = mySuper;
     }
 
-    public void cancel(Object e){
+    public void cancel(Object e, boolean state){
         if (e instanceof Cancellable) {
-            ((Cancellable) e).setCancelled(true);
+            ((Cancellable) e).setCancelled(state);
         }
     }
     

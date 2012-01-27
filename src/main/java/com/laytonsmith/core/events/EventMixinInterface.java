@@ -18,7 +18,7 @@ public interface EventMixinInterface {
      * Cancel this event, if possible.
      * @param e 
      */
-    public void cancel(Object e);
+    public void cancel(Object e, boolean state);
     /**
      * Return if this event is cancellable
      * @param o

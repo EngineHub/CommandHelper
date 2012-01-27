@@ -12,7 +12,7 @@ import com.laytonsmith.core.MScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-//import java.awt.Color;
+import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
@@ -20,11 +20,8 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import org.fusesource.jansi.AnsiConsole;
 
-import static org.fusesource.jansi.Ansi.*;
-import static org.fusesource.jansi.Ansi.Color.*;
-
+import static com.laytonsmith.PureUtilities.TermColors.*;
 /**
  *
  * @author layton
@@ -35,7 +32,6 @@ public class Manager {
 
     public static void start() {
         cls();
-        AnsiConsole.systemInstall();
         pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
         scanner = new Scanner(System.in);
         
@@ -43,12 +39,12 @@ public class Manager {
         try {
             MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex("player()", null)), new Env(), null, null);
         } catch (ConfigCompileException ex) {}
-        pl(green + "Welcome to the CommandHelper " + cyan + "Data Manager!");
-        pl(blinkon + red + "Warning!" + blinkoff + yellow + " Be sure your server is not running before using this tool to make changes to your database!");
+        pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
+        pl(BLINKON + RED + "Warning!" + BLINKOFF + YELLOW + " Be sure your server is not running before using this tool to make changes to your database!");
         pl("------------------------");
         boolean finished = false;
         do {
-            pl(yellow + "What function would you like to run? Type \"help\" for a full list of options.");
+            pl(YELLOW + "What function would you like to run? Type \"help\" for a full list of options.");
             String input = prompt();
             pl();
             if (input.toLowerCase().startsWith("help")) {
@@ -70,7 +66,7 @@ public class Manager {
             } else if(input.equalsIgnoreCase("interpreter")){
                 Interpreter.start();
             } else if (input.equalsIgnoreCase("exit")) {
-                pl("Thanks for using the " + cyan + "Data Manager!");
+                pl("Thanks for using the " + CYAN + "Data Manager!");
                 finished = true;
             } else {
                 pl("I'm sorry, that's not a valid command. Here's the help:");
@@ -81,17 +77,17 @@ public class Manager {
     
     public static void export(){
         cls();
-        pl(green + "Export creates a text based file that you can use to get your persisted data\n"
+        pl(GREEN + "Export creates a text based file that you can use to get your persisted data\n"
          + "out of the database. You have various options for the export type.");
         String type;
         while(true){
-            pl(yellow + "What export type would you like? The options are: XML, plain text, INI, and YML.");
+            pl(YELLOW + "What export type would you like? The options are: XML, plain text, INI, and YML.");
             pl("[XML/TEXT/INI/YML]");
             type = prompt().toLowerCase();
             if(type.equals("xml") || type.equals("text") || type.equals("ini") || type.equals("yml")){
                 break;
             } else {
-                pl(red + "That's not a valid type.");
+                pl(RED + "That's not a valid type.");
             }
         }
         
@@ -101,12 +97,12 @@ public class Manager {
             filename = prompt();
             File file = new File(filename);
             if(file.exists()){
-                pl(red + "That file already exists, do you want to overwrite it? " + white + "[Y/N]");
+                pl(RED + "That file already exists, do you want to overwrite it? " + WHITE + "[Y/N]");
                 if(prompt().equalsIgnoreCase("y")){
                     break;
                 }
             } else if(file.getAbsoluteFile().getParentFile() != null && !file.getAbsoluteFile().getParentFile().exists()){
-                pl(red + "That file's parent directory doesn't exist yet.");
+                pl(RED + "That file's parent directory doesn't exist yet.");
                 pl("I'm not going to create any directories, so go create them first\n"
                         + "if that's really where you want the file.");
             } else {
@@ -122,12 +118,12 @@ public class Manager {
     }
     
     public static void doExport(String type, File file){
-        pl(red + "Actually, this feature isn't implemented yet :(");
+        pl(RED + "Actually, this feature isn't implemented yet :(");
     }
     
     public static void cleardb(){
-        pl(red + "Are you absolutely sure you want to clear out your database? " + blinkon + "No backup is going to be made." + blinkoff);
-        pl(white + "This will completely wipe your persistance information out. (No other data will be changed)");
+        pl(RED + "Are you absolutely sure you want to clear out your database? " + BLINKON + "No backup is going to be made." + BLINKOFF);
+        pl(WHITE + "This will completely wipe your persistance information out. (No other data will be changed)");
         pl("[YES/No]");
         String choice = prompt();
         if(choice.equals("YES")){
@@ -140,7 +136,7 @@ public class Manager {
                     db.clearAllData();
                     db.save();
                 } catch (Exception ex) {
-                    pl(red + ex.getMessage());
+                    pl(RED + ex.getMessage());
                 }
                 pl("Done!");
             }
@@ -152,19 +148,19 @@ public class Manager {
     public static void help(String [] args){
         if(args[0].equals("")){
             pl("Currently, your options are:\n"
-                            + "\t" + blue + "refactor" + white + " - Options for refactoring your persisted data from one backend to another\n"
-                            + "\t" + green + "upgrade" + white + " - Runs upgrade scripts on your persisted data\n"
-                            + "\t" + green + "print" + white + " - Prints out the information from your persisted data\n"
-                            + "\t" + green + "cleardb" + white + " - Clears out your database of persisted data\n"
-                            + "\t" + blue + "import" + white + " - Imports a text based file into the persistance database\n"
-                            + "\t" + blue + "export" + white + " - Exports your persisted data to a text based file\n"
-                            + "\t" + green + "edit" + white + " - Allows you to edit individual fields\n"
-                            + "\t" + green + "interpreter" + white + " - Command Line Interpreter mode. Most minecraft related functions don't work.\n"
-                            + "\n\t" + red + "exit" + white + " - Quits the Data Manager\n");
+                            + "\t" + BLUE + "refactor" + WHITE + " - Options for refactoring your persisted data from one backend to another\n"
+                            + "\t" + GREEN + "upgrade" + WHITE + " - Runs upgrade scripts on your persisted data\n"
+                            + "\t" + GREEN + "print" + WHITE + " - Prints out the information from your persisted data\n"
+                            + "\t" + GREEN + "cleardb" + WHITE + " - Clears out your database of persisted data\n"
+                            + "\t" + BLUE + "import" + WHITE + " - Imports a text based file into the persistance database\n"
+                            + "\t" + BLUE + "export" + WHITE + " - Exports your persisted data to a text based file\n"
+                            + "\t" + GREEN + "edit" + WHITE + " - Allows you to edit individual fields\n"
+                            + "\t" + GREEN + "interpreter" + WHITE + " - Command Line Interpreter mode. Most minecraft related functions don't work.\n"
+                            + "\n\t" + RED + "exit" + WHITE + " - Quits the Data Manager\n");
             
-            pl("Type " + magenta + "help <command>" + white + " for more details about a specific command");
-            if(system.equals(sys.UNIX)){
-                pl(blue + "Blue" + white + " entries are not yet working.");
+            pl("Type " + MAGENTA + "help <command>" + WHITE + " for more details about a specific command");
+            if(SYSTEM.equals(SYS.UNIX)){
+                pl(BLUE + "Blue" + WHITE + " entries are not yet working.");
             }
         } else {
             if(args[0].equals("refactor")){
@@ -174,11 +170,11 @@ public class Manager {
                         + " match the old format is not touched.");
             } else if(args[0].equals("print")){
                 pl("Prints out the information in your persistance file. Entries may be narrowed down by"
-                        + " specifying the namespace (for instance " + magenta + "print user.username" + white
+                        + " specifying the namespace (for instance " + MAGENTA + "print user.username" + WHITE
                         + " will only show that particular users's aliases.) This is namespace based, so you"
                         + " must provide the entire namespace that your are trying to narrow down."
-                        + "(" + magenta + "print storage" + white + " is valid, but " + magenta + "print stor"
-                        + white + " is not)");
+                        + "(" + MAGENTA + "print storage" + WHITE + " is valid, but " + MAGENTA + "print stor"
+                        + WHITE + " is not)");
             } else if(args[0].equals("cleardb")){
                 pl("Wipes your database clean of CommandHelper's persistance entries, but not other data. This"
                         + " includes any data that CommandHelper would have inserted into the database, or data"
@@ -208,26 +204,26 @@ public class Manager {
     public static void edit(){
         cls();
         while(true){
-            pl("Would you like to " + green + "(a)dd/edit" + white 
-                    + " a value, " + red + "(r)emove" + white + " a value, " + cyan 
-                    + "(v)iew" + white + " a single value, or " 
-                    + magenta + "(s)top" + white + " editting? [" + green + "A" + white + "/" 
-                    + red + "R" + white + "/" + cyan + "V" + white + "/" + magenta + "S" + white + "]");
+            pl("Would you like to " + GREEN + "(a)dd/edit" + WHITE 
+                    + " a value, " + RED + "(r)emove" + WHITE + " a value, " + CYAN 
+                    + "(v)iew" + WHITE + " a single value, or " 
+                    + MAGENTA + "(s)top" + WHITE + " editting? [" + GREEN + "A" + WHITE + "/" 
+                    + RED + "R" + WHITE + "/" + CYAN + "V" + WHITE + "/" + MAGENTA + "S" + WHITE + "]");
             String choice = prompt();
             if(choice.equalsIgnoreCase("s") || choice.equalsIgnoreCase("exit")){
                 break;
             } else if(choice.equalsIgnoreCase("a")){
-                pl("Type the name of the key " + yellow + "EXACTLY" + white + " as shown in the"
+                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
                         + " persistance format,\nnot the format you use when using store_value().");
                 String key = prompt();
-                pl("Provide a value for " + cyan + key + white + ". This value you provide will"
+                pl("Provide a value for " + CYAN + key + WHITE + ". This value you provide will"
                         + " be interpreted as pure mscript. (So things like array() will work)");
                 String value = prompt();
                 if(doAddEdit(key, value)){
                     pl("Value changed!");
                 }
             } else if(choice.equalsIgnoreCase("r")){
-                pl("Type the name of the key " + yellow + "EXACTLY" + white + " as shown in the"
+                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
                         + " persistance format,\nnot the format you use when using store_value().");
                 String key = prompt();
                 if(doRemove(key)){
@@ -236,7 +232,7 @@ public class Manager {
                     pl("That value wasn't in the database to start with");
                 }
             } else if(choice.equalsIgnoreCase("v")){
-                pl("Type the name of the key " + yellow + "EXACTLY" + white + " as shown in the"
+                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
                         + " persistance format,\nnot the format you use when using store_value().");
                 String key = prompt();
                 doView(key);
@@ -252,13 +248,13 @@ public class Manager {
         try {
             db.load();
         } catch (Exception ex) {
-            pl(red + ex.getMessage());
+            pl(RED + ex.getMessage());
         }
         if(!db.isKeySet(new String[]{key})){
-            pl(red + "That value is not set!");
+            pl(RED + "That value is not set!");
             return true;
         }
-        pl(cyan + key + ":" + white + db.getValue(new String[]{key}));
+        pl(CYAN + key + ":" + WHITE + db.getValue(new String[]{key}));
         return true;
     }
     
@@ -266,13 +262,13 @@ public class Manager {
         try {
             Construct c = MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(valueScript, null)), new Env(), null, null);
             String value = Construct.json_encode(c, 0, null);
-            pl(cyan + "Adding: " + white + value);
+            pl(CYAN + "Adding: " + WHITE + value);
             Persistance db = GetDB();
             db.setValue(new String[]{key}, value);
             db.save();
             return true;
         } catch (Exception ex) {
-            pl(red + ex.getMessage());
+            pl(RED + ex.getMessage());
             return false;
         }        
     }
@@ -282,7 +278,7 @@ public class Manager {
         try {
             db.load();
         } catch (Exception ex) {
-            pl(red + ex.getMessage());
+            pl(RED + ex.getMessage());
             return false;
         }
         if(db.isKeySet(new String[]{key})){
@@ -305,7 +301,7 @@ public class Manager {
             try {
                 sp.load();
             } catch (Exception ex) {
-                pl(red + ex.getMessage());
+                pl(RED + ex.getMessage());
             }
             data = sp.rawData();
         }
@@ -319,10 +315,10 @@ public class Manager {
                         continue;
                     }
                 }
-                pl(cyan + key.toString() + ": " + white + data.get(key).toString());
+                pl(CYAN + key.toString() + ": " + WHITE + data.get(key).toString());
                 count++;
             }
-            pl(blue + count + " items found");
+            pl(BLUE + count + " items found");
         }
     }
 
@@ -330,8 +326,8 @@ public class Manager {
         pl("\nThis will automatically detect and upgrade your persisted data. Though this will"
                 + " create a backup for you, you should manually back up your data before running"
                 + " this utility.");
-        pl("Would you like to continue? [" + green + "Y" + white + "/"
-                + red + "N" + white + "]");
+        pl("Would you like to continue? [" + GREEN + "Y" + WHITE + "/"
+                + RED + "N" + WHITE + "]");
         String choice = prompt();
         pl();
         if (choice.equalsIgnoreCase("y")) {
@@ -352,7 +348,7 @@ public class Manager {
                     try {
                         sp.load();
                     } catch (Exception ex) {
-                        pl(red + ex.getMessage());
+                        pl(RED + ex.getMessage());
                     }
                     Map<String, Serializable> data = sp.rawData();
                     if (data.isEmpty()) {
@@ -361,7 +357,7 @@ public class Manager {
                     }
                     sp.clearAllData(); //Bye bye!
                     //Ok, now we need to determine the type of data we're currently working with
-                    p(white + "Working");
+                    p(WHITE + "Working");
                     int counter = 0;
                     int changes = 0;
                     Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA};
@@ -400,18 +396,18 @@ public class Manager {
                     try {
                         sp.save();
                     } catch (Exception ex) {
-                        pl(red + ex.getMessage());
+                        pl(RED + ex.getMessage());
                     }
                     pl();
-                    pl(green + "Assuming there are no error messages above, it should be upgraded now! (Use print to verify)");
-                    pl(cyan.toString() + changes + " change" + (changes==1?" was":"s were") + " made");
+                    pl(GREEN + "Assuming there are no error messages above, it should be upgraded now! (Use print to verify)");
+                    pl(CYAN.toString() + changes + " change" + (changes==1?" was":"s were") + " made");
 
                 } catch (IOException ex) {
-                    pl(red + ex.getMessage());
+                    pl(RED + ex.getMessage());
                 }
             }
         } else {
-            pl(red + "Upgrade Cancelled");
+            pl(RED + "Upgrade Cancelled");
         }
     }
     
@@ -431,93 +427,16 @@ public class Manager {
     }
     
     public static String prompt(){
-        p(">" + magenta);
+        p(">" + MAGENTA);
         System.out.flush();
         String ret = scanner.nextLine();
-        p(white);
+        p(WHITE);
         return ret;
     }
 
     public static void pl(CharSequence c) {
-        System.out.println(c + white);
+        System.out.println(c + WHITE);
     }
 
-    private enum sys {
-
-        WINDOWS,
-        UNIX
-    }
-    private static sys system;
-
-    static {
-        String os = System.getProperty("os.name");
-        if (os.contains("Windows")) {
-            system = sys.WINDOWS;
-        } else {
-            system = sys.UNIX;
-        }
-    }
     
-    public static void cls(){
-        if(system.equals(sys.WINDOWS)){
-            //Fuck you windows.
-            for(int i = 0; i < 50; i++){
-                pl();
-            }
-        } else {           
-            System.out.print("\u001b[2J");
-            System.out.flush();
-        }
-    }
-    
-    public static final String red = color(Color.RED).toString();
-    public static final String green = color(Color.GREEN).toString();
-    public static final String blue = color(Color.BLUE).toString();
-    public static final String yellow = color(Color.YELLOW).toString();
-    public static final String cyan = color(Color.CYAN).toString();
-    public static final String magenta = color(Color.MAGENTA).toString();
-    public static final String black = color(Color.BLACK).toString();
-    public static final String white = color(Color.WHITE).toString();
-    
-    public static final String blinkon = special("blinkon");
-    public static final String blinkoff = special("blinkoff");
-    
-    private static String special(String type){
-        if(system.equals(sys.UNIX)){
-            if(type.equals("blinkon")){
-                return "\033[5m";
-            }
-            if(type.equals("blinkoff")){
-                return "\033[25m";
-            }
-        }
-        return "";
-    }
-
-    private static CharSequence color(Color c) {
-        return ansi().fg(c).toString();
-        /*if (system.equals(sys.WINDOWS)) {
-            return "";
-        }
-
-        String color = "37";
-        if (c.equals(Color.RED)) {
-            color = "31";
-        } else if (c.equals(Color.GREEN)) {
-            color = "32";
-        } else if (c.equals(Color.BLUE)) {
-            color = "34";
-        } else if (c.equals(Color.YELLOW)) {
-            color = "33";
-        } else if (c.equals(Color.CYAN)) {
-            color = "36";
-        } else if (c.equals(Color.MAGENTA)) {
-            color = "35";
-        } else if (c.equals(Color.BLACK)) {
-            color = "30";
-        } else if (c.equals(Color.WHITE)) {
-            color = "37";
-        }
-        return "\033[" + color + "m";*/
-    }
 }

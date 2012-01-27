@@ -18,6 +18,7 @@ import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.constructs.Token;
 import static com.laytonsmith.tools.Manager.*;
+import static com.laytonsmith.PureUtilities.TermColors.*;
 
 /**
  * This is a command line implementation of the in game interpreter mode.
@@ -35,51 +36,51 @@ public class Interpreter {
             MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex("player()", null)), new Env(), null, null);
         } catch (ConfigCompileException ex) {}
         CommandHelperPlugin.persist = new SerializedPersistance(new File("CommandHelper/persistance.ser"));
-        pl(yellow + "You are now in cmdline interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
+        pl(YELLOW + "You are now in cmdline interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
                 + " multiline mode.\nMost Minecraft features will not work, and your working directory is the"
                 + " CommandHelper.jar directory, not the Server directory. Have fun!");
         Scanner scanner = new Scanner(System.in);
-        p(blue + ":" + white);
+        p(BLUE + ":" + WHITE);
         while(textLine(scanner.nextLine())){
-            p(blue + ":" + white);
+            p(BLUE + ":" + WHITE);
         }
     }
 
     public static boolean textLine(String line) {
         if (line.equals("-")) {
             //Exit interpreter mode
-            pl(yellow + "Now exiting interpreter mode");
+            pl(YELLOW + "Now exiting interpreter mode");
             return false;
         } else if (line.equals(">>>")) {
             //Start multiline mode
             if (multilineMode) {
-                pl(red + "You are already in multiline mode!");
+                pl(RED + "You are already in multiline mode!");
             } else {
                 multilineMode = true;
-                pl(yellow + "You are now in multiline mode. Type <<< on a line by itself to execute.");
-                pl(":" + white + ">>>");
+                pl(YELLOW + "You are now in multiline mode. Type <<< on a line by itself to execute.");
+                pl(":" + WHITE + ">>>");
             }
         } else if (line.equals("<<<")) {
             //Execute multiline
-            pl(":" + white + "<<<");
+            pl(":" + WHITE + "<<<");
             multilineMode = false;
             try {
                 execute(script);
                 script = "";
             } catch (ConfigCompileException e) {
-                pl(red + e.getMessage() + ":" + e.getLineNum());
+                pl(RED + e.getMessage() + ":" + e.getLineNum());
             }
         } else {
             if (multilineMode) {
                 //Queue multiline
                 script = script + line + "\n";
-                pl(":" + white + line);
+                pl(":" + WHITE + line);
             } else {
                 try {
                     //Execute single line
                     execute(line);
                 } catch (ConfigCompileException ex) {
-                    pl(red + ex.getMessage());
+                    pl(RED + ex.getMessage());
                 }
             }
         }
@@ -102,10 +103,10 @@ public class Interpreter {
                     } else {
                         if (output.startsWith("/")) {
                             //Run the command
-                            pl(":" + yellow + output);
+                            pl(":" + YELLOW + output);
                         } else {
                             //output the results
-                            pl(":" + green + output);
+                            pl(":" + GREEN + output);
                         }
                     }
                 }
@@ -113,7 +114,7 @@ public class Interpreter {
         } catch (CancelCommandException e) {
             pl(":");
         } catch(Exception e){
-            pl(red + e.toString());
+            pl(RED + e.toString());
             e.printStackTrace();
         }
     }

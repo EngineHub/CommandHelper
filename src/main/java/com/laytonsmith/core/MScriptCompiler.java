@@ -49,6 +49,7 @@ public class MScriptCompiler {
                 in_comment = true;
                 if(c2 == '*'){
                     comment_is_block = true;
+                    i++;
                 }
                 continue;
             }

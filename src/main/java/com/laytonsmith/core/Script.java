@@ -193,6 +193,10 @@ public class Script {
             }
             System.out.println("The continue() function must be used inside a for() or foreach() loop");
         } catch (FunctionReturnException e) {
+            if(myEnv.GetEvent() != null){
+                //Oh, we're running in an event handler. Those know how to catch it too.
+                throw e;
+            }
             if(p != null){
                 p.sendMessage("The return() function must be used inside a procedure.");
             }

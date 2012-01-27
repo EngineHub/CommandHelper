@@ -122,8 +122,8 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         mixin.manualTrigger(o);
     }
     
-    public void cancel(Object o){
-        mixin.cancel(o);
+    public void cancel(Object o, boolean state){
+        mixin.cancel(o, state);
     }
     
     public boolean isCancellable(Object o){

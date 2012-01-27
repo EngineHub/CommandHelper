@@ -11,6 +11,7 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.EnumMap;
 import java.util.Iterator;
@@ -168,6 +169,8 @@ public class EventUtils {
                     activeEvent.setBoundEvent(b);
                     activeEvent.setParsedEvent(driver.evaluate(e));                    
                     b.trigger(activeEvent);
+                } catch (FunctionReturnException ex){
+                    //We also know how to deal with this
                 } catch (EventException ex) {
                     throw new ConfigRuntimeException(ex.getMessage(), null, 0, null);
                 } catch(ConfigRuntimeException ex){

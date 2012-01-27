@@ -18,6 +18,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -354,6 +355,12 @@ public class BoundEvent implements Comparable<BoundEvent> {
         public void setCancelled(boolean cancelled) {
             this.addHistory("Setting cancelled flag to " + cancelled + " " + boundEvent);
             this.cancelled = cancelled;
+            try {
+                boundEvent.getEventDriver().cancel(underlyingEvent, cancelled);
+            } catch (EventException ex) {
+                //Ignore this exception. This is thrown if the event isn't cancellable.
+                //Who cares.
+            }
         }         
         
         public Event getEventDriver(){

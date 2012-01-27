@@ -23,6 +23,7 @@ import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.User;
@@ -119,7 +120,9 @@ public class CommandHelperPlugin extends JavaPlugin {
             String main_file = (String) Static.getPreferences().getPreference("main-file");
             boolean showSplashScreen = ((Boolean)Static.getPreferences().getPreference("show-splash-screen")).booleanValue();
             if(showSplashScreen){
-                System.out.println("\n\n" + Static.Logo());
+                System.out.println(TermColors.reset());
+                //System.out.flush();
+                System.out.println("\n\n\n" + Static.Logo());
             }
             ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), prefsFile, new File("plugins/CommandHelper/" + main_file), perms, this);
         } catch (IOException ex) {

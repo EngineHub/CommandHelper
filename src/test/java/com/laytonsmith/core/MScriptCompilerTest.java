@@ -503,6 +503,15 @@ public class MScriptCompilerTest {
         verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
     }
     
+    @Test public void testCompile12() throws ConfigCompileException{
+        String config = "/*/one = bad()*/\n"
+                + "/two = msg('Good')\n";
+        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        s.compile();
+        assertFalse(s.match("/one"));
+        assertTrue(s.match("/two"));
+    }
+    
     @Test public void testUnicode() throws ConfigCompileException{
         SRun("msg('\\u0037 is win!')", fakePlayer);
         verify(fakePlayer).sendMessage("7 is win!");

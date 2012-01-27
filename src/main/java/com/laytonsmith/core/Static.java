@@ -10,6 +10,7 @@ import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.Preferences.Type;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.PureUtilities.rParser;
 import com.laytonsmith.abstraction.*;
@@ -28,12 +29,9 @@ import java.util.logging.Logger;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.logging.Level;
-import org.fusesource.jansi.Ansi;
-import org.fusesource.jansi.AnsiConsole;
 
 
 /**
@@ -835,23 +833,19 @@ public class Static {
     
     public static String Logo(){
         String logo = Installer.parseISToString(Static.class.getResourceAsStream("/mainlogo"));
-        AnsiConsole.systemInstall();
-        logo = logo.replaceAll(" ", Ansi.ansi().bg(Ansi.Color.BLACK).a(" ").toString());
-        logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.RED).fg(Ansi.Color.RED).a("_").toString());
-        logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
-        String s = logo + Ansi.ansi().a(Ansi.Attribute.RESET);
-        AnsiConsole.systemUninstall();
+        logo = logo.replaceAll(" ", TermColors.BG_BLACK + " ");
+        logo = logo.replaceAll("_", TermColors.BG_RED + TermColors.RED + "_");
+        logo = logo.replaceAll("/", TermColors.BG_BRIGHT_WHITE + TermColors.WHITE + "/");
+        String s = logo + TermColors.reset();
         return s;
     }
     
     public static String DataManagerLogo(){
         String logo = Installer.parseISToString(Static.class.getResourceAsStream("/datamanagerlogo"));
-        AnsiConsole.systemInstall();
-        logo = logo.replaceAll(" ", Ansi.ansi().bg(Ansi.Color.BLACK).a(" ").toString());
-        logo = logo.replaceAll("_", Ansi.ansi().bg(Ansi.Color.CYAN).fg(Ansi.Color.CYAN).a("_").toString());
-        logo = logo.replaceAll("/", Ansi.ansi().bg(Ansi.Color.WHITE).fg(Ansi.Color.WHITE).a("/").toString());
-        String s = logo + Ansi.ansi().a(Ansi.Attribute.RESET);
-        AnsiConsole.systemUninstall();
+        logo = logo.replaceAll(" ", TermColors.BG_BLACK + " ");
+        logo = logo.replaceAll("_", TermColors.CYAN + TermColors.BG_CYAN + "_");
+        logo = logo.replaceAll("/", TermColors.BG_WHITE + TermColors.WHITE + "/");
+        String s = logo + TermColors.reset();
         return s;
     }
     

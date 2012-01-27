@@ -72,7 +72,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * should throw an EventException, which is caught in the triggering code, and
      * at this time ignored.
      */
-    public void cancel(Object e) throws EventException;
+    public void cancel(Object e, boolean state) throws EventException;
     
     
     /**
