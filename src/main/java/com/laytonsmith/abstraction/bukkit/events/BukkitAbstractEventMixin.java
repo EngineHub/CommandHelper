@@ -55,6 +55,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
         } else if(e instanceof FurnaceBurnEvent || e instanceof FurnaceSmeltEvent){
             macro = "inventory";
         } else if(e instanceof PlayerEvent){
+            map.put("player", new CString(((PlayerEvent)e).getPlayer().getName(), 0, null));
             macro = "player";
         } else if(e instanceof ServerEvent){
             macro = "server";

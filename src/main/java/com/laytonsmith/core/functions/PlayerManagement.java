@@ -2625,4 +2625,226 @@ public class PlayerManagement {
         
     }
     
+//    @api public static class phas_item implements Function{
+//
+//        public String getName() {
+//            return "phas_item";
+//        }
+//
+//        public Integer[] numArgs() {
+//            return new Integer[]{1, 2};
+//        }
+//
+//        public String docs() {
+//            return "int {[player], itemId} Returns the quantity of the specified item"
+//                    + " that the player is carrying. This counts across all slots in"
+//                    + " inventory. Recall that 0 is false, and anything else is true,"
+//                    + " so this can be used to get the total, or just see if they have"
+//                    + " the item.";
+//        }
+//
+//        public ExceptionType[] thrown() {
+//            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+//        }
+//
+//        public boolean isRestricted() {
+//            return true;
+//        }
+//
+//        public boolean preResolveVariables() {
+//            return true;
+//        }
+//
+//        public Boolean runAsync() {
+//            return false;
+//        }
+//
+//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//            throw new UnsupportedOperationException("Not supported yet.");
+//        }
+//
+//        public String since() {
+//            return "3.3.0";
+//        }
+//        
+//    }
+//    
+//    @api public static class pitem_slot implements Function{
+//
+//        public String getName() {
+//            return "pitem_slot";
+//        }
+//
+//        public Integer[] numArgs() {
+//            return new Integer[]{1, 2};
+//        }
+//
+//        public String docs() {
+//            return "array {[player], itemID} Given an item id, returns the slot numbers"
+//                    + " that the matching item has at least one item in.";
+//        }
+//
+//        public ExceptionType[] thrown() {
+//            return new ExceptionType[]{};
+//        }
+//
+//        public boolean isRestricted() {
+//            return true;
+//        }
+//
+//        public boolean preResolveVariables() {
+//            return true;
+//        }
+//
+//        public Boolean runAsync() {
+//            return false;
+//        }
+//
+//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//            throw new UnsupportedOperationException("Not supported yet.");
+//        }
+//
+//        public String since() {
+//            return "3.3.0";
+//        }
+//        
+//    }
+//    
+//    @api public static class pgive_item implements Function{
+//
+//        public String getName() {
+//            return "pgive_item";
+//        }
+//
+//        public Integer[] numArgs() {
+//            return new Integer[]{2, 3};
+//        }
+//
+//        public String docs() {
+//            return "int {[player], itemID, qty} Gives a player the specified item * qty."
+//                    + " Unlike set_pinv(), this does not specify a slot. The qty is distributed"
+//                    + " in the player's inventory, first filling up slots that have the same item"
+//                    + " type, up to the max stack size, then fills up empty slots, until either"
+//                    + " the entire inventory is filled, or the entire amount has been given."
+//                    + " The number of items actually given is returned, which will be less than"
+//                    + " or equal to the quantity provided.";
+//        }
+//
+//        public ExceptionType[] thrown() {
+//            return new ExceptionType[]{};
+//        }
+//
+//        public boolean isRestricted() {
+//            return true;
+//        }
+//
+//        public boolean preResolveVariables() {
+//            return true;
+//        }
+//
+//        public Boolean runAsync() {
+//            return false;
+//        }
+//
+//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//            throw new UnsupportedOperationException("Not supported yet.");
+//        }
+//
+//        public String since() {
+//            return "3.3.0";
+//        }
+//        
+//    }
+//    
+//    @api public static class ptake_item implements Function{
+//
+//        public String getName() {
+//            return "ptake_item";
+//        }
+//
+//        public Integer[] numArgs() {
+//            return new Integer[]{2, 3};
+//        }
+//
+//        public String docs() {
+//            return "int {[player], itemID, qty} Works in reverse of pgive_item(), but"
+//                    + " returns the number of items actually taken, which will be"
+//                    + " from 0 to qty.";
+//        }
+//
+//        public ExceptionType[] thrown() {
+//            return new ExceptionType[]{};
+//        }
+//
+//        public boolean isRestricted() {
+//            return true;
+//        }
+//
+//        public boolean preResolveVariables() {
+//            return true;
+//        }
+//
+//        public Boolean runAsync() {
+//            return false;
+//        }
+//
+//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//            throw new UnsupportedOperationException("Not supported yet.");
+//        }
+//
+//        public String since() {
+//            return "3.3.0";
+//        }
+//        
+//    }
+//    
+//    @api
+//    public static class pinv_consolidate implements Function {
+//        
+//        public String getName() {
+//            return "pinv_consolidate";
+//        }
+//        
+//        public Integer[] numArgs() {
+//            return new Integer[]{0, 1};
+//        }
+//        
+//        public String docs() {
+//            return "void {[player]} Consolidates a player's inventory as much as possible."
+//                    + " There is no guarantee anything will happen after this function"
+//                    + " is called, and there is no way to specify details about how"
+//                    + " consolidation occurs, however, the following heuristics are followed:"
+//                    + " The hotbar items will not be moved from the hotbar, unless there are"
+//                    + " two+ slots that have the same item. Items in the main inventory area"
+//                    + " will be moved closer to the bottom of the main inventory. No empty slots"
+//                    + " will be filled in the hotbar.";
+//        }
+//        
+//        public ExceptionType[] thrown() {
+//            return new ExceptionType[]{};
+//        }
+//        
+//        public boolean isRestricted() {
+//            return true;
+//        }
+//        
+//        public boolean preResolveVariables() {
+//            return true;
+//        }
+//        
+//        public Boolean runAsync() {
+//            return false;
+//        }
+//        
+//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//            throw new UnsupportedOperationException("Not yet supported");
+//        }
+//        
+//        public String since() {
+//            return "3.3.0";
+//        }
+//    }
+    
+    
+    
 }

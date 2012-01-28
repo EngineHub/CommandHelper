@@ -36,8 +36,8 @@ public class PlayerEvents {
                     + "Setting join_message to null causes it to not be displayed at all. Cancelling "
                     + "the event does not prevent them from logging in. Instead, you should just kick() them."
                     + "{player: The player's name | join_message: The default join message}"
-                    + "{player|join_message}"
-                    + "{join_message}";
+                    + "{join_message}"
+                    + "{player|join_message}";
         }
 
         public String since() {
@@ -76,8 +76,8 @@ public class PlayerEvents {
                     + "facing: The (lowercase) face of the block they clicked. See <<jd:[bukkit]org.bukkit.block.BlockFace>> for"
                     + " the possible values |"
                     + "location: The (x, y, z, world) location of the block they clicked}"
-                    + "{player|action|item|location|facing}"
-                    + "{}";
+                    + "{}"
+                    + "{player|action|item|location|facing}";
         }
 
         public String since() {
@@ -91,4 +91,35 @@ public class PlayerEvents {
         
         
     }
+    
+    @docs(type = docs.type.EVENT)
+    public static class player_spawn extends AbstractEvent {
+        
+        public player_spawn(EventHandlerInterface handler) {
+            super(handler);
+        }
+        
+        public String getName() {
+            return "player_spawn";
+        }
+        
+        public String docs() {
+            return "{x: <expression>, y: <expression>, z: <expression>, world: <string match>}"
+                    + "Fires when a player respawns, due to any reason (Death, /spawn, initial login)"
+                    + "{player: The player that is respawning | "
+                    + "location: The location they are going to respawn at}"
+                    + "{location}"
+                    + "{player|location}";
+        }
+        
+        public Driver driver() {
+            return Driver.PLAYER_SPAWN;
+        }
+        
+        public String since() {
+            return "3.3.0";
+        }
+    }
+    
+    
 }

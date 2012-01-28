@@ -132,9 +132,13 @@ public class BukkitConvertor implements Convertor {
             case PLAYER_JOIN:
                 t = Event.Type.PLAYER_JOIN;
                 break;
+            case PLAYER_SPAWN:
+                t = Event.Type.PLAYER_RESPAWN;
+                break;
         }
         if(t == null){
-            throw new ConfigRuntimeException("Incompatible event! " + t, null, 0, null);
+            throw new ConfigRuntimeException("Incompatible event! Did you forget to update the"
+                    + " GetBukkitType function after adding a new event?" + t, null, 0, null);
         }
         return t;
     }
@@ -148,9 +152,13 @@ public class BukkitConvertor implements Convertor {
             case PLAYER_JOIN:
                 t = Driver.PLAYER_JOIN;
                 break;
+            case PLAYER_RESPAWN:
+                t = Driver.PLAYER_SPAWN;
+                break;
         }
         if(t == null){
-            throw new ConfigRuntimeException("Incompatible event! " + t, null, 0, null);
+            throw new ConfigRuntimeException("Incompatible event! Did you forget to update the"
+                    + " GetGenericType function after adding a new event?" + t, null, 0, null);
         }
         return t;
     }

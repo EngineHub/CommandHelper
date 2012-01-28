@@ -11,5 +11,7 @@ package com.laytonsmith.core.events;
  */
 public enum Driver {
     PLAYER_JOIN,    
-    PLAYER_INTERACT,     
+    PLAYER_INTERACT, 
+    PLAYER_SPAWN,     
+    PLAYER_DEATH,
 }

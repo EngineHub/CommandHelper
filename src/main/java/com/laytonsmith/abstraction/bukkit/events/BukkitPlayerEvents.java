@@ -9,7 +9,9 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CInt;
@@ -27,12 +29,14 @@ import com.laytonsmith.core.events.abstraction;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Map;
+import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -61,7 +65,7 @@ public class BukkitPlayerEvents {
             if(e instanceof PlayerJoinEvent){
                 PlayerJoinEvent ple = (PlayerJoinEvent) e;
                 Map<String, Construct> map = mixin.evaluate_helper(e);
-                map.put("player", new CString(ple.getPlayer().getName(), 0, null));
+                //map.put("player", new CString(ple.getPlayer().getName(), 0, null));
                 map.put("join_message", new CString(ple.getJoinMessage(), 0, null));
                 return map;
             } else{
@@ -99,7 +103,7 @@ public class BukkitPlayerEvents {
     @abstraction(load=com.laytonsmith.core.events.drivers.PlayerEvents.player_interact.class,
             type=Implementation.Type.BUKKIT)
     public static class player_interact implements EventHandlerInterface{
-        public boolean matches(Map<String, Construct> prefilter, Object e) {
+        public boolean matches(Map<String, Construct> prefilter, Object e) throws PrefilterNonMatchException {
             if(e instanceof PlayerInteractEvent){
                 PlayerInteractEvent pie = (PlayerInteractEvent)e;
                 if(((PlayerInteractEvent)e).getAction().equals(Action.PHYSICAL)){
@@ -118,13 +122,9 @@ public class BukkitPlayerEvents {
                     }
                 }
                 
-                try{
-                    Prefilters.match(prefilter, "item", Static.ParseItemNotation(new BukkitMCItemStack(pie.getItem())), PrefilterType.ITEM_MATCH);
-                    Prefilters.match(prefilter, "block", Static.ParseItemNotation(new BukkitMCBlock(pie.getClickedBlock())), PrefilterType.ITEM_MATCH);
-                    Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
-                }catch(PrefilterNonMatchException x){
-                    return false;
-                }
+                Prefilters.match(prefilter, "item", Static.ParseItemNotation(new BukkitMCItemStack(pie.getItem())), PrefilterType.ITEM_MATCH);
+                Prefilters.match(prefilter, "block", Static.ParseItemNotation(new BukkitMCBlock(pie.getClickedBlock())), PrefilterType.ITEM_MATCH);
+                Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
                 
                 return true;
             }
@@ -135,7 +135,7 @@ public class BukkitPlayerEvents {
             if(e instanceof PlayerInteractEvent){
                 PlayerInteractEvent pie = (PlayerInteractEvent) e;
                 Map<String, Construct> map = mixin.evaluate_helper(e);
-                map.put("player", new CString(pie.getPlayer().getName(), 0, null));
+                //map.put("player", new CString(pie.getPlayer().getName(), 0, null));
                 Action a = pie.getAction();
                 map.put("action", new CString(a.name().toLowerCase(), 0, null));
                 map.put("block", new CString(Static.ParseItemNotation(new BukkitMCBlock(pie.getClickedBlock())), 0, null));
@@ -179,6 +179,61 @@ public class BukkitPlayerEvents {
 
         public EventMixinInterface customMixin(AbstractEvent e) {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+    }
+    
+    @abstraction(load = com.laytonsmith.core.events.drivers.PlayerEvents.player_spawn.class,
+    type = Implementation.Type.BUKKIT)
+    public static class player_spawn implements EventHandlerInterface {
+
+        public boolean matches(Map<String, Construct> prefilter, Object e) throws PrefilterNonMatchException {
+            if (e instanceof PlayerRespawnEvent) {
+                PlayerRespawnEvent event = (PlayerRespawnEvent) e;
+                Prefilters.match(prefilter, "x", event.getRespawnLocation().getBlockX(), PrefilterType.EXPRESSION);
+                Prefilters.match(prefilter, "y", event.getRespawnLocation().getBlockY(), PrefilterType.EXPRESSION);
+                Prefilters.match(prefilter, "z", event.getRespawnLocation().getBlockZ(), PrefilterType.EXPRESSION);
+                Prefilters.match(prefilter, "world", event.getRespawnLocation().getWorld().getName(), PrefilterType.STRING_MATCH);
+                return true;
+            }
+            return false;
+        }
+        
+        public Map<String, Construct> evaluate(Object e, EventMixinInterface mixin) throws EventException {
+            if (e instanceof PlayerRespawnEvent) {
+                PlayerRespawnEvent event = (PlayerRespawnEvent) e;
+                Map<String, Construct> map = mixin.evaluate_helper(e);
+                //the helper puts the player in for us
+                CArray location = Static.GetLocationArray(new BukkitMCLocation(event.getRespawnLocation()));
+                map.put("location", location);
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to PlayerRespawnEvent");
+            }
+        }
+        
+        public Object convert(CArray manual) {
+            //For firing off the event manually, we have to convert the CArray into an
+            //actual object that will trigger it
+            Player p = ((BukkitMCPlayer)Static.GetPlayer(manual.get("player")))._Player();
+            Location l = ((BukkitMCLocation)Static.GetLocation(manual.get("location"), new BukkitMCWorld(p.getWorld()), 0, null))._Location();
+            PlayerRespawnEvent e = new PlayerRespawnEvent(p, l, false);
+            return e;
+        }
+        
+        public boolean modifyEvent(String key, Construct value, Object event) {
+            if (event instanceof PlayerRespawnEvent) {
+                PlayerRespawnEvent e = (PlayerRespawnEvent) event;
+                if (key.equals("location")) {
+                    //Change this parameter in e to value
+                    e.setRespawnLocation(((BukkitMCLocation)Static.GetLocation(value, new BukkitMCWorld(e.getPlayer().getWorld()), 0, null))._Location());
+                    return true;
+                }
+            }
+            return false;
+        }
+        
+        public EventMixinInterface customMixin(AbstractEvent e) {
+            return null;
         }
     }
 }

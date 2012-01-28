@@ -7,6 +7,8 @@ package com.laytonsmith.core.events;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
@@ -55,6 +57,16 @@ public class Prefilters {
     public static void match(Map<String, Construct> map, String key,
             String actualValue, PrefilterType type) throws PrefilterNonMatchException{
         match(map, key, new CString(actualValue, 0, null), type);
+    }
+    
+    public static void match(Map<String, Construct> map, String key,
+            int actualValue, PrefilterType type) throws PrefilterNonMatchException{
+        match(map, key, new CInt(actualValue, 0, null), type);
+    }
+    
+    public static void match(Map<String, Construct> map, String key,
+            double actualValue, PrefilterType type) throws PrefilterNonMatchException{
+        match(map, key, new CDouble(actualValue, 0, null), type);
     }
     
     /**

@@ -264,6 +264,7 @@ public class DocGen {
                 String prefilter = PrefilterData.Get(m.group(1).split("\\|"), type);
                 String eventData = EventData.Get(m.group(3).split("\\|"), type);
                 String mutability = MutabilityData.Get(m.group(4).split("\\|"), type);
+                String manualTrigger = ManualTriggerData.Get(m.group(5).split("\\|"), type);
                 String since = d.since();
 
                 if (type.equals("html")) {
@@ -401,6 +402,12 @@ public class DocGen {
                 first = false;
             }
             return b.toString();
+        }
+    }
+    
+    private static class ManualTriggerData{
+        public static String Get(String[] data, String type){
+            throw new UnsupportedOperationException("FIXME");
         }
     }
 }
