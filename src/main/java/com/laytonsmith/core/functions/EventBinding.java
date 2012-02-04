@@ -486,7 +486,7 @@ public class EventBinding {
                 if(args[0] instanceof CArray){
                     CArray ca = (CArray)args[1];
                     for(int i = 0; i < ca.size(); i++){
-                        params.add(ca.get(i, 0).val());
+                        params.add(ca.get(i, line_num, f).val());
                     }
                 } else {
                     for(int i = 0; i < args.length; i++){

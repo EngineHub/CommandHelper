@@ -167,7 +167,7 @@ public class Exceptions {
                 } else if(ptypes instanceof CArray){
                     CArray ca = (CArray)ptypes;
                     for(int i = 0; i < ca.size(); i++){
-                        interest.add(ca.get(i, line_num).val());
+                        interest.add(ca.get(i, line_num, f).val());
                     }
                 } else {
                     throw new ConfigRuntimeException("Expected argument 4 to be a string, or an array of strings.", 

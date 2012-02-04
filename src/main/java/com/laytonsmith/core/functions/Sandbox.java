@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.BukkitDirtyRegisteredListener;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -198,7 +199,7 @@ public class Sandbox {
                     natural = true;
                 } else {
                     if (args[0] instanceof CArray) {
-                        l = Static.GetLocation(args[0], (l != null ? l.getWorld() : null), line_num, f);
+                        l = ObjectGenerator.GetGenerator().location(args[0], (l != null ? l.getWorld() : null), line_num, f);
                         natural = false;
                     } else {
                         l = Static.GetPlayer(args[0].val(), line_num, f).getLocation();
@@ -210,7 +211,7 @@ public class Sandbox {
             } else if (args.length == 3) {
                 //We are specifying all 3
                 if (args[0] instanceof CArray) {
-                    l = Static.GetLocation(args[0], (l != null ? l.getWorld() : null), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(args[0], (l != null ? l.getWorld() : null), line_num, f);
                     natural = false;
                 } else {
                     l = Static.GetPlayer(args[0].val(), line_num, f).getLocation();

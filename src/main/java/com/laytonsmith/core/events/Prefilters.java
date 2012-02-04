@@ -49,7 +49,9 @@ public class Prefilters {
         EXPRESSION,
         /**
          * A macro expression allows for either an exact string match, or a regular expression,
-         * or an expression. It is parsed according to the format of the prefilter.
+         * or an expression. It is parsed according to the format of the prefilter. In
+         * general, this should be used most often for things that are not definitively
+         * another type, so as to give scripts more flexibility.
          */
         MACRO
     }
@@ -159,7 +161,10 @@ public class Prefilters {
             }
         } else {
             throw new ConfigRuntimeException("Prefilter expecting expression type, and \"" 
-                    + expression.val() + "\" does not follow expression format", ExceptionType.FormatException, expression.getLineNum(), expression.getFile());
+                    + expression.val() + "\" does not follow expression format. "
+                    + "(Did you surround it in parenthesis?)", 
+                    ExceptionType.FormatException, expression.getLineNum(), 
+                    expression.getFile());
         }
     }
     

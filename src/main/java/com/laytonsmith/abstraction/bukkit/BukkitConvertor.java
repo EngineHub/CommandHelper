@@ -97,6 +97,7 @@ public class BukkitConvertor implements Convertor {
                         l = BlockListener;
                         break;
                     case ENTITY:
+                    case LIVING_ENTITY:
                         l = EntityListener;
                         break;
                     case INVENTORY:
@@ -118,6 +119,11 @@ public class BukkitConvertor implements Convertor {
                         l = WorldListener;
                         break;
                 }
+                if(l == null){                    
+                    throw new ConfigRuntimeException("Unable to register listener for event, is a category"
+                            + " missing?", 
+                            0, null);
+                }
                 chp.registerEvent(BukkitConvertor.GetBukkitType(e.driver()), l, Priority.Lowest);
             }
         }
@@ -135,10 +141,13 @@ public class BukkitConvertor implements Convertor {
             case PLAYER_SPAWN:
                 t = Event.Type.PLAYER_RESPAWN;
                 break;
+            case PLAYER_DEATH:
+                t = Event.Type.ENTITY_DEATH;
+                break;
         }
         if(t == null){
             throw new ConfigRuntimeException("Incompatible event! Did you forget to update the"
-                    + " GetBukkitType function after adding a new event?" + t, null, 0, null);
+                    + " GetBukkitType function after adding a new event?" + t, 0, null);
         }
         return t;
     }
@@ -155,10 +164,13 @@ public class BukkitConvertor implements Convertor {
             case PLAYER_RESPAWN:
                 t = Driver.PLAYER_SPAWN;
                 break;
+            case ENTITY_DEATH:
+                t = Driver.PLAYER_DEATH;
+                break;
         }
         if(t == null){
             throw new ConfigRuntimeException("Incompatible event! Did you forget to update the"
-                    + " GetGenericType function after adding a new event?" + t, null, 0, null);
+                    + " GetGenericType function after adding a new event?" + t, 0, null);
         }
         return t;
     }

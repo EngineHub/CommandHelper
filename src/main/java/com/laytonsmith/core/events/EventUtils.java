@@ -18,6 +18,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
+import javax.security.auth.callback.ConfirmationCallback;
 
 /**
  *
@@ -108,12 +109,23 @@ public class EventUtils {
             Event driver = EventList.getEvent(type, eventName);
             if (bounded != null) {
                 for (BoundEvent b : bounded) {
-                    try {
-                        if (b.getEventName().equalsIgnoreCase(eventName) && driver.matches(b.getPrefilter(), driver.convert(object))) {
-                            toRun.add(b);
+                    if(b.getEventName().equalsIgnoreCase(eventName)){
+                        try {
+                            Object convertedEvent = null;
+                            try{
+                                convertedEvent = driver.convert(object);
+                            } catch(ConfigRuntimeException e){
+                                if(ConfigRuntimeException.HandleUncaughtException(e) == ConfigRuntimeException.Reaction.REPORT){
+                                    ConfigRuntimeException.DoReport(e, "Did you include all the event parameters?");
+                                }
+                                continue;
+                            }
+                            if (driver.matches(b.getPrefilter(), convertedEvent)) {
+                                toRun.add(b);
+                            }
+                        } catch (PrefilterNonMatchException ex) {
+                            //Not running this one
                         }
-                    } catch (PrefilterNonMatchException ex) {
-                        //Not running this one
                     }
                 }
             }
@@ -125,6 +137,9 @@ public class EventUtils {
                     //It's serverwide, so we can just trigger it normally with the driver, and it should trickle back down to us
                     driver.manualTrigger(driver.convert(object));
                 }
+            } else {
+                //TODO: They have fired a non existant event, which is currently silently
+                //ignored. This should fire off a warning instead
             }
         }
     }

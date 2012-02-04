@@ -33,5 +33,6 @@ public class BukkitPlayerListener extends PlayerListener{
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         EventUtils.TriggerListener(BukkitConvertor.GetGenericType(Type.PLAYER_RESPAWN), "player_spawn", event);
     }
+    
 
 }

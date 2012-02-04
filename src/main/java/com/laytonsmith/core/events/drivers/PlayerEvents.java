@@ -104,7 +104,7 @@ public class PlayerEvents {
         }
         
         public String docs() {
-            return "{x: <expression>, y: <expression>, z: <expression>, world: <string match>}"
+            return "{x: <expression>, y: <expression>, z: <expression>, world: <string match>, player: <macro>}"
                     + "Fires when a player respawns, due to any reason (Death, /spawn, initial login)"
                     + "{player: The player that is respawning | "
                     + "location: The location they are going to respawn at}"
@@ -114,6 +114,35 @@ public class PlayerEvents {
         
         public Driver driver() {
             return Driver.PLAYER_SPAWN;
+        }
+        
+        public String since() {
+            return "3.3.0";
+        }
+    }
+    
+    @docs(type = docs.type.EVENT)
+    public static class player_death extends AbstractEvent {
+        
+        public player_death(EventHandlerInterface handler) {
+            super(handler);
+        }
+        
+        public String getName() {
+            return "player_death";
+        }
+        
+        public String docs() {
+            return "{player: <macro>}"
+                    + "Fired when a player dies."
+                    + "{player: The player that died | drops: An array of the dropped items"
+                    + "| xp: The xp that will be dropped | cause: The cause of death}"
+                    + "{xp}"
+                    + "{player, drops}";
+        }
+        
+        public Driver driver() {
+            return Driver.PLAYER_DEATH;
         }
         
         public String since() {

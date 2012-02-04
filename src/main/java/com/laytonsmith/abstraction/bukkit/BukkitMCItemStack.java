@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -81,5 +82,9 @@ public class BukkitMCItemStack implements MCItemStack{
 
     public ItemStack __ItemStack() {
         return is;
+    }
+
+    public void setData(int data) {
+        is.setData(new MaterialData(is.getTypeId(), (byte)data));
     }
 }

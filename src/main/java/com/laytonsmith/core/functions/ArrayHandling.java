@@ -102,11 +102,11 @@ public class ArrayHandling {
                             //Special exception, we want to clone the whole array
                             CArray na = new CArray(line_num, f);
                             na.forceAssociativeMode();
-                            for(Construct key : ca.keySet()){                                
+                            for(String key : ca.keySet()){                                
                                 try {
-                                    na.set(key, ca.get(key, line_num).clone());
+                                    na.set(key, ca.get(key, line_num, f).clone());
                                 } catch (CloneNotSupportedException ex) {
-                                    na.set(key, ca.get(key, line_num));
+                                    na.set(key, ca.get(key, line_num, f));
                                 }
                             }
                             return na;
@@ -142,9 +142,9 @@ public class ArrayHandling {
                         }
                         for(int i = start; i <= finish; i++){
                             try{
-                                na.push(ca.get(i, line_num).clone());
+                                na.push(ca.get(i, line_num, f).clone());
                             } catch(CloneNotSupportedException e){
-                                na.push(ca.get(i, line_num));
+                                na.push(ca.get(i, line_num, f));
                             }
                         }
                         return na;
@@ -158,9 +158,9 @@ public class ArrayHandling {
                             //negative index, convert to positive index
                             iindex = ca.size() + iindex;
                         }
-                        return ca.get(iindex, line_num);
+                        return ca.get(iindex, line_num, f);
                     } else {
-                        return ca.get(args[1], line_num);
+                        return ca.get(args[1], line_num, f);
                     }
                 }
             } else{
@@ -313,7 +313,7 @@ public class ArrayHandling {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray) args[0];
                 for(int i = 0; i < ca.size(); i++){
-                    if(((CBoolean)e.exec(line_num, f, env, ca.get(i, line_num), args[1])).getBoolean()){
+                    if(((CBoolean)e.exec(line_num, f, env, ca.get(i, line_num, f), args[1])).getBoolean()){
                         return new CBoolean(true, line_num, f);
                     }
                 }
@@ -389,7 +389,7 @@ public class ArrayHandling {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray) args[0];
                 for(int i = 0; i < ca.size(); i++){
-                    if(((CBoolean)e.exec(line_num, f, environment, ca.get(i, line_num), args[1])).getBoolean()){
+                    if(((CBoolean)e.exec(line_num, f, environment, ca.get(i, line_num, f), args[1])).getBoolean()){
                         return new CBoolean(true, line_num, f);
                     }
                 }
@@ -616,8 +616,8 @@ public class ArrayHandling {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
                 CArray ca2 = new CArray(line_num, f);
-                for(Construct c : ca.keySet()){
-                    ca2.push(c);
+                for(String c : ca.keySet()){
+                    ca2.push(new CString(c, line_num, f));
                 }
                 return ca2;
             } else {
@@ -668,8 +668,8 @@ public class ArrayHandling {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
                 CArray ca2 = new CArray(line_num, f);
-                for(Construct c : ca.keySet()){
-                    ca2.push(ca.get(c, line_num));
+                for(String c : ca.keySet()){
+                    ca2.push(ca.get(c, line_num, f));
                 }
                 return ca2;
             } else {
@@ -725,11 +725,11 @@ public class ArrayHandling {
                     CArray cur = (CArray)args[i];
                     if(!cur.inAssociativeMode()){
                         for(int j = 0; j < cur.size(); j++){
-                            newArray.push(cur.get(j, line_num));
+                            newArray.push(cur.get(j, line_num, f));
                         }
                     } else {
-                        for(Construct key : cur.keySet()){
-                            newArray.set(key, cur.get(key, line_num));
+                        for(String key : cur.keySet()){
+                            newArray.set(key, cur.get(key, line_num, f));
                         }
                     }
                 } else {
@@ -833,8 +833,8 @@ public class ArrayHandling {
                 glue = args[1].val();
             }
             boolean first = true;
-            for(Construct key : ca.keySet()){
-                Construct value = ca.get(key, line_num);
+            for(String key : ca.keySet()){
+                Construct value = ca.get(key, line_num, f);
                 if(!first){
                     b.append(glue).append(value.val());
                 } else {

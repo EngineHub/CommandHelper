@@ -122,13 +122,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
             if (!ca.inAssociativeMode()) {
                 List<Object> list = new ArrayList<Object>();
                 for(int i = 0; i < ca.size(); i++){
-                    list.add(json_encode0(ca.get(i, 0), line_num, f));
+                    list.add(json_encode0(ca.get(i, line_num, f), line_num, f));
                 }
                 return list;
             } else {
                 Map<String, Object> map = new HashMap<String, Object>();
-                for(Construct key : ca.keySet()){
-                    map.put(key.val(), json_encode0(ca.get(key, 0), line_num, f));
+                for(String key : ca.keySet()){
+                    map.put(key, json_encode0(ca.get(key, line_num, f), line_num, f));
                 }
                 return map;
             }

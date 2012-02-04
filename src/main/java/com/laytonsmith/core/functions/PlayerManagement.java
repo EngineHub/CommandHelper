@@ -28,15 +28,12 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
-
-/**
- * Specially used in set_peffect
- */
 
 
 /**
@@ -235,7 +232,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "boolean {[MCPlayer], xyzArray | [MCPlayer], x, y, z} Sets the location of the MCPlayer to the specified coordinates. If the coordinates"
+            return "boolean {[MCPlayer], locationArray | [MCPlayer], x, y, z} Sets the location of the MCPlayer to the specified coordinates. If the coordinates"
                     + " are not valid, or the MCPlayer was otherwise prevented from moving, false is returned, otherwise true. If MCPlayer is omitted, "
                     + " the current MCPlayer is used. Note that 1 is automatically added to the y component, which means that sending a MCPlayer to"
                     + " x, y, z coordinates shown with F3 will work as expected, instead of getting them stuck inside the floor. ";
@@ -275,10 +272,10 @@ public class PlayerManagement {
             if (args.length == 1) {
                 if (args[0] instanceof CArray) {
                     CArray ca = (CArray) args[0];
-                    l = Static.GetLocation(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), line_num, f);
-                    x = Static.getNumber(ca.get(0, line_num));
-                    y = Static.getNumber(ca.get(1, line_num));
-                    z = Static.getNumber(ca.get(2, line_num));
+                    l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), line_num, f);
+                    x = Static.getNumber(ca.get(0, line_num, f));
+                    y = Static.getNumber(ca.get(1, line_num, f));
+                    z = Static.getNumber(ca.get(2, line_num, f));
                     if (p instanceof MCPlayer) {
                         m = ((MCPlayer) p);
                     }
@@ -291,7 +288,7 @@ public class PlayerManagement {
                 if (args[1] instanceof CArray) {
                     CArray ca = (CArray) args[1];
                     MCPlayer = args[0].val();
-                    l = Static.GetLocation(ca, Static.getServer().getPlayer(MCPlayer).getWorld(), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(ca, Static.getServer().getPlayer(MCPlayer).getWorld(), line_num, f);
                     x = l.getX();
                     y = l.getY();
                     z = l.getZ();
@@ -1275,17 +1272,17 @@ public class PlayerManagement {
                     ca = (CArray) args[1];
                 }
 
-                for (Construct key : ca.keySet()) {
+                for (String key : ca.keySet()) {
                     int i = 0;
-                    if (Integer.valueOf(key.val()) != null) {
-                        i = Integer.parseInt(key.val());
+                    if (Integer.valueOf(key) != null) {
+                        i = Integer.parseInt(key);
                     } else {
                         continue; //Ignore this key
                     }
                     if (!ca.contains(key)) {
                         continue; //Ignore this key too
                     }
-                    Construct item = ca.get(key, line_num);
+                    Construct item = ca.get(key);
                     if (item instanceof CNull) {
                         this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
                                 new CInt(i, line_num, f),
@@ -1296,13 +1293,13 @@ public class PlayerManagement {
                             Construct enchantArray = new CArray(line_num, f);
                             Construct levelArray = new CArray(line_num, f);
                             if (citem.size() == 4) {
-                                enchantArray = citem.get(2, line_num);
-                                levelArray = citem.get(3, line_num);
+                                enchantArray = citem.get(2, line_num, f);
+                                levelArray = citem.get(3, line_num, f);
                             }
                             this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
                                     new CInt(i, line_num, f),
-                                    new CString(citem.get(0, line_num).val(), line_num, f),
-                                    new CInt(Static.getInt(citem.get(1, line_num)), line_num, f),
+                                    new CString(citem.get(0, line_num, f).val(), line_num, f),
+                                    new CInt(Static.getInt(citem.get(1, line_num, f)), line_num, f),
                                     enchantArray, levelArray);
                         } else {
                             throw new ConfigRuntimeException("Expecting internal values of the array to be 2 or 4 element arrays", ExceptionType.CastException, line_num, f);
@@ -1311,6 +1308,7 @@ public class PlayerManagement {
                 }
                 return new CVoid(line_num, f);
             }
+            //else we are using the first method
             if (args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])) {
                 //We're using the slot as arg 1
                 if (Static.isNull(args[0])) {
@@ -2035,11 +2033,14 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "void {MCPlayer, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30.";
+            return "void {MCPlayer, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30."
+                    + " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
+                    + " cause the client to crash, fairly hardcore.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException,
+            ExceptionType.RangeException};
         }
 
         public boolean isRestricted() {
@@ -2067,6 +2068,12 @@ public class PlayerManagement {
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             int effect = (int) Static.getInt(args[1]);
+            //To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
+            //otherwise the client crashes, and requires deletion of
+            //player data to fix.
+            if(effect < 1 || effect > 19){
+                throw new ConfigRuntimeException("Invalid effect ID recieved, ignoring", ExceptionType.RangeException, line_num, f);
+            }
             int strength = (int) Static.getInt(args[2]);
             int seconds = 30;
             if (args.length == 4) {
@@ -2457,17 +2464,17 @@ public class PlayerManagement {
             MCPlayer m = null;
             MCLocation l;
             if(args.length == 1){
-                l = Static.GetLocation(args[0], null, line_num, f);
+                l = ObjectGenerator.GetGenerator().location(args[0], null, line_num, f);
             } else {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                l = Static.GetLocation(args[1], null, line_num, f);
+                l = ObjectGenerator.GetGenerator().location(args[1], null, line_num, f);
             }
             if (m == null) {
                 throw new ConfigRuntimeException("That MCPlayer is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
             MCLocation old = m.getCompassTarget();
             m.setCompassTarget(l);
-            return Static.GetLocationArray(old);
+            return ObjectGenerator.GetGenerator().location(old);
         }
         
     }
@@ -2514,7 +2521,7 @@ public class PlayerManagement {
             if (m == null) {
                 throw new ConfigRuntimeException("That MCPlayer is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            return Static.GetLocationArray(m.getCompassTarget());
+            return ObjectGenerator.GetGenerator().location(m.getCompassTarget());
         }
         
     }

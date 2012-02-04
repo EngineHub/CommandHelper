@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.Static;
@@ -78,11 +79,11 @@ public class WorldEdit {
             }
             if(args.length == 2){
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+                l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), line_num, f);
                 setter = true;
             } else if(args.length == 1){
                 if(args[0] instanceof CArray){
-                    l = Static.GetLocation(args[0], (m==null?null:m.getWorld()), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(args[0], (m==null?null:m.getWorld()), line_num, f);
                     setter = true;
                 } else {
                     m = Static.GetPlayer(args[0].val(), line_num, f);
@@ -141,11 +142,11 @@ public class WorldEdit {
             }
             if (args.length == 2){
                 m = Static.GetPlayer(args[0].val(), line_num, f);
-                l = Static.GetLocation(args[1], m.getWorld(), line_num, f);
+                l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), line_num, f);
                 setter = true;
             } else if (args.length == 1){
                 if (args[0] instanceof CArray) {
-                    l = Static.GetLocation(args[0], (m==null?null:m.getWorld()), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(args[0], (m==null?null:m.getWorld()), line_num, f);
                     setter = true;
                 } else {
                     m = Static.GetPlayer(args[0].val(), line_num, f);
@@ -333,8 +334,8 @@ public class WorldEdit {
             if (args[2] instanceof CArray) {
                 CArray arg = (CArray)args[2];
                 for (int i = 0; i < arg.size(); i++) {
-                    ProtectedRegion region = mgr.getRegion(arg.get(i, line_num).val());
-                    if (region == null) throw new ConfigRuntimeException("Region " + arg.get(i, line_num).val() + " could not be found!", ExceptionType.PluginInternalException, line_num, f);
+                    ProtectedRegion region = mgr.getRegion(arg.get(i, line_num, f).val());
+                    if (region == null) throw new ConfigRuntimeException("Region " + arg.get(i, line_num, f).val() + " could not be found!", ExceptionType.PluginInternalException, line_num, f);
                     checkRegions.add(region);
                 }
             } else {

@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -86,15 +87,12 @@ public class Environment {
             }
             if (args.length == 1 || args.length == 2) {
                 if (args[0] instanceof CArray) {
+                    MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, line_num, f);
                     CArray ca = (CArray) args[0];
-                    if (ca.size() == 3) {
-                        x = Static.getDouble(ca.get(0, line_num));
-                        y = Static.getDouble(ca.get(1, line_num));
-                        z = Static.getDouble(ca.get(2, line_num));
-                    } else {
-                        throw new ConfigRuntimeException("get_block_at expects the array at param 1 to have 3 arguments", ExceptionType.LengthException,
-                                line_num, f);
-                    }
+                    x = loc.getX();
+                    y = loc.getY();
+                    z = loc.getZ();
+                    world = loc.getWorld().getName();
                 } else {
                     throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, line_num, f);
                 }
@@ -176,7 +174,7 @@ public class Environment {
                 w = env.GetPlayer().getWorld();
             }
             if ((args.length == 2 || args.length == 3) && args[0] instanceof CArray) {
-                MCLocation l = Static.GetLocation(args[0], env.GetPlayer().getWorld(), line_num, f);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], env.GetPlayer().getWorld(), line_num, f);
                 x = l.getBlockX();
                 y = l.getBlockY();
                 z = l.getBlockZ();
@@ -284,7 +282,7 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
             if (l.getBlock().isSign()) {
                 String line1 = "";
                 String line2 = "";
@@ -293,16 +291,16 @@ public class Environment {
                 if (args.length == 2 && args[1] instanceof CArray) {
                     CArray ca = (CArray) args[1];
                     if (ca.size() >= 1) {
-                        line1 = ca.get(0, line_num).val();
+                        line1 = ca.get(0, line_num, f).val();
                     }
                     if (ca.size() >= 2) {
-                        line2 = ca.get(1, line_num).val();
+                        line2 = ca.get(1, line_num, f).val();
                     }
                     if (ca.size() >= 3) {
-                        line3 = ca.get(2, line_num).val();
+                        line3 = ca.get(2, line_num, f).val();
                     }
                     if (ca.size() >= 4) {
-                        line4 = ca.get(3, line_num).val();
+                        line4 = ca.get(3, line_num, f).val();
                     }
 
                 } else {
@@ -371,7 +369,7 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
             if (l.getBlock().isSign()) {
                 MCSign s = l.getBlock().getSign();
                 CString line1 = new CString(s.getLine(0), line_num, f);
@@ -421,7 +419,7 @@ public class Environment {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = Static.GetLocation(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
             return new CBoolean(l.getBlock().getType().equals(org.bukkit.Material.SIGN_POST)
                     || l.getBlock().getType().equals(org.bukkit.Material.WALL_SIGN), line_num, f);
         }
@@ -467,7 +465,7 @@ public class Environment {
             MCPlayer p;
             p = environment.GetPlayer();
             MCWorld w = (p != null ? p.getWorld() : null);
-            l = Static.GetLocation(args[0], w, line_num, f);
+            l = ObjectGenerator.GetGenerator().location(args[0], w, line_num, f);
             if (l.getWorld() instanceof CraftWorld) {
                 CraftWorld cw = (CraftWorld) l.getWorld();
                 net.minecraft.server.Block.byId[l.getBlock().getTypeId()].dropNaturally(cw.getHandle(), l.getBlockX(), l.getBlockY(), l.getBlockZ(), l.getBlock().getData(), 1.0f, 0);

@@ -10,4 +10,6 @@ package com.laytonsmith.abstraction.blocks;
  */
 public interface MCMaterial {
     short getMaxDurability();
+
+    public int getType();
 }

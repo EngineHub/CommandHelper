@@ -90,8 +90,8 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      */
     public static Object DoConvert(CArray manualObject){
         Map<String, Construct> map = new HashMap<String, Construct>();
-        for(Construct key : manualObject.keySet()){
-            map.put(key.val(), manualObject.get(key, 0));
+        for(String key : manualObject.keySet()){
+            map.put(key, manualObject.get(key, 0, null));
         }
         return map;        
     }
@@ -104,7 +104,10 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         return handler.evaluate(e, this.mixin);
     }
     
-    public Object convert(CArray manual){
+    public Object convert(CArray manual) throws ConfigRuntimeException{
+        //So as to return the appropriate exception if a parameter is missing,
+        //force the array into associative mode
+        manual.forceAssociativeMode();
         return handler.convert(manual);
     }
     

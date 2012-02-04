@@ -23,4 +23,6 @@ public interface MCItemStack {
     public void setTypeId(int type);
     
     public int getAmount();
+
+    public void setData(int data);
 }

@@ -301,8 +301,8 @@ public class Regex {
         String sflags = "";
         if(c instanceof CArray){
             CArray ca = (CArray)c;
-            regex = ca.get(0, line_num).val();
-            sflags = ca.get(1, line_num).val();
+            regex = ca.get(0, line_num, f).val();
+            sflags = ca.get(1, line_num, f).val();
             for(int i = 0; i < sflags.length(); i++){
                 if(sflags.toLowerCase().charAt(i) == 'i'){
                     flags |= Pattern.CASE_INSENSITIVE;

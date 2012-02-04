@@ -173,20 +173,20 @@ public class Enchantments {
             } else {
                 levelArray = (CArray) args[3 - offset];
             }
-            for (Construct key : enchantArray.keySet()) {
-                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, line_num).val()).toUpperCase());
+            for (String key : enchantArray.keySet()) {
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, line_num, f).val()).toUpperCase());
                 if(e == null){
-                    throw new ConfigRuntimeException(enchantArray.get(key, line_num).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, line_num, f);
+                    throw new ConfigRuntimeException(enchantArray.get(key, line_num, f).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, line_num, f);
                 }
                 if (e.canEnchantItem(is)) {
-                    int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num).val()), line_num, f));
+                    int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num, f).val()), line_num, f));
                     if (e.getMaxLevel() >= level && level > 0) {
                         is.addEnchantment(e, level);
                     } else {
                         throw new ConfigRuntimeException(level + " is too high for the " + e.getName() + " enchantment. The range is 1-" + e.getMaxLevel(), ExceptionType.RangeException, line_num, f);
                     }
                 } else {
-                    throw new ConfigRuntimeException(enchantArray.get(key, line_num).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, line_num, f);
+                    throw new ConfigRuntimeException(enchantArray.get(key, line_num, f).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, line_num, f);
                 }
             }
             return new CVoid(line_num, f);
@@ -255,8 +255,8 @@ public class Enchantments {
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
-            for (Construct key : enchantArray.keySet()) {
-                MCEnchantment e = StaticLayer.GetEnchantmentByName(enchantArray.get(key, line_num).val().toUpperCase());
+            for (String key : enchantArray.keySet()) {
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(enchantArray.get(key, line_num, f).val().toUpperCase());
                 is.removeEnchantment(e);
             }
             return new CVoid(line_num, f);

@@ -15,6 +15,7 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -51,7 +52,7 @@ public class Weather {
             int safeIndex = 1;
             if(args[0] instanceof CArray){
                 CArray a = (CArray)args[0];
-                MCLocation l = Static.GetLocation(a, (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), line_num, f);
+                MCLocation l = ObjectGenerator.GetGenerator().location(a, (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), line_num, f);
                 x = (int)java.lang.Math.floor(l.getX());
                 y = (int)java.lang.Math.floor(l.getY());
                 z = (int)java.lang.Math.floor(l.getZ());

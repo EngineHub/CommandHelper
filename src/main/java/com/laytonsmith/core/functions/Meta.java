@@ -57,7 +57,7 @@ public class Meta {
             if (args[0] instanceof CArray) {
                 CArray u = (CArray) args[0];
                 for (int i = 0; i < u.size(); i++) {
-                    exec(line_num, f, env, new Construct[]{new CString(u.get(i, line_num).val(), line_num, f), args[1]});
+                    exec(line_num, f, env, new Construct[]{new CString(u.get(i, line_num, f).val(), line_num, f), args[1]});
                 }
                 return new CVoid(line_num, f);
             }

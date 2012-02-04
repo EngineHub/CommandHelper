@@ -719,7 +719,7 @@ public class Math {
             for(Construct c : args){
                 if(c instanceof CArray){
                     for(int i = 0; i < ((CArray)c).size(); i++){
-                        recList(list, ((CArray)c).get(i, 0));
+                        recList(list, ((CArray)c).get(i, 0, null));
                     }
                 } else {
                     list.add(c);
@@ -792,7 +792,7 @@ public class Math {
             for(Construct c : args){
                 if(c instanceof CArray){
                     for(int i = 0; i < ((CArray)c).size(); i++){
-                        recList(list, ((CArray)c).get(i, 0));
+                        recList(list, ((CArray)c).get(i, 0, null));
                     }
                 } else {
                     list.add(c);
@@ -1283,9 +1283,9 @@ public class Math {
                 int i = 0;
                 da = new double[vars.size()];
                 varNames = new String[vars.size()];
-                for(Construct key : vars.keySet()){
-                    varNames[i] = key.val();
-                    da[i] = Static.getDouble(vars.get(key, line_num));
+                for(String key : vars.keySet()){
+                    varNames[i] = key;
+                    da[i] = Static.getDouble(vars.get(key, line_num, f));
                     i++;
                 }
             } else {

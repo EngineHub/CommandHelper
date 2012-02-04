@@ -22,5 +22,9 @@ class BukkitMCMaterial implements MCMaterial {
     public short getMaxDurability() {
         return m.getMaxDurability();
     }
+
+    public int getType() {
+        return m.getId();
+    }
     
 }

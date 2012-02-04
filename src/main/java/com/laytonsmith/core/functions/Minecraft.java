@@ -24,6 +24,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -304,7 +305,7 @@ public class Minecraft {
             if (args.length > 2) {
                 if (args[2] instanceof CArray) {
                     CArray ca = (CArray) args[2];
-                    l = Static.GetLocation(ca, (l != null?l.getWorld():null), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(ca, (l != null?l.getWorld():null), line_num, f);
                 } else {
                     throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array",
                             ExceptionType.CastException, line_num, f);
@@ -531,7 +532,7 @@ public class Minecraft {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = Static.GetLocation(args[0], (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), line_num, f);
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), line_num, f);
             MCEffect e = null;
             try{
                 e = MCEffect.valueOf(args[1].val().toUpperCase());

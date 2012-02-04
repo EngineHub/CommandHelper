@@ -126,7 +126,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             Env env, GenericTreeNode<Construct> tree, int line_num, File file) throws EventException {
         this.eventName = name;
 
-        if (options != null && options.contains("id")) {
+        if (options != null && options.containsKey("id")) {
             this.id = options.get("id").val();
             if (this.id.matches(".*?:\\d*?")) {
                 throw new EventException("The id given may not match the format\"string:number\"");
@@ -135,7 +135,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             //Generate a new event id
             id = name + ":" + GetUniqueID();
         }
-        if (options != null && options.contains("priority")) {
+        if (options != null && options.containsKey("priority")) {
             try{
             this.priority = Priority.valueOf(options.get("priority").val().toUpperCase());
             } catch(IllegalArgumentException e){
@@ -147,9 +147,8 @@ public class BoundEvent implements Comparable<BoundEvent> {
 
         this.prefilter = new HashMap<String, Construct>();
         if (prefilter != null) {
-            for (Construct key : prefilter.keySet()) {
-                String k = key.val();
-                this.prefilter.put(k, prefilter.get(key, 0));
+            for (String key : prefilter.keySet()) {
+                this.prefilter.put(key, prefilter.get(key, 0, null));
             }
         }
 
@@ -260,8 +259,8 @@ public class BoundEvent implements Comparable<BoundEvent> {
             Env env = originalEnv.clone();
             env.GetVarList().set(new IVariable(eventObjName, event, 0, null));
             Map<String, Construct> map = new HashMap<String, Construct>();
-            for(Construct key : event.keySet()){
-                map.put(key.val(), event.get(key, 0));
+            for(String key : event.keySet()){
+                map.put(key, event.get(key, 0, null));
             }
             ActiveEvent activeEvent = new ActiveEvent(null);
             activeEvent.setParsedEvent(map);

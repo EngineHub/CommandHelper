@@ -128,7 +128,7 @@ public class DataHandling {
                     if(!inner.contains(c.indexChain.get(i))){
                         makeIt = true;
                     } else {
-                        t = inner.get(c.indexChain.get(i), line_num);
+                        t = inner.get(c.indexChain.get(i), line_num, f);
                         if(!(t instanceof CArray)){
                             makeIt = true;
                         }
@@ -275,7 +275,7 @@ public class DataHandling {
                     IVariable two = (IVariable)iv;
                     if(!one.inAssociativeMode()){
                         for(int i = 0; i < one.size(); i++){
-                            env.GetVarList().set(new IVariable(two.getName(), one.get(i, line_num), line_num, f));
+                            env.GetVarList().set(new IVariable(two.getName(), one.get(i, line_num, f), line_num, f));
                             try{
                                 that.eval(code, env);
                             } catch(LoopBreakException e){
@@ -293,7 +293,7 @@ public class DataHandling {
                     } else {
                         for(int i = 0; i < one.size(); i++){
                             Construct index = one.keySet().toArray(new Construct[]{})[i];
-                            env.GetVarList().set(new IVariable(two.getName(), one.get(index, line_num), line_num, f));
+                            env.GetVarList().set(new IVariable(two.getName(), one.get(index, line_num, f), line_num, f));
                             try{
                                 that.eval(code, env);
                             } catch(LoopBreakException e){

@@ -5,9 +5,13 @@
 
 package com.laytonsmith.core.exceptions;
 
+import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.util.logging.Level;
 
 
 /**
@@ -56,20 +60,96 @@ public class ConfigRuntimeException extends RuntimeException {
         FATAL
     }
     
+    /**
+     * If a exception bubbles all the way up to the top, this should be called first,
+     * to see what reaction the plugin should take.
+     * @param e
+     * @return 
+     */
     public static Reaction HandleUncaughtException(ConfigRuntimeException e){
         //For now just return DEFAULT, but eventually, we will also see what the
         //bound events do for it
         return Reaction.REPORT;
     }
     
+    /**
+     * If the Reaction returned by HandleUncaughtException is to report the exception,
+     * this function should be used to standardize the report format.
+     * @param e 
+     */
     public static void DoReport(ConfigRuntimeException e){
-        System.out.println(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
-        if(e != null){
-            if(e.env.GetPlayer() != null){
-                e.env.GetPlayer().sendMessage(e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
-            }
+        DoReport(e, null);
+    }
+    
+    /**
+     * If the Reaction returned by HandleUncaughtException is to report the exception,
+     * this function should be used to standardize the report format. If the error message
+     * wouldn't be very useful by itself, or if a hint is desired, an optional message
+     * may be provided (null otherwise)
+     * @param e
+     * @param optionalMessage 
+     */
+    public static void DoReport(ConfigRuntimeException e, String optionalMessage){
+        String formatted = optionalMessage==null?"":"; " + optionalMessage;
+        System.out.println(TermColors.RED + e.getMessage() + formatted 
+                + TermColors.WHITE + " :: " + TermColors.GREEN 
+                + e.getExceptionType() + TermColors.WHITE + ":" 
+                + TermColors.YELLOW + e.getFile() + TermColors.WHITE + ":" 
+                + TermColors.CYAN + e.getLineNum() + TermColors.reset());
+        if(e != null && e.env != null && e.env.GetPlayer() != null){
+            e.env.GetPlayer().sendMessage(MCChatColor.RED.toString() + e.getMessage() + formatted + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
         }
     }
+    
+    /**
+     * Shorthand for DoWarning(exception, null, true);
+     * @param e 
+     */
+    public static void DoWarning(Exception e){
+        DoWarning(e, null, true);
+    }
+    
+    /**
+     * Shorthand for DoWarning(null, message, true);
+     * @param optionalMessage 
+     */
+    public static void DoWarning(String optionalMessage){
+        DoWarning(null, optionalMessage, true);
+    }
+    
+    /**
+     * To standardize the warning messages displayed, this function should
+     * be used. It checks the preference setting for warnings to see if
+     * the warning should be shown to begin with, if checkPref is true. The exception
+     * is simply used to get an error message, and is otherwise unused. If the exception
+     * is a ConfigRuntimeException, it is displayed specially (including line number
+     * and file)
+     * @param e
+     * @param optionalMessage 
+     * @throws NullPointerException If both the exception and message are null (or empty)
+     */
+    public static void DoWarning(Exception e, String optionalMessage, boolean checkPrefs){
+        if(e == null && (optionalMessage == null || optionalMessage.isEmpty())){
+            throw new NullPointerException("Both the exception and the message cannot be empty");
+        }
+        if(!checkPrefs || (Boolean)Static.getPreferences().getPreference("show-warnings")){
+            String exceptionMessage = "";
+            if(e instanceof ConfigRuntimeException){
+                ConfigRuntimeException cre = (ConfigRuntimeException)e;
+                exceptionMessage = MCChatColor.YELLOW + cre.getMessage() 
+                + MCChatColor.WHITE + " :: " + MCChatColor.GREEN 
+                + cre.getExceptionType() + MCChatColor.WHITE + ":" 
+                + MCChatColor.YELLOW + cre.getFile() + MCChatColor.WHITE + ":" 
+                + MCChatColor.AQUA + cre.getLineNum();
+            } else if(e != null){
+                exceptionMessage = MCChatColor.YELLOW + e.getMessage();
+            }
+            String message = exceptionMessage + MCChatColor.WHITE + optionalMessage;
+            Static.getLogger().log(Level.WARNING, Static.MCToANSIColors(message) + TermColors.reset());
+            //Warnings are not shown to players ever
+        }
+    }
+    
     
     private ExceptionType ex;
     private int line_num;

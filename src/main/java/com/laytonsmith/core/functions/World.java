@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -78,7 +79,7 @@ public class World {
             } else {
                 world = args[0].val();
             }
-            return Static.GetLocationArray(Static.getServer().getWorld(world).getSpawnLocation());
+            return ObjectGenerator.GetGenerator().location(Static.getServer().getWorld(world).getSpawnLocation());
         }
         
     }
@@ -125,7 +126,7 @@ public class World {
             int z;
             if(args.length == 1){
                 //Location array provided                
-                MCLocation l = Static.GetLocation(args[0], m!=null?m.getWorld():null, line_num, f);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m!=null?m.getWorld():null, line_num, f);
                 world = l.getWorld();
                 x = l.getBlockX();
                 z = l.getBlockZ();
@@ -133,7 +134,7 @@ public class World {
                 //Either location array and world provided, or x and z. Test for array at pos 2
                 if(args[1] instanceof CArray){
                     world = Static.getServer().getWorld(args[0].val());
-                    MCLocation l = Static.GetLocation(args[1], null, line_num, f);
+                    MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, line_num, f);
                     x = l.getBlockX();
                     z = l.getBlockZ();
                 } else {

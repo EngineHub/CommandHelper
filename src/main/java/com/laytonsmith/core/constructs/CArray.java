@@ -27,7 +27,7 @@ public class CArray extends Construct {
     private boolean associative_mode = false;
     private long next_index = 0;
     private List<Construct> array;
-    private SortedMap<Construct, Construct> associative_array;
+    private SortedMap<String, Construct> associative_array;
     private String mutVal;
     CArray parent = null;
 
@@ -41,22 +41,22 @@ public class CArray extends Construct {
             }
         }
         if(associative_mode){
-            associative_array = new TreeMap<Construct, Construct>();
+            associative_array = new TreeMap<String, Construct>();
             for(Construct item : items){
                 if(item instanceof CEntry){
                     associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).construct);
                 } else {
                     int max = Integer.MIN_VALUE;            
-                    for (Construct key : associative_array.keySet()) {
+                    for (String key : associative_array.keySet()) {
                         try{
-                            int i = Integer.parseInt(key.val());
+                            int i = Integer.parseInt(key);
                             max = java.lang.Math.max(max, i);
                         } catch(NumberFormatException e){}
                     }
                     if(max == Integer.MIN_VALUE){
                         max = -1; //Special case, there are no integer indexes in here yet.
                     }
-                    associative_array.put(new CInt(max + 1, item.getLineNum(), item.getFile()), item);
+                    associative_array.put(Integer.toString(max + 1), item);
                     if(item instanceof CArray){
                         ((CArray)item).parent = this;
                     }
@@ -88,7 +88,7 @@ public class CArray extends Construct {
      */
     public void forceAssociativeMode(){
         if(associative_array == null){
-            associative_array = new TreeMap<Construct, Construct>();
+            associative_array = new TreeMap<String, Construct>();
         }
         associative_mode = true;
     }
@@ -107,12 +107,12 @@ public class CArray extends Construct {
             }
         } else {
             boolean first = true;
-            for(Construct key : associative_array.keySet()){
+            for(String key : associative_array.keySet()){
                 if(!first){
                     b.append(", ");
                 }
                 first = false;
-                b.append(key.val()).append(": ").append(associative_array.get(key).val());
+                b.append(key).append(": ").append(associative_array.get(key).val());
             }
         }
         b.append("}");
@@ -132,16 +132,16 @@ public class CArray extends Construct {
             next_index++;
         } else {
             int max = 0;            
-            for (Construct key : associative_array.keySet()) {
+            for (String key : associative_array.keySet()) {
                 try{
-                    int i = Integer.parseInt(key.val());
+                    int i = Integer.parseInt(key);
                     max = java.lang.Math.max(max, i);
                 } catch(NumberFormatException e){}
             }
             if(c instanceof CEntry){
-                associative_array.put(new CInt(max + 1, 0, null), ((CEntry)c).construct());
+                associative_array.put(Integer.toString(max + 1), ((CEntry)c).construct());
             } else {
-                associative_array.put(new CInt(max + 1, 0, null), c);
+                associative_array.put(Integer.toString(max + 1), c);
             }
         }
         if(c instanceof CArray){
@@ -156,11 +156,11 @@ public class CArray extends Construct {
      * returns that.
      * @return 
      */
-    public Set<Construct> keySet(){
-        Set<Construct> set = new HashSet<Construct>(!associative_mode?array.size():associative_array.size());
+    public Set<String> keySet(){
+        Set<String> set = new HashSet<String>(!associative_mode?array.size():associative_array.size());
         if(!associative_mode){
             for(int i = 0; i < array.size(); i++){
-                set.add(new CInt(i, 0, null));
+                set.add(Integer.toString(i));
             }
             set = new TreeSet(set);
         } else {
@@ -187,9 +187,9 @@ public class CArray extends Construct {
                 }
             } catch (ConfigRuntimeException e) {
                 //Not a number. Convert to associative.
-                associative_array = new TreeMap<Construct, Construct>();
+                associative_array = new TreeMap<String, Construct>();
                 for (int i = 0; i < array.size(); i++) {
-                    associative_array.put(new CInt(i, 0, null), array.get(i));
+                    associative_array.put(Integer.toString(i), array.get(i));
                 }
                 associative_mode = true;
                 array = null; // null out the original array container so it can be GC'd
@@ -207,13 +207,26 @@ public class CArray extends Construct {
     public void set(int index, Construct c){
         this.set(new CInt(index, 0, null), c);
     }
+    /* Shortcuts */
+    
+    public void set(String index, Construct c){
+        set(new CString(index, c.getLineNum(), c.getFile()), c);
+    }
+    
+    public void set(String index, String value, int line_num, File f){
+        set(index, new CString(value, line_num, f));
+    }
+    
+    public void set(String index, String value){
+        set(index, value, 0, null);
+    }
 
-    public Construct get(Construct index, int line_num) {
+    public Construct get(Construct index, int line_num, File f) {
         if(!associative_mode){
             try {
                 return array.get((int)Static.getInt(index));
             } catch (IndexOutOfBoundsException e) {
-                throw new ConfigRuntimeException("The element at index " + index.val() + " does not exist", ExceptionType.IndexOverflowException, line_num, file);
+                throw new ConfigRuntimeException("The element at index " + index.val() + " does not exist", ExceptionType.IndexOverflowException, line_num, f);
             }
         } else {
             if(associative_array.containsKey(normalizeConstruct(index))){
@@ -223,34 +236,63 @@ public class CArray extends Construct {
                 }
                 return val;
             } else {
-                throw new ConfigRuntimeException("The element at index " + index.val() + " does not exist", ExceptionType.IndexOverflowException, line_num, file);
+                throw new ConfigRuntimeException("The element at index " + index.val() + " does not exist", ExceptionType.IndexOverflowException, line_num, f);
             }
         }
     }
     
-    public Construct get(int index, int line_num){
-        return this.get(new CInt(index, 0, null), line_num);
+    public Construct get(int index, int line_num, File f){
+        return this.get(new CInt(index, line_num, f), line_num, f);
     }
     
-    /**
-     * This should only be used when the value in the array is being used internally
-     * @param index
-     * @return 
-     */
+    public Construct get(String index, int line_num, File f){
+        return this.get(new CString(index, line_num, f), line_num, f);
+    }
+    
     public Construct get(String index){
-        return this.get(new CString(index, 0, null), 0);
+        return this.get(index, 0, null);
+    }
+    
+    public Construct get(int index){
+        return this.get(index, 0, null);
+    }
+    
+    public boolean containsKey(String c){
+        Integer i;
+        try{
+            i = Integer.valueOf(c);
+        } catch(NumberFormatException e){
+            i = null;
+        }
+        if(associative_mode){
+            return associative_array.containsKey(c);
+        } else {
+            if(i == null){
+                return false;
+            } else {
+                return array.size() > i;
+            }
+        }
+    }
+    
+    public boolean containsKey(int i){
+        return this.containsKey(Integer.toString(i));
     }
     
     public boolean contains(Construct c){
         if(associative_mode){
-            return associative_array.containsKey(c);
+            return associative_array.containsValue(c);
         } else {
             return array.contains(c);
         }
     }
     
     public boolean contains(String c){
-        return this.contains(new CString(c, 0, null));
+        return contains(new CString(c, 0, null));
+    }
+    
+    public boolean contains(int i){
+        return contains(new CString(Integer.toString(i), 0, null));
     }
 
     @Override
@@ -281,35 +323,35 @@ public class CArray extends Construct {
             }
         } else {
             if(associative_array != null){
-                clone.associative_array = new TreeMap<Construct, Construct>(this.associative_array);
+                clone.associative_array = new TreeMap<String, Construct>(this.associative_array);
             }
         }
         clone.regenValue();
         return clone;
     }
     
-    private Construct normalizeConstruct(Construct c){
+    private String normalizeConstruct(Construct c){
         if(c instanceof CArray){
             throw new ConfigRuntimeException("Arrays cannot be used as the key in an associative array", ExceptionType.CastException, c.line_num, c.file);
         } else if(c instanceof CString || c instanceof CInt){
-            return c;
+            return c.val();
         } else if(c instanceof CNull){
-            return new CString("", c.line_num, c.file);
+            return "";
         } else if(c instanceof CBoolean){
             if(((CBoolean)c).getBoolean()){
-                return new CInt(1, c.line_num, c.file);
+                return "1";
             } else {
-                return new CInt(0, c.line_num, c.file);
+                return "0";
             }
         } else if(c instanceof CLabel){
             return normalizeConstruct(((CLabel)c).cVal());
         } else {
-            return new CString(c.val(), c.line_num, c.file);
+            return c.val();
         }
     }
 
     public void remove(Construct construct) {
-        construct = normalizeConstruct(construct);
+        String c = normalizeConstruct(construct);
         if(!associative_mode){
             array.remove((int)Static.getInt(construct));
         } else {

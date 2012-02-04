@@ -138,10 +138,10 @@ public class ArrayHandlingTest {
     public void testArrayPush() throws CancelCommandException {
         ArrayHandling.array_push a = new ArrayHandling.array_push();
         assertReturn(a.exec(0, null, env, commonArray, C.onstruct(4)), C.Void);
-        assertCEquals(C.onstruct(1), commonArray.get(0, 0));
-        assertCEquals(C.onstruct(2), commonArray.get(1, 0));
-        assertCEquals(C.onstruct(3), commonArray.get(2, 0));
-        assertCEquals(C.onstruct(4), commonArray.get(3, 0));
+        assertCEquals(C.onstruct(1), commonArray.get(0, 0, null));
+        assertCEquals(C.onstruct(2), commonArray.get(1, 0, null));
+        assertCEquals(C.onstruct(3), commonArray.get(2, 0, null));
+        assertCEquals(C.onstruct(4), commonArray.get(3, 0, null));
     }
     
     @Test public void testArrayPush2() throws ConfigCompileException{

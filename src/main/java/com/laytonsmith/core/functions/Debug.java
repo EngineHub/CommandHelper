@@ -361,11 +361,11 @@ public class Debug {
                     }
                 }
             } else if (args[0] instanceof CArray) {
-                for (Construct c : ((CArray) args[0]).keySet()) {
+                for (String c : ((CArray) args[0]).keySet()) {
                     try {
-                        set.add(Event.Type.valueOf(((CArray) args[0]).get(c, line_num).val().toUpperCase()));
+                        set.add(Event.Type.valueOf(((CArray) args[0]).get(c, line_num, f).val().toUpperCase()));
                     } catch (IllegalArgumentException e) {
-                        throw new ConfigRuntimeException(c.val() + " is not a valid filter type. The filter log has not been changed.", ExceptionType.FormatException, line_num, f);
+                        throw new ConfigRuntimeException(c + " is not a valid filter type. The filter log has not been changed.", ExceptionType.FormatException, line_num, f);
                     }
                 }
             } else {
@@ -427,8 +427,8 @@ public class Debug {
                 EVENT_PLUGIN_FILTER.clear();
                 EVENT_PLUGIN_FILTER.add(args[0].val().toUpperCase());
             } else if (args[0] instanceof CArray) {
-                for (Construct c : ((CArray) args[0]).keySet()) {
-                    EVENT_PLUGIN_FILTER.add(((CArray) args[0]).get(c, 0).val().toUpperCase());
+                for (String c : ((CArray) args[0]).keySet()) {
+                    EVENT_PLUGIN_FILTER.add(((CArray) args[0]).get(c, line_num, f).val().toUpperCase());
                 }
             } else {
                 throw new ConfigRuntimeException(this.getName() + " expects the argument to be a single string, or an array of strings.", ExceptionType.CastException, line_num, f);
