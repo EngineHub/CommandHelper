@@ -104,8 +104,8 @@ public class PlayerEvents {
         }
         
         public String docs() {
-            return "{x: <expression>, y: <expression>, z: <expression>, world: <string match>, player: <macro>}"
-                    + "Fires when a player respawns, due to any reason (Death, /spawn, initial login)"
+            return "{x: <expression>| y: <expression>| z: <expression>| world: <string match>| player: <macro>}"
+                    + "Fires when a player respawns"
                     + "{player: The player that is respawning | "
                     + "location: The location they are going to respawn at}"
                     + "{location}"

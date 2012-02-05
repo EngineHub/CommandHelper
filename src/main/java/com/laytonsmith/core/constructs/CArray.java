@@ -9,12 +9,11 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.SortedMap;
-import java.util.SortedSet;
 import java.util.TreeMap;
 import java.util.TreeSet;
 
@@ -41,7 +40,7 @@ public class CArray extends Construct {
             }
         }
         if(associative_mode){
-            associative_array = new TreeMap<String, Construct>();
+            associative_array = new TreeMap<String, Construct>(comparator);
             for(Construct item : items){
                 if(item instanceof CEntry){
                     associative_array.put(normalizeConstruct(((CEntry)item).ckey), ((CEntry)item).construct);
@@ -187,7 +186,7 @@ public class CArray extends Construct {
                 }
             } catch (ConfigRuntimeException e) {
                 //Not a number. Convert to associative.
-                associative_array = new TreeMap<String, Construct>();
+                associative_array = new TreeMap<String, Construct>(comparator);
                 for (int i = 0; i < array.size(); i++) {
                     associative_array.put(Integer.toString(i), array.get(i));
                 }
@@ -355,8 +354,37 @@ public class CArray extends Construct {
         if(!associative_mode){
             array.remove((int)Static.getInt(construct));
         } else {
-            associative_array.remove(construct);
+            associative_array.remove(construct.val());
         }
         regenValue();
     }
+    
+    private Comparator<String> comparator = new Comparator<String>(){
+
+        public int compare(String o1, String o2) {
+            //Due to a dumb behavior in Double.parseDouble, 
+            //we need to check to see if there are non-digit characters in
+            //the keys, and if so, do a string comparison.
+            if(o1.matches(".*[^0-9\\.]+.*") || o2.matches(".*[^0-9\\.]+.*")){
+                return o1.compareTo(o2);
+            }
+            try{
+                int i1 = Integer.parseInt(o1);
+                int i2 = Integer.parseInt(o2);
+                //They're both integers, do an integer comparison
+                return new Integer(i1).compareTo(new Integer(i2));
+            } catch(NumberFormatException e){
+                try{                    
+                    double d1 = Double.parseDouble(o1);
+                    double d2 = Double.parseDouble(o2);
+                    //They're both doubles, do a double comparison
+                    return new Double(d1).compareTo(new Double(d2));
+                } catch(NumberFormatException ee){
+                    //Just do a string comparison
+                    return o1.compareTo(o2);
+                }
+            }
+        }
+        
+    };
 }

@@ -125,7 +125,7 @@ public class DataHandling {
                 } else {
                     boolean makeIt = false;
                     Construct t = null;
-                    if(!inner.contains(c.indexChain.get(i))){
+                    if(!inner.containsKey(c.indexChain.get(i).val())){
                         makeIt = true;
                     } else {
                         t = inner.get(c.indexChain.get(i), line_num, f);
@@ -292,7 +292,7 @@ public class DataHandling {
                         }
                     } else {
                         for(int i = 0; i < one.size(); i++){
-                            Construct index = one.keySet().toArray(new Construct[]{})[i];
+                            String index = one.keySet().toArray(new String[]{})[i];
                             env.GetVarList().set(new IVariable(two.getName(), one.get(index, line_num, f), line_num, f));
                             try{
                                 that.eval(code, env);

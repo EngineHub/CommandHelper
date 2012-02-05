@@ -445,7 +445,7 @@ public class ArrayHandling {
                     return new CBoolean(index <= ca.size() - 1, line_num, f);
                 } else {
                     CArray ca = (CArray)args[0];
-                    return new CBoolean(ca.contains(args[1]), line_num, f);
+                    return new CBoolean(ca.containsKey(args[1].val()), line_num, f);
                 }
             } else {
                 throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num, f);
