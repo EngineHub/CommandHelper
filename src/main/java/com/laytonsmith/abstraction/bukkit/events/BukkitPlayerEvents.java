@@ -31,8 +31,10 @@ import java.util.Map;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
+import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -265,7 +267,17 @@ public class BukkitPlayerEvents {
                 Player p = (Player)event.getEntity();
                 map.put("drops", ca);
                 map.put("xp", new CInt(event.getDroppedExp(), 0, null));
-                map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), 0, null));
+                try{
+                    map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), 0, null));
+                    Entity damager = event.getEntity().getLastDamageCause().getEntity();
+                    if(damager instanceof Player){
+                        map.put("damager", new CString(((Player)damager).getName(), 0, null));
+                    } else {
+                        map.put("damager", new CInt(damager.getEntityId(), 0, null));
+                    }
+                } catch(NullPointerException ex){
+                    map.put("cause", new CString(DamageCause.CUSTOM.name(), 0, null));
+                }
                 map.put("location", ObjectGenerator.GetGenerator().location(new BukkitMCLocation(p.getLocation())));
                 //map.put("event object data name", event.getDataFromEvent());
                 return map;
