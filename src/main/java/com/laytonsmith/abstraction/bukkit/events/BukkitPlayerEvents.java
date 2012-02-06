@@ -5,9 +5,6 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
@@ -21,7 +18,6 @@ import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.events.AbstractEvent;
-import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventHandlerInterface;
 import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.events.Prefilters;

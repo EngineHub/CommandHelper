@@ -14,6 +14,8 @@ import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.EventException;
 import java.util.HashMap;
 import java.util.Map;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Player;
 import org.bukkit.event.Cancellable;
 import org.bukkit.event.block.BlockEvent;
 import org.bukkit.event.entity.EntityEvent;
@@ -52,6 +54,10 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
             macro = "block";
         } else if(e instanceof EntityEvent){
             macro = "entity";
+            if(((EntityEvent)e).getEntity() instanceof Player){
+                Entity entity = ((EntityEvent)e).getEntity();
+                map.put("player", new CString(((Player)entity).getName(), 0, null));
+            }
         } else if(e instanceof FurnaceBurnEvent || e instanceof FurnaceSmeltEvent){
             macro = "inventory";
         } else if(e instanceof PlayerEvent){
