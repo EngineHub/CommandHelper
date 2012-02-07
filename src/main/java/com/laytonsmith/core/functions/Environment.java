@@ -316,10 +316,7 @@ public class Environment {
                     if (args.length >= 5) {
                         line4 = args[4].val();
                     }
-                }
-                /**
-                 * TODO: Remove this bukkit reference
-                 */                
+                }               
                 MCSign s = l.getBlock().getSign();
                 s.setLine(0, line1);
                 s.setLine(1, line2);
@@ -420,8 +417,7 @@ public class Environment {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
-            return new CBoolean(l.getBlock().getType().equals(org.bukkit.Material.SIGN_POST)
-                    || l.getBlock().getType().equals(org.bukkit.Material.WALL_SIGN), line_num, f);
+            return new CBoolean(l.getBlock().isSign(), line_num, f);
         }
     }
 

@@ -269,12 +269,12 @@ public class BukkitPlayerEvents {
                 map.put("xp", new CInt(event.getDroppedExp(), 0, null));
                 try{
                     map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), 0, null));
-                    Entity damager = event.getEntity().getLastDamageCause().getEntity();
-                    if(damager instanceof Player){
-                        map.put("damager", new CString(((Player)damager).getName(), 0, null));
-                    } else {
-                        map.put("damager", new CInt(damager.getEntityId(), 0, null));
-                    }
+//                    Entity damager = event.getEntity().getLastDamageCause().getEntity();
+//                    if(damager instanceof Player){
+//                        map.put("damager", new CString(((Player)damager).getName(), 0, null));
+//                    } else {
+//                        map.put("damager", new CInt(damager.getEntityId(), 0, null));
+//                    }
                 } catch(NullPointerException ex){
                     map.put("cause", new CString(DamageCause.CUSTOM.name(), 0, null));
                 }

@@ -2072,7 +2072,7 @@ public class PlayerManagement {
             //otherwise the client crashes, and requires deletion of
             //player data to fix.
             if(effect < 1 || effect > 19){
-                throw new ConfigRuntimeException("Invalid effect ID recieved, ignoring", ExceptionType.RangeException, line_num, f);
+                throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-19", ExceptionType.RangeException, line_num, f);
             }
             int strength = (int) Static.getInt(args[2]);
             int seconds = 30;
