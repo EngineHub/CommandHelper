@@ -5,7 +5,9 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCTameable;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.Tameable;
 
 /**
  *
@@ -20,6 +22,14 @@ class BukkitMCEntity implements MCEntity {
     
     public int getEntityId(){
         return e.getEntityId();
+    }
+
+    public boolean isTameable() {
+        return e instanceof Tameable;
+    }
+
+    public MCTameable getMCTameable() {
+        return new BukkitMCTameable((Tameable)e);
     }
     
 }

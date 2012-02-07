@@ -10,4 +10,8 @@ package com.laytonsmith.abstraction;
  */
 public interface MCEntity {
     public int getEntityId();
+
+    public boolean isTameable();
+
+    public MCTameable getMCTameable();
 }

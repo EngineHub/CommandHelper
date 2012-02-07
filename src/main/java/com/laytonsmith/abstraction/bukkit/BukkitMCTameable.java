@@ -44,6 +44,14 @@ public class BukkitMCTameable implements MCTameable{
         }
         return 0;
     }
+
+    public boolean isTameable() {
+        return true;
+    }
+
+    public MCTameable getMCTameable() {
+        return new BukkitMCTameable(t);
+    }
     
     
 

@@ -372,8 +372,8 @@ public class Minecraft {
             MCEntity e = Static.getEntity(id);
             if(e == null){
                 return new CVoid(line_num, f);
-            } else if(e instanceof MCTameable){                
-                MCTameable t = (MCTameable) e;
+            } else if(e.isTameable()){                
+                MCTameable t = e.getMCTameable();
                 if(player != null){
                     t.setOwner(Static.getServer().getOfflinePlayer(player));
                 } else {

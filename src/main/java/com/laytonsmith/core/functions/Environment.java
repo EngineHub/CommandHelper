@@ -88,7 +88,6 @@ public class Environment {
             if (args.length == 1 || args.length == 2) {
                 if (args[0] instanceof CArray) {
                     MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, line_num, f);
-                    CArray ca = (CArray) args[0];
                     x = loc.getX();
                     y = loc.getY();
                     z = loc.getZ();
