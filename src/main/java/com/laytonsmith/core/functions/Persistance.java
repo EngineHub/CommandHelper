@@ -198,11 +198,11 @@ public class Persistance {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             com.laytonsmith.PureUtilities.Persistance p = Static.getPersistance();
-            List<Map.Entry> list = p.getNamespaceValues(args[0].val().split("\\."));
+            List<Map.Entry<String, Object>> list = p.getNamespaceValues(args[0].val().split("\\."));
             CArray ca = new CArray(line_num, f);
-            for(Map.Entry e : list){
+            for(Map.Entry<String, Object> e : list){
                 try {
-                    ca.set(new CString(e.getKey().toString(), line_num, f), 
+                    ca.set(new CString((String)e.getKey(), line_num, f), 
                             Construct.json_decode(e.getValue().toString(), line_num, f));
                 } catch (MarshalException ex) {
                     Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);

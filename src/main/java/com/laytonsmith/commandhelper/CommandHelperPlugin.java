@@ -26,7 +26,6 @@ import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.User;
 import com.laytonsmith.core.Version;
 import com.laytonsmith.core.events.EventList;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
@@ -44,9 +43,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.MScriptCompiler;
-import org.bukkit.Server;
+import com.laytonsmith.core.UserManager;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -179,19 +176,25 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if(sender.isOp() && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
-            try {
-                if(ac.reload()){
-                    System.out.println("Command Helper scripts sucessfully recompiled.");
-                } else{
-                    System.out.println("An error occured when trying to compile the script. Check the console for more information.");
-                }
-                return true;
-            } catch (ConfigCompileException ex) {
-                logger.log(Level.SEVERE, null, ex);
-                System.out.println("An error occured when trying to compile the script. Check the console for more information.");
-                return false;
+        if((sender.isOp() || (sender instanceof Player && (perms.hasPermission(((Player)sender).getName(), "commandhelper.reloadaliases") 
+                || perms.hasPermission(((Player)sender).getName(), "ch.reloadaliases"))))
+                && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
+            MCPlayer player = null;
+            if(sender instanceof Player){
+                player = new BukkitMCPlayer((Player)sender);
             }
+            if(ac.reload(player)){
+                if(sender instanceof Player){
+                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");
+                }
+                System.out.println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
+            } else{
+                if(sender instanceof Player){
+                    Static.SendMessage(player, MCChatColor.RED + "An error occured when trying to compile the script. Check the console for more information.");
+                }
+                System.out.println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
+            }
+            return true;
         } else if(cmd.getName().equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")){
             return true;
         } else if(cmd.getName().equals("runalias")){
@@ -223,13 +226,12 @@ public class CommandHelperPlugin extends JavaPlugin {
      * @return
      */
     private boolean runCommand(final MCPlayer player, String cmd, String[] args) {
-        CommandHelperSession session = playerListener.getSession(player);
         if(commandRunning.contains(player)){
             return true;
         }
 
         commandRunning.add(player);
-        
+        UserManager um = UserManager.GetUserManager(player.getName());
         // Repeat command
         if (cmd.equals("repeat")) {
             if(perms.hasPermission(player.getName(), "commandhelper.repeat") ||
@@ -237,9 +239,9 @@ public class CommandHelperPlugin extends JavaPlugin {
                 //Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
                 //an infinite loop though, because the preprocessor won't try to fire off a repeat command
                 commandRunning.remove(player);
-                if (session.getLastCommand() != null) {
-                    Static.SendMessage(player, MCChatColor.GRAY + session.getLastCommand());
-                    execCommand(player, session.getLastCommand());
+                if (um.getLastCommand() != null) {
+                    Static.SendMessage(player, MCChatColor.GRAY + um.getLastCommand());
+                    execCommand(player, um.getLastCommand());
                 } else {
                     Static.SendMessage(player, MCChatColor.RED + "No previous command.");
                 }
@@ -262,16 +264,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 
                 String alias = CommandHelperPlugin.joinString(args, " ");
                 try {
-                    User u = new User(player, persist);
-                    //AliasConfig uac = new AliasConfig(alias, u, perms);
-                    MScriptCompiler.compile(MScriptCompiler.lex(alias, null));
-                    //TODO: Finish this
-                    int id = u.addAlias(alias);
+                    int id = um.addAlias(alias);
                     if(id > -1){
                         Static.SendMessage(player, MCChatColor.YELLOW + "Alias added with id '" + id + "'");
                     }
-                } catch (/*ConfigCompile*/Exception ex) {
-                    Static.SendMessage(player, MCChatColor.RED + ex.getMessage());
+                } catch (ConfigCompileException ex) {
+                    Static.SendMessage(player, "Your alias could not be added due to a compile error:\n" + MCChatColor.RED + ex.getMessage());
                 }
             } else{
                 //Display a help message
@@ -290,8 +288,13 @@ public class CommandHelperPlugin extends JavaPlugin {
                 commandRunning.remove(player);
                 return true;
             }
-            User u = new User(player, persist);
-            Static.SendMessage(player, u.getAllAliases());
+            int page = 0;
+            try{
+                page = Integer.parseInt(args[0]);
+            } catch(Exception e){
+                //Meh. Index out of bounds, or number format exception. Whatever, show page 1
+            }
+            Static.SendMessage(player, um.getAllAliases(page));
             commandRunning.remove(player);
             return true;
         // Delete alias
@@ -301,11 +304,10 @@ public class CommandHelperPlugin extends JavaPlugin {
                 commandRunning.remove(player);
                 return true;
             }
-            User u = new User(player, persist);
             try{
                 ArrayList<String> deleted = new ArrayList<String>();
                 for(int i = 0; i < args.length; i++){
-                    u.removeAlias(Integer.parseInt(args[i]));
+                    um.delAlias(Integer.parseInt(args[i]));
                     deleted.add("#" + args[i]);
                 }
                 if(args.length > 1){
@@ -313,7 +315,7 @@ public class CommandHelperPlugin extends JavaPlugin {
                     Static.SendMessage(player, s);
 
                 } else{
-                    Static.SendMessage(player, MCChatColor.YELLOW + "Alias #" + args[0] + "was deleted");
+                    Static.SendMessage(player, MCChatColor.YELLOW + "Alias #" + args[0] + " was deleted");
                 }
             } catch(NumberFormatException e){
                 Static.SendMessage(player, MCChatColor.RED + "The id must be a number");
@@ -323,25 +325,6 @@ public class CommandHelperPlugin extends JavaPlugin {
             commandRunning.remove(player);
             return true;
     
-        // Reload global aliases
-        } else if (cmd.equalsIgnoreCase("reloadaliases")) {
-            if(!perms.hasPermission(player.getName(), "commandhelper.reloadaliases") && !perms.hasPermission(player.getName(), "ch.reloadaliases")){
-                Static.SendMessage(player, MCChatColor.DARK_RED + "You do not have permission to use that command");
-                commandRunning.remove(player);
-                return true;
-            }
-            try {
-                if(ac.reload()){
-                    Static.SendMessage(player, "Command Helper scripts sucessfully recompiled.");
-                } else{
-                    Static.SendMessage(player, "An error occured when trying to compile the script. Check the console for more information.");
-                }
-                commandRunning.remove(player);
-                return true;
-            } catch (ConfigCompileException ex) {
-                logger.log(Level.SEVERE, null, ex);
-                Static.SendMessage(player, "An error occured when trying to compile the script. Check the console for more information.");
-            }
         } else if(cmd.equalsIgnoreCase("interpreter")){
             if(perms.hasPermission(player.getName(), "commandhelper.interpreter")){
                 if((Boolean)Static.getPreferences().getPreference("enable-interpreter")){

@@ -12,6 +12,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -125,6 +126,11 @@ public class SerializedPersistance implements Persistance{
         } else {
             data.put(key, value);
         }
+        try {
+            save();
+        } catch (Exception ex) {
+            Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
+        }
         return oldVal;
     }
 
@@ -167,7 +173,8 @@ public class SerializedPersistance implements Persistance{
     }
 
     /**
-     * Returns the value of a particular key
+     * Returns the value of a particular key, or null if the
+     * key doesn't exist
      * @param key
      * @return
      */
@@ -224,9 +231,9 @@ public class SerializedPersistance implements Persistance{
      * @param partialKey The partial name of the keys you wish to return
      * @return An ArrayList of Map.Entries.
      */
-    public synchronized ArrayList<Map.Entry> getNamespaceValues(String[] partialKey){
+    public synchronized List<Map.Entry<String, Object>> getNamespaceValues(String[] partialKey){
 
-        ArrayList<Map.Entry> matches = new ArrayList<Map.Entry>();
+        List<Map.Entry<String, Object>> matches = new ArrayList<Map.Entry<String, Object>>();
         String m = getNamespace(partialKey);
         partialKey = m.split("\\.");
         if(!isLoaded){

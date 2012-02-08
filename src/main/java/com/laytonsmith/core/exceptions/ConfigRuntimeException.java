@@ -7,6 +7,7 @@ package com.laytonsmith.core.exceptions;
 
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -89,17 +90,30 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param e
      * @param optionalMessage 
      */
-    public static void DoReport(ConfigRuntimeException e, String optionalMessage){
+    public static void DoReport(String message, String exceptionType, String file, String simpleFile, String line_num, String optionalMessage, MCPlayer player){
         String formatted = optionalMessage==null?"":"; " + optionalMessage;
-        System.out.println(TermColors.RED + e.getMessage() + formatted 
+        System.out.println(TermColors.RED + message + formatted 
                 + TermColors.WHITE + " :: " + TermColors.GREEN 
-                + e.getExceptionType() + TermColors.WHITE + ":" 
-                + TermColors.YELLOW + e.getFile() + TermColors.WHITE + ":" 
-                + TermColors.CYAN + e.getLineNum() + TermColors.reset());
-        if(e != null && e.env != null && e.env.GetPlayer() != null){
-            e.env.GetPlayer().sendMessage(MCChatColor.RED.toString() + e.getMessage() + formatted + " :: " + e.getExceptionType() + ":" + e.getSimpleFile() + ":" + e.getLineNum());
+                + exceptionType + TermColors.WHITE + ":" 
+                + TermColors.YELLOW + file + TermColors.WHITE + ":" 
+                + TermColors.CYAN + line_num + TermColors.reset());
+        if(player != null){
+            player.sendMessage(MCChatColor.RED.toString() + message + formatted
+                    + MCChatColor.WHITE + " :: " + MCChatColor.GREEN
+                    + exceptionType + MCChatColor.WHITE + ":" 
+                    + MCChatColor.YELLOW + simpleFile + MCChatColor.WHITE + ":" 
+                    + MCChatColor.AQUA + line_num);
         }
     }
+    
+    public static void DoReport(ConfigRuntimeException e, String optionalMessage){
+        DoReport(e.getMessage(), e.getExceptionType().toString(), e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, e.getEnv().GetPlayer());
+    }
+    
+    public static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){
+        DoReport(e.getMessage(), "COMPILE ERROR", e.getFile().getPath(), e.getSimpleFile(), e.getLineNum(), optionalMessage, player);
+    }
+        
     
     /**
      * Shorthand for DoWarning(exception, null, true);

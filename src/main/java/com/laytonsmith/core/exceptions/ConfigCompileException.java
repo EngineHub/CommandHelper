@@ -48,4 +48,16 @@ public class ConfigCompileException extends Exception{
                     + (file!=null?"(" + file.getAbsolutePath() + ")":"");
         }
     }
+
+    public File getFile() {
+        return this.file;
+    }
+
+    public String getSimpleFile(){
+        if(this.file != null){
+            return this.file.getName();
+        } else {
+            return null;
+        }
+    }
 }

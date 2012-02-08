@@ -24,22 +24,16 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.BukkitDirtyRegisteredListener;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.InternalException;
-import com.laytonsmith.core.MScriptCompiler;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.User;
+import com.laytonsmith.core.UserManager;
 import com.sk89q.worldguard.bukkit.WorldGuardPlayerListener;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.util.logging.Logger;
 import java.util.logging.Level;
-import java.util.Map;
-import java.util.HashMap;
-import java.io.*;
-import java.util.ArrayList;
+import java.util.List;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerListener;
@@ -56,11 +50,7 @@ public class CommandHelperListener extends PlayerListener {
      * Logger.
      */
     private static final Logger logger = Logger.getLogger("Minecraft");
-    /**
-     * Sessions.
-     */
-    private Map<String, CommandHelperSession> sessions =
-            new HashMap<String, CommandHelperSession>();
+
     /**
      * List of global aliases.
      */
@@ -85,39 +75,12 @@ public class CommandHelperListener extends PlayerListener {
      * @return
      */
     public boolean runAlias(String command, MCPlayer player) {
-        try {
-            User u = new User(player, plugin.persist);
-            ArrayList<String> aliases = u.getAliasesAsArray();
-            ArrayList<Script> scripts = new ArrayList<Script>();
-            for (String script : aliases) {
-                Env env = new Env();
-                env.SetPlayer(player);
-                scripts.addAll(MScriptCompiler.preprocess(MScriptCompiler.lex(script, new File("Player")), env));
-            }
-            return CommandHelperPlugin.getCore().alias(command, player, scripts);
-            //return globalAliases.get(command.toLowerCase());
+        UserManager um = UserManager.GetUserManager(player.getName());
+        List<Script> scripts = um.getAllScripts();
 
-        } catch (ConfigCompileException ex) {
-            logger.log(Level.SEVERE, null, ex);
-            return false;
-        }
+        return CommandHelperPlugin.getCore().alias(command, player, scripts);
     }
 
-    /**
-     * Get session.
-     * 
-     * @param player
-     * @return
-     */
-    public CommandHelperSession getSession(MCPlayer player) {
-        if (sessions.containsKey(player.getName())) {
-            return sessions.get(player.getName());
-        } else {
-            CommandHelperSession session = new CommandHelperSession(player.getName());
-            sessions.put(player.getName(), session);
-            return session;
-        }
-    }
         
 
     /**
@@ -145,7 +108,8 @@ public class CommandHelperListener extends PlayerListener {
         if (cmd.equals("/.") || cmd.equals("/repeat")) {
             return;
         }
-        this.getSession(player).setLastCommand(cmd);
+        
+        UserManager.GetUserManager(player.getName()).setLastCommand(cmd);
 
         if (!(Boolean) Static.getPreferences().getPreference("play-dirty")) {
             if (event.isCancelled()) {
@@ -184,7 +148,7 @@ public class CommandHelperListener extends PlayerListener {
     @Override
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
-        sessions.remove(player.getName());
+        UserManager.ClearUser(player.getName());
     }
     
 

@@ -75,7 +75,7 @@ public interface Persistance {
      * @param partialKey The partial name of the keys you wish to return
      * @return An ArrayList of Map.Entries.
      */
-    public List<Map.Entry> getNamespaceValues(String[] partialKey);
+    public List<Map.Entry<String, Object>> getNamespaceValues(String[] partialKey);
     
     /**
      * Prints all of the stored values to the specified stream.

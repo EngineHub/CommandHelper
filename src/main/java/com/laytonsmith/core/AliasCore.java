@@ -7,6 +7,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -55,7 +56,7 @@ public class AliasCore {
         this.perms = perms;
         this.parent = parent;
         this.mainFile = mainFile;
-        reload();
+        reload(null);
     }
 
     /**
@@ -67,7 +68,7 @@ public class AliasCore {
      * @param command
      * @return
      */
-    public boolean alias(String command, final MCCommandSender player, ArrayList<Script> playerCommands) {
+    public boolean alias(String command, final MCCommandSender player, List<Script> playerCommands) {
         
         Env env = new Env();
         env.SetCommandSender(player);
@@ -168,34 +169,36 @@ public class AliasCore {
                     for (Script ac : playerCommands) {
                         //RunnableAlias b = ac.getRunnableAliases(command, player);
                         try {
+                            
                             ac.compile();
+                            
                             if (ac.match(command)) {
                                 Static.getAliasCore().addPlayerReference(player);
-                                try {
-                                    ac.run(ac.getVariables(command), env, new MScriptComplete() {
+                                ac.run(ac.getVariables(command), env, new MScriptComplete() {
 
-                                        public void done(String output) {
-                                            if (output != null) {
-                                                if (!output.trim().equals("") && output.trim().startsWith("/")) {
-                                                    if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
-                                                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer)player).getName() + ": " + output.trim());
-                                                    }
-                                                    ((MCPlayer)player).chat(output.trim());
+                                    public void done(String output) {
+                                        if (output != null) {
+                                            if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                                if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer)player).getName() + ": " + output.trim());
                                                 }
+                                                ((MCPlayer)player).chat(output.trim());
                                             }
-                                            Static.getAliasCore().removePlayerReference(player);
                                         }
-                                    });
-                                } catch (/*ConfigRuntimeException*/Throwable e) {
-                                    //Unlike system scripts, this should just report the problem to the player
-                                    System.err.println(e.getMessage());
-                                    player.sendMessage(MCChatColor.RED + e.getMessage());
-                                    Static.getAliasCore().removePlayerReference(player);
-                                }
+                                        Static.getAliasCore().removePlayerReference(player);
+                                    }
+                                });
                                 match = true;
+                                break;
                             }
-                        } catch (Exception e) {
-                            ((MCPlayer)player).chat("An exception occured while trying to compile/run your alias: " + e.getMessage());
+                        } catch (ConfigRuntimeException e) {
+                            //Unlike system scripts, this should just report the problem to the player
+                            ConfigRuntimeException.DoReport(e);
+                            Static.getAliasCore().removePlayerReference(player);
+                        } catch(ConfigCompileException e){
+                            //Something strange happened, and a bad alias was added
+                            //to the database. Our best course of action is to just
+                            //skip it.
                         }
                     }
 
@@ -208,10 +211,12 @@ public class AliasCore {
     }
 
     /**
-     * Loads the global alias file in from
+     * Loads the global alias file in from the file system. If a player is
+     * running the command, send a reference to them, and they will see
+     * compile errors, otherwise, null.
      */
-    public final boolean reload() throws ConfigCompileException {
-        boolean is_loaded = false;
+    public final boolean reload(MCPlayer player) {
+        boolean is_loaded = true;
         try {
             Globals.clear();
             EventUtils.UnregisterAll();            
@@ -253,13 +258,12 @@ public class AliasCore {
                 MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(main, mainFile)), main_env, new MScriptComplete() {
 
                     public void done(String output) {
-                        logger.log(Level.INFO, "[CommandHelper]: Main file processed");
+                        logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: Main file processed" + TermColors.reset());
                     }
                 }, null);
             } catch(ConfigCompileException e){
-                logger.log(Level.SEVERE, "[CommandHelper]: Main file could not be compiled, due to a compile error: " + e.getMessage());
-            } catch(ConfigRuntimeException e){
-                logger.log(Level.SEVERE, "[CommandHelper]: Main file did not finish running, due to a runtime error: " + e.getMessage() + ":" + e.getExceptionType() + ":" + e.getLineNum());
+                ConfigRuntimeException.DoReport(e, "Main file could not be compiled, due to a compile error.", null);
+                is_loaded = false;
             }
             
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
@@ -270,7 +274,8 @@ public class AliasCore {
                     s.compile();
                     s.checkAmbiguous((ArrayList<Script>) scripts);
                 } catch (ConfigCompileException e) {
-                    logger.log(Level.SEVERE, "[CommandHelper]: " + e.toString() + "\nCompilation will continue.");
+                    ConfigRuntimeException.DoReport(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+                    is_loaded = false;
                 }
             }
             int errors = 0;
@@ -280,13 +285,11 @@ public class AliasCore {
                 }
             }
             if (errors > 0) {
-                System.out.println("[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, with " + errors + " aliases with compile errors.");
+                System.out.println("[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
+                is_loaded = false;
             } else {
                 System.out.println("[CommandHelper]: " + scripts.size() + " alias(es) defined.");
             }
-            is_loaded = true;
-        } catch (ConfigCompileException ex) {
-            logger.log(Level.SEVERE, "[CommandHelper]: " + ex.toString());
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
                     + " check the location and try loading the plugin again.");
