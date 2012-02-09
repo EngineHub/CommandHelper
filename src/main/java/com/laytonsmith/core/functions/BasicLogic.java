@@ -1,15 +1,10 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.api;
-import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.*;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.constructs.*;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.List;

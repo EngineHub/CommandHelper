@@ -5,10 +5,10 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MScriptCompiler;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.File;

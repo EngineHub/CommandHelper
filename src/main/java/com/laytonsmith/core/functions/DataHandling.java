@@ -4,27 +4,10 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.api;
-import com.laytonsmith.core.GenericTreeNode;
-import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CArrayReference;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.Globals;
-import com.laytonsmith.core.Procedure;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.exceptions.LoopContinueException;
-import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.*;
+import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;

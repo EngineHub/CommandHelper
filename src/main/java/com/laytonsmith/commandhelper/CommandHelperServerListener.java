@@ -4,16 +4,15 @@
  */
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.logging.Level;
-import com.laytonsmith.abstraction.MCChatColor;
-import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
-import org.bukkit.command.CommandSender;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.event.server.ServerListener;
 

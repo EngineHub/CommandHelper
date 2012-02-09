@@ -6,7 +6,6 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.abstraction.MCChatColor;
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;

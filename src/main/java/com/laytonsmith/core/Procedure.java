@@ -5,9 +5,9 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.*;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.IVariableList;
 import com.sk89q.util.StringUtil;
 import java.util.ArrayList;

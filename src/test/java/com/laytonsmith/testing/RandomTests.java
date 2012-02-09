@@ -5,30 +5,26 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MCPlayer;
-import org.junit.Before;
-import com.sk89q.worldedit.expression.ExpressionException;
-import com.sk89q.worldedit.expression.Expression;
-import org.bukkit.Location;
-import org.bukkit.World;
-import com.laytonsmith.core.constructs.*;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.MarshalException;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
-import com.laytonsmith.core.functions.Function;
-import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionList;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import com.sk89q.worldedit.expression.Expression;
+import com.sk89q.worldedit.expression.ExpressionException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.Server;
-import org.junit.Test;
 import static org.junit.Assert.*;
-import static com.laytonsmith.testing.StaticTest.*;
+import org.junit.Before;
+import org.junit.Test;
 import static org.mockito.Mockito.*;
 
 /**

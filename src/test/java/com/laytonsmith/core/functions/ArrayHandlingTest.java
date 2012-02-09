@@ -4,22 +4,21 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
+import static com.laytonsmith.testing.StaticTest.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
 import static org.mockito.Mockito.*;
-import static com.laytonsmith.testing.StaticTest.*;
-import static org.junit.Assert.*;
 
 /**
  *

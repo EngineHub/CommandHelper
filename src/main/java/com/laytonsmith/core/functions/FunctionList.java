@@ -4,12 +4,11 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.api;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.core.api;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.constructs.CFunction;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;

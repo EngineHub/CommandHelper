@@ -4,26 +4,23 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.fileutility.FileUtility;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Env;
-import java.io.File;
-import com.laytonsmith.PureUtilities.fileutility.FileUtility;
+import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.Script;
+import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import java.io.File;
 import java.io.IOException;
-import com.laytonsmith.core.constructs.Variable;
 import java.util.Arrays;
-import com.laytonsmith.core.Script;
-import com.laytonsmith.core.MScriptCompiler;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.mockito.Mockito.*;
-import static com.laytonsmith.testing.StaticTest.*;
+import org.junit.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *

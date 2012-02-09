@@ -11,7 +11,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.docs;
 import com.laytonsmith.core.docs.type;
-import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.events.EventHandlerInterface;
 import com.laytonsmith.core.functions.Function;
 import java.lang.reflect.Constructor;

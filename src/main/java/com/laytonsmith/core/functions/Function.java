@@ -4,9 +4,9 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;

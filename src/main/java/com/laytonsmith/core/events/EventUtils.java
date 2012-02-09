@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -13,12 +12,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import javax.security.auth.callback.ConfirmationCallback;
+import java.util.*;
 
 /**
  *

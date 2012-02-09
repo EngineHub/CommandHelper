@@ -6,22 +6,16 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.io.File;
 import com.laytonsmith.core.MScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
-import org.bukkit.entity.Player;
-import org.bukkit.Server;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import java.io.File;
+import static org.junit.Assert.fail;
+import org.junit.*;
 import static org.mockito.Mockito.*;
 
 /**

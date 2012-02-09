@@ -9,32 +9,28 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
-import com.laytonsmith.core.api;
-import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.api;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.io.File;
-
 import com.sk89q.worldedit.BlockVector2D;
-import com.sk89q.worldedit.bukkit.BukkitUtil;
 import com.sk89q.worldedit.Vector;
+import com.sk89q.worldedit.bukkit.BukkitUtil;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionSelector;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
-
-import java.util.*;
-
 import com.sk89q.worldguard.protection.GlobalRegionManager;
-import com.sk89q.worldguard.protection.UnsupportedIntersectionException;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
+import java.io.File;
+import java.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.World;

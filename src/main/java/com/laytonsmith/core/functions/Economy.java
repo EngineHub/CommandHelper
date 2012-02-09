@@ -5,14 +5,14 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.bukkit.BukkitMCPluginManager;
+import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.nijikokun.register.payment.Method;
 import com.nijikokun.register.payment.Method.MethodAccount;
 import com.nijikokun.register.payment.Method.MethodBankAccount;

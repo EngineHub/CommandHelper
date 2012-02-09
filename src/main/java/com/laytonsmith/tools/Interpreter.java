@@ -5,20 +5,20 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.AliasCore;
-import java.io.File;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import java.util.Scanner;
-import com.laytonsmith.core.MScriptComplete;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.MScriptCompiler;
-import java.util.List;
-import com.laytonsmith.core.GenericTreeNode;
-import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.constructs.Token;
-import static com.laytonsmith.tools.Manager.*;
 import static com.laytonsmith.PureUtilities.TermColors.*;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.Env;
+import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.MScriptComplete;
+import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import static com.laytonsmith.tools.Manager.p;
+import static com.laytonsmith.tools.Manager.pl;
+import java.io.File;
+import java.util.List;
+import java.util.Scanner;
 
 /**
  * This is a command line implementation of the in game interpreter mode.

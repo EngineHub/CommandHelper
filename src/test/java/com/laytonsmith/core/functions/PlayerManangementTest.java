@@ -4,32 +4,19 @@
  */
 package com.laytonsmith.core.functions;
 
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.junit.runner.RunWith;
-import com.laytonsmith.testing.StaticTest;
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MScriptComplete;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import org.junit.Test;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.powermock.modules.junit4.PowerMockRunner;
-import static org.powermock.api.mockito.PowerMockito.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.times;
+import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertEquals;
+import org.junit.*;
+import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.*;
 
 /**
  *

@@ -4,16 +4,12 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Token.TType;
+import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EmptyStackException;
-import java.util.List;
-import java.util.Stack;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**

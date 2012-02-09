@@ -1,8 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
-import java.util.ArrayList;
-
 import com.laytonsmith.abstraction.MCChatColor;
+import java.util.ArrayList;
 
 /**
  * This class provides a method for working around the not so pretty line breaks

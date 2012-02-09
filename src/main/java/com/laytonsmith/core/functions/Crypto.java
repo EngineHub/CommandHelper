@@ -4,16 +4,16 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.Env;
+import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import com.laytonsmith.core.api;
-import java.math.BigInteger;
 
 /**
  * @author Layton

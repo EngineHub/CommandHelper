@@ -6,6 +6,8 @@ package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
+import com.laytonsmith.PureUtilities.TermColors.SYS;
+import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MScriptCompiler;
@@ -20,8 +22,6 @@ import java.util.Map;
 import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.laytonsmith.PureUtilities.TermColors.*;
 /**
  *
  * @author layton

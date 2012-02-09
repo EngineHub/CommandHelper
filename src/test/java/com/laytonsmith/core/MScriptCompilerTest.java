@@ -4,30 +4,22 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.Script;
-import com.laytonsmith.core.MScriptCompiler;
-import com.laytonsmith.core.MScriptComplete;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.testing.StaticTest;
-import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.constructs.Token;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.testing.StaticTest;
+import static com.laytonsmith.testing.StaticTest.SRun;
+import com.sk89q.bukkit.migration.PermissionsResolverManager;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
 import static org.junit.Assert.*;
+import org.junit.*;
 import static org.mockito.Mockito.*;
-import static com.laytonsmith.testing.StaticTest.*;
 
 /**
  *

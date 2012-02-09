@@ -4,13 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCAnimalTamer;
-import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCPluginManager;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;

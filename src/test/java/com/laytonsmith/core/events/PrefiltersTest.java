@@ -4,19 +4,14 @@
  */
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.events.Prefilters;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.testing.C;
 import java.util.HashMap;
 import java.util.Map;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
+import static org.junit.Assert.fail;
+import org.junit.*;
 
 /**
  *

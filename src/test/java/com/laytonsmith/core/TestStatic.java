@@ -4,16 +4,14 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.NotInitializedYetException;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *

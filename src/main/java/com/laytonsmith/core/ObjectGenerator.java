@@ -4,23 +4,13 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.abstraction.MCEnchantment;
-import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.abstraction.*;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
-import net.minecraft.server.ItemGlassBottle;
 
 /**
  * This file is responsible for converting CH objects into server objects,

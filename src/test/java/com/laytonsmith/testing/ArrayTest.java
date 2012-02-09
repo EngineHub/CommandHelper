@@ -6,18 +6,18 @@ package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import static org.junit.Assert.*;
-import static com.laytonsmith.testing.StaticTest.*;
+import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
 import org.bukkit.plugin.Plugin;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.InOrder;
+import static org.mockito.Mockito.*;
 
 /**
  *

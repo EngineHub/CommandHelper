@@ -4,23 +4,19 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 

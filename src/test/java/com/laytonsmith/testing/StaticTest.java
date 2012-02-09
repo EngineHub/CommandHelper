@@ -4,44 +4,31 @@
  */
 package com.laytonsmith.testing;
 
+import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.junit.runner.RunWith;
-import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
-import com.laytonsmith.abstraction.MCConsoleCommandSender;
-import com.laytonsmith.abstraction.MCWorld;
-import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.functions.BasicLogic.equals;
-import com.laytonsmith.core.MScriptCompiler;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
-import java.lang.reflect.Field;
-import com.laytonsmith.core.constructs.Token;
-import java.util.List;
-import java.util.ArrayList;
-import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.MScriptComplete;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.Version;
+import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.exceptions.*;
+import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
-import com.laytonsmith.core.exceptions.FunctionReturnException;
-import com.laytonsmith.core.exceptions.LoopBreakException;
-import com.laytonsmith.core.exceptions.LoopContinueException;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Random;
 import org.bukkit.World;
+import static org.junit.Assert.fail;
+import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import static org.junit.Assert.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  * 

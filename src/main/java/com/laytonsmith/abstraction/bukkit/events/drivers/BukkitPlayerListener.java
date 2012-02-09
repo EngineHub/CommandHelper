@@ -5,7 +5,6 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
-import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.event.Event.Type;
 import org.bukkit.event.player.PlayerInteractEvent;

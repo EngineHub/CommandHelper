@@ -4,25 +4,19 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.functions.IVariableList;
-import com.laytonsmith.core.functions.Math;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 import static com.laytonsmith.testing.StaticTest.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
+import org.junit.*;
+import static org.mockito.Mockito.verify;
 
 /**
  *

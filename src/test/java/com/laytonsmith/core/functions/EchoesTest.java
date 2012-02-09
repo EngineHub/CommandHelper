@@ -4,22 +4,18 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.functions.Echoes;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import java.lang.reflect.InvocationTargetException;
-import org.junit.After;
-import org.junit.AfterClass;
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.mockito.Mockito.*;
 import static com.laytonsmith.testing.StaticTest.*;
+import java.lang.reflect.InvocationTargetException;
+import org.junit.*;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 /**
  *

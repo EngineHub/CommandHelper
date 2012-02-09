@@ -4,16 +4,12 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.api;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.api;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

@@ -4,10 +4,10 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.tools.DocGen;
-import com.laytonsmith.tools.Manager;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
+import com.laytonsmith.tools.DocGen;
 import com.laytonsmith.tools.Interpreter;
+import com.laytonsmith.tools.Manager;
 import com.laytonsmith.tools.SyntaxHighlighters;
 import java.io.File;
 import java.io.FileNotFoundException;

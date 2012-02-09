@@ -9,7 +9,6 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.docs;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.EventHandlerInterface;
-import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
@@ -17,16 +16,7 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.SortedSet;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,7 +27,7 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) {
-        events("wiki");
+        functions("wiki");
     }
 
     public static void functions(String type) {

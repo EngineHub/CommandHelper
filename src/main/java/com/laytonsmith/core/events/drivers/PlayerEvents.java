@@ -6,8 +6,8 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.core.docs;
 import com.laytonsmith.core.events.AbstractEvent;
-import com.laytonsmith.core.events.EventHandlerInterface;
 import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventHandlerInterface;
 
 
 /**

@@ -6,7 +6,6 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
-import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.PlayerInventory;
 
 /**

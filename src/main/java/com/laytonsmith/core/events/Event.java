@@ -4,11 +4,11 @@
  */
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Map;

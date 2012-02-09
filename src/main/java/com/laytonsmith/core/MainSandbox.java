@@ -4,25 +4,6 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.core.functions.Regex;
-import com.sun.java.swing.plaf.windows.WindowsTreeUI.CollapsedIcon;
-import java.io.File;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.net.URL;
-import java.security.CodeSource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipInputStream;
-//import net.minecraft.server.Packet;
-
 /**
  * This class is for testing concepts
  * @author Layton

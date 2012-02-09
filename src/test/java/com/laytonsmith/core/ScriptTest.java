@@ -4,17 +4,10 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Variable;
-import java.util.ArrayList;
-import java.util.List;
-import org.bukkit.entity.Player;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *

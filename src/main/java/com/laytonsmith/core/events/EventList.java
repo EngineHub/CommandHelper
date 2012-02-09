@@ -10,11 +10,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.EnumMap;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
