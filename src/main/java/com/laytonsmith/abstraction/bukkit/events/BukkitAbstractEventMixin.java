@@ -48,7 +48,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
     public Map<String, Construct> evaluate_helper(Object e) throws EventException{
         Map<String, Construct> map = new HashMap<String, Construct>();
         map.put("type", new CString(mySuper.getName(), 0, null));
-        String macro = "";
+        String macro;
         if(e instanceof BlockEvent){
             macro = "block";
         } else if(e instanceof EntityEvent){

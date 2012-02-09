@@ -16,7 +16,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertEquals;
 import org.junit.*;
 import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.*;
+//import static org.powermock.api.mockito.PowerMockito.*;
 
 /**
  *
@@ -35,7 +35,7 @@ public class PlayerManangementTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-        mockStatic(StaticLayer.class);
+        //mockStatic(StaticLayer.class);
     }
 
     @AfterClass
@@ -43,7 +43,7 @@ public class PlayerManangementTest {
     }
     
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         fakeServer = GetFakeServer();
         fakePlayer = GetOp("wraithguard01", fakeServer);
         when(fakePlayer.getServer()).thenReturn(fakeServer);
@@ -82,7 +82,7 @@ public class PlayerManangementTest {
         assertEquals("{wraithguard01, wraithguard02, wraithguard03}", done);
     }
     
-    @Test public void testPloc() throws ConfigCompileException{
+    @Test public void testPloc() throws ConfigCompileException, Exception{
         String script = "ploc()";
         BukkitMCWorld w = GetWorld("world");
         MCLocation loc = StaticLayer.GetLocation(w, 0, 1, 0);
@@ -98,7 +98,7 @@ public class PlayerManangementTest {
         assertEquals("{0.0, 0.0, 0.0, world}", done.toString());
     }
     
-    /*@Test*/ public void testSetPloc() throws ConfigCompileException{
+    /*@Test*/ public void testSetPloc() throws ConfigCompileException, Exception{
         MCWorld w = GetWorld("world");
         CommandHelperPlugin.myServer = fakeServer;
         String name = fakePlayer.getName();
@@ -122,7 +122,7 @@ public class PlayerManangementTest {
         verify(fakePlayer).teleport(StaticLayer.GetLocation(w, 4, 5, 4, 0, 0));
     }
     
-    @Test public void testPcursor() throws ConfigCompileException{  
+    @Test public void testPcursor() throws ConfigCompileException, Exception{  
         MCBlock b = mock(MCBlock.class);
         CommandHelperPlugin.myServer = fakeServer;
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);

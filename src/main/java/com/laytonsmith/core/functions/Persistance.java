@@ -13,6 +13,8 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
@@ -72,6 +74,9 @@ public class Persistance {
             char pc = '.';
             for(int i = 0; i < key.length(); i++){
                 Character c = key.charAt(i);
+                if(i != 0){
+                    pc = key.charAt(i - 1);
+                }
                 if((i == 0 || i == key.length() - 1 || pc == '.') && c == '.'){
                     throw new ConfigRuntimeException("Periods may only be used as seperators between namespaces.", ExceptionType.FormatException, line_num, f);
                 }
@@ -193,11 +198,15 @@ public class Persistance {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             com.laytonsmith.PureUtilities.Persistance p = Static.getPersistance();
-            List<Map.Entry<String, Object>> list = p.getNamespaceValues(args[0].val().split("\\."));
+            List<String> keyChain = new ArrayList<String>();
+            keyChain.add("storage");
+            keyChain.addAll(Arrays.asList(args[0].val().split("\\.")));
+            List<Map.Entry<String, Object>> list = p.getNamespaceValues(keyChain.toArray(new String[]{}));
             CArray ca = new CArray(line_num, f);
             for(Map.Entry<String, Object> e : list){
                 try {
-                    ca.set(new CString((String)e.getKey(), line_num, f), 
+                    String key = ((String)e.getKey()).replaceFirst("storage\\.", ""); //Get that junk out of here
+                    ca.set(new CString(key, line_num, f), 
                             Construct.json_decode(e.getValue().toString(), line_num, f));
                 } catch (MarshalException ex) {
                     Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
