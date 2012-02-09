@@ -1062,7 +1062,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "mixed {[MCPlayer], [index]} Gets the inventory information for the specified MCPlayer, or the current MCPlayer if none specified. If the index is specified, only the slot "
+            return "mixed {[MCPlayer, [index]]} Gets the inventory information for the specified MCPlayer, or the current MCPlayer if none specified. If the index is specified, only the slot "
                     + " given will be returned, but in general, the return format is: array(array(data, qty, enchantArray, enchantLevel), array(data, qty, enchantArray, enchantLevel), ...)"
                     + " where data is the x:y value of the block (or just the"
                     + " value if it's an item, and y is the damage value for tools), and"
@@ -1098,7 +1098,7 @@ public class PlayerManagement {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
-            int index = -1;
+            Integer index = -1;
             boolean all = false;
             MCPlayer m = null;
             if (args.length == 0) {
@@ -1111,7 +1111,7 @@ public class PlayerManagement {
                 m = p.getServer().getPlayer(args[0].val());
             } else if (args.length == 2) {
                 if (args[1] instanceof CNull) {
-                    index = -1;
+                    index = null;
                 } else {
                     index = (int) Static.getInt(args[1]);
                 }
@@ -1122,85 +1122,53 @@ public class PlayerManagement {
                 throw new ConfigRuntimeException("The specified MCPlayer is not online",
                         ExceptionType.PlayerOfflineException, line_num, f);
             }
-            if (!all) {
-                if ((index < 0 || index > 35) && (index < 100 || index > 103) && index != -1) {
-                    throw new ConfigRuntimeException("The index specified must be between 0-35, or 100-103",
-                            ExceptionType.RangeException, line_num, f);
+            if(all){
+                CArray ret = new CArray(line_num, f);
+                ret.forceAssociativeMode();
+                for(int i = 0; i < 36; i++){
+                    ret.set(i, getInvSlot(m, i, line_num, f));
                 }
-            }
-            MCInventory inv = m.getInventory();
-            if (!all) {
-                String value = "";
-                int qty = 0;
-                if (index == -1) {
-                    MCItemStack is = m.getItemInHand();
-                    return getInvSlot(is, line_num, f, env);
+                for(int i = 100; i < 104; i++){
+                    ret.set(i, getInvSlot(m, i, line_num, f));
                 }
-                if (index >= 100 && index <= 103) {
-                    qty = 1;
-                    switch (index) {
-                        case 100:
-                            value = Integer.toString(inv.getBoots().getTypeId());
-                            break;
-                        case 101:
-                            value = Integer.toString(inv.getLeggings().getTypeId());
-                            break;
-                        case 102:
-                            value = Integer.toString(inv.getChestplate().getTypeId());
-                            break;
-                        case 103:
-                            value = Integer.toString(inv.getHelmet().getTypeId());
-                            break;
-                    }
-                    if (value.equals("0")) {
-                        value = null;
-                        qty = 0;
-                    }
-                } else {
-                    if (inv.getItem(index).getTypeId() == 0) {
-                        value = null;
-                    } else {
-                        value = Static.ParseItemNotation(inv.getItem(index));
-                    }
-                    qty = inv.getItem(index).getAmount();
-                }
-                if (value == null) {
-                    return new CNull(line_num, f);
-                } else {
-                    Construct cvalue = null;
-                    cvalue = new CString(value, line_num, f);
-                    return new CArray(line_num, f, cvalue, new CInt(qty, line_num, f));
-                }
+                return ret;
             } else {
-                CArray ca = new CArray(line_num, f);
-                for (int i = 0; i < 36; i++) {
-                    MCItemStack is = inv.getItem(i);
-                    ca.push(getInvSlot(is, line_num, f, env));
-                }
-                ca.set(100, getInvSlot(inv.getBoots(), line_num, f, env));
-                ca.set(101, getInvSlot(inv.getLeggings(), line_num, f, env));
-                ca.set(102, getInvSlot(inv.getChestplate(), line_num, f, env));
-                ca.set(103, getInvSlot(inv.getHelmet(), line_num, f, env));
-                return ca;
+                return getInvSlot(m, index, line_num, f);
             }
         }
 
-        private Construct getInvSlot(MCItemStack is, int line_num, File f, Env env) {
-            if (is != null && is.getTypeId() != 0) {
-                CArray enchants = new CArray(line_num, f);
-                CArray levels = new CArray(line_num, f);
-                for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
-                    MCEnchantment e = entry.getKey();
-                    Integer l = entry.getValue();
-                    enchants.push(new CString(e.getName(), line_num, f));
-                    levels.push(new CInt(l, line_num, f));
-                }
-                return new CArray(line_num, f,
-                        new CString(Static.ParseItemNotation(is), line_num, f),
-                        new CInt(is.getAmount(), line_num, f), enchants, levels);
-            } else {
-                return new CNull(line_num, f);
+        private Construct getInvSlot(MCPlayer m, Integer slot, int line_num, File f) {
+            if(slot == null){
+                return ObjectGenerator.GetGenerator().item(m.getItemInHand(), line_num, f);
             }
+            MCInventory inv = m.getInventory();
+            if(slot.equals(36)){
+                slot = 100;
+            }
+            if(slot.equals(37)){
+                slot = 101;
+            }
+            if(slot.equals(38)){
+                slot = 102;
+            }
+            if(slot.equals(39)){
+                slot = 103;
+            }
+            MCItemStack is;
+            if(slot >= 0 && slot <= 35){
+                is = inv.getItem(slot);
+            } else if(slot.equals(100)){
+                is = inv.getBoots();
+            } else if(slot.equals(101)){
+                is = inv.getLeggings();
+            } else if(slot.equals(102)){
+                is = inv.getChestplate();
+            } else if(slot.equals(103)){
+                is = inv.getHelmet();
+            } else {
+                throw new ConfigRuntimeException("Slot index must be 0-35, or 100-103", ExceptionType.RangeException, line_num, f);
+            }
+            return ObjectGenerator.GetGenerator().item(is, line_num, f);
         }
     }
 
@@ -1289,6 +1257,7 @@ public class PlayerManagement {
                                 new CInt(0, line_num, f));
                     } else {
                         if (item instanceof CArray && (((CArray) item).size() == 2) || ((CArray) item).size() == 4) {
+                            
                             CArray citem = (CArray) item;
                             Construct enchantArray = new CArray(line_num, f);
                             Construct levelArray = new CArray(line_num, f);

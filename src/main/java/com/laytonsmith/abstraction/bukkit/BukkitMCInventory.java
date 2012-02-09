@@ -25,7 +25,7 @@ public class BukkitMCInventory implements MCInventory {
     }
 
     public void setItem(int slot, MCItemStack stack) {
-        this.i.setItem(slot, ((BukkitMCItemStack)stack).is);
+        this.i.setItem(slot, stack==null?null:((BukkitMCItemStack)stack).is);
     }
 
     public void setHelmet(MCItemStack stack) {

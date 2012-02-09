@@ -152,7 +152,7 @@ public class ObjectGenerator {
      * @return 
      */
     public Construct item(MCItemStack is, int line_num, File f){
-        if(is == null){
+        if(is == null || is.getAmount() == 0){
             return new CNull(line_num, f);
         }
         int type = is.getTypeId();
