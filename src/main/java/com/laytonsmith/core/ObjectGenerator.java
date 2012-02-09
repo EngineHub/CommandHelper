@@ -155,27 +155,22 @@ public class ObjectGenerator {
         if(is == null || is.getAmount() == 0){
             return new CNull(line_num, f);
         }
-        int type = is.getTypeId();
+        int type = is.getTypeId();        
         int data = (is.getData()!=null?is.getData().getData():0);
         int qty = is.getAmount();
         CArray enchants = new CArray(line_num, f);
         for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()){
             CArray enchObj = new CArray(line_num, f);
             enchObj.forceAssociativeMode();
-            enchObj.set(0, new CString(entry.getKey().getName(), line_num, f));
             enchObj.set("etype", new CString(entry.getKey().getName(), line_num, f));
-            enchObj.set(1, new CInt(entry.getValue(), line_num, f));
             enchObj.set("elevel", new CInt(entry.getValue(), line_num, f));
             enchants.push(enchObj);
         }
         CArray ret = new CArray(line_num, f);
         ret.forceAssociativeMode();
-        ret.set("0", type + (data!=0?(":" + data):""));
         ret.set("type", Integer.toString(type));
         ret.set("data", Integer.toString(data));
-        ret.set("1", Integer.toString(qty));
         ret.set("qty", Integer.toString(qty));
-        ret.set("2", enchants);
         ret.set("enchants", enchants);
         return ret;
     }
@@ -189,58 +184,37 @@ public class ObjectGenerator {
      * @return 
      */
     public MCItemStack item(Construct i, int line_num, File f){
+        if(i instanceof CNull){
+            return EmptyItem();
+        }
         if(!(i instanceof CArray)){
             throw new ConfigRuntimeException("Expected an array!", ExceptionType.FormatException, line_num, f);
         }
-        //We need to support
-        //both the new version, and the old version, but the new version
-        //supersedes the old version. Also, either version
-        //might be present, because the old version should be phased out eventually,
-        //so let's also give a deprecation warning
-        //First, try to pull out the old items
         CArray item = (CArray)i;
         int type = 0;
         int data = 0;
-        int qty = 0;
+        int qty = 1;
         Map<MCEnchantment, Integer> enchants = new HashMap<MCEnchantment, Integer>();
-        boolean depWarning = false;
-        if(item.containsKey(0) || item.containsKey("type") || item.containsKey("data")){
-            //This is the type and possibly data segment
-            String typeData = "Expecting a number";
-            if(item.containsKey(0)){
-                typeData = item.get(0).val();
-                depWarning = true;
-            }            
-            if(item.containsKey("type")){
-                String td = item.get("type").val();
-                if(item.containsKey("data") && !item.get("data").val().equals("0")){
-                    td += ":" + item.get("data");
-                }
-                typeData = td;
-            }
-            String[] split = typeData.split(":");
+
+        if(item.containsKey("type")){
             try{
-                type = Integer.parseInt(split[0]);
+                type = Integer.parseInt(item.get("type").val());
             }catch(NumberFormatException e){
-                throw new ConfigRuntimeException("Could not get item information from given information (" + split[0] + ")", ExceptionType.FormatException, line_num, f, e);
-            }
-            if(split.length == 2){
-                try{
-                    data = Integer.parseInt(split[1]);
-                } catch(NumberFormatException e){
-                    throw new ConfigRuntimeException("Could not get item data from given information (" + split[1] + ")", ExceptionType.FormatException, line_num, f, e);                    
-                }
+                throw new ConfigRuntimeException("Could not get item information from given information (" + item.get("type").val() + ")", ExceptionType.FormatException, line_num, f, e);
             }
         } else {
-            throw new ConfigRuntimeException("Could not find item data!", ExceptionType.FormatException, line_num, f);
+            throw new ConfigRuntimeException("Could not find item type!", ExceptionType.FormatException, line_num, f);
         }
-        if(item.containsKey(1) || item.containsKey("qty")){
+        if(item.containsKey("data")){
+            try{
+                data = Integer.parseInt(item.get("data").val());
+            } catch(NumberFormatException e){
+                throw new ConfigRuntimeException("Could not get item data from given information (" + item.get("data").val() + ")", ExceptionType.FormatException, line_num, f, e);                    
+            }            
+        }
+        if(item.containsKey("qty")){
             //This is the qty
             String sqty = "notanumber";
-            if(item.containsKey(1)){
-                sqty = item.get(1).val();
-                depWarning = true;
-            }
             if(item.containsKey("qty")){
                 sqty = item.get("qty").val();
             }
@@ -251,13 +225,9 @@ public class ObjectGenerator {
             }
         }
         
-        if(item.containsKey(2) || item.containsKey("enchants")){
+        if(item.containsKey("enchants")){
             CArray enchantArray = null;
             try{
-                if(item.containsKey(2)){
-                    enchantArray = (CArray)item.get(2);
-                    depWarning = true;
-                }
                 if(item.containsKey("enchants")){
                     enchantArray = (CArray)item.get("enchants");
                 }
@@ -273,24 +243,12 @@ public class ObjectGenerator {
                     CArray enchantment = (CArray)enchantArray.get(index);
                     String setype = null;
                     String selevel = null;
-                    if(enchantment.containsKey(0) || enchantment.containsKey("etype")){
-                        if(enchantment.containsKey(0)){
-                            setype = enchantment.get(0).val();
-                            depWarning = true;
-                        }
-                        if(enchantment.containsKey("etype")){
-                            setype = enchantment.get("etype").val();
-                        }
+                    if(enchantment.containsKey("etype")){
+                        setype = enchantment.get("etype").val();
                     }
                     
-                    if(enchantment.containsKey(1) || enchantment.containsKey("elevel")){
-                        if(enchantment.containsKey(1)){
-                            selevel = enchantment.get(1).val();
-                            depWarning = true;
-                        }
-                        if(enchantment.containsKey("elevel")){
-                            selevel = enchantment.get("elevel").val();
-                        }                        
+                    if(enchantment.containsKey("elevel")){
+                        selevel = enchantment.get("elevel").val();                     
                     }
                     if(setype == null || selevel == null){
                         throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, line_num, f);                                            
@@ -310,12 +268,19 @@ public class ObjectGenerator {
         }
         MCItemStack ret = StaticLayer.GetItemStack(type, qty);
         ret.setData(data);
+        ret.setDurability((short)data);
         for(Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()){
             ret.addEnchantment(entry.getKey(), entry.getValue());
         }
-        if(depWarning){
-            ConfigRuntimeException.DoWarning("Using old item objects; this may not be supported in the future!");
+
+        //Giving them air crashes the client, so just clear the inventory slot
+        if(ret.getTypeId() == 0){
+            ret = EmptyItem();
         }
         return ret;        
+    }
+    
+    private static MCItemStack EmptyItem(){
+        return StaticLayer.GetItemStack(0, 1);
     }
 }

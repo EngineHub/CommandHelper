@@ -1063,14 +1063,16 @@ public class PlayerManagement {
 
         public String docs() {
             return "mixed {[MCPlayer, [index]]} Gets the inventory information for the specified MCPlayer, or the current MCPlayer if none specified. If the index is specified, only the slot "
-                    + " given will be returned, but in general, the return format is: array(array(data, qty, enchantArray, enchantLevel), array(data, qty, enchantArray, enchantLevel), ...)"
-                    + " where data is the x:y value of the block (or just the"
-                    + " value if it's an item, and y is the damage value for tools), and"
-                    + " qty is the number of items. EnchantArray and enchantLevel are an array of enchantments (and their corresponding level)"
-                    + " applied to the item. It will always be an array, but it may be empty, or contain just one element."
+                    + " given will be returned."
                     + " The index of the array in the array is 0 - 35, 100 - 103, which corresponds to the slot in the MCPlayers inventory. To access armor"
                     + " slots, you may also specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the MCPlayer's hand is returned, regardless"
-                    + " of what slot is selected. If there is no item at the slot specified, null is returned.";
+                    + " of what slot is selected. If there is no item at the slot specified, null is returned."
+                    + " If all slots are requested, an associative array of item objects is returned, and if"
+                    + " only one item is requested, just that single item object is returned. An item object"
+                    + " consists of the following associative array(type: The id of the item, data: The data value of the item,"
+                    + " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
+                    + " of enchant objects, with 0 or more associative arrays which look like:"
+                    + " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
         }
 
         public ExceptionType[] thrown() {
@@ -1184,20 +1186,19 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "void {[MCPlayer], slot, item_id, [qty], [damage], [enchantArray, levelArray] | [MCPlayer], pinvArray} Sets the index of the slot to the specified item_id, with the specified qty,"
-                    + " or 1 by default. If the qty of armor indexes is greater than 1, it is silently ignored, and only 1 is added."
-                    + " item_id follows the same notation for items used elsewhere. Damage defaults to 0, and is a percentage from 0-100, of"
-                    + " how damaged an item is. If slot is null, it defaults to the item in hand. The item_id notation gives a shortcut"
-                    + " to setting damage values, for instance, set_pinv(null, '35:15') will give the MCPlayer black wool. The \"15\""
-                    + " here is an unscaled damage value. This is the same thing as set_pinv(null, 35, 1, 100). 100 is a scaled damage"
-                    + " value. When using the second signature, the pinvArray should be an array similar to the array returned by pinv()."
-                    + " enchantArray and levelArray may also be specified, which is a shortcut to using enchant_inv. In addition, pinvArray"
-                    + " may contain instead of 2 elements, 4 elements, of which the last two are the enchantArray and levelArray, per item.";
+            return "void {[MCPlayer], pinvArray} Sets a player's inventory to the specified inventory object."
+                    + " An inventory object is one that matches what is returned by pinv(), so set_pinv(pinv()),"
+                    + " while pointless, would be a correct call. The array must be associative, "
+                    + " however, it may skip items, in which case, only the specified values will be changed. If"
+                    + " a key is out of range, or otherwise improper, a warning is emitted, and it is skipped,"
+                    + " but the function will not fail as a whole. A simple way to set one item in a player's"
+                    + " inventory would be: set_pinv(array(2: array(type: 1, qty: 64))) This sets the player's second slot"
+                    + " to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat.";
 
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException, ExceptionType.RangeException};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException, ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -1225,126 +1226,161 @@ public class PlayerManagement {
             if (p instanceof MCPlayer) {
                 m = (MCPlayer) p;
             }
-            int slot = 0;
-            int offset = 0;
-            int qty = 1;
-            short damage = -1;
-            if (args.length == 1 && args[0] instanceof CArray || args.length == 2 && args[1] instanceof CArray) {
-                //we are using the set_pinv(pinv()) method
-                CArray ca = null;
-                if (args.length == 1) {
-                    ca = (CArray) args[0];
-                }
-                if (args.length == 2) {
-                    m = Static.GetPlayer(args[0].val(), line_num, f);
-                    ca = (CArray) args[1];
-                }
-
-                for (String key : ca.keySet()) {
-                    int i = 0;
-                    if (Integer.valueOf(key) != null) {
-                        i = Integer.parseInt(key);
-                    } else {
-                        continue; //Ignore this key
-                    }
-                    if (!ca.contains(key)) {
-                        continue; //Ignore this key too
-                    }
-                    Construct item = ca.get(key);
-                    if (item instanceof CNull) {
-                        this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
-                                new CInt(i, line_num, f),
-                                new CInt(0, line_num, f));
-                    } else {
-                        if (item instanceof CArray && (((CArray) item).size() == 2) || ((CArray) item).size() == 4) {
-                            
-                            CArray citem = (CArray) item;
-                            Construct enchantArray = new CArray(line_num, f);
-                            Construct levelArray = new CArray(line_num, f);
-                            if (citem.size() == 4) {
-                                enchantArray = citem.get(2, line_num, f);
-                                levelArray = citem.get(3, line_num, f);
-                            }
-                            this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
-                                    new CInt(i, line_num, f),
-                                    new CString(citem.get(0, line_num, f).val(), line_num, f),
-                                    new CInt(Static.getInt(citem.get(1, line_num, f)), line_num, f),
-                                    enchantArray, levelArray);
-                        } else {
-                            throw new ConfigRuntimeException("Expecting internal values of the array to be 2 or 4 element arrays", ExceptionType.CastException, line_num, f);
-                        }
-                    }
-                }
-                return new CVoid(line_num, f);
-            }
-            //else we are using the first method
-            if (args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])) {
-                //We're using the slot as arg 1
-                if (Static.isNull(args[0])) {
-                    slot = -1;
-                } else {
-                    slot = (int) Static.getInt(args[0]);
-                }
+            Construct arg;
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0]);
+                arg = args[1];
+            } else if(args.length == 1){
+                arg = args[0];
             } else {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
-                if (Static.isNull(args[1])) {
-                    slot = -1;
-                } else {
-                    slot = (int) Static.getInt(args[1]);
+                throw new ConfigRuntimeException("The old format for set_pinv has been deprecated. Please update your script.", line_num, f);
+            }
+            if(!(arg instanceof CArray)){
+                throw new ConfigRuntimeException("Expecting an array as argument " + (args.length==1?"1":"2"), ExceptionType.CastException, line_num, f);
+            }
+            CArray array = (CArray)arg;
+            for(String key : array.keySet()){
+                try{
+                    int index = Integer.parseInt(key);
+                    MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), line_num, f);
+                    if(index >= 0 && index <= 35){
+                        m.getInventory().setItem(index, is);
+                    } else if(index == 100){
+                        m.getInventory().setBoots(is);
+                    } else if(index == 101){
+                        m.getInventory().setLeggings(is);
+                    } else if(index == 102){
+                        m.getInventory().setChestplate(is);
+                    } else if(index == 103){
+                        m.getInventory().setHelmet(is);
+                    } else {
+                        ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_pinv(), so ignoring.");
+                    }
+                } catch(NumberFormatException e){
+                    ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_pinv(), but \"" + key + "\" was found. Ignoring.");
                 }
-                offset = 1;
-            }
-            if (slot < -1 || slot > 35 && slot < 100 || slot > 103) {
-                throw new ConfigRuntimeException("Slot number must be from 0-35 or 100-103", ExceptionType.RangeException, line_num, f);
-            }
-            if (args.length > 2 + offset) {
-                qty = (int) Static.getInt(args[2 + offset]);
-            }
-            qty = Static.Normalize(qty, 0, Integer.MAX_VALUE);
-            MCItemStack is = Static.ParseItemNotation(this.getName(), args[1 + offset].val(), qty, line_num, f);
-            if (args.length > 3 + offset) {
-                damage = (short) Static.getInt(args[3 + offset]);
-            }
-
-
-            if (damage != -1) {
-                damage = (short) java.lang.Math.max(0, java.lang.Math.min(100, damage));
-                short max = is.getType().getMaxDurability();
-                is.setDurability((short) ((max * damage) / 100));
-            }
-
-            if (is.getTypeId() == 0) {
-                qty = 0; //Giving the MCPlayer air crashes their client, so just remove the item
-                is.setTypeId(1);
-            }
-
-            if (qty == 0) {
-                is = null;
-            }
-            if (slot == -1) {
-                m.setItemInHand(is);
-            } else {
-                if (slot == 103) {
-                    m.getInventory().setHelmet(is);
-                } else if (slot == 102) {
-                    m.getInventory().setChestplate(is);
-                } else if (slot == 101) {
-                    m.getInventory().setLeggings(is);
-                } else if (slot == 100) {
-                    m.getInventory().setBoots(is);
-                } else {
-                    m.getInventory().setItem(slot, is);
-                }
-            }
-            if (args.length > 4 + offset) {
-                //We want to enchant this item also
-                Enchantments.enchant_inv ei = new Enchantments.enchant_inv();
-                ei.exec(line_num, f, env, new CString(m.getName(), line_num, f),
-                        new CInt(slot, line_num, f),
-                        args[4 + offset],
-                        args[5 + offset]);
             }
             return new CVoid(line_num, f);
+//            int slot = 0;
+//            int offset = 0;
+//            int qty = 1;
+//            short damage = -1;
+//            if (args.length == 1 && args[0] instanceof CArray || args.length == 2 && args[1] instanceof CArray) {
+//                //we are using the set_pinv(pinv()) method
+//                CArray ca = null;
+//                if (args.length == 1) {
+//                    ca = (CArray) args[0];
+//                }
+//                if (args.length == 2) {
+//                    m = Static.GetPlayer(args[0].val(), line_num, f);
+//                    ca = (CArray) args[1];
+//                }
+//
+//                for (String key : ca.keySet()) {
+//                    int i = 0;
+//                    if (Integer.valueOf(key) != null) {
+//                        i = Integer.parseInt(key);
+//                    } else {
+//                        continue; //Ignore this key
+//                    }
+//                    if (!ca.contains(key)) {
+//                        continue; //Ignore this key too
+//                    }
+//                    Construct item = ca.get(key);
+//                    if (item instanceof CNull) {
+//                        this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
+//                                new CInt(i, line_num, f),
+//                                new CInt(0, line_num, f));
+//                    } else {
+//                        if (item instanceof CArray && (((CArray) item).size() == 2) || ((CArray) item).size() == 4) {
+//                            
+//                            CArray citem = (CArray) item;
+//                            Construct enchantArray = new CArray(line_num, f);
+//                            Construct levelArray = new CArray(line_num, f);
+//                            if (citem.size() == 4) {
+//                                enchantArray = citem.get(2, line_num, f);
+//                                levelArray = citem.get(3, line_num, f);
+//                            }
+//                            this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
+//                                    new CInt(i, line_num, f),
+//                                    new CString(citem.get(0, line_num, f).val(), line_num, f),
+//                                    new CInt(Static.getInt(citem.get(1, line_num, f)), line_num, f),
+//                                    enchantArray, levelArray);
+//                        } else {
+//                            throw new ConfigRuntimeException("Expecting internal values of the array to be 2 or 4 element arrays", ExceptionType.CastException, line_num, f);
+//                        }
+//                    }
+//                }
+//                return new CVoid(line_num, f);
+//            }
+//            //else we are using the first method
+//            if (args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])) {
+//                //We're using the slot as arg 1
+//                if (Static.isNull(args[0])) {
+//                    slot = -1;
+//                } else {
+//                    slot = (int) Static.getInt(args[0]);
+//                }
+//            } else {
+//                m = Static.GetPlayer(args[0].val(), line_num, f);
+//                if (Static.isNull(args[1])) {
+//                    slot = -1;
+//                } else {
+//                    slot = (int) Static.getInt(args[1]);
+//                }
+//                offset = 1;
+//            }
+//            if (slot < -1 || slot > 35 && slot < 100 || slot > 103) {
+//                throw new ConfigRuntimeException("Slot number must be from 0-35 or 100-103", ExceptionType.RangeException, line_num, f);
+//            }
+//            if (args.length > 2 + offset) {
+//                qty = (int) Static.getInt(args[2 + offset]);
+//            }
+//            qty = Static.Normalize(qty, 0, Integer.MAX_VALUE);
+//            MCItemStack is = Static.ParseItemNotation(this.getName(), args[1 + offset].val(), qty, line_num, f);
+//            if (args.length > 3 + offset) {
+//                damage = (short) Static.getInt(args[3 + offset]);
+//            }
+//
+//
+//            if (damage != -1) {
+//                damage = (short) java.lang.Math.max(0, java.lang.Math.min(100, damage));
+//                short max = is.getType().getMaxDurability();
+//                is.setDurability((short) ((max * damage) / 100));
+//            }
+//
+//            if (is.getTypeId() == 0) {
+//                qty = 0; //Giving the MCPlayer air crashes their client, so just remove the item
+//                is.setTypeId(1);
+//            }
+//
+//            if (qty == 0) {
+//                is = null;
+//            }
+//            if (slot == -1) {
+//                m.setItemInHand(is);
+//            } else {
+//                if (slot == 103) {
+//                    m.getInventory().setHelmet(is);
+//                } else if (slot == 102) {
+//                    m.getInventory().setChestplate(is);
+//                } else if (slot == 101) {
+//                    m.getInventory().setLeggings(is);
+//                } else if (slot == 100) {
+//                    m.getInventory().setBoots(is);
+//                } else {
+//                    m.getInventory().setItem(slot, is);
+//                }
+//            }
+//            if (args.length > 4 + offset) {
+//                //We want to enchant this item also
+//                Enchantments.enchant_inv ei = new Enchantments.enchant_inv();
+//                ei.exec(line_num, f, env, new CString(m.getName(), line_num, f),
+//                        new CInt(slot, line_num, f),
+//                        args[4 + offset],
+//                        args[5 + offset]);
+//            }
+//            return new CVoid(line_num, f);
         }
     }
 

@@ -53,6 +53,7 @@ public class SyntaxHighlighters {
         return "File for the following syntax highlighters are currently available:\n"
                 + "\tNotepad++ - Use type \"npp\". You may also select a theme, either \"default\" or \"obsidian\"\n"
                 + "\tTextWrangler - Use type \"textwrangler\". Only the default theme is available.\n"
+                + "\t\tTo install: put the generated file in ~/Library/Application Support/TextWrangler/Language Modules/\n"
                 + "\tGeSHi - Use type \"geshi\". Only the default theme is available.\n"
                 + "\tViM - Use type \"vim\". Only the default theme is available.\n"
                 + "\t\tTo install: put in ~/.vim/syntax/commandhelper.vim then edit\n"
