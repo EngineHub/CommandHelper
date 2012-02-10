@@ -445,15 +445,21 @@ public class MScriptCompiler {
                     tree.addChild(c);
                 }
                 //Check argument number now
-                if(!tree.getData().val().matches("^_[^_].*")){
-                    Integer [] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
-                    if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())){
-                        throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().getLineNum(),
-                                tree.getData().getFile());
+                if(tree.getData().val() != null){
+                    if(!tree.getData().val().matches("^_[^_].*")){
+                        Integer [] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
+                        if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())){
+                            throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().getLineNum(),
+                                    tree.getData().getFile());
+                        }
                     }
                 }
                 constructCount.pop();
-                constructCount.peek().incrementAndGet();
+                try{
+                    constructCount.peek().incrementAndGet();
+                } catch(EmptyStackException e){                    
+                    throw new ConfigCompileException("Unexpected end parenthesis", t.line_num, t.file);
+                }
                 try{
                     tree = parents.peek();
                 } catch(EmptyStackException e){
@@ -512,7 +518,7 @@ public class MScriptCompiler {
             if(root.getNumberOfChildren() == 1){
                 returnable = retc;
             }
-            String ret = retc.val();
+            String ret = retc instanceof CNull?"null":retc.val();
             if (ret != null && !ret.trim().equals("")) {
                 b.append(ret).append(" ");
             }
