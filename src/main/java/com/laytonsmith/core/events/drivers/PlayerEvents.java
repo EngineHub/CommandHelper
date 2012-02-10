@@ -136,10 +136,10 @@ public class PlayerEvents {
             return "{player: <macro>}"
                     + "Fired when a player dies."
                     + "{player: The player that died | drops: An array of the dropped items"
-                    + "| xp: The xp that will be dropped | cause: The cause of death | message: The"
+                    + "| xp: The xp that will be dropped | cause: The cause of death | death_message: The"
                     + " death message}"
                     + "{xp|drops: An array of item objects, or null. The items to be dropped"
-                    + " are replaced with the given items, not added to|message: the death message,"
+                    + " are replaced with the given items, not added to|death_message: the death message,"
                     + " or null to remove it entirely}"
                     + "{player| drops}";
         }

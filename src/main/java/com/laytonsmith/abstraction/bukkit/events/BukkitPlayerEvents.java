@@ -307,7 +307,7 @@ public class BukkitPlayerEvents {
                 map.put("drops", ca);
                 map.put("xp", new CInt(event.getDroppedExp(), 0, null));
                 if(event instanceof PlayerDeathEvent){
-                    map.put("message", new CString(((PlayerDeathEvent)event).getDeathMessage(), 0, null));
+                    map.put("death_message", new CString(((PlayerDeathEvent)event).getDeathMessage(), 0, null));
                 }
                 try{
                     map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), 0, null));
@@ -357,7 +357,7 @@ public class BukkitPlayerEvents {
                     }
                     return true;
                 }
-                if(event instanceof PlayerDeathEvent && key.equals("message")){
+                if(event instanceof PlayerDeathEvent && key.equals("death_message")){
                     ((PlayerDeathEvent)event).setDeathMessage(value.val());
                     return true;
                 }
