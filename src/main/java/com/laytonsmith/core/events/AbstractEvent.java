@@ -53,14 +53,22 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
 
     
     /**
-     * This function is run when the actual event occurs. By default, the script
-     * is simply run with the BoundEvent's environment, however this could be overridden
-     * if necessary. It should eventually run the script however.
+     * This function is run when the actual event occurs.
      * @param s
      * @param b 
      */
-    public void execute(Script s, BoundEvent b, Env env) throws ConfigRuntimeException{          
+    public final void execute(Script s, BoundEvent b, Env env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
+        try{
+            handler.preExecution(env, activeEvent);
+        } catch(UnsupportedOperationException e){
+            //Ignore. This particular event doesn't need to customize
+        }
         s.run(null, env, null);
+        try{
+            handler.postExecution(env, activeEvent);
+        } catch(UnsupportedOperationException e){
+            //Ignore.
+        }
     }
 
     /**

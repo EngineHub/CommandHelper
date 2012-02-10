@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.events;
 
+import com.laytonsmith.core.Env;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.EventException;
@@ -57,4 +58,22 @@ public interface EventHandlerInterface {
      * @return 
      */
     public EventMixinInterface customMixin(AbstractEvent e);
+    
+    /**
+     * At the last moment, an event is allowed to customize the environment or server
+     * if needed. Most events probably won't need this hook, and can safely throw
+     * an UnsupportedOperationException.
+     * @param env
+     * @param activeEvent 
+     */
+    public void preExecution(Env env, BoundEvent.ActiveEvent activeEvent);
+    
+    /**
+     * Right after the script is run, this function is fired, allowing
+     * an event to unhook if hooks had previously been inserted that shouldn't
+     * remain.
+     * @param env
+     * @param activeEvent 
+     */
+    public void postExecution(Env env, BoundEvent.ActiveEvent activeEvent);
 }

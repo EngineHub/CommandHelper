@@ -39,6 +39,18 @@ public class ConfigRuntimeException extends RuntimeException {
     public Env getEnv(){
         return this.env;
     }
+
+    public void setFile(File f) {
+        if(file == null){
+            file = f;
+        }
+    }
+
+    public void setLineNum(int line_num) {
+        if(this.line_num == 0){
+            this.line_num = line_num;
+        }
+    }
     
     public static enum Reaction{
         /**
@@ -107,11 +119,11 @@ public class ConfigRuntimeException extends RuntimeException {
     }
     
     public static void DoReport(ConfigRuntimeException e, String optionalMessage){
-        DoReport(e.getMessage(), e.getExceptionType().toString(), e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, e.getEnv().GetPlayer());
+        DoReport(e.getMessage(), e.getExceptionType().toString(), e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, e.getEnv().GetPlayer());
     }
     
     public static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){
-        DoReport(e.getMessage(), "COMPILE ERROR", e.getFile().getPath(), e.getSimpleFile(), e.getLineNum(), optionalMessage, player);
+        DoReport(e.getMessage(), "COMPILE ERROR", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), e.getLineNum(), optionalMessage, player);
     }
         
     

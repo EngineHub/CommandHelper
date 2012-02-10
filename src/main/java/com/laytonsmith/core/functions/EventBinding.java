@@ -423,7 +423,13 @@ public class EventBinding {
             ActiveEvent active = environment.GetEvent();
             boolean success = false;
             if(!active.isLocked(parameter)){
-                success = e.modifyEvent(parameter, value, environment.GetEvent().getUnderlyingEvent());
+                try{
+                    success = e.modifyEvent(parameter, value, environment.GetEvent().getUnderlyingEvent());
+                } catch(ConfigRuntimeException ex){
+                    ex.setFile(f);
+                    ex.setLineNum(line_num);
+                    throw ex;
+                }
             } else {
                 success = false;
             }

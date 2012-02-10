@@ -22,4 +22,10 @@ public class CNull extends Construct implements Cloneable{
     public CNull clone() throws CloneNotSupportedException{
         return (CNull) super.clone();
     }
+    
+    @Override
+    public String val(){
+        return null;
+    }
+    
 }

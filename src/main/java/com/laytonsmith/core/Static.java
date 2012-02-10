@@ -25,10 +25,7 @@ import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -599,9 +596,13 @@ public class Static {
         return b.getTypeId() + (b.getData() == 0 ? "" : ":" + Byte.toString(b.getData()));
     }
 
-    public static MCPlayer GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException {
+    private static Map<String, MCPlayer> injectedPlayers = new HashMap<String, MCPlayer>();
+    public static MCPlayer GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException {        
         MCPlayer m = Static.getServer().getPlayer(player);
-        if (m == null || !m.isOnline()) {
+        if(injectedPlayers.containsKey(player)){
+            m = injectedPlayers.get(player);
+        }
+        if (m == null || (!m.isOnline() && !injectedPlayers.containsKey(player))) {
             throw new ConfigRuntimeException("The specified player (player) is not online", ExceptionType.PlayerOfflineException, line_num, f);
         }
         return m;
@@ -806,5 +807,13 @@ public class Static {
                 .replaceAll("§e", TermColors.BRIGHT_YELLOW)
                 .replaceAll("§f", TermColors.BRIGHT_WHITE) + TermColors.reset();
                 
+    }
+
+    public static void InjectPlayer(MCPlayer player) {
+        injectedPlayers.put(player.getName(), player);
+    }
+    
+    public static void UninjectPlayer(MCPlayer player){
+        injectedPlayers.remove(player.getName());
     }
 }

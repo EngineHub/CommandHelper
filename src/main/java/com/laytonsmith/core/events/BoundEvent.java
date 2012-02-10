@@ -234,9 +234,12 @@ public class BoundEvent implements Comparable<BoundEvent> {
             env.SetEvent(activeEvent);
             activeEvent.addHistory("Triggering bound event: " + this);
             try{
-                this.execute(env);
+                this.execute(env, activeEvent);
             } catch(ConfigRuntimeException e){
+                //We don't know how to handle this, but we need to set the env,
+                //then pass it up the chain
                 e.setEnv(env);
+                throw e;
             }
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
@@ -260,18 +263,18 @@ public class BoundEvent implements Comparable<BoundEvent> {
             activeEvent.setParsedEvent(map);
             activeEvent.setBoundEvent(this);
             env.SetEvent(activeEvent);
-            this.execute(env);
+            this.execute(env, activeEvent);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    private void execute(Env env) throws EventException{
+    private void execute(Env env, ActiveEvent activeEvent) throws EventException{
         GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
         superRoot.addChild(tree);
         Script s = Script.GenerateScript(superRoot, "*");        
         Event myDriver = this.getEventDriver();
-        myDriver.execute(s, this, env);
+        myDriver.execute(s, this, env, activeEvent);
     }
     
     /**

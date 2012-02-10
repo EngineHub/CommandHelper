@@ -4,33 +4,48 @@
  */
 package com.laytonsmith.abstraction.bukkit.events;
 
+import apple.awt.CList;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.core.Env;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
 import com.laytonsmith.core.events.*;
+import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.functions.Exceptions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import org.bukkit.Location;
+import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.permissions.Permission;
+import org.bukkit.permissions.PermissionAttachment;
+import org.bukkit.permissions.PermissionAttachmentInfo;
+import org.bukkit.plugin.Plugin;
 
 /**
  *
@@ -89,6 +104,14 @@ public class BukkitPlayerEvents {
 
         public EventMixinInterface customMixin(AbstractEvent e) {
             return null;
+        }
+
+        public void preExecution(Env env, ActiveEvent activeEvent) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void postExecution(Env env, ActiveEvent activeEvent) {
+            throw new UnsupportedOperationException("Not supported yet.");
         }
     }
     
@@ -173,6 +196,14 @@ public class BukkitPlayerEvents {
         public EventMixinInterface customMixin(AbstractEvent e) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
+
+        public void preExecution(Env env, ActiveEvent activeEvent) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void postExecution(Env env, ActiveEvent activeEvent) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
     
     @abstraction(load = com.laytonsmith.core.events.drivers.PlayerEvents.player_spawn.class,
@@ -219,7 +250,7 @@ public class BukkitPlayerEvents {
                 PlayerRespawnEvent e = (PlayerRespawnEvent) event;
                 if (key.equals("location")) {
                     //Change this parameter in e to value
-                    e.setRespawnLocation(((BukkitMCLocation)ObjectGenerator.GetGenerator().location(value, new BukkitMCWorld(e.getPlayer().getWorld()), 0, null))._Location());
+                    e.setRespawnLocation(((BukkitMCLocation)ObjectGenerator.GetGenerator().location(value, new BukkitMCWorld(e.getPlayer().getWorld()), 0, null))._Location());                    
                     return true;
                 }
             }
@@ -228,6 +259,23 @@ public class BukkitPlayerEvents {
         
         public EventMixinInterface customMixin(AbstractEvent e) {
             return null;
+        }
+
+        public void preExecution(Env env, ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof PlayerRespawnEvent){
+                //Static lookups of the player don't seem to work here, but
+                //the player is passed in with the event.
+                MCPlayer player = (new BukkitMCPlayer(((PlayerRespawnEvent)activeEvent.getUnderlyingEvent()).getPlayer()));
+                env.SetPlayer(player);
+                Static.InjectPlayer(player);
+            }
+        }
+
+        public void postExecution(Env env, ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof PlayerRespawnEvent){
+                MCPlayer player = (new BukkitMCPlayer(((PlayerRespawnEvent)activeEvent.getUnderlyingEvent()).getPlayer()));
+                Static.UninjectPlayer(player);
+            }
         }
     }
     
@@ -258,19 +306,15 @@ public class BukkitPlayerEvents {
                 Player p = (Player)event.getEntity();
                 map.put("drops", ca);
                 map.put("xp", new CInt(event.getDroppedExp(), 0, null));
+                if(event instanceof PlayerDeathEvent){
+                    map.put("message", new CString(((PlayerDeathEvent)event).getDeathMessage(), 0, null));
+                }
                 try{
                     map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), 0, null));
-//                    Entity damager = event.getEntity().getLastDamageCause().getEntity();
-//                    if(damager instanceof Player){
-//                        map.put("damager", new CString(((Player)damager).getName(), 0, null));
-//                    } else {
-//                        map.put("damager", new CInt(damager.getEntityId(), 0, null));
-//                    }
                 } catch(NullPointerException ex){
                     map.put("cause", new CString(DamageCause.CUSTOM.name(), 0, null));
                 }
                 map.put("location", ObjectGenerator.GetGenerator().location(new BukkitMCLocation(p.getLocation())));
-                //map.put("event object data name", event.getDataFromEvent());
                 return map;
             } else {
                 throw new EventException("Cannot convert e to EntityDeathEvent");
@@ -296,7 +340,25 @@ public class BukkitPlayerEvents {
                 EntityDeathEvent e = (EntityDeathEvent) event;
                 if (key.equals("xp")) {
                     //Change this parameter in e to value
-                    e.setDroppedExp((int)Static.getInt(value));
+                    e.setDroppedExp((int)Static.getInt(value));                    
+                    return true;
+                }
+                if(key.equals("drops")){
+                    if(value instanceof CNull){
+                        value = new CArray(0, null);
+                    }
+                    if(!(value instanceof CArray)){
+                        throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, 0, null);
+                    }
+                    e.getDrops().clear();
+                    CArray drops = (CArray) value;
+                    for(String dropID : drops.keySet()){
+                        e.getDrops().add(((BukkitMCItemStack)ObjectGenerator.GetGenerator().item(drops.get(dropID), 0, null)).__ItemStack());
+                    }
+                    return true;
+                }
+                if(event instanceof PlayerDeathEvent && key.equals("message")){
+                    ((PlayerDeathEvent)event).setDeathMessage(value.val());
                     return true;
                 }
             }
@@ -306,5 +368,14 @@ public class BukkitPlayerEvents {
         public EventMixinInterface customMixin(AbstractEvent e) {
             return null;
         }
+
+        public void preExecution(Env env, ActiveEvent activeEvent) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void postExecution(Env env, ActiveEvent activeEvent) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
     }
+   
 }

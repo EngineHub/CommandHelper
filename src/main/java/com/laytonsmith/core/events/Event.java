@@ -9,6 +9,7 @@ import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Map;
@@ -105,7 +106,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * the Event itself. AbstractEvent's default implementation is to simply run the
      * script, but an event can choose to override this functionality if needed.
      */
-    public void execute(Script s, BoundEvent b, Env env) throws EventException;
+    public void execute(Script s, BoundEvent b, Env env, ActiveEvent activeEvent) throws EventException;
     
     /**
      * If it is required to do something extra for server wide events, this can be
