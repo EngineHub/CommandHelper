@@ -60,11 +60,11 @@ public class Static {
             try {
                 d = Double.parseDouble(c.val());
             } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Expecting a number, but received " + c.val() + " instead",
+                throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
                         ExceptionType.CastException, c.getLineNum(), c.getFile());
             }
         } else {
-            throw new ConfigRuntimeException("Expecting a number, but received " + c.val() + " instead",
+            throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
                     ExceptionType.CastException, c.getLineNum(), c.getFile());
         }
         return d;

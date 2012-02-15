@@ -72,7 +72,8 @@ public class DataHandling {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Construct c = args[1];
             while(c instanceof IVariable){
-                c = env.GetVarList().get(((IVariable)c).getName()).ival();
+                IVariable cur = (IVariable)c;
+                c = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();
             }
             if(args[0] instanceof IVariable){
                 IVariable v = new IVariable(((IVariable)args[0]).getName(), c, line_num, f);
@@ -96,7 +97,8 @@ public class DataHandling {
         public Construct array_assign(int line_num, File f, Env env, Construct arrayAndIndex, Construct toSet){
             Construct ival = toSet;
             while(ival instanceof IVariable){
-                ival = env.GetVarList().get(((IVariable)ival).getName()).ival();
+                IVariable cur = (IVariable)ival;
+                ival = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();
             }
             Chain c = new Chain();
             prepare((CArrayReference)arrayAndIndex, c);
@@ -248,7 +250,8 @@ public class DataHandling {
             
             Construct arr = that.eval(array, env);
             if(arr instanceof IVariable){
-                arr = env.GetVarList().get(((IVariable)arr).getName()).ival();
+                IVariable cur = (IVariable)arr;
+                arr = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();
             }
             Construct iv = that.eval(ivar, env);
             
@@ -1064,7 +1067,8 @@ public class DataHandling {
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             if(args.length == 1){
                 if(args[0] instanceof IVariable){
-                    Globals.SetGlobal(environment.GetVarList().get(((IVariable)args[0]).getName()));
+                    IVariable cur = (IVariable)args[0];
+                    Globals.SetGlobal(environment.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()));
                 } else { 
                     throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, line_num, f);
                 }

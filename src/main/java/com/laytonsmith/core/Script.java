@@ -207,7 +207,8 @@ public class Script {
     public Construct seval(GenericTreeNode<Construct> c, final Env env){
         Construct ret = eval(c, env);
         if(ret instanceof IVariable){
-            return env.GetVarList().get(((IVariable)ret).getName()).ival();
+            IVariable cur = (IVariable)ret;
+            return env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();
         }
         return ret;
     }
@@ -362,7 +363,8 @@ public class Script {
                         if(!(var instanceof IVariable)){
                             throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, m.getLineNum(), m.getFile());
                         }
-                        ((IVariable)var).setIval(env.GetVarList().get(((IVariable)var).getName()).ival());
+                        IVariable cur = (IVariable)var;
+                        ((IVariable)var).setIval(env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival());
                         custom_params.set((IVariable)var);
                     }
                     Env newEnv = env;
@@ -426,7 +428,8 @@ public class Script {
                         continue;
                     }
                     if(f.preResolveVariables() && ca[i] instanceof IVariable){
-                        ca[i] = env.GetVarList().get(((IVariable)ca[i]).getName()).ival();
+                        IVariable cur = (IVariable)ca[i];
+                        ca[i] = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();                        
                     }
                 }
 
@@ -448,7 +451,7 @@ public class Script {
         for (int i = 0; i < ca.length; i++) {
             if (ca[i] instanceof IVariable) {
                 IVariable v = (IVariable) ca[i];
-                ca[i] = CurrentEnv.GetVarList().get(v.getName()).ival();
+                ca[i] = CurrentEnv.GetVarList().get(v.getName(), v.getLineNum(), v.getFile()).ival();
             } else if (ca[i] instanceof CArray) {
 //                CArray ca2 = (CArray) ca[i];
 //                Construct [] ca_raw = new Construct[ca2.size()];

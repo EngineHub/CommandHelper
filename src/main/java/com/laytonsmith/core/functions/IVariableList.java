@@ -5,6 +5,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.constructs.IVariable;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,9 +20,9 @@ public class IVariableList {
         varList.put(v.getName(), v);
     }
     
-    public IVariable get(String name){
+    public IVariable get(String name, int line_num, File f){
         if(!varList.containsKey(name)){
-            this.set(new IVariable(name, 0, null));
+            this.set(new IVariable(name, line_num, f));
         }
         return varList.get(name);
     }

@@ -306,12 +306,14 @@ public class Math {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
-                IVariable v = env.GetVarList().get(((IVariable)args[0]).getName());
+                IVariable cur = (IVariable)args[0];
+                IVariable v = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile());
                 Construct newVal;
                 long value = 1;
                 if(args.length == 2){
                     if(args[1] instanceof IVariable){
-                        args[1] = env.GetVarList().get(((IVariable)args[1]).getName());
+                        IVariable cur2 = (IVariable)args[1];
+                        args[1] = env.GetVarList().get(cur2.getName(), cur2.getLineNum(), cur2.getFile());
                     }
                     value = Static.getInt(args[1]);
                 }
@@ -364,11 +366,13 @@ public class Math {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof IVariable){
-                IVariable v = env.GetVarList().get(((IVariable)args[0]).getName());
+                IVariable cur = (IVariable)args[0];
+                IVariable v = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile());
                 long value = 1;
                 if(args.length == 2){
                     if(args[1] instanceof IVariable){
-                        args[1] = env.GetVarList().get(((IVariable)args[1]).getName());
+                        IVariable cur2 = (IVariable)args[1];
+                        args[1] = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile());
                     }
                     value = Static.getInt(args[1]);
                 }

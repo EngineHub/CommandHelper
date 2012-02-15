@@ -49,9 +49,9 @@ public class PlayerManagement {
                 p = Static.getServer().getPlayer(args[0].val());
             }
             
-            if (p.instanceofPlayer()) {
+            if (p != null && p.instanceofPlayer()) {
                 return new CString(((MCPlayer) p).getName(), line_num, f);
-            } else if (p.instanceofMCConsoleCommandSender()) {
+            } else if (p != null && p.instanceofMCConsoleCommandSender()) {
                 return new CString("~console", line_num, f);
             } else {
                 return new CNull(line_num, f);
