@@ -119,7 +119,11 @@ public class ConfigRuntimeException extends RuntimeException {
     }
     
     public static void DoReport(ConfigRuntimeException e, String optionalMessage){
-        DoReport(e.getMessage(), e.getExceptionType().toString(), e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, e.getEnv().GetPlayer());
+        MCPlayer p = null;
+        if(e.getEnv() != null && e.getEnv().GetPlayer() != null){
+            p = e.getEnv().GetPlayer();
+        }
+        DoReport(e.getMessage(), e.getExceptionType().toString(), e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, p);
     }
     
     public static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){

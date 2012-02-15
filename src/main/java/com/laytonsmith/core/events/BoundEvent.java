@@ -13,6 +13,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.functions.Exceptions;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -225,9 +226,17 @@ public class BoundEvent implements Comparable<BoundEvent> {
                 ca.set(new CString(key, 0, null), activeEvent.parsedEvent.get(key));
             }
             if(activeEvent.parsedEvent.containsKey("player")){
-                MCPlayer p = Static.getServer().getPlayer(activeEvent.parsedEvent.get("player").val());
-                if(p != null && p.isOnline()){
-                    env.SetPlayer(p);                
+                try{
+                    MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player").val());
+                    if(p != null && p.isOnline()){
+                        env.SetPlayer(p);                
+                    }
+                } catch(ConfigRuntimeException e){
+                    if(!e.getExceptionType().equals(Exceptions.ExceptionType.PlayerOfflineException)){
+                        throw e;
+                    }
+                    //else we just leave the player to be null. It either doesn't matter here,
+                    //or the event will add it later, manually.
                 }
             }
             env.GetVarList().set(new IVariable(eventObjName, ca, 0, null));

@@ -46,7 +46,7 @@ public class PlayerManagement {
             }
             
             if (args.length == 1) {
-                p = Static.getServer().getPlayer(args[0].val());
+                p = Static.GetPlayer(args[0].val());
             }
             
             if (p != null && p.instanceofPlayer()) {
@@ -155,7 +155,7 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 1) {
-                m = Static.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
                     throw new ConfigRuntimeException("The player is not online",
                             ExceptionType.PlayerOfflineException, line_num, f);
@@ -270,7 +270,7 @@ public class PlayerManagement {
                 if (args[1] instanceof CArray) {
                     CArray ca = (CArray) args[1];
                     MCPlayer = args[0].val();
-                    l = ObjectGenerator.GetGenerator().location(ca, Static.getServer().getPlayer(MCPlayer).getWorld(), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer).getWorld(), line_num, f);
                     x = l.getX();
                     y = l.getY();
                     z = l.getZ();
@@ -291,10 +291,10 @@ public class PlayerManagement {
                 x = Static.getNumber(args[1]);
                 y = Static.getNumber(args[2]);
                 z = Static.getNumber(args[3]);
-                l = StaticLayer.GetLocation(Static.getServer().getPlayer(MCPlayer).getWorld(), x, y, z, 0, 0);
+                l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer).getWorld(), x, y, z, 0, 0);
             }
             if (m == null && MCPlayer != null) {
-                m = Static.getServer().getPlayer(MCPlayer);
+                m = Static.GetPlayer(MCPlayer);
             }
             if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("That player is not online",
@@ -348,7 +348,7 @@ public class PlayerManagement {
                     m = (MCPlayer) p;
                 }
             } else {
-                m = Static.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
                     throw new ConfigRuntimeException("That player is not online",
                             ExceptionType.PlayerOfflineException, line_num, f);
@@ -389,7 +389,7 @@ public class PlayerManagement {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (args.length == 1) {
-                m = Static.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
             } else {
                 if (p instanceof MCPlayer) {
                     m = (MCPlayer) p;
@@ -450,16 +450,13 @@ public class PlayerManagement {
                     m = (MCPlayer) p;
                 }
             } else {
-                m = Static.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
             }
 
             if (m == null) {
                 throw new ConfigRuntimeException("player was not specified, or is offline", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online.",
-                        ExceptionType.PlayerOfflineException, line_num, f);
-            }
+            
             String[] sa = Static.getPermissionsResolverManager().getGroups(m.getName());
             Construct[] ca = new Construct[sa.length];
             for (int i = 0; i < sa.length; i++) {
@@ -548,26 +545,23 @@ public class PlayerManagement {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender m = env.GetCommandSender();
-            String MCPlayer = "";
+            String player = "";
             int index = -1;
             if (args.length == 0) {
-                MCPlayer = (m instanceof MCPlayer ? ((MCPlayer) m).getName() : null);
+                player = (m instanceof MCPlayer ? ((MCPlayer) m).getName() : null);
                 index = -1;
             } else if (args.length == 1) {
-                MCPlayer = args[0].val();
+                player = args[0].val();
                 index = -1;
             } else {
-                MCPlayer = args[0].val();
+                player = args[0].val();
                 index = (int) Static.getInt(args[1]);
             }
-            if (MCPlayer == null) {
+            if (player == null) {
                 throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            MCPlayer p = Static.getServer().getPlayer(MCPlayer);
-            if (p == null || !p.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online",
-                        ExceptionType.PlayerOfflineException, line_num, f);
-            }
+            MCPlayer p = Static.GetPlayer(player);
+
             if (index < -1 || index > 11) {
                 throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 11",
                         ExceptionType.RangeException, line_num, f);
@@ -695,7 +689,7 @@ public class PlayerManagement {
                     m = (MCPlayer) p;
                 }
             } else {
-                m = Static.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
                 if (m == null || !m.isOnline()) {
                     throw new ConfigRuntimeException("That player is not online",
                             ExceptionType.PlayerOfflineException, line_num, f);
@@ -754,7 +748,7 @@ public class PlayerManagement {
                 }
             }
             if (args.length >= 1) {
-                m = Static.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
             }
             if (args.length >= 2) {
                 message = args[1].val();
@@ -820,7 +814,7 @@ public class PlayerManagement {
                 }
                 name = args[0].val();
             } else {
-                MCPlayer = p.getServer().getPlayer(args[0].val());
+                MCPlayer = Static.GetPlayer(args[0].val());
                 name = args[1].val();
             }
             if (MCPlayer == null || !MCPlayer.isOnline()) {
@@ -879,7 +873,7 @@ public class PlayerManagement {
                     MCPlayer = (MCPlayer) p;
                 }
             } else {
-                MCPlayer = p.getServer().getPlayer(args[0].val());
+                MCPlayer = Static.GetPlayer(args[0].val());
             }
             if (MCPlayer == null || !MCPlayer.isOnline()) {
                 throw new ConfigRuntimeException("That player is not online",
@@ -951,7 +945,7 @@ public class PlayerManagement {
                     try {
                         Integer.parseInt(args[0].val());
                     } catch (NumberFormatException e) {
-                        MCPlayer p2 = p.getServer().getPlayer(args[0].val());
+                        MCPlayer p2 = Static.GetPlayer(args[0].val());
                         if (p2 == null || !p2.isOnline()) {
                             throw new ConfigRuntimeException("The specified player is offline",
                                     ExceptionType.PlayerOfflineException, line_num, f);
@@ -999,7 +993,7 @@ public class PlayerManagement {
                     pitch = (float) Static.getNumber(args[1]);
                 } catch (NumberFormatException e) {
                     //It's the MCPlayer, F variation
-                    toSet = Static.getServer().getPlayer(args[0].val());
+                    toSet = Static.GetPlayer(args[0].val());
                     pitch = toSet.getLocation().getPitch();
                     int g = (int) Static.getInt(args[1]);
                     if (g < 0 || g > 3) {
@@ -1010,7 +1004,7 @@ public class PlayerManagement {
                 }
             } else if (args.length == 3) {
                 //It's the MCPlayer, yaw, pitch variation
-                toSet = Static.getServer().getPlayer(args[0].val());
+                toSet = Static.GetPlayer(args[0].val());
                 yaw = (float) Static.getNumber(args[1]);
                 pitch = (float) Static.getNumber(args[2]);
             }
@@ -1092,7 +1086,7 @@ public class PlayerManagement {
                 }
             } else if (args.length == 1) {
                 all = true;
-                m = p.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
             } else if (args.length == 2) {
                 if (args[1] instanceof CNull) {
                     index = null;
@@ -1100,7 +1094,7 @@ public class PlayerManagement {
                     index = (int) Static.getInt(args[1]);
                 }
                 all = false;
-                m = p.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
             }
             if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is not online",
@@ -1411,7 +1405,7 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 1) {
-                m = Static.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
             }
             if (m == null || !m.isOnline()) {
                 throw new ConfigRuntimeException("The specified player is offline", ExceptionType.PlayerOfflineException, line_num, f);
@@ -1469,7 +1463,7 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 2) {
-                m = Static.getServer().getPlayer(args[0].val());
+                m = Static.GetPlayer(args[0].val());
                 mode = args[1].val();
             } else {
                 mode = args[0].val();
