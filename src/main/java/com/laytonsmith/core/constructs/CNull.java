@@ -25,6 +25,11 @@ public class CNull extends Construct implements Cloneable{
     
     @Override
     public String val(){
+        return "null";
+    }
+    
+    @Override
+    public String nval(){
         return null;
     }
     

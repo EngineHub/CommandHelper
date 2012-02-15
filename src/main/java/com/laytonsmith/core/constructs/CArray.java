@@ -218,7 +218,7 @@ public class CArray extends Construct {
             try {
                 return array.get((int)Static.getInt(index));
             } catch (IndexOutOfBoundsException e) {
-                throw new ConfigRuntimeException("The element at index " + index.val() + " does not exist", ExceptionType.IndexOverflowException, line_num, f);
+                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, line_num, f);
             }
         } else {
             if(associative_array.containsKey(normalizeConstruct(index))){
@@ -228,7 +228,7 @@ public class CArray extends Construct {
                 }
                 return val;
             } else {
-                throw new ConfigRuntimeException("The element at index " + index.val() + " does not exist", ExceptionType.IndexOverflowException, line_num, f);
+                throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, line_num, f);
             }
         }
     }

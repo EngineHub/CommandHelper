@@ -44,7 +44,7 @@ public class Meta {
         }
 
         public Construct exec(int line_num, File f, final Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if (args[1].val() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
+            if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
                         ExceptionType.FormatException, line_num, f);
             }
@@ -182,7 +182,7 @@ public class Meta {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if (args[0].val() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+            if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
                         ExceptionType.FormatException, line_num, f);
             }

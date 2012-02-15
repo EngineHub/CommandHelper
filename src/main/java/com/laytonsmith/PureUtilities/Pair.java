@@ -8,7 +8,7 @@ package com.laytonsmith.PureUtilities;
  *
  * @author layton
  */
-public class Pair<A extends Object, B extends Object> {
+public class Pair<A, B> {
 
     public final A fst;
     public final B snd;

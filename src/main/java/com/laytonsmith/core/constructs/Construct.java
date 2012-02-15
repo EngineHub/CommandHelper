@@ -54,9 +54,24 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
         this.file = file;
     }
 
+    /**
+     * Returns the standard string representation of this Construct.
+     * @return 
+     */
     public String val() {
         return value;
     }
+    
+    /**
+     * Returns the standard string representation of this Construct, except
+     * in the case that the construct is a CNull, in which case it returns
+     * java null.
+     * @return 
+     */
+    public String nval(){
+        return val();
+    }
+    
 
     @Override
     public String toString() {

@@ -138,6 +138,21 @@
             <scope>compile</scope>
         </dependency>
         
+        <!-- Evil-y thing -->
+        <dependency>
+            <groupId>cglib</groupId>
+            <artifactId>cglib</artifactId>
+            <version>2.2.2</version>
+            <scope>compile</scope>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>org.javassist</groupId>
+            <artifactId>javassist</artifactId>
+            <version>3.15.0-GA</version>
+            <type>jar</type>
+        </dependency>
+        
         <!-- Test libraries -->
         <dependency>
             <groupId>junit</groupId>
