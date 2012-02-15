@@ -15,6 +15,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.util.StringUtil;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -189,8 +190,12 @@ public class AliasCore {
                             }
                         } catch (ConfigRuntimeException e) {
                             //Unlike system scripts, this should just report the problem to the player
-                            ConfigRuntimeException.DoReport(e);
+                            if(e.getEnv() == null){
+                                e.setEnv(new Env());
+                            }
+                            e.getEnv().SetCommandSender(player);
                             Static.getAliasCore().removePlayerReference(player);
+                            ConfigRuntimeException.DoReport(e);
                         } catch(ConfigCompileException e){
                             //Something strange happened, and a bad alias was added
                             //to the database. Our best course of action is to just
@@ -201,7 +206,13 @@ public class AliasCore {
                 }
             }
         } catch (Throwable e) {
-            throw new InternalException("An error occured in the CommandHelper plugin: " + e.getMessage() + Arrays.asList(e.getStackTrace()));
+            //Not only did an error happen, an error happened in our error handler
+            throw new InternalException(TermColors.RED + "An unexpected error occured in the CommandHelper plugin. "
+                    + "Further, this is likely an error with the error handler, so it may be caused by your script, "
+                    + "however, there is no more information at this point. Check your script, but also report this "
+                    + "as a bug in CommandHelper. Also, it's possible that some commands will no longer work. As a temporary "
+                    + "workaround, restart the server, and avoid doing whatever it is you did to make this happen.\nThe error is as follows: " 
+                    + e.toString() + "\n" + TermColors.reset() + "Stack Trace:\n" + StringUtil.joinString(Arrays.asList(e.getStackTrace()), "\n", 0));
         }
         return match;
     }

@@ -603,7 +603,7 @@ public class Static {
             m = injectedPlayers.get(player);
         }
         if (m == null || (!m.isOnline() && !injectedPlayers.containsKey(player))) {
-            throw new ConfigRuntimeException("The specified player (player) is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, line_num, f);
         }
         return m;
     }
