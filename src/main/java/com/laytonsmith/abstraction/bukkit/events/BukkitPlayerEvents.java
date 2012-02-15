@@ -349,7 +349,7 @@ public class BukkitPlayerEvents {
                     return true;
                 }
                 if(event instanceof PlayerDeathEvent && key.equals("death_message")){
-                    ((PlayerDeathEvent)event).setDeathMessage(value.val());
+                    ((PlayerDeathEvent)event).setDeathMessage(value.nval());
                     return true;
                 }
             }
