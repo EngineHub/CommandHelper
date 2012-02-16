@@ -306,4 +306,15 @@ public class DataHandlingTest {
         verify(fakePlayer, times(2)).sendMessage("false");
         verify(fakePlayer, times(3)).sendMessage("true");
     }
+    
+    @Test public void testIsIntegral() throws ConfigCompileException{
+        SRun("msg(is_integral(5.5)) msg(is_integral(5)) msg(is_integral(4.0))", fakePlayer);
+        verify(fakePlayer).sendMessage("false");
+        verify(fakePlayer, times(2)).sendMessage("true");
+    }
+    
+    @Test public void testDoubleCastToInteger() throws ConfigCompileException{
+        SRun("msg(integer(4.5))", fakePlayer);
+        verify(fakePlayer).sendMessage("4");
+    }
 }

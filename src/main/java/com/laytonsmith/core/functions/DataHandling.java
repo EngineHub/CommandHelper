@@ -726,6 +726,57 @@ public class DataHandling {
         
     }
     
+    @api public static class is_integral implements Function{
+
+        public String getName() {
+            return "is_integral";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {item} Returns true if the numeric value represented by "
+                    + " a given double or numeric string could be cast to an integer"
+                    + " without losing data (or if it's an integer). For instance,"
+                    + " is_numeric(4.5) would return true, and integer(4.5) would work,"
+                    + " however, equals(4.5, integer(4.5)) returns false, because the"
+                    + " value was narrowed to 4.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            double d;
+            try{
+                d = Static.getDouble(args[0]);
+            } catch(ConfigRuntimeException e){
+                return new CBoolean(false, line_num, f);
+            }
+            return new CBoolean((long)d == d, line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
     @api public static class proc implements Function{
 
         public String getName() {
@@ -1224,7 +1275,10 @@ public class DataHandling {
         public String docs() {
             return "integer {item} Returns a new construct that has been cast to an integer."
                     + " This function will throw a CastException if is_numeric would return"
-                    + " false for this item, but otherwise, it will be cast properly.";
+                    + " false for this item, but otherwise, it will be cast properly. Data"
+                    + " may be lost in this conversion. For instance, 4.5 will be converted"
+                    + " to 4, by using integer truncation. You can use is_integral to see"
+                    + " if this data loss would occur.";
         }
 
         public ExceptionType[] thrown() {
@@ -1244,7 +1298,7 @@ public class DataHandling {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CInt(Static.getInt(args[0]), line_num, f);
+            return new CInt((long)Static.getDouble(args[0]), line_num, f);
         }
 
         public String since() {
