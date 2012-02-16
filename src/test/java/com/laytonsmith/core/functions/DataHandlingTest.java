@@ -19,8 +19,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
 import org.junit.*;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 /**
  *
@@ -275,5 +274,36 @@ public class DataHandlingTest {
         SRun("export('hi', 20)", fakePlayer);
         SRun("msg(import('hi'))", fakePlayer);
         verify(fakePlayer).sendMessage("20");
+    }
+    
+    @Test public void testIsBoolean() throws ConfigCompileException{
+        SRun("msg(is_boolean(1)) msg(is_boolean(true))", fakePlayer);
+        verify(fakePlayer).sendMessage("false");
+        verify(fakePlayer).sendMessage("true");
+    }
+    
+    @Test public void testIsInteger() throws ConfigCompileException{
+        SRun("msg(is_integer(5.0)) msg(is_integer('s')) msg(is_integer(5))", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("false");
+        verify(fakePlayer).sendMessage("true");
+    }
+    
+    @Test public void testIsDouble() throws ConfigCompileException{
+        SRun("msg(is_double(5)) msg(is_double('5.0')) msg(is_double(5.0))", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("false");
+        verify(fakePlayer).sendMessage("true");
+    }
+    
+    @Test public void testIsNull() throws ConfigCompileException{
+        SRun("msg(is_null('null')) msg(is_null(null))", fakePlayer);
+        verify(fakePlayer).sendMessage("false");
+        verify(fakePlayer).sendMessage("true");
+    }
+    
+    @Test public void testIsNumeric() throws ConfigCompileException{
+        SRun("msg(is_numeric('s')) msg(is_numeric(null)) msg(is_numeric(true)) msg(is_numeric(2))"
+                + " msg(is_numeric(2.0))", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("false");
+        verify(fakePlayer, times(3)).sendMessage("true");
     }
 }

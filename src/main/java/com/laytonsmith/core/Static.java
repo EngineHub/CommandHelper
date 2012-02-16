@@ -63,6 +63,12 @@ public class Static {
                 throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
                         ExceptionType.CastException, c.getLineNum(), c.getFile());
             }
+        } else if(c instanceof CBoolean){
+            if(((CBoolean)c).getBoolean()){
+                d = 1;
+            } else {
+                d = 0;
+            }
         } else {
             throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
                     ExceptionType.CastException, c.getLineNum(), c.getFile());
@@ -97,6 +103,12 @@ public class Static {
         }
         if (c instanceof CInt) {
             i = ((CInt) c).getInt();
+        } else if(c instanceof CBoolean){
+            if(((CBoolean)c).getBoolean()){
+                i = 1;
+            } else {
+                i = 0;
+            }
         } else {
             try {
                 i = Long.parseLong(c.val());

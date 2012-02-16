@@ -356,7 +356,7 @@ public class Echoes {
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
         public boolean isRestricted() {

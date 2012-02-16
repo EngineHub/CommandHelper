@@ -519,8 +519,9 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "boolean {item} Returns whether or not the given item is a double. Note that a numeric string will return true, and so"
-                    + " will integers.";
+            return "boolean {item} Returns whether or not the given item is a double. Note that numeric strings and integers"
+                    + " can usually be used as a double, however this function checks the actual datatype of the item. If"
+                    + " you just want to see if an item can be used as a number, use is_numeric() instead.";
         }
 
         public ExceptionType[] thrown() {
@@ -544,13 +545,7 @@ public class DataHandling {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            boolean b = true;
-            try{
-                Static.getDouble(args[0]);
-            } catch(ConfigRuntimeException e){
-                b = false;
-            }
-            return new CBoolean(b, line_num, f);
+            return new CBoolean(args[0] instanceof CDouble, line_num, f);
         }
         
     }
@@ -566,7 +561,9 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "boolean {item} Returns whether or not the given item is an integer. Note that numeric strings can be used as integers.";
+            return "boolean {item} Returns whether or not the given item is an integer. Note that numeric strings can usually be used as integers,"
+                    + " however this function checks the actual datatype of the item. If you just want to see if an item can be used as a number,"
+                    + " use is_numeric() instead.";
         }
 
         public ExceptionType[] thrown() {
@@ -592,13 +589,7 @@ public class DataHandling {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            boolean b = true;
-            try{
-                Static.getInt(args[0]);
-            } catch(ConfigRuntimeException e){
-                b = false;
-            }
-            return new CBoolean(b, line_num, f);
+            return new CBoolean(args[0] instanceof CInt, line_num, f);
         }
         
     }
@@ -614,9 +605,8 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "boolean {item} Returns whether the given item is a boolean. Note that all datatypes can be used as booleans, however"
-                    + " null and arrays always return false. Essentially, this mean that this function ALWAYS returns true. Really, you"
-                    + " probably shouldn't ever use it.";
+            return "boolean {item} Returns whether the given item is of the boolean datatype. Note that all datatypes can be used as booleans, however"
+                    + " this function checks the specific datatype of the given item.";
         }
 
         public ExceptionType[] thrown() {
@@ -642,7 +632,7 @@ public class DataHandling {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(true, line_num, f);
+            return new CBoolean(args[0] instanceof CBoolean, line_num, f);
         }
         
     }
@@ -688,7 +678,54 @@ public class DataHandling {
         }
         
     }
-    //TODO: proc
+    
+    @api public static class is_numeric implements Function{
+
+        public String getName() {
+            return "is_numeric";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {item} Returns false if the item would fail if it were used as a numeric value."
+                    + " If it can be parsed or otherwise converted into a numeric value, true is returned.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            boolean b = true;
+            try{
+                Static.getNumber(args[0]);
+            } catch(ConfigRuntimeException e){
+                b = false;
+            }
+            return new CBoolean(b, line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
     @api public static class proc implements Function{
 
         public String getName() {
@@ -1124,6 +1161,175 @@ public class DataHandling {
         public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> nodes){
             CClosure closure = new CClosure(f.toString(), nodes.get(0), env, line_num, f);
             return closure;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class _boolean implements Function{
+
+        public String getName() {
+            return "boolean";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {item} Returns a new construct that has been cast to a boolean. The item is cast according to"
+                    + " the boolean conversion rules. Since all data types can be cast to a"
+                    + " a boolean, this function will never throw an exception.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(Static.getBoolean(args[0]), line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class _integer implements Function{
+
+        public String getName() {
+            return "integer";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "integer {item} Returns a new construct that has been cast to an integer."
+                    + " This function will throw a CastException if is_numeric would return"
+                    + " false for this item, but otherwise, it will be cast properly.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CInt(Static.getInt(args[0]), line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class _double implements Function{
+
+        public String getName() {
+            return "double";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "double {item} Returns a new construct that has been cast to an double."
+                    + " This function will throw a CastException if is_numeric would return"
+                    + " false for this item, but otherwise, it will be cast properly.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CDouble(Static.getDouble(args[0]), line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class _string implements Function{
+
+        public String getName() {
+            return "string";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {item} Creates a new construct that is the \"toString\" of an item."
+                    + " For arrays, an human readable version is returned; this should not be"
+                    + " used directly, as the format is not guaranteed. Booleans return \"true\""
+                    + " or \"false\" and null returns \"null\".";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CString(args[0].val(), line_num, f);
         }
 
         public String since() {
