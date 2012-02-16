@@ -828,4 +828,13 @@ public class Static {
     public static void UninjectPlayer(MCPlayer player){
         injectedPlayers.remove(player.getName());
     }
+
+    public static void HostnameCache(final MCPlayer p) {
+        CommandHelperPlugin.hostnameLookupThreadPool.submit(new Runnable(){
+           public void run(){
+               CommandHelperPlugin.hostnameLookupCache.put(p.getName(),
+                       p.getAddress().getHostName());
+           } 
+        });
+    }
 }

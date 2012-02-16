@@ -31,6 +31,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
+import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -144,6 +145,11 @@ public class CommandHelperListener extends PlayerListener {
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         UserManager.ClearUser(player.getName());
+    }
+
+    @Override
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Static.HostnameCache(new BukkitMCPlayer(event.getPlayer()));
     }
     
 

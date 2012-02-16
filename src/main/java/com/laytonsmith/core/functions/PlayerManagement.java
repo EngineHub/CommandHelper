@@ -6,6 +6,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -626,7 +627,11 @@ public class PlayerManagement {
                 retVals.add(a);
             }
             if (index == 10 || index == -1) {
-                retVals.add(new CString(p.getAddress().getHostName(), line_num, f));
+                String hostname = p.getAddress().getAddress().getHostAddress();
+                if(CommandHelperPlugin.hostnameLookupCache.containsKey(p.getName())){
+                    hostname = CommandHelperPlugin.hostnameLookupCache.get(p.getName());
+                }
+                retVals.add(new CString(hostname, line_num, f));
             }
             if(index == 11 || index == -1){
                 retVals.add(new CBoolean(p.isSneaking(), line_num, f));

@@ -240,7 +240,6 @@ public class StringHandling {
             } catch (Exception ex) {
                 Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + new File(location).getAbsolutePath()
                         + "\nFile " + (new File(location).exists() ? "exists" : "does not exist"));
-                ex.printStackTrace();
                 throw new ConfigRuntimeException("File could not be read in.",
                         ExceptionType.IOException, line_num, f);
             }

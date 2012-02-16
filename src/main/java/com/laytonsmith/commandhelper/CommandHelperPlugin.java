@@ -38,6 +38,10 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.command.Command;
@@ -67,6 +71,9 @@ public class CommandHelperPlugin extends JavaPlugin {
     public static Preferences prefs;
     public static CommandHelperPlugin self;
     public static WorldEditPlugin wep;
+    public static ExecutorService hostnameLookupThreadPool;
+    public static ConcurrentHashMap<String, String> hostnameLookupCache;
+    private static int hostnameThreadPoolID = 0;
     /**
      * Listener for the plugin system.
      */
@@ -123,9 +130,28 @@ public class CommandHelperPlugin extends JavaPlugin {
         } catch (ConfigCompileException ex) {
             logger.log(Level.SEVERE, null, ex);
         }
+        
+        //Clear out our hostname cache
+        hostnameLookupCache = new ConcurrentHashMap<String, String>();
+        //Create a new thread pool, with a custom ThreadFactory,
+        //so we can more clearly name our threads.
+        hostnameLookupThreadPool = Executors.newFixedThreadPool(3, new ThreadFactory() {
+            
+            public Thread newThread(Runnable r) {
+                return new Thread(r, "CommandHelperHostnameLookup-" + (++hostnameThreadPoolID));
+            }
+        });
+        for(MCPlayer p : Static.getServer().getOnlinePlayers()){
+            //Repopulate our cache for currently online players.
+            //New players that join later will get a lookup done
+            //on them at that time.
+            Static.HostnameCache(p);
+        }
+        
         Static.PlayDirty();
         registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Lowest);
         registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
+        registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal);
         
         //interpreter events
         registerEvent(Event.Type.PLAYER_CHAT, interpreterListener, Priority.Lowest);
