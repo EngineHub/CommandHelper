@@ -1174,7 +1174,10 @@ public class PlayerManagement {
                     + " a key is out of range, or otherwise improper, a warning is emitted, and it is skipped,"
                     + " but the function will not fail as a whole. A simple way to set one item in a player's"
                     + " inventory would be: set_pinv(array(2: array(type: 1, qty: 64))) This sets the player's second slot"
-                    + " to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat.";
+                    + " to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat. To set the"
+                    + " item in hand, use something like set_pinv(array(null: array(type: 298))), where"
+                    + " the key is null. If you set a null key in addition to an entire inventory set, only"
+                    + " one item will be used (which one is undefined).";
 
         }
 
@@ -1222,9 +1225,21 @@ public class PlayerManagement {
             CArray array = (CArray)arg;
             for(String key : array.keySet()){
                 try{
-                    int index = Integer.parseInt(key);
+                    int index = -2;
+                    try{
+                        index = Integer.parseInt(key);
+                    } catch(NumberFormatException e){
+                        if(key.equals("")){
+                            //It was a null key
+                            index = -1;
+                        } else {
+                            throw e;
+                        }
+                    }
                     MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), line_num, f);
-                    if(index >= 0 && index <= 35){
+                    if(index == -1){
+                        m.setItemInHand(is);
+                    } else if(index >= 0 && index <= 35){
                         m.getInventory().setItem(index, is);
                     } else if(index == 100){
                         m.getInventory().setBoots(is);
@@ -1242,126 +1257,6 @@ public class PlayerManagement {
                 }
             }
             return new CVoid(line_num, f);
-//            int slot = 0;
-//            int offset = 0;
-//            int qty = 1;
-//            short damage = -1;
-//            if (args.length == 1 && args[0] instanceof CArray || args.length == 2 && args[1] instanceof CArray) {
-//                //we are using the set_pinv(pinv()) method
-//                CArray ca = null;
-//                if (args.length == 1) {
-//                    ca = (CArray) args[0];
-//                }
-//                if (args.length == 2) {
-//                    m = Static.GetPlayer(args[0].val(), line_num, f);
-//                    ca = (CArray) args[1];
-//                }
-//
-//                for (String key : ca.keySet()) {
-//                    int i = 0;
-//                    if (Integer.valueOf(key) != null) {
-//                        i = Integer.parseInt(key);
-//                    } else {
-//                        continue; //Ignore this key
-//                    }
-//                    if (!ca.contains(key)) {
-//                        continue; //Ignore this key too
-//                    }
-//                    Construct item = ca.get(key);
-//                    if (item instanceof CNull) {
-//                        this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
-//                                new CInt(i, line_num, f),
-//                                new CInt(0, line_num, f));
-//                    } else {
-//                        if (item instanceof CArray && (((CArray) item).size() == 2) || ((CArray) item).size() == 4) {
-//                            
-//                            CArray citem = (CArray) item;
-//                            Construct enchantArray = new CArray(line_num, f);
-//                            Construct levelArray = new CArray(line_num, f);
-//                            if (citem.size() == 4) {
-//                                enchantArray = citem.get(2, line_num, f);
-//                                levelArray = citem.get(3, line_num, f);
-//                            }
-//                            this.exec(line_num, f, env, new CString(m.getName(), line_num, f),
-//                                    new CInt(i, line_num, f),
-//                                    new CString(citem.get(0, line_num, f).val(), line_num, f),
-//                                    new CInt(Static.getInt(citem.get(1, line_num, f)), line_num, f),
-//                                    enchantArray, levelArray);
-//                        } else {
-//                            throw new ConfigRuntimeException("Expecting internal values of the array to be 2 or 4 element arrays", ExceptionType.CastException, line_num, f);
-//                        }
-//                    }
-//                }
-//                return new CVoid(line_num, f);
-//            }
-//            //else we are using the first method
-//            if (args[0].val().matches("\\d*(:\\d*)?") || Static.isNull(args[0])) {
-//                //We're using the slot as arg 1
-//                if (Static.isNull(args[0])) {
-//                    slot = -1;
-//                } else {
-//                    slot = (int) Static.getInt(args[0]);
-//                }
-//            } else {
-//                m = Static.GetPlayer(args[0].val(), line_num, f);
-//                if (Static.isNull(args[1])) {
-//                    slot = -1;
-//                } else {
-//                    slot = (int) Static.getInt(args[1]);
-//                }
-//                offset = 1;
-//            }
-//            if (slot < -1 || slot > 35 && slot < 100 || slot > 103) {
-//                throw new ConfigRuntimeException("Slot number must be from 0-35 or 100-103", ExceptionType.RangeException, line_num, f);
-//            }
-//            if (args.length > 2 + offset) {
-//                qty = (int) Static.getInt(args[2 + offset]);
-//            }
-//            qty = Static.Normalize(qty, 0, Integer.MAX_VALUE);
-//            MCItemStack is = Static.ParseItemNotation(this.getName(), args[1 + offset].val(), qty, line_num, f);
-//            if (args.length > 3 + offset) {
-//                damage = (short) Static.getInt(args[3 + offset]);
-//            }
-//
-//
-//            if (damage != -1) {
-//                damage = (short) java.lang.Math.max(0, java.lang.Math.min(100, damage));
-//                short max = is.getType().getMaxDurability();
-//                is.setDurability((short) ((max * damage) / 100));
-//            }
-//
-//            if (is.getTypeId() == 0) {
-//                qty = 0; //Giving the MCPlayer air crashes their client, so just remove the item
-//                is.setTypeId(1);
-//            }
-//
-//            if (qty == 0) {
-//                is = null;
-//            }
-//            if (slot == -1) {
-//                m.setItemInHand(is);
-//            } else {
-//                if (slot == 103) {
-//                    m.getInventory().setHelmet(is);
-//                } else if (slot == 102) {
-//                    m.getInventory().setChestplate(is);
-//                } else if (slot == 101) {
-//                    m.getInventory().setLeggings(is);
-//                } else if (slot == 100) {
-//                    m.getInventory().setBoots(is);
-//                } else {
-//                    m.getInventory().setItem(slot, is);
-//                }
-//            }
-//            if (args.length > 4 + offset) {
-//                //We want to enchant this item also
-//                Enchantments.enchant_inv ei = new Enchantments.enchant_inv();
-//                ei.exec(line_num, f, env, new CString(m.getName(), line_num, f),
-//                        new CInt(slot, line_num, f),
-//                        args[4 + offset],
-//                        args[5 + offset]);
-//            }
-//            return new CVoid(line_num, f);
         }
     }
 
