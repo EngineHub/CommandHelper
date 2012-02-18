@@ -26,7 +26,11 @@ import java.util.logging.Logger;
  */
 public class Persistance {
     public static String docs(){
-        return "Allows scripts to store data from execution to execution. See the guide on [[CommandHelper/Persistance|persistance]] for more information.";
+        return "Allows scripts to store data from execution to execution. See the guide on [[CommandHelper/Persistance|persistance]] for more information."
+                + " In all the functions, you may send multiple arguments for the key, which will automatically"
+                + " be concatenated with a period (the namespace separator). No magic happens here, you can"
+                + " put periods yourself, or combine manually namespaced values or automatically namespaced values"
+                + " with no side effects.";
     }
     
     @api public static class store_value implements Function{
@@ -36,11 +40,11 @@ public class Persistance {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "void {key, value} Allows you to store a value, which can then be retrieved later. key must be a string containing"
+            return "void {key[, namespace, ...], value} Allows you to store a value, which can then be retrieved later. key must be a string containing"
                     + " only letters, numbers, underscores. Periods may also be used, but they form a namespace, and have special meaning."
                     + " (See get_values())";
         }
@@ -64,7 +68,7 @@ public class Persistance {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            String key = args[0].val();
+            String key = GetNamespace(args, args.length - 1, getName(), line_num, f);
             String value = null;
             try{
                 value = Construct.json_encode(args[1], line_num, f);
@@ -109,11 +113,11 @@ public class Persistance {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "Mixed {key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
+            return "Mixed {key[, namespace, ...]} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
                     + " is returned. On a more detailed note: If the value stored in the persistance database is not actually a construct,"
                     + " then null is also returned.";
         }
@@ -139,7 +143,7 @@ public class Persistance {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
             Object o;
             try {
-                Object obj = Static.getPersistance().getValue(new String[]{"storage", args[0].val()});
+                Object obj = Static.getPersistance().getValue(new String[]{"storage", GetNamespace(args, null, getName(), line_num, f)});
                 if(obj == null){
                     return new CNull(line_num, f);
                 }
@@ -167,11 +171,11 @@ public class Persistance {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "array {name.space} Returns all the values in a particular namespace"
+            return "array {name[, space, ...]} Returns all the values in a particular namespace"
                     + " as an associative"
                     + " array(key: value, key: value). Only full namespace matches are considered,"
                     + " so if the key 'users.data.username.hi' existed in the database, and you tried"
@@ -200,7 +204,7 @@ public class Persistance {
             com.laytonsmith.PureUtilities.Persistance p = Static.getPersistance();
             List<String> keyChain = new ArrayList<String>();
             keyChain.add("storage");
-            keyChain.addAll(Arrays.asList(args[0].val().split("\\.")));
+            keyChain.addAll(Arrays.asList(GetNamespace(args, null, getName(), line_num, f).split("\\.")));
             List<Map.Entry<String, Object>> list = p.getNamespaceValues(keyChain.toArray(new String[]{}));
             CArray ca = new CArray(line_num, f);
             for(Map.Entry<String, Object> e : list){
@@ -228,11 +232,11 @@ public class Persistance {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "boolean {key} Returns whether or not there is data stored at the specified key in the Persistance database.";
+            return "boolean {key[, namespace, ...]} Returns whether or not there is data stored at the specified key in the Persistance database.";
         }
 
         public ExceptionType[] thrown() {
@@ -258,7 +262,7 @@ public class Persistance {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(Static.getPersistance().isKeySet(new String[]{"storage", args[0].val()}), line_num, f);
+            return new CBoolean(Static.getPersistance().isKeySet(new String[]{"storage", GetNamespace(args, null, getName(), line_num, f)}), line_num, f);
         }
         
     }
@@ -270,11 +274,11 @@ public class Persistance {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "void {key} Completely removes a value from storage. Calling has_value(key) after this call will return false.";
+            return "void {key[, namespace, ...]} Completely removes a value from storage. Calling has_value(key) after this call will return false.";
         }
 
         public ExceptionType[] thrown() {
@@ -298,9 +302,36 @@ public class Persistance {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Static.getPersistance().setValue(new String[]{"storage", args[0].val()}, null);
+            Static.getPersistance().setValue(new String[]{"storage", GetNamespace(args, null, getName(), line_num, f)}, null);
             return new CVoid(line_num, f);
         }
         
+    }
+    
+    /**
+     * Generates the namespace for this value, given an array of constructs. 
+     * If the entire list of arguments isn't supposed to be part of the namespace,
+     * the value to be excluded may be specified.
+     * @param args
+     * @param exclude
+     * @return 
+     */
+    private static String GetNamespace(Construct [] args, Integer exclude, String name, int line_num, File f){
+        if(exclude != null && args.length < 2 || exclude == null && args.length < 1){
+            throw new ConfigRuntimeException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, line_num, f);
+        }
+        boolean first = true;
+        StringBuilder b = new StringBuilder();
+        for(int i = 0; i < args.length; i++){
+            if(exclude != null && exclude == i){
+                continue;
+            }
+            if(!first){
+                b.append(".");
+            }
+            first = false;
+            b.append(args[i].val());
+        }
+        return b.toString();
     }
 }

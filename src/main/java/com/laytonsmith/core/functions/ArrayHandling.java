@@ -433,9 +433,14 @@ public class ArrayHandling {
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 if(!((CArray)args[0]).inAssociativeMode()){
-                    int index = (int)Static.getInt(args[1]);
-                    CArray ca = (CArray)args[0];
-                    return new CBoolean(index <= ca.size() - 1, line_num, f);
+                    try{
+                        int index = (int)Static.getInt(args[1]);                    
+                        CArray ca = (CArray)args[0];
+                        return new CBoolean(index <= ca.size() - 1, line_num, f);
+                    } catch(ConfigRuntimeException e){
+                        //They sent a key that is a string. Obviously it doesn't exist.
+                        return new CBoolean(false, line_num, f);
+                    }
                 } else {
                     CArray ca = (CArray)args[0];
                     return new CBoolean(ca.containsKey(args[1].val()), line_num, f);
