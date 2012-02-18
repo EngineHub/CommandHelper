@@ -1916,7 +1916,8 @@ public class PlayerManagement {
         public String docs() {
             return "void {player, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30."
                     + " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
-                    + " cause the client to crash, fairly hardcore.";
+                    + " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects for a"
+                    + " complete list of potions that can be added. To remove an effect, set the strength (or duration) to 0.";
         }
 
         public ExceptionType[] thrown() {
@@ -1960,7 +1961,11 @@ public class PlayerManagement {
             if (args.length == 4) {
                 seconds = (int) Static.getInt(args[3]);
             }
-            m.addEffect(effect, strength, seconds);
+            if(seconds == 0 || strength == 0){
+                m.removeEffect(effect);
+            } else {
+                m.addEffect(effect, strength, seconds);
+            }
             return new CVoid(line_num, f);
         }
     }

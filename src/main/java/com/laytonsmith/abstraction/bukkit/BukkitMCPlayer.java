@@ -13,6 +13,9 @@ import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import net.minecraft.server.EntityLiving;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MobEffect;
 import net.minecraft.server.ServerConfigurationManager;
@@ -21,6 +24,7 @@ import org.bukkit.GameMode;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.potion.PotionEffectType;
 
 /**
  *
@@ -270,8 +274,27 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
     }
     
     public void removeEffect(int potionID){
+//        p.removePotionEffect(PotionEffectType.getById(potionID));
         EntityPlayer ep = ((CraftPlayer) p).getHandle();
-        ep.effects = new HashMap();
+        try {
+            Field f = EntityLiving.class.getDeclaredField("effects");
+            f.setAccessible(true);
+            HashMap effects = (HashMap)f.get(ep);
+            MobEffect me = (MobEffect) effects.get(potionID);
+            Field fDuration = me.getClass().getDeclaredField("duration");
+            fDuration.setAccessible(true);
+            fDuration.set(me, 0);
+        } catch (IllegalArgumentException ex) {
+            Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IllegalAccessException ex) {
+            Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (NoSuchFieldException ex) {
+            Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (SecurityException ex) {
+            Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        //Meh, stupid bukkit.
+        //ep.effects.remove(potionID);
     }
     
 }
