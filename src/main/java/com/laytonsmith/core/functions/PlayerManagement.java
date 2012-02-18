@@ -1936,7 +1936,7 @@ public class PlayerManagement {
         }
 
         public String since() {
-            return "0.0.0";
+            return "3.3.0";
         }
 
         public Boolean runAsync() {

@@ -9,13 +9,10 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import net.minecraft.server.EntityLiving;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MobEffect;
 import net.minecraft.server.ServerConfigurationManager;
@@ -249,25 +246,32 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
         p.setFireTicks(i);
     }
 
-    public void addEffect(int potionID, int strength, int seconds) {
-        EntityPlayer ep = ((CraftPlayer) p).getHandle();
-        Class epc = EntityLiving.class;
+    public void addEffect(int potionID, int strength, int seconds) {        
+        EntityPlayer ep = ((CraftPlayer) p).getHandle();        
         MobEffect me = new MobEffect(potionID, seconds * 20, strength);
-        try {
-            Method meth = epc.getDeclaredMethod("d", net.minecraft.server.MobEffect.class);
-            //ep.d(new MobEffect(effect, seconds * 20, strength));
-            //Call it reflectively, because it's deobfuscated in newer versions of CB
-            meth.invoke(ep, me);
-        } catch (Exception e) {
-            try {
-                //Look for the addEffect version                
-                Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
-                //ep.addEffect(me);
-                meth.invoke(ep, me);
-            } catch (Exception ex) {
-                Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
+        ep.addEffect(me);
+        
+//        Class epc = EntityLiving.class;
+//        try {
+//            Method meth = epc.getDeclaredMethod("d", net.minecraft.server.MobEffect.class);
+//            //ep.d(new MobEffect(effect, seconds * 20, strength));
+//            //Call it reflectively, because it's deobfuscated in newer versions of CB
+//            meth.invoke(ep, me);
+//        } catch (Exception e) {
+//            try {
+//                //Look for the addEffect version                
+//                Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
+//                //ep.addEffect(me);
+//                meth.invoke(ep, me);
+//            } catch (Exception ex) {
+//                Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+//            }
+//        }
+    }
+    
+    public void removeEffect(int potionID){
+        EntityPlayer ep = ((CraftPlayer) p).getHandle();
+        ep.effects = new HashMap();
     }
     
 }

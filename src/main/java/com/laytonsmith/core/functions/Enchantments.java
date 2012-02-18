@@ -83,6 +83,12 @@ public class Enchantments {
      */
     public static String ConvertLevel(String romanNumeral){
         String lc = romanNumeral.toLowerCase().trim();
+        try{
+            Integer.parseInt(lc);
+            return lc;
+        } catch(NumberFormatException e){
+            //Maybe roman numeral?
+        }
         int i = romanToWestern(lc);
 //        if(lc.equals("i")){
 //            i = 1;
@@ -214,10 +220,10 @@ public class Enchantments {
                 }
                 if (e.canEnchantItem(is)) {
                     int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num, f).val()), line_num, f));
-                    if (/*e.getMaxLevel() >= level &&*/ level > 0) {
+                    if (e.getMaxLevel() >= level && level > 0) {
                         is.addEnchantment(e, level);
                     } else {
-                        throw new ConfigRuntimeException("Level must be > 0, but was " + level, ExceptionType.RangeException, line_num, f);
+                        throw new ConfigRuntimeException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, ExceptionType.RangeException, line_num, f);
                     }
                 } else {
                     throw new ConfigRuntimeException(enchantArray.get(key, line_num, f).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, line_num, f);
@@ -226,6 +232,8 @@ public class Enchantments {
             return new CVoid(line_num, f);
         }
     }
+    
+    
 
     @api
     public static class enchant_rm_inv implements Function {

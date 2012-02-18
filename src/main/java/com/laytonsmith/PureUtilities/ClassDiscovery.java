@@ -19,7 +19,18 @@ import java.util.zip.ZipInputStream;
 public class ClassDiscovery {
 
     public static Class[] GetClassesWithinPackageHierarchy(){
-        String url = ClassDiscovery.class.getResource(ClassDiscovery.class.getSimpleName() + ".class").toString();
+        return GetClassesWithinPackageHierarchy(null);
+    }
+    /**
+     * Gets all the classes in the specified location. The url can point to a jar, or a
+     * file system location. If null, the current binary is used.
+     * @param url
+     * @return 
+     */
+    public static Class[] GetClassesWithinPackageHierarchy(String url){
+        if(url == null){
+            url = ClassDiscovery.class.getResource(ClassDiscovery.class.getSimpleName() + ".class").toString();
+        }
         List<String> classNameList = new ArrayList<String>();
         if(url.startsWith("file:")){
             //We are running from the file system

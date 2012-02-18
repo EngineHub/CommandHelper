@@ -13,9 +13,7 @@ import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.event.Cancellable;
-import org.bukkit.event.Event;
-import org.bukkit.event.Listener;
+import org.bukkit.event.*;
 import org.bukkit.plugin.EventExecutor;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredListener;
@@ -29,14 +27,15 @@ import org.perf4j.StopWatch;
 public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
     private final Listener listener;
-    private final Event.Priority priority;
+    private final EventPriority priority;
     private final Plugin plugin;
     private final EventExecutor executor;
     private static final int queueCapacity = 20;
     private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(queueCapacity);
 
-    public BukkitDirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor, final Event.Priority eventPriority, final Plugin registeredPlugin) {
-        super(pluginListener, eventExecutor, eventPriority, registeredPlugin);
+    public BukkitDirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor, final EventPriority eventPriority, final Plugin registeredPlugin,
+            boolean ignoreCancelled) {
+        super(pluginListener, eventExecutor, eventPriority, registeredPlugin, ignoreCancelled);
         listener = pluginListener;
         priority = eventPriority;
         plugin = registeredPlugin;
@@ -181,7 +180,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
         Field rPriority = real.getClass().getDeclaredField("priority");
         rPriority.setAccessible(true);
-        Event.Priority nPriority = (Event.Priority) rPriority.get(real);
+        EventPriority nPriority = (EventPriority) rPriority.get(real);
 
         Field rPlugin = real.getClass().getDeclaredField("plugin");
         rPlugin.setAccessible(true);
@@ -190,8 +189,12 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
         Field rExecutor = real.getClass().getDeclaredField("executor");
         rExecutor.setAccessible(true);
         EventExecutor nExecutor = (EventExecutor) rExecutor.get(real);
+        
+        Field rIgnoreCancelled = real.getClass().getDeclaredField("ignoreCancelled");
+        rIgnoreCancelled.setAccessible(true);
+        boolean nIgnoreCancelled = rIgnoreCancelled.getBoolean(real);
 
-        return new BukkitDirtyRegisteredListener(nListener, nExecutor, nPriority, nPlugin);
+        return new BukkitDirtyRegisteredListener(nListener, nExecutor, nPriority, nPlugin, nIgnoreCancelled);
     }
 
     /**
@@ -214,7 +217,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
             callEvent0(event);
         } else {
             //If it's a cancellable event, and this listener isn't Monitor priority, just return
-            if (event instanceof Cancellable && this.priority != Event.Priority.Monitor) {
+            if (event instanceof Cancellable && this.priority != EventPriority.MONITOR) {
                 if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
                         && Debug.EVENT_LOGGING_FILTER.contains(event.getType())) {
                     Debug.DoLog(event.getType(), 3, "\tEvent is being ignored, due to play-dirty mode rules");
@@ -224,7 +227,7 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
                 if (Debug.EVENT_LOGGING && Debug.IsFiltered(plugin)
                         && Debug.EVENT_LOGGING_FILTER.contains(event.getType())) {
                     Debug.DoLog(event.getType(), 3, "\tEvent is super cancelled, but this listener is either monitor priority (Y/N:"
-                            + (this.priority == Event.Priority.Monitor ? "y" : "n") + " or it it is not cancellable (Y/N:"
+                            + (this.priority == EventPriority.MONITOR ? "y" : "n") + " or it it is not cancellable (Y/N:"
                             + (event instanceof Cancellable ? "n" : "y"));
                 }
                 callEvent0(event);
@@ -284,7 +287,11 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
                     + (event.getType() == Event.Type.CUSTOM_EVENT ? "CUSTOM_EVENT/" + event.getEventName() : event.getType().name()) //Event name
                     );
         }
-        executor.execute(listener, event);
+        try{
+            executor.execute(listener, event);
+        } catch(EventException e){
+            Logger.getLogger(BukkitDirtyRegisteredListener.class.getName()).log(Level.SEVERE, e.getMessage(), e);
+        }
         if (stopWatch != null) {
             stopWatch.stop();
             if (Debug.EVENT_LOGGING) {

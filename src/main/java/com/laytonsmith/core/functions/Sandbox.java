@@ -1,14 +1,10 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -43,92 +39,93 @@ public class Sandbox {
                 + " likely to have good documentation.";
     }
 
-    @api
-    public static class plugin_cmd implements Function {
-
-        public String getName() {
-            return "plugin_cmd";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2};
-        }
-
-        public String docs() {
-            return "void {plugin, cmd} ";
-        }
-
-        public ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public String since() {
-            return "0.0.0";
-        }
-
-        public Boolean runAsync() {
-            return false;
-        }
-
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Object o = AliasCore.parent.getServer().getPluginManager();
-            if (o instanceof SimplePluginManager) {
-                SimplePluginManager spm = (SimplePluginManager) o;
-                try {
-                    Method m = spm.getClass().getDeclaredMethod("getEventListeners", Event.Type.class);
-                    m.setAccessible(true);
-                    SortedSet<RegisteredListener> sl = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.SERVER_COMMAND);
-                    for(RegisteredListener l : sl){
-                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
-                            if(env.GetCommandSender() instanceof ConsoleCommandSender){
-                                l.callEvent(new ServerCommandEvent((ConsoleCommandSender)env.GetCommandSender(), args[1].val()));
-                            }
-                        }
-                    }
-                    SortedSet<RegisteredListener> ss = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.PLAYER_COMMAND_PREPROCESS);
-
-                    for (RegisteredListener l : ss) {
-                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
-                            if(env.GetCommandSender() instanceof MCPlayer){
-                                l.callEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)env.GetPlayer())._Player(), args[1].val()));
-                            }
-                            PluginCommand.class.getDeclaredMethods();
-                            Constructor c = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
-                            c.setAccessible(true);
-                            List<String> argList = Arrays.asList(args[1].val().split(" "));
-                            Command com = (Command) c.newInstance(argList.get(0).substring(1), l.getPlugin());
-                            l.getPlugin().onCommand(((BukkitMCCommandSender)env.GetCommandSender())._CommandSender(), com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
-                        }
-                    }
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (InvocationTargetException ex) {
-                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (NoSuchMethodException ex) {
-                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (SecurityException ex) {
-                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-
-            return new CVoid(line_num, f);
-        }
-    }
+    //This broke as of 1.1
+//    @api
+//    public static class plugin_cmd implements Function {
+//
+//        public String getName() {
+//            return "plugin_cmd";
+//        }
+//
+//        public Integer[] numArgs() {
+//            return new Integer[]{2};
+//        }
+//
+//        public String docs() {
+//            return "void {plugin, cmd} ";
+//        }
+//
+//        public ExceptionType[] thrown() {
+//            return null;
+//        }
+//
+//        public boolean isRestricted() {
+//            return true;
+//        }
+//
+//        public void varList(IVariableList varList) {
+//        }
+//
+//        public boolean preResolveVariables() {
+//            return true;
+//        }
+//
+//        public String since() {
+//            return "0.0.0";
+//        }
+//
+//        public Boolean runAsync() {
+//            return false;
+//        }
+//
+//        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+//            Object o = AliasCore.parent.getServer().getPluginManager();
+//            if (o instanceof SimplePluginManager) {
+//                SimplePluginManager spm = (SimplePluginManager) o;
+//                try {
+//                    Method m = spm.getClass().getDeclaredMethod("getEventListeners", Event.Type.class);
+//                    m.setAccessible(true);
+//                    SortedSet<RegisteredListener> sl = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.SERVER_COMMAND);
+//                    for(RegisteredListener l : sl){
+//                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
+//                            if(env.GetCommandSender() instanceof ConsoleCommandSender){
+//                                l.callEvent(new ServerCommandEvent((ConsoleCommandSender)env.GetCommandSender(), args[1].val()));
+//                            }
+//                        }
+//                    }
+//                    SortedSet<RegisteredListener> ss = (SortedSet<RegisteredListener>) m.invoke(spm, Event.Type.PLAYER_COMMAND_PREPROCESS);
+//
+//                    for (RegisteredListener l : ss) {
+//                        if (l.getPlugin().getDescription().getName().equalsIgnoreCase(args[0].val())) {
+//                            if(env.GetCommandSender() instanceof MCPlayer){
+//                                l.callEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)env.GetPlayer())._Player(), args[1].val()));
+//                            }
+//                            PluginCommand.class.getDeclaredMethods();
+//                            Constructor c = PluginCommand.class.getDeclaredConstructor(String.class, Plugin.class);
+//                            c.setAccessible(true);
+//                            List<String> argList = Arrays.asList(args[1].val().split(" "));
+//                            Command com = (Command) c.newInstance(argList.get(0).substring(1), l.getPlugin());
+//                            l.getPlugin().onCommand(((BukkitMCCommandSender)env.GetCommandSender())._CommandSender(), com, argList.get(0).substring(1), argList.subList(1, argList.size()).toArray(new String[]{}));
+//                        }
+//                    }
+//                } catch (InstantiationException ex) {
+//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (IllegalAccessException ex) {
+//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (IllegalArgumentException ex) {
+//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (InvocationTargetException ex) {
+//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (NoSuchMethodException ex) {
+//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
+//                } catch (SecurityException ex) {
+//                    Logger.getLogger(Sandbox.class.getName()).log(Level.SEVERE, null, ex);
+//                }
+//            }
+//
+//            return new CVoid(line_num, f);
+//        }
+//    }
 
     @api
     public static class item_drop implements Function {
@@ -326,6 +323,83 @@ public class Sandbox {
             return new CVoid(line_num, f);
         }
         
+    }
+    
+    @api
+    public static class enchant_inv_unsafe implements Function{
+        public String getName() {
+            return "enchant_inv_unsafe";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{3, 4};
+        }
+
+        public String docs() {
+            return "void {[player], slot, type, level} Works the same as enchant_inv, except anything goes. "
+                    + " You can enchant a fish with a level 5000 enchantment if you wish. Side effects"
+                    + " may include nausia, dry mouth, insomnia, or server crashes. (Seriously, this might"
+                    + " crash your server, be careful with it.)";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "0.0.0";
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer m = environment.GetPlayer();
+            int offset = 1;
+            if (args.length == 4) {
+                m = Static.GetPlayer(args[0].val(), line_num, f);
+                offset = 0;
+            }
+            MCItemStack is = null;
+            if (args[1 - offset] instanceof CNull) {
+                is = m.getItemInHand();
+            } else {
+                int slot = (int) Static.getInt(args[1 - offset]);
+                is = m.getInventory().getItem(slot);
+            }
+            CArray enchantArray = new CArray(line_num, f);
+            if (!(args[2 - offset] instanceof CArray)) {
+                enchantArray.push(args[2 - offset]);
+            } else {
+                enchantArray = (CArray) args[2 - offset];
+            }
+
+            CArray levelArray = new CArray(line_num, f);
+            if (!(args[3 - offset] instanceof CArray)) {
+                levelArray.push(args[3 - offset]);
+            } else {
+                levelArray = (CArray) args[3 - offset];
+            }
+            for (String key : enchantArray.keySet()) {
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, line_num, f).val()).toUpperCase());
+                if(e == null){
+                    throw new ConfigRuntimeException(enchantArray.get(key, line_num, f).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, line_num, f);
+                }
+                int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num, f).val()), line_num, f));
+                
+                is.addUnsafeEnchantment(e, level);
+            }
+            return new CVoid(line_num, f);
+        }
     }
 
     

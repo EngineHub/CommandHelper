@@ -49,8 +49,12 @@ public class BukkitMCItemStack implements MCItemStack{
         is.setDurability(data);
     }
 
-    public void addEnchantment(MCEnchantment e, int level) {
+    public void addEnchantment(MCEnchantment e, int level) {        
         is.addEnchantment(((BukkitMCEnchantment)e).__Enchantment(), level);
+    }
+    
+    public void addUnsafeEnchantment(MCEnchantment e, int level){
+        is.addUnsafeEnchantment(((BukkitMCEnchantment)e).__Enchantment(), level);
     }
     
     public Map<MCEnchantment, Integer> getEnchantments(){

@@ -17,6 +17,7 @@ public interface MCItemStack {
     public int getTypeId();
     public void setDurability(short data);
     public void addEnchantment(MCEnchantment e, int level);
+    public void addUnsafeEnchantment(MCEnchantment e, int level);
     public Map<MCEnchantment, Integer> getEnchantments();
     public void removeEnchantment(MCEnchantment e);
     public MCMaterial getType();
