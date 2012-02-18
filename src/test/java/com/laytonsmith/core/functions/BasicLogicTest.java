@@ -115,6 +115,17 @@ public class BasicLogicTest {
         
     }
     
+    @Test public void testEqualsMulti() throws ConfigCompileException{
+        assertEquals("true", SRun("equals(1, '1', 1.0)", fakePlayer));
+        assertEquals("false", SRun("equals('blah', 'blah', 'blarg')", fakePlayer));
+    }
+    
+    @Test public void testEqualsICMulti() throws ConfigCompileException{
+        assertEquals("true", SRun("equals_ic(1, '1', 1.0)", fakePlayer));
+        assertEquals("false", SRun("equals_ic('blah', 'blah', 'blarg')", fakePlayer));
+        assertEquals("true", SRun("equals_ic('blah', 'Blah', 'BLAH')", fakePlayer));
+    }
+    
     public void _t(String val1, String val2){
         try {
             assertEquals("true", SRun("equals(" + val1 + ", " + val2 + ")", null));

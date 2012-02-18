@@ -200,33 +200,60 @@ public class BasicLogic {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(Static.anyBooleans(args)){
-                boolean arg1 = Static.getBoolean(args[0]);
-                boolean arg2 = Static.getBoolean(args[1]);
-                return new CBoolean(arg1 == arg2, line_num, f);
+            if(args.length <= 1){
+                throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, line_num, f);
             }
-            if(args[0].val().equals(args[1].val())){
-                return new CBoolean(true, line_num, f);
+            if(Static.anyBooleans(args)){
+                boolean equals = true;
+                for(int i = 1; i < args.length; i++){
+                    boolean arg1 = Static.getBoolean(args[i - 1]);
+                    boolean arg2 = Static.getBoolean(args[i]);
+                    if(arg1 != arg2){
+                        equals = false;
+                        break;
+                    }
+                }
+                return new CBoolean(equals, line_num, f);
+            }
+            
+            {
+                boolean equals = true;
+                for(int i = 1; i < args.length; i++){
+                    if(!args[i - 1].val().equals(args[i].val())){
+                        equals = false;
+                        break;
+                    }
+                }
+                if(equals){
+                    return new CBoolean(true, line_num, f);
+                }
             }
             try{
-                double arg1 = Static.getNumber(args[0]);
-                double arg2 = Static.getNumber(args[1]);
-                return new CBoolean(arg1 == arg2, line_num, f);
+                boolean equals = true;
+                for(int i = 1; i < args.length; i++){
+                    double arg1 = Static.getNumber(args[i - 1]);
+                    double arg2 = Static.getNumber(args[i]);
+                    if(arg1 != arg2){
+                        equals = false;
+                        break;
+                    }
+                }
+                return new CBoolean(equals, line_num, f);
             } catch (ConfigRuntimeException e){
                 return new CBoolean(false, line_num, f);
             }
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
         }
 
         public String docs() {
-            return "boolean {var1, var2} Returns true or false if the two arguments are equal";
+            return "boolean {var1, var2[, varX...]} Returns true or false if all the arguments are equal";
         }
 
         public boolean isRestricted() {
@@ -346,16 +373,16 @@ public class BasicLogic {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "boolean {val1, val2} Returns true if the two values are equal to each other, while"
+            return "boolean {val1, val2[, valX...]} Returns true if all the values are equal to each other, while"
                     + " ignoring case.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
         }
 
         public boolean isRestricted() {
@@ -377,18 +404,45 @@ public class BasicLogic {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            if(Static.anyBooleans(args)){
-                boolean arg1 = Static.getBoolean(args[0]);
-                boolean arg2 = Static.getBoolean(args[1]);
-                return new CBoolean(arg1 == arg2, line_num, f);
+            if(args.length <= 1){
+                throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, line_num, f);
             }
-            if(args[0].val().equalsIgnoreCase(args[1].val())){
-                return new CBoolean(true, line_num, f);
+            if(Static.anyBooleans(args)){
+                boolean equals = true;
+                for(int i = 1; i < args.length; i++){
+                    boolean arg1 = Static.getBoolean(args[i - 1]);
+                    boolean arg2 = Static.getBoolean(args[i]);
+                    if(arg1 != arg2){
+                        equals = false;
+                        break;
+                    }
+                }
+                return new CBoolean(equals, line_num, f);
+            }
+            
+            {
+                boolean equals = true;
+                for(int i = 1; i < args.length; i++){
+                    if(!args[i - 1].val().equalsIgnoreCase(args[i].val())){
+                        equals = false;
+                        break;
+                    }
+                }
+                if(equals){
+                    return new CBoolean(true, line_num, f);
+                }
             }
             try{
-                double arg1 = Static.getNumber(args[0]);
-                double arg2 = Static.getNumber(args[1]);
-                return new CBoolean(arg1 == arg2, line_num, f);
+                boolean equals = true;
+                for(int i = 1; i < args.length; i++){
+                    double arg1 = Static.getNumber(args[i - 1]);
+                    double arg2 = Static.getNumber(args[i]);
+                    if(arg1 != arg2){
+                        equals = false;
+                        break;
+                    }
+                }
+                return new CBoolean(equals, line_num, f);
             } catch (ConfigRuntimeException e){
                 return new CBoolean(false, line_num, f);
             }
