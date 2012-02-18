@@ -66,8 +66,15 @@ public class DocGen {
                     + "Turing Complete language [http://en.wikipedia.org/wiki/Turing_Complete].\n"
                     + "There are several functions defined, and they are grouped into \"classes\".");
         }
+        List<Map.Entry<Class, ArrayList<Function>>> entrySet = new ArrayList<Map.Entry<Class, ArrayList<Function>>>(functionlist.entrySet());
+        Collections.sort(entrySet, new Comparator<Map.Entry<Class, ArrayList<Function>>>() {
 
-        for (Map.Entry<Class, ArrayList<Function>> entry : functionlist.entrySet()) {
+            public int compare(Map.Entry<Class, ArrayList<Function>> o1, Map.Entry<Class, ArrayList<Function>> o2) {
+                return o1.getKey().getName().compareTo(o2.getKey().getName());
+            }
+        });
+
+        for (Map.Entry<Class, ArrayList<Function>> entry : entrySet) {
             Class apiClass = entry.getKey();
             String className = apiClass.getName().split("\\.")[apiClass.getName().split("\\.").length - 1];
             if (className.equals("Sandbox")) {
@@ -122,6 +129,13 @@ public class DocGen {
                 }
                 System.out.println("**********************************************************************************************");
             }
+            List<Function> flist = entry.getValue();
+            Collections.sort(flist, new Comparator<Function>() {
+
+                public int compare(Function o1, Function o2) {
+                    return o1.getName().compareTo(o2.getName());
+                }
+            });
             for (Function f : entry.getValue()) {
                 String doc = f.docs();
                 String ret = null;
