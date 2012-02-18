@@ -83,21 +83,61 @@ public class Enchantments {
      */
     public static String ConvertLevel(String romanNumeral){
         String lc = romanNumeral.toLowerCase().trim();
-        int i = 0;
-        if(lc.equals("i")){
-            i = 1;
-        } else if(lc.equals("ii")){
-            i = 2;
-        } else if(lc.equals("iii")){
-            i = 3;
-        } else if(lc.equals("iv")){
-            i = 4;
-        } else if(lc.equals("v")){
-            i = 5;
-        } else {
-            return romanNumeral;
-        }
+        int i = romanToWestern(lc);
+//        if(lc.equals("i")){
+//            i = 1;
+//        } else if(lc.equals("ii")){
+//            i = 2;
+//        } else if(lc.equals("iii")){
+//            i = 3;
+//        } else if(lc.equals("iv")){
+//            i = 4;
+//        } else if(lc.equals("v")){
+//            i = 5;
+//        } else {
+//            return romanNumeral;
+//        }
         return Integer.toString(i);
+    }
+    
+    public static int romanToWestern(String roman) {
+         
+        int western = 0; //the numerical version
+        char currentChar;
+        char nextChar;
+         
+        int i=0;
+         
+        while(i<roman.length()) {
+            currentChar = roman.charAt(i);
+            if(i<roman.length()-1) {
+                nextChar = roman.charAt(i+1);
+                if(getValue(currentChar)<getValue(nextChar)) {
+                    western += (getValue(nextChar) - getValue(currentChar));
+                    i+=2;
+                } else {
+                    western += getValue(currentChar);
+                    i++;
+                }
+            } else {
+                western += getValue(currentChar);
+                i++;
+            }
+        }
+        return western;
+         
+    }
+     
+    private static int getValue(char l) { //Converts the numeral to a number
+        String letter = String.valueOf(l);
+        if(letter.equalsIgnoreCase("I")) return 1;
+        if(letter.equalsIgnoreCase("V")) return 5;
+        if(letter.equalsIgnoreCase("X")) return 10;
+        if(letter.equalsIgnoreCase("L")) return 50;
+        if(letter.equalsIgnoreCase("C")) return 100;
+        if(letter.equalsIgnoreCase("D")) return 500;
+        if(letter.equalsIgnoreCase("M")) return 1000;
+        return 0;
     }
 
     @api
@@ -174,10 +214,10 @@ public class Enchantments {
                 }
                 if (e.canEnchantItem(is)) {
                     int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num, f).val()), line_num, f));
-                    if (e.getMaxLevel() >= level && level > 0) {
+                    if (/*e.getMaxLevel() >= level &&*/ level > 0) {
                         is.addEnchantment(e, level);
                     } else {
-                        throw new ConfigRuntimeException(level + " is too high for the " + e.getName() + " enchantment. The range is 1-" + e.getMaxLevel(), ExceptionType.RangeException, line_num, f);
+                        throw new ConfigRuntimeException("Level must be > 0, but was " + level, ExceptionType.RangeException, line_num, f);
                     }
                 } else {
                     throw new ConfigRuntimeException(enchantArray.get(key, line_num, f).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, line_num, f);

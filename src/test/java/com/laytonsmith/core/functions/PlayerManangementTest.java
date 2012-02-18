@@ -12,6 +12,7 @@ import com.laytonsmith.core.MScriptComplete;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
+import java.util.HashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertEquals;
 import org.junit.*;
@@ -126,12 +127,12 @@ public class PlayerManangementTest {
         MCBlock b = mock(MCBlock.class);
         CommandHelperPlugin.myServer = fakeServer;
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
-        when(fakePlayer.getTargetBlock(null, 200)).thenReturn(b);
+        when(fakePlayer.getTargetBlock((HashSet)eq(null), anyInt())).thenReturn(b);
         MCWorld w = mock(MCWorld.class);
         when(b.getWorld()).thenReturn(w);
         Run("pcursor()", fakePlayer);
         Run("pcursor('" + fakePlayer.getName() + "')", fakePlayer);
-        verify(fakePlayer, times(2)).getTargetBlock(null, 200);
+        verify(fakePlayer, times(2)).getTargetBlock((HashSet)eq(null), anyInt());
     }
     
     @Test public void testKill() throws ConfigCompileException{        
