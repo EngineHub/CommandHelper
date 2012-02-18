@@ -48,6 +48,9 @@ public class SyntaxHighlighters {
         if("vim".equals(type)){
             return template("/syntax-templates/vim/default.vim");
         }
+        if("nano".equals(type)){
+            return template("/syntax-templates/nano/default.txt");
+        }
 
         return "File for the following syntax highlighters are currently available:\n"
                 + "\tNotepad++ - Use type \"npp\". You may also select a theme, either \"default\" or \"obsidian\"\n"
@@ -59,6 +62,7 @@ public class SyntaxHighlighters {
                 + "\t\t~/.vim/ftdetect/commandhelper.vim and add the line \n"
                 + "\t\tau BufRead,BufNewFile *.ms set filetype=commandhelper\n"
                 + "\t\t(Create directories and files as needed)\n"
+                + "\tnano - Use type\"nano\". Only the default theme is available.\n"
                 + "\n\n"
                 + "Know how to write a syntax highlighter file for your favorite text editor? Let me know, and we\n"
                 + "can work to get it included in CommandHelper!";
@@ -131,6 +135,14 @@ public class SyntaxHighlighters {
                 footer = "'";
             } else {
                 spliter = ", ";
+            }
+        } else if(type.equalsIgnoreCase("pipe")){
+            if(params.contains("quoted")){
+                header = "'";
+                spliter = "|";
+                footer = "'";
+            } else {
+                spliter = "|";
             }
         } else if(type.equalsIgnoreCase("xml")){
             String tag = "PLEASE INCLUDE THE TAG NAME USING tag=tagname AS A PARAMETER";
