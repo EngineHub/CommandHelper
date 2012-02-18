@@ -356,7 +356,7 @@ public class PlayerManagement {
                 }
             }
             if (m != null) {
-                MCBlock b = m.getTargetBlock(null, 200);
+                MCBlock b = m.getTargetBlock(null, 10000);
                 if (b == null) {
                     throw new ConfigRuntimeException("No block in sight, or block too far",
                             ExceptionType.RangeException, line_num, f);
