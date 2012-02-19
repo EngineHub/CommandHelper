@@ -127,11 +127,18 @@ public class Script {
         MCCommandSender p = myEnv.GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
             int line_num = 0;
+            File f = null;
             if (left.size() >= 1) {
-                line_num = left.get(0).line_num;
+                try{
+                    line_num = left.get(0).line_num;
+                    f = left.get(0).file;
+                } catch(NullPointerException e){
+                    //Oh well, we tried to get more information
+                }
             }
-            throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command.",
-                    null, line_num, null);
+            throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command."
+                    + " To see the compile error, run /reloadaliases",
+                    null, line_num, f);
         }
         if (p instanceof MCPlayer) {
             if (CurrentEnv.GetLabel() != null) {

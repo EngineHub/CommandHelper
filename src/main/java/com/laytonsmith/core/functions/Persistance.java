@@ -71,7 +71,7 @@ public class Persistance {
             String key = GetNamespace(args, args.length - 1, getName(), line_num, f);
             String value = null;
             try{
-                value = Construct.json_encode(args[1], line_num, f);
+                value = Construct.json_encode(args[args.length - 1], line_num, f);
             } catch(MarshalException e){
                 throw new ConfigRuntimeException(e.getMessage(), line_num, f);
             }

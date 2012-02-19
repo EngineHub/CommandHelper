@@ -103,16 +103,20 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param optionalMessage 
      */
     public static void DoReport(String message, String exceptionType, String file, String simpleFile, String line_num, String optionalMessage, MCPlayer player){
+        String type = exceptionType;
+        if(exceptionType == null){
+            type = "FATAL";
+        }
         String formatted = optionalMessage==null?"":"; " + optionalMessage;
         System.out.println(TermColors.RED + message + formatted 
                 + TermColors.WHITE + " :: " + TermColors.GREEN 
-                + exceptionType + TermColors.WHITE + ":" 
+                + type + TermColors.WHITE + ":" 
                 + TermColors.YELLOW + file + TermColors.WHITE + ":" 
                 + TermColors.CYAN + line_num + TermColors.reset());
         if(player != null){
             player.sendMessage(MCChatColor.RED.toString() + message + formatted
                     + MCChatColor.WHITE + " :: " + MCChatColor.GREEN
-                    + exceptionType + MCChatColor.WHITE + ":" 
+                    + type + MCChatColor.WHITE + ":" 
                     + MCChatColor.YELLOW + simpleFile + MCChatColor.WHITE + ":" 
                     + MCChatColor.AQUA + line_num);
         }
