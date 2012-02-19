@@ -273,7 +273,7 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
 //        }
     }
     
-    public void removeEffect(int potionID){
+    public boolean removeEffect(int potionID){
 //        p.removePotionEffect(PotionEffectType.getById(potionID));
         EntityPlayer ep = ((CraftPlayer) p).getHandle();
         try {
@@ -281,18 +281,27 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
             f.setAccessible(true);
             HashMap effects = (HashMap)f.get(ep);
             MobEffect me = (MobEffect) effects.get(potionID);
+            if(me == null){
+                //This mob effect isn't added to this player
+                return false;
+            }
             Field fDuration = me.getClass().getDeclaredField("duration");
             fDuration.setAccessible(true);
             fDuration.set(me, 0);
         } catch (IllegalArgumentException ex) {
             Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         } catch (IllegalAccessException ex) {
             Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         } catch (NoSuchFieldException ex) {
             Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         } catch (SecurityException ex) {
             Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
+            return false;
         }
+        return true;
         //Meh, stupid bukkit.
         //ep.effects.remove(potionID);
     }

@@ -85,7 +85,7 @@ public class Persistance {
                     throw new ConfigRuntimeException("Periods may only be used as seperators between namespaces.", ExceptionType.FormatException, line_num, f);
                 }
                 if(c != '_' && c != '.' && !Character.isLetterOrDigit(c)){
-                    throw new ConfigRuntimeException("Param 1 in store_value must only contain letters, digits, or underscores.",
+                    throw new ConfigRuntimeException("Param 1 in store_value must only contain letters, digits, underscores, or dots, (which denote namespaces).",
                             ExceptionType.FormatException, line_num, f);
                 }
             }
