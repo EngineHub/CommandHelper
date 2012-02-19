@@ -4,12 +4,12 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import org.bukkit.event.world.WorldListener;
+import org.bukkit.event.Listener;
 
 /**
  *
  * @author Layton
  */
-public class BukkitWorldListener extends WorldListener{
+public class BukkitWorldListener implements Listener{
     
 }

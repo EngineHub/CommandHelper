@@ -14,7 +14,7 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.IncludeCache;
-import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.util.StringUtil;
 import java.io.*;
 import java.util.*;

@@ -4,12 +4,12 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import org.bukkit.event.vehicle.VehicleListener;
+import org.bukkit.event.Listener;
 
 /**
  *
  * @author Layton
  */
-public class BukkitVehicleListener extends VehicleListener{
+public class BukkitVehicleListener implements Listener{
     
 }

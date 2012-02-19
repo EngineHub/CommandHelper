@@ -12,7 +12,7 @@ import com.laytonsmith.core.MScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
-import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
 import static org.junit.Assert.fail;
 import org.junit.*;

@@ -4,12 +4,13 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import org.bukkit.event.block.BlockListener;
+import org.bukkit.event.Listener;
+
 
 /**
  *
  * @author Layton
  */
-public class BukkitBlockListener extends BlockListener{
+public class BukkitBlockListener implements Listener{
     
 }

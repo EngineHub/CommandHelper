@@ -4,12 +4,12 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import org.bukkit.event.inventory.InventoryListener;
+import org.bukkit.event.Listener;
 
 /**
  *
  * @author Layton
  */
-public class BukkitInventoryListener extends InventoryListener{
+public class BukkitInventoryListener implements Listener{
     
 }

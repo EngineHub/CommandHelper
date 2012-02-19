@@ -13,21 +13,23 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
 import java.util.*;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
  *
  * @author Layton
  */
-public class CommandHelperInterpreterListener extends PlayerListener {
+public class CommandHelperInterpreterListener implements Listener {
 
     Set<String> interpreterMode = new HashSet<String>();
     Map<String, String> multilineMode = new HashMap<String, String>();
 
-    @Override
+    @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerChat(PlayerChatEvent event) {
         if (interpreterMode.contains(event.getPlayer().getName())) {
             MCPlayer p = new BukkitMCPlayer(event.getPlayer());
@@ -37,13 +39,13 @@ public class CommandHelperInterpreterListener extends PlayerListener {
 
     }
 
-    @Override
+    @EventHandler(priority= EventPriority.NORMAL)
     public void onPlayerQuit(PlayerQuitEvent event) {
         interpreterMode.remove(event.getPlayer().getName());
         multilineMode.remove(event.getPlayer().getName());
     }
 
-    @Override
+    @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         if (interpreterMode.contains(event.getPlayer().getName())) {
             MCPlayer p = new BukkitMCPlayer(event.getPlayer());

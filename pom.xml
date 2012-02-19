@@ -52,6 +52,10 @@
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2/</url>
         </repository>
+        <repository>
+            <id>zml2008</id>
+            <url>http://files.zachsthings.com/repo/</url>
+        </repository>
     </repositories>
 
     <dependencies>
@@ -59,7 +63,7 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldedit</artifactId>
-            <version>5.1</version>
+            <version>5.2</version>
         </dependency>
     
         <!-- Bukkit -->
@@ -81,7 +85,7 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldguard</artifactId>
-            <version>5.3</version>
+            <version>5.5</version>
         </dependency>
     
         <dependency>

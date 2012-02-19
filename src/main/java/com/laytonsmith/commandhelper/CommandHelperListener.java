@@ -30,9 +30,11 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
@@ -40,7 +42,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
  *
  * @author sk89q
  */
-public class CommandHelperListener extends PlayerListener {
+public class CommandHelperListener implements Listener {
 
     /**
      * Logger.
@@ -84,7 +86,7 @@ public class CommandHelperListener extends PlayerListener {
      *
      * @param event Relevant event details
      */
-    @Override
+    @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
 //        if((Boolean)Static.getPreferences().getPreference("debug-mode")){
 //            System.out.println("CommandHelper: (>'.')> Received event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
@@ -141,13 +143,13 @@ public class CommandHelperListener extends PlayerListener {
      *
      * @param event Relevant event details
      */
-    @Override
+    @EventHandler(priority= EventPriority.NORMAL)
     public void onPlayerQuit(PlayerQuitEvent event) {
         Player player = event.getPlayer();
         UserManager.ClearUser(player.getName());
     }
 
-    @Override
+    @EventHandler(priority= EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Static.HostnameCache(new BukkitMCPlayer(event.getPlayer()));
     }

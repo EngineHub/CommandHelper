@@ -30,8 +30,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.sk89q.bukkit.migration.PermissionsResolverManager;
-import com.sk89q.bukkit.migration.PermissionsResolverServerListener;
+import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
 import java.io.IOException;
@@ -49,7 +48,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
-import org.bukkit.event.Event.Priority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -107,8 +105,8 @@ public class CommandHelperPlugin extends JavaPlugin {
         persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), this);
         logger.info("CommandHelper/CommandHelper " + getDescription().getVersion() + " enabled");
         version = new Version(getDescription().getVersion());
-        perms = new PermissionsResolverManager(getConfiguration(), getServer(),
-                getDescription().getName(), logger);
+        PermissionsResolverManager.initialize(this);
+        perms = PermissionsResolverManager.getInstance();
         Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
         if(pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin){
             wep = (WorldEditPlugin)pwep;
@@ -149,20 +147,18 @@ public class CommandHelperPlugin extends JavaPlugin {
         }
         
         Static.PlayDirty();
-        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, playerListener, Priority.Lowest);
-        registerEvent(Event.Type.PLAYER_QUIT, playerListener, Priority.Normal);
-        registerEvent(Event.Type.PLAYER_JOIN, playerListener, Priority.Normal);
+        registerEvent(playerListener);
+        registerEvent(playerListener);
+        registerEvent(playerListener);
         
         //interpreter events
-        registerEvent(Event.Type.PLAYER_CHAT, interpreterListener, Priority.Lowest);
-        registerEvent(Event.Type.PLAYER_COMMAND_PREPROCESS, interpreterListener, Priority.Lowest);
-        registerEvent(Event.Type.PLAYER_QUIT, interpreterListener, Priority.Normal);
-        registerEvent(Event.Type.SERVER_COMMAND, serverListener, Priority.Lowest);
+        registerEvent(interpreterListener);
+        registerEvent(interpreterListener);
+        registerEvent(interpreterListener);
+        registerEvent(serverListener);
         
         //Script events
         EventList.Startup(this);
-        
-        (new PermissionsResolverServerListener(perms, this)).register(this);
         
         playerListener.loadGlobalAliases();
         interpreterListener.reload();
@@ -189,8 +185,8 @@ public class CommandHelperPlugin extends JavaPlugin {
      * @param listener
      * @param priority
      */
-    public void registerEvent(Event.Type type, Listener listener, Priority priority) {
-        getServer().getPluginManager().registerEvent(type, listener, priority, this);
+    public void registerEvent(Listener listener) {
+        getServer().getPluginManager().registerEvents(listener, this);
     }
 
     /**

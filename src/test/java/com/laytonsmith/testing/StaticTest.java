@@ -15,7 +15,7 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
-import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.wepif.PermissionsResolverManager;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;

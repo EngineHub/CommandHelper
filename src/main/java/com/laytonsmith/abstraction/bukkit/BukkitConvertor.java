@@ -9,18 +9,12 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.Driver;
-import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.util.Iterator;
-import java.util.SortedSet;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.event.Event;
-import org.bukkit.event.Event.Category;
-import org.bukkit.event.Event.Priority;
-import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
@@ -75,97 +69,7 @@ public class BukkitConvertor implements Convertor {
     public static final BukkitWorldListener WorldListener = new BukkitWorldListener();
 
     public void Startup(CommandHelperPlugin chp) {
-        for(Driver type : Driver.values()){            
-            SortedSet<com.laytonsmith.core.events.Event> set = EventList.GetEvents(type);
-            if(set == null){
-                continue;
-            }
-            Iterator<com.laytonsmith.core.events.Event> i = set.iterator();
-            while(i.hasNext()){
-                com.laytonsmith.core.events.Event e = i.next();
-                Listener l = null;
-                Category c = BukkitConvertor.GetBukkitType(e.driver()).getCategory();
-                switch(c){
-                    case BLOCK:
-                        l = BlockListener;
-                        break;
-                    case ENTITY:
-                    case LIVING_ENTITY:
-                        l = EntityListener;
-                        break;
-                    case INVENTORY:
-                        l = InventoryListener;
-                        break;
-                    case PLAYER:
-                        l = PlayerListener;
-                        break;
-                    case SERVER:
-                        l = ServerListener;
-                        break;
-                    case VEHICLE:
-                        l = VehicleListener;
-                        break;
-                    case WEATHER:
-                        l = WeatherListener;
-                        break;
-                    case WORLD:
-                        l = WorldListener;
-                        break;
-                }
-                if(l == null){                    
-                    throw new ConfigRuntimeException("Unable to register listener for event, is a category"
-                            + " missing?", 
-                            0, null);
-                }
-                chp.registerEvent(BukkitConvertor.GetBukkitType(e.driver()), l, Priority.Lowest);
-            }
-        }
-    }
-    
-    public static Event.Type GetBukkitType(Driver tt){
-        Event.Type t = null;
-        switch(tt){
-            case PLAYER_INTERACT:
-                t = Event.Type.PLAYER_INTERACT;
-                break;
-            case PLAYER_JOIN:
-                t = Event.Type.PLAYER_JOIN;
-                break;
-            case PLAYER_SPAWN:
-                t = Event.Type.PLAYER_RESPAWN;
-                break;
-            case PLAYER_DEATH:
-                t = Event.Type.ENTITY_DEATH;
-                break;
-        }
-        if(t == null){
-            throw new ConfigRuntimeException("Incompatible event! Did you forget to update the"
-                    + " GetBukkitType function after adding a new event?" + t, 0, null);
-        }
-        return t;
-    }
-    
-    public static Driver GetGenericType(Event.Type tt){
-        Driver t = null;
-        switch(tt){
-            case PLAYER_INTERACT:
-                t = Driver.PLAYER_INTERACT;
-                break;
-            case PLAYER_JOIN:
-                t = Driver.PLAYER_JOIN;
-                break;
-            case PLAYER_RESPAWN:
-                t = Driver.PLAYER_SPAWN;
-                break;
-            case ENTITY_DEATH:
-                t = Driver.PLAYER_DEATH;
-                break;
-        }
-        if(t == null){
-            throw new ConfigRuntimeException("Incompatible event! Did you forget to update the"
-                    + " GetGenericType function after adding a new event?" + t, 0, null);
-        }
-        return t;
+        
     }
 
     public int LookupItemId(String materialName) {

@@ -11,7 +11,7 @@ import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.wepif.PermissionsResolverManager;
 import org.junit.*;
 import static org.mockito.Mockito.*;
 

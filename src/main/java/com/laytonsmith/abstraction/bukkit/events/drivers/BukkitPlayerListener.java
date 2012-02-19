@@ -4,33 +4,34 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
-import org.bukkit.event.Event.Type;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.event.player.PlayerListener;
 import org.bukkit.event.player.PlayerRespawnEvent;
 
 /**
  *
  * @author Layton
  */
-public class BukkitPlayerListener extends PlayerListener{
+public class BukkitPlayerListener implements Listener{
     
-    @Override
+    @EventHandler(priority=EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e){
-        EventUtils.TriggerListener(BukkitConvertor.GetGenericType(Type.PLAYER_JOIN), "player_join", e);
+        EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", e);
     }
     
-    @Override
+    @EventHandler(priority=EventPriority.LOWEST)
     public void onPlayerInteract(PlayerInteractEvent e){
-        EventUtils.TriggerListener(BukkitConvertor.GetGenericType(Type.PLAYER_INTERACT), "player_interact", e);
+        EventUtils.TriggerListener(Driver.PLAYER_INTERACT, "player_interact", e);
     }  
 
-    @Override
+    @EventHandler(priority=EventPriority.LOWEST)
     public void onPlayerRespawn(PlayerRespawnEvent event) {
-        EventUtils.TriggerListener(BukkitConvertor.GetGenericType(Type.PLAYER_RESPAWN), "player_spawn", event);
+        EventUtils.TriggerListener(Driver.PLAYER_SPAWN, "player_spawn", event);
     }
     
 

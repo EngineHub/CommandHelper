@@ -13,16 +13,18 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.logging.Level;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.EventPriority;
+import org.bukkit.event.Listener;
 import org.bukkit.event.server.ServerCommandEvent;
-import org.bukkit.event.server.ServerListener;
 
 /**
  *
  * @author Layton
  */
-public class CommandHelperServerListener extends ServerListener{
+public class CommandHelperServerListener implements Listener{
     
-    @Override
+    @EventHandler(priority= EventPriority.LOWEST)
     public void onServerCommand(ServerCommandEvent event){
         MCCommandSender player = new BukkitMCCommandSender(event.getSender());
         boolean match = false;

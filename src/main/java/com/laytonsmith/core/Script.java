@@ -34,7 +34,7 @@ import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Meta.eval;
 import com.laytonsmith.core.functions.Meta.scriptas;
 import com.laytonsmith.core.functions.StringHandling.sconcat;
-import com.sk89q.bukkit.migration.PermissionsResolverManager;
+import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
 import java.util.*;
 
