@@ -69,7 +69,14 @@ public class BukkitConvertor implements Convertor {
     public static final BukkitWorldListener WorldListener = new BukkitWorldListener();
 
     public void Startup(CommandHelperPlugin chp) {
-        
+        chp.registerEvent(BlockListener);
+        chp.registerEvent(EntityListener);
+        chp.registerEvent(InventoryListener);
+        chp.registerEvent(PlayerListener);
+        chp.registerEvent(ServerListener);
+        chp.registerEvent(VehicleListener);
+        chp.registerEvent(WeatherListener);
+        chp.registerEvent(WorldListener);        
     }
 
     public int LookupItemId(String materialName) {
