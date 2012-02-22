@@ -10,9 +10,7 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Set;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import net.minecraft.server.EntityLiving;
@@ -22,9 +20,11 @@ import net.minecraft.server.ServerConfigurationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Server;
+import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.potion.PotionEffectType;
+import org.bukkit.util.BlockIterator;
 
 /**
  *
@@ -118,7 +118,39 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
     }
     
     public MCBlock getTargetBlock(HashSet<Byte> b, int i){
-        return new BukkitMCBlock(p.getTargetBlock(b, i));
+        return new BukkitMCBlock(getTargetBlock0(b, i));
+    }
+    
+    
+    private Block getTargetBlock0(HashSet<Byte> transparent, int maxDistance) {
+        List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);
+        return blocks.get(0);
+    }
+    
+    private List<Block> getLineOfSight(HashSet<Byte> transparent, int maxDistance, int maxLength) {
+        if (maxDistance > 512) {
+            maxDistance = 512;
+        }
+        ArrayList<Block> blocks = new ArrayList<Block>();
+        Iterator<Block> itr = new BlockIterator(p, maxDistance);
+        while (itr.hasNext()) {
+            Block block = itr.next();
+            blocks.add(block);
+            if (maxLength != 0 && blocks.size() > maxLength) {
+                blocks.remove(0);
+            }
+            int id = block.getTypeId();
+            if (transparent == null) {
+                if (id != 0) {
+                    break;
+                }
+            } else {
+                if (!transparent.contains((byte) id)) {
+                    break;
+                }
+            }
+        }
+        return blocks;
     }
     
     public InetSocketAddress getAddress(){

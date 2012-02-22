@@ -98,7 +98,7 @@ rain:/rain $true_false = storm($true_false)
     #loop through the array stored in @ap, from 0 to one less than the size of the array
     for(assign(@i, 0), lt(@i, array_size(@ap)), assign(@i, add(@i, 1)),
         #append our player's name to the end of @pl string
-        assign(@pl, concat(@pl, array_get(@ap, @i), ' '))
+        assign(@pl, concat(@pl, @ap[@i], ' '))
     )
     #output the string
     msg(@pl)

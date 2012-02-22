@@ -906,7 +906,7 @@ public class DataHandling {
             Construct arg = parent.eval(tree, env);
             arg = parent.preResolveVariables(new Construct[]{arg})[0];
             String location = arg.val();
-            GenericTreeNode<Construct> include = IncludeCache.get(new File(location), line_num, f);
+            GenericTreeNode<Construct> include = IncludeCache.get(new File(f.getParent(), location), line_num, f);
             parent.eval(include.getChildAt(0), env);
             return new CVoid(line_num, f);
         }

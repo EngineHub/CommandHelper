@@ -228,6 +228,7 @@ public class StringHandling {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String location = args[0].val();
+            location = new File(f.getParentFile(), location).getAbsolutePath();
             //Verify this file is not above the craftbukkit directory (or whatever directory the user specified
             if (!Static.CheckSecurity(location)) {
                 throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
