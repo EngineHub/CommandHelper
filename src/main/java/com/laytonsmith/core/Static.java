@@ -623,12 +623,8 @@ public class Static {
         return GetPlayer(player.val(), line_num, f);
     }
 
-    public static MCPlayer GetPlayer(String player) {
-        return GetPlayer(player, 0, null);
-    }
-
     public static MCPlayer GetPlayer(Construct player) {
-        return GetPlayer(player, 0, null);
+        return GetPlayer(player, player.getLineNum(), player.getFile());
     }
 
     public static boolean isNull(Construct construct) {

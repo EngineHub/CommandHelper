@@ -79,7 +79,7 @@ public class UserManager {
     
     private Script getAlias(String alias) throws ConfigCompileException{
         Env env = new Env();
-        env.SetPlayer(Static.GetPlayer(name));            
+        env.SetPlayer(Static.GetPlayer(name, 0, null));            
         List<Token> tokens;
         if(script_cache.containsKey(alias)){
             tokens = script_cache.get(alias);

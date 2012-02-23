@@ -227,7 +227,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             }
             if(activeEvent.parsedEvent.containsKey("player")){
                 try{
-                    MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player").val());
+                    MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player"));
                     if(p != null && p.isOnline()){
                         env.SetPlayer(p);                                        
                     }                    

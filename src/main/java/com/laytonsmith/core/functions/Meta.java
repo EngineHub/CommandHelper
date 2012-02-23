@@ -84,7 +84,7 @@ public class Meta {
                     }
                 }
             } else {
-                MCPlayer m = Static.GetPlayer(args[0].val());
+                MCPlayer m = Static.GetPlayer(args[0]);
                 if (m != null && m.isOnline()) {
                     if (env.GetCommandSender() instanceof MCPlayer) {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[0].val().trim());

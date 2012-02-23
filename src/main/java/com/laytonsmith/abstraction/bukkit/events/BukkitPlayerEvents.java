@@ -321,7 +321,7 @@ public class BukkitPlayerEvents {
             for(String key : clist.keySet()){
                 list.add(((BukkitMCItemStack)ObjectGenerator.GetGenerator().item(clist.get(key), clist.getLineNum(), clist.getFile())).__ItemStack());
             }
-            EntityDeathEvent e = new EntityDeathEvent(((BukkitMCPlayer)Static.GetPlayer(splayer))._Player(), list);
+            EntityDeathEvent e = new EntityDeathEvent(((BukkitMCPlayer)Static.GetPlayer(splayer, 0, null))._Player(), list);
             return e;
         }
 

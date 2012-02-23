@@ -47,7 +47,7 @@ public class PlayerManagement {
             }
             
             if (args.length == 1) {
-                p = Static.GetPlayer(args[0].val());
+                p = Static.GetPlayer(args[0]);
             }
             
             if (p != null && p.instanceofPlayer()) {
@@ -156,11 +156,7 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val());
-                if (m == null || !m.isOnline()) {
-                    throw new ConfigRuntimeException("The player is not online",
-                            ExceptionType.PlayerOfflineException, line_num, f);
-                }
+                m = Static.GetPlayer(args[0]);
             }
             if (m == null) {
                 throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
@@ -271,7 +267,7 @@ public class PlayerManagement {
                 if (args[1] instanceof CArray) {
                     CArray ca = (CArray) args[1];
                     MCPlayer = args[0].val();
-                    l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer).getWorld(), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer, line_num, f).getWorld(), line_num, f);
                     x = l.getX();
                     y = l.getY();
                     z = l.getZ();
@@ -292,15 +288,12 @@ public class PlayerManagement {
                 x = Static.getNumber(args[1]);
                 y = Static.getNumber(args[2]);
                 z = Static.getNumber(args[3]);
-                l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer).getWorld(), x, y, z, 0, 0);
+                l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer, line_num, f).getWorld(), x, y, z, 0, 0);
             }
             if (m == null && MCPlayer != null) {
-                m = Static.GetPlayer(MCPlayer);
+                m = Static.GetPlayer(MCPlayer, line_num, f);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online",
-                        ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             return new CBoolean(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), line_num, f);
         }
     }
@@ -349,11 +342,7 @@ public class PlayerManagement {
                     m = (MCPlayer) p;
                 }
             } else {
-                m = Static.GetPlayer(args[0].val());
-                if (m == null || !m.isOnline()) {
-                    throw new ConfigRuntimeException("That player is not online",
-                            ExceptionType.PlayerOfflineException, line_num, f);
-                }
+                m = Static.GetPlayer(args[0]);
             }
             if (m != null) {
                 MCBlock b = m.getTargetBlock(null, 10000);
@@ -390,15 +379,11 @@ public class PlayerManagement {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val());
+                m = Static.GetPlayer(args[0]);
             } else {
                 if (p instanceof MCPlayer) {
                     m = (MCPlayer) p;
                 }
-            }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The player is not online",
-                        ExceptionType.PlayerOfflineException, line_num, f);
             }
             m.setHealth(0);
             return new CVoid(line_num, f);
@@ -451,7 +436,7 @@ public class PlayerManagement {
                     m = (MCPlayer) p;
                 }
             } else {
-                m = Static.GetPlayer(args[0].val());
+                m = Static.GetPlayer(args[0]);
             }
 
             if (m == null) {
@@ -561,7 +546,7 @@ public class PlayerManagement {
             if (player == null) {
                 throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
             }
-            MCPlayer p = Static.GetPlayer(player);
+            MCPlayer p = Static.GetPlayer(player, line_num, f);
 
             if (index < -1 || index > 11) {
                 throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 11",
@@ -694,11 +679,7 @@ public class PlayerManagement {
                     m = (MCPlayer) p;
                 }
             } else {
-                m = Static.GetPlayer(args[0].val());
-                if (m == null || !m.isOnline()) {
-                    throw new ConfigRuntimeException("That player is not online",
-                            ExceptionType.PlayerOfflineException, line_num, f);
-                }
+                m = Static.GetPlayer(args[0]);
             }
             return new CString(m.getWorld().getName(), line_num, f);
         }
@@ -753,19 +734,14 @@ public class PlayerManagement {
                 }
             }
             if (args.length >= 1) {
-                m = Static.GetPlayer(args[0].val());
+                m = Static.GetPlayer(args[0]);
             }
             if (args.length >= 2) {
                 message = args[1].val();
             }
             MCPlayer ptok = m;
-            if (ptok != null && ptok.isOnline()) {
-                ptok.kickPlayer(message);
-                return new CVoid(line_num, f);
-            } else {
-                throw new ConfigRuntimeException("The specified player does not seem to be online",
-                        ExceptionType.PlayerOfflineException, line_num, f);
-            }
+            ptok.kickPlayer(message);
+            return new CVoid(line_num, f);
         }
     }
 
@@ -819,13 +795,10 @@ public class PlayerManagement {
                 }
                 name = args[0].val();
             } else {
-                MCPlayer = Static.GetPlayer(args[0].val());
+                MCPlayer = Static.GetPlayer(args[0]);
                 name = args[1].val();
             }
-            if (MCPlayer == null || !MCPlayer.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online",
-                        ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             MCPlayer.setDisplayName(name);
             return new CVoid(line_num, f);
         }
@@ -878,12 +851,9 @@ public class PlayerManagement {
                     MCPlayer = (MCPlayer) p;
                 }
             } else {
-                MCPlayer = Static.GetPlayer(args[0].val());
+                MCPlayer = Static.GetPlayer(args[0]);
             }
-            if (MCPlayer == null || !MCPlayer.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online",
-                        ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             MCPlayer.setDisplayName(MCPlayer.getName());
             return new CVoid(line_num, f);
         }
@@ -950,13 +920,8 @@ public class PlayerManagement {
                     try {
                         Integer.parseInt(args[0].val());
                     } catch (NumberFormatException e) {
-                        MCPlayer p2 = Static.GetPlayer(args[0].val());
-                        if (p2 == null || !p2.isOnline()) {
-                            throw new ConfigRuntimeException("The specified player is offline",
-                                    ExceptionType.PlayerOfflineException, line_num, f);
-                        } else {
-                            l = p2.getLocation();
-                        }
+                        MCPlayer p2 = Static.GetPlayer(args[0]);
+                        l = p2.getLocation();                        
                     }
                 }
                 if (l != null) {
@@ -998,7 +963,7 @@ public class PlayerManagement {
                     pitch = (float) Static.getNumber(args[1]);
                 } catch (NumberFormatException e) {
                     //It's the MCPlayer, F variation
-                    toSet = Static.GetPlayer(args[0].val());
+                    toSet = Static.GetPlayer(args[0]);
                     pitch = toSet.getLocation().getPitch();
                     int g = (int) Static.getInt(args[1]);
                     if (g < 0 || g > 3) {
@@ -1009,16 +974,12 @@ public class PlayerManagement {
                 }
             } else if (args.length == 3) {
                 //It's the MCPlayer, yaw, pitch variation
-                toSet = Static.GetPlayer(args[0].val());
+                toSet = Static.GetPlayer(args[0]);
                 yaw = (float) Static.getNumber(args[1]);
                 pitch = (float) Static.getNumber(args[2]);
             }
 
             //Error check our data
-            if (toSet == null || !toSet.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online",
-                        ExceptionType.PlayerOfflineException, line_num, f);
-            }
             if (pitch > 90 || pitch < -90) {
                 throw new ConfigRuntimeException("pitch must be between -90 and 90",
                         ExceptionType.RangeException, line_num, f);
@@ -1091,7 +1052,7 @@ public class PlayerManagement {
                 }
             } else if (args.length == 1) {
                 all = true;
-                m = Static.GetPlayer(args[0].val());
+                m = Static.GetPlayer(args[0]);
             } else if (args.length == 2) {
                 if (args[1] instanceof CNull) {
                     index = null;
@@ -1099,12 +1060,9 @@ public class PlayerManagement {
                     index = (int) Static.getInt(args[1]);
                 }
                 all = false;
-                m = Static.GetPlayer(args[0].val());
+                m = Static.GetPlayer(args[0]);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online",
-                        ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             if(all){
                 CArray ret = new CArray(line_num, f);
                 ret.forceAssociativeMode();
@@ -1306,11 +1264,9 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val());
+                m = Static.GetPlayer(args[0]);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is offline", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             String mode = m.getGameMode().name();
             return new CString(mode, line_num, f);
         }
@@ -1333,7 +1289,7 @@ public class PlayerManagement {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -1364,13 +1320,10 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 2) {
-                m = Static.GetPlayer(args[0].val());
+                m = Static.GetPlayer(args[0]);
                 mode = args[1].val();
             } else {
                 mode = args[0].val();
-            }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
 
             try {
@@ -1431,9 +1384,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             return new CInt((int) (m.getExp() * 100), line_num, f);
         }
     }
@@ -1489,9 +1440,7 @@ public class PlayerManagement {
             } else {
                 xp = (int) Static.getInt(args[0]);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             m.setExp(((float) xp) / 100.0F);
             return new CVoid(line_num, f);
         }
@@ -1544,9 +1493,6 @@ public class PlayerManagement {
                 xp = (int) Static.getInt(args[1]);
             } else {
                 xp = (int) Static.getInt(args[0]);
-            }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
             }
 
             m.giveExp(xp);
@@ -1602,9 +1548,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             return new CInt(m.getLevel(), line_num, f);
         }
     }
@@ -1660,15 +1604,8 @@ public class PlayerManagement {
             } else {
                 level = (int) Static.getInt(args[0]);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             m.setLevel(level);
-//            float portion = m.getExp();
-//            m.setLevel(0);
-//            m.setExp(0);
-//            m.setTotalExperience(0);
-//            m.giveExp(7 + (level * 7 >> 1));
             return new CVoid(line_num, f);
         }
     }
@@ -1720,9 +1657,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             return new CInt(m.getTotalExperience(), line_num, f);
         }
     }
@@ -1778,9 +1713,7 @@ public class PlayerManagement {
             } else {
                 xp = (int) Static.getInt(args[0]);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             m.setTotalExperience(xp);
 //            m.setLevel(0);
 //            m.setExp(0);
@@ -1837,9 +1770,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), line_num, f);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             return new CInt(m.getFoodLevel(), line_num, f);
         }
     }
@@ -1895,9 +1826,7 @@ public class PlayerManagement {
             } else {
                 level = (int) Static.getInt(args[0]);
             }
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("The specified player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             m.setFoodLevel(level);
             return new CVoid(line_num, f);
         }
@@ -1950,9 +1879,7 @@ public class PlayerManagement {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = Static.GetPlayer(args[0].val(), line_num, f);
-            if (m == null || !m.isOnline()) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
-            }
+
             int effect = (int) Static.getInt(args[1]);
             //To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
             //otherwise the client crashes, and requires deletion of
@@ -2074,7 +2001,17 @@ public class PlayerManagement {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(Static.getServer().getOfflinePlayer(args[0].val()).isOnline(), line_num, f);
+            boolean value;
+            try{
+                //We have to use this method here, because we might be in the midst
+                //of an event, in which the player is offline, but not really. It will
+                //throw an exception if the player doesn't exist
+                MCPlayer player = Static.GetPlayer(args[0]);
+                value = true;
+            } catch(ConfigRuntimeException e){
+                value = false; //Nope
+            }
+            return new CBoolean(value, line_num, f);
         }
     }
 
