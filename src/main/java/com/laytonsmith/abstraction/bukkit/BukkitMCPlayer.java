@@ -335,7 +335,20 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
         }
         return true;
         //Meh, stupid bukkit.
-        //ep.effects.remove(potionID);
+        //ep.effects.remove(potionID);        
     }
+
+    public boolean canSee(MCPlayer p) {
+        return this.p.canSee(((BukkitMCPlayer)p)._Player());
+    }
+
+    public void setVanished(boolean set, MCPlayer to) {
+        if(set){
+            p.showPlayer(((BukkitMCPlayer)to)._Player());
+        } else {
+            p.hidePlayer(((BukkitMCPlayer)to)._Player());
+        }
+    }
+    
     
 }

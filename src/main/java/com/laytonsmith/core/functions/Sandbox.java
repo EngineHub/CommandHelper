@@ -401,6 +401,116 @@ public class Sandbox {
             return new CVoid(line_num, f);
         }
     }
+    
+    @api public static class raw_set_pvanish implements Function{
+
+        public String getName() {
+            return "raw_set_pvanish";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public String docs() {
+            return "void {[player], isVanished, otherPlayer} Sets the visibility"
+                    + " of the current player (or the one specified) to visible or invisible"
+                    + " (based on the value of isVanished) from the view of the otherPlayer."
+                    + " This is the raw access function, you probably shouldn't use this, as"
+                    + " the CommandHelper vanish api functions will probably be easier to use.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true; //lol, very
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer me;
+            boolean isVanished;
+            MCPlayer other;
+            if(args.length == 2){
+                me = environment.GetPlayer();
+                isVanished = Static.getBoolean(args[0]);
+                other = Static.GetPlayer(args[1]);
+            } else {
+                me = Static.GetPlayer(args[0]);
+                isVanished = Static.getBoolean(args[1]);
+                other = Static.GetPlayer(args[2]);
+            }
+            
+            me.setVanished(isVanished, other);
+            
+            return new CVoid(line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class raw_pcan_see implements Function{
+
+        public String getName() {
+            return "raw_pcan_see";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "boolean {[player], other} Returns a boolean stating if the other player can"
+                    + " see this player or not. This is the raw access function, you probably shouldn't use this, as"
+                    + " the CommandHelper vanish api functions will probably be easier to use.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer me;
+            MCPlayer other;
+            if(args.length == 1){
+                me = environment.GetPlayer();
+                other = Static.GetPlayer(args[0]);
+            } else {
+                me = Static.GetPlayer(args[0]);
+                other = Static.GetPlayer(args[1]);
+            }
+            return new CBoolean(me.canSee(other), line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
 
     
 }

@@ -260,7 +260,7 @@ public class ObjectGenerator {
         ret.setData(data);
         ret.setDurability((short)data);
         for(Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()){
-            ret.addEnchantment(entry.getKey(), entry.getValue());
+            ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
         }
 
         //Giving them air crashes the client, so just clear the inventory slot

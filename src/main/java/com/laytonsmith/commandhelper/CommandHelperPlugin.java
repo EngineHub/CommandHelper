@@ -148,12 +148,8 @@ public class CommandHelperPlugin extends JavaPlugin {
         
         Static.PlayDirty();
         registerEvent(playerListener);
-        registerEvent(playerListener);
-        registerEvent(playerListener);
         
         //interpreter events
-        registerEvent(interpreterListener);
-        registerEvent(interpreterListener);
         registerEvent(interpreterListener);
         registerEvent(serverListener);
         

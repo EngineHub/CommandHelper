@@ -494,7 +494,8 @@ public class Meta {
             return "boolean {[player], permissionName} Using the built in permissions system, checks to see if the player has a particular permission."
                     + " This is simply passed through to the permissions system. This function does not throw a PlayerOfflineException, because"
                     + " it works with offline players, but that means that names must be an exact match. If you notice, this function isn't"
-                    + " restricted. However, it IS restricted if the player attempts to check another player's permissions.";
+                    + " restricted. However, it IS restricted if the player attempts to check another player's permissions. If run from"
+                    + " the console, will always return true.";
         }
 
         public ExceptionType[] thrown() {
@@ -520,6 +521,10 @@ public class Meta {
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             String player = null;
             String permission = null;
+            if(environment.GetCommandSender().instanceofMCConsoleCommandSender()){
+                //Console always has permission
+                return new CBoolean(true, line_num, f);
+            }
             if(args.length == 1){
                 player = environment.GetPlayer().getName();
                 permission = args[0].val();

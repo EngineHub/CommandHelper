@@ -1177,7 +1177,8 @@ public class PlayerManagement {
                     + " to be a stack of stone. set_pinv(array(103: array(type: 298))) gives them a hat. To set the"
                     + " item in hand, use something like set_pinv(array(null: array(type: 298))), where"
                     + " the key is null. If you set a null key in addition to an entire inventory set, only"
-                    + " one item will be used (which one is undefined).";
+                    + " one item will be used (which one is undefined). Note that this uses the unsafe"
+                    + " enchantment mechanism to add enchantments, so any enchantment value will work.";
 
         }
 

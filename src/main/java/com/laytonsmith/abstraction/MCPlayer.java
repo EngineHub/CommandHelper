@@ -68,4 +68,7 @@ public interface MCPlayer extends MCCommandSender, MCOfflinePlayer{
     public void addEffect(int potionID, int strength, int seconds);
 
     public boolean removeEffect(int effect);
+    
+    public boolean canSee(MCPlayer p);
+    public void setVanished(boolean set, MCPlayer to);
 }
