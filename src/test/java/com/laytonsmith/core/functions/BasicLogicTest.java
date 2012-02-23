@@ -313,6 +313,13 @@ public class BasicLogicTest {
                 + "correct)", null));
     }
     
+    @Test public void testSwitchWithArray() throws ConfigCompileException{
+        assertEquals("correct", SRun("switch(3,"
+                + "array(1, 2), wrong,"
+                + "array(3, 4), correct,"
+                + "5, wrong)", null));
+    }
+    
     @Test public void testSequals() throws ConfigCompileException{
         assertEquals("true", SRun("sequals(1, 1)", null));
         assertEquals("false", SRun("sequals(1, '1')", null));

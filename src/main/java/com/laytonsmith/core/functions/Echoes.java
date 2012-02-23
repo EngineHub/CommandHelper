@@ -21,6 +21,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.util.StringUtil;
 import java.io.File;
+import java.util.Enumeration;
 import java.util.logging.Level;
 
 /**
@@ -224,9 +225,13 @@ public class Echoes {
         }
 
         public String docs() {
+            String [] b = new String[MCChatColor.values().length];
+            for(int i = 0; i < b.length; i++){
+                b[i] = MCChatColor.values()[i].name(); Enum e = null;
+            }
             return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
                     + " The list of valid color names can be found in the MCChatColor class, and case doesn't matter. For your reference,"
-                    + " here is the list of valid colors: " + StringUtil.joinString(MCChatColor.values(), ", ", 0) + ", in addition the integers 0-15 will work, or the hex numbers from 0-F.";
+                    + " here is the list of valid colors: " + StringUtil.joinString(b, ", ", 0) + ", in addition the integers 0-15 will work, or the hex numbers from 0-F.";
         }
         
         public ExceptionType[] thrown(){

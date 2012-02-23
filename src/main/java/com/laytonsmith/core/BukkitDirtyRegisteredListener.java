@@ -103,8 +103,8 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
     }
 
     public static void Repopulate() throws NoSuchFieldException, ClassCastException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException {
-        ConfigRuntimeException.DoReport(null, "Play-dirty mode is currently disabled until further notice. Disable play-dirty in your preferences file"
-                + " to get rid of this message.");
+        ConfigRuntimeException.DoWarning(null, "Play-dirty mode is currently disabled until further notice. Disable play-dirty in your preferences file"
+                + " to get rid of this message.", false);
         //Go through the list of registered listeners, and inject our
         //our own poisoned DirtyRegisteredListeners in instead
 //        SimplePluginManager pm = (SimplePluginManager) AliasCore.parent.getServer().getPluginManager();

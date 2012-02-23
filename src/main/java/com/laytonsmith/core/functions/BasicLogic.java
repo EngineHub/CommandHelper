@@ -120,8 +120,17 @@ public class BasicLogic {
                 GenericTreeNode<Construct> code = children.get(i + 1);
                 Construct evalStatement = env.GetScript().eval(statement, env);
                 evalStatement = env.GetScript().preResolveVariable(evalStatement);
-                if(((CBoolean)equals.exec(line_num, f, env, value, evalStatement)).getBoolean()){
-                    return env.GetScript().eval(code, env);
+                if(evalStatement instanceof CArray){
+                    for(String index : ((CArray)evalStatement).keySet()){
+                        Construct inner = ((CArray)evalStatement).get(index);
+                        if(((CBoolean)equals.exec(line_num, f, env, value, inner)).getBoolean()){
+                            return env.GetScript().eval(code, env);
+                        }
+                    }
+                } else {
+                    if(((CBoolean)equals.exec(line_num, f, env, value, evalStatement)).getBoolean()){
+                        return env.GetScript().eval(code, env);
+                    }
                 }
             }
             if(children.size() % 2 == 0){
