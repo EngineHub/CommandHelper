@@ -229,8 +229,8 @@ public class BoundEvent implements Comparable<BoundEvent> {
                 try{
                     MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player").val());
                     if(p != null && p.isOnline()){
-                        env.SetPlayer(p);                
-                    }
+                        env.SetPlayer(p);                                        
+                    }                    
                 } catch(ConfigRuntimeException e){
                     if(!e.getExceptionType().equals(Exceptions.ExceptionType.PlayerOfflineException)){
                         throw e;

@@ -494,10 +494,9 @@ public class Static {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
-                MCPlayer p = null;
                 if (m instanceof MCPlayer) {
-                    p = (MCPlayer) m;
-                    if (p == null || !p.isOnline()) {
+                    MCPlayer p = (MCPlayer) m;
+                    if (p == null) {
                         throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
                     }
                     p.sendMessage(line);
