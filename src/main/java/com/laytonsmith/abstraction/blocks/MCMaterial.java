@@ -12,4 +12,6 @@ public interface MCMaterial {
     short getMaxDurability();
 
     public int getType();
+
+    public int getMaxStackSize();
 }

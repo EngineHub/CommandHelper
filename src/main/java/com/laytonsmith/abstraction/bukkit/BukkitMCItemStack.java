@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.enchantments.Enchantment;

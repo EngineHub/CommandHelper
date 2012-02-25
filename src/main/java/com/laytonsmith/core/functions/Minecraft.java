@@ -31,17 +31,30 @@ public class Minecraft {
     public static String docs() {
         return "These functions provide a hook into game functionality.";
     }
-    private static final SortedMap<String, Construct> DataLookup = new TreeMap<String, Construct>();
+    private static final SortedMap<String, Construct> DataValueLookup = new TreeMap<String, Construct>();
+    private static final SortedMap<String, Construct> DataNameLookup = new TreeMap<String, Construct>();
     static{
-        Properties p = new Properties();
+        Properties p1 = new Properties();
         try {
-            p.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
-            Enumeration e = p.propertyNames();
+            p1.load(Minecraft.class.getResourceAsStream("/data_values.txt"));
+            Enumeration e = p1.propertyNames();
             while(e.hasMoreElements()){
                 String name = e.nextElement().toString();
-                DataLookup.put(name, new CString(p.getProperty(name).toString(), 0, null));
+                DataValueLookup.put(name, new CString(p1.getProperty(name).toString(), 0, null));
             }
         } catch (IOException ex) {
+            Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        
+        Properties p2 = new Properties();
+        try{
+            p2.load(Minecraft.class.getResourceAsStream("/data_names.txt"));
+            Enumeration e = p2.propertyNames();
+            while(e.hasMoreElements()){
+                String name = e.nextElement().toString();
+                DataNameLookup.put(name, new CString(p2.getProperty(name).toString(), 0, null));
+            }
+        } catch(IOException ex){
             Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
@@ -76,8 +89,8 @@ public class Minecraft {
                 //Remove anything that isn't a letter or a number
                 changed = changed.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
                 //Do a lookup in the DataLookup table
-                if(DataLookup.containsKey(changed)){
-                    String split[] = DataLookup.get(changed).toString().split(":");
+                if(DataValueLookup.containsKey(changed)){
+                    String split[] = DataValueLookup.get(changed).toString().split(":");
                     if(split[1].equals("0")){
                         return new CInt(split[0], line_num, f);
                     }
@@ -127,12 +140,14 @@ public class Minecraft {
         }
 
         public String docs() {
-            return "string {int} Performs the reverse functionality as data_values. Given 1, returns 'STONE'. Note that the enum value"
-                    + " given in bukkit's Material class is what is returned.";
+            return "string {int | itemArray} Performs the reverse functionality as data_values. Given 1, returns 'Stone'. Note that the enum value"
+                    + " given in bukkit's Material class is what is returned as a fallback, if the id doesn't match a value in the internally maintained list."
+                    + " If a completely invalid argument is passed"
+                    + " in, null is returned.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {
@@ -153,19 +168,101 @@ public class Minecraft {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             int i = -1;
+            int i2 = -1;
             if(args[0] instanceof CString){
                 //We also accept item notation
                 if(args[0].val().contains(":")){
                     String[] split = args[0].val().split(":");
                     try{
                         i = Integer.parseInt(split[0]);
+                        i2 = Integer.parseInt(split[1]);
                     } catch(NumberFormatException e){}
                 }
+            } else if(args[0] instanceof CArray){
+                MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], line_num, f);
+                i = is.getTypeId();
+                i2 = (int)is.getData().getData();
             }
             if(i == -1){
                 i = (int)Static.getInt(args[0]);
-            }            
-            return new CString(StaticLayer.LookupMaterialName(i), line_num, f);
+            }  
+            if(i2 == -1){
+                i2 = 0;
+            }
+            if(DataNameLookup.containsKey(i + "_" + i2)){
+                return DataNameLookup.get(i + "_" + i2);
+            } else if(DataNameLookup.containsKey(i + "_0")){
+                return DataNameLookup.get(i + "_0");
+            } else {
+                try{
+                    return new CString(StaticLayer.LookupMaterialName(i), line_num, f);
+                } catch(NullPointerException e){
+                    return new CNull(line_num, f);
+                }
+            }
+        }
+        
+    }
+    
+    @api
+    public static class max_stack_size implements Function{
+
+        public String getName() {
+            return "max_stack_size";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "integer {itemType | itemArray} Given an item type, returns"
+                    + " the maximum allowed stack size. This method will accept either"
+                    + " a single data value (i.e. 278) or an item array like is returned"
+                    + " from pinv(). Additionally, if a single value, it can also be in"
+                    + " the old item notation (i.e. '35:11'), though for the purposes of this"
+                    + " function, the data is unneccesary.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(args[0] instanceof CArray){
+                MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], line_num, f);
+                return new CInt(is.getType().getMaxStackSize(), line_num, f);
+            } else {
+                String item = args[0].val();
+                if(item.contains(":")){
+                    String[] split = item.split(":");
+                    item = split[0];
+                }
+                try{
+                    int iitem = Integer.parseInt(item);
+                    int max = StaticLayer.GetItemStack(iitem, 1).getType().getMaxStackSize();
+                    return new CInt(max, line_num, f);
+                } catch(NumberFormatException e){
+                    
+                }
+            }
+            throw new ConfigRuntimeException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", ExceptionType.CastException, line_num, f);
+        }
+
+        public String since() {
+            return "3.3.0";
         }
         
     }

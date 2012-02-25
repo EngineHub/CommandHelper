@@ -11,7 +11,7 @@ import org.bukkit.Material;
  *
  * @author layton
  */
-class BukkitMCMaterial implements MCMaterial {
+public class BukkitMCMaterial implements MCMaterial {
     Material m;
 
     public BukkitMCMaterial(Material type) {
@@ -24,6 +24,10 @@ class BukkitMCMaterial implements MCMaterial {
 
     public int getType() {
         return m.getId();
+    }
+
+    public int getMaxStackSize() {
+        return m.getMaxStackSize();
     }
     
 }
