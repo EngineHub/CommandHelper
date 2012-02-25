@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.entity.Player;
@@ -21,7 +22,7 @@ public class BukkitEntityListener implements Listener{
     @EventHandler(priority=EventPriority.LOWEST)
     public void onEntityDeath(EntityDeathEvent event) {
         if(event.getEntity() instanceof Player){
-            EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", event);
+            EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", new BukkitPlayerEvents.BukkitMCPlayerDeathEvent(event));
         }
     }
     

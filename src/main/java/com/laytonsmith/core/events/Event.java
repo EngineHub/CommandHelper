@@ -42,7 +42,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * This function should return true if the event code should be run, based
      * on this prefilter and triggering event's parameters.
      */
-    public boolean matches(Map<String, Construct> prefilter, Object e) throws PrefilterNonMatchException;
+    public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException;
     
     /**
      * If an event is manually triggered, then it may be required for an event
@@ -50,7 +50,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * @param manualObject
      * @return 
      */
-    public Object convert(CArray manualObject);
+    public BindableEvent convert(CArray manualObject);
     
     /**
      * This function is called when an event is triggered. It passes the event, and expects
@@ -60,12 +60,12 @@ public interface Event extends Comparable<Event>, Documentation{
      * @param e
      * @return 
      */
-    public Map<String, Construct> evaluate(Object e) throws EventException;
+    public Map<String, Construct> evaluate(BindableEvent e) throws EventException;
     
     /**
      * This is called to determine if an event is cancellable in the first place
      */
-    public boolean isCancellable(Object e);
+    public boolean isCancellable(BindableEvent e);
     
     /**
      * This is called if the script attempts to cancel the event, so the underlying
@@ -73,7 +73,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * should throw an EventException, which is caught in the triggering code, and
      * at this time ignored.
      */
-    public void cancel(Object e, boolean state) throws EventException;
+    public void cancel(BindableEvent e, boolean state) throws EventException;
     
     
     /**
@@ -114,7 +114,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * this event server-wide.
      * @param e 
      */
-    public void manualTrigger(Object e);
+    public void manualTrigger(BindableEvent e);
     
     /**
      * If the event is an external event, and there is no reason to attempt a serverwide manual
@@ -129,6 +129,6 @@ public interface Event extends Comparable<Event>, Documentation{
      * takes a key, a construct, and the underlying event. It returns true if the underlying
      * event was successfully updated.
      */
-    public boolean modifyEvent(String key, Construct value, Object event);
+    public boolean modifyEvent(String key, Construct value, BindableEvent event);
     
 }

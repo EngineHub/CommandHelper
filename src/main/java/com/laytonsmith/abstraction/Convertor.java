@@ -7,7 +7,11 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 
 /**
- *
+ * This should be implemented once for each server type. It mostly wraps
+ * static methods, but also provides methods for getting other server specific
+ * things. You can get an instance of the current Convertor by looking for the
+ * <code>@convert</code> tag. StaticLayer wraps all the functionality for you
+ * however.
  * @author layton
  */
 public interface Convertor {

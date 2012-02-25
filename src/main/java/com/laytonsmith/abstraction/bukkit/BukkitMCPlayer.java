@@ -30,7 +30,7 @@ import org.bukkit.util.BlockIterator;
  *
  * @author layton
  */
-public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
+public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer, MCEntity {
 
     Player p;
 
@@ -348,6 +348,22 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer {
         } else {
             p.hidePlayer(((BukkitMCPlayer)to)._Player());
         }
+    }
+
+    public int getEntityId() {
+        return p.getEntityId();
+    }
+
+    public boolean isTameable() {
+        return false;
+    }
+
+    public MCTameable getMCTameable() {
+        return null;
+    }
+
+    public MCDamageCause getLastDamageCause() {
+        return MCDamageCause.valueOf(p.getLastDamageCause().getCause().name());
     }
     
     

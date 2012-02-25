@@ -455,6 +455,9 @@ public class Static {
     }
 
     public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
+        if(variable == null){
+            return new CNull(0, null);
+        }
         if (variable.getCType() == Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {
                 if (var.getName().equals(((Variable) variable).getName())) {

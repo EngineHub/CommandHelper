@@ -303,7 +303,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * is also cached here.
      */
     public static class ActiveEvent{
-        private final Object underlyingEvent;
+        private final BindableEvent underlyingEvent;
         private Map<String, Construct> parsedEvent;
         private BoundEvent boundEvent;
         private boolean cancelled;
@@ -314,7 +314,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         
         private final List<String> history;
         
-        public ActiveEvent(Object underlyingEvent){
+        public ActiveEvent(BindableEvent underlyingEvent){
             this.underlyingEvent = underlyingEvent;
             this.cancelled = false;
             whenCancelled = new ArrayList<Pair<CClosure, Env>>();
@@ -337,7 +337,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             return parsedEvent;
         }
 
-        public Object getUnderlyingEvent() {
+        public BindableEvent getUnderlyingEvent() {
             return underlyingEvent;
         }
 

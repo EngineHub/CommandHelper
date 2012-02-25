@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.MCDamageCause;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCTameable;
 import org.bukkit.entity.Entity;
@@ -13,7 +14,7 @@ import org.bukkit.entity.Tameable;
  *
  * @author layton
  */
-class BukkitMCEntity implements MCEntity {
+public class BukkitMCEntity implements MCEntity {
 
     Entity e;
     public BukkitMCEntity(Entity e) {
@@ -30,6 +31,14 @@ class BukkitMCEntity implements MCEntity {
 
     public MCTameable getMCTameable() {
         return new BukkitMCTameable((Tameable)e);
+    }
+    
+    public Entity _Entity(){
+        return e;
+    }
+
+    public MCDamageCause getLastDamageCause() {
+        return MCDamageCause.valueOf(e.getLastDamageCause().getCause().name());
     }
     
 }

@@ -5,6 +5,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCAnimalTamer;
+import com.laytonsmith.abstraction.MCDamageCause;
 import com.laytonsmith.abstraction.MCTameable;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.Tameable;
@@ -51,6 +52,10 @@ public class BukkitMCTameable implements MCTameable{
 
     public MCTameable getMCTameable() {
         return new BukkitMCTameable(t);
+    }
+
+    public MCDamageCause getLastDamageCause() {
+        return MCDamageCause.valueOf(((Entity)t).getLastDamageCause().getCause().name());
     }
     
     

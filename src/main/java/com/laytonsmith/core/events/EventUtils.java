@@ -105,7 +105,7 @@ public class EventUtils {
                 for (BoundEvent b : bounded) {
                     if(b.getEventName().equalsIgnoreCase(eventName)){
                         try {
-                            Object convertedEvent = null;
+                            BindableEvent convertedEvent;
                             try{
                                 convertedEvent = driver.convert(object);
                             } catch(ConfigRuntimeException e){
@@ -145,7 +145,7 @@ public class EventUtils {
      * @param type
      * @param e 
      */
-    public static void TriggerListener(Driver type, String eventName, Object e) {
+    public static void TriggerListener(Driver type, String eventName, BindableEvent e) {
         SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
         //This is the Event driver
         Event driver = EventList.getEvent(type, eventName);
@@ -168,7 +168,7 @@ public class EventUtils {
         FireListeners(toRun, driver, e);
     }
 
-    private static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, Object e) {
+    private static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, BindableEvent e) {
         //Sort our event handlers by priorities
         BoundEvent.ActiveEvent activeEvent = new BoundEvent.ActiveEvent(e);
         for (BoundEvent b : toRun) {

@@ -18,17 +18,17 @@ public interface EventMixinInterface {
      * Cancel this event, if possible.
      * @param e 
      */
-    public void cancel(Object e, boolean state);
+    public void cancel(BindableEvent e, boolean state);
     /**
      * Return if this event is cancellable
      * @param o
      * @return 
      */
-    public boolean isCancellable(Object o);    
-    public Map<String, Construct> evaluate_helper(Object e) throws EventException;
+    public boolean isCancellable(BindableEvent o);    
+    public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException;
     /**
      * Manually trigger this implementation specific event
      * @param e 
      */
-    public void manualTrigger(Object e);
+    public void manualTrigger(BindableEvent e);
 }

@@ -21,13 +21,13 @@ import java.util.Map;
  */
 public abstract class AbstractEvent implements Event, Comparable<Event> {
     
-    protected EventMixinInterface mixin;
-    protected EventHandlerInterface handler;
-    
-    protected AbstractEvent(EventHandlerInterface handler){
-        this.handler = handler;
-    }
-    
+    private EventMixinInterface mixin;
+//    protected EventHandlerInterface handler;
+//    
+//    protected AbstractEvent(EventHandlerInterface handler){
+//        this.handler = handler;
+//    }
+//    
     public final void setAbstractEventMixin(EventMixinInterface mixin){
         this.mixin = mixin;
     }
@@ -59,16 +59,24 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      */
     public final void execute(Script s, BoundEvent b, Env env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
         try{
-            handler.preExecution(env, activeEvent);
+            preExecution(env, activeEvent);
         } catch(UnsupportedOperationException e){
             //Ignore. This particular event doesn't need to customize
         }
         s.run(null, env, null);
         try{
-            handler.postExecution(env, activeEvent);
+            this.postExecution(env, activeEvent);
         } catch(UnsupportedOperationException e){
             //Ignore.
         }
+    }
+    
+    public void preExecution(Env env, BoundEvent.ActiveEvent activeEvent){
+        throw new UnsupportedOperationException();
+    }
+    
+    public void postExecution(Env env, BoundEvent.ActiveEvent activeEvent){
+        throw new UnsupportedOperationException();
     }
 
     /**
@@ -104,23 +112,8 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         return map;        
     }
     
-    public boolean matches(Map<String, Construct> prefilter, Object e) throws PrefilterNonMatchException{
-        return handler.matches(prefilter, e);
-    }
-    
-    public Map<String, Construct> evaluate(Object e) throws EventException{
-        return handler.evaluate(e, this.mixin);
-    }
-    
-    public Object convert(CArray manual) throws ConfigRuntimeException{
-        //So as to return the appropriate exception if a parameter is missing,
-        //force the array into associative mode
-        manual.forceAssociativeMode();
-        return handler.convert(manual);
-    }
-    
-    public boolean modifyEvent(String key, Construct value, Object event){
-        return handler.modifyEvent(key, value, event);
+    public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException{
+        return mixin.evaluate_helper(e);
     }
     
     /**
@@ -129,15 +122,15 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * in the actual event (if it's an external event, for instance)
      * @param o 
      */
-    public void manualTrigger(Object o){
+    public void manualTrigger(BindableEvent o){
         mixin.manualTrigger(o);
     }
     
-    public void cancel(Object o, boolean state){
+    public void cancel(BindableEvent o, boolean state){
         mixin.cancel(o, state);
     }
     
-    public boolean isCancellable(Object o){
+    public boolean isCancellable(BindableEvent o){
         return mixin.isCancellable(o);
     }
     

@@ -14,4 +14,6 @@ public interface MCEntity {
     public boolean isTameable();
 
     public MCTameable getMCTameable();
+
+    public MCDamageCause getLastDamageCause();
 }

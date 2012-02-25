@@ -6,9 +6,8 @@ package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.core.Documentation;
-import com.laytonsmith.core.docs;
-import com.laytonsmith.core.events.AbstractEvent;
-import com.laytonsmith.core.events.EventHandlerInterface;
+import com.laytonsmith.core.api;
+import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
@@ -27,7 +26,7 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) {
-        functions("wiki");
+        events("wiki");
     }
 
     public static void functions(String type) {
@@ -216,17 +215,15 @@ public class DocGen {
     }
 
     public static void events(String type) {
-        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(docs.class);
+        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
         Set<Documentation> list = new TreeSet<Documentation>();
         for (Class c : classes) {
-            docs d = (docs) c.getAnnotation(docs.class);
-            if (d.type().equals(docs.type.EVENT) && AbstractEvent.class.isAssignableFrom(c)
+            if (Event.class.isAssignableFrom(c)
                     && Documentation.class.isAssignableFrom(c)) {
                 try {
-                    //First, we have to instatiate the event. We don't have a handler, but
-                    //that's ok, we're just interested in the Documentation element
-                    Constructor<AbstractEvent> cons = c.getConstructor(EventHandlerInterface.class);
-                    Documentation docs = (Documentation) cons.newInstance((Object) null);
+                    //First, we have to instatiate the event.
+                    Constructor<Event> cons = c.getConstructor();
+                    Documentation docs = (Documentation) cons.newInstance();
                     list.add(docs);
                 } catch (Exception ex) {
                     System.err.println("Could not get documentation for " + c.getSimpleName());

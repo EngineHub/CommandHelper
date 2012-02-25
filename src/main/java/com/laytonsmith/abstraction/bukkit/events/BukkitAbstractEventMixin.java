@@ -5,6 +5,7 @@
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
+import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -38,17 +39,19 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
         this.mySuper = mySuper;
     }
 
-    public void cancel(Object e, boolean state){
-        if (e instanceof Cancellable) {
-            ((Cancellable) e).setCancelled(state);
+    @Override
+    public void cancel(BindableEvent e, boolean state){
+        if (e._GetObject() instanceof Cancellable) {
+            ((Cancellable) e._GetObject()).setCancelled(state);
         }
     }
     
     @Override
-    public Map<String, Construct> evaluate_helper(Object e) throws EventException{
+    public Map<String, Construct> evaluate_helper(BindableEvent event) throws EventException{
         Map<String, Construct> map = new HashMap<String, Construct>();
         map.put("type", new CString(mySuper.getName(), 0, null));
         String macro;
+        Object e = event._GetObject();
         if(e instanceof BlockEvent){
             macro = "block";
         } else if(e instanceof EntityEvent){
@@ -77,14 +80,16 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
         return map;
     }
     
-    public void manualTrigger(Object e){
-        if(e instanceof org.bukkit.event.Event){
+    @Override
+    public void manualTrigger(BindableEvent e){
+        if(e._GetObject() instanceof org.bukkit.event.Event){
             ((BukkitMCServer)Static.getServer()).__Server().getPluginManager().callEvent((org.bukkit.event.Event)e);
         }
     }
 
-    public boolean isCancellable(Object o) {
-        return (o instanceof Cancellable);
+    @Override
+    public boolean isCancellable(BindableEvent o) {
+        return (o._GetObject() instanceof Cancellable);
     }
     
 }

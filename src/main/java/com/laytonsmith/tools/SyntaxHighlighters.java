@@ -9,9 +9,7 @@ import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
-import com.laytonsmith.core.docs;
-import com.laytonsmith.core.docs.type;
-import com.laytonsmith.core.events.EventHandlerInterface;
+import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Function;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -171,18 +169,15 @@ public class SyntaxHighlighters {
     
     private static List<Documentation> GetEvents(){
         List<Documentation> l = new ArrayList<Documentation>();
-        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(docs.class);
+        Class[] classes = ClassDiscovery.GetClassesWithinPackageHierarchy();
         for(Class c : classes){
-            if (Documentation.class.isAssignableFrom(c)) {
-                docs d = (docs) c.getAnnotation(docs.class);
-                if(d.type().equals(type.EVENT)){
-                    try {
-                        Constructor m = c.getConstructor(EventHandlerInterface.class);
-                        Documentation e = (Documentation)m.newInstance((EventHandlerInterface)null);
-                        l.add(e);
-                    } catch (Exception ex) {
-                        System.err.println(ex.getMessage());
-                    }
+            if (Event.class.isAssignableFrom(c) && Documentation.class.isAssignableFrom(c)) {
+                try {
+                    Constructor m = c.getConstructor();
+                    Documentation e = (Documentation)m.newInstance();
+                    l.add(e);
+                } catch (Exception ex) {
+                    System.err.println(ex.getMessage());
                 }
             }           
         }
