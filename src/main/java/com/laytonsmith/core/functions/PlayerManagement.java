@@ -1136,7 +1136,9 @@ public class PlayerManagement {
                     + " item in hand, use something like set_pinv(array(null: array(type: 298))), where"
                     + " the key is null. If you set a null key in addition to an entire inventory set, only"
                     + " one item will be used (which one is undefined). Note that this uses the unsafe"
-                    + " enchantment mechanism to add enchantments, so any enchantment value will work.";
+                    + " enchantment mechanism to add enchantments, so any enchantment value will work. If"
+                    + " type uses the old format (for instance, \"35:11\"), then the second number is taken"
+                    + " to be the data, making this backwards compatible (and sometimes more convenient).";
 
         }
 

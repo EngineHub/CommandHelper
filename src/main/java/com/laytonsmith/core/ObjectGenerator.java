@@ -188,6 +188,12 @@ public class ObjectGenerator {
 
         if(item.containsKey("type")){
             try{
+                if(item.get("type").val().contains(":")){
+                    //We're using the combo addressing method
+                    String [] split = item.get("type").val().split(":");
+                    item.set("type", split[0]);
+                    item.set("data", split[1]);
+                }
                 type = Integer.parseInt(item.get("type").val());
             }catch(NumberFormatException e){
                 throw new ConfigRuntimeException("Could not get item information from given information (" + item.get("type").val() + ")", ExceptionType.FormatException, line_num, f, e);
