@@ -2591,47 +2591,80 @@ public class PlayerManagement {
         
     }
     
-//    @api public static class pitem_slot implements Function{
-//
-//        public String getName() {
-//            return "pitem_slot";
-//        }
-//
-//        public Integer[] numArgs() {
-//            return new Integer[]{1, 2};
-//        }
-//
-//        public String docs() {
-//            return "array {[player], itemID} Given an item id, returns the slot numbers"
-//                    + " that the matching item has at least one item in.";
-//        }
-//
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{};
-//        }
-//
-//        public boolean isRestricted() {
-//            return true;
-//        }
-//
-//        public boolean preResolveVariables() {
-//            return true;
-//        }
-//
-//        public Boolean runAsync() {
-//            return false;
-//        }
-//
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//
-//        public String since() {
-//            return "3.3.0";
-//        }
-//        
-//    }
-//    
+    @api public static class pitem_slot implements Function{
+
+        public String getName() {
+            return "pitem_slot";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "array {[player], itemID} Given an item id, returns the slot numbers"
+                    + " that the matching item has at least one item in.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+                ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            String item;
+            if(args.length == 1){
+                item = args[0].val();
+            } else {
+                p = Static.GetPlayer(args[0]);
+                item = args[1].val();
+            }
+            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, line_num, f);
+            MCInventory inv = p.getInventory();
+            CArray ca = new CArray(line_num, f);
+            for(int i = 0; i < 36; i++){
+                if(match(is, inv.getItem(i))){
+                    ca.push(new CInt(i, line_num, f));
+                }
+            }
+            if(match(is, inv.getBoots())){
+                ca.push(new CInt(100, line_num, f));
+            }
+            if(match(is, inv.getLeggings())){
+                ca.push(new CInt(101, line_num, f));
+            }
+            if(match(is, inv.getChestplate())){
+                ca.push(new CInt(102, line_num, f));
+            }
+            if(match(is, inv.getHelmet())){
+                ca.push(new CInt(103, line_num, f));
+            }
+            return ca;
+        }
+        
+        private boolean match(MCItemStack is, MCItemStack iis){
+            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
 //    @api public static class pgive_item implements Function{
 //
 //        public String getName() {
