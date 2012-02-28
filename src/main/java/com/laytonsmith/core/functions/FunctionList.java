@@ -52,8 +52,9 @@ public class FunctionList {
                         t.printStackTrace();
                     }
                 }
-            } else {
-                System.out.println("@api functions must implement " + FunctionList.class.getPackage().getName() + ".Function! " + c.getSimpleName() + " cannot be loaded.");
+            } else if(!api.ValidClasses.IsValid(c)){
+                System.out.println("Invalid class found: " + c.getName() + ". Classes tagged with @api"
+                        + " must extend a valid class type.");
             }
         }
 //        for (int i = 0; i < classes.length; i++) {

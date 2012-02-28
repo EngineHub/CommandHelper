@@ -322,8 +322,8 @@ public class PlayerEvents {
                     + "{player: The player that died | drops: An array of the dropped items"
                     + "| xp: The xp that will be dropped | cause: The cause of death | death_message: The"
                     + " death message}"
-                    + "{xp|drops: An array of item objects, or null. The items to be dropped"
-                    + " are replaced with the given items, not added to|death_message: the death message,"
+                    + "{xp|drops An array of item objects, or null. The items to be dropped"
+                    + " are replaced with the given items, not added to|death_message the death message,"
                     + " or null to remove it entirely}"
                     + "{player| drops}";
         }
@@ -428,11 +428,11 @@ public class PlayerEvents {
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when any player attempts to send a chat message."
-                    + "{message: The message to be sent | recipients: An array of"
+                    + "{message: The message to be sent | recipients}"
+                    + "{message|recipients: An array of"
                     + " players that will recieve the chat message. If a player doesn't exist"
                     + " or is offline, and is in the array, it is simply ignored, no"
                     + " exceptions will be thrown.}"
-                    + "{message|recipients}"
                     + "{player|message}";
         }
         

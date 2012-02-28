@@ -101,7 +101,10 @@ public class EventList {
                 } catch (IllegalAccessException ex) {
                     Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
                 }
-            }            
+            } else if(!api.ValidClasses.IsValid(c)){
+                System.out.println("Invalid class found: " + c.getName() + ". Classes tagged with @api"
+                        + " must extend a valid class type.");
+            }
         }
         
         if((Boolean)com.laytonsmith.core.Static.getPreferences().getPreference("debug-mode")){
