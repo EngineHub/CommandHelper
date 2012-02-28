@@ -6,6 +6,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.ObjectGenerator;
@@ -2580,7 +2581,12 @@ public class PlayerManagement {
         
         private int total(MCItemStack is, MCItemStack iis){
             if(iis.getTypeId() == is.getTypeId() && iis.getData().getData() == is.getData().getData()){
-                return iis.getAmount();
+                int i = iis.getAmount();
+                if(i < 0){
+                    //Infinite stack
+                    i = iis.maxStackSize();
+                }
+                return i;
             }         
             return 0;
         }
@@ -2665,94 +2671,178 @@ public class PlayerManagement {
         
     }
     
-//    @api public static class pgive_item implements Function{
-//
-//        public String getName() {
-//            return "pgive_item";
-//        }
-//
-//        public Integer[] numArgs() {
-//            return new Integer[]{2, 3};
-//        }
-//
-//        public String docs() {
-//            return "int {[player], itemID, qty} Gives a player the specified item * qty."
-//                    + " Unlike set_pinv(), this does not specify a slot. The qty is distributed"
-//                    + " in the player's inventory, first filling up slots that have the same item"
-//                    + " type, up to the max stack size, then fills up empty slots, until either"
-//                    + " the entire inventory is filled, or the entire amount has been given."
-//                    + " The number of items actually given is returned, which will be less than"
-//                    + " or equal to the quantity provided.";
-//        }
-//
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{};
-//        }
-//
-//        public boolean isRestricted() {
-//            return true;
-//        }
-//
-//        public boolean preResolveVariables() {
-//            return true;
-//        }
-//
-//        public Boolean runAsync() {
-//            return false;
-//        }
-//
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//
-//        public String since() {
-//            return "3.3.0";
-//        }
-//        
-//    }
-//    
-//    @api public static class ptake_item implements Function{
-//
-//        public String getName() {
-//            return "ptake_item";
-//        }
-//
-//        public Integer[] numArgs() {
-//            return new Integer[]{2, 3};
-//        }
-//
-//        public String docs() {
-//            return "int {[player], itemID, qty} Works in reverse of pgive_item(), but"
-//                    + " returns the number of items actually taken, which will be"
-//                    + " from 0 to qty.";
-//        }
-//
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{};
-//        }
-//
-//        public boolean isRestricted() {
-//            return true;
-//        }
-//
-//        public boolean preResolveVariables() {
-//            return true;
-//        }
-//
-//        public Boolean runAsync() {
-//            return false;
-//        }
-//
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-//            throw new UnsupportedOperationException("Not supported yet.");
-//        }
-//
-//        public String since() {
-//            return "3.3.0";
-//        }
-//        
-//    }
-//    
+    @api public static class pgive_item implements Function{
+
+        public String getName() {
+            return "pgive_item";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public String docs() {
+            return "int {[player], itemID, qty} Gives a player the specified item * qty."
+                    + " Unlike set_pinv(), this does not specify a slot. The qty is distributed"
+                    + " in the player's inventory, first filling up slots that have the same item"
+                    + " type, up to the max stack size, then fills up empty slots, until either"
+                    + " the entire inventory is filled, or the entire amount has been given."
+                    + " The number of items actually given is returned, which will be less than"
+                    + " or equal to the quantity provided. This function will not touch the player's"
+                    + " armor slots however.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException,
+                ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            MCItemStack is;
+            if(args.length == 2){
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), line_num, f);
+            } else {
+                p = Static.GetPlayer(args[0]);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), line_num, f);
+            }
+            int total = is.getAmount();
+            int remaining = is.getAmount();
+            MCInventory inv = p.getInventory();
+            for(int i = 0; i < 36; i++){
+                MCItemStack iis = inv.getItem(i);
+                if(remaining <= 0){
+                    break;
+                }
+                if(match(is, iis) || iis.getTypeId() == 0){
+                    //It's either the same item stack, or air.
+                    int currentQty = 0;
+                    int max = is.maxStackSize();
+                    if(iis.getTypeId() != 0){
+                        currentQty = iis.getAmount();
+                    }
+                    if(currentQty < 0){
+                        //Infinite stack. Assume max stack size.
+                        currentQty = is.maxStackSize();
+                    }
+                    int left = max - currentQty;
+                    int toGive;
+                    if(left < remaining){
+                        //We'll have to split this across more than this stack.
+                        toGive = left;
+                    } else {
+                        //We can distribute the rest in this stack
+                        toGive = remaining;
+                    }
+                    remaining -= toGive;
+                    
+                    //The total we are going to set the stack size to is toGive + currentQty
+                    int replace = toGive + currentQty;
+                    
+                    inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+                }
+            }
+            return new CInt(total - remaining, line_num, f);
+        }
+       
+        private boolean match(MCItemStack is, MCItemStack iis){
+            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+        }
+        
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class ptake_item implements Function{
+
+        public String getName() {
+            return "ptake_item";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public String docs() {
+            return "int {[player], itemID, qty} Works in reverse of pgive_item(), but"
+                    + " returns the number of items actually taken, which will be"
+                    + " from 0 to qty.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException,
+                ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            MCItemStack is;
+            if(args.length == 2){
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), line_num, f);
+            } else {
+                p = Static.GetPlayer(args[0]);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), line_num, f);
+            }
+            int total = is.getAmount();
+            int remaining = is.getAmount();
+            MCInventory inv = p.getInventory();
+            for(int i = 35; i >= 0; i--){
+                MCItemStack iis = inv.getItem(i);
+                if(remaining <= 0){
+                    break;
+                }
+                if(match(is, iis)){
+                    //Take the minimum of either: remaining, or iis.getAmount()
+                    int toTake = java.lang.Math.min(remaining, iis.getAmount());
+                    remaining -= toTake;
+                    int replace = iis.getAmount() - toTake;
+                    if(replace == 0){
+                        inv.setItem(i, StaticLayer.GetItemStack(0, 0));
+                    } else {
+                        inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+                    }
+                }
+            }
+            return new CInt(total - remaining, line_num, f);
+            
+        }
+        
+        private boolean match(MCItemStack is, MCItemStack iis){
+            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
 //    @api
 //    public static class pinv_consolidate implements Function {
 //        

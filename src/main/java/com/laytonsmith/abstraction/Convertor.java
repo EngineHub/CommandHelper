@@ -32,5 +32,7 @@ public interface Convertor {
     public int LookupItemId(String materialName);
 
     public String LookupMaterialName(int id);
+
+    public MCItemStack GetItemStack(int type, byte data, int qty);
     
 }

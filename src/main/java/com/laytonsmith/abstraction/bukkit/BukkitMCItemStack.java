@@ -92,4 +92,8 @@ public class BukkitMCItemStack implements MCItemStack{
     public void setData(int data) {
         is.setData(new MaterialData(is.getTypeId(), (byte)data));
     }
+
+    public int maxStackSize() {
+        return is.getMaxStackSize();
+    }
 }

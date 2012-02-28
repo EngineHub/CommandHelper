@@ -23,6 +23,8 @@ public interface MCItemStack {
     public MCMaterial getType();
     public void setTypeId(int type);
     
+    public int maxStackSize();
+    
     public int getAmount();
 
     public void setData(int data);

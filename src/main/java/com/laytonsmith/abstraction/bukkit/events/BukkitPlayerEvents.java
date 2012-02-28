@@ -209,6 +209,12 @@ public class BukkitPlayerEvents {
             }
             return drops;
         }
+        public void clearDrops() {
+            ede.getDrops().clear();
+        }
+        public void addDrop(MCItemStack is){
+            ede.getDrops().add(((BukkitMCItemStack)is).__ItemStack());
+        }
 
         public MCEntity getEntity() {
             return new BukkitMCPlayer((Player)ede.getEntity());
@@ -230,9 +236,6 @@ public class BukkitPlayerEvents {
             ((PlayerDeathEvent)ede).setDeathMessage(nval);
         }
 
-        public void clearDrops() {
-            ede.getDrops().clear();
-        }
     }
    
 }

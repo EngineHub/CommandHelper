@@ -406,7 +406,7 @@ public class PlayerEvents {
                     e.clearDrops();
                     CArray drops = (CArray) value;
                     for(String dropID : drops.keySet()){
-                        e.getDrops().add(ObjectGenerator.GetGenerator().item(drops.get(dropID), 0, null));
+                        e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID), 0, null));
                     }
                     return true;
                 }

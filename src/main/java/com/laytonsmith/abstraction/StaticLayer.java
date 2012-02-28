@@ -69,6 +69,10 @@ public class StaticLayer {
         return convertor.GetItemStack(type, qty);
     }
     
+    public static MCItemStack GetItemStack(int type, byte data, int qty){
+        return convertor.GetItemStack(type, data, qty);
+    }
+    
     public static MCServer GetServer(){
         return convertor.GetServer();
     }

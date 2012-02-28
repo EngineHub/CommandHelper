@@ -25,4 +25,6 @@ public interface MCPlayerDeathEvent extends BindableEvent{
 
     public void clearDrops();
     
+    public void addDrop(MCItemStack is);
+    
 }

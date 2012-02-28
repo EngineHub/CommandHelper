@@ -58,6 +58,9 @@ public class BukkitConvertor implements Convertor {
     public MCItemStack GetItemStack(int type, int qty) {
         return new BukkitMCItemStack(new ItemStack(type, qty));
     }
+    public MCItemStack GetItemStack(int type, byte data, int qty) {
+        return new BukkitMCItemStack(new ItemStack(type, qty, (short)0, data));
+    }
     
     public static final BukkitBlockListener BlockListener = new BukkitBlockListener();
     public static final BukkitEntityListener EntityListener = new BukkitEntityListener();
@@ -90,4 +93,5 @@ public class BukkitConvertor implements Convertor {
     public String LookupMaterialName(int id) {
         return Material.getMaterial(id).toString();
     }
+
 }
