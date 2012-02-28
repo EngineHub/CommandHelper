@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) {
-        events("wiki");
+        functions("wiki");
     }
 
     public static void functions(String type) {
@@ -177,7 +177,7 @@ public class DocGen {
                 } else if (type.equals("wiki")) {
                     //Turn args into a prettified version
                     args = args.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
-                    System.out.println("|-\n"
+                    System.out.println("|- id=\"" + f.getName() + "\"\n"
                             + "! scope=\"row\" | [[CommandHelper/API/" + f.getName() + "|" + f.getName() + "]]\n"
                             + "| " + ret + "\n"
                             + "| " + args + "\n"
