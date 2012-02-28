@@ -142,8 +142,8 @@
             <scope>compile</scope>
         </dependency>
         
-        <!-- Evil-y thing -->
-        <dependency>
+        <!-- Evil-y things (currently not used) -->
+        <!--<dependency>
             <groupId>cglib</groupId>
             <artifactId>cglib</artifactId>
             <version>2.2.2</version>
@@ -155,7 +155,7 @@
             <artifactId>javassist</artifactId>
             <version>3.15.0-GA</version>
             <type>jar</type>
-        </dependency>
+        </dependency>-->
         
         <!-- Test libraries -->
         <dependency>

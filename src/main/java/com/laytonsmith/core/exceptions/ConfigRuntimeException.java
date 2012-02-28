@@ -126,8 +126,8 @@ public class ConfigRuntimeException extends RuntimeException {
         MCPlayer p = null;
         if(e.getEnv() != null && e.getEnv().GetPlayer() != null){
             p = e.getEnv().GetPlayer();
-        }
-        DoReport(e.getMessage(), e.getExceptionType().toString(), e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, p);
+        }        
+        DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, p);
     }
     
     public static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){

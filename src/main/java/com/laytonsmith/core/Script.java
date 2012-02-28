@@ -59,6 +59,7 @@ public class Script {
     private List<Token> fullRight;
     private List<Construct> cleft;
     private List<GenericTreeNode<Construct>> cright;
+    //This should be null if we are running in non-alias mode
     private Map<String, Variable> left_vars;
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
@@ -163,6 +164,9 @@ public class Script {
                 tree.setRoot(rootNode);
                 for (GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)) {
                     if (tempNode.data instanceof Variable) {
+                        if(left_vars == null){
+                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.data.getLineNum(), tempNode.data.getFile());
+                        }
                         ((Variable) tempNode.data).setVal(
                                 Static.resolveConstruct(
                                 Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getLineNum(), tempNode.data.getFile()));
