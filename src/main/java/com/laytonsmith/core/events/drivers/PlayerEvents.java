@@ -402,7 +402,7 @@ public class PlayerEvents {
                     if(!(value instanceof CArray)){
                         throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getLineNum(), value.getFile());
                     }
-                    e.getDrops().clear();
+                    e.clearDrops();
                     CArray drops = (CArray) value;
                     for(String dropID : drops.keySet()){
                         e.getDrops().add(ObjectGenerator.GetGenerator().item(drops.get(dropID), 0, null));

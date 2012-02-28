@@ -229,6 +229,10 @@ public class BukkitPlayerEvents {
         public void setDeathMessage(String nval) {
             ((PlayerDeathEvent)ede).setDeathMessage(nval);
         }
+
+        public void clearDrops() {
+            ede.getDrops().clear();
+        }
     }
    
 }

@@ -22,5 +22,7 @@ public interface MCPlayerDeathEvent extends BindableEvent{
     public void setDroppedExp(int i);
 
     public void setDeathMessage(String nval);
+
+    public void clearDrops();
     
 }

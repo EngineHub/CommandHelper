@@ -9,7 +9,7 @@ import com.laytonsmith.core.exceptions.EventException;
 import java.util.Map;
 
 /**
- * The abstract event mixin contains functions that are common to all
+ * The abstract event mixin contains functions that are common to all or most
  * event types in a particular implementation.
  * @author layton
  */
@@ -25,6 +25,12 @@ public interface EventMixinInterface {
      * @return 
      */
     public boolean isCancellable(BindableEvent o);    
+    /**
+     * This constructs the common elements in an event.
+     * @param e
+     * @return
+     * @throws EventException 
+     */
     public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException;
     /**
      * Manually trigger this implementation specific event
