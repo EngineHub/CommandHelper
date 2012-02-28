@@ -135,12 +135,13 @@ public class FunctionList {
     public static Function getFunction(Construct c) throws ConfigCompileException {
         if (c instanceof CFunction) {
             if(!functions.containsKey(c.val())){
-                throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist");
+                throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist",
+                        c.getLineNum(), c.getFile());
             } else {
                 return functions.get(c.val());
             }              
         }
-        throw new ConfigCompileException("Excpecting CFunction type");
+        throw new ConfigCompileException("Excpecting CFunction type", c.getLineNum(), c.getFile());
     }
 
 //    public FunctionList(User u) {

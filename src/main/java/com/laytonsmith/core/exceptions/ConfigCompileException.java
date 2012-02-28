@@ -22,11 +22,6 @@ public class ConfigCompileException extends Exception{
         this.line_num = line_num;
         this.file = f;
     }
-
-    public ConfigCompileException(String string) {
-        message = string;
-        line_num = 0;
-    }
     
     @Override
     public String getMessage() {

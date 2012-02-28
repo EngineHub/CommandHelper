@@ -28,6 +28,10 @@ public class CommandHelperInterpreterListener implements Listener {
 
     Set<String> interpreterMode = new HashSet<String>();
     Map<String, String> multilineMode = new HashMap<String, String>();
+    
+    public boolean isInInterpreterMode(MCPlayer p){
+        return (interpreterMode.contains(p.getName()));
+    }
 
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerChat(PlayerChatEvent event) {

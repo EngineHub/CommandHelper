@@ -2461,26 +2461,26 @@ public class PlayerManagement {
         
     }
     
-//    @api public static class phas_item implements Function{
+    //Disabled until bukkit fixes their bug
+//    @api public static class pvelocity implements Function{
 //
 //        public String getName() {
-//            return "phas_item";
+//            return "pvelocity";
 //        }
 //
 //        public Integer[] numArgs() {
-//            return new Integer[]{1, 2};
+//            return new Integer[]{0, 1};
 //        }
 //
 //        public String docs() {
-//            return "int {[player], itemId} Returns the quantity of the specified item"
-//                    + " that the player is carrying. This counts across all slots in"
-//                    + " inventory. Recall that 0 is false, and anything else is true,"
-//                    + " so this can be used to get the total, or just see if they have"
-//                    + " the item.";
+//            return "array {[player]} Returns an associative array that represents the player's velocity."
+//                    + " The array contains the following items: magnitude, x, y, z. These represent a"
+//                    + " 3 dimensional Vector. The important part is x, y, z, however, the magnitude is provided"
+//                    + " for you as a convenience. (It should equal sqrt(add(exp(x, 2), exp(y, 2), exp(z, 2))))";
 //        }
 //
 //        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+//            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 //        }
 //
 //        public boolean isRestricted() {
@@ -2496,7 +2496,18 @@ public class PlayerManagement {
 //        }
 //
 //        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-//            throw new UnsupportedOperationException("Not supported yet.");
+//            MCPlayer p = environment.GetPlayer();
+//            if(args.length == 1){
+//                p = Static.GetPlayer(args[0]);
+//            }
+//            CArray vector = new CArray(line_num, f);
+//            vector.forceAssociativeMode();
+//            MCPlayer.Velocity velocity = p.getVelocity();
+//            vector.set("magnitude", new CDouble(velocity.magnitute, line_num, f));
+//            vector.set("x", new CDouble(velocity.x, line_num, f));
+//            vector.set("y", new CDouble(velocity.y, line_num, f));
+//            vector.set("z", new CDouble(velocity.z, line_num, f));
+//            return vector;
 //        }
 //
 //        public String since() {
@@ -2504,7 +2515,82 @@ public class PlayerManagement {
 //        }
 //        
 //    }
-//    
+    
+    
+    
+    @api public static class phas_item implements Function{
+
+        public String getName() {
+            return "phas_item";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "int {[player], itemId} Returns the quantity of the specified item"
+                    + " that the player is carrying (including armor slots)."
+                    + " This counts across all slots in"
+                    + " inventory. Recall that 0 is false, and anything else is true,"
+                    + " so this can be used to get the total, or just see if they have"
+                    + " the item. itemId can be either a plain number, or a 0:0 number,"
+                    + " indicating a data value.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException,
+                ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            String item;
+            if(args.length == 1){
+                item = args[0].val();
+            } else {
+                p = Static.GetPlayer(args[0]);
+                item = args[1].val();
+            }
+            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, line_num, f);
+            MCInventory inv = p.getInventory();
+            int total = 0;
+            for(int i = 0; i < 36; i++){
+                MCItemStack iis = inv.getItem(i);
+                total += total(is, iis);
+            }
+            total += total(is, inv.getBoots());
+            total += total(is, inv.getLeggings());
+            total += total(is, inv.getChestplate());
+            total += total(is, inv.getHelmet());
+            return new CInt(total, line_num, f);
+        }
+        
+        private int total(MCItemStack is, MCItemStack iis){
+            if(iis.getTypeId() == is.getTypeId() && iis.getData().getData() == is.getData().getData()){
+                return iis.getAmount();
+            }         
+            return 0;
+        }
+
+        public String since() {
+            return "3.3.0";
+        }
+        
+    }
+    
 //    @api public static class pitem_slot implements Function{
 //
 //        public String getName() {

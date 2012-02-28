@@ -23,7 +23,6 @@ import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.potion.PotionEffectType;
 import org.bukkit.util.BlockIterator;
 
 /**
@@ -364,6 +363,11 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer, M
 
     public MCDamageCause getLastDamageCause() {
         return MCDamageCause.valueOf(p.getLastDamageCause().getCause().name());
+    }
+    
+    public Velocity getVelocity(){
+        org.bukkit.util.Vector vec = p.getVelocity();
+        return new Velocity(vec.length(), vec.getX(), vec.getY(), vec.getZ());
     }
     
     

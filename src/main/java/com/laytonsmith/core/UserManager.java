@@ -55,7 +55,7 @@ public class UserManager {
         try{
             MScriptCompiler.preprocess(MScriptCompiler.lex(alias, new File("User Alias")), new Env()).get(0).compile();
         } catch(IndexOutOfBoundsException e){
-            throw new ConfigCompileException("Improperly formatted alias");
+            throw new ConfigCompileException("Improperly formatted alias", 0, new File("User Alias"));
         }
         Persistance persist = Static.getPersistance();
         List<Map.Entry<String, Object>> list = persist.getNamespaceValues(new String[]{"user", name, "aliases"});

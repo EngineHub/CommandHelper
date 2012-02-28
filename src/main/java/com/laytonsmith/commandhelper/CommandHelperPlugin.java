@@ -81,7 +81,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     /**
      * Interpreter listener
      */
-    final CommandHelperInterpreterListener interpreterListener = 
+    public final CommandHelperInterpreterListener interpreterListener = 
             new CommandHelperInterpreterListener();
     /**
      * Server Command Listener, for console commands

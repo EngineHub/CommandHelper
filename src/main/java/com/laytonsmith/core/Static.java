@@ -561,6 +561,17 @@ public class Static {
         return false;
     }
 
+    /**
+     * Returns an item stack from the given item notation. Defaulting to the specified qty, this
+     * will throw an exception if the notation is invalid.
+     * @param functionName
+     * @param notation
+     * @param qty
+     * @param line_num
+     * @param f
+     * @throws ConfigRuntimeException FormatException if the notation is invalid.
+     * @return 
+     */
     public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, int line_num, File f) {
         int type = 0;
         byte data = 0;

@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
 import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
@@ -446,6 +447,11 @@ public class PlayerEvents {
         
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerChatEvent) {
+                //As a very special case, if this player is currently in interpreter mode, we do not want to
+                //intercept their chat event
+                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerChatEvent)e).getPlayer())){
+                    throw new PrefilterNonMatchException();
+                }
                 Prefilters.match(prefilter, "player", ((MCPlayerChatEvent)e).getPlayer().getName(), PrefilterType.MACRO);
                 return true;
             }

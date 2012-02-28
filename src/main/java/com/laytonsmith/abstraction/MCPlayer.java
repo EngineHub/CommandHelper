@@ -71,4 +71,21 @@ public interface MCPlayer extends MCCommandSender, MCOfflinePlayer{
     
     public boolean canSee(MCPlayer p);
     public void setVanished(boolean set, MCPlayer to);
+    
+    public Velocity getVelocity();
+    
+    
+    
+    public static class Velocity{
+        public double magnitute;
+        public double x;
+        public double y;
+        public double z;
+        public Velocity(double magnitute, double x, double y, double z){
+            this.magnitute = magnitute;
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
+    }
 }
