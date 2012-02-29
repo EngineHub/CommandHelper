@@ -450,7 +450,7 @@ public class Sandbox {
                 other = Static.GetPlayer(args[2]);
             }
             
-            me.setVanished(isVanished, other);
+            me.setVanished(other, isVanished);
             
             return new CVoid(line_num, f);
         }
