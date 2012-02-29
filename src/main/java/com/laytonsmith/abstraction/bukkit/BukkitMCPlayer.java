@@ -342,7 +342,7 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer, M
     }
 
     public void setVanished(boolean set, MCPlayer to) {
-        if(set){
+        if(!set){
             p.showPlayer(((BukkitMCPlayer)to)._Player());
         } else {
             p.hidePlayer(((BukkitMCPlayer)to)._Player());
