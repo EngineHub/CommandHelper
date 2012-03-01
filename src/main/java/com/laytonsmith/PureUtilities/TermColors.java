@@ -2,6 +2,17 @@
 package com.laytonsmith.PureUtilities;
 
 import java.awt.Color;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -14,7 +25,6 @@ public class TermColors {
         UNIX
     }
     public static final SYS SYSTEM;
-
     static {
         String os = System.getProperty("os.name");
         if (os.contains("Windows")) {
@@ -23,6 +33,7 @@ public class TermColors {
             SYSTEM = SYS.UNIX;
         }
     }
+
     
     public static void cls(){
         if(SYSTEM.equals(SYS.WINDOWS)){
@@ -36,56 +47,106 @@ public class TermColors {
         }
     }
     
+    @Retention(RetentionPolicy.RUNTIME)
+    @Target(ElementType.FIELD)
+    private @interface color{}
+    
     /*
      * Standard foreground colors 
      */
-    public static final String RED = color(Color.RED).toString();
-    public static final String GREEN = color(Color.GREEN).toString();
-    public static final String BLUE = color(Color.BLUE).toString();
-    public static final String YELLOW = color(Color.YELLOW).toString();
-    public static final String CYAN = color(Color.CYAN).toString();
-    public static final String MAGENTA = color(Color.MAGENTA).toString();
-    public static final String BLACK = color(Color.BLACK).toString();
-    public static final String WHITE = color(Color.WHITE).toString();
+    @color public static String RED = color(Color.RED).toString();
+    @color public static String GREEN = color(Color.GREEN).toString();
+    @color public static String BLUE = color(Color.BLUE).toString();
+    @color public static String YELLOW = color(Color.YELLOW).toString();
+    @color public static String CYAN = color(Color.CYAN).toString();
+    @color public static String MAGENTA = color(Color.MAGENTA).toString();
+    @color public static String BLACK = color(Color.BLACK).toString();
+    @color public static String WHITE = color(Color.WHITE).toString();
     
     /*
      * Bright foreground colors
      */
-    public static final String BRIGHT_RED = color(Color.RED, true, true);
-    public static final String BRIGHT_GREEN = color(Color.GREEN, true, true);
-    public static final String BRIGHT_BLUE = color(Color.BLUE, true, true);
-    public static final String BRIGHT_YELLOW = color(Color.YELLOW, true, true);
-    public static final String BRIGHT_CYAN = color(Color.CYAN, true, true);
-    public static final String BRIGHT_MAGENTA = color(Color.MAGENTA, true, true);
-    public static final String BRIGHT_BLACK = color(Color.BLACK, true, true);
-    public static final String BRIGHT_WHITE = color(Color.WHITE, true, true);
+    @color public static String BRIGHT_RED = color(Color.RED, true, true);
+    @color public static String BRIGHT_GREEN = color(Color.GREEN, true, true);
+    @color public static String BRIGHT_BLUE = color(Color.BLUE, true, true);
+    @color public static String BRIGHT_YELLOW = color(Color.YELLOW, true, true);
+    @color public static String BRIGHT_CYAN = color(Color.CYAN, true, true);
+    @color public static String BRIGHT_MAGENTA = color(Color.MAGENTA, true, true);
+    @color public static String BRIGHT_BLACK = color(Color.BLACK, true, true);
+    @color public static String BRIGHT_WHITE = color(Color.WHITE, true, true);
     
     /*
      * Standard background colors 
      */
-    public static final String BG_RED = color(Color.RED, false, false).toString();
-    public static final String BG_GREEN = color(Color.GREEN, false, false).toString();
-    public static final String BG_BLUE = color(Color.BLUE, false, false).toString();
-    public static final String BG_YELLOW = color(Color.YELLOW, false, false).toString();
-    public static final String BG_CYAN = color(Color.CYAN, false, false).toString();
-    public static final String BG_MAGENTA = color(Color.MAGENTA, false, false).toString();
-    public static final String BG_BLACK = color(Color.BLACK, false, false).toString();
-    public static final String BG_WHITE = color(Color.WHITE, false, false).toString();
+    @color public static String BG_RED = color(Color.RED, false, false).toString();
+    @color public static String BG_GREEN = color(Color.GREEN, false, false).toString();
+    @color public static String BG_BLUE = color(Color.BLUE, false, false).toString();
+    @color public static String BG_YELLOW = color(Color.YELLOW, false, false).toString();
+    @color public static String BG_CYAN = color(Color.CYAN, false, false).toString();
+    @color public static String BG_MAGENTA = color(Color.MAGENTA, false, false).toString();
+    @color public static String BG_BLACK = color(Color.BLACK, false, false).toString();
+    @color public static String BG_WHITE = color(Color.WHITE, false, false).toString();
     
     /*
      * Bright background colors
      */
-    public static final String BG_BRIGHT_RED = color(Color.RED, true, false);
-    public static final String BG_BRIGHT_GREEN = color(Color.GREEN, true, false);
-    public static final String BG_BRIGHT_BLUE = color(Color.BLUE, true, false);
-    public static final String BG_BRIGHT_YELLOW = color(Color.YELLOW, true, false);
-    public static final String BG_BRIGHT_CYAN = color(Color.CYAN, true, false);
-    public static final String BG_BRIGHT_MAGENTA = color(Color.MAGENTA, true, false);
-    public static final String BG_BRIGHT_BLACK = color(Color.BLACK, true, false);
-    public static final String BG_BRIGHT_WHITE = color(Color.WHITE, true, false);
+    @color public static String BG_BRIGHT_RED = color(Color.RED, true, false);
+    @color public static String BG_BRIGHT_GREEN = color(Color.GREEN, true, false);
+    @color public static String BG_BRIGHT_BLUE = color(Color.BLUE, true, false);
+    @color public static String BG_BRIGHT_YELLOW = color(Color.YELLOW, true, false);
+    @color public static String BG_BRIGHT_CYAN = color(Color.CYAN, true, false);
+    @color public static String BG_BRIGHT_MAGENTA = color(Color.MAGENTA, true, false);
+    @color public static String BG_BRIGHT_BLACK = color(Color.BLACK, true, false);
+    @color public static String BG_BRIGHT_WHITE = color(Color.WHITE, true, false);
     
-    public static final String BLINKON = special("blinkon");
-    public static final String BLINKOFF = special("blinkoff");
+    @color public static String BLINKON = special("blinkon");
+    @color public static String BLINKOFF = special("blinkoff");
+    
+    private static Map<String, String> defaults = new HashMap<String, String>();
+    private static List<Field> fields = null;
+    
+    private static List<Field> fields(){
+        if(fields == null){
+            fields = new ArrayList<Field>();
+            for(Field f : TermColors.class.getFields()){
+                if(f.getAnnotation(color.class) != null){
+                    fields.add(f);
+                    try {
+                        defaults.put(f.getName(), (String)f.get(null));
+                    } catch (IllegalArgumentException ex) {
+                        Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+                    } catch (IllegalAccessException ex) {
+                        Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            }            
+        }
+        return fields;
+    }
+    
+    public static void EnableColors(){
+        for(Field f : fields()){
+            try {
+                f.set(null, defaults.get(f.getName()));
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    public static void DisableColors(){
+        for(Field f : fields()){
+            try {
+                f.set(null, "");
+            } catch (IllegalArgumentException ex) {
+                Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+            } catch (IllegalAccessException ex) {
+                Logger.getLogger(TermColors.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
     
     private static String special(String type){
         if(SYSTEM.equals(SYS.UNIX)){
@@ -120,10 +181,7 @@ public class TermColors {
      * @param c
      * @return 
      */
-    public static String color(Color c, boolean bright, boolean foreground) {
-        if (SYSTEM.equals(SYS.WINDOWS)) {
-            return "";
-        }
+    private static String color(Color c, boolean bright, boolean foreground) {
 
         int color = 37;
         if (c.equals(Color.RED)) {

@@ -63,7 +63,7 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldedit</artifactId>
-            <version>5.2</version>
+            <version>5.3-SNAPSHOT</version>
         </dependency>
     
         <!-- Bukkit -->
@@ -120,12 +120,12 @@
         </dependency>
         
         <!-- Used for IRC hooks -->
-        <dependency>
+        <!--<dependency> NOT READY YET
             <groupId>org.jibble</groupId>
             <artifactId>pircbot</artifactId>
             <version>1.5.0</version>
             <scope>compile</scope>
-        </dependency>
+        </dependency>-->
         
         <!-- Profiling library -->
         <dependency>

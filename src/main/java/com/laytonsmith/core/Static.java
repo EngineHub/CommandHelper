@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.Preferences.Type;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.PureUtilities.TermColors.SYS;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.PureUtilities.rParser;
 import com.laytonsmith.abstraction.*;
@@ -289,6 +290,7 @@ public class Static {
             a.add(new Preference("allow-profiling", "false", Type.BOOLEAN, "If set to false, the Profiling class of functions will do nothing."));
             a.add(new Preference("profiling-file", "logs/profiling/%Y-%M-%D-profiling.log", Type.STRING, "The path to the profiling logs. These logs are perf4j formatted logs. Consult the documentation for more information."));
             a.add(new Preference("show-splash-screen", "true", Type.BOOLEAN, "Whether or not to show the splash screen at server startup"));
+            a.add(new Preference("use-colors", (TermColors.SYSTEM==SYS.WINDOWS?"false":"true"), Type.BOOLEAN, "Whether or not to use console colors. If this is a Windows machine, defaults to false, however, it can be toggled manually, and will then respect your setting."));
             com.laytonsmith.commandhelper.CommandHelperPlugin.prefs = new Preferences("CommandHelper", getLogger(), a);
         }
         return com.laytonsmith.commandhelper.CommandHelperPlugin.prefs;

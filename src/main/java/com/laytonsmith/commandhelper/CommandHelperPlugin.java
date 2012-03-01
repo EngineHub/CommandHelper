@@ -99,7 +99,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     /**
      * Called on plugin enable.
      */
-    public void onEnable() {
+    public void onEnable() {       
         self = this;
         myServer = StaticLayer.GetServer();
         persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), this);
@@ -114,6 +114,11 @@ public class CommandHelperPlugin extends JavaPlugin {
         try {
             File prefsFile = new File("plugins/CommandHelper/preferences.txt");
             Static.getPreferences().init(prefsFile);
+            if((Boolean)Static.getPreferences().getPreference("use-colors")){
+                TermColors.EnableColors();
+            } else {
+                TermColors.DisableColors();
+            }
             String script_name = (String) Static.getPreferences().getPreference("script-name");
             String main_file = (String) Static.getPreferences().getPreference("main-file");
             boolean showSplashScreen = ((Boolean)Static.getPreferences().getPreference("show-splash-screen")).booleanValue();
