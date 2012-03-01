@@ -326,7 +326,7 @@ public class PlayerEvents {
                     + "{xp|drops An array of item objects, or null. The items to be dropped"
                     + " are replaced with the given items, not added to|death_message the death message,"
                     + " or null to remove it entirely}"
-                    + "{player| drops}";
+                    + "{player | drops | death_message}";
         }
         
         public Driver driver() {
@@ -379,11 +379,13 @@ public class PlayerEvents {
             //actual object that will trigger it
             String splayer = manual.get("player").val();
             List<MCItemStack> list = new ArrayList<MCItemStack>();
+            String deathMessage = manual.get("death_message").val();
             CArray clist = (CArray)manual.get("drops");
             for(String key : clist.keySet()){
                 list.add(ObjectGenerator.GetGenerator().item(clist.get(key), clist.getLineNum(), clist.getFile()));
-            }
-            MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer, 0, null), list, 0);
+            }            
+            MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer, 0, null), list,
+                    0, deathMessage);
             return e;
         }
 

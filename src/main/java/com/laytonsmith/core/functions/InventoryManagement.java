@@ -223,21 +223,24 @@ public class InventoryManagement {
                             throw e;
                         }
                     }
-                    MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), line_num, f);
                     if(index == -1){
+                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(""), line_num, f);
                         m.setItemInHand(is);
-                    } else if(index >= 0 && index <= 35){
-                        m.getInventory().setItem(index, is);
-                    } else if(index == 100){
-                        m.getInventory().setBoots(is);
-                    } else if(index == 101){
-                        m.getInventory().setLeggings(is);
-                    } else if(index == 102){
-                        m.getInventory().setChestplate(is);
-                    } else if(index == 103){
-                        m.getInventory().setHelmet(is);
                     } else {
-                        ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_pinv(), so ignoring.");
+                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), line_num, f);
+                        if(index >= 0 && index <= 35){
+                            m.getInventory().setItem(index, is);
+                        } else if(index == 100){
+                            m.getInventory().setBoots(is);
+                        } else if(index == 101){
+                            m.getInventory().setLeggings(is);
+                        } else if(index == 102){
+                            m.getInventory().setChestplate(is);
+                        } else if(index == 103){
+                            m.getInventory().setHelmet(is);
+                        } else {
+                            ConfigRuntimeException.DoWarning("Out of range value (" + index + ") found in array passed to set_pinv(), so ignoring.");
+                        }
                     }
                 } catch(NumberFormatException e){
                     ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_pinv(), but \"" + key + "\" was found. Ignoring.");

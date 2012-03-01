@@ -195,10 +195,10 @@ public class BukkitPlayerEvents {
             return ede;
         }
         
-        public static BukkitMCPlayerDeathEvent _instantiate(MCEntity entity, List<MCItemStack> listOfDrops,
-                int droppedExp){
+        public static BukkitMCPlayerDeathEvent _instantiate(MCPlayer entity, List<MCItemStack> listOfDrops,
+                int droppedExp, String deathMessage){
             List<ItemStack> drops = new ArrayList<ItemStack>();
-            return new BukkitMCPlayerDeathEvent(new EntityDeathEvent(((BukkitMCEntity)entity)._Entity(), drops, droppedExp));
+            return new BukkitMCPlayerDeathEvent(new PlayerDeathEvent(((BukkitMCPlayer)entity)._Player(), drops, droppedExp, deathMessage));
         }
 
         public List<MCItemStack> getDrops() {
