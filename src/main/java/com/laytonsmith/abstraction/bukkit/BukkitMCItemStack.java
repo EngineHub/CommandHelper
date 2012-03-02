@@ -47,14 +47,23 @@ public class BukkitMCItemStack implements MCItemStack{
     }
 
     public void setDurability(short data) {
+        if(is == null){
+            return;
+        }
         is.setDurability(data);
     }
 
     public void addEnchantment(MCEnchantment e, int level) {        
+        if(is == null){
+            return;
+        }
         is.addEnchantment(((BukkitMCEnchantment)e).__Enchantment(), level);
     }
     
     public void addUnsafeEnchantment(MCEnchantment e, int level){
+        if(is == null){
+            return;
+        }
         is.addUnsafeEnchantment(((BukkitMCEnchantment)e).__Enchantment(), level);
     }
     
@@ -70,18 +79,30 @@ public class BukkitMCItemStack implements MCItemStack{
     }
     
     public void removeEnchantment(MCEnchantment e){
+        if(is == null){
+            return;
+        }
         is.removeEnchantment(((BukkitMCEnchantment)e).__Enchantment());
     }
 
     public MCMaterial getType() {
+        if(is == null){
+            return null;
+        }
         return new BukkitMCMaterial(is.getType());
     }
 
     public void setTypeId(int type) {
+        if(is == null){
+            return;
+        }
         is.setTypeId(type);
     }
 
     public int getAmount() {
+        if(is == null){
+            return 0;
+        }
         return is.getAmount();
     }
 
@@ -90,10 +111,16 @@ public class BukkitMCItemStack implements MCItemStack{
     }
 
     public void setData(int data) {
+        if(is == null){
+            return;
+        }
         is.setData(new MaterialData(is.getTypeId(), (byte)data));
     }
 
     public int maxStackSize() {
+        if(is == null){
+            return 0;
+        }
         return is.getMaxStackSize();
     }
 }
