@@ -74,7 +74,7 @@ public class BukkitMCItemStack implements MCItemStack{
         Map<MCEnchantment, Integer> map = new HashMap<MCEnchantment, Integer>();
         for(Map.Entry<Enchantment, Integer> entry : is.getEnchantments().entrySet()){
             map.put(new BukkitMCEnchantment(entry.getKey()), entry.getValue());
-        }
+        } 
         return map;
     }
     
