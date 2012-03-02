@@ -25,7 +25,7 @@
     <scm>
         <connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
         <url>https://github.com/sk89q/commandhelper</url>
-        <developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
+        <developerConnection>scm:git:ssh://git@github.com:sk89q/commandhelper.git</developerConnection>
     </scm>
 
     <repositories>
