@@ -215,13 +215,22 @@ public class BukkitMCWorld implements MCWorld {
                 Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
                 s.setPassenger(sk);
             }
-            if (e instanceof Sheep) {
-                Sheep s = (Sheep) e;
+            if (((BukkitMCEntity)e)._Entity() instanceof Sheep) {
+                Sheep s = (Sheep) ((BukkitMCEntity)e)._Entity();
                 try {
                     s.setColor(DyeColor.valueOf(subClass.toUpperCase()));
                 } catch (IllegalArgumentException ex) {
                     throw new ConfigRuntimeException(subClass.toUpperCase() + " is not a valid color",
                             ExceptionType.FormatException, line_num, f);
+                }
+            }
+            if(((BukkitMCEntity)e)._Entity() instanceof Ocelot){
+                Ocelot o = (Ocelot)((BukkitMCEntity)e)._Entity();
+                try{
+                    o.setCatType(Ocelot.Type.valueOf(subClass.toUpperCase()));
+                } catch (IllegalArgumentException ex){
+                    throw new ConfigRuntimeException(subClass.toUpperCase() + " is not a ocelot type",
+                            ExceptionType.FormatException, line_num, f);                    
                 }
             }
             ids.push(new CInt(e.getEntityId(), line_num, f));

@@ -329,11 +329,10 @@ public class Minecraft {
         public String docs() {
             return "array {mobType, [qty], [location]} (Currently only works with Bukkit) Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
                     + " to the location of the player. mobType can be one of: BLAZE, CAVESPIDER, CHICKEN, COW, CREEPER, ENDERDRAGON, ENDERMAN, GHAST,"
-                    + " MAGMACUBE, MOOSHROOM, PIG, PIGZOMBIE, SHEEP, SILVERFISH, SKELETON, SLIME, SPIDER, SPIDERJOCKEY, SQUID, VILLAGER, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
+                    + " IRONGOLEM, MAGMACUBE, MOOSHROOM, OCELOT, PIG, PIGZOMBIE, SHEEP, SILVERFISH, SKELETON, SLIME, SPIDER, SPIDERJOCKEY, SQUID, VILLAGER, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
-                    + " specified. An array of the entity IDs spawned is returned."
-                    + ""
+                    + " specified. An array of the entity IDs spawned is returned. OCELOT can also take a subtype, like sheep, and may be one of: WILD_OCELOT, BLACK_CAT, RED_CAT, or SIAMESE_CAT"
                     + " <p><small>GIANTs can also be spawned, if you are running craftbukkit. This is an experimental feature. Only one GIANT can be spawned at a time</small></p>";
         }
 
@@ -364,10 +363,10 @@ public class Minecraft {
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mob = args[0].val();
-            String sheepColor = "WHITE";
-            if (mob.toUpperCase().startsWith("SHEEP:")) {
-                sheepColor = mob.substring(6);
-                mob = "SHEEP";
+            String secondary = "";
+            if (mob.contains(":")) {
+                secondary = mob.substring(mob.indexOf(":") + 1);
+                mob = mob.substring(0, mob.indexOf(":"));
             }
             int qty = 1;
             if (args.length > 1) {
@@ -391,7 +390,7 @@ public class Minecraft {
                 }
             }
             if(l.getWorld() != null){
-                return l.getWorld().spawnMob(mob, sheepColor, qty, l, line_num, f);
+                return l.getWorld().spawnMob(mob, secondary, qty, l, line_num, f);
             } else {
                 throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
             }
