@@ -109,7 +109,8 @@ public class BukkitMCWorld implements MCWorld {
 
         CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME,
         SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH, VILLAGER,
-        BLAZE, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY, GIANT, SNOWGOLEM
+        BLAZE, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY, GIANT, SNOWGOLEM,
+        OCELOT, CAT, IRONGOLEM;
     }
 
     public Construct spawnMob(String name, String subClass, int qty, MCLocation l, int line_num, File f) {
@@ -195,6 +196,12 @@ public class BukkitMCWorld implements MCWorld {
                     return new CVoid(line_num, f);
                 case SNOWGOLEM:
                     mobType = Snowman.class;
+                    break;
+                case OCELOT:
+                    mobType = Ocelot.class;
+                    break;
+                case IRONGOLEM:
+                    mobType = IronGolem.class;
                     break;
             }
         } catch (IllegalArgumentException e) {

@@ -156,7 +156,7 @@ public class DocGen {
                             if (i != 0) {
                                 thrown.append("<br />\n");
                             }
-                            thrown.append("[[Exceptions#").append(t.toString()).append("|").append(t.toString()).append("]]");
+                            thrown.append("[[CommandHelper/Exceptions#").append(t.toString()).append("|").append(t.toString()).append("]]");
                         }
                     }
                 }

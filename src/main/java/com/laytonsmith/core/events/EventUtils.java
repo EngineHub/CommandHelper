@@ -132,8 +132,8 @@ public class EventUtils {
                     driver.manualTrigger(driver.convert(object));
                 }
             } else {
-                //TODO: They have fired a non existant event, which is currently silently
-                //ignored. This should fire off a warning instead
+                //They have fired a non existant event
+                ConfigRuntimeException.DoWarning(new ConfigRuntimeException("Non existant event is being triggered: " + eventName, object.getLineNum(), object.getFile()));
             }
         }
     }
