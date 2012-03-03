@@ -327,13 +327,13 @@ public class Minecraft {
         }
 
         public String docs() {
-            return "array {mobType, [qty], [location]} (Currently only works with Bukkit) Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
+            return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
                     + " to the location of the player. mobType can be one of: BLAZE, CAVESPIDER, CHICKEN, COW, CREEPER, ENDERDRAGON, ENDERMAN, GHAST,"
                     + " IRONGOLEM, MAGMACUBE, MOOSHROOM, OCELOT, PIG, PIGZOMBIE, SHEEP, SILVERFISH, SKELETON, SLIME, SPIDER, SPIDERJOCKEY, SQUID, VILLAGER, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
                     + " specified. An array of the entity IDs spawned is returned. OCELOT can also take a subtype, like sheep, and may be one of: WILD_OCELOT, BLACK_CAT, RED_CAT, or SIAMESE_CAT"
-                    + " <p><small>GIANTs can also be spawned, if you are running craftbukkit. This is an experimental feature. Only one GIANT can be spawned at a time</small></p>";
+                    + " <small>GIANTs can also be spawned, if you are running craftbukkit. This is an experimental feature. Only one GIANT can be spawned at a time</small>";
         }
 
         public ExceptionType[] thrown() {
@@ -408,7 +408,7 @@ public class Minecraft {
         }
 
         public String docs() {
-            return "void {[player], entityID} Tames the entity specified to the player. Currently only wolves are supported. Offline players"
+            return "void {[player], entityID} Tames the entity specified to the player. Wolves and ocelots are supported. Offline players"
                     + " are supported, but this means that partial matches are NOT supported. You must type the players name exactly. Setting"
                     + " the player to null will untame the mob. If the entity doesn't exist, nothing happens.";
         }

@@ -217,6 +217,9 @@ public class BukkitMCWorld implements MCWorld {
             }
             if (((BukkitMCEntity)e)._Entity() instanceof Sheep) {
                 Sheep s = (Sheep) ((BukkitMCEntity)e)._Entity();
+                if("".equals(subClass)){
+                    subClass = DyeColor.WHITE.name();
+                }
                 try {
                     s.setColor(DyeColor.valueOf(subClass.toUpperCase()));
                 } catch (IllegalArgumentException ex) {
@@ -226,6 +229,9 @@ public class BukkitMCWorld implements MCWorld {
             }
             if(((BukkitMCEntity)e)._Entity() instanceof Ocelot){
                 Ocelot o = (Ocelot)((BukkitMCEntity)e)._Entity();
+                if("".equals(subClass)){
+                    subClass = Ocelot.Type.WILD_OCELOT.name();
+                }
                 try{
                     o.setCatType(Ocelot.Type.valueOf(subClass.toUpperCase()));
                 } catch (IllegalArgumentException ex){
