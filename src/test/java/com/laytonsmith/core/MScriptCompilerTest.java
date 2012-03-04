@@ -372,6 +372,15 @@ public class MScriptCompilerTest {
         verify(fakePlayer).sendMessage("hello");
         assertTrue(bool.get());
     }
+    
+    @Test
+    public void testExecute21() throws ConfigCompileException{
+        String script = "#*\n"
+                + "msg('Not a comment')\n"
+                + "#*#";
+        SRun(script, fakePlayer);
+        verify(fakePlayer).sendMessage("Not a comment");
+    }
 
     @Test
     public void testCompile1() {

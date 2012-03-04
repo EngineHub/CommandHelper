@@ -43,7 +43,7 @@ public class MScriptCompiler {
 //                    && c == '#') {
             if((c == '#' || (c == '/' && (c2 == '*'))) && !in_comment && !state_in_quote){
                 in_comment = true;
-                if(c2 == '*'){
+                if(c == '/' && c2 == '*'){
                     comment_is_block = true;
                     i++;
                 }
