@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.MCBiomeType;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.core.constructs.Construct;
 import java.io.File;
@@ -41,4 +42,8 @@ public interface MCWorld {
     public long getTime();
     
     public Construct spawnMob(String name, String subClass, int qty, MCLocation location, int line_num, File file);
+
+    public MCBiomeType getBiome(int x, int z);
+    
+    public void setBiome(int x, int z, MCBiomeType type);
 }

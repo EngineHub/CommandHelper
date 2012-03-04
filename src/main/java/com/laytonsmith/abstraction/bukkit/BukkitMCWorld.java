@@ -105,6 +105,14 @@ public class BukkitMCWorld implements MCWorld {
         return w.getTime();
     }
 
+    public MCBiomeType getBiome(int x, int z) {
+        return MCBiomeType.valueOf(w.getBiome(x, z).name());
+    }
+
+    public void setBiome(int x, int z, MCBiomeType type) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
     private enum MOBS {
 
         CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME,

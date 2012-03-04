@@ -4,9 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
@@ -18,6 +16,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.sk89q.util.StringUtil;
 import java.io.File;
 import net.minecraft.server.Packet0KeepAlive;
 import org.bukkit.craftbukkit.CraftServer;
@@ -424,11 +423,11 @@ public class Environment {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{1, 2, 3};
         }
 
         public String docs() {
-            return "void {locationObject} Mostly simulates a block break at a location. (Does not trigger an event)";
+            return "void {x, z, [world] | locationObject} Mostly simulates a block break at a location. (Does not trigger an event)";
         }
 
         public ExceptionType[] thrown() {
@@ -464,8 +463,135 @@ public class Environment {
             l.getBlock().setTypeId(0);
             CraftServer cs = (CraftServer)((BukkitMCServer)Static.getServer()).__Server();
             cs.getHandle().a(new Packet0KeepAlive(), 0);
-            return new CVoid(line_num, f);
-            
+            return new CVoid(line_num, f);            
         }
+    }
+    
+    public static class set_biome implements Function{
+
+        public String getName() {
+            return "set_biome";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3, 4};
+        }
+
+        public String docs() {
+            return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
+                    + " The location array's y value is ignored."
+                    + " Biome may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ",", 0);
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            int x;
+            int z;
+            MCWorld w;
+            if(args.length == 2){
+                MCWorld defaultWorld = environment.GetPlayer()==null?null:environment.GetPlayer().getWorld();
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, line_num, f);
+                x = l.getBlockX();
+                z = l.getBlockZ();
+                w = l.getWorld();
+            } else {
+                x = (int) Static.getInt(args[0]);
+                z = (int) Static.getInt(args[1]);
+                if(args.length == 3){
+                    w = environment.GetPlayer().getWorld();
+                } else {
+                    w = Static.getServer().getWorld(args[2].val());
+                }
+            }
+            MCBiomeType bt;
+            try{               
+                bt = MCBiomeType.valueOf(args[args.length - 1].val());
+            } catch(IllegalArgumentException e){
+                throw new ConfigRuntimeException("The biome type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, line_num, f);
+            }
+            w.setBiome(x, z, bt);
+            return new CVoid(line_num, f);
+        }
+
+        public String since() {
+            return "3.3.1";
+        }
+        
+    }
+    
+    @api public static class get_biome implements Function{
+
+        public String getName() {
+            return "get_biome";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
+                    + " y value is ignored. The value returned"
+                    + " may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ",", 0);
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            int x;
+            int z;
+            MCWorld w;
+            if(args.length == 1){
+                MCWorld defaultWorld = environment.GetPlayer()==null?null:environment.GetPlayer().getWorld();
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, line_num, f);
+                x = l.getBlockX();
+                z = l.getBlockZ();
+                w = l.getWorld();
+            } else {
+                x = (int) Static.getInt(args[0]);
+                z = (int) Static.getInt(args[1]);
+                if(args.length == 2){
+                    w = environment.GetPlayer().getWorld();
+                } else {
+                    w = Static.getServer().getWorld(args[2].val());
+                }
+            }
+            MCBiomeType bt = w.getBiome(x, z);
+            return new CString(bt.name(), line_num, f);
+        }
+
+        public String since() {
+            return "3.3.1";
+        }
+        
     }
 }
