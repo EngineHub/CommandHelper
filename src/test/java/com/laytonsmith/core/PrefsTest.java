@@ -1,0 +1,63 @@
+package com.laytonsmith.core;
+
+import com.laytonsmith.PureUtilities.Preferences;
+import com.laytonsmith.PureUtilities.Preferences.Type;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.Map;
+import org.junit.Test;
+import org.junit.AfterClass;
+import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.BeforeClass;
+import org.junit.Test;
+import org.mockito.Spy;
+
+/**
+ *
+ * @author layton
+ */
+public class PrefsTest {
+    
+    @Test public void testPrefs() throws Exception{
+        Map<String, Preferences.Preference> prefs;
+        Prefs.init();
+        Field f = Preferences.class.getDeclaredField("prefs");
+        f.setAccessible(true);
+        prefs = (Map<String, Preferences.Preference>)f.get(Static.getPreferences());
+        assertNotNull(prefs);
+        for(String name : prefs.keySet()){
+            String [] parts = name.split("-");
+            StringBuilder b = new StringBuilder();
+            for(String part : parts){
+                if(part.length() > 1){
+                    b.append(Character.toUpperCase(part.charAt(0))).append(part.substring(1));
+                } else {
+                    b.append(part.toUpperCase());
+                }
+            }
+            String functionName = b.toString();
+            Preferences.Preference p = prefs.get(name);
+            //Ok, functionName is the name of the method. Let's first make sure it exists.            
+            Method function;
+            try{
+                function = Prefs.class.getDeclaredMethod(functionName);
+            } catch(NoSuchMethodException e){
+                fail("Need method " + functionName + " to be included in Prefs.");
+                return;
+            }
+            //Now we need to make sure that it returns the correct type
+            Class returnType = function.getReturnType();
+            if(p.allowed == Type.BOOLEAN && returnType.equals(Boolean.class) ||
+               p.allowed == Type.DOUBLE && returnType.equals(Double.class) ||
+               p.allowed == Type.INT && returnType.equals(Integer.class) ||
+               p.allowed == Type.STRING && returnType.equals(String.class) ||
+               p.allowed == Type.NUMBER && returnType.equals(Double.class)){
+                //Good
+            } else {
+                fail("Incorrect return type for " + functionName);
+            }
+                        
+        }
+    }
+}
