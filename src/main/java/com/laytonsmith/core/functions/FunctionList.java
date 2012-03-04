@@ -46,46 +46,21 @@ public class FunctionList {
                 } catch (IllegalAccessException ex) {
                     Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
                 } catch(Throwable t){
-                    if(Prefs.DebugMode()){
-                        System.err.println("Something when wrong while trying to load up " + c.getSimpleName() + ":");
-                        if(t.getCause() != null){
-                            t.getCause().printStackTrace();
-                        } else {
-                            t.printStackTrace();
+                    if(t.getCause() instanceof ClassNotFoundException){
+                        if(Prefs.DebugMode()){
+                            System.err.println("Could not load " + c.getSimpleName() + "; Are you missing a dependency? (No further errors will happen, unless you try to use the function.)");
                         }
+                    } else {
+                        Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, "Something when wrong while trying to load up " + c.getSimpleName(),
+                                t.getCause()!=null?t.getCause():t);
                     }
                     //Otherwise, they'll get the error later, when they try and use the function.
                 }
             } else if(!api.ValidClasses.IsValid(c)){
-                System.out.println("Invalid class found: " + c.getName() + ". Classes tagged with @api"
+                System.err.println("Invalid class found: " + c.getName() + ". Classes tagged with @api"
                         + " must extend a valid class type.");
             }
         }
-//        for (int i = 0; i < classes.length; i++) {
-//            Annotation[] a = classes[i].getAnnotations();
-//            for (int j = 0; j < a.length; j++) {
-//                Annotation ann = a[j];
-//                if (ann.annotationType().equals(api.class)) {
-//                    Class api = classes[i];
-//                    String apiClass = (api.getEnclosingClass() != null
-//                            ? api.getEnclosingClass().getName().split("\\.")[api.getEnclosingClass().getName().split("\\.").length - 1]
-//                            : "<global>");
-//                    if (Function.class.isAssignableFrom(api)) {
-//                        try {
-//                            Function f = (Function) api.newInstance();
-//                            registerFunction(f, apiClass);
-//                            //System.out.println("Loaded " + apiClass + "." + f.getName());
-//                        } catch (InstantiationException ex) {
-//                            Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
-//                        } catch (IllegalAccessException ex) {
-//                            Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
-//                        }
-//                    } else {
-//                        System.out.println("@api functions must implement " + FunctionList.class.getPackage().getName() + ".Function! " + api.getSimpleName() + " cannot be loaded.");
-//                    }
-//                }
-//            }
-//        }
         
         if(Prefs.DebugMode()){
             System.out.println("CommandHelper: Loaded " + functions.size() + " function" + (functions.size()==1?"":"s"));
@@ -147,31 +122,6 @@ public class FunctionList {
         }
         throw new ConfigCompileException("Excpecting CFunction type", c.getLineNum(), c.getFile());
     }
-
-//    public FunctionList(User u) {
-//        this.u = u;
-//        if (functions.isEmpty()) {
-//            initFunctions();
-//        }
-//    }
-
-//    public Construct exec(String name, int line_num, Player p, Construct... args) throws ConfigCompileException, CancelCommandException {
-//        for (Function f : functions) {
-//            if (f.getName().equals(name)) {
-//                return f.exec(line_num, p, args);
-//            }
-//        }
-//        throw new ConfigCompileException("Function " + name + " is not defined");
-//    }
-//
-//    public Integer[] numArgs(String name) throws ConfigCompileException {
-//        for (Function f : functions) {
-//            if (f.getName().equals(name)) {
-//                return f.numArgs();
-//            }
-//        }
-//        throw new ConfigCompileException("Function " + name + " is not defined");
-//    }
 
     public static List<Function> getFunctionList() {
         List<Function> f = new ArrayList<Function>();
