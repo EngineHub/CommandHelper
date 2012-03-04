@@ -5,9 +5,9 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.api;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -107,7 +107,7 @@ public class EventList {
             }
         }
         
-        if((Boolean)com.laytonsmith.core.Static.getPreferences().getPreference("debug-mode")){
+        if(Prefs.DebugMode()){
             System.out.println("CommandHelper: Loaded " + total + " event" + (total==1?"":"s"));
         }
     }
@@ -139,7 +139,7 @@ public class EventList {
             e.hook();
         } catch(UnsupportedOperationException ex){}
         
-        if((Boolean)com.laytonsmith.core.Static.getPreferences().getPreference("debug-mode")){
+        if(Prefs.DebugMode()){
             System.out.println("CommandHelper: Loaded event \"" + e.getName() + "\"");
         }
     }

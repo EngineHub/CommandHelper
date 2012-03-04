@@ -14,8 +14,8 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.IncludeCache;
-import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.util.StringUtil;
+import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
@@ -89,7 +89,7 @@ public class AliasCore {
                 try {
                     if (s.match(command)) {
                         this.addPlayerReference(player);
-                        if ((Boolean) Static.getPreferences().getPreference("console-log-commands")) {
+                        if (Prefs.ConsoleLogCommands()) {
                             StringBuilder b = new StringBuilder("CH: Running original command ");
                             if (player instanceof MCPlayer) {
                                 b.append("on player ").append(((MCPlayer) player).getName());
@@ -107,7 +107,7 @@ public class AliasCore {
                                     try {
                                         if (output != null) {
                                             if (!output.trim().equals("") && output.trim().startsWith("/")) {
-                                                if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                                if (Prefs.DebugMode()) {
                                                     if (player instanceof MCPlayer) {
                                                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer) player).getName() + ": " + output.trim());
                                                     } else {
@@ -176,7 +176,7 @@ public class AliasCore {
                                     public void done(String output) {
                                         if (output != null) {
                                             if (!output.trim().equals("") && output.trim().startsWith("/")) {
-                                                if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                                                if (Prefs.DebugMode()) {
                                                     Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer)player).getName() + ": " + output.trim());
                                                 }
                                                 ((MCPlayer)player).chat(output.trim());

@@ -6,10 +6,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.GenericTreeNode;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -60,7 +57,7 @@ public class Meta {
                 //Store their current op status
                 Boolean isOp = env.GetCommandSender().isOp();
 
-                if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+                if (Prefs.DebugMode()) {
                     if (env.GetCommandSender() instanceof MCPlayer) {
                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[1].val().trim());
                     } else {
@@ -187,7 +184,7 @@ public class Meta {
                         ExceptionType.FormatException, line_num, f);
             }
             String cmd = args[0].val().substring(1);
-            if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+            if (Prefs.DebugMode()) {
                 if (env.GetCommandSender() instanceof MCPlayer) {
                     Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[0].val().trim());
                 } else {

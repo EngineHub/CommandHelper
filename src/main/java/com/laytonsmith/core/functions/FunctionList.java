@@ -5,6 +5,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
@@ -45,12 +46,15 @@ public class FunctionList {
                 } catch (IllegalAccessException ex) {
                     Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
                 } catch(Throwable t){
-                    if(t.getCause() != null){
+                    if(Prefs.DebugMode()){
                         System.err.println("Something when wrong while trying to load up " + c.getSimpleName() + ":");
-                        t.getCause().printStackTrace();
-                    } else {
-                        t.printStackTrace();
+                        if(t.getCause() != null){
+                            t.getCause().printStackTrace();
+                        } else {
+                            t.printStackTrace();
+                        }
                     }
+                    //Otherwise, they'll get the error later, when they try and use the function.
                 }
             } else if(!api.ValidClasses.IsValid(c)){
                 System.out.println("Invalid class found: " + c.getName() + ". Classes tagged with @api"
@@ -83,7 +87,7 @@ public class FunctionList {
 //            }
 //        }
         
-        if((Boolean)com.laytonsmith.core.Static.getPreferences().getPreference("debug-mode")){
+        if(Prefs.DebugMode()){
             System.out.println("CommandHelper: Loaded " + functions.size() + " function" + (functions.size()==1?"":"s"));
         }
         
@@ -119,7 +123,7 @@ public class FunctionList {
     
     public static void registerFunction(Function f, String apiClass) {
         if(!apiClass.equals("Sandbox")){
-            if((Boolean)com.laytonsmith.core.Static.getPreferences().getPreference("debug-mode")){
+            if(Prefs.DebugMode()){
                 System.out.println("CommandHelper: Loaded function \"" + f.getName() + "\"");
             }
         }

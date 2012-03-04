@@ -5,11 +5,8 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Preferences;
-import com.laytonsmith.PureUtilities.Preferences.Preference;
-import com.laytonsmith.PureUtilities.Preferences.Type;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.PureUtilities.TermColors.SYS;
 import com.laytonsmith.PureUtilities.fileutility.LineCallback;
 import com.laytonsmith.PureUtilities.rParser;
 import com.laytonsmith.abstraction.*;
@@ -270,28 +267,7 @@ public class Static {
      */
     public static Preferences getPreferences() throws NotInitializedYetException {
         if (com.laytonsmith.commandhelper.CommandHelperPlugin.prefs == null) {
-            ArrayList<Preferences.Preference> a = new ArrayList<Preferences.Preference>();
-            //a.add(new Preference("check-for-updates", "false", Type.BOOLEAN, "Whether or not to check to see if there's an update for CommandHelper"));
-            a.add(new Preference("debug-mode", "false", Type.BOOLEAN, "Whether or not to display debug information in the console"));
-            a.add(new Preference("show-warnings", "true", Type.BOOLEAN, "Whether or not to display warnings in the console, while compiling"));
-            a.add(new Preference("console-log-commands", "true", Type.BOOLEAN, "Whether or not to display the original command in the console when it is run"));
-            //a.add(new Preference("max-sleep-time", "5", Type.INT, "The maximum number of seconds a sleep function can sleep for. If <= 0, no limit is imposed. Must be an integer."));
-            a.add(new Preference("script-name", "config.txt", Type.STRING, "The path to the config file, relative to the CommandHelper plugin folder"));
-            a.add(new Preference("enable-interpreter", "false", Type.BOOLEAN, "Whether or not to enable the /interpreter command. Note that even with this enabled, a player must still have the commandhelper.interpreter permission, but"
-                    + " setting it to false prevents all players from accessing the interpreter regardless of their permissions."));
-            a.add(new Preference("base-dir", "", Type.STRING, "The base directory that scripts can read and write to. If left blank, then the default of the server directory will be used. "
-                    + "This setting affects functions like include and read."));
-            a.add(new Preference("play-dirty", "false", Type.BOOLEAN, "Makes CommandHelper play dirty and break all sorts of programming rules, so that other plugins can't interfere with the operations that you defined. Note that doing this essentially makes CommandHelper have absolute say over commands. Use this setting only if you can't get another plugin to cooperate with CH, because it is a global setting."));
-            a.add(new Preference("case-sensitive", "true", Type.BOOLEAN, "Makes command matching be case sensitive. If set to false, if your config defines /cmd, but the user runs /CMD, it will trigger the command anyways."));
-            a.add(new Preference("main-file", "main.ms", Type.STRING, "The path to the main file, relative to the CommandHelper folder"));
-            a.add(new Preference("allow-debug-logging", "false", Type.BOOLEAN, "If set to false, the Debug class of functions will do nothing."));
-            a.add(new Preference("debug-log-file", "logs/debug/%Y-%M-%D-debug.log", Type.STRING, "The path to the debug output log file. Six variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current year, month, day, hour, minute and second respectively. It is highly recommended that you use at least year, month, and day if you are for whatever reason leaving logging on, otherwise the file size would get excessively large. The path is relative to the CommandHelper directory and is not bound by the base-dir restriction."));
-            a.add(new Preference("standard-log-file", "logs/%Y-%M-%D-commandhelper.log", Type.STRING, "The path the standard log files that the log() function writes to. Six variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current year, month, day, hour, minute and second respectively. It is highly recommended that you use at least year, month, and day if you are actively logging things, otherwise the file size would get excessively large. The path is relative to the CommandHelper directory and is not bound by the base-dir restriction."));
-            a.add(new Preference("allow-profiling", "false", Type.BOOLEAN, "If set to false, the Profiling class of functions will do nothing."));
-            a.add(new Preference("profiling-file", "logs/profiling/%Y-%M-%D-profiling.log", Type.STRING, "The path to the profiling logs. These logs are perf4j formatted logs. Consult the documentation for more information."));
-            a.add(new Preference("show-splash-screen", "true", Type.BOOLEAN, "Whether or not to show the splash screen at server startup"));
-            a.add(new Preference("use-colors", (TermColors.SYSTEM==SYS.WINDOWS?"false":"true"), Type.BOOLEAN, "Whether or not to use console colors. If this is a Windows machine, defaults to false, however, it can be toggled manually, and will then respect your setting."));
-            com.laytonsmith.commandhelper.CommandHelperPlugin.prefs = new Preferences("CommandHelper", getLogger(), a);
+            Prefs.init();
         }
         return com.laytonsmith.commandhelper.CommandHelperPlugin.prefs;
     }
@@ -543,7 +519,7 @@ public class Static {
      * @return 
      */
     public static boolean CheckSecurity(String location) {
-        String pref = (String) Static.getPreferences().getPreference("base-dir");
+        String pref = Prefs.BaseDir();
         if (pref.trim().equals("")) {
             pref = ".";
         }
@@ -711,7 +687,7 @@ public class Static {
      * Sets up CommandHelper to play-dirty, if the user has specified as such
      */
     public static void PlayDirty() {
-        if ((Boolean) Static.getPreferences().getPreference("play-dirty")) {
+        if (Prefs.PlayDirty()) {
             try {
                 //Set up our "proxy"
                 BukkitDirtyRegisteredListener.Repopulate();

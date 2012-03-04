@@ -6,10 +6,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.GenericTreeNode;
-import com.laytonsmith.core.Script;
-import com.laytonsmith.core.Static;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
@@ -324,7 +321,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         }
         
         public void addHistory(String history){
-            if(((Boolean)Static.getPreferences().getPreference("debug-mode"))){
+            if(Prefs.DebugMode()){
                 this.history.add(Static.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ") + history);
             }
         }

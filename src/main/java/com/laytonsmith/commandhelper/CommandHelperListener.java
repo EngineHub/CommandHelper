@@ -88,7 +88,7 @@ public class CommandHelperListener implements Listener {
      */
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
-//        if((Boolean)Static.getPreferences().getPreference("debug-mode")){
+//        if(Prefs.DebugMode()){
 //            System.out.println("CommandHelper: (>'.')> Received event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
 //        }
         
@@ -109,7 +109,7 @@ public class CommandHelperListener implements Listener {
         
         UserManager.GetUserManager(player.getName()).setLastCommand(cmd);
 
-        if (!(Boolean) Static.getPreferences().getPreference("play-dirty")) {
+        if (!Prefs.PlayDirty()) {
             if (event.isCancelled()) {
                 return;
             }
@@ -118,7 +118,7 @@ public class CommandHelperListener implements Listener {
         try {
             if (runAlias(event.getMessage(), player)) {
                 event.setCancelled(true);
-                if((Boolean) Static.getPreferences().getPreference("play-dirty")){
+                if(Prefs.PlayDirty()){
                     //Super cancel the event
                     BukkitDirtyRegisteredListener.setCancelled(event);
                 }

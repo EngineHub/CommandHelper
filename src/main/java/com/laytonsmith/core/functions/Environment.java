@@ -4,7 +4,10 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.MCBiomeType;
+import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
@@ -480,7 +483,7 @@ public class Environment {
         public String docs() {
             return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
                     + " The location array's y value is ignored."
-                    + " Biome may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ",", 0);
+                    + " Biome may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
         }
 
         public ExceptionType[] thrown() {
@@ -547,7 +550,7 @@ public class Environment {
         public String docs() {
             return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
                     + " y value is ignored. The value returned"
-                    + " may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ",", 0);
+                    + " may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
         }
 
         public ExceptionType[] thrown() {

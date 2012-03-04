@@ -183,7 +183,7 @@ public class Exceptions {
             try{
                 that.eval(tryCode, env);
             } catch (ConfigRuntimeException e){
-                if((Boolean)Static.getPreferences().getPreference("debug-mode")){
+                if(Prefs.DebugMode()){
                     System.out.println("[CommandHelper]: Exception thrown -> " + e.getMessage() + " :: " + e.getExceptionType() + ":" + e.getFile() + ":" + e.getLineNum());
                 }
                 if(e.getExceptionType() != null  && (interest.isEmpty() || interest.contains(e.getExceptionType().toString()))){

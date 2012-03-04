@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -166,7 +167,7 @@ public class ConfigRuntimeException extends RuntimeException {
         if(e == null && (optionalMessage == null || optionalMessage.isEmpty())){
             throw new NullPointerException("Both the exception and the message cannot be empty");
         }
-        if(!checkPrefs || (Boolean)Static.getPreferences().getPreference("show-warnings")){
+        if(!checkPrefs || Prefs.ShowWarnings()){
             String exceptionMessage = "";
             if(e instanceof ConfigRuntimeException){
                 ConfigRuntimeException cre = (ConfigRuntimeException)e;

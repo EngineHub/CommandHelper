@@ -5,6 +5,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CVoid;
@@ -76,7 +77,7 @@ public class Performance {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            if(!(Boolean)Static.getPreferences().getPreference("allow-profiling")){
+            if(!Prefs.AllowProfiling()){
                 throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, line_num, f);
             }
             PERFORMANCE_LOGGING = Static.getBoolean(args[0]);

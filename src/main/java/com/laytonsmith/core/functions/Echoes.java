@@ -21,7 +21,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.util.StringUtil;
 import java.io.File;
-import java.util.Enumeration;
 import java.util.logging.Level;
 
 /**

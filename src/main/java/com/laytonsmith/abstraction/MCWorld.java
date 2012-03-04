@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.abstraction;
 
-import com.laytonsmith.abstraction.MCBiomeType;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.core.constructs.Construct;
 import java.io.File;

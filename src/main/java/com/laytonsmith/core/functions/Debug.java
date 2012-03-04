@@ -4,25 +4,16 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
-import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.bukkit.event.Event;
-import org.bukkit.event.Listener;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredListener;
-import org.bukkit.plugin.SimplePluginManager;
 
 /**
  * TODO: Remove bukkit references
@@ -229,7 +220,7 @@ public class Debug {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            if ((Boolean) Static.getPreferences().getPreference("debug-mode")) {
+            if (Prefs.DebugMode()) {
                 try {
                     Static.LogDebug(args[0].val());
                 } catch (IOException ex) {

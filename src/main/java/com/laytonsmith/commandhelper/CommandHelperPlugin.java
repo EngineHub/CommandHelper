@@ -47,7 +47,6 @@ import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
@@ -114,14 +113,14 @@ public class CommandHelperPlugin extends JavaPlugin {
         try {
             File prefsFile = new File("plugins/CommandHelper/preferences.txt");
             Static.getPreferences().init(prefsFile);
-            if((Boolean)Static.getPreferences().getPreference("use-colors")){
+            if(Prefs.UseColors()){
                 TermColors.EnableColors();
             } else {
                 TermColors.DisableColors();
             }
-            String script_name = (String) Static.getPreferences().getPreference("script-name");
-            String main_file = (String) Static.getPreferences().getPreference("main-file");
-            boolean showSplashScreen = ((Boolean)Static.getPreferences().getPreference("show-splash-screen")).booleanValue();
+            String script_name = Prefs.ScriptName();
+            String main_file = Prefs.MainFile();
+            boolean showSplashScreen = Prefs.ShowSplashScreen();
             if(showSplashScreen){
                 System.out.println(TermColors.reset());
                 //System.out.flush();
@@ -346,7 +345,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     
         } else if(cmd.equalsIgnoreCase("interpreter")){
             if(perms.hasPermission(player.getName(), "commandhelper.interpreter")){
-                if((Boolean)Static.getPreferences().getPreference("enable-interpreter")){
+                if(Prefs.EnableInterpreter()){
                     interpreterListener.startInterpret(player.getName());
                     Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
                             + " multiline mode.");

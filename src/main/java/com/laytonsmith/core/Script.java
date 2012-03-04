@@ -499,7 +499,7 @@ public class Script {
 //        return null;
 //    }
     public boolean match(String command) {
-        boolean case_sensitive = (Boolean)Static.getPreferences().getPreference("case-sensitive");
+        boolean case_sensitive = Prefs.CaseSensitive();
         String[] cmds = command.split(" ");
         List<String> args = new ArrayList(Arrays.asList(cmds));
         boolean isAMatch = true;
