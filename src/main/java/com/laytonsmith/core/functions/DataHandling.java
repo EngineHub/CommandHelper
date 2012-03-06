@@ -1189,6 +1189,8 @@ public class DataHandling {
                     + " the original code, but will be functionally equivalent. The current environment"
                     + " is \"snapshotted\" and stored with the closure, however, this information is"
                     + " only stored in memory, it isn't retained during a serialization operation."
+                    + " Also, the special variable @arguments is automatically created for you, and contains"
+                    + " an array of all the arguments passed to the closure, much like procedures."
                     + " See the wiki article on [[CommandHelper/Closures|closures]] for more details"
                     + " and examples.";
         }
@@ -1250,13 +1252,13 @@ public class DataHandling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "void {closure, [varArray]} Executes the given closure. You can also specify"
-                    + " to use your current environment, instead of the closure's environment by sending"
-                    + " false as the second argument. It defaults to true.";
+            return "void {[values...,] closure} Executes the given closure. You can also send arguments"
+                    + " to the closure, which it may or may not use, depending on the particular closure's"
+                    + " definition.";
         }
 
         public ExceptionType[] thrown() {

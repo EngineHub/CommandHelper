@@ -365,4 +365,19 @@ public class DataHandlingTest {
                 + "execute(@go)", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World");
     }
+    
+    @Test public void testClosure8() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(true);
+        SRun("execute(Hello, World, closure(msg(@arguments)))", fakePlayer);
+        verify(fakePlayer).sendMessage("{Hello, World}");
+    }
+    
+    @Test public void testClosure9() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(true);
+        SRun("assign(@a, closure(@array, assign(@array[0], 'Hello World')))\n"
+                + "assign(@value, array())\n"
+                + "execute(@value, @a)\n"
+                + "msg(@value)", fakePlayer);
+        verify(fakePlayer).sendMessage("{Hello World}");
+    }
 }
