@@ -317,4 +317,52 @@ public class DataHandlingTest {
         SRun("msg(integer(4.5))", fakePlayer);
         verify(fakePlayer).sendMessage("4");
     }
+    
+    @Test public void testClosure1() throws ConfigCompileException{
+        SRun("assign(@go, closure(console( 'Hello World' ))) msg(@go)", fakePlayer);
+        verify(fakePlayer).sendMessage("console('Hello World')");
+    }
+    
+    @Test public void testClosure2() throws ConfigCompileException{
+        SRun("assign(@go, closure(msg('Hello World')))", fakePlayer);
+        verify(fakePlayer, times(0)).sendMessage("Hello World");
+    }
+    
+    @Test public void testClosure3() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@go, closure(msg('Hello' 'World')))\n"
+                + "execute(@go)", fakePlayer);
+        verify(fakePlayer).sendMessage("Hello World");
+    }
+    
+    @Test public void testClosure4() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@hw, 'Hello World')\n"
+                + "assign(@go, closure(msg(@hw)))\n"
+                + "execute(@go)", fakePlayer);
+        verify(fakePlayer).sendMessage("Hello World");
+    }
+    
+    @Test public void testClosure5() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@hw, 'Nope')\n"
+                + "assign(@go, closure(@hw, msg(@hw)))\n"
+                + "execute('Hello World', @go)", fakePlayer);
+        verify(fakePlayer).sendMessage("Hello World");
+    }
+    
+    @Test public void testClosure6() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@hw, 'Hello World')\n"
+                + "assign(@go, closure(msg(@hw)))\n"
+                + "execute('Nope', @go)", fakePlayer);
+        verify(fakePlayer).sendMessage("Hello World");
+    }
+    
+    @Test public void testClosure7() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@go, closure(assign(@hw, 'Hello World'), msg(@hw)))\n"
+                + "execute(@go)", fakePlayer);
+        verify(fakePlayer).sendMessage("Hello World");
+    }
 }

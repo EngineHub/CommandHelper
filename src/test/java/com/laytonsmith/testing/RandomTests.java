@@ -79,7 +79,6 @@ public class RandomTests {
     @Test public void testClone() throws CloneNotSupportedException{
         CArray c1 = C.Array(C.Void(), C.Void()).clone();
         CBoolean c2 = C.Boolean(true).clone();
-        CClosure c3 = new CClosure("", null, null, 0, null).clone();
         CDouble c4 = C.Double(1).clone();
         CFunction c5 = new CFunction("", 0, null).clone();
         CInt c6 = C.Int(1).clone();

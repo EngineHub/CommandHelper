@@ -7,6 +7,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 
 /**
@@ -613,11 +614,20 @@ public class InventoryManagement {
 //        }
 //        
 //        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-//            throw new UnsupportedOperationException("Not yet supported");
+//            MCPlayer p = environment.GetPlayer();
+//            if(args.length == 1){
+//                p = Static.GetPlayer(args[0]);
+//            }
+//            //First, we need to address the hotbar
+//            for(int i = 0; i < 10; i++){
+//                //If the stack size is maxed out, we're done.
+//            }
+//            
+//            return new CVoid(line_num, f);
 //        }
 //        
 //        public String since() {
-//            return "3.3.0";
+//            return "3.3.1";
 //        }
 //    }
 }

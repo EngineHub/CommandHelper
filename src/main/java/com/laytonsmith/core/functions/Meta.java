@@ -310,7 +310,7 @@ public class Meta {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return Static.resolveConstruct(args[0].val(), line_num, f);
+            return args[0];
         }
     }
 

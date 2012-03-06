@@ -12,6 +12,8 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -1175,18 +1177,20 @@ public class DataHandling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "closure {code} Returns a closure on the provided code. A closure is"
+            return "closure {[varNames...,] code} Returns a closure on the provided code. A closure is"
                     + " a datatype that represents some code as code, not the results of some"
                     + " code after it is run. Code placed in a closure can be used as"
                     + " a string, or executed by other functions using the eval() function."
                     + " If a closure is \"to string'd\" it will not necessarily look like"
-                    + " the original code, but will be functionally equivalent. The environment"
-                    + " is not inherently stored with the closure, however, specific functions"
-                    + " may choose to store the environment in addition to the closure.";
+                    + " the original code, but will be functionally equivalent. The current environment"
+                    + " is \"snapshotted\" and stored with the closure, however, this information is"
+                    + " only stored in memory, it isn't retained during a serialization operation."
+                    + " See the wiki article on [[CommandHelper/Closures|closures]] for more details"
+                    + " and examples.";
         }
 
         public ExceptionType[] thrown() {
@@ -1210,12 +1214,81 @@ public class DataHandling {
         }
         
         public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> nodes){
-            CClosure closure = new CClosure(f.toString(), nodes.get(0), env, line_num, f);
+            String[] names = new String[nodes.size() - 1];
+            Construct[] defaults = new Construct[nodes.size() - 1];
+            for(int i = 0; i < nodes.size() - 1; i++){
+                GenericTreeNode<Construct> node = nodes.get(i);
+                GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", line_num, f));
+                List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
+                children.add(node);
+                newNode.setChildren(children);
+                Construct ret = MScriptCompiler.execute(newNode, env, null, null);
+                if(!(ret instanceof IVariable)){
+                    throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, line_num, f);
+                }
+                names[i] = ((IVariable)ret).getName();
+                try {
+                    defaults[i] = ((IVariable)ret).ival().clone();
+                } catch (CloneNotSupportedException ex) {
+                    Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+            CClosure closure = new CClosure(nodes.get(nodes.size() - 1), env, names, defaults, line_num, f);
             return closure;
         }
 
         public String since() {
             return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class execute implements Function{
+
+        public String getName() {
+            return "execute";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {closure, [varArray]} Executes the given closure. You can also specify"
+                    + " to use your current environment, instead of the closure's environment by sending"
+                    + " false as the second argument. It defaults to true.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(args[args.length - 1] instanceof CClosure){
+                Construct [] vals = new Construct[args.length - 1];
+                System.arraycopy(args, 0, vals, 0, args.length - 1);
+                CClosure closure = (CClosure)args[args.length - 1];
+                closure.execute(vals);
+            } else {
+                throw new ConfigRuntimeException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, line_num, f);
+            }
+            return new CVoid(line_num, f);
+        }
+
+        public String since() {
+            return "3.3.1";
         }
         
     }
