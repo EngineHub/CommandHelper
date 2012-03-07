@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -17,12 +18,12 @@ import org.bukkit.entity.Player;
  * @author layton
  */
 public class BukkitMCServer implements MCServer{
-    
+
     Server s;
     public BukkitMCServer(){
         this.s = Bukkit.getServer();
     }
-    
+
     public Server __Server(){
         return s;
     }
@@ -48,7 +49,7 @@ public class BukkitMCServer implements MCServer{
     public static MCServer Get() {
         return new BukkitMCServer();
     }
-    
+
     public boolean dispatchCommand(MCCommandSender sender, String command){
         return s.dispatchCommand(((BukkitMCCommandSender)sender).c, command);
     }
@@ -73,7 +74,7 @@ public class BukkitMCServer implements MCServer{
         }
         return new BukkitMCWorld(s.getWorld(name));
     }
-    
+
     public List<MCWorld> getWorlds(){
         if(s.getWorlds() == null){
             return null;
@@ -93,4 +94,70 @@ public class BukkitMCServer implements MCServer{
         return new BukkitMCOfflinePlayer(s.getOfflinePlayer(player));
     }
 
+    /* Boring information get methods -.- */
+    public String getBukkitVersion() {
+        return s.getBukkitVersion();
+    }
+
+    public String getVersion() {
+        return s.getVersion();
+    }
+
+    public Boolean getAllowEnd() {
+        return s.getAllowEnd();
+    }
+
+    public Boolean getAllowFlight() {
+        return s.getAllowFlight();
+    }
+
+    public Boolean getAllowNether() {
+        return s.getAllowNether();
+    }
+
+    public String getWorldContainer() {
+        return s.getWorldContainer().getPath();
+    }
+
+    public String getServerName() {
+        return s.getServerName();
+    }
+
+    public int getMaxPlayers() {
+        return s.getMaxPlayers();
+    }
+
+    public List<MCOfflinePlayer> getBannedPlayers() {
+        if(s.getBannedPlayers() == null){
+            return null;
+        }
+        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
+        for(OfflinePlayer p : s.getBannedPlayers()){
+            list.add(getOfflinePlayer(p.getName()));
+        }
+        return list;
+    }
+
+    public List<MCOfflinePlayer> getWhitelistedPlayers() {
+        if(s.getBannedPlayers() == null){
+            return null;
+        }
+        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
+        for(OfflinePlayer p : s.getWhitelistedPlayers()){
+            list.add(getOfflinePlayer(p.getName()));
+        }
+        return list;
+    }
+
+    public List<MCOfflinePlayer> getOperators() {
+        if(s.getOperators() == null){
+            return null;
+        }
+        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
+        for(OfflinePlayer p : s.getOperators()){
+            list.add(getOfflinePlayer(p.getName()));
+        }
+        return list;
+    }
 }
+
