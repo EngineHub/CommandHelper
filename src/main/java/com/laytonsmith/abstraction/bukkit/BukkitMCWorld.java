@@ -61,6 +61,13 @@ public class BukkitMCWorld implements MCWorld {
         return new BukkitMCBlock(w.getBlockAt(x, y, z));
     }
 
+    public MCBlock getHighestBlockAt(int x, int z) {
+        if (w.getHighestBlockAt(x, z) == null) {
+            return null;
+        }
+        return new BukkitMCBlock(w.getHighestBlockAt(x, z));
+    }
+
     public MCEntity spawn(MCLocation l, Class mobType) {
         return new BukkitMCEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
     }
