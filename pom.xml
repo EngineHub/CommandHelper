@@ -6,6 +6,70 @@
     <version>3.3.1-SNAPSHOT</version>
     <name>CommandHelper</name>
     <description>CommandHelper adds powerful command related utility functions</description>
+    <inceptionYear>2010</inceptionYear>
+    <organization>
+        <name>Mostly Layton Smith</name>
+        <url>http://wiki.sk89q.com/CommandHelper</url>
+    </organization>
+    <developers>
+        <developer>
+            <id>layton</id>
+            <name>Layton Smith</name>
+            <email>gmail: laytonsmith14</email>
+            <url>http://www.laytonsmith.com#donations</url>
+            <organization>Enable IC</organization>
+            <organizationUrl>http://www.laytonsmith.com</organizationUrl>
+            <roles>
+                <role>project manager</role>
+                <role>developer</role>
+                <role>tester</role>
+            </roles>
+            <timezone>-6</timezone>
+        </developer>
+        <developer>
+            <id>sk89q</id>
+            <name>sk89q</name>
+            <url>http://www.sk89q.com</url>
+            <roles>                
+                <role>infrastructure maintainer</role>
+            </roles>
+            <timezone>-8</timezone>
+        </developer>
+    </developers>
+    <contributors>
+        <!-- If I left you out, let me know, and I'll gladly add you! Also, there are more
+            fields that can be filled out, if you want more information added in, I'll do that too -->
+        <contributor>
+            <name>opoq</name>
+            <roles>
+                <role>testing wench</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>Deaygo</name>
+            <roles>
+                <role>contributor</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>t3hk0d3</name>
+            <roles>
+                <role>contributor</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>zml2008</name>
+            <roles>
+                <role>contributor</role>
+            </roles>
+        </contributor>
+        <contributor>
+            <name>albatrossen</name>
+            <roles>
+                <role>contributor</role>
+            </roles>
+        </contributor>
+    </contributors>
     <issueManagement>
         <system>BukkitDev</system>
         <url>http://dev.bukkit.org/server-mods/commandhelper/create-ticket/</url>
@@ -15,10 +79,16 @@
         <url>http://build.sk89q.com/job/CommandHelper/</url>
     </ciManagement>
     <licenses>
+        <!-- We are dual licensed -->
         <license>
             <name>GNU Lesser General Public License, Version 3</name>
             <url>http://www.gnu.org/licenses/lgpl.html</url>
             <distribution>repo</distribution>
+        </license>
+        <license>
+            <name>The MIT License</name>
+            <url>http://www.opensource.org/licenses/MIT</url>
+            <distribution>repo</distribution>            
         </license>
     </licenses>
   
@@ -177,7 +247,7 @@
             <scope>test</scope>
         </dependency>
         <dependency>
-          <groupId>org.powermock</groupId>
+            <groupId>org.powermock</groupId>
             <artifactId>powermock-module-junit4</artifactId>
             <version>1.4.10</version>
             <scope>test</scope>

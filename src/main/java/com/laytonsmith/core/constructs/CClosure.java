@@ -78,22 +78,31 @@ public class CClosure extends Construct {
         return clone;
     }
     
+    /**
+     * Executes the closure, giving it the supplied arguments. {@code values} may be null, which means that
+     * no arguments are being sent.
+     * @param values 
+     */
     public void execute(Construct[] values){
         try {
             Env environment = env.clone();
-            for(int i = 0; i < names.length; i++){
-                String name = names[i];
-                Construct value;
-                try{
-                    value = values[i];
-                } catch(Exception e) {
-                    value = defaults[i].clone();
+            if(values != null){
+                for(int i = 0; i < names.length; i++){
+                    String name = names[i];
+                    Construct value;
+                    try{
+                        value = values[i];
+                    } catch(Exception e) {
+                        value = defaults[i].clone();
+                    }
+                    environment.GetVarList().set(new IVariable(name, value, line_num, file));
                 }
-                environment.GetVarList().set(new IVariable(name, value, line_num, file));
             }
             CArray arguments = new CArray(node.getChildAt(0).data.getLineNum(), node.getChildAt(0).data.getFile());
-            for(Construct value : values){
-                arguments.push(value);
+            if(values != null){
+                for(Construct value : values){
+                    arguments.push(value);
+                }
             }
             environment.GetVarList().set(new IVariable("@arguments", arguments, node.getChildAt(0).data.getLineNum(), node.getChildAt(0).data.getFile()));
             GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", line_num, file));

@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -89,6 +90,10 @@ public class BukkitConvertor implements Convertor {
 
     public String LookupMaterialName(int id) {
         return Material.getMaterial(id).toString();
+    }
+
+    public int SetFutureRunnable(long ms, Runnable r) {
+        return Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, (long)(ms / 50));
     }
 
 }

@@ -35,4 +35,13 @@ public interface Convertor {
 
     public MCItemStack GetItemStack(int type, byte data, int qty);
     
+    /**
+     * A future runnable is run on a server accessible thread at roughly the time specified in the future.
+     * This is no guarantee however, as the particular server implementation may make this hard to do. The
+     * value returned is 
+     * @param r
+     * @return 
+     */
+    public int SetFutureRunnable(long ms, Runnable r);
+    
 }

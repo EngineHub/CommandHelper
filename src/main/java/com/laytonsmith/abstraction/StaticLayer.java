@@ -107,4 +107,8 @@ public class StaticLayer {
         return convertor.LookupMaterialName(id);
     }
     
+    public static int SetFutureRunnable(long ms, Runnable r){
+        return convertor.SetFutureRunnable(ms, r);
+    }
+    
 }

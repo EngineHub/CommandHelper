@@ -4,9 +4,11 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
+import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -169,4 +171,96 @@ public class Scheduling {
             return true;
         }
     }
+    
+    public static class set_interval implements Function{
+
+        public String getName() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Integer[] numArgs() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String docs() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public ExceptionType[] thrown() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean isRestricted() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public boolean preResolveVariables() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Boolean runAsync() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String since() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        
+    }
+    
+    @api public static class set_timeout implements Function{
+
+        public String getName() {
+            return "set_timeout";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "int {timeInMS, closure}";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            long time = Static.getInt(args[0]);
+            if(!(args[1] instanceof CClosure)){
+                throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, line_num, f);
+            }
+            final CClosure c = (CClosure) args[1];            
+            int ret = StaticLayer.SetFutureRunnable(time, new Runnable(){
+               public void run(){
+                   c.execute(null);
+               } 
+            });
+            return new CInt(ret, line_num, f);
+        }
+
+        public String since() {
+            return "3.3.1";
+        }
+        
+    }
+    
+    
 }
