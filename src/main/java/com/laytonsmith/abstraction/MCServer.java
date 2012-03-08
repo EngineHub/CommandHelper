@@ -22,4 +22,17 @@ public interface MCServer {
     public void broadcastMessage(String message);
 
     public MCOfflinePlayer getOfflinePlayer(String player);
+
+    /* Boring information get methods -.- */
+    public String getServerName();
+    public String getModVersion();
+    public String getVersion();
+    public Boolean getAllowEnd();
+    public Boolean getAllowFlight();
+    public Boolean getAllowNether();
+    public String getWorldContainer();
+    public int getMaxPlayers();
+    public List<MCOfflinePlayer> getBannedPlayers();
+    public List<MCOfflinePlayer> getWhitelistedPlayers();
+    public List<MCOfflinePlayer> getOperators();
 }
