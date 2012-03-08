@@ -644,7 +644,7 @@ public class Environment {
                 w = env.GetPlayer().getWorld();
             }
 
-            if (args[0] instanceof CArray || !(args.length == 3)) {
+            if (args[0] instanceof CArray && !(args.length == 3)) {
                 MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, line_num, f);
                 x = loc.getX();
                 z = loc.getZ();
