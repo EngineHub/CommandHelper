@@ -6,6 +6,9 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CInt;
@@ -112,6 +115,10 @@ public class BukkitMCWorld implements MCWorld {
     public void setBiome(int x, int z, MCBiomeType type) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
+
+    public MCBlock getHighestBlockAt(int x, int z) {
+        return new BukkitMCBlock(w.getHighestBlockAt(x, z));
+     }
 
     private enum MOBS {
 
