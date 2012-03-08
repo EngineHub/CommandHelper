@@ -668,7 +668,7 @@ public class Environment {
                 throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
             }
             x = java.lang.Math.floor(x);
-            y = java.lang.Math.floor(y);
+            y = java.lang.Math.floor(y) - 1;
             z = java.lang.Math.floor(z);
             MCBlock b = w.getHighestBlockAt((int) x, (int) z);
             return new CArray(line_num, f,
