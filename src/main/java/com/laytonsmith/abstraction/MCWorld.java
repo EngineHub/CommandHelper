@@ -17,6 +17,8 @@ public interface MCWorld {
     public List<MCLivingEntity> getLivingEntities();
     public String getName();
     public MCBlock getBlockAt(int x, int y, int z);
+    public MCBlock getHighestBlockAt(int x, int z);
+
 
     public MCEntity spawn(MCLocation l, Class mobType);
 

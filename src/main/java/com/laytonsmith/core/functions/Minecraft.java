@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.nijikokun.register.listeners.server;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.LivingEntity;
@@ -45,7 +47,7 @@ public class Minecraft {
         } catch (IOException ex) {
             Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
         }
-        
+
         Properties p2 = new Properties();
         try{
             p2.load(Minecraft.class.getResourceAsStream("/data_names.txt"));
@@ -128,7 +130,7 @@ public class Minecraft {
             return false;
         }
     }
-    
+
     @api public static class data_name implements Function{
 
         public String getName() {
@@ -185,7 +187,7 @@ public class Minecraft {
             }
             if(i == -1){
                 i = (int)Static.getInt(args[0]);
-            }  
+            }
             if(i2 == -1){
                 i2 = 0;
             }
@@ -201,9 +203,9 @@ public class Minecraft {
                 }
             }
         }
-        
+
     }
-    
+
     @api
     public static class max_stack_size implements Function{
 
@@ -255,7 +257,7 @@ public class Minecraft {
                     int max = StaticLayer.GetItemStack(iitem, 1).getType().getMaxStackSize();
                     return new CInt(max, line_num, f);
                 } catch(NumberFormatException e){
-                    
+
                 }
             }
             throw new ConfigRuntimeException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", ExceptionType.CastException, line_num, f);
@@ -264,7 +266,7 @@ public class Minecraft {
         public String since() {
             return "3.3.0";
         }
-        
+
     }
 
     @api
@@ -359,7 +361,7 @@ public class Minecraft {
             return false;
         }
 
-        
+
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mob = args[0].val();
@@ -396,7 +398,7 @@ public class Minecraft {
             }
         }
     }
-    
+
     @api public static class tame_mob implements Function{
 
         public String getName() {
@@ -450,7 +452,7 @@ public class Minecraft {
             MCEntity e = Static.getEntity(id);
             if(e == null){
                 return new CVoid(line_num, f);
-            } else if(e.isTameable()){                
+            } else if(e.isTameable()){
                 MCTameable t = e.getMCTameable();
                 if(player != null){
                     t.setOwner(Static.getServer().getOfflinePlayer(player));
@@ -462,9 +464,9 @@ public class Minecraft {
                 throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, line_num, f);
             }
         }
-        
+
     }
-    
+
     @api public static class get_mob_owner implements Function{
 
         public String getName() {
@@ -518,9 +520,9 @@ public class Minecraft {
                 throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, line_num, f);
             }
         }
-        
+
     }
-    
+
     @api public static class is_tameable implements Function{
 
         public String getName() {
@@ -568,9 +570,9 @@ public class Minecraft {
             }
             return new CBoolean(ret, line_num, f);
         }
-        
+
     }
-    
+
     @api public static class make_effect implements Function{
 
         public String getName() {
@@ -628,9 +630,9 @@ public class Minecraft {
             l.getWorld().playEffect(l, e, data, radius);
             return new CVoid(line_num, f);
         }
-        
+
     }
-    
+
     @api public static class set_entity_health implements Function{
 
         public String getName() {
@@ -678,9 +680,9 @@ public class Minecraft {
             }
             return new CVoid(line_num, f);
         }
-        
+
     }
-    
+
     @api public static class get_entity_health implements Function{
 
         public String getName() {
@@ -725,6 +727,161 @@ public class Minecraft {
                 throw new ConfigRuntimeException("Not a valid entity id", ExceptionType.FormatException, line_num, f);
             }
         }
-        
-    }    
+
+    }
+
+    @api
+    public static class get_server_info implements Function {
+
+        public String getName() {
+            return "get_server_info";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0,1};
+        }
+
+        public String docs() {
+            return "mixed {[value]} Returns various information about server."
+                    + "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
+                    + " will be returned. Otherwise if value is not specified (or is -1), it returns an array of"
+                    + " information with the following pieces of information in the specified index: "
+                    + "<ul><li>0 - Server name; the name of the server in server.properties. "
+                    + "</li><li>1 - API version; The bukkit api version that is implemented in this build.</li><li>2 - Bukkit version; The version of craftbukkit your using.  "
+                    + "</li><li>3 - Allow flight; If true, minecrafts inbuild anti fly check is enabled.</li><li>4 - Allow nether; is true, nether is enabled"
+                    + "</li><li>5 - Allow end; if true, end is enabled"
+                    + "</li><li>6 - World container; The path to the world container.</li><li>7 - "
+                    + "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li><li>9 - Banned players;"
+                    + " An array of banned players.</li><li>10 - Whitelist; All players on the whitelist;</li>"
+                    + "</ul>";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.4.0";
+        }
+
+        public Boolean runAsync() {
+            return true;
+        }
+
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            MCServer server = env.GetCommandSender().getServer();
+
+
+            int index = -1;
+            if (args.length == 0) {
+                index = -1;
+            } else if (args.length == 1) {
+                index = (int) Static.getInt(args[0]);
+            }
+
+            if (index < -1 || index > 10) {
+                throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 10",
+                        ExceptionType.RangeException, line_num, f);
+            }
+
+            assert index >= -1 && index <= 10;
+            ArrayList<Construct> retVals = new ArrayList<Construct>();
+
+            if (index == 0 || index == -1) {
+                //Server name
+                retVals.add(new CString(server.getServerName(), line_num, f));
+            }
+
+            if (index == 1 || index == -1) {
+                //Server Version
+                retVals.add(new CString(server.getVersion(), line_num, f));
+            }
+            if (index == 2 || index == -1) {
+                //Bukkit Version
+                retVals.add(new CString(server.getBukkitVersion(), line_num, f));
+            }
+            if (index == 3 || index == -1) {
+                //Allow flight
+                retVals.add(new CBoolean(server.getAllowFlight(), line_num, f));
+            }
+            if (index == 4 || index == -1) {
+                //Allow nether
+                retVals.add(new CBoolean(server.getAllowNether(), line_num, f));
+            }
+            if (index == 5 || index == -1) {
+                //Allow end
+                retVals.add(new CBoolean(server.getAllowEnd(), line_num, f));
+            }
+            if (index == 6 || index == -1) {
+                //World container
+                retVals.add(new CString(server.getWorldContainer(), line_num, f));
+            }
+            if (index == 7 || index == -1) {
+                //Max player limit
+                retVals.add(new CInt(server.getMaxPlayers(), line_num, f));
+            }
+            if (index == 8 || index == -1) {
+                //Array of op's
+                CArray co = new CArray(line_num, f);
+                List<MCOfflinePlayer> so = server.getOperators();
+                for(MCOfflinePlayer o : so) {
+                    if(o == null) {
+                        continue;
+                    }
+                    CString os = new CString(o.getName(), line_num, f);
+                    co.push(os);
+                }
+                retVals.add(co);
+            }
+
+            if (index == 9 || index == -1) {
+                //Array of banned players
+                CArray co = new CArray(line_num, f);
+                List<MCOfflinePlayer> so = server.getBannedPlayers();
+                for(MCOfflinePlayer o : so) {
+                    if(o == null) {
+                        continue;
+                    }
+                    CString os = new CString(o.getName(), line_num, f);
+                    co.push(os);
+                }
+                retVals.add(co);
+            }
+
+            if (index == 10 || index == -1) {
+                //Max player limit
+                CArray co = new CArray(line_num, f);
+                List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
+                for(MCOfflinePlayer o : so) {
+                    if(o == null) {
+                        continue;
+                    }
+                    CString os = new CString(o.getName(), line_num, f);
+                    co.push(os);
+                }
+                retVals.add(co);
+            }
+
+            if (retVals.size() == 1) {
+                return retVals.get(0);
+            } else {
+                CArray ca = new CArray(line_num, f);
+                for (Construct c : retVals) {
+                    ca.push(c);
+                }
+                return ca;
+            }
+        }
+    }
 }
