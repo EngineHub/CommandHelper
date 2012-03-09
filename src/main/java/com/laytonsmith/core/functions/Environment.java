@@ -470,7 +470,7 @@ public class Environment {
         }
     }
     
-    public static class set_biome implements Function{
+    @api public static class set_biome implements Function{
 
         public String getName() {
             return "set_biome";
@@ -487,7 +487,7 @@ public class Environment {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {

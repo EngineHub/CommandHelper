@@ -140,7 +140,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.2.3-R0.1-SNAPSHOT</version>
+            <version>1.2.3-R0.2-SNAPSHOT</version>
         </dependency>
         
         <!-- CraftBukkit Dependency for experimental features -->
@@ -148,7 +148,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.2.3-R0.1-SNAPSHOT</version>
+            <version>1.2.3-R0.2-SNAPSHOT</version>
         </dependency>
         
         <!-- WorldGuard for some of the sk functions -->

@@ -499,6 +499,11 @@ public class Script {
 //        return null;
 //    }
     public boolean match(String command) {
+        if(cleft == null){
+            //The compilation error happened during the signature declaration, so 
+            //we can't match it, nor can we even tell if it's what they intended for us to run.
+            return false;
+        }
         boolean case_sensitive = Prefs.CaseSensitive();
         String[] cmds = command.split(" ");
         List<String> args = new ArrayList(Arrays.asList(cmds));

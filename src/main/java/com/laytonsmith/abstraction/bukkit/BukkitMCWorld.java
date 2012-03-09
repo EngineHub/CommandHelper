@@ -19,6 +19,7 @@ import java.util.List;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.World;
+import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
@@ -110,7 +111,7 @@ public class BukkitMCWorld implements MCWorld {
     }
 
     public void setBiome(int x, int z, MCBiomeType type) {
-        throw new UnsupportedOperationException("Not supported yet.");
+        w.setBiome(x, z, Biome.valueOf(type.name()));
     }
 
     private enum MOBS {
