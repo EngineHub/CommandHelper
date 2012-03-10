@@ -342,14 +342,20 @@ public class CArray extends Construct {
         }
     }
 
-    public void remove(Construct construct) {
+    public Construct remove(Construct construct) {
         String c = normalizeConstruct(construct);
+        Construct ret;
         if(!associative_mode){
-            array.remove((int)Static.getInt(construct));
+            try{
+                ret = array.remove(Integer.parseInt(c));
+            } catch(NumberFormatException e){
+                throw new ConfigRuntimeException("Expecting an integer, but received " + c, construct.getLineNum(), construct.getFile());
+            }
         } else {
-            associative_array.remove(construct.val());
+            ret = associative_array.remove(c);
         }
         regenValue();
+        return ret;
     }
     
     private Comparator<String> comparator = new Comparator<String>(){

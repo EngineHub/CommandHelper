@@ -87,6 +87,13 @@ public class MScriptCompilerTest {
             }
         }
     }
+    @Test(expected=ConfigCompileException.class)
+    public void testSmartStrings() throws ConfigCompileException{
+        
+        SRun("assign(@word, 'word')\n"
+                + "msg(\"@word\")", fakePlayer);
+
+    }
     @Test
     public void testCompile() throws ConfigCompileException {
         System.out.println("compile");
@@ -126,8 +133,25 @@ public class MScriptCompilerTest {
         } catch (ConfigCompileException e) {
             //passed
         }
+        
+        try{
+            //no multiline end construct
+            MScriptCompiler.preprocess(MScriptCompiler.lex("/cmd = >>>\nmsg('hi')\n", null), env).get(0).compileRight();
+            fail("Did not expect no multiline end construct to pass");
+        } catch(ConfigCompileException e){
+            //passed
+        }
 
         MScriptCompiler.compile(MScriptCompiler.lex("if(1, msg('') msg(''))", null));
+    }
+    
+    @Test
+    public void testCompile13() throws ConfigCompileException{
+        MScriptCompiler.compile(MScriptCompiler.lex("msg ('hi')", null));
+    }
+    
+    @Test public void testCompile14() throws ConfigCompileException{
+        MScriptCompiler.compile(MScriptCompiler.lex("msg(('hi'))", null));
     }
 
     @Test
@@ -380,6 +404,11 @@ public class MScriptCompilerTest {
                 + "#*#";
         SRun(script, fakePlayer);
         verify(fakePlayer).sendMessage("Not a comment");
+    }
+    
+    @Test public void testExecute22() throws ConfigCompileException{
+        SRun("msg('hi' (this is a thing))", fakePlayer);
+        verify(fakePlayer).sendMessage("hi this is a thing");
     }
 
     @Test

@@ -208,4 +208,9 @@ public class ArrayHandlingTest {
         SRun("assign(@a, array(a: a, b: b, c: c)) array_remove(@a, 'b') msg(@a)", fakePlayer);
         verify(fakePlayer).sendMessage("{a: a, c: c}");
     }
+    
+    @Test public void testStringSlice() throws ConfigCompileException{
+        SRun("msg('slice'[2..])", fakePlayer);
+        verify(fakePlayer).sendMessage("ice");
+    }
 }

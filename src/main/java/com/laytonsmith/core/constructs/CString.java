@@ -12,9 +12,12 @@ import java.io.File;
  */
 public class CString extends Construct implements Cloneable{
     
-    public static final long serialVersionUID = 1L;
     public CString(String value, int line_num, File file){
         super(value, ConstructType.STRING, line_num, file);
+    }
+    
+    public CString(char value, int line_num, File file){
+        this(Character.toString(value), line_num, file);
     }
     
     @Override

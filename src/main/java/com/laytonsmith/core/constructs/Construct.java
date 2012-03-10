@@ -24,7 +24,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
 
     public enum ConstructType {
 
-        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL
+        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
+        DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE
     }
     protected ConstructType ctype;
     protected String value;

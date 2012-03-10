@@ -80,18 +80,20 @@ public class ArrayHandling {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            String index = "0..-1";
+            Construct index = new CSlice(0, -1, line_num, f);
             if(args.length == 2){
-                index = args[1].val();
+                index = args[1];
             }
+            
             if(env.GetFlag("array_get_alt_mode") == Boolean.TRUE){                
-                return new CArrayReference(args[0], new CString(index, line_num, f), env);
+                return new CArrayReference(args[0], args[1], env);
             }
+            
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
-                if(index.contains("..")){
+                if(index instanceof CSlice){
                     if(ca.inAssociativeMode()){
-                        if(index.equals("0..-1")){
+                        if(((CSlice)index).getStart() == 0 && ((CSlice)index).getFinish() == -1){
                             //Special exception, we want to clone the whole array
                             CArray na = new CArray(line_num, f);
                             na.forceAssociativeMode();
@@ -107,20 +109,9 @@ public class ArrayHandling {
                         throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, line_num, f);
                     }
                     //It's a range
-                    int start = 0;
-                    int finish = 0;
-                    String[] split = index.split("\\.\\.");
+                    long start = ((CSlice)index).getStart();
+                    long finish = ((CSlice)index).getFinish();
                     try{
-                        if(split[0].isEmpty()){
-                            start = 0;
-                        } else {
-                            start = Integer.parseInt(split[0]);
-                        }
-                        if(split.length == 1 || split[1].isEmpty()){
-                            finish = ca.size() - 1;
-                        } else {
-                            finish = Integer.parseInt(split[1]);
-                        }
                         //Convert negative indexes 
                         if(start < 0){
                             start = ca.size() + start;
@@ -133,11 +124,11 @@ public class ArrayHandling {
                             //return an empty array in cases where the indexes don't make sense
                             return na;
                         }
-                        for(int i = start; i <= finish; i++){
+                        for(long i = start; i <= finish; i++){
                             try{
-                                na.push(ca.get(i, line_num, f).clone());
+                                na.push(ca.get((int)i, line_num, f).clone());
                             } catch(CloneNotSupportedException e){
-                                na.push(ca.get(i, line_num, f));
+                                na.push(ca.get((int)i, line_num, f));
                             }
                         }
                         return na;
@@ -155,6 +146,36 @@ public class ArrayHandling {
                     } else {
                         return ca.get(args[1], line_num, f);
                     }
+                }
+            } else if(args[0] instanceof CString){
+                if(index instanceof CSlice){
+                    //It's a range
+                    long start = ((CSlice)index).getStart();
+                    long finish = ((CSlice)index).getFinish();
+                    try{
+                        //Convert negative indexes 
+                        if(start < 0){
+                            start = args[0].val().length() + start;
+                        }
+                        if(finish < 0){
+                            finish = args[0].val().length() + finish;
+                        }
+                        CArray na = new CArray(line_num, f);
+                        if(finish < start){
+                            //return an empty array in cases where the indexes don't make sense
+                            return new CString("", line_num, f);
+                        }
+                        StringBuilder b = new StringBuilder();
+                        String val = args[0].val();
+                        for(long i = start; i <= finish; i++){
+                            b.append(val.charAt((int)i));
+                        }
+                        return new CString(b.toString(), line_num, f);
+                    } catch(NumberFormatException e){
+                        throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, line_num, f);
+                    }
+                } else {
+                    return new CString(args[0].val().charAt((int)Static.getInt(index)), line_num, f);
                 }
             } else{
                 throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, line_num, f);
@@ -750,7 +771,7 @@ public class ArrayHandling {
         }
 
         public String docs() {
-            return "void {array, index} Removes an index from an array. If the array is a normal"
+            return "mixed {array, index} Removes an index from an array. If the array is a normal"
                     + " array, all values' indicies are shifted left one. If the array is associative,"
                     + " the index is simply removed. If the index doesn't exist, the array remains"
                     + " unchanged.";
@@ -779,11 +800,10 @@ public class ArrayHandling {
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
-                ca.remove(args[1]);
+                return ca.remove(args[1]);
             } else {
                 throw new ConfigRuntimeException("Argument 1 of array_remove should be an array", ExceptionType.CastException, line_num, f);
             }
-            return new CVoid(line_num, f);
         }
         
     }
@@ -845,6 +865,49 @@ public class ArrayHandling {
 
         public String since() {
             return "3.3.0";
+        }
+        
+    }
+    
+    @api public static class cslice implements Function{
+
+        public String getName() {
+            return "cslice";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "slice {from, to} Dynamically creates an array slice, which can be used with array_get"
+                    + " (or the [bracket notation]) to get a range of elements. cslice(0, 5) is equivalent"
+                    + " to 0..5 directly in code, however with this function you can also do cslice(@var, @var),"
+                    + " or other more complex expressions, which are not possible in static code.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CSlice(Static.getInt(args[0]), Static.getInt(args[1]), line_num, f);
+        }
+
+        public String since() {
+            return "3.3.1";
         }
         
     }

@@ -24,6 +24,7 @@ public class MScriptCompiler {
         List<Token> token_list = new ArrayList<Token>();
         //Set our state variables
         boolean state_in_quote = false;
+            boolean in_smart_quote = false;
         boolean in_comment = false;
             boolean comment_is_block = false;
         boolean in_opt_var = false;
@@ -57,6 +58,43 @@ public class MScriptCompiler {
             if(c == '*' && c2 == '/' && in_comment && comment_is_block){
                 in_comment = false;
                 comment_is_block = false;
+                i++;
+                continue;
+            }
+            if(c == '-' && c2 == '>' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.DEREFERENCE, "->", line_num, file));
+                i++;
+                continue;
+            }
+            if(c == '.' && c2 == '.' && !state_in_quote){
+                //This one has to come before plain .
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.SLICE, "..", line_num, file));
+                i++;
+                continue;
+            }
+            if(c == '.' && !Character.isDefined(c2) && !state_in_quote){
+                //if it's a number after this, it's a decimal
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.DEREFERENCE, ".", line_num, file));
+                continue;
+            }
+            if(c == ':' && c2 == ':' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.DEREFERENCE, "::", line_num, file));
                 i++;
                 continue;
             }
@@ -110,6 +148,19 @@ public class MScriptCompiler {
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.FUNC_NAME, buf.toString(), line_num, file));
                     buf = new StringBuffer();
+                } else {
+                    //The previous token, if unknown, should be changed to a FUNC_NAME. If it's not
+                    //unknown, we may be doing standalone parenthesis, so auto tack on the p function
+                    try{
+                        if(token_list.get(token_list.size() - 1).type == TType.UNKNOWN){
+                            token_list.get(token_list.size() - 1).type = TType.FUNC_NAME;
+                        } else {                            
+                            token_list.add(new Token(TType.FUNC_NAME, "p", line_num, file));
+                        }
+                    } catch(IndexOutOfBoundsException e){
+                        //This is the first element on the list, so, it's another p.
+                        token_list.add(new Token(TType.FUNC_NAME, "p", line_num, file));
+                    }
                 }
                 token_list.add(new Token(TType.FUNC_START, "(", line_num, file));
                 continue;
@@ -129,26 +180,53 @@ public class MScriptCompiler {
                     buf = new StringBuffer();
                 }
             } else if (c == '\'') {
-                if (state_in_quote) {
+                if (state_in_quote && !in_smart_quote) {
                     token_list.add(new Token(TType.STRING, buf.toString(), line_num, file));
                     buf = new StringBuffer();
                     state_in_quote = false;
                     continue;
-                } else {
+                } else if(!state_in_quote){
                     state_in_quote = true;
+                    in_smart_quote = false;
                     if (buf.length() > 0) {
                         token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
                         buf = new StringBuffer();
                     }
                     continue;
+                } else {
+                    //we're in a smart quote
+                    buf.append("'");
+                }
+            } else if (c == '"'){
+                if(state_in_quote && in_smart_quote){
+                    //For now, since this feature isn't fully implemented, just throw an exception
+                    if(true)
+                        throw new ConfigCompileException("Doubly quoted strings are not yet supported.", line_num, file);
+                    token_list.add(new Token(TType.SMART_STRING, buf.toString(), line_num, file));
+                    buf = new StringBuffer();
+                    state_in_quote = false;
+                    continue;
+                } else if(!state_in_quote){
+                    state_in_quote = true;
+                    in_smart_quote = true;
+                    if (buf.length() > 0) {
+                        token_list.add(new Token(TType.UNKNOWN, buf.toString(), line_num, file));
+                        buf = new StringBuffer();
+                    }
+                    continue;
+                } else {
+                    //we're in normal quotes
+                    buf.append('"');
                 }
             } else if (c == '\\') {
                 //escaped characters
                 if (state_in_quote) {
                     if (c2 == '\\') {
                         buf.append("\\");
-                    } else if (c2 == '\'') {
+                    } else if (c2 == '\'' && !in_smart_quote) {
                         buf.append("'");
+                    } else if(c2 == '"' && in_smart_quote){
+                        buf.append('"');
                     } else if(c2 == 'n'){
                         buf.append("\n");
                     } else if(c2 == 'u'){
@@ -246,14 +324,14 @@ public class MScriptCompiler {
         }
 
         tokenStream = temp;
-        temp = new ArrayList<Token>();
 
         //Handle multiline constructs
         ArrayList<Token> tokens1_1 = new ArrayList<Token>();
         boolean inside_multiline = false;
+        Token thisToken = null;
         for (int i = 0; i < tokenStream.size(); i++) {
             Token prevToken = i - 1 >= tokenStream.size() ? tokenStream.get(i - 1) : new Token(TType.UNKNOWN, "", 0, null);
-            Token thisToken = tokenStream.get(i);
+            thisToken = tokenStream.get(i);
             Token nextToken = i + 1 < tokenStream.size() ? tokenStream.get(i + 1) : new Token(TType.UNKNOWN, "", 0, null);
             //take out newlines between the = >>> and <<< tokens (also the tokens)
             if (thisToken.type.equals(TType.ALIAS_END) && nextToken.val().equals(">>>")) {
@@ -270,6 +348,9 @@ public class MScriptCompiler {
                 inside_multiline = false;
                 continue;
             }
+            if(thisToken.val().equals(">>>") && inside_multiline){
+                throw new ConfigCompileException("Did not expect a multiline start symbol here, are you missing a multiline end symbol above this line?", thisToken.line_num, thisToken.file);
+            }
             if (thisToken.val().equals(">>>") && !prevToken.type.equals(TType.ALIAS_END)) {
                 throw new ConfigCompileException("Multiline symbol must follow the alias_end token", thisToken.line_num, thisToken.file);
             }
@@ -279,6 +360,10 @@ public class MScriptCompiler {
             if (!inside_multiline || (inside_multiline && !thisToken.type.equals(TType.NEWLINE))) {
                 tokens1_1.add(thisToken);
             }
+        }
+        
+        if(inside_multiline){
+            throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", thisToken.line_num, thisToken.file);
         }
 
         //take out newlines that are behind a \
@@ -345,6 +430,7 @@ public class MScriptCompiler {
             t = stream.get(i);
             Token prev = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
             Token next = i + 1 < stream.size() ? stream.get(i + 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file); 
+            Token afterNext = i + 2 < stream.size() ? stream.get(i + 2) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
                 
             //Associative array handling
             if(next.type.equals(TType.IDENT)){
@@ -352,7 +438,26 @@ public class MScriptCompiler {
                 constructCount.peek().incrementAndGet();
                 i++;
                 continue;
-            }           
+            }          
+            //Slice notation handling
+            if(next.type.equals(TType.SLICE)){
+                CSlice slice;
+                if(t.value.equals("[")){
+                    //empty first
+                    slice = new CSlice(".." + afterNext.value, afterNext.line_num, afterNext.file);
+                    arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
+                } else if(afterNext.value.equals("]")){
+                    //empty last
+                    slice = new CSlice(t.value + "..", t.line_num, t.file);
+                } else {
+                    //both are provided
+                    slice = new CSlice(t.value + ".." + afterNext.value, t.line_num, t.file);
+                    i++;
+                }
+                i++;
+                tree.addChild(new GenericTreeNode<Construct>(slice));                
+                continue;
+            }
             //Array notation handling
             if(t.type.equals(TType.LSQUARE_BRACKET)){                
                 arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
@@ -373,7 +478,7 @@ public class MScriptCompiler {
                 if(!emptyArray){
                     myIndex = tree.getChildAt(index);
                 } else {
-                    myIndex = new GenericTreeNode<Construct>(new CString("0..-1", t.line_num, t.file));
+                    myIndex = new GenericTreeNode<Construct>(new CSlice("0..-1", t.line_num, t.file));
                 }
                 tree.setChildren(tree.getChildren().subList(0, array));
                 GenericTreeNode<Construct> arrayGet = new GenericTreeNode<Construct>(new CFunction("array_get", t.line_num, t.file));
@@ -382,10 +487,25 @@ public class MScriptCompiler {
                 tree.addChild(arrayGet);
                 constructCount.peek().decrementAndGet();
             }
-            /*if (t.type.equals(TType.OPT_VAR_ASSIGN) || t.type.equals(TType.LSQUARE_BRACKET)
-                    || t.type.equals(TType.RSQUARE_BRACKET)) {
-                throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num);
-            } else */if (t.type == TType.LIT) {
+            
+            //Smart strings
+            if(t.type == TType.SMART_STRING){
+                GenericTreeNode<Construct> function = new GenericTreeNode<Construct>();
+                function.setData(new CFunction("smart_string", t.line_num, t.file));
+                GenericTreeNode<Construct> string = new GenericTreeNode<Construct>();
+                string.setData(new CString(t.value, t.line_num, t.file));
+                function.addChild(string);
+                tree.addChild(function);
+                continue;
+            }
+            
+            if(t.type == TType.DEREFERENCE){
+                //Currently unimplemented, but going ahead and making it strict
+                throw new ConfigCompileException("The '" + t.val() + "' symbol is not currently allowed in raw strings. You must quote all"
+                        + " symbols.", t.line_num, t.file);
+            }
+            
+            if (t.type == TType.LIT) {
                 tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.line_num, t.file)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
@@ -488,7 +608,7 @@ public class MScriptCompiler {
                 }
                 constructCount.peek().set(0);
                 continue;
-            } 
+            }
         }
         if(arrayStack.size() != 1){
             throw new ConfigCompileException("Mismatched square brackets", t.line_num, t.file);
