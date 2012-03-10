@@ -597,4 +597,89 @@ public class Environment {
         }
         
     }
+
+    @api
+    public static class get_highest_block_at implements Function {
+
+        public String getName() {
+            return "get_highest_block_at";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3};
+        }
+
+        public String docs() {
+            return "array {x, z, [world] | xyzArray, [world]} Gets the xyz of the highest block at a x and a z."
+                    + "It works the same as get_block_at, except that it doesn't matter now what the Y is."
+                    + "You can set it to -1000 or to 92374 it will just be ignored.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.4.0";
+        }
+
+        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            double x = 0;
+            double y = 0;
+            double z = 0;
+            MCWorld w = null;
+            String world = null;
+            if (env.GetPlayer() instanceof MCPlayer) {
+                w = env.GetPlayer().getWorld();
+            }
+
+            if (args[0] instanceof CArray && !(args.length == 3)) {
+                MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, line_num, f);
+                x = loc.getX();
+                z = loc.getZ();
+                world = loc.getWorld().getName();
+                if (args.length == 2) {
+                    world = args[1].val();
+                }
+            } else if (args.length == 2 || args.length == 3) {
+                x = Static.getDouble(args[0]);
+                z = Static.getDouble(args[1]);
+                if (args.length == 3) {
+                    world = args[2].val();
+                }
+            }
+
+
+            if (world != null) {
+                w = Static.getServer().getWorld(world);
+            }
+            if (w == null) {
+                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
+            }
+            x = java.lang.Math.floor(x);
+            y = java.lang.Math.floor(y) - 1;
+            z = java.lang.Math.floor(z);
+            MCBlock b = w.getHighestBlockAt((int) x, (int) z);
+            return new CArray(line_num, f,
+                    new CInt(b.getX(), line_num, f) ,
+                    new CInt(b.getY(), line_num, f) ,
+                    new CInt(b.getZ(), line_num, f)
+            );
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+    }
 }
