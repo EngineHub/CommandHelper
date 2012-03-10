@@ -45,4 +45,6 @@ public interface MCWorld {
     public MCBiomeType getBiome(int x, int z);
     
     public void setBiome(int x, int z, MCBiomeType type);
+
+    public MCBlock getHighestBlockAt(int x, int z);
 }

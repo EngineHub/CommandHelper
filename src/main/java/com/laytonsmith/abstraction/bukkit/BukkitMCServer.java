@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.*;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
@@ -91,6 +92,72 @@ public class BukkitMCServer implements MCServer{
 
     public MCOfflinePlayer getOfflinePlayer(String player) {
         return new BukkitMCOfflinePlayer(s.getOfflinePlayer(player));
+    }
+
+    /* Boring information get methods -.- */
+    public String getModVersion() {
+        return s.getBukkitVersion();
+    }
+
+    public String getVersion() {
+        return s.getVersion();
+    }
+
+    public Boolean getAllowEnd() {
+        return s.getAllowEnd();
+    }
+
+    public Boolean getAllowFlight() {
+        return s.getAllowFlight();
+    }
+
+    public Boolean getAllowNether() {
+        return s.getAllowNether();
+    }
+
+    public String getWorldContainer() {
+        return s.getWorldContainer().getPath();
+    }
+
+    public String getServerName() {
+        return s.getServerName();
+    }
+
+    public int getMaxPlayers() {
+        return s.getMaxPlayers();
+    }
+
+    public List<MCOfflinePlayer> getBannedPlayers() {
+        if(s.getBannedPlayers() == null){
+            return null;
+        }
+        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
+        for(OfflinePlayer p : s.getBannedPlayers()){
+            list.add(getOfflinePlayer(p.getName()));
+        }
+        return list;
+    }
+
+    public List<MCOfflinePlayer> getWhitelistedPlayers() {
+        if(s.getBannedPlayers() == null){
+            return null;
+        }
+        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
+        for(OfflinePlayer p : s.getWhitelistedPlayers()){
+            list.add(getOfflinePlayer(p.getName()));
+        }
+        return list;
+    }
+
+    public List<MCOfflinePlayer> getOperators() {
+        if(s.getOperators() == null){
+            return null;
+        }
+        List<MCOfflinePlayer> list = new ArrayList<MCOfflinePlayer>();
+        for(OfflinePlayer p : s.getOperators()){
+            list.add(getOfflinePlayer(p.getName()));
+        }
+        return list;
     }
 
 }
