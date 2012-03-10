@@ -774,7 +774,7 @@ public class ArrayHandling {
             return "mixed {array, index} Removes an index from an array. If the array is a normal"
                     + " array, all values' indicies are shifted left one. If the array is associative,"
                     + " the index is simply removed. If the index doesn't exist, the array remains"
-                    + " unchanged.";
+                    + " unchanged. The value removed is returned.";
         }
 
         public ExceptionType[] thrown() {
