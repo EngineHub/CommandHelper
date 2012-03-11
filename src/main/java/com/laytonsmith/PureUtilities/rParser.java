@@ -112,7 +112,7 @@ public class rParser {
         //Loop through all the characters, skipping any color characters
         //and their following color codes
         for (int x = 0; x < str.length(); x++) {
-            if (str.charAt(x) == '?' /*|| str.charAt(x) == MCChatColor.White.charAt(0)*/) {
+            if (str.charAt(x) == '§' /*|| str.charAt(x) == MCChatColor.White.charAt(0)*/) {
                 if (x + 1 != str.length()) {
                     if (colorChange(str.charAt(x + 1)) != null) {
                         x++;
