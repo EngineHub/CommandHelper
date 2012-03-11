@@ -322,7 +322,7 @@ public class Meta {
         }
 
         public String docs() {
-            return "string {script_string} Executes arbitrary MScript. Note that this function is very experimental, and is subject to changing or "
+            return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
                     + "removal.";
         }
 

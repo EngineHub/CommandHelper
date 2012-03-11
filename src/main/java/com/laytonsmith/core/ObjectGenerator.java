@@ -62,7 +62,7 @@ public class ObjectGenerator {
     /**
      * Given a Location Object, returns a MCLocation. If the optional world is
      * not specified in the object, the world provided is used instead. Location
-     * "objects" are mscript arrays that represent a location in game. There are
+     * "objects" are MethodScript arrays that represent a location in game. There are
      * 4 usages: <ul> <li>(x, y, z)</li> <li>(x, y, z, world)</li> <li>(x, y, z,
      * yaw, pitch)</li> <li>(x, y, z, world, yaw, pitch)</li> </ul> In all
      * cases, the pitch and yaw default to 0, and the world defaults to the

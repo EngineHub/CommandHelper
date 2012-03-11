@@ -67,7 +67,6 @@ public class ArrayHandlingTest {
     public void testArraySet1() throws  ConfigCompileException {
         String script =
                 "assign(@array, array(1,2,3)) msg(@array) array_set(@array, 2, 1) msg(@array)";
-        //MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
         StaticTest.Run(script, fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2, 3}");
         verify(fakePlayer).sendMessage("{1, 2, 1}");
@@ -99,7 +98,7 @@ public class ArrayHandlingTest {
 //    public void testArraySetEx() throws CancelCommandException, ConfigCompileException{
 //        String script =
 //                "assign(@array, array()) array_set(@array, 3, 1) msg(@array)";
-//        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
+//        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
 //    }
 
     @Test

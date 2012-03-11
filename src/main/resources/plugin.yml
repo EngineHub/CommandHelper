@@ -1,6 +1,7 @@
 name: CommandHelper
 main: com.laytonsmith.commandhelper.CommandHelperPlugin
 version: "${project.version}"
+softdepend: [Vault]
 commands:
     repeat:
         description: Repeat the last command

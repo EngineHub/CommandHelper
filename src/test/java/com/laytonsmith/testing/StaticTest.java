@@ -192,7 +192,7 @@ public class StaticTest {
     }
 
     /**
-     * Checks to see if two constructs are equal, using the same method that MScript equals() uses. In
+     * Checks to see if two constructs are equal, using the same method that MethodScript equals() uses. In
      * fact, this method depends on equals() working, as it actually uses the function.
      * @param expected
      * @param actual 
@@ -345,7 +345,7 @@ public class StaticTest {
     }
     
     /**
-     * Lexes, compiles, and runs a given mscript, using the given player.
+     * Lexes, compiles, and runs a given MethodScript, using the given player.
      * @param script
      * @param player
      * @throws ConfigCompileException 
@@ -354,15 +354,15 @@ public class StaticTest {
         Run(script, player, null);
     }
     
-    public static void Run(String script, MCCommandSender player, MScriptComplete done) throws ConfigCompileException{
+    public static void Run(String script, MCCommandSender player, MethodScriptComplete done) throws ConfigCompileException{
         Env env = new Env();
         env.SetCommandSender(player);
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, done, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, done, null);
     }
     
     public static String SRun(String script, MCCommandSender player) throws ConfigCompileException{
         final StringBuffer b = new StringBuffer();
-        Run(script, player, new MScriptComplete() {
+        Run(script, player, new MethodScriptComplete() {
 
             public void done(String output) {
                 b.append(output);

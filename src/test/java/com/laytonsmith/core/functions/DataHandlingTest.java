@@ -8,7 +8,7 @@ import com.laytonsmith.PureUtilities.fileutility.FileUtility;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Env;
-import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -63,7 +63,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{0, 1, 2, 3, 4}");
@@ -78,7 +78,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
         
     }
     
@@ -90,7 +90,7 @@ public class DataHandlingTest {
                 + "     array_push(@array, @i)\n"
                 + " )\n"
                 + " msg(@array)\n";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
         
     }
     
@@ -103,7 +103,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{1, 2, 3, 4, 5}");
@@ -119,7 +119,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{3, 4, 5}");
@@ -138,7 +138,7 @@ public class DataHandlingTest {
                 + " )"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{1, 2}");
@@ -154,7 +154,7 @@ public class DataHandlingTest {
                 + " msg(is_proc(_proc))"
                 + " call_proc(_proc)"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("false");
@@ -175,7 +175,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{0, 1, 3, 4}");
@@ -190,7 +190,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{0, 1, 4}");
@@ -205,7 +205,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{0, 1}");
@@ -223,7 +223,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{j:0, j:1, i:0, j:0, j:1, i:1}");
@@ -241,7 +241,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MScriptCompiler.preprocess(MScriptCompiler.lex(config, null), env).get(0);
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
         s.run(Arrays.asList(new Variable[]{}), env, null);
         verify(fakePlayer).sendMessage("{j:0, j:1}");
@@ -253,7 +253,7 @@ public class DataHandlingTest {
         //Create the test file
         File test = new File("unit_test_inc.ms");
         FileUtility.write("msg('hello')", test);
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, new File("./script.txt"))), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("./script.txt"))), env, null, null);
         verify(fakePlayer).sendMessage("hello");
         //delete the test file
         test.delete();

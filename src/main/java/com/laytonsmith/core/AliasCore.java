@@ -13,6 +13,7 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.sk89q.util.StringUtil;
 import com.sk89q.wepif.PermissionsResolverManager;
@@ -101,7 +102,7 @@ public class AliasCore {
                         }
                         try {
                             env.SetCommand(command);
-                            s.run(s.getVariables(command), env, new MScriptComplete() {
+                            s.run(s.getVariables(command), env, new MethodScriptComplete() {
 
                                 public void done(String output) {
                                     try {
@@ -171,7 +172,7 @@ public class AliasCore {
                             
                             if (ac.match(command)) {
                                 Static.getAliasCore().addPlayerReference(player);
-                                ac.run(ac.getVariables(command), env, new MScriptComplete() {
+                                ac.run(ac.getVariables(command), env, new MethodScriptComplete() {
 
                                     public void done(String output) {
                                         if (output != null) {
@@ -262,7 +263,7 @@ public class AliasCore {
                 Env main_env = new Env();
                 main_env.SetCommandSender(null);
                 String main = file_get_contents(mainFile.getAbsolutePath());
-                MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(main, mainFile)), main_env, new MScriptComplete() {
+                MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(main, mainFile)), main_env, new MethodScriptComplete() {
 
                     public void done(String output) {
                         logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: Main file processed" + TermColors.reset());
@@ -275,7 +276,7 @@ public class AliasCore {
             
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
             //config = new AliasConfig(alias_config, null, perms);
-            scripts = MScriptCompiler.preprocess(MScriptCompiler.lex(alias_config, aliasConfig), new Env());
+            scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias_config, aliasConfig), new Env());
             for (Script s : scripts) {
                 try {
                     s.compile();
@@ -302,6 +303,13 @@ public class AliasCore {
                     + " check the location and try loading the plugin again.");
         } catch (Throwable t) {
             t.printStackTrace();
+        }
+        
+        if(!Economy.setupEconomy()){
+            if(Prefs.DebugMode()){
+                logger.log(Level.WARNING, "[CommandHelper]: Economy could not be initialized. No further"
+                        + " errors will occur, unless you try to use an Economy function.");
+            }
         }
 
         return is_loaded;

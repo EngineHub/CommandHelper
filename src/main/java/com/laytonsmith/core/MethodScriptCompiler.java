@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Layton
  */
-public class MScriptCompiler {
+public class MethodScriptCompiler {
 
     public static List<Token> lex(String config, File file) throws ConfigCompileException {
         config = config.replaceAll("\r\n", "\n");
@@ -299,7 +299,7 @@ public class MScriptCompiler {
     }
 
     /**
-     * This function breaks the token stream into parts, seperating the aliases/MScript from the command triggers
+     * This function breaks the token stream into parts, seperating the aliases/MethodScript from the command triggers
      * @param tokenStream
      * @return
      * @throws ConfigCompileException 
@@ -620,14 +620,14 @@ public class MScriptCompiler {
     }      
     
     /**
-     * Executes a pre-compiled mscript, given the specified Script environment. Both done and script 
+     * Executes a pre-compiled MethodScript, given the specified Script environment. Both done and script 
      * may be null, and if so, reasonable defaults will be provided. The value sent to done will also
      * be returned, as a Construct, so this one function may be used synchronously also.
      * @param root
      * @param done
      * @param script 
      */
-    public static Construct execute(GenericTreeNode<Construct> root, Env env, MScriptComplete done, Script script){
+    public static Construct execute(GenericTreeNode<Construct> root, Env env, MethodScriptComplete done, Script script){
         if(script == null){
             script = new Script(null, null);
         }

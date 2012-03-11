@@ -464,13 +464,13 @@ public class BoundEvent implements Comparable<BoundEvent> {
         
         public void executeTriggered(){
 //            for(Pair<CClosure, Env> pair : whenTriggered){
-//                MScriptCompiler.execute(pair.fst, pair.snd, null, null);
+//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
 //            }            
         }
         
         public void executeCancelled(){
 //            for(Pair<CClosure, Env> pair : whenCancelled){
-//                MScriptCompiler.execute(pair.fst, pair.snd, null, null);
+//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
 //            }            
         }
     }

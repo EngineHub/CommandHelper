@@ -9,8 +9,8 @@ import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
-import com.laytonsmith.core.MScriptCompiler;
-import com.laytonsmith.core.MScriptComplete;
+import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -33,7 +33,7 @@ public class Interpreter {
 
     public static void start(){
         try {
-            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex("player()", null)), new Env(), null, null);
+            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
         } catch (ConfigCompileException ex) {}
         CommandHelperPlugin.persist = new SerializedPersistance(new File("CommandHelper/persistance.ser"));
         pl(YELLOW + "You are now in cmdline interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
@@ -88,13 +88,13 @@ public class Interpreter {
     }
 
     public static void execute(String script) throws ConfigCompileException {
-        List<Token> stream = MScriptCompiler.lex(script, new File("Interpreter"));
-        GenericTreeNode tree = MScriptCompiler.compile(stream);
+        List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
+        GenericTreeNode tree = MethodScriptCompiler.compile(stream);
         Env env = new Env();
         env.SetPlayer(null);
         env.SetLabel("*");
         try {
-            MScriptCompiler.execute(tree, env, new MScriptComplete() {
+            MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 
                 public void done(String output) {
                     output = output.trim();

@@ -169,9 +169,9 @@
         
         <!-- Used for economy stuff -->
         <dependency>
-            <groupId>com.nijikokun</groupId>
-            <artifactId>register</artifactId>
-            <version>1.5</version>
+            <groupId>net.milkbowl</groupId>
+            <artifactId>vault</artifactId>
+            <version>1.2.12</version>
         </dependency>
         
         <!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->

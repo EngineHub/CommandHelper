@@ -1,4 +1,4 @@
-## Nano color coding for CommandHelpers mscript.
+## Nano color coding for CommandHelpers methodscript.
 ##
 syntax "ms" "\.ms|config\.txt$" 
 

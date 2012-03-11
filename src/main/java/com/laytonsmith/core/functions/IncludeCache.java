@@ -6,7 +6,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
 import com.laytonsmith.core.GenericTreeNode;
-import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -32,7 +32,7 @@ public class IncludeCache {
             if(Static.CheckSecurity(file.getAbsolutePath())){
                 try {
                     String s = FileUtility.read(file);
-                    GenericTreeNode<Construct> tree = MScriptCompiler.compile(MScriptCompiler.lex("g(\n" + s + "\n)", file));
+                    GenericTreeNode<Construct> tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("g(\n" + s + "\n)", file));
                     IncludeCache.add(file, tree);
                 } catch (ConfigCompileException ex) {
                     throw new ConfigRuntimeException("There was a compile error when trying to include the script at " + file

@@ -46,12 +46,12 @@ public class DocGen {
             fl.add(f);
         }
         if (type.equals("html")) {
-            System.out.println("Command Helper uses a language called MScript, which greatly extend the capabilities of the plugin, "
+            System.out.println("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
                     + "and make the plugin a fully "
                     + "<a href=\"http://en.wikipedia.org/wiki/Turing_Complete\">Turing Complete</a> language. "
                     + "There are several functions defined, and they are grouped into \"classes\". ");
         } else if (type.equals("wiki")) {
-            System.out.println("Command Helper uses a language called MScript, which greatly extend the capabilities of the plugin, "
+            System.out.println("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
                     + "and make the plugin a fully "
                     + "[http://en.wikipedia.org/wiki/Turing_Complete Turing Complete] language. "
                     + "There are several functions defined, and they are grouped into \"classes\". ");
@@ -60,7 +60,7 @@ public class DocGen {
                     + "or can think of a better example to show. Please copy over [[CommandHelper/API/Function Template|this template]]"
                     + " and use it.");
         } else if (type.equals("text")) {
-            System.out.println("Command Helper uses a language called MScript, which greatly extend the capabilities of the plugin, "
+            System.out.println("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
                     + "and make the plugin a fully "
                     + "Turing Complete language [http://en.wikipedia.org/wiki/Turing_Complete].\n"
                     + "There are several functions defined, and they are grouped into \"classes\".");

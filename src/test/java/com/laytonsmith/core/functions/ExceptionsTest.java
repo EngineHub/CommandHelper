@@ -8,7 +8,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
-import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
@@ -62,7 +62,7 @@ public class ExceptionsTest {
                 + "msg(@ex[2])\n"
                 + "msg(@ex[3])\n"
                 + ")";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("InsufficientPermissionException");
         verify(fakePlayer).sendMessage("You do not have permission to use the ploc function.");
         verify(fakePlayer).sendMessage("null");
@@ -79,7 +79,7 @@ public class ExceptionsTest {
                 + "msg(@ex[2])\n"
                 + "msg(@ex[3])\n"               
                 + ")";
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("PlayerOfflineException");
         verify(fakePlayer).sendMessage("This is a message");
         verify(fakePlayer).sendMessage("null");
@@ -96,7 +96,7 @@ public class ExceptionsTest {
                 + "msg(@ex[3])\n"               
                 + "), @ex, msg('2'))";
         try{
-            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, new File("file.txt"))), env, null, null);
+            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("file.txt"))), env, null, null);
             fail("This test was supposed to throw an exception");
         }catch(ConfigRuntimeException e){
             //Pass

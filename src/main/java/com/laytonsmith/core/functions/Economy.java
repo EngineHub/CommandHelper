@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.bukkit.BukkitMCPluginManager;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
@@ -13,10 +12,6 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.nijikokun.register.payment.Method;
-import com.nijikokun.register.payment.Method.MethodAccount;
-import com.nijikokun.register.payment.Method.MethodBankAccount;
-import com.nijikokun.register.payment.Methods;
 import java.io.File;
 
 /**
@@ -24,12 +19,120 @@ import java.io.File;
  * @author Layton
  */
 public class Economy {
+    //Small abstraction layer around the economy plugin handler
+    private static class Account {
+        
+        String name;
+
+        private Account(String name) {
+            this.name = name;
+        }
+
+        private boolean SetBalance(double number){
+            double current = economy.getBalance(name);
+            if(number < current){
+                //Withdrawal
+                return economy.withdrawPlayer(name, current - number).transactionSuccess();
+            } else {
+                //Deposit
+                return economy.depositPlayer(name, number - current).transactionSuccess();
+            }
+        }
+        
+        private boolean divide(double number) {
+            return SetBalance(balance() / number);
+        }
+
+        private boolean multiply(double number) {
+            return SetBalance(balance() * number);
+        }
+
+        private boolean subtract(double number) {
+            return SetBalance(balance() - number);
+        }
+
+        private boolean add(double number) {
+            return SetBalance(balance() + number);
+        }
+
+        private boolean set(double number) {
+            return SetBalance(number);
+        }
+        
+        private double balance(){
+            return economy.getBalance(name);      
+        }
+        
+    }
+    
+    private static class BankAccount {
+
+        String bank_name;
+        
+        private BankAccount(String bank_name) {
+            this.bank_name = bank_name;
+        }
+        
+        private boolean SetBalance(double number){
+            double current = economy.bankBalance(bank_name).balance;
+            if(number < current){
+                //Withdrawal
+                return economy.bankWithdraw(bank_name, current - number).transactionSuccess();
+            } else {
+                //Deposit
+                return economy.bankDeposit(bank_name, number - current).transactionSuccess();
+            }
+        }
+
+        private boolean remove() {
+            return economy.deleteBank(bank_name).transactionSuccess();
+        }
+
+        private boolean divide(double number) {
+            return SetBalance(balance() / number);
+        }
+
+        private boolean multiply(double number) {
+            return SetBalance(balance() * number);
+        }
+
+        private boolean subtract(double number) {
+            return SetBalance(balance() - number);
+        }
+
+        private boolean add(double number) {
+            return SetBalance(balance() + number);
+        }
+
+        private boolean set(double number) {
+            return SetBalance(number);
+        }
+        
+        private double balance(){
+            return economy.bankBalance(bank_name).balance;           
+        }
+        
+    }
+    
+    private static net.milkbowl.vault.economy.Economy economy;
+    
+    public static Boolean setupEconomy(){
+        net.milkbowl.vault.economy.Economy economyProvider = Static.getServer().getEconomy();
+        if (economyProvider != null) {
+            economy = economyProvider;
+        }
+
+        return (economy != null);
+    }
     
     public static String docs(){
         return "Provides functions to hook into the server's economy plugin. To use any of these functions, you must have one of the"
-                + " following economy plugins installed: iConomy 4, 5, & 6+, BOSEconomy 6 & 7, Essentials Economy 2.2.17+, MultiCurrency."
-                + " No special installation is required beyond simply getting the economy plugin working by itself. Using any of these functions"
-                + " without one of the economy plugins will cause it to throw a InvalidPluginException at runtime.";
+                + " following economy plugins installed: iConomy 4,5,6, BOSEconomy 6 & 7, EssentialsEcon,"
+                + " 3Co, MultiCurrency, MineConomy, eWallet, EconXP, CurrencyCore, CraftConomy."
+                + " In addition, you must download the [http://dev.bukkit.org/server-mods/vault/ Vault plugin]. Beyond this,"
+                + " there is no special setup to get the economy functions working, assuming they work for you in game using"
+                + " the plugin's default controls. Bank controls may not be supported in your particular"
+                + " plugin, check the details of that particular plugin.";
     }
     
     @api public static class acc_balance implements Function{
@@ -67,7 +170,7 @@ public class Economy {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            MethodAccount ma = GetAccount(this.getName(), line_num, f, args);
+            Account ma = GetAccount(this.getName(), line_num, f, args);
             return new CDouble(ma.balance(), line_num, f);
         }
         
@@ -308,7 +411,8 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {account_name} Removes the specified account from the game";
+            return "void {account_name} Removes the specified account from the game - Currently unimplemented, due to lack of support in Vault. Calling"
+                    + " this function will currently always throw an exception.";
         }
 
         public ExceptionType[] thrown() {
@@ -334,11 +438,14 @@ public class Economy {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            if(GetAccount(this.getName(), line_num, f, args).remove()){
-                return new CVoid(line_num, f);
-            } else {
-                throw new ConfigRuntimeException("An error occured when trying to set the balance on account " + args[0].val(), ExceptionType.PluginInternalException, line_num, f);
-            }
+            throw new ConfigRuntimeException("An error occured while trying to remove the player's account, due to"
+                    + " this operation being unsupported in Vault. If you want to see this feature supported, "
+                    + " contact the authors of Vault!", ExceptionType.PluginInternalException, line_num, f);
+//            if(GetAccount(this.getName(), line_num, f, args).remove()){
+//                return new CVoid(line_num, f);
+//            } else {
+//                throw new ConfigRuntimeException("An error occured when trying to set the balance on account " + args[0].val(), ExceptionType.PluginInternalException, line_num, f);
+//            }
         }
         
     }
@@ -353,7 +460,7 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, account_name} Gets the specified bank account's balance";
+            return "void {bank_name} Gets the specified bank account's balance";
         }
 
         public ExceptionType[] thrown() {
@@ -394,7 +501,7 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, account_name, value} Sets the bank account's balance to the given amount";
+            return "void {bank_name, value} Sets the bank account's balance to the given amount";
         }
 
         public ExceptionType[] thrown() {
@@ -439,7 +546,7 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, account_name, value} Adds the specified amount to the bank account's balance";
+            return "void {bank_name, value} Adds the specified amount to the bank account's balance";
         }
 
         public ExceptionType[] thrown() {
@@ -484,7 +591,7 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, account_name, value} Subtracts the specified amount from the bank account's balance";
+            return "void {bank_name, value} Subtracts the specified amount from the bank account's balance";
         }
 
         public ExceptionType[] thrown() {
@@ -529,7 +636,7 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, account_name, value} Multiplies the given bank account's balance by the given value";
+            return "void {bank_name, value} Multiplies the given bank account's balance by the given value";
         }
 
         public ExceptionType[] thrown() {
@@ -574,7 +681,7 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, account_name, value} Divides the bank account's balance by the given value";
+            return "void {bank_name, value} Divides the bank account's balance by the given value";
         }
 
         public ExceptionType[] thrown() {
@@ -619,7 +726,7 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, account_name} Removes the given bank account from the game";
+            return "void {bank_name} Removes the given bank account from the game";
         }
 
         public ExceptionType[] thrown() {
@@ -654,29 +761,10 @@ public class Economy {
         
     }
     
-    public static Method GetMethod(int line_num, File file){
-        com.nijikokun.register.payment.Methods m = new Methods();
-        if(!Methods.hasMethod()){
-            //Register only works with Bukkit for now anyways.
-            Methods.setMethod(((BukkitMCPluginManager)Static.getServer().getPluginManager()).__PluginManager());
-            //initialize our plugin if it isn't already
-//            Plugin [] plugins = Static.getServer().getPluginManager().getPlugins();
-//            for(Plugin plugin : plugins){
-//                if(m.setMethod(plugin)){
-//                    break;
-//                }
-//            }
-        }
-        if(Methods.getMethod() == null){
-            throw new ConfigRuntimeException("No Economy plugins appear to be loaded", ExceptionType.InvalidPluginException, line_num, file);
-        } else {
-            return Methods.getMethod();
-        }
-    }
     
-    public static MethodAccount GetAccount(String fname, int line_num, File file, Construct ... args){
+    private static Account GetAccount(String fname, int line_num, File file, Construct ... args){
         String name = args[0].val();
-        MethodAccount m = GetMethod(line_num, file).getAccount(name);
+        Account m = new Account(name);
         if(m == null){
             throw new ConfigRuntimeException("Could not access an account by that name (" + args[0].val() + ")", ExceptionType.PluginInternalException, line_num, file);
         } else {
@@ -684,12 +772,11 @@ public class Economy {
         }
     }
     
-    public static MethodBankAccount GetBankAccount(String fname, int line_num, File file, Construct ... args){
+    private static BankAccount GetBankAccount(String fname, int line_num, File file, Construct ... args){
         String bank_name = args[0].val();
-        String account_name = args[1].val();
-        MethodBankAccount m = GetMethod(line_num, file).getBankAccount(bank_name, account_name);
+        BankAccount m = new BankAccount(bank_name);
         if(m == null){
-            throw new ConfigRuntimeException("Could not access a bank account by that name (" + args[0].val() + ":" + args[1].val() + ")", ExceptionType.PluginInternalException, line_num, file);
+            throw new ConfigRuntimeException("Could not access a bank account by that name (" + args[0].val() + ")", ExceptionType.PluginInternalException, line_num, file);
         } else {
             return m;
         }

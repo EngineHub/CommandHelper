@@ -8,7 +8,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
-import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import com.sk89q.wepif.PermissionsResolverManager;
@@ -56,7 +56,7 @@ public class MetaTest {
         MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("wraithguard02", fakeServer);
         when(fakeServer.getPlayer("wraithguard02")).thenReturn(fakePlayer2);
         when(fakePlayer.isOp()).thenReturn(true);
-        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
         //verify(fakePlayer2).performCommand("cmd yay");
         verify(fakeServer).dispatchCommand(fakePlayer2, "cmd yay");
     }
@@ -76,7 +76,7 @@ public class MetaTest {
 //            }
 //            
 //        });
-//        MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(script, null)), fakePlayer, null, null);
+//        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), fakePlayer, null, null);
 //        assertTrue(bool.get());
 //    }
     

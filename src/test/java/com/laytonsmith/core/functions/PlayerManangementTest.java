@@ -8,7 +8,7 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.MScriptComplete;
+import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
@@ -92,7 +92,7 @@ public class PlayerManangementTest {
         when(fakePlayer.getLocation()).thenReturn(loc);
         when(fakePlayer.getWorld()).thenReturn(w);
         final StringBuilder done = new StringBuilder();
-        Run(script, fakePlayer, new MScriptComplete() {
+        Run(script, fakePlayer, new MethodScriptComplete() {
 
             public void done(String output) {
                 done.append(output);

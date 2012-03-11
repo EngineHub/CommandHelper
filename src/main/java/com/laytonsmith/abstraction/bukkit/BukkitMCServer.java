@@ -7,11 +7,13 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.*;
 import java.util.ArrayList;
 import java.util.List;
+import net.milkbowl.vault.economy.Economy;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  *
@@ -158,6 +160,14 @@ public class BukkitMCServer implements MCServer{
             list.add(getOfflinePlayer(p.getName()));
         }
         return list;
+    }
+
+    public Economy getEconomy() {
+        RegisteredServiceProvider<Economy> economyProvider = s.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
+        if (economyProvider != null) {
+            return economyProvider.getProvider();
+        }
+        return null;
     }
 
 }

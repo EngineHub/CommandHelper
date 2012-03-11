@@ -121,7 +121,7 @@ public class Script {
         return compilerError;
     }
 
-    public void run(final List<Variable> vars, Env myEnv, final MScriptComplete done) {
+    public void run(final List<Variable> vars, Env myEnv, final MethodScriptComplete done) {
         //Some things, such as the label are determined at compile time
         this.CurrentEnv = myEnv;
         this.CurrentEnv.SetLabel(this.label);
@@ -174,9 +174,9 @@ public class Script {
                 }
                 File auto_include = new File("plugins/CommandHelper/auto_include.ms");
                 if (auto_include.exists()) {
-                    MScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), CurrentEnv, null, this);
+                    MethodScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), CurrentEnv, null, this);
                 }
-                MScriptCompiler.execute(tree.getRoot(), CurrentEnv, done, this);
+                MethodScriptCompiler.execute(tree.getRoot(), CurrentEnv, done, this);
             }
         } catch (ConfigRuntimeException ex) {
             //We don't know how to handle this really, so let's pass it up the chain.
@@ -296,7 +296,7 @@ public class Script {
                         throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
                     }
                     try{
-                        GenericTreeNode<Construct> root = MScriptCompiler.compile(MScriptCompiler.lex(ch.get(0).getData().val(), null));
+                        GenericTreeNode<Construct> root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(ch.get(0).getData().val(), null));
                         StringBuilder b = new StringBuilder();
                         for (GenericTreeNode<Construct> child : root.getChildren()) {
                             CString cs = new CString(eval(child, env).val(), 0, null);
@@ -799,7 +799,7 @@ public class Script {
         right.add(temp);
         cright = new ArrayList<GenericTreeNode<Construct>>();
         for (List<Token> l : right) {
-            cright.add(MScriptCompiler.compile(l));
+            cright.add(MethodScriptCompiler.compile(l));
         }
     }
 

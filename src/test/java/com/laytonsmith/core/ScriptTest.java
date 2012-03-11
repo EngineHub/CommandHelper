@@ -57,7 +57,7 @@ public class ScriptTest {
 //        System.out.println("run");
 //        List<Variable> vars = null;
 //        Player p = null;
-//        MScriptComplete done = null;
+//        MethodScriptComplete done = null;
 //        Script instance = null;
 //        instance.run(vars, p, done);
 //        // TODO review the generated test code and remove the default call to fail.

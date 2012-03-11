@@ -53,7 +53,7 @@ public class UserManager {
     
     public int addAlias(String alias) throws ConfigCompileException {
         try{
-            MScriptCompiler.preprocess(MScriptCompiler.lex(alias, new File("User Alias")), new Env()).get(0).compile();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias")), new Env()).get(0).compile();
         } catch(IndexOutOfBoundsException e){
             throw new ConfigCompileException("Improperly formatted alias", 0, new File("User Alias"));
         }
@@ -84,9 +84,9 @@ public class UserManager {
         if(script_cache.containsKey(alias)){
             tokens = script_cache.get(alias);
         } else {
-            tokens = MScriptCompiler.lex(alias, new File("User Alias"));            
+            tokens = MethodScriptCompiler.lex(alias, new File("User Alias"));            
         }
-        return MScriptCompiler.preprocess(tokens, env).get(0);
+        return MethodScriptCompiler.preprocess(tokens, env).get(0);
     }
     
     public void delAlias(int id){

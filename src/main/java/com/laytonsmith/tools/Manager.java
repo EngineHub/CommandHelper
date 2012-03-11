@@ -10,7 +10,7 @@ import com.laytonsmith.PureUtilities.TermColors.SYS;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.PureUtilities.fileutility.FileUtility;
 import com.laytonsmith.core.Env;
-import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -37,7 +37,7 @@ public class Manager {
         
         pl("Starting the Data Manager...");
         try {
-            MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex("player()", null)), new Env(), null, null);
+            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
         } catch (ConfigCompileException ex) {}
         pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
         pl(BLINKON + RED + "Warning!" + BLINKOFF + YELLOW + " Be sure your server is not running before using this tool to make changes to your database!");
@@ -217,7 +217,7 @@ public class Manager {
                         + " persistance format,\nnot the format you use when using store_value().");
                 String key = prompt();
                 pl("Provide a value for " + CYAN + key + WHITE + ". This value you provide will"
-                        + " be interpreted as pure mscript. (So things like array() will work)");
+                        + " be interpreted as pure MethodScript. (So things like array() will work)");
                 String value = prompt();
                 if(doAddEdit(key, value)){
                     pl("Value changed!");
@@ -260,7 +260,7 @@ public class Manager {
     
     public static boolean doAddEdit(String key, String valueScript){
         try {
-            Construct c = MScriptCompiler.execute(MScriptCompiler.compile(MScriptCompiler.lex(valueScript, null)), new Env(), null, null);
+            Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null)), new Env(), null, null);
             String value = Construct.json_encode(c, 0, null);
             pl(CYAN + "Adding: " + WHITE + value);
             Persistance db = GetDB();

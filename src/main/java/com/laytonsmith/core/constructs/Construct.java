@@ -90,7 +90,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
      * CString, CVoid, Command. Currently unsupported, but will be in the future are: CClosure/CFunction
      * The following map is applied when encoding and decoding:
      * <table border='1'>
-     * <tr><th>JSON</th><th>MScript</th></tr>
+     * <tr><th>JSON</th><th>MethodScript</th></tr>
      * <tr><td>string</td><td>CString, CVoid, Command, but all are decoded into CString</td></tr>
      * <tr><td>number</td><td>CInt, CDouble, and it is decoded intelligently</td></tr>
      * <tr><td>boolean</td><td>CBoolean</td></tr>

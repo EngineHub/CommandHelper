@@ -18,7 +18,7 @@ import java.util.List;
  */
 public class Exceptions {
     public static String docs(){
-        return "This class contains functions related to Exception handling in MScript";
+        return "This class contains functions related to Exception handling in MethodScript";
     }
     public enum ExceptionType{
         /**

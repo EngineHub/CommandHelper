@@ -5,6 +5,7 @@
 package com.laytonsmith.abstraction;
 
 import java.util.List;
+import net.milkbowl.vault.economy.Economy;
 
 
 /**
@@ -35,4 +36,6 @@ public interface MCServer {
     public List<MCOfflinePlayer> getBannedPlayers();
     public List<MCOfflinePlayer> getWhitelistedPlayers();
     public List<MCOfflinePlayer> getOperators();
+
+    public Economy getEconomy();
 }
