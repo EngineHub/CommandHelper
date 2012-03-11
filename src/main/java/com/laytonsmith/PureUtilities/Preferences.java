@@ -128,21 +128,21 @@ public class Preferences {
                 try{
                     return Integer.parseInt(value);
                 } catch (NumberFormatException e){
-                    logger.log(Level.WARNING, "[{0}] expects the value of {1} to be an integer. Using the default of {2}", new Object[]{appName, p.name, p.value});
+                    logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an integer. Using the default of " + p.value);
                     return Integer.parseInt(p.value);
                 }
             case DOUBLE:
                 try{
                     return Double.parseDouble(value);
                 } catch (NumberFormatException e){
-                    logger.log(Level.WARNING, "[{0}] expects the value of {1} to be a double. Using the default of {2}", new Object[]{appName, p.name, p.value});
+                    logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an double. Using the default of " + p.value);
                     return Double.parseDouble(p.value);
                 }
             case BOOLEAN:
                 try{
                     return getBoolean(value);
                 } catch (NumberFormatException e){
-                    logger.log(Level.WARNING, "[{0}] expects the value of {1} to be a boolean. Using the default of {2}", new Object[]{appName, p.name, p.value});
+                    logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be an boolean. Using the default of " + p.value);
                     return getBoolean(p.value);
                 }
             case NUMBER:
@@ -152,7 +152,7 @@ public class Preferences {
                     try{
                         return Double.parseDouble(value);
                     } catch(NumberFormatException f){
-                        logger.log(Level.WARNING, "[{0}] expects the value of {1} to be a number. Using the default of {2}", new Object[]{appName, p.name, p.value});
+                        logger.log(Level.WARNING, "[" + appName + "] expects the value of " + p.name + " to be a number. Using the default of " + p.value);
                         try{
                             return Integer.parseInt(p.value);
                         } catch(NumberFormatException g){
@@ -236,7 +236,7 @@ public class Preferences {
             out.write(b.toString());
             out.close();
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "[{0}] Could not write out preferences file", appName);
+            logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file");
         }
     }
     

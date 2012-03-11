@@ -7,6 +7,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MScriptCompiler;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Meta;
 import java.io.File;
 import java.util.ArrayList;
@@ -33,7 +34,7 @@ public class CClosure extends Construct {
         try {
             this.env = env.clone();
         } catch (CloneNotSupportedException ex) {
-            this.env = env;
+            throw new ConfigRuntimeException("A failure occured while trying to clone the environment.", line_num, file);
         }
         this.names = names;
         this.defaults = defaults;

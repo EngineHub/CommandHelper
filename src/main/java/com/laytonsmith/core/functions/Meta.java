@@ -59,9 +59,9 @@ public class Meta {
 
                 if (Prefs.DebugMode()) {
                     if (env.GetCommandSender() instanceof MCPlayer) {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on {0}: {1}", new Object[]{env.GetPlayer().getName(), args[1].val().trim()});
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[1].val().trim());
                     } else {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: {0}", args[1].val().trim());
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[1].val().trim());
                     }
                 }
 
@@ -83,7 +83,7 @@ public class Meta {
             } else {
                 MCPlayer m = Static.GetPlayer(args[0]);
                 if (m != null && m.isOnline()) {
-                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on {0} (running as {1}): {2}", new Object[]{env.GetPlayer().getName(), args[0].val(), args[1].val().trim()});
+                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + " (running as " + args[0].val() + "): " + args[1].val().trim());
                     //m.chat(cmd);
                     Static.getServer().dispatchCommand(m, cmd);
                 } else {
@@ -139,7 +139,7 @@ public class Meta {
             } catch (ClassNotFoundException e) {
             } catch (IllegalStateException e) {
             } catch (Throwable e) {
-                Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player {0}", player.getName());
+                Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
             }
         }
 

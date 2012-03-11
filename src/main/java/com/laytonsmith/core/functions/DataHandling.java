@@ -1059,6 +1059,47 @@ public class DataHandling {
         
     }   
     
+    @api public static class is_closure implements Function{
+
+        public String getName() {
+            return "is_closure";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "boolean {arg} Returns true if the argument is a closure (could be executed)"
+                    + " or false otherwise";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CClosure, line_num, f);
+        }
+
+        public String since() {
+            return "3.3.1";
+        }
+        
+    }
+    
     @api public static class _import implements Function{
 
         public String getName() {

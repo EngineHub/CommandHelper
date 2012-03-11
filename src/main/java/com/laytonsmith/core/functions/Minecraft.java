@@ -754,7 +754,7 @@ public class Minecraft {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.CastException};
         }
 
         public boolean isRestricted() {

@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -50,6 +51,11 @@ public class IVariableList {
         IVariableList clone = new IVariableList();
         clone.varList = new HashMap<String, IVariable>(varList);
         return clone;
+    }
+
+    //package private, only the reflection package should be accessing this anyways
+    Set<String> keySet() {
+        return varList.keySet();
     }
     
     
