@@ -110,7 +110,7 @@ public class CClosure extends Construct {
             List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
             children.add(node);
             newNode.setChildren(children);
-            MScriptCompiler.execute(newNode, environment, null, null);
+            MScriptCompiler.execute(newNode, environment, null, environment.GetScript());
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
         }
