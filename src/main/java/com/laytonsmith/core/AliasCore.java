@@ -15,6 +15,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
+import com.laytonsmith.core.functions.Scheduling;
 import com.sk89q.util.StringUtil;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.*;
@@ -227,6 +228,7 @@ public class AliasCore {
         boolean is_loaded = true;
         try {
             Globals.clear();
+            Scheduling.ClearScheduledRunners();
             EventUtils.UnregisterAll();            
             IncludeCache.clearCache(); //Clear the include cache, so it re-pulls files
             if (!aliasConfig.exists()) {

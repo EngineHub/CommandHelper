@@ -43,5 +43,11 @@ public interface Convertor {
      * @return 
      */
     public int SetFutureRunnable(long ms, Runnable r);
+
+    public void ClearAllRunnables();
+
+    public void ClearFutureRunnable(int id);
+
+    public int SetFutureRepeater(long ms, Runnable r);
     
 }

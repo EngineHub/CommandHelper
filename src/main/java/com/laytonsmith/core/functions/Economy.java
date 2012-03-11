@@ -19,12 +19,25 @@ import java.io.File;
  * @author Layton
  */
 public class Economy {
+    
+    private static void CheckInstallation() throws ConfigRuntimeException{
+        try{
+            economy.getName();
+        } catch(NoClassDefFoundError e){
+            throw new ConfigRuntimeException("You are attempting to use"
+                    + " an economy function, and your economy setup is not valid."
+                    + " Please install Vault and an Economy plugin before attempting"
+                    + " to use any of the Economy functions.", ExceptionType.InvalidPluginException, 0, null);
+        }
+    }
+    
     //Small abstraction layer around the economy plugin handler
     private static class Account {
         
         String name;
 
-        private Account(String name) {
+        private Account(String name) { 
+            CheckInstallation();
             this.name = name;
         }
 
@@ -70,6 +83,7 @@ public class Economy {
         String bank_name;
         
         private BankAccount(String bank_name) {
+            CheckInstallation();
             this.bank_name = bank_name;
         }
         

@@ -16,12 +16,21 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
+import java.util.Set;
+import java.util.TreeSet;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
  * @author Layton
  */
 public class Scheduling {
+    
+    
+    public static void ClearScheduledRunners(){
+        StaticLayer.ClearAllRunnables();
+    }
+    
     public static String docs(){
         return "This class contains methods for dealing with time and server scheduling.";
     }
@@ -175,55 +184,18 @@ public class Scheduling {
     public static class set_interval implements Function{
 
         public String getName() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return "set_interval";
         }
 
         public Integer[] numArgs() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return new Integer[]{2};
         }
 
         public String docs() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public ExceptionType[] thrown() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public boolean isRestricted() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public boolean preResolveVariables() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public Boolean runAsync() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-
-        public String since() {
-            throw new UnsupportedOperationException("Not supported yet.");
-        }
-        
-    }
-    
-    @api public static class set_timeout implements Function{
-
-        public String getName() {
-            return "set_timeout";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
-        public String docs() {
-            return "int {timeInMS, closure}";
+            return "int {timeInMS, closure} Sets a task to run every so often. This works similarly to set_timeout,"
+                    + " except the task will automatically re-register itself to run again. Note that the resolution"
+                    + " of the time is in ms, however, the server will only have a resolution of up to 50 ms, meaning"
+                    + " that a time of 1-50ms is essentially the same as 50ms.";
         }
 
         public ExceptionType[] thrown() {
@@ -247,13 +219,71 @@ public class Scheduling {
             if(!(args[1] instanceof CClosure)){
                 throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, line_num, f);
             }
-            final CClosure c = (CClosure) args[1];            
-            int ret = StaticLayer.SetFutureRunnable(time, new Runnable(){
+            final CClosure c = (CClosure) args[1];     
+            final AtomicInteger ret = new AtomicInteger(-1);
+            
+            ret.set(StaticLayer.SetFutureRepeater(time, new Runnable(){
                public void run(){
+                   c.getEnv().SetCustom("timeout-id", ret.get());
                    c.execute(null);
                } 
-            });
-            return new CInt(ret, line_num, f);
+            }));
+            return new CInt(ret.get(), line_num, f);
+        }
+
+        public String since() {
+            return "3.3.1";
+        }
+        
+    }
+    
+    @api public static class set_timeout implements Function{
+
+        public String getName() {
+            return "set_timeout";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "int {timeInMS, closure} Sets a task to run in the specified number of ms in the future."
+                    + " The task will only run once. Note that the resolution"
+                    + " of the time is in ms, however, the server will only have a resolution of up to 50 ms, meaning"
+                    + " that a time of 1-50ms is essentially the same as 50ms.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            long time = Static.getInt(args[0]);
+            if(!(args[1] instanceof CClosure)){
+                throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, line_num, f);
+            }
+            final CClosure c = (CClosure) args[1];     
+            final AtomicInteger ret = new AtomicInteger(-1);
+            ret.set(StaticLayer.SetFutureRunnable(time, new Runnable(){
+               public void run(){
+                   c.getEnv().SetCustom("timeout-id", ret.get());
+                   c.execute(null);
+               } 
+            }));
+            return new CInt(ret.get(), line_num, f);
         }
 
         public String since() {

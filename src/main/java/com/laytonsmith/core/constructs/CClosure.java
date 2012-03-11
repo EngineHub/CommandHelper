@@ -80,13 +80,28 @@ public class CClosure extends Construct {
     }
     
     /**
+     * If meta code needs to affect this closure's environment, it can
+     * access it with this function. Note that changing this will only
+     * affect future runs of the closure, it will not affect the currently
+     * running closure, (if any) due to the environment being cloned right
+     * before running.
+     * @return 
+     */
+    public synchronized Env getEnv(){        
+        return env;
+    }
+    
+    /**
      * Executes the closure, giving it the supplied arguments. {@code values} may be null, which means that
      * no arguments are being sent.
      * @param values 
      */
     public void execute(Construct[] values){
         try {
-            Env environment = env.clone();
+            Env environment;
+            synchronized(this){
+                environment = env.clone();
+            }
             if(values != null){
                 for(int i = 0; i < names.length; i++){
                     String name = names[i];

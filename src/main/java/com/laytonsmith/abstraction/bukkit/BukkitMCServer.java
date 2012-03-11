@@ -163,11 +163,16 @@ public class BukkitMCServer implements MCServer{
     }
 
     public Economy getEconomy() {
-        RegisteredServiceProvider<Economy> economyProvider = s.getServicesManager().getRegistration(net.milkbowl.vault.economy.Economy.class);
-        if (economyProvider != null) {
-            return economyProvider.getProvider();
+        try{
+            RegisteredServiceProvider<Economy> economyProvider = (RegisteredServiceProvider<Economy>)
+                    s.getServicesManager().getRegistration(Class.forName("net.milkbowl.vault.economy.Economy"));
+            if (economyProvider != null) {
+                return economyProvider.getProvider();
+            }
+        } catch(ClassNotFoundException e){
+            //Ignored, it means they don't have Vault installed.
         }
-        return null;
+        return null;            
     }
 
 }

@@ -8,6 +8,8 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import java.util.Set;
+import java.util.TreeSet;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -91,9 +93,35 @@ public class BukkitConvertor implements Convertor {
     public String LookupMaterialName(int id) {
         return Material.getMaterial(id).toString();
     }
+    
+    /**
+     * We don't want to allow scripts to clear other plugin's tasks
+     * on accident, so only ids registered through our interface
+     * can also be cancelled.
+     */
+    private static Set<Integer> validIDs = new TreeSet<Integer>();
 
     public int SetFutureRunnable(long ms, Runnable r) {
-        return Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, (long)(ms / 50));
+        int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, (long)(ms / 50));
+        validIDs.add(id);
+        return id;
+    }
+    
+    public int SetFutureRepeater(long ms, Runnable r){
+        int id = Bukkit.getServer().getScheduler().scheduleAsyncRepeatingTask(CommandHelperPlugin.self, r, ms, (long)(ms / 50));
+        validIDs.add(id);
+        return id;        
+    }
+
+    public void ClearAllRunnables() {
+        Bukkit.getServer().getScheduler().cancelTasks(CommandHelperPlugin.self);
+    }
+
+    public void ClearFutureRunnable(int id) {
+        if(validIDs.contains(id)){
+            Bukkit.getServer().getScheduler().cancelTask(id);
+            validIDs.remove(id);
+        }
     }
 
 }
