@@ -188,14 +188,16 @@ public class Scheduling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
-            return "int {timeInMS, closure} Sets a task to run every so often. This works similarly to set_timeout,"
+            return "int {timeInMS, [initialDelayInMS,] closure} Sets a task to run every so often. This works similarly to set_timeout,"
                     + " except the task will automatically re-register itself to run again. Note that the resolution"
                     + " of the time is in ms, however, the server will only have a resolution of up to 50 ms, meaning"
-                    + " that a time of 1-50ms is essentially the same as 50ms.";
+                    + " that a time of 1-50ms is essentially the same as 50ms. The inital delay defaults to the same"
+                    + " thing as timeInMS, that is, there will be a pause between registration and initial firing. However,"
+                    + " this can be set to 0 (or some other number) to adjust how long of a delay there is before it begins.";
         }
 
         public ExceptionType[] thrown() {
@@ -216,13 +218,19 @@ public class Scheduling {
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
             long time = Static.getInt(args[0]);
-            if(!(args[1] instanceof CClosure)){
+            int offset = 0;
+            long delay = time;
+            if(args.length == 3){
+                offset = 1;
+                delay = Static.getInt(args[1]);
+            }            
+            if(!(args[1 + offset] instanceof CClosure)){
                 throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, line_num, f);
             }
-            final CClosure c = (CClosure) args[1];     
+            final CClosure c = (CClosure) args[1 + offset];     
             final AtomicInteger ret = new AtomicInteger(-1);
             
-            ret.set(StaticLayer.SetFutureRepeater(time, new Runnable(){
+            ret.set(StaticLayer.SetFutureRepeater(time, delay, new Runnable(){
                public void run(){
                    c.getEnv().SetCustom("timeout-id", ret.get());
                    c.execute(null);
@@ -314,7 +322,7 @@ public class Scheduling {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InsufficientArgumentsException};
         }
 
         public boolean isRestricted() {

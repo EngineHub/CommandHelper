@@ -111,8 +111,8 @@ public class StaticLayer {
         return convertor.SetFutureRunnable(ms, r);
     }
     
-    public static int SetFutureRepeater(long ms, Runnable r){
-        return convertor.SetFutureRepeater(ms, r);
+    public static int SetFutureRepeater(long ms, long initialDelay, Runnable r){
+        return convertor.SetFutureRepeater(ms, initialDelay, r);
     }
 
     public static void ClearAllRunnables() {
