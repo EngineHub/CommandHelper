@@ -83,6 +83,11 @@ public final class Env implements Cloneable{
         ((Map<String, Object>)custom.get("custom")).put(name, var);        
     }
     
+    /**
+     * Returns the custom value to which the specified key is mapped, or null if this map contains no mapping for the key.
+     * @param name
+     * @return 
+     */
     public Object GetCustom(String name){
         if(!custom.containsKey("custom")){
             custom.put("custom", new HashMap<String, Object>());

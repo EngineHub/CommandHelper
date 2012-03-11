@@ -108,7 +108,7 @@ public class BukkitConvertor implements Convertor {
     }
     
     public int SetFutureRepeater(long ms, Runnable r){
-        int id = Bukkit.getServer().getScheduler().scheduleAsyncRepeatingTask(CommandHelperPlugin.self, r, ms, (long)(ms / 50));
+        int id = Bukkit.getServer().getScheduler().scheduleAsyncRepeatingTask(CommandHelperPlugin.self, r, (long)(ms / 50), (long)(ms / 50));
         validIDs.add(id);
         return id;        
     }

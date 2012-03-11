@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.Static;
@@ -214,7 +215,7 @@ public class EventBinding {
         public String docs() {
             return "void {[state]} Cancels the event (if applicable). If the event is not cancellable, or is already cancelled, nothing happens."
                     + " If called from outside an event handler, a BindException is thrown. By default, state is true, but you can"
-                    + " uncancel an event (if possible) by calling cancel(false)";
+                    + " uncancel an event (if possible) by calling cancel(false).";
         }
 
         public ExceptionType[] thrown() {
@@ -238,16 +239,17 @@ public class EventBinding {
         }
 
         public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            boolean cancelled = true;
+            if(args.length == 1){
+                cancelled = Static.getBoolean(args[0]);
+            }            
+            
             BoundEvent.ActiveEvent original = environment.GetEvent();
             if(original == null){
                 throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
             }
             if(original.getUnderlyingEvent() != null && original.isCancellable()){
-                if(args.length == 1){
-                    original.setCancelled(Static.getBoolean(args[0]));
-                } else {
-                    original.setCancelled(true);
-                }
+                original.setCancelled(cancelled);
             }
             environment.GetEvent().setCancelled(true);
             return new CVoid(line_num, f);

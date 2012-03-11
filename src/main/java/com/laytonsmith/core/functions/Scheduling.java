@@ -181,7 +181,7 @@ public class Scheduling {
         }
     }
     
-    public static class set_interval implements Function{
+    @api public static class set_interval implements Function{
 
         public String getName() {
             return "set_interval";
@@ -244,7 +244,7 @@ public class Scheduling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
+            return new Integer[]{2};
         }
 
         public String docs() {
@@ -292,5 +292,58 @@ public class Scheduling {
         
     }
     
-    
+    @api public static class clear_task implements Function{
+
+        public String getName() {
+            return "clear_task";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[id]} Stops the interval or timeout that is specified. The id can be gotten by"
+                    + " storing the integer returned from either set_timeout or set_interval."
+                    + " An invalid id is simply ignored. Also note that you can cancel an interval"
+                    + " (and technically a timeout, though this is pointless) from within the interval"
+                    + " by using the cancel function. This clear_task function is more useful for set_timeout, where"
+                    + " you may queue up some task to happen in the far future, yet have some trigger to"
+                    + " prevent it from happening. ID is optional, but only if called from within a set_interval or set_timeout"
+                    + " closure, in which case it defaults to the id of that particular task.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(args.length == 0 && environment.GetCustom("timeout-id") != null){
+                StaticLayer.ClearFutureRunnable((Integer)environment.GetCustom("timeout-id"));
+            } else if(args.length == 1){
+                StaticLayer.ClearFutureRunnable((int)Static.getInt(args[0]));
+            } else {
+                throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, line_num, f);
+            }
+            return new CVoid(line_num, f);
+        }
+
+        public String since() {
+            return "3.3.1";
+        }
+        
+    }    
+        
 }
