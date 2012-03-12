@@ -477,7 +477,7 @@ public class AliasCore {
     }
     
     private static void GetAuxAliases(File start, LocalPackage pack){
-        if(start.isDirectory() && !start.getName().endsWith(".disabled")){
+        if(start.isDirectory() && !start.getName().endsWith(".disabled") && !start.getName().endsWith(".library")){
             for(File f : start.listFiles()){
                 GetAuxAliases(f, pack);
             }
