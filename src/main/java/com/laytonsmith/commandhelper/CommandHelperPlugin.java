@@ -126,7 +126,7 @@ public class CommandHelperPlugin extends JavaPlugin {
                 //System.out.flush();
                 System.out.println("\n\n\n" + Static.Logo());
             }
-            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), prefsFile, new File("plugins/CommandHelper/" + main_file), perms, this);
+            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), new File("plugins/CommandHelper/LocalPackages"), prefsFile, new File("plugins/CommandHelper/" + main_file), perms, this);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         } catch (ConfigCompileException ex) {
@@ -201,17 +201,18 @@ public class CommandHelperPlugin extends JavaPlugin {
             if(sender instanceof Player){
                 player = new BukkitMCPlayer((Player)sender);
             }
-            if(ac.reload(player)){
-                if(sender instanceof Player){
-                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");
-                }
-                System.out.println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
-            } else{
-                if(sender instanceof Player){
-                    Static.SendMessage(player, MCChatColor.RED + "An error occured when trying to compile the script. Check the console for more information.");
-                }
-                System.out.println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
-            }
+            ac.reload(player);
+//            if(ac.reload(player)){
+//                if(sender instanceof Player){
+//                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");
+//                }
+//                System.out.println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
+//            } else{
+//                if(sender instanceof Player){
+//                    Static.SendMessage(player, MCChatColor.RED + "An error occured when trying to compile the script. Check the console for more information.");
+//                }
+//                System.out.println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
+//            }
             return true;
         } else if(cmd.getName().equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")){
             return true;

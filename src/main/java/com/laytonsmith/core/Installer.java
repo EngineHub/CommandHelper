@@ -29,6 +29,7 @@ public class Installer {
                 Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+        new File("plugins/CommandHelper/LocalPackages").mkdirs();
     }
 
     public static String parseISToString(java.io.InputStream is) {

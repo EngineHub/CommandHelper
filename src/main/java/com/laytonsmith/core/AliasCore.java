@@ -22,6 +22,9 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipException;
+import java.util.zip.ZipFile;
 
 /**
  * This class contains all the handling code. It only deals with built-in Java Objects,
@@ -32,6 +35,7 @@ import java.util.logging.Logger;
 public class AliasCore {
 
     private File aliasConfig;
+    private File auxAliases;
     private File prefFile;
     private File mainFile;
     //AliasConfig config;
@@ -49,8 +53,9 @@ public class AliasCore {
      * @param maxCommands How many commands an alias may contain. Since aliases can be used like a
      * macro, this can help prevent command spamming.
      */
-    public AliasCore(File aliasConfig, File prefFile, File mainFile, PermissionsResolverManager perms, CommandHelperPlugin parent) throws ConfigCompileException {
+    public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, PermissionsResolverManager perms, CommandHelperPlugin parent) throws ConfigCompileException {
         this.aliasConfig = aliasConfig;
+        this.auxAliases = auxAliases;
         this.prefFile = prefFile;
         this.perms = perms;
         this.parent = parent;
@@ -224,8 +229,7 @@ public class AliasCore {
      * running the command, send a reference to them, and they will see
      * compile errors, otherwise, null.
      */
-    public final boolean reload(MCPlayer player) {
-        boolean is_loaded = true;
+    public final void reload(MCPlayer player) {
         try {
             Globals.clear();
             Scheduling.ClearScheduledRunners();
@@ -259,47 +263,26 @@ public class AliasCore {
 
             Preferences prefs = Static.getPreferences();
             prefs.init(prefFile);
+            scripts = new ArrayList<Script>();
+            
+            LocalPackage localPackages = new LocalPackage();
             
             //Run the main file once
-            try{
-                Env main_env = new Env();
-                main_env.SetCommandSender(null);
-                String main = file_get_contents(mainFile.getAbsolutePath());
-                MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(main, mainFile)), main_env, new MethodScriptComplete() {
-
-                    public void done(String output) {
-                        logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: Main file processed" + TermColors.reset());
-                    }
-                }, null);
-            } catch(ConfigCompileException e){
-                ConfigRuntimeException.DoReport(e, "Main file could not be compiled, due to a compile error.", null);
-                is_loaded = false;
-            }
+            Env main_env = new Env();
+            main_env.SetCommandSender(null);
+            String main = file_get_contents(mainFile.getAbsolutePath());
+            localPackages.appendMS(main, mainFile);
+            
             
             String alias_config = file_get_contents(aliasConfig.getAbsolutePath()); //get the file again
-            //config = new AliasConfig(alias_config, null, perms);
-            scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias_config, aliasConfig), new Env());
-            for (Script s : scripts) {
-                try {
-                    s.compile();
-                    s.checkAmbiguous((ArrayList<Script>) scripts);
-                } catch (ConfigCompileException e) {
-                    ConfigRuntimeException.DoReport(e, "Compile error in script. Compilation will attempt to continue, however.", player);
-                    is_loaded = false;
-                }
-            }
-            int errors = 0;
-            for (Script s : scripts) {
-                if (s.compilerError) {
-                    errors++;
-                }
-            }
-            if (errors > 0) {
-                System.out.println("[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
-                is_loaded = false;
-            } else {
-                System.out.println("[CommandHelper]: " + scripts.size() + " alias(es) defined.");
-            }
+            localPackages.appendMSA(alias_config, aliasConfig);
+            
+            //Now that we've included the default files, search the local_packages directory
+            GetAuxAliases(auxAliases, localPackages);
+
+            localPackages.compileMS(main_env, player);
+            localPackages.compileMSA(scripts, player);
+            
         } catch (IOException ex) {
             logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
                     + " check the location and try loading the plugin again.");
@@ -313,8 +296,6 @@ public class AliasCore {
                         + " errors will occur, unless you try to use an Economy function.");
             }
         }
-
-        return is_loaded;
     }
 
 //    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config, User u) throws ConfigCompileException {
@@ -423,6 +404,126 @@ public class AliasCore {
             return echoCommand.contains(((MCPlayer)p).getName());
         } else {
             return false;
+        }
+    }
+    
+    private static class LocalPackage {
+        private static class FileInfo{
+            String contents;
+            File file;
+            FileInfo(String contents, File file){
+                this.contents = contents;
+                this.file = file;
+            }
+        }
+        private List<FileInfo> ms = new ArrayList<FileInfo>();
+        private List<FileInfo> msa = new ArrayList<FileInfo>();
+        
+        public void appendMSA(String s, File path){
+            msa.add(new FileInfo(s, path));
+        }
+        
+        public void appendMS(String s, File path){
+            ms.add(new FileInfo(s, path));
+        }
+        
+        public void compileMSA(List<Script> scripts, MCPlayer player) {
+            
+            for(FileInfo fi : msa){
+                List<Script> tempScripts;
+                try{
+                    tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file), new Env());
+                    for (Script s : tempScripts) {
+                        try {
+                            s.compile();
+                            s.checkAmbiguous((ArrayList<Script>) scripts);
+                            scripts.add(s);
+                        } catch (ConfigCompileException e) {
+                            ConfigRuntimeException.DoReport(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+                        }
+                    }
+                } catch(ConfigCompileException e){
+                    ConfigRuntimeException.DoReport(e, "Could not compile file " + fi.file + " compilation will halt.", player);
+                    return;
+                }
+            }
+            int errors = 0;
+            for (Script s : scripts) {
+                if (s.compilerError) {
+                    errors++;
+                }
+            }
+            if (errors > 0) {
+                System.out.println(TermColors.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
+            } else {
+                System.out.println(TermColors.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined." + TermColors.reset());
+            }
+        }
+        
+        public void compileMS(Env main_env, MCPlayer player){
+            for(FileInfo fi : ms){
+                try{
+                    MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), main_env, null, null);
+                } catch(ConfigCompileException e){
+                    ConfigRuntimeException.DoReport(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
+                    if(Prefs.HaltOnFailure()){
+                        logger.log(Level.SEVERE, TermColors.RED + "[CommandHelper]: Compilation halted due to unrecoverable failure." + TermColors.reset());
+                        return;
+                    }
+                }
+            }
+            logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: MethodScript files processed" + TermColors.reset());
+        }
+    }
+    
+    private static void GetAuxAliases(File start, LocalPackage pack){
+        if(start.isDirectory() && !start.getName().endsWith(".disabled")){
+            for(File f : start.listFiles()){
+                GetAuxAliases(f, pack);
+            }
+        } else if(start.isFile()){
+            if(start.getName().endsWith(".msa")){
+                try {
+                    pack.appendMSA(file_get_contents(start.getAbsolutePath()), start);
+                } catch (IOException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else if(start.getName().endsWith(".ms")){
+                try {
+                    pack.appendMS(file_get_contents(start.getAbsolutePath()), start);
+                } catch (IOException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else if(start.getName().endsWith(".mslp") || start.getName().endsWith(".zip")){
+                try {
+                    GetAuxZipAliases(new ZipFile(start), pack);
+                } catch (ZipException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+    
+    private static void GetAuxZipAliases(ZipFile file, LocalPackage pack){
+        ZipEntry ze;
+        Enumeration<? extends ZipEntry> entries = file.entries();
+        while(entries.hasMoreElements()){
+            ze = entries.nextElement();
+            if(ze.getName().endsWith(".ms")){
+                try {
+                    pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
+                } catch (IOException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else if(ze.getName().endsWith(".msa")){
+                try {
+                    pack.appendMSA(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
+                } catch (IOException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
         }
     }
 }

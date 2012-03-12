@@ -20,11 +20,11 @@ public class Globals {
     public static Map<String, IVariable> global_ivar = new HashMap<String, IVariable>();
     public static Map<String, Construct> global_construct = new HashMap<String, Construct>();
     
-    public static void SetGlobal(IVariable ivar){
+    public static synchronized void SetGlobal(IVariable ivar){
         Map<String, IVariable> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
         vars.put(ivar.getName(), ivar);
     }
-    public static IVariable GetGlobalIVar(IVariable var){
+    public static synchronized IVariable GetGlobalIVar(IVariable var){
         Map<String, IVariable> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
         if(vars.containsKey(var.getName())){
             return vars.get(var.getName());
@@ -34,11 +34,11 @@ public class Globals {
             return v;
         }
     }
-    public static void SetGlobal(String name, Construct value){
+    public static synchronized void SetGlobal(String name, Construct value){
         Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
         vars.put(name, value);
     }
-    public static Construct GetGlobalConstruct(String name){
+    public static synchronized Construct GetGlobalConstruct(String name){
         Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
         if(vars.containsKey(name)){
             return vars.get(name);
@@ -47,7 +47,7 @@ public class Globals {
         }
     }
     
-    public static void clear(){
+    public static synchronized void clear(){
         global_ivar.clear();
         global_construct.clear();
     }

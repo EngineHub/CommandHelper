@@ -28,7 +28,8 @@ public class Prefs {
         ALLOW_PROFILING("allow-profiling"),
         PROFILING_FILE("profiling-file"),
         SHOW_SPLASH_SCREEN("show-splash-screen"),
-        USE_COLORS("use-colors");
+        USE_COLORS("use-colors"),
+        HALT_ON_FAILURE("halt-on-failure");
         String name;
         private PNames(String name){
             this.name = name;
@@ -60,6 +61,7 @@ public class Prefs {
         a.add(new Preference(PNames.PROFILING_FILE.config(), "logs/profiling/%Y-%M-%D-profiling.log", Preferences.Type.STRING, "The path to the profiling logs. These logs are perf4j formatted logs. Consult the documentation for more information."));
         a.add(new Preference(PNames.SHOW_SPLASH_SCREEN.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to show the splash screen at server startup"));
         a.add(new Preference(PNames.USE_COLORS.config(), (TermColors.SYSTEM == TermColors.SYS.WINDOWS ? "false" : "true"), Preferences.Type.BOOLEAN, "Whether or not to use console colors. If this is a Windows machine, defaults to false, however, it can be toggled manually, and will then respect your setting."));
+        a.add(new Preference(PNames.HALT_ON_FAILURE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to halt compilation of pure mscript files if a compilation failure occurs in any one of the files."));
         CommandHelperPlugin.prefs = new Preferences("CommandHelper", Static.getLogger(), a);
     }
     
@@ -125,5 +127,9 @@ public class Prefs {
     
     public static Boolean UseColors(){
         return (Boolean)pref(PNames.USE_COLORS);
+    }
+    
+    public static Boolean HaltOnFailure() {
+        return (Boolean)pref(PNames.HALT_ON_FAILURE);
     }
 }
