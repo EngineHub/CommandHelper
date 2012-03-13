@@ -102,12 +102,13 @@ public class CommandHelperInterpreterListener implements Listener {
     }
 
     public void execute(String script, final MCPlayer p) throws ConfigCompileException {
-        List<Token> stream = MethodScriptCompiler.lex("include('plugins/CommandHelper/auto_include.ms')\n" + script, new File("Interpreter"));
+        List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
         GenericTreeNode tree = MethodScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
         Env env = new Env();
         env.SetPlayer(p);
         try {
+            MethodScriptCompiler.registerAutoIncludes(env, null);
             MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 
                 public void done(String output) {

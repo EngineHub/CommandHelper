@@ -8,6 +8,7 @@ import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.IncludeCache;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -650,5 +651,16 @@ public class MethodScriptCompiler {
             return returnable;
         }
         return Static.resolveConstruct(b.toString().trim(), 0, null);
+    }
+
+    public static void registerAutoIncludes(Env env, Script s) {
+        File auto_include = new File("plugins/CommandHelper/auto_include.ms");
+        if (auto_include.exists()) {
+            MethodScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), env, null, s);
+        }
+        
+        for(File f : Static.getAliasCore().autoIncludes){
+            MethodScriptCompiler.execute(IncludeCache.get(f, 0, f), env, null, s);            
+        }        
     }
 }

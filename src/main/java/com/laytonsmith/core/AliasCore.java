@@ -43,6 +43,7 @@ public class AliasCore {
     static final Logger logger = Logger.getLogger("Minecraft");
     private Set<String> echoCommand = new HashSet<String>();
     private PermissionsResolverManager perms;
+    public List<File> autoIncludes;
     public static CommandHelperPlugin parent;
 
     /**
@@ -266,6 +267,7 @@ public class AliasCore {
             scripts = new ArrayList<Script>();
             
             LocalPackage localPackages = new LocalPackage();
+                        
             
             //Run the main file once
             Env main_env = new Env();
@@ -279,6 +281,8 @@ public class AliasCore {
             
             //Now that we've included the default files, search the local_packages directory
             GetAuxAliases(auxAliases, localPackages);
+            
+            autoIncludes = localPackages.getAutoIncludes();
 
             localPackages.compileMS(main_env, player);
             localPackages.compileMSA(scripts, player);
@@ -408,6 +412,7 @@ public class AliasCore {
     }
     
     private static class LocalPackage {
+
         private static class FileInfo{
             String contents;
             File file;
@@ -416,8 +421,17 @@ public class AliasCore {
                 this.file = file;
             }
         }
+        private List<File> autoIncludes = new ArrayList<File>();
         private List<FileInfo> ms = new ArrayList<FileInfo>();
         private List<FileInfo> msa = new ArrayList<FileInfo>();
+        
+        private List<File> getAutoIncludes() {
+            return autoIncludes;
+        }
+        
+        public void addAutoInclude(File f){
+            autoIncludes.add(f);
+        }
         
         public void appendMSA(String s, File path){
             msa.add(new FileInfo(s, path));
@@ -489,10 +503,14 @@ public class AliasCore {
                     Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
                 }
             } else if(start.getName().endsWith(".ms")){
-                try {
-                    pack.appendMS(file_get_contents(start.getAbsolutePath()), start);
-                } catch (IOException ex) {
-                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                if(start.getName().equals("auto_include.ms")){
+                    pack.addAutoInclude(start);
+                } else {
+                    try {
+                        pack.appendMS(file_get_contents(start.getAbsolutePath()), start);
+                    } catch (IOException ex) {
+                        Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             } else if(start.getName().endsWith(".mslp") || start.getName().endsWith(".zip")){
                 try {
@@ -512,10 +530,14 @@ public class AliasCore {
         while(entries.hasMoreElements()){
             ze = entries.nextElement();
             if(ze.getName().endsWith(".ms")){
-                try {
-                    pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
-                } catch (IOException ex) {
-                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                if(ze.getName().endsWith(File.separator + "auto_include.ms")){
+                    pack.addAutoInclude(new File(file.getName() + File.separator + ze.getName()));
+                } else {
+                    try {
+                        pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
+                    } catch (IOException ex) {
+                        Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                    }
                 }
             } else if(ze.getName().endsWith(".msa")){
                 try {

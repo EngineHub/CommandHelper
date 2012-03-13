@@ -63,9 +63,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{0, 1, 2, 3, 4}");
     }
     
@@ -103,9 +101,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2, 3, 4, 5}");
     }
     
@@ -119,9 +115,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{3, 4, 5}");
     }
     
@@ -138,9 +132,7 @@ public class DataHandlingTest {
                 + " )"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2}");
     }
     
@@ -154,9 +146,7 @@ public class DataHandlingTest {
                 + " msg(is_proc(_proc))"
                 + " call_proc(_proc)"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("false");
         verify(fakePlayer).sendMessage("true");
         verify(fakePlayer).sendMessage("hello world");
@@ -175,9 +165,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{0, 1, 3, 4}");
     }
     
@@ -190,9 +178,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{0, 1, 4}");
     }
     
@@ -205,9 +191,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{0, 1}");
     }
     
@@ -223,9 +207,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{j:0, j:1, i:0, j:0, j:1, i:1}");
     }
     
@@ -241,9 +223,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
-        s.compile();
-        s.run(Arrays.asList(new Variable[]{}), env, null);
+        SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{j:0, j:1}");
     }
     

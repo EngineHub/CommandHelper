@@ -12,10 +12,12 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.sk89q.wepif.PermissionsResolverManager;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -370,6 +372,34 @@ public class StaticTest {
         });
         return b.toString();
     }
+    //TODO: Fix this
+//    public static void RunVars(List<Variable> vars, String script, MCCommandSender player) throws ConfigCompileException{
+//        Env env = new Env();
+//        env.SetCommandSender(player);
+//        MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));
+//        injectAliasCore();
+//        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(script, null), env).get(0);        
+//        s.compile();
+//        s.run(vars, env, null);
+//        
+//    }
+    
+    //Blarg. Dumb thing.
+//    private static void injectAliasCore() throws ConfigCompileException{
+//        PermissionsResolverManager prm = mock(PermissionsResolverManager.class);
+//        CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
+//        AliasCore ac = new AliasCore(new File("plugins/CommandHelper/config.txt"), 
+//                new File("plugins/CommandHelper/LocalPackages"), 
+//                new File("plugins/CommandHelper/preferences.txt"), 
+//                new File("plugins/CommandHelper/main.ms"), prm, chp);
+//        try{
+//            Field aliasCore = CommandHelperPlugin.class.getDeclaredField("ac");
+//            aliasCore.setAccessible(true);
+//            aliasCore.set(null, ac);
+//        } catch(Exception e){
+//            throw new RuntimeException("Core could not be injected", e);
+//        }
+//    }
     
     /**
      * Creates an entire fake server environment, adding players and everything.

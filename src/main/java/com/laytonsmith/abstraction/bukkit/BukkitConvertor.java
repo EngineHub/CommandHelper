@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.Static;
 import java.util.Set;
 import java.util.TreeSet;
 import org.bukkit.Bukkit;
@@ -114,7 +115,7 @@ public class BukkitConvertor implements Convertor {
     }
 
     public void ClearAllRunnables() {
-        Bukkit.getServer().getScheduler().cancelTasks(CommandHelperPlugin.self);
+        ((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
     }
 
     public void ClearFutureRunnable(int id) {

@@ -60,6 +60,7 @@ import org.bukkit.plugin.java.JavaPlugin;
  */
 public class CommandHelperPlugin extends JavaPlugin {
     public static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
+    //Do not rename this field, it is changed reflectively in unit tests.
     private static AliasCore ac;
     public static MCServer myServer;
     public static SerializedPersistance persist;

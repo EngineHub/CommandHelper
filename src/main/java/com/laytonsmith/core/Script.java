@@ -172,10 +172,8 @@ public class Script {
                                 Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getLineNum(), tempNode.data.getFile()));
                     }
                 }
-                File auto_include = new File("plugins/CommandHelper/auto_include.ms");
-                if (auto_include.exists()) {
-                    MethodScriptCompiler.execute(IncludeCache.get(auto_include, 0, auto_include), CurrentEnv, null, this);
-                }
+                
+                MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
                 MethodScriptCompiler.execute(tree.getRoot(), CurrentEnv, done, this);
             }
         } catch (ConfigRuntimeException ex) {
