@@ -114,13 +114,13 @@ public class CClosure extends Construct {
                     environment.GetVarList().set(new IVariable(name, value, line_num, file));
                 }
             }
-            CArray arguments = new CArray(node.getChildAt(0).data.getLineNum(), node.getChildAt(0).data.getFile());
+            CArray arguments = new CArray(node.data.getLineNum(), node.data.getFile());
             if(values != null){
                 for(Construct value : values){
                     arguments.push(value);
                 }
             }
-            environment.GetVarList().set(new IVariable("@arguments", arguments, node.getChildAt(0).data.getLineNum(), node.getChildAt(0).data.getFile()));
+            environment.GetVarList().set(new IVariable("@arguments", arguments, node.data.getLineNum(), node.data.getFile()));
             GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", line_num, file));
             List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
             children.add(node);

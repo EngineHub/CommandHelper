@@ -51,7 +51,7 @@ public class FunctionList {
                             System.err.println("Could not load " + c.getSimpleName() + "; Are you missing a dependency? (No further errors will happen, unless you try to use the function.)");
                         }
                     } else {
-                        Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, "Something when wrong while trying to load up " + c.getSimpleName(),
+                        Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, "Something went wrong while trying to load up " + c.getSimpleName(),
                                 t.getCause()!=null?t.getCause():t);
                     }
                     //Otherwise, they'll get the error later, when they try and use the function.
@@ -120,7 +120,7 @@ public class FunctionList {
                 return functions.get(c.val());
             }              
         }
-        throw new ConfigCompileException("Excpecting CFunction type", c.getLineNum(), c.getFile());
+        throw new ConfigCompileException("Expecting CFunction type", c.getLineNum(), c.getFile());
     }
 
     public static List<Function> getFunctionList() {
