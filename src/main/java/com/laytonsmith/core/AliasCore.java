@@ -61,7 +61,6 @@ public class AliasCore {
         this.perms = perms;
         this.parent = parent;
         this.mainFile = mainFile;
-        reload(null);
     }
 
     /**
@@ -269,9 +268,7 @@ public class AliasCore {
             LocalPackage localPackages = new LocalPackage();
                         
             
-            //Run the main file once
-            Env main_env = new Env();
-            main_env.SetCommandSender(null);
+            //Run the main file once           
             String main = file_get_contents(mainFile.getAbsolutePath());
             localPackages.appendMS(main, mainFile);
             
@@ -284,7 +281,7 @@ public class AliasCore {
             
             autoIncludes = localPackages.getAutoIncludes();
 
-            localPackages.compileMS(main_env, player);
+            localPackages.compileMS(player);
             localPackages.compileMSA(scripts, player);
             
         } catch (IOException ex) {
@@ -474,10 +471,12 @@ public class AliasCore {
             }
         }
         
-        public void compileMS(Env main_env, MCPlayer player){
+        public void compileMS(MCPlayer player){
             for(FileInfo fi : ms){
                 try{
-                    MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), main_env, null, null);
+                    Env env = new Env();
+                    MethodScriptCompiler.registerAutoIncludes(env, null);
+                    MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), env, null, null);
                 } catch(ConfigCompileException e){
                     ConfigRuntimeException.DoReport(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
                     if(Prefs.HaltOnFailure()){

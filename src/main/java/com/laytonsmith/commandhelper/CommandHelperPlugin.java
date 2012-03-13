@@ -128,6 +128,7 @@ public class CommandHelperPlugin extends JavaPlugin {
                 System.out.println("\n\n\n" + Static.Logo());
             }
             ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), new File("plugins/CommandHelper/LocalPackages"), prefsFile, new File("plugins/CommandHelper/" + main_file), perms, this);
+            ac.reload(null);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
         } catch (ConfigCompileException ex) {
