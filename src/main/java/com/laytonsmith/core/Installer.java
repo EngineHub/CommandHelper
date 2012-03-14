@@ -4,7 +4,7 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.fileutility.FileUtility;
+import com.laytonsmith.PureUtilities.FileUtility;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

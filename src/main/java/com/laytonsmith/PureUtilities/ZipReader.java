@@ -1,12 +1,8 @@
 package com.laytonsmith.PureUtilities;
 
-import com.laytonsmith.PureUtilities.fileutility.FileUtility;
-import com.laytonsmith.core.Installer;
 import java.io.*;
 import java.util.Deque;
-import java.util.HashMap;
 import java.util.LinkedList;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
@@ -21,7 +17,7 @@ import java.util.zip.ZipInputStream;
  * good to keep in mind this when using the reader, you'll have to balance
  * between memory usage (caching) or CPU use (re-reading as needed).
  *
- * @author layton
+ * @author Layton Smith
  */
 public class ZipReader {
 

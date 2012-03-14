@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.PureUtilities.fileutility;
+package com.laytonsmith.PureUtilities;
 
 import java.io.*;
 import java.util.Scanner;

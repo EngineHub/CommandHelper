@@ -3,7 +3,7 @@
  * and open the template in the editor.
  */
 
-package com.laytonsmith.PureUtilities.fileutility;
+package com.laytonsmith.PureUtilities;
 
 /**
  *

@@ -8,7 +8,7 @@ import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors.SYS;
 import static com.laytonsmith.PureUtilities.TermColors.*;
-import com.laytonsmith.PureUtilities.fileutility.FileUtility;
+import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;

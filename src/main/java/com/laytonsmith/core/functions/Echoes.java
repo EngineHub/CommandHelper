@@ -5,7 +5,7 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.fileutility.LineCallback;
+import com.laytonsmith.PureUtilities.LineCallback;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;

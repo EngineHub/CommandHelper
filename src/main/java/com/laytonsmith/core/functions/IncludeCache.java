@@ -4,7 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.fileutility.FileUtility;
+import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;

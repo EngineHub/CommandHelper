@@ -7,7 +7,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.PureUtilities.fileutility.LineCallback;
+import com.laytonsmith.PureUtilities.LineCallback;
 import com.laytonsmith.PureUtilities.rParser;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
