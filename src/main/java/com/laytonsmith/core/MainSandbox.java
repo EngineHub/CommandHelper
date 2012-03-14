@@ -4,12 +4,16 @@
  */
 package com.laytonsmith.core;
 
+import java.io.File;
+
 /**
  * This class is for testing concepts
  * @author Layton
  */
 public class MainSandbox {
     public static void main(String[] argv) {
+        File f = new File("target/test/file.zip/blah/file.txt");
+        System.out.println(f.getAbsolutePath());
         
     }
     

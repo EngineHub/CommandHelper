@@ -277,6 +277,12 @@
                 </includes>
             </resource>
         </resources>
+        <testResources>
+            <testResource>
+                <targetPath>.</targetPath>
+                <directory>${basedir}/src/test/resources</directory>
+            </testResource>
+        </testResources>
 
     <!-- Plugins -->
         <plugins>

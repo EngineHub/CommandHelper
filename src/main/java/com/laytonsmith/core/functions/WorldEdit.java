@@ -309,7 +309,7 @@ public class WorldEdit {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE}; //@wraithguard01
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
