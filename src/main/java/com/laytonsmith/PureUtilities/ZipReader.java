@@ -21,24 +21,41 @@ import java.util.zip.ZipInputStream;
  */
 public class ZipReader {
 
+    /**
+     * The top level zip file, which represents the actual file on the file system.
+     */
     private final File topZip;
+    
+    /**
+     * The chain of Files that this file represents.
+     */
     private final Deque<File> chainedPath;
+    
+    /**
+     * The actual file object.
+     */
     private final File file;
+    
+    /**
+     * Whether or not we have to dig down into the zip, or if
+     * we can use trivial file operations.
+     */
     private final boolean isZipped;
 
     /**
      * Creates a new ZipReader object, which can be used to read from a zip
      * file, as if the zip files were simple directories. All files are checked
      * to see if they are a zip.
+     * 
+     * <p>{@code new ZipReader(new File("path/to/container.zip/with/nested.zip/file.txt"));}</p>
+     * 
      *
      * @param file The path to the internal file. This needn't exist, according
      * to File, as the zip file won't appear as a directory to other classes.
      * This constructor will however throw a FileNotFoundException if it
      * determines that the file doesn't exist.
-     * @param tempDirectory
-     * @param zipExtentions
      */
-    public ZipReader(File file, File tempDirectory) throws FileNotFoundException, IOException {
+    public ZipReader(File file){
         chainedPath = new LinkedList<File>();
 
         this.file = file;
@@ -65,32 +82,61 @@ public class ZipReader {
                 Logger.getLogger(ZipReader.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
-        topZip = tempTopZip;
 
         //If it's not a zipped file, this will make operations easier to deal with,
         //so let's save that information
-        isZipped = topZip != null;
-        if (!isZipped) {
-            //Go ahead and assert that the file exists, so we can safely ignore this exception later
-            if (!file.exists()) {
-                throw new FileNotFoundException(file.getAbsolutePath() + " does not exist");
-            }
-            if (!file.canRead()) {
-                throw new IOException("Cannot read target file!");
-            }
-            //We're done here, since it isn't zipped. The rest of the operations are trivial.
+        isZipped = tempTopZip != null;
+        if(isZipped){
+            topZip = tempTopZip;
         } else {
-            //We need to walk through the entries, and see if they match any of our chained paths (below us)
-            //If so, we need to see if they are zips also. Everything from this point is in memory,
-            //because we have to inflate the zips dynamically
-            ZipInputStream zis = new ZipInputStream(new FileInputStream(topZip));
-            //We're just getting it for test purposes, so we want to immediately close it
-            getFile(chainedPath, topZip.getAbsolutePath(), zis).close();
+            topZip = file;
         }
 
-
+    }
+    
+    /**
+     * Returns if this file exists or not. Note this is a non-trivial operation.
+     * 
+     * @return 
+     */
+    public boolean exists(){
+        if(!topZip.exists()){
+            return false; //Don't bother trying
+        }
+        try{
+            getInputStream().close();
+            return true;
+        } catch(IOException e){
+            return false;
+        }
+    }
+    
+    /**
+     * Returns true if this file is read accessible. Note that if the file is a zip,
+     * the permissions are checked on the topmost zip file.
+     * @return 
+     */
+    public boolean canRead(){
+        return topZip.canRead();
+    }
+    
+    /**
+     * Returns true if this file has write permissions. Note that if the file is nested
+     * in a zip, then this will always return false
+     * @return 
+     */
+    public boolean canWrite(){
+        if(isZipped){
+            return false;
+        } else {
+            return topZip.canWrite();
+        }
     }
 
+    /*
+     * This function recurses down into a zip file, ultimately returning the InputStream for the file,
+     * or throwing exceptions if it can't be found.
+     */
     private InputStream getFile(Deque<File> fullChain, String zipName, final ZipInputStream zis) throws FileNotFoundException, IOException {
         ZipEntry entry;
         InputStream zipReader = new InputStream() {
@@ -151,41 +197,40 @@ public class ZipReader {
         }
     }
 
-    public InputStream getInputStream() {
-        if (!isZipped) {
-            try {
-                return new FileInputStream(file);
-            } catch (FileNotFoundException e) {
-                //This really shouldn't ever happen, unless the file was deleted
-                //in between construction and this call, in which case it's more of
-                //an error than an expected condition
-                throw new IOError(e);
-            }
-        } else {
-            try {
-                return getFile(chainedPath, topZip.getAbsolutePath(), new ZipInputStream(new FileInputStream(topZip)));
-            } catch (IOException ex) {
-                throw new IOError(ex); //Uh, it's unspecified why this would happen, so whatever.
-            }
+    /**
+     * Returns a raw input stream for this file. If you just need the string contents,
+     * it would probably be easer to use getFileContents instead, however, this method
+     * is necessary for accessing binary files.
+     * @return An InputStream that will read the specified file
+     * @throws FileNotFoundException If the file is not found
+     * @throws IOException If you specify a file that isn't a zip file as if it were a folder
+     */
+    public InputStream getInputStream() throws FileNotFoundException, IOException {
+        if (!isZipped) {           
+            return new FileInputStream(file);
+        } else {            
+            return getFile(chainedPath, topZip.getAbsolutePath(), new ZipInputStream(new FileInputStream(topZip)));
         }
     }
 
-    public String getFileContents() {
+    /**
+     * If the file is a simple text file, this function is your best option. It returns
+     * the contents of the file as a string.
+     * @return
+     * @throws FileNotFoundException If the file is not found
+     * @throws IOException If you specify a file that isn't a zip file as if it were a folder
+     */
+    public String getFileContents() throws FileNotFoundException, IOException {
         if (!isZipped) {
-            try {
-                return FileUtility.read(file);
-            } catch (FileNotFoundException ex) {
-                throw new IOError(ex);
-            }
-        } else {
-            try{
-                return getStringFromInputStream(getInputStream());
-            } catch(IOException e){
-                throw new IOError(e);
-            }
+            return FileUtility.read(file);
+        } else {            
+            return getStringFromInputStream(getInputStream());
         }
     }
     
+    /*
+     * Converts an input stream into a string
+     */
     private String getStringFromInputStream(InputStream is) throws IOException {
         BufferedReader din = new BufferedReader(new InputStreamReader(is));
         StringBuilder sb = new StringBuilder();
@@ -204,4 +249,32 @@ public class ZipReader {
         }
         return sb.toString();
     }
+
+    /**
+     * Delegates the equals check to the underlying File object.
+     * @param obj
+     * @return 
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj == null) {
+            return false;
+        }
+        if (getClass() != obj.getClass()) {
+            return false;
+        }
+        final ZipReader other = (ZipReader) obj;        
+        return other.file.equals(this.file);
+    }
+
+    /**
+     * Delegates the hashCode to the underlying File object.
+     * @return 
+     */
+    @Override
+    public int hashCode() {
+        return file.hashCode();
+    }
+    
+    
 }

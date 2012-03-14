@@ -15,7 +15,6 @@ public class ZipReaderTest {
     private static File TestZip;
     private static File TestFile;
     private static File TestNestedZip;
-    private static File TempFile;
     
     public ZipReaderTest() {
     }
@@ -28,28 +27,12 @@ public class ZipReaderTest {
         TestFile = new File(ZipReaderTest.class.getResource("/test.txt").getFile());
         
         File nestedParent = new File(ZipReaderTest.class.getResource("/testNested.zip").getFile());
-        TestNestedZip = new File(nestedParent, "innerZip.zip" + File.separator + "test.txt");
-        
-        TempFile = new File("./temp");
-        TempFile.mkdirs();
-    }
-
-    @AfterClass
-    public static void tearDownClass() throws Exception {
-        TempFile.deleteOnExit();
-    }
-    
-    @Before
-    public void setUp() {
-    }
-    
-    @After
-    public void tearDown() {
+        TestNestedZip = new File(nestedParent, "innerZip.zip" + File.separator + "test.txt");        
     }
     
     @Test
     public void testNestedRead() throws IOException{
-        String contents = new ZipReader(TestNestedZip, TempFile).getFileContents();
+        String contents = new ZipReader(TestNestedZip).getFileContents();
         assertNotNull("Could not read contents!", contents);
         assertEquals("Hello World!", contents.trim());
     }
@@ -57,27 +40,27 @@ public class ZipReaderTest {
     @Test
     public void testStringRead() throws FileNotFoundException, IOException {
         // TODO review the generated test code and remove the default call to fail.        
-        String contents = new ZipReader(TestZip, TempFile).getFileContents();
+        String contents = new ZipReader(TestZip).getFileContents();
         assertNotNull("Could not read contents!", contents);
         assertEquals("This is a file", contents.trim());
     }
     
     @Test
     public void testTrivialRead() throws IOException{
-        String contents = new ZipReader(TestFile, TempFile).getFileContents();
+        String contents = new ZipReader(TestFile).getFileContents();
         assertNotNull("Could not read contents!", contents);
         assertEquals("Hello World!", contents.trim());
     }    
     
     @Test(expected=FileNotFoundException.class)
     public void testNestedFileNotFound() throws IOException{
-        new ZipReader(new File(TestZip.getParent(), "notAFile.txt"), TempFile).getFileContents();
+        new ZipReader(new File(TestZip.getParent(), "notAFile.txt")).getFileContents();
     }
     
     @Test
     public void testNestedNotAZip(){
         try{
-            ZipReader zipReader = new ZipReader(new File(new File(TestZip.getParent(), "file.txt"), "file.txt"), TempFile);
+            new ZipReader(new File(new File(TestZip.getParent(), "file.txt"), "file.txt")).getFileContents();
             fail("Wanted IOException, but none was thrown");
         } catch(FileNotFoundException e){
             fail("Wanted IOException, but got FileNotFoundException");
