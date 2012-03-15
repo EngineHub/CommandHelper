@@ -408,25 +408,40 @@ public class AliasCore {
         }
     }
     
-    private static class LocalPackage {
+    public static class LocalPackage {
 
-        private static class FileInfo{
+        public static class FileInfo{
             String contents;
             File file;
-            FileInfo(String contents, File file){
+            private FileInfo(String contents, File file){
                 this.contents = contents;
                 this.file = file;
+            }
+            
+            public String contents(){
+                return contents;
+            }
+            public File file(){
+                return file;
             }
         }
         private List<File> autoIncludes = new ArrayList<File>();
         private List<FileInfo> ms = new ArrayList<FileInfo>();
         private List<FileInfo> msa = new ArrayList<FileInfo>();
         
+        public List<FileInfo> getMSFiles(){
+            return new ArrayList<FileInfo>(ms);
+        }
+        
+        public List<FileInfo> getMSAFiles(){
+            return new ArrayList<FileInfo>(msa);
+        }
+        
         private List<File> getAutoIncludes() {
             return autoIncludes;
         }
         
-        public void addAutoInclude(File f){
+        private void addAutoInclude(File f){
             autoIncludes.add(f);
         }
         
@@ -489,7 +504,7 @@ public class AliasCore {
         }
     }
     
-    private static void GetAuxAliases(File start, LocalPackage pack){
+    public static void GetAuxAliases(File start, LocalPackage pack){
         if(start.isDirectory() && !start.getName().endsWith(".disabled") && !start.getName().endsWith(".library")){
             for(File f : start.listFiles()){
                 GetAuxAliases(f, pack);

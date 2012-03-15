@@ -801,7 +801,7 @@ public class Script {
         }
     }
 
-    public void checkAmbiguous(ArrayList<Script> scripts) throws ConfigCompileException {
+    public void checkAmbiguous(List<Script> scripts) throws ConfigCompileException {
         //for (int i = 0; i < scripts.size(); i++) {
         List<Construct> thisCommand = this.cleft;
         for (int j = 0; j < scripts.size(); j++) {
