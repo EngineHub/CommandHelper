@@ -5,10 +5,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
-import com.laytonsmith.tools.DocGen;
-import com.laytonsmith.tools.Interpreter;
-import com.laytonsmith.tools.Manager;
-import com.laytonsmith.tools.SyntaxHighlighters;
+import com.laytonsmith.tools.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -33,7 +30,7 @@ public class Main {
         System.err.println("Running with arguments: " + Arrays.asList(args));
         try {
             Static.getPreferences().init(new File("CommandHelper/preferences.txt"));
-            List l = Arrays.asList(args);
+            List<String> l = Arrays.asList(args);
             if (args.length == 0) {
                 l.add("-help");
             }
@@ -44,6 +41,17 @@ public class Main {
             if(l.contains("--interpreter")){
                 Interpreter.start();
                 System.exit(0);
+            }
+            try{
+                if(l.get(0).equals("--mslp")){
+                    try{
+                        MSLPMaker.start(l.get(1));
+                    } catch(IndexOutOfBoundsException e){
+                        System.out.println("Usage: java -jar CommandHelper.jar --mslp path/to/folder");
+                    }
+                }
+            } catch(IndexOutOfBoundsException e){
+                //
             }
             if (l.contains("-help") || l.contains("-h") || l.contains("--help") || l.contains("/?")) {
                 System.out.println("CommandHelper can be run as a standalone jar with the command:\n\n"

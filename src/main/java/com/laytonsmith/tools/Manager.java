@@ -33,7 +33,7 @@ public class Manager {
     public static void start() {
         cls();
         pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
-        scanner = new Scanner(System.in);
+
         
         pl("Starting the Data Manager...");
         try {
@@ -417,26 +417,7 @@ public class Manager {
         return new SerializedPersistance(new File("CommandHelper/persistance.ser"), null);
     }
 
-    public static void p(CharSequence c) {
-        System.out.print(c);
-        System.out.flush();
-    }
-
-    public static void pl() {
-        pl("");
-    }
     
-    public static String prompt(){
-        p(">" + MAGENTA);
-        System.out.flush();
-        String ret = scanner.nextLine();
-        p(WHITE);
-        return ret;
-    }
-
-    public static void pl(CharSequence c) {
-        System.out.println(c + WHITE);
-    }
 
     
 }

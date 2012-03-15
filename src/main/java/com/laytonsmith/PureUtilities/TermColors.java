@@ -7,10 +7,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -205,5 +202,30 @@ public class TermColors {
             color += 10;
         }
         return "\033[" + (bright?"1;":"") + color + "m";
+    }
+    
+    public static void p(CharSequence c) {
+        System.out.print(c);
+        System.out.flush();
+    }
+
+    public static void pl() {
+        pl("");
+    }
+    
+    public static String prompt(){
+        if(scanner == null){
+            scanner = new Scanner(System.in);
+        }
+        p(">" + MAGENTA);
+        System.out.flush();
+        String ret = scanner.nextLine();
+        p(WHITE);
+        return ret;
+    }
+
+    private static Scanner scanner;
+    public static void pl(CharSequence c) {
+        System.out.println(c + WHITE);
     }
 }
