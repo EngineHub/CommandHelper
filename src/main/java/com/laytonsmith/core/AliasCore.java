@@ -91,7 +91,6 @@ public class AliasCore {
             }
 
             //Global aliases override personal ones, so check the list first
-            //a = config.getRunnableAliases(command, player);
             for (Script s : scripts) {
                 try {
                     if (s.match(command)) {
@@ -299,16 +298,6 @@ public class AliasCore {
         }
     }
 
-//    public ArrayList<AliasConfig> parse_user_config(ArrayList<String> config, User u) throws ConfigCompileException {
-//        if (config == null) {
-//            return null;
-//        }
-//        ArrayList<AliasConfig> alac = new ArrayList<AliasConfig>();
-//        for (int i = 0; i < config.size(); i++) {
-//            alac.add(new AliasConfig(config.get(i), u, perms));
-//        }
-//        return alac;
-//    }
     /**
      * Returns the contents of a file as a string. Accepts the file location
      * as a string.
@@ -526,7 +515,7 @@ public class AliasCore {
                         Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
                     }
                 }
-            } else if(start.getName().endsWith(".mslp") || start.getName().endsWith(".zip")){
+            } else if(start.getName().endsWith(".mslp")){
                 try {
                     GetAuxZipAliases(new ZipFile(start), pack);
                 } catch (ZipException ex) {

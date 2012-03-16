@@ -79,7 +79,8 @@ public class ZipReader {
             } catch (ZipException ex) {
                 //This is fine, it's just not a zip file
             } catch (IOException ex) {
-                Logger.getLogger(ZipReader.class.getName()).log(Level.SEVERE, null, ex);
+                //This is fine too, it may mean we don't have permission to access this directory,
+                //but that's ok, we don't need access yet.
             }
         }
 

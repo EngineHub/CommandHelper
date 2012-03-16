@@ -1774,17 +1774,11 @@ public class PlayerManagement {
         }
 
         public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            boolean value;
-            try{
-                //We have to use this method here, because we might be in the midst
-                //of an event, in which the player is offline, but not really. It will
-                //throw an exception if the player doesn't exist
-                MCPlayer player = Static.GetPlayer(args[0]);
-                value = true;
-            } catch(ConfigRuntimeException e){
-                value = false; //Nope
-            }
-            return new CBoolean(value, line_num, f);
+            //We have to use this method here, because we might be in the midst
+            //of an event, in which the player is offline, but not really. It will
+            //throw an exception if the player doesn't exist
+            MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());
+            return new CBoolean(player.isOnline(), line_num, f);
         }
     }
 
