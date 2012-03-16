@@ -544,7 +544,7 @@ public class Environment {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{1, 2, 3};
         }
 
         public String docs() {

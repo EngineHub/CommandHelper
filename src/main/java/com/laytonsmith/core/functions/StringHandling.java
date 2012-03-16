@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.Static;
@@ -208,14 +209,7 @@ public class StringHandling {
     public static class read implements Function {
 
         public static String file_get_contents(String file_location) throws Exception {
-            BufferedReader in = new BufferedReader(new FileReader(file_location));
-            StringBuilder ret = new StringBuilder();
-            String str;
-            while ((str = in.readLine()) != null) {
-                ret.append(str).append("\n");
-            }
-            in.close();
-            return ret.toString();
+            return new ZipReader(new File(file_location)).getFileContents();
         }
 
         public String getName() {

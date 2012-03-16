@@ -544,7 +544,7 @@ public class AliasCore {
         while(entries.hasMoreElements()){
             ze = entries.nextElement();
             if(ze.getName().endsWith(".ms")){
-                if(ze.getName().endsWith(File.separator + "auto_include.ms")){
+                if(ze.getName().equals("auto_include.ms")){
                     pack.addAutoInclude(new File(file.getName() + File.separator + ze.getName()));
                 } else {
                     try {
