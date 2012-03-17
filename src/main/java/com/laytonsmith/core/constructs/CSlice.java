@@ -2,8 +2,6 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Math;
-import java.io.File;
 
 /**
  *

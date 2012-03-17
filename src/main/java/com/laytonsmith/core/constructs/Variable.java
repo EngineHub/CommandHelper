@@ -5,7 +5,6 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.Static;
-import java.io.File;
 
 /**
  *

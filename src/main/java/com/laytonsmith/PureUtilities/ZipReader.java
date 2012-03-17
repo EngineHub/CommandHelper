@@ -3,8 +3,6 @@ package com.laytonsmith.PureUtilities;
 import java.io.*;
 import java.util.Deque;
 import java.util.LinkedList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;

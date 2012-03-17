@@ -7,7 +7,6 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.io.File;
 import org.bukkit.event.Cancellable;
 
 /**

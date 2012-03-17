@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.google.common.util.concurrent.FakeTimeLimiter;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;

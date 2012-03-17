@@ -6,14 +6,12 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import static com.laytonsmith.testing.StaticTest.*;
-import com.sk89q.wepif.PermissionsResolverManager;
+import static com.laytonsmith.testing.StaticTest.SRun;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;

@@ -13,7 +13,6 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

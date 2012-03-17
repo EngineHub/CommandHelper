@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.BoundEvent;
@@ -15,7 +14,6 @@ import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 

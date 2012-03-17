@@ -8,7 +8,6 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 

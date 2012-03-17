@@ -10,7 +10,6 @@ import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.io.File;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 

@@ -3,8 +3,9 @@ package com.laytonsmith.PureUtilities;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import org.junit.*;
 import static org.junit.Assert.*;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 /**
  *

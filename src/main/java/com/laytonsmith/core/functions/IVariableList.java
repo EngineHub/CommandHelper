@@ -6,7 +6,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
-import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

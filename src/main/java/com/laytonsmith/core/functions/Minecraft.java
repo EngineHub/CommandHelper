@@ -13,7 +13,6 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.io.File;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;

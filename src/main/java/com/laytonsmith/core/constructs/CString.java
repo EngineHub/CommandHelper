@@ -4,8 +4,6 @@
  */
 package com.laytonsmith.core.constructs;
 
-import java.io.File;
-
 /**
  *
  * @author Layton

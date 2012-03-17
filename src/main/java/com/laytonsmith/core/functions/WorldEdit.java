@@ -29,7 +29,6 @@ import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
-import java.io.File;
 import java.util.*;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
