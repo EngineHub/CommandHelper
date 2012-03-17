@@ -127,19 +127,17 @@ public class Script {
         this.CurrentEnv.SetLabel(this.label);
         MCCommandSender p = myEnv.GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
-            int line_num = 0;
-            File f = null;
+            Target target = Target.UNKNOWN;
             if (left.size() >= 1) {
                 try{
-                    line_num = left.get(0).line_num;
-                    f = left.get(0).file;
+                    target = new Target(left.get(0).line_num, left.get(0).file, left.get(0).column);
                 } catch(NullPointerException e){
                     //Oh well, we tried to get more information
                 }
             }
             throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command."
                     + " To see the compile error, run /reloadaliases",
-                    null, line_num, f);
+                    null, target);
         }
         if (p instanceof MCPlayer) {
             if (CurrentEnv.GetLabel() != null) {
@@ -149,7 +147,7 @@ public class Script {
                     if (group.startsWith("-") && perms.inGroup(((MCPlayer)p).getName(), group.substring(1))) {
                         //negative permission
                         throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
-                                0, null);
+                                Target.UNKNOWN);
                     } else if (perms.inGroup(((MCPlayer)p).getName(), group)) {
                         //They do have permission.
                         break;
@@ -165,11 +163,11 @@ public class Script {
                 for (GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)) {
                     if (tempNode.data instanceof Variable) {
                         if(left_vars == null){
-                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.data.getLineNum(), tempNode.data.getFile());
+                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.data.getTarget());
                         }
                         ((Variable) tempNode.data).setVal(
                                 Static.resolveConstruct(
-                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getLineNum(), tempNode.data.getFile()));
+                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getTarget()));
                     }
                 }
                 
@@ -213,11 +211,17 @@ public class Script {
         }
     }
     
+    /**
+     * Runs eval on the code tree, and if it returns an ival, resolves it.
+     * @param c
+     * @param env
+     * @return 
+     */
     public Construct seval(GenericTreeNode<Construct> c, final Env env){
         Construct ret = eval(c, env);
         if(ret instanceof IVariable){
             IVariable cur = (IVariable)ret;
-            return env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();
+            return env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
         }
         return ret;
     }
@@ -232,13 +236,8 @@ public class Script {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
                     if (p == null) {
-                        throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
+                        throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getTarget());
                     }
-//                    List<Construct> variables = new ArrayList<Construct>();
-//                    for (GenericTreeNode<Construct> child : c.getChildren()) {
-//                        variables.add(eval(child, env));
-//                    }
-//                    variables = Arrays.asList(preResolveVariables(variables.toArray(new Construct[]{})));
                     Env newEnv = env;
                     try{
                         newEnv = env.clone();
@@ -250,7 +249,7 @@ public class Script {
                     f = FunctionList.getFunction(m);
                 } catch(ConfigCompileException e){
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
-                    throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getLineNum(), m.getFile());
+                    throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getTarget());
                 }
                 //We have special handling for loop and other control flow functions
                 if(f instanceof assign){
@@ -260,153 +259,14 @@ public class Script {
                             env.SetFlag("array_get_alt_mode", true);
                             Construct arrayAndIndex = eval(c.getChildAt(0), env);
                             env.ClearFlag("array_get_alt_mode");
-                            return ((assign)f).array_assign(m.getLineNum(), m.getFile(), env, arrayAndIndex, eval(c.getChildAt(1), env));
+                            return ((assign)f).array_assign(m.getTarget(), env, arrayAndIndex, eval(c.getChildAt(1), env));
                         }
                     }
                 }
-                if (f instanceof _for) {
-                    _for fr = (_for) f;
-                    List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    try {
-                        return fr.execs(m.getLineNum(), m.getFile(), env, this, ch.get(0), ch.get(1), ch.get(2), ch.get(3));
-                    } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to for", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
-                    }
-                } else if (f instanceof _if) {
-                    _if fr = (_if) f;
-                    List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    try {
-                        return fr.execs(m.getLineNum(), m.getFile(), env, this, ch.get(0), ch.get(1), ch.size() > 2 ? ch.get(2) : null);
-                    } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to if", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
-                    }
-                } else if (f instanceof foreach) {
-                    foreach fe = (foreach) f;
-                    List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    try {
-                        return fe.execs(m.getLineNum(), m.getFile(), env, this, ch.get(0), ch.get(1), ch.get(2));
-                    } catch (IndexOutOfBoundsException e) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to foreach", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
-                    }
-                } else if (f instanceof eval) {
-                    List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    if (ch.size() > 1) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to eval", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
-                    }
-                    try{
-                        GenericTreeNode<Construct> root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(ch.get(0).getData().val(), null));
-                        StringBuilder b = new StringBuilder();
-                        for (GenericTreeNode<Construct> child : root.getChildren()) {
-                            CString cs = new CString(eval(child, env).val(), 0, null);
-                            if (!cs.val().trim().equals("")) {
-                                b.append(cs.val()).append(" ");
-                            }
-                        }
-                        return new CString(b.toString(), 0, null);
-                    } catch(ConfigCompileException e){
-                        
-                    }
-                } else if (f instanceof _try) {
-                    List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    if (ch.size() != 4 && ch.size() != 3) {
-                        throw new ConfigRuntimeException("Invalid number of parameters passed to try", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
-                    }
-                    GenericTreeNode<Construct> fourth = null;
-                    if (ch.size() == 4) {
-                        fourth = ch.get(3);
-                    }
-                    return ((_try) f).execs(m.getLineNum(), m.getFile(), env, this, ch.get(0), ch.get(1), ch.get(2), fourth);
-                } else if (f instanceof proc) {
-                    List<GenericTreeNode<Construct>> ch = c.getChildren();
-                    if (ch.size() <= 1) {
-                        throw new ConfigRuntimeException("Invalid number of parameters sent to proc()", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
-                    }
-                    String name = "";
-                    List<IVariable> vars = new ArrayList<IVariable>();
-                    GenericTreeNode<Construct> tree = null;
-                    for (int i = 0; i < ch.size(); i++) {
-                        if (i == ch.size() - 1) {
-                            tree = ch.get(i);
-                        } else {
-                            Construct cons = eval(ch.get(i), env);
-                            if (i == 0 && cons instanceof IVariable) {
-                                //Soon, this will be allowed, so anonymous procedures can be created, but for now
-                                //it's not allowed
-                                throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
-                            } else {
-                                if (i == 0 && !(cons instanceof IVariable)) {
-                                    name = cons.val();
-                                } else {
-                                    if (!(cons instanceof IVariable)) {
-                                        throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, m.getLineNum(), m.getFile());
-                                    } else {
-                                        vars.add((IVariable) cons);
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    Procedure myProc = new Procedure(name, vars, tree, (CFunction) c.getData());
-                    env.GetProcs().put(name, myProc);
-                    return new CVoid(m.getLineNum(), m.getFile());                
-                } else if (f instanceof call_proc) {
-                    Construct[] ar = new Construct[c.getChildren().size()];
-                    for (int i = 0; i < c.getChildren().size(); i++) {
-                        ar[i] = eval(c.getChildAt(i), env);
-                    }
-                    ar = preResolveVariables(ar);
-                    return ((call_proc) f).execs(m.getLineNum(), m.getFile(), env, ar);
-                } else if (f instanceof include) {
-                    return ((include) f).execs(m.getLineNum(), m.getFile(), env, c.getChildren(), this);
-                } else if(f instanceof bind){
-                    if(c.getChildren().size() < 5){
-                        throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, m.getLineNum(), m.getFile());
-                    }
-                    Construct name = preResolveVariable(eval(c.getChildAt(0), env));
-                    Construct options = preResolveVariable(eval(c.getChildAt(1), env));
-                    Construct prefilter = preResolveVariable(eval(c.getChildAt(2), env));
-                    Construct event_object = eval(c.getChildAt(3), env);
-                    IVariableList custom_params = new IVariableList();
-                    for(int a = 0; a < c.getChildren().size() - 5; a++){
-                        Construct var = eval(c.getChildAt(4 + a), env);
-                        if(!(var instanceof IVariable)){
-                            throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, m.getLineNum(), m.getFile());
-                        }
-                        IVariable cur = (IVariable)var;
-                        ((IVariable)var).setIval(env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival());
-                        custom_params.set((IVariable)var);
-                    }
-                    Env newEnv = env;
-                    try{
-                        newEnv = env.clone();
-                    } catch(Exception e){}
-                    newEnv.SetVarList(custom_params);
-                    GenericTreeNode<Construct> tree = c.getChildAt(c.getChildren().size() - 1);
-                    return ((bind)f).execs(name, options, prefilter, event_object, tree, newEnv, m.getLineNum(), m.getFile());
-                } else if(f instanceof scriptas){
-                    return ((scriptas)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
-//                    Construct user = eval(c.getChildAt(0), env);
-//                    GenericTreeNode<Construct> script = c.getChildAt(1);
-//                    env.SetCustom("script_node", script);
-//                    return ((scriptas)f).exec(m.getLineNum(), m.getFile(), env, user);
-                } else if(f instanceof sconcat){
-                    return ((sconcat)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
-                } else if(f instanceof ifelse){
-                    return ((ifelse)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
-                } else if(f instanceof _switch){
-                    return ((_switch)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());                    
-                } else if(f instanceof and){
-                    return ((and)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
-                } else if(f instanceof nand){
-                    return ((nand)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
-                } else if(f instanceof or){
-                    return ((or)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
-                } else if(f instanceof nor){
-                    return ((nor)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
-                } else if(f instanceof closure){
-                    return ((closure)f).execs(m.getLineNum(), m.getFile(), env, c.getChildren());
+                
+                if(f.useSpecialExec()){
+                    return f.execs(m.getTarget(), env, this, c.getChildren().toArray(new GenericTreeNode[]{}));
                 }
-
 
                 ArrayList<Construct> args = new ArrayList<Construct>();
                 for (GenericTreeNode<Construct> c2 : c.getChildren()) {
@@ -416,7 +276,7 @@ public class Script {
                     boolean perm = Static.hasCHPermission(f.getName(), env);
                     if (!perm) {
                         throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
-                                ExceptionType.InsufficientPermissionException, m.getLineNum(), m.getFile());
+                                ExceptionType.InsufficientPermissionException, m.getTarget());
                     }
                 }
                 Object[] a = args.toArray();
@@ -431,71 +291,27 @@ public class Script {
                             && (!f.getName().equals("sconcat") && (ca[i] instanceof CLabel))) {
                         throw new ConfigRuntimeException("Invalid Construct (" 
                                 + ca[i].getClass() + ") being passed as an argument to a function (" 
-                                + f.getName() + ")", null, m.getLineNum(), m.getFile());
+                                + f.getName() + ")", null, m.getTarget());
                     }
                     if(env.GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
                         continue;
                     }
                     if(f.preResolveVariables() && ca[i] instanceof IVariable){
                         IVariable cur = (IVariable)ca[i];
-                        ca[i] = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();                        
+                        ca[i] = env.GetVarList().get(cur.getName(), cur.getTarget()).ival();                        
                     }
                 }
 
-                Construct ret = f.exec(m.getLineNum(), m.getFile(), env, ca);
+                Construct ret = f.exec(m.getTarget(), env, ca);
                 return ret;
 
         } else if (m.getCType() == ConstructType.VARIABLE) {
-            return Static.resolveConstruct(m.val(), m.getLineNum(), m.getFile());
+            return Static.resolveConstruct(m.val(), m.getTarget());
         } else {
             return m;
         }
     }
-    public Construct preResolveVariable(Construct ca){
-        Construct[] c = new Construct[1];
-        c[0] = ca;
-        return preResolveVariables(c)[0];
-    }
-    public Construct[] preResolveVariables(Construct[] ca) {
-        for (int i = 0; i < ca.length; i++) {
-            if (ca[i] instanceof IVariable) {
-                IVariable v = (IVariable) ca[i];
-                ca[i] = CurrentEnv.GetVarList().get(v.getName(), v.getLineNum(), v.getFile()).ival();
-            } else if (ca[i] instanceof CArray) {
-//                CArray ca2 = (CArray) ca[i];
-//                Construct [] ca_raw = new Construct[ca2.size()];
-//                for(int j = 0; j < ca_raw.length; j++){
-//                    ca_raw[j] = ca2.get(j, 0);
-//                }
-//                List<Construct> resolved = Arrays.asList(preResolveVariables(ca_raw));
-//                for(int j = 0; j < resolved.size(); j++){
-//                    
-//                }
-            }
-        }
-        return ca;
-    }
 
-//    private Construct blockingNonThreadSafe(final Player p, Callable task) throws CancelCommandException {
-//        Plugin self = CommandHelperPlugin.self;
-//        try {
-//            Future<Construct> f = Static.getServer().getScheduler().callSyncMethod(self, task);
-//            while (!f.isDone()) {
-//                Thread.sleep(10);
-//            }
-//            return f.get();
-//        } catch (InterruptedException ex) {
-//            Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex);
-//        } catch (ExecutionException ex) {
-//            if (ex.getCause() instanceof CancelCommandException) {
-//                CancelCommandException e = (CancelCommandException) ex.getCause();
-//                throw e;
-//            } else {
-//                Logger.getLogger(Script.class.getName()).log(Level.SEVERE, null, ex.getCause());
-//            }
-//        }
-//        return null;
-//    }
     public boolean match(String command) {
         if(cleft == null){
             //The compilation error happened during the signature declaration, so 
@@ -517,9 +333,6 @@ public class Script {
                 Construct c = cleft.get(j);
                 String arg = args.get(j);
                 if (c.getCType() != ConstructType.VARIABLE) {
-//                        || c.getCType() == ConstructType.TOKEN
-//                        || c.getCType() == ConstructType.LITERAL
-//                        || c.getCType() == ConstructType.STRING || ConstructType.) {
                     if (case_sensitive && !c.val().equals(arg) || !case_sensitive && !c.val().equalsIgnoreCase(arg)) {
                         isAMatch = false;
                         continue;
@@ -584,15 +397,15 @@ public class Script {
                 if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
                     if (((Variable) cleft.get(j)).getName().equals("$")) {
                         v = new Variable(((Variable) cleft.get(j)).getName(),
-                                lastVar.toString(), 0, null);
+                                lastVar.toString(), Target.UNKNOWN);
                     } else {
                         v = new Variable(((Variable) cleft.get(j)).getName(),
-                                args.get(j), 0, null);
+                                args.get(j), Target.UNKNOWN);
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
                 v = new Variable(((Variable) cleft.get(j)).getName(),
-                        ((Variable) cleft.get(j)).getDefault(), 0, null);
+                        ((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
             }
             if (v != null) {
                 vars.add(v);
@@ -617,15 +430,15 @@ public class Script {
                             lastVar.append(args.get(k).trim()).append(" ");
                         }
                         v = new Variable(((Variable) cleft.get(j)).getName(),
-                                lastVar.toString().trim(), 0, null);
+                                lastVar.toString().trim(), Target.UNKNOWN);
                     } else {
                         v = new Variable(((Variable) cleft.get(j)).getName(),
-                                args.get(j), 0, null);
+                                args.get(j), Target.UNKNOWN);
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
                 v = new Variable(((Variable) cleft.get(j)).getName(),
-                        ((Variable) cleft.get(j)).getDefault(), 0, null);
+                        ((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
             }
             if (v != null) {
                 vars.add(v);
@@ -654,9 +467,9 @@ public class Script {
         for (int j = 0; j < left.size(); j++) {
             Token t = left.get(j);
             //Token prev_token = j - 2 >= 0?c.tokens.get(j - 2):new Token(TType.UNKNOWN, "", t.line_num);
-            Token last_token = j - 1 >= 0 ? left.get(j - 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
-            Token next_token = j + 1 < left.size() ? left.get(j + 1) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
-            Token after_token = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.line_num, t.file);
+            Token last_token = j - 1 >= 0 ? left.get(j - 1) : new Token(TType.UNKNOWN, "", t.getTarget());
+            Token next_token = j + 1 < left.size() ? left.get(j + 1) : new Token(TType.UNKNOWN, "", t.getTarget());
+            Token after_token = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.getTarget());
 
             if (j == 0) {
                 if (next_token.type == TType.IDENT) {
@@ -673,10 +486,10 @@ public class Script {
             }
 
             if (t.type.equals(TType.FINAL_VAR) && left.size() - j >= 5) {
-                throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.line_num, t.file);
+                throw new ConfigCompileException("FINAL_VAR must be the last argument in the alias", t.target);
             }
             if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-                Variable v = new Variable(t.val(), null, t.line_num, t.file);
+                Variable v = new Variable(t.val(), null, t.target);
                 lastVar = t.val();
                 v.setOptional(last_token.type.equals(TType.LSQUARE_BRACKET));
                 left_vars.put(t.val(), v);
@@ -689,19 +502,19 @@ public class Script {
             if (j == 0 && !t.type.equals(TType.COMMAND)) {
                 if (!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)) {
                     throw new ConfigCompileException("Expected command (/command) at start of alias."
-                            + " Instead, found " + t.type + " (" + t.val() + ")", t.line_num, t.file);
+                            + " Instead, found " + t.type + " (" + t.val() + ")", t.target);
                 }
             }
             if (last_token.type.equals(TType.LSQUARE_BRACKET)) {
                 inside_opt_var = true;
                 if (!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))) {
-                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.line_num, t.file);
+                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.target);
                 }
             }
             if (after_no_def_opt_var && !inside_opt_var) {
                 if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                     throw new ConfigCompileException("You cannot have anything other than optional arguments after your"
-                            + " first optional argument, other that other optional arguments with no default", t.line_num, t.file);
+                            + " first optional argument, other that other optional arguments with no default", t.target);
                 }
             }
             if (!t.type.equals(TType.LSQUARE_BRACKET)
@@ -712,26 +525,26 @@ public class Script {
                     && !t.type.equals(TType.COMMAND)
                     && !t.type.equals(TType.FINAL_VAR)) {
                 if (!(t.type.equals(TType.STRING) && j - 1 > 0 && left.get(j - 1).type.equals(TType.OPT_VAR_ASSIGN))) {
-                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.line_num, t.file);
+                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.target);
                 }
             }
             if (last_token.type.equals(TType.COMMAND)) {
                 if (!(t.type.equals(TType.VARIABLE) || t.type.equals(TType.LSQUARE_BRACKET) || t.type.equals(TType.FINAL_VAR)
                         || t.type.equals(TType.LIT))) {
-                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.line_num, t.file);
+                    throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ") after command", t.target);
                 }
             }
             if (inside_opt_var && t.type.equals(TType.OPT_VAR_ASSIGN)) {
                 if (!((next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) && after_token.type.equals(TType.RSQUARE_BRACKET)
                         || (next_token.type.equals(TType.RSQUARE_BRACKET)))) {
-                    throw new ConfigCompileException("Unexpected token in optional variable", t.line_num, t.file);
+                    throw new ConfigCompileException("Unexpected token in optional variable", t.target);
                 } else if (next_token.type.equals(TType.STRING) || next_token.type.equals(TType.LIT)) {
                     left_vars.get(lastVar).setDefault(next_token.val());
                 }
             }
             if (t.type.equals(TType.RSQUARE_BRACKET)) {
                 if (!inside_opt_var) {
-                    throw new ConfigCompileException("Unexpected " + t.type.toString(), t.line_num, t.file);
+                    throw new ConfigCompileException("Unexpected " + t.type.toString(), t.target);
                 }
                 inside_opt_var = false;
 //                if (last_token.type.equals(TType.VARIABLE)
@@ -749,17 +562,17 @@ public class Script {
         for (int i = 0; i < left.size(); i++) {
             Token t = left.get(i);
             if (t.type == Token.TType.COMMAND) {
-                cleft.add(new Command(t.val(), t.line_num, t.file));
+                cleft.add(new Command(t.val(), t.target));
             } else if (t.type == Token.TType.VARIABLE) {
-                cleft.add(new Variable(t.val(), null, t.line_num, t.file));
+                cleft.add(new Variable(t.val(), null, t.target));
             } else if (t.type.equals(TType.FINAL_VAR)) {
-                Variable v = new Variable(t.val(), null, t.line_num, t.file);
+                Variable v = new Variable(t.val(), null, t.target);
                 v.setFinal(true);
                 cleft.add(v);
             } else if (t.type.equals(TType.LSQUARE_BRACKET)) {
                 if (i + 2 < left.size() && left.get(i + 2).type.equals(TType.OPT_VAR_ASSIGN)) {
                     Variable v = new Variable(left.get(i + 1).val(),
-                            left.get(i + 3).val(), t.line_num, t.file);
+                            left.get(i + 3).val(), t.target);
                     v.setOptional(true);
                     if (left.get(i + 1).type.equals(TType.FINAL_VAR)) {
                         v.setFinal(true);
@@ -768,7 +581,7 @@ public class Script {
                     i += 4;
                 } else {
                     t = left.get(i + 1);
-                    Variable v = new Variable(t.val(), null, t.line_num, t.file);
+                    Variable v = new Variable(t.val(), null, t.target);
                     v.setOptional(true);
                     if (t.val().equals("$")) {
                         v.setFinal(true);
@@ -777,7 +590,7 @@ public class Script {
                     i += 2;
                 }
             } else {
-                cleft.add(new CString(t.val(), t.line_num, t.file));
+                cleft.add(new CString(t.val(), t.getTarget()));
             }
         }
         return true;
@@ -869,7 +682,7 @@ public class Script {
                 scripts.get(j).compilerError = true;
                 this.compilerError = true;
                 throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
-                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getLineNum(), thisCommand.get(0).getFile());
+                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getTarget());
             }
         }
 

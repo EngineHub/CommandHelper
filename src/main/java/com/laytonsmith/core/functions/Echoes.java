@@ -12,10 +12,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -31,17 +28,17 @@ public class Echoes {
     public static String docs(){
         return "These functions allow you to echo information to the screen";
     }
-    @api public static class die implements Function{
+    @api public static class die extends AbstractFunction{
         public Integer []numArgs() {
             return new Integer[] {0,1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException{
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException{
             if(args.length == 0){
                 throw new CancelCommandException("");
             } else if(args.length == 1){
                 try{
-                    Static.SendMessage(env.GetCommandSender(), args[0].val(), line_num, f);
+                    Static.SendMessage(env.GetCommandSender(), args[0].val(), t);
                 } finally{
                     throw new CancelCommandException("");
                 }
@@ -76,7 +73,7 @@ public class Echoes {
         }
     }
     
-    @api public static class msg implements Function{
+    @api public static class msg extends AbstractFunction{
 
         public String getName() {
             return "msg";
@@ -86,12 +83,12 @@ public class Echoes {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for(int i = 0; i < args.length; i++){
                 b.append(args[i].val());
             }
-            Static.SendMessage(env.GetCommandSender(), b.toString(), line_num, f);
+            Static.SendMessage(env.GetCommandSender(), b.toString(), t);
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){
@@ -99,7 +96,7 @@ public class Echoes {
 //                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
 //                start += 100;
 //            }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
         public ExceptionType[] thrown(){
@@ -128,7 +125,7 @@ public class Echoes {
     
     }
     
-    @api public static class tmsg implements Function{
+    @api public static class tmsg extends AbstractFunction{
 
         public String getName() {
             return "tmsg";
@@ -138,19 +135,19 @@ public class Echoes {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length < 2){
-                throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, line_num, f);
+                throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, t);
             }
             MCPlayer p = Static.GetPlayer(args[0]);
             if(p == null){
-                throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, t);
             }
             StringBuilder b = new StringBuilder();
             for(int i = 1; i < args.length; i++){
                 b.append(args[i].val());
             }
-            Static.SendMessage(p, b.toString(), line_num, f);
+            Static.SendMessage(p, b.toString(), t);
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){
@@ -158,7 +155,7 @@ public class Echoes {
 //                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
 //                start += 100;
 //            }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String docs() {
@@ -185,7 +182,7 @@ public class Echoes {
         }
     }
     
-    @api public static class color implements Function{
+    @api public static class color extends AbstractFunction{
 
         public String getName() {
             return "color";
@@ -195,7 +192,7 @@ public class Echoes {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String color = MCChatColor.WHITE.toString();
             
             try{
@@ -220,7 +217,7 @@ public class Echoes {
                 color = MCChatColor.getByCode(p).toString();
             } catch(NumberFormatException e){}
             
-            return new CString(color, line_num, f);
+            return new CString(color, t);
         }
 
         public String docs() {
@@ -254,7 +251,7 @@ public class Echoes {
         }
     }
     
-    @api public static class strip_colors implements Function{
+    @api public static class strip_colors extends AbstractFunction{
 
         public String getName() {
             return "strip_colors";
@@ -288,13 +285,13 @@ public class Echoes {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CString(MCChatColor.stripColor(args[0].val()), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CString(MCChatColor.stripColor(args[0].val()), t);
         }
         
     }
     
-    @api public static class chat implements Function{
+    @api public static class chat extends AbstractFunction{
 
         public String getName() {
             return "chat";
@@ -304,18 +301,18 @@ public class Echoes {
             return new Integer[]{1};
         }
 
-        public Construct exec(final int line_num, final File f, final Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(final Target t, final Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
                     if(!(env.GetCommandSender() instanceof MCPlayer)){
-                        throw new ConfigRuntimeException("The current player is not online, or this is being run from the console", ExceptionType.PlayerOfflineException, line_num, f);
+                        throw new ConfigRuntimeException("The current player is not online, or this is being run from the console", ExceptionType.PlayerOfflineException, t);
                     }
                     (env.GetPlayer()).chat(line);
                 }
             }, args[0].val());
 
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String docs() {
@@ -344,7 +341,7 @@ public class Echoes {
         
     }
     
-    @api public static class chatas implements Function{
+    @api public static class chatas extends AbstractFunction{
 
         public String getName() {
             return "chatas";
@@ -377,7 +374,7 @@ public class Echoes {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             final MCPlayer player = Static.GetPlayer(args[0]);
             Static.SendMessage(new LineCallback() {
 
@@ -388,7 +385,7 @@ public class Echoes {
                 }
             }, args[1].val());
             
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         public Boolean runAsync(){
             return false;
@@ -396,7 +393,7 @@ public class Echoes {
         
     }
     
-    @api public static class broadcast implements Function{
+    @api public static class broadcast extends AbstractFunction{
 
         public String getName() {
             return "broadcast";
@@ -428,9 +425,9 @@ public class Echoes {
             return "3.0.1";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
-                throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, t);
             }
             final MCServer server = Static.getServer();
             Static.SendMessage(new LineCallback() {
@@ -439,7 +436,7 @@ public class Echoes {
                     server.broadcastMessage(line);
                 }
             }, args[0].val());
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         public Boolean runAsync(){
             return false;
@@ -447,7 +444,7 @@ public class Echoes {
         
     }
     
-    @api public static class console implements Function{
+    @api public static class console extends AbstractFunction{
 
         public String getName() {
             return "console";
@@ -480,7 +477,7 @@ public class Echoes {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mes = args[0].val();
             boolean prefix = true;
             if(args.length > 1){
@@ -488,7 +485,7 @@ public class Echoes {
             }
             mes = Static.MCToANSIColors(mes);
             com.laytonsmith.core.Static.getLogger().log(Level.INFO, (prefix?"CommandHelper: ":"") + mes);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         public Boolean runAsync(){
             return null;

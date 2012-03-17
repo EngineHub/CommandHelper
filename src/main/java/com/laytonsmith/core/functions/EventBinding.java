@@ -5,10 +5,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.GenericTreeNode;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
@@ -31,7 +28,7 @@ public class EventBinding {
         return "This class of functions provide methods to hook deep into the server's event architecture";
     }
     
-    @api public static class bind implements Function{
+    @api public static class bind extends AbstractFunction{
 
         public String getName() {
             return "bind";
@@ -69,21 +66,45 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CVoid(line_num, f);
-        }
-        
-        public Construct execs(Construct name, Construct options, Construct prefilter, 
-                Construct event_obj, GenericTreeNode<Construct> tree, Env env, int line_num, File f){
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(t);
+        }               
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            if(nodes.length < 5){
+                throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, t);
+            }
+            Construct name = parent.seval(nodes[0], env);
+            Construct options = parent.seval(nodes[1], env);
+            Construct prefilter = parent.seval(nodes[2], env);
+            Construct event_obj = parent.eval(nodes[3], env);
+            IVariableList custom_params = new IVariableList();
+            for(int a = 0; a < nodes.length - 5; a++){
+                Construct var = parent.eval(nodes[4 + a], env);
+                if(!(var instanceof IVariable)){
+                    throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, t);
+                }
+                IVariable cur = (IVariable)var;
+                ((IVariable)var).setIval(env.GetVarList().get(cur.getName(), cur.getTarget()).ival());
+                custom_params.set((IVariable)var);
+            }
+            Env newEnv = env;
+            try{
+                newEnv = env.clone();
+            } catch(Exception e){}
+            newEnv.SetVarList(custom_params);
+            GenericTreeNode<Construct> tree = nodes[nodes.length - 1];
+
             //Check to see if our arguments are correct
             if(!(options instanceof CNull || options instanceof CArray)){
-                throw new ConfigRuntimeException("The options must be an array or null", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("The options must be an array or null", ExceptionType.CastException, t);
             }
             if(!(prefilter instanceof CNull || prefilter instanceof CArray)){
-                throw new ConfigRuntimeException("The prefilters must be an array or null", ExceptionType.CastException, line_num, f);                
+                throw new ConfigRuntimeException("The prefilters must be an array or null", ExceptionType.CastException, t);                
             }
             if(!(event_obj instanceof IVariable)){                
-                throw new ConfigRuntimeException("The event object must be an IVariable", ExceptionType.CastException, line_num, f);                
+                throw new ConfigRuntimeException("The event object must be an IVariable", ExceptionType.CastException, t);                
             }
             CString id;
             if(options instanceof CNull){
@@ -94,19 +115,24 @@ public class EventBinding {
             }
             try {
                 BoundEvent be = new BoundEvent(name.val(), (CArray)options, (CArray)prefilter, 
-                        ((IVariable)event_obj).getName(), env, tree, line_num, f);
+                        ((IVariable)event_obj).getName(), env, tree, t);
                 EventUtils.RegisterEvent(be);
-                id = new CString(be.getId(), line_num, f);
+                id = new CString(be.getId(), t);
             } catch (EventException ex) {
-                throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.BindException, t);
             }
             
             return id;
         }
         
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
+        
     }
     
-    @api public static class dump_events implements Function{
+    @api public static class dump_events extends AbstractFunction{
 
         public String getName() {
             return "dump_events";
@@ -143,13 +169,13 @@ public class EventBinding {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return EventUtils.DumpEvents();
         }
         
     }
     
-    @api public static class unbind implements Function{
+    @api public static class unbind extends AbstractFunction{
 
         public String getName() {
             return "unbind";
@@ -184,7 +210,7 @@ public class EventBinding {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String id = null;
             if(args.length == 1){
                 //We are cancelling an arbitrary event
@@ -192,17 +218,17 @@ public class EventBinding {
             } else {
                 //We are cancelling this event. If we are not in an event, throw an exception
                 if(environment.GetEvent() == null){
-                    throw new ConfigRuntimeException("No event ID specified, and not running inside an event", ExceptionType.BindException, line_num, f);
+                    throw new ConfigRuntimeException("No event ID specified, and not running inside an event", ExceptionType.BindException, t);
                 }
                 id = environment.GetEvent().getBoundEvent().getId();
             }
             EventUtils.UnregisterEvent(id);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
-    @api public static class cancel implements Function{
+    @api public static class cancel extends AbstractFunction{
 
         public String getName() {
             return "cancel";
@@ -238,7 +264,7 @@ public class EventBinding {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             boolean cancelled = true;
             if(args.length == 1){
                 cancelled = Static.getBoolean(args[0]);
@@ -246,18 +272,18 @@ public class EventBinding {
             
             BoundEvent.ActiveEvent original = environment.GetEvent();
             if(original == null){
-                throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("cancel cannot be called outside an event handler", ExceptionType.BindException, t);
             }
             if(original.getUnderlyingEvent() != null && original.isCancellable()){
                 original.setCancelled(cancelled);
             }
             environment.GetEvent().setCancelled(true);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
-    @api public static class is_cancelled implements Function{
+    @api public static class is_cancelled extends AbstractFunction{
 
         public String getName() {
             return "is_cancelled";
@@ -292,21 +318,21 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.GetEvent();
             if(original == null){
-                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
             }
             boolean result = false;
             if(original.getUnderlyingEvent() != null && original.isCancellable()){
                 result = original.isCancelled();
             }
-            return new CBoolean(result, line_num, f);
+            return new CBoolean(result, t);
         }
         
     }
     
-    @api public static class trigger implements Function{
+    @api public static class trigger extends AbstractFunction{
 
         public String getName() {
             return "trigger";
@@ -345,26 +371,26 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             CArray obj = null;
             if(args[1] instanceof CNull){
-                obj = new CArray(line_num, f);
+                obj = new CArray(t);
             } else if(args[1] instanceof CArray){
                 obj = (CArray)args[1];
             } else {
-                throw new ConfigRuntimeException("The eventObject must be null, or an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("The eventObject must be null, or an array", ExceptionType.CastException, t);
             }
             boolean serverWide = false;
             if(args.length == 3){
                 serverWide = Static.getBoolean(args[2]);
             }
             EventUtils.ManualTrigger(args[0].val(), obj, serverWide);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
-    @api public static class modify_event implements Function{
+    @api public static class modify_event extends AbstractFunction{
 
         public String getName() {
             return "modify_event";
@@ -408,7 +434,7 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String parameter = args[0].val();
             Construct value = args[1];
             boolean throwOnFailure = false;
@@ -416,11 +442,11 @@ public class EventBinding {
                 throwOnFailure = Static.getBoolean(args[3]);
             }
             if(environment.GetEvent() == null){
-                throw new ConfigRuntimeException(this.getName() + " must be called from within an event handler", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException(this.getName() + " must be called from within an event handler", ExceptionType.BindException, t);
             }
             Event e = environment.GetEvent().getEventDriver();
             if(environment.GetEvent().getBoundEvent().getPriority().equals(Priority.MONITOR)){
-                throw new ConfigRuntimeException("Monitor level handlers may not modify an event!", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("Monitor level handlers may not modify an event!", ExceptionType.BindException, t);
             }
             ActiveEvent active = environment.GetEvent();
             boolean success = false;
@@ -428,22 +454,23 @@ public class EventBinding {
                 try{
                     success = e.modifyEvent(parameter, value, environment.GetEvent().getUnderlyingEvent());
                 } catch(ConfigRuntimeException ex){
-                    ex.setFile(f);
-                    ex.setLineNum(line_num);
+                    ex.setFile(t.file());
+                    ex.setLineNum(t.line());
+                    ex.setColumn(t.col());
                     throw ex;
                 }
             } else {
                 success = false;
             }
             if(throwOnFailure && !success){
-                throw new ConfigRuntimeException("Event parameter is already locked!", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("Event parameter is already locked!", ExceptionType.BindException, t);
             }
-            return new CBoolean(success, line_num, f);
+            return new CBoolean(success, t);
         }
         
     }
     
-    @api public static class lock implements Function{
+    @api public static class lock extends AbstractFunction{
 
         public String getName() {
             return "lock";
@@ -474,9 +501,9 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(environment.GetEvent() == null){
-                throw new ConfigRuntimeException("lock must be called from within an event handler", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("lock must be called from within an event handler", ExceptionType.BindException, t);
             }
             
             BoundEvent.ActiveEvent e = environment.GetEvent();
@@ -488,7 +515,7 @@ public class EventBinding {
                 if(args[0] instanceof CArray){
                     CArray ca = (CArray)args[1];
                     for(int i = 0; i < ca.size(); i++){
-                        params.add(ca.get(i, line_num, f).val());
+                        params.add(ca.get(i, t).val());
                     }
                 } else {
                     for(int i = 0; i < args.length; i++){
@@ -499,7 +526,7 @@ public class EventBinding {
             for(String param : params){
                 e.lock(param);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String since() {
@@ -508,7 +535,7 @@ public class EventBinding {
         
     }
     
-    @api public static class is_locked implements Function{
+    @api public static class is_locked extends AbstractFunction{
 
         public String getName() {
             return "is_locked";
@@ -541,12 +568,12 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(environment.GetEvent() == null){
-                throw new ConfigRuntimeException("is_locked may only be called from inside an event handler", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("is_locked may only be called from inside an event handler", ExceptionType.BindException, t);
             }
             boolean locked = environment.GetEvent().isLocked(args[0].val());
-            return new CBoolean(locked, line_num, f);
+            return new CBoolean(locked, t);
         }
 
         public String since() {
@@ -555,7 +582,7 @@ public class EventBinding {
         
     }
     
-    @api public static class consume implements Function{
+    @api public static class consume extends AbstractFunction{
 
         public String getName() {
             return "consume";
@@ -587,12 +614,12 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(environment.GetEvent() == null){
-                throw new ConfigRuntimeException("consume may only be called from an event handler!", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("consume may only be called from an event handler!", ExceptionType.BindException, t);
             }
             environment.GetEvent().consume();
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String since() {
@@ -601,7 +628,7 @@ public class EventBinding {
         
     }
     
-    @api public static class is_consumed implements Function{
+    @api public static class is_consumed extends AbstractFunction{
 
         public String getName() {
             return "is_consumed";
@@ -634,11 +661,11 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(environment.GetEvent() == null){
-                throw new ConfigRuntimeException("is_consumed must be called from within an event handler", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("is_consumed must be called from within an event handler", ExceptionType.BindException, t);
             }
-            return new CBoolean(environment.GetEvent().isConsumed(), line_num, f);
+            return new CBoolean(environment.GetEvent().isConsumed(), t);
         }
 
         public String since() {
@@ -647,15 +674,15 @@ public class EventBinding {
         
     }
   
-//    @api public static class when_triggered implements Function{
+//    @api public static class when_triggered extends AbstractFunction{
 //        
 //    }
     
-//    @api public static class when_cancelled implements Function{
+//    @api public static class when_cancelled extends AbstractFunction{
 //        
 //    }
     
-    @api public static class event_meta implements Function{
+    @api public static class event_meta extends AbstractFunction{
 
         public String getName() {
             return "event_meta";
@@ -686,13 +713,13 @@ public class EventBinding {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(environment.GetEvent() == null){
-                throw new ConfigRuntimeException("event_meta must be called from within an event handler!", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("event_meta must be called from within an event handler!", ExceptionType.BindException, t);
             }
-            CArray history = new CArray(line_num, f);
+            CArray history = new CArray(t);
             for(String entry : environment.GetEvent().getHistory()){
-                history.push(new CString(entry, line_num, f));
+                history.push(new CString(entry, t));
             }
             return history;
         }

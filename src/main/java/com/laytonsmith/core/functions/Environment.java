@@ -36,7 +36,7 @@ public class Environment {
     }
 
     @api
-    public static class get_block_at implements Function {
+    public static class get_block_at extends AbstractFunction {
 
         public String getName() {
             return "get_block_at";
@@ -74,7 +74,7 @@ public class Environment {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
@@ -85,13 +85,13 @@ public class Environment {
             }
             if (args.length == 1 || args.length == 2) {
                 if (args[0] instanceof CArray) {
-                    MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, line_num, f);
+                    MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
                     x = loc.getX();
                     y = loc.getY();
                     z = loc.getZ();
                     world = loc.getWorld().getName();
                 } else {
-                    throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, line_num, f);
+                    throw new ConfigRuntimeException("get_block_at expects param 1 to be an array", ExceptionType.CastException, t);
                 }
                 if (args.length == 2) {
                     world = args[1].val();
@@ -108,13 +108,13 @@ public class Environment {
                 w = Static.getServer().getWorld(world);
             }
             if (w == null) {
-                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
             }
             x = java.lang.Math.floor(x);
             y = java.lang.Math.floor(y);
             z = java.lang.Math.floor(z);
             MCBlock b = w.getBlockAt((int) x, (int) y, (int) z);
-            return new CString(b.getTypeId() + ":" + b.getData(), line_num, f);
+            return new CString(b.getTypeId() + ":" + b.getData(), t);
         }
 
         public Boolean runAsync() {
@@ -123,7 +123,7 @@ public class Environment {
     }
 
     @api
-    public static class set_block_at implements Function {
+    public static class set_block_at extends AbstractFunction {
 
         public String getName() {
             return "set_block_at";
@@ -160,7 +160,7 @@ public class Environment {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
@@ -171,7 +171,7 @@ public class Environment {
                 w = env.GetPlayer().getWorld();
             }
             if ((args.length == 2 || args.length == 3) && args[0] instanceof CArray) {
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], env.GetPlayer().getWorld(), line_num, f);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], env.GetPlayer().getWorld(), t);
                 x = l.getBlockX();
                 y = l.getBlockY();
                 z = l.getBlockZ();
@@ -194,7 +194,7 @@ public class Environment {
                 w = Static.getServer().getWorld(world);
             }
             if (w == null) {
-                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
             }
             x = java.lang.Math.floor(x);
             y = java.lang.Math.floor(y);
@@ -212,7 +212,7 @@ public class Environment {
                 if (!inMeta) {
                     if (!Character.isDigit(c) && c != ':') {
                         throw new ConfigRuntimeException("id must be formatted as such: 'x:y' where x and y are integers", ExceptionType.FormatException,
-                                line_num, f);
+                                t);
                     }
                     if (c == ':') {
                         inMeta = true;
@@ -232,7 +232,7 @@ public class Environment {
             b.setTypeId(idata);
             b.setData(imeta);
 
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public Boolean runAsync() {
@@ -241,7 +241,7 @@ public class Environment {
     }
 
     @api
-    public static class set_sign_text implements Function {
+    public static class set_sign_text extends AbstractFunction {
 
         public String getName() {
             return "set_sign_text";
@@ -278,8 +278,8 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), t);
             if (l.getBlock().isSign()) {
                 String line1 = "";
                 String line2 = "";
@@ -288,16 +288,16 @@ public class Environment {
                 if (args.length == 2 && args[1] instanceof CArray) {
                     CArray ca = (CArray) args[1];
                     if (ca.size() >= 1) {
-                        line1 = ca.get(0, line_num, f).val();
+                        line1 = ca.get(0, t).val();
                     }
                     if (ca.size() >= 2) {
-                        line2 = ca.get(1, line_num, f).val();
+                        line2 = ca.get(1, t).val();
                     }
                     if (ca.size() >= 3) {
-                        line3 = ca.get(2, line_num, f).val();
+                        line3 = ca.get(2, t).val();
                     }
                     if (ca.size() >= 4) {
-                        line4 = ca.get(3, line_num, f).val();
+                        line4 = ca.get(3, t).val();
                     }
 
                 } else {
@@ -319,15 +319,15 @@ public class Environment {
                 s.setLine(1, line2);
                 s.setLine(2, line3);
                 s.setLine(3, line4);
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             } else {
-                throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, line_num, f);
+                throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
             }
         }
     }
 
     @api
-    public static class get_sign_text implements Function {
+    public static class get_sign_text extends AbstractFunction {
 
         public String getName() {
             return "get_sign_text";
@@ -362,23 +362,23 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), t);
             if (l.getBlock().isSign()) {
                 MCSign s = l.getBlock().getSign();
-                CString line1 = new CString(s.getLine(0), line_num, f);
-                CString line2 = new CString(s.getLine(1), line_num, f);
-                CString line3 = new CString(s.getLine(2), line_num, f);
-                CString line4 = new CString(s.getLine(3), line_num, f);
-                return new CArray(line_num, f, line1, line2, line3, line4);
+                CString line1 = new CString(s.getLine(0), t);
+                CString line2 = new CString(s.getLine(1), t);
+                CString line3 = new CString(s.getLine(2), t);
+                CString line4 = new CString(s.getLine(3), t);
+                return new CArray(t, line1, line2, line3, line4);
             } else {
-                throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, line_num, f);
+                throw new ConfigRuntimeException("The block at the specified location is not a sign", ExceptionType.RangeException, t);
             }
         }
     }
 
     @api
-    public static class is_sign_at implements Function {
+    public static class is_sign_at extends AbstractFunction {
 
         public String getName() {
             return "is_sign_at";
@@ -412,14 +412,14 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), line_num, f);
-            return new CBoolean(l.getBlock().isSign(), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), t);
+            return new CBoolean(l.getBlock().isSign(), t);
         }
     }
 
     @api
-    public static class break_block implements Function {
+    public static class break_block extends AbstractFunction {
 
         public String getName() {
             return "break_block";
@@ -453,12 +453,12 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCLocation l;
             MCPlayer p;
             p = environment.GetPlayer();
             MCWorld w = (p != null ? p.getWorld() : null);
-            l = ObjectGenerator.GetGenerator().location(args[0], w, line_num, f);
+            l = ObjectGenerator.GetGenerator().location(args[0], w, t);
             if (l.getWorld() instanceof CraftWorld) {
                 CraftWorld cw = (CraftWorld) l.getWorld();
                 net.minecraft.server.Block.byId[l.getBlock().getTypeId()].dropNaturally(cw.getHandle(), l.getBlockX(), l.getBlockY(), l.getBlockZ(), l.getBlock().getData(), 1.0f, 0);
@@ -466,11 +466,11 @@ public class Environment {
             l.getBlock().setTypeId(0);
             CraftServer cs = (CraftServer)((BukkitMCServer)Static.getServer()).__Server();
             cs.getHandle().a(new Packet0KeepAlive(), 0);
-            return new CVoid(line_num, f);            
+            return new CVoid(t);            
         }
     }
     
-    @api public static class set_biome implements Function{
+    @api public static class set_biome extends AbstractFunction{
 
         public String getName() {
             return "set_biome";
@@ -502,13 +502,13 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             int x;
             int z;
             MCWorld w;
             if(args.length == 2){
                 MCWorld defaultWorld = environment.GetPlayer()==null?null:environment.GetPlayer().getWorld();
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, line_num, f);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
                 x = l.getBlockX();
                 z = l.getBlockZ();
                 w = l.getWorld();
@@ -525,10 +525,10 @@ public class Environment {
             try{               
                 bt = MCBiomeType.valueOf(args[args.length - 1].val());
             } catch(IllegalArgumentException e){
-                throw new ConfigRuntimeException("The biome type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, line_num, f);
+                throw new ConfigRuntimeException("The biome type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
             }
             w.setBiome(x, z, bt);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String since() {
@@ -537,7 +537,7 @@ public class Environment {
         
     }
     
-    @api public static class get_biome implements Function{
+    @api public static class get_biome extends AbstractFunction{
 
         public String getName() {
             return "get_biome";
@@ -554,7 +554,7 @@ public class Environment {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
+            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
         }
 
         public boolean isRestricted() {
@@ -569,13 +569,13 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             int x;
             int z;
             MCWorld w;
             if(args.length == 1){
                 MCWorld defaultWorld = environment.GetPlayer()==null?null:environment.GetPlayer().getWorld();
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, line_num, f);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
                 x = l.getBlockX();
                 z = l.getBlockZ();
                 w = l.getWorld();
@@ -589,7 +589,7 @@ public class Environment {
                 }
             }
             MCBiomeType bt = w.getBiome(x, z);
-            return new CString(bt.name(), line_num, f);
+            return new CString(bt.name(), t);
         }
 
         public String since() {
@@ -599,7 +599,7 @@ public class Environment {
     }
 
     @api
-    public static class get_highest_block_at implements Function {
+    public static class get_highest_block_at extends AbstractFunction {
 
         public String getName() {
             return "get_highest_block_at";
@@ -634,7 +634,7 @@ public class Environment {
             return "3.4.0";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
@@ -645,7 +645,7 @@ public class Environment {
             }
 
             if (args[0] instanceof CArray && !(args.length == 3)) {
-                MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, line_num, f);
+                MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
                 x = loc.getX();
                 z = loc.getZ();
                 world = loc.getWorld().getName();
@@ -665,16 +665,16 @@ public class Environment {
                 w = Static.getServer().getWorld(world);
             }
             if (w == null) {
-                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("The specified world " + world + " doesn't exist", ExceptionType.InvalidWorldException, t);
             }
             x = java.lang.Math.floor(x);
             y = java.lang.Math.floor(y) - 1;
             z = java.lang.Math.floor(z);
             MCBlock b = w.getHighestBlockAt((int) x, (int) z);
-            return new CArray(line_num, f,
-                    new CInt(b.getX(), line_num, f) ,
-                    new CInt(b.getY(), line_num, f) ,
-                    new CInt(b.getZ(), line_num, f)
+            return new CArray(t,
+                    new CInt(b.getX(), t) ,
+                    new CInt(b.getY(), t) ,
+                    new CInt(b.getZ(), t)
             );
         }
 

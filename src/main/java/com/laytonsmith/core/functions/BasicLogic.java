@@ -17,7 +17,7 @@ public class BasicLogic {
     public static String docs(){
         return "These functions provide basic logical operations.";
     }
-    @api public static class _if implements Function{
+    @api public static class _if extends AbstractFunction{
 
         public String getName() {
             return "if";
@@ -27,21 +27,27 @@ public class BasicLogic {
             return new Integer[]{2, 3};
         }
         
-        public Construct execs(int line_num, File f, Env env, Script parent, 
-                GenericTreeNode<Construct> condition, GenericTreeNode<Construct> __if, 
-                GenericTreeNode<Construct> __else) throws CancelCommandException{
-            if(Static.getBoolean(parent.eval(condition, env))){
-                return parent.eval(__if, env);
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            GenericTreeNode<Construct> condition = nodes[0];
+            GenericTreeNode<Construct> __if = nodes[1];
+            GenericTreeNode<Construct> __else = null;
+            if(nodes.length == 3){
+                __else = nodes[2];
+            }
+            
+            if(Static.getBoolean(parent.seval(condition, env))){
+                return parent.seval(__if, env);
             } else {
                 if(__else == null){
-                    return new CVoid(line_num, f);
+                    return new CVoid(t);
                 }
-                return parent.eval(__else, env);
+                return parent.seval(__else, env);
             }
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CVoid(line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CVoid(t);
         }
         
         public ExceptionType[] thrown(){
@@ -60,7 +66,7 @@ public class BasicLogic {
         public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
-            return false;
+            return true;
         }
         public String since() {
             return "3.0.1";
@@ -70,9 +76,14 @@ public class BasicLogic {
             return false;
         }
         
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
+        
     }
     
-    @api public static class _switch implements Function{
+    @api public static class _switch extends AbstractFunction{
 
         public String getName() {
             return "switch";
@@ -108,40 +119,45 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CNull(line_num, f);
-        }
-        
-        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> children){
-            Construct value = env.GetScript().preResolveVariable(env.GetScript().eval(children.get(0), env));
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CNull(t);
+        }               
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            Construct value = env.GetScript().eval(nodes[0], env);
             equals equals = new equals();
-            for(int i = 1; i < children.size() - 2; i+=2){
-                GenericTreeNode<Construct> statement = children.get(i);
-                GenericTreeNode<Construct> code = children.get(i + 1);
-                Construct evalStatement = env.GetScript().eval(statement, env);
-                evalStatement = env.GetScript().preResolveVariable(evalStatement);
+            for(int i = 1; i < nodes.length - 2; i+=2){
+                GenericTreeNode<Construct> statement = nodes[i];
+                GenericTreeNode<Construct> code = nodes[i + 1];
+                Construct evalStatement = parent.seval(statement, env);
                 if(evalStatement instanceof CArray){
                     for(String index : ((CArray)evalStatement).keySet()){
                         Construct inner = ((CArray)evalStatement).get(index);
-                        if(((CBoolean)equals.exec(line_num, f, env, value, inner)).getBoolean()){
+                        if(((CBoolean)equals.exec(t, env, value, inner)).getBoolean()){
                             return env.GetScript().eval(code, env);
                         }
                     }
                 } else {
-                    if(((CBoolean)equals.exec(line_num, f, env, value, evalStatement)).getBoolean()){
+                    if(((CBoolean)equals.exec(t, env, value, evalStatement)).getBoolean()){
                         return env.GetScript().eval(code, env);
                     }
                 }
             }
-            if(children.size() % 2 == 0){
-                return env.GetScript().eval(children.get(children.size() - 1), env);
+            if(nodes.length % 2 == 0){
+                return env.GetScript().eval(nodes[nodes.length - 1], env);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
+        }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
         }
         
     }
     
-    @api public static class ifelse implements Function{
+    @api public static class ifelse extends AbstractFunction{
 
         public String getName() {
             return "ifelse";
@@ -177,32 +193,37 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CNull(line_num, f);
-        }
-        
-        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> children){
-            if(children.size() < 2){
-                throw new ConfigRuntimeException("ifelse expects at least 2 arguments", ExceptionType.InsufficientArgumentsException, line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CNull(t);
+        }        
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            if(nodes.length < 2){
+                throw new ConfigRuntimeException("ifelse expects at least 2 arguments", ExceptionType.InsufficientArgumentsException, t);
             }
-            for(int i = 0; i <= children.size() - 2; i+=2){
-                GenericTreeNode<Construct> statement = children.get(i);
-                GenericTreeNode<Construct> code = children.get(i + 1);
-                Construct evalStatement = env.GetScript().eval(statement, env);
-                evalStatement = env.GetScript().preResolveVariable(evalStatement);
+            for(int i = 0; i <= nodes.length - 2; i+=2){
+                GenericTreeNode<Construct> statement = nodes[i];
+                GenericTreeNode<Construct> code = nodes[i + 1];
+                Construct evalStatement = parent.seval(statement, env);
                 if(Static.getBoolean(evalStatement)){
                     return env.GetScript().eval(code, env);
                 }
             }
-            if(children.size() % 2 == 1){
-                return env.GetScript().eval(children.get(children.size() - 1), env);
+            if(nodes.length % 2 == 1){
+                return env.GetScript().seval(nodes[nodes.length - 1], env);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
+        }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
         }
         
     }
     
-    @api public static class equals implements Function{
+    @api public static class equals extends AbstractFunction{
 
         public String getName() {
             return "equals";
@@ -212,9 +233,9 @@ public class BasicLogic {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args.length <= 1){
-                throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, line_num, f);
+                throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, t);
             }
             if(Static.anyBooleans(args)){
                 boolean equals = true;
@@ -226,7 +247,7 @@ public class BasicLogic {
                         break;
                     }
                 }
-                return new CBoolean(equals, line_num, f);
+                return new CBoolean(equals, t);
             }
             
             {
@@ -238,7 +259,7 @@ public class BasicLogic {
                     }
                 }
                 if(equals){
-                    return new CBoolean(true, line_num, f);
+                    return new CBoolean(true, t);
                 }
             }
             try{
@@ -251,9 +272,9 @@ public class BasicLogic {
                         break;
                     }
                 }
-                return new CBoolean(equals, line_num, f);
+                return new CBoolean(equals, t);
             } catch (ConfigRuntimeException e){
-                return new CBoolean(false, line_num, f);
+                return new CBoolean(false, t);
             }
         }
         
@@ -282,7 +303,7 @@ public class BasicLogic {
         }
     }
     
-    @api public static class sequals implements Function{
+    @api public static class sequals extends AbstractFunction{
 
         public String getName() {
             return "sequals";
@@ -320,19 +341,19 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             equals equals = new equals();
             if(args[1].getClass().equals(args[0].getClass())
-                    && ((CBoolean)equals.exec(line_num, f, environment, args)).getBoolean()){
-                return new CBoolean(true, line_num, f);
+                    && ((CBoolean)equals.exec(t, environment, args)).getBoolean()){
+                return new CBoolean(true, t);
             } else {
-                return new CBoolean(false, line_num, f);
+                return new CBoolean(false, t);
             }
         }
         
     }
     
-    @api public static class nequals implements Function{
+    @api public static class nequals extends AbstractFunction{
 
         public String getName() {
             return "nequals";
@@ -367,15 +388,15 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             equals e = new equals();
-            CBoolean b = (CBoolean) e.exec(line_num, f, env, args);
-            return new CBoolean(!b.getBoolean(), line_num, f);
+            CBoolean b = (CBoolean) e.exec(t, env, args);
+            return new CBoolean(!b.getBoolean(), t);
         }
         
     }
     
-    @api public static class equals_ic implements Function{
+    @api public static class equals_ic extends AbstractFunction{
 
         public String getName() {
             return "equals_ic";
@@ -412,9 +433,9 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             if(args.length <= 1){
-                throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, line_num, f);
+                throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, t);
             }
             if(Static.anyBooleans(args)){
                 boolean equals = true;
@@ -426,7 +447,7 @@ public class BasicLogic {
                         break;
                     }
                 }
-                return new CBoolean(equals, line_num, f);
+                return new CBoolean(equals, t);
             }
             
             {
@@ -438,7 +459,7 @@ public class BasicLogic {
                     }
                 }
                 if(equals){
-                    return new CBoolean(true, line_num, f);
+                    return new CBoolean(true, t);
                 }
             }
             try{
@@ -451,15 +472,15 @@ public class BasicLogic {
                         break;
                     }
                 }
-                return new CBoolean(equals, line_num, f);
+                return new CBoolean(equals, t);
             } catch (ConfigRuntimeException e){
-                return new CBoolean(false, line_num, f);
+                return new CBoolean(false, t);
             }
         }
         
     }
     
-    @api public static class nequals_ic implements Function{
+    @api public static class nequals_ic extends AbstractFunction{
 
         public String getName() {
             return "nequals_ic";
@@ -494,14 +515,14 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             equals_ic e = new equals_ic();
-            return new CBoolean(!((CBoolean)e.exec(line_num, f, environment, args)).getBoolean(), line_num, f);
+            return new CBoolean(!((CBoolean)e.exec(t, environment, args)).getBoolean(), t);
         }
         
     }
     
-    @api public static class lt implements Function{
+    @api public static class lt extends AbstractFunction{
 
         public String getName() {
             return "lt";
@@ -511,10 +532,10 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
-            return new CBoolean(arg1 < arg2, line_num, f);
+            return new CBoolean(arg1 < arg2, t);
         }
         
         public ExceptionType[] thrown(){
@@ -542,7 +563,7 @@ public class BasicLogic {
         }
     }
     
-    @api public static class gt implements Function{
+    @api public static class gt extends AbstractFunction{
 
         public String getName() {
             return "gt";
@@ -552,10 +573,10 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
-            return new CBoolean(arg1 > arg2, line_num, f);
+            return new CBoolean(arg1 > arg2, t);
         }
         
         public ExceptionType[] thrown(){
@@ -584,7 +605,7 @@ public class BasicLogic {
         }
     }
     
-    @api public static class lte implements Function{
+    @api public static class lte extends AbstractFunction{
 
         public String getName() {
             return "lte";
@@ -594,10 +615,10 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
-            return new CBoolean(arg1 <= arg2, line_num, f);
+            return new CBoolean(arg1 <= arg2, t);
         }
         
         public ExceptionType[] thrown(){
@@ -625,7 +646,7 @@ public class BasicLogic {
         }
     }
     
-    @api public static class gte implements Function{
+    @api public static class gte extends AbstractFunction{
 
         public String getName() {
             return "gte";
@@ -635,10 +656,10 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double arg1 = Static.getNumber(args[0]);
             double arg2 = Static.getNumber(args[1]);
-            return new CBoolean(arg1 >= arg2, line_num, f);
+            return new CBoolean(arg1 >= arg2, t);
         }
         
         public ExceptionType[] thrown(){
@@ -666,7 +687,7 @@ public class BasicLogic {
         }
     }
     
-    @api public static class and implements Function{
+    @api public static class and extends AbstractFunction{
 
         public String getName() {
             return "and";
@@ -675,18 +696,20 @@ public class BasicLogic {
         public Integer[] numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
-        public Construct exec(int line_num, File f, Env env, Construct ... args){
-            return new CNull(line_num, f);
-        }
-        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> args) throws CancelCommandException, ConfigRuntimeException {
-            for(GenericTreeNode<Construct> tree : args){
-                Construct c = env.GetScript().eval(tree, env);
+        public Construct exec(Target t, Env env, Construct ... args){
+            return new CNull(t);
+        }        
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            for(GenericTreeNode<Construct> tree : nodes){
+                Construct c = env.GetScript().seval(tree, env);
                 boolean b = Static.getBoolean(c);
                 if(b == false){
-                    return new CBoolean(false, line_num, f);
+                    return new CBoolean(false, t);
                 }
             }
-            return new CBoolean(true, line_num, f);
+            return new CBoolean(true, t);
         }
         
         public ExceptionType[] thrown(){
@@ -713,9 +736,14 @@ public class BasicLogic {
         public Boolean runAsync() {
             return null;
         }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
     
-    @api public static class or implements Function{
+    @api public static class or extends AbstractFunction{
 
         public String getName() {
             return "or";
@@ -725,18 +753,19 @@ public class BasicLogic {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args){
-            return new CNull(line_num, f);
-        }
-        
-        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> args) throws CancelCommandException, ConfigRuntimeException {            
-            for(GenericTreeNode<Construct> tree: args){
+        public Construct exec(Target t, Env env, Construct... args){
+            return new CNull(t);
+        }                
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            for(GenericTreeNode<Construct> tree: nodes){
                 Construct c = env.GetScript().eval(tree, env);
                 if(Static.getBoolean(c)){
-                    return new CBoolean(true, line_num, f);
+                    return new CBoolean(true, t);
                 }
             }
-            return new CBoolean(false, line_num, f);
+            return new CBoolean(false, t);
         }
         
         public ExceptionType[] thrown(){
@@ -763,9 +792,13 @@ public class BasicLogic {
         public Boolean runAsync() {
             return null;
         }
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
     
-    @api public static class not implements Function{
+    @api public static class not extends AbstractFunction{
 
         public String getName() {
             return "not";
@@ -775,8 +808,8 @@ public class BasicLogic {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CBoolean(!Static.getBoolean(args[0]), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CBoolean(!Static.getBoolean(args[0]), t);
         }
         
         public ExceptionType[] thrown(){
@@ -804,7 +837,7 @@ public class BasicLogic {
         }
     }
     
-    @api public static class xor implements Function{
+    @api public static class xor extends AbstractFunction{
 
         public String getName() {
             return "xor";
@@ -838,15 +871,15 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             boolean val1 = Static.getBoolean(args[0]);
             boolean val2 = Static.getBoolean(args[1]);
-            return new CBoolean(val1 ^ val2, line_num, f);
+            return new CBoolean(val1 ^ val2, t);
         }
         
     }
     
-    @api public static class nand implements Function{
+    @api public static class nand extends AbstractFunction{
 
         public String getName() {
             return "nand";
@@ -879,18 +912,25 @@ public class BasicLogic {
         public Boolean runAsync() {
             return null;
         }
-        public Construct exec(int line_num, File f, Env environment, Construct... args){
-            return new CNull(line_num, f);
-        }
-        public Construct execs(int line_num, File f, Env environment, List<GenericTreeNode<Construct>> args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args){
+            return new CNull(t);
+        }        
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
             and and = new and();
-            boolean val = ((CBoolean)and.execs(line_num, f, environment, args)).getBoolean();
-            return new CBoolean(!val, line_num, f);
+            boolean val = ((CBoolean)and.execs(t, env, parent, nodes)).getBoolean();
+            return new CBoolean(!val, t);
         }
+
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }                
         
     }
     
-    @api public static class nor implements Function{
+    @api public static class nor extends AbstractFunction{
 
         public String getName() {
             return "nor";
@@ -923,19 +963,25 @@ public class BasicLogic {
         public Boolean runAsync() {
             return null;
         }
-        public Construct exec(int line_num, File f, Env environment, Construct ... args){
-            return new CNull(line_num, f);
+        public Construct exec(Target t, Env environment, Construct ... args){
+            return new CNull(t);
         }
         
-        public Construct execs(int line_num, File f, Env environment, List<GenericTreeNode<Construct>> args) throws ConfigRuntimeException {
+        @Override
+        public Construct execs(Target t, Env environment, Script parent, GenericTreeNode<Construct> ... args) throws ConfigRuntimeException {
             or or = new or();
-            boolean val = ((CBoolean)or.execs(line_num, f, environment, args)).getBoolean();
-            return new CBoolean(!val, line_num, f);
+            boolean val = ((CBoolean)or.execs(t, environment, parent, args)).getBoolean();
+            return new CBoolean(!val, t);
+        }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
         }
         
     }
     
-    @api public static class xnor implements Function{
+    @api public static class xnor extends AbstractFunction{
 
         public String getName() {
             return "xnor";
@@ -969,15 +1015,15 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             xor xor = new xor();
-            boolean val = ((CBoolean)xor.exec(line_num, f, environment, args)).getBoolean();
-            return new CBoolean(!val, line_num, f);
+            boolean val = ((CBoolean)xor.exec(t, environment, args)).getBoolean();
+            return new CBoolean(!val, t);
         }
         
     }
     
-    @api public static class bit_and implements Function{
+    @api public static class bit_and extends AbstractFunction{
 
         public String getName() {
             return "bit_and";
@@ -1011,20 +1057,20 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(args.length < 1){
-                throw new ConfigRuntimeException("bit_and requires at least one argument", ExceptionType.InsufficientArgumentsException, line_num, f);
+                throw new ConfigRuntimeException("bit_and requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
             }
             long val = Static.getInt(args[0]);
             for(int i = 1; i < args.length; i++){
                 val = val & Static.getInt(args[i]);
             }
-            return new CInt(val, line_num, f);
+            return new CInt(val, t);
         }
         
     }
     
-    @api public static class bit_or implements Function{
+    @api public static class bit_or extends AbstractFunction{
 
         public String getName() {
             return "bit_or";
@@ -1058,20 +1104,20 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(args.length < 1){
-                throw new ConfigRuntimeException("bit_or requires at least one argument", ExceptionType.InsufficientArgumentsException, line_num, f);
+                throw new ConfigRuntimeException("bit_or requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
             }
             long val = Static.getInt(args[0]);
             for(int i = 1; i < args.length; i++){
                 val = val | Static.getInt(args[i]);
             }
-            return new CInt(val, line_num, f);
+            return new CInt(val, t);
         }
         
     }
     
-    @api public static class bit_not implements Function{
+    @api public static class bit_not extends AbstractFunction{
 
         public String getName() {
             return "bit_not";
@@ -1105,13 +1151,13 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CInt(~Static.getInt(args[0]), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CInt(~Static.getInt(args[0]), t);
         }
         
     }
     
-    @api public static class lshift implements Function{
+    @api public static class lshift extends AbstractFunction{
 
         public String getName() {
             return "lshift";
@@ -1145,15 +1191,15 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             long value = Static.getInt(args[0]);
             long toShift = Static.getInt(args[1]);
-            return new CInt(value << toShift, line_num, f);            
+            return new CInt(value << toShift, t);            
         }
                 
     }
     
-    @api public static class rshift implements Function{
+    @api public static class rshift extends AbstractFunction{
 
         public String getName() {
             return "rshift";
@@ -1187,15 +1233,15 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             long value = Static.getInt(args[0]);
             long toShift = Static.getInt(args[1]);
-            return new CInt(value >> toShift, line_num, f);
+            return new CInt(value >> toShift, t);
         }
         
     }
     
-    @api public static class urshift implements Function{
+    @api public static class urshift extends AbstractFunction{
 
         public String getName() {
             return "urshift";
@@ -1230,10 +1276,10 @@ public class BasicLogic {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             long value = Static.getInt(args[0]);
             long toShift = Static.getInt(args[1]);
-            return new CInt(value >>> toShift, line_num, f);
+            return new CInt(value >>> toShift, t);
         }
         
     }

@@ -17,13 +17,13 @@ public class IVariable extends Construct implements Cloneable{
     private Construct var_value;
     final private String name;
 
-    public IVariable(String name, int line_num, File file){
-        super(name, ConstructType.IVARIABLE, line_num, file);
-        this.var_value = new CString("", line_num, file);
+    public IVariable(String name, Target t){
+        super(name, ConstructType.IVARIABLE, t);
+        this.var_value = new CString("", t);
         this.name = name;
     }
-    public IVariable(String name, Construct value, int line_num, File file){
-        super(name, ConstructType.IVARIABLE, line_num, file);
+    public IVariable(String name, Construct value, Target t){
+        super(name, ConstructType.IVARIABLE, t);
         this.var_value = value;
         this.name = name;
     }

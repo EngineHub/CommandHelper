@@ -10,6 +10,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -55,7 +56,7 @@ public class Debug {
     }
 
 //    @api
-//    public static class dump_listeners implements Function {
+//    public static class dump_listeners extends AbstractFunction {
 //
 //        public String getName() {
 //            return "dump_listeners";
@@ -89,9 +90,9 @@ public class Debug {
 //            return false;
 //        }
 //
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, line_num, f);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
 //            StringBuilder b = new StringBuilder("\n");
 //            if (args.length >= 1 && args[0] instanceof CNull) {
@@ -185,7 +186,7 @@ public class Debug {
 //    }
 
     @api
-    public static class debug implements Function {
+    public static class debug extends AbstractFunction {
 
         public String getName() {
             return "debug";
@@ -219,20 +220,20 @@ public class Debug {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if (Prefs.DebugMode()) {
                 try {
                     Static.LogDebug(args[0].val());
                 } catch (IOException ex) {
-                    throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, line_num, f, ex);
+                    throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
                 }
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
 //    @api
-//    public static class debug_log_events implements Function {
+//    public static class debug_log_events extends AbstractFunction {
 //
 //        public String getName() {
 //            return "debug_log_events";
@@ -270,9 +271,9 @@ public class Debug {
 //            return false;
 //        }
 //
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, line_num, f);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
 //            boolean on = Static.getBoolean(args[0]);
 //            int level = 1;
@@ -284,12 +285,12 @@ public class Debug {
 //            if(args.length >= 3){
 //                Debug.LOG_TO_SCREEN = Static.getBoolean(args[2]);
 //            }
-//            return new CVoid(line_num, f);
+//            return new CVoid(t);
 //        }
 //    }
 
 //    @api
-//    public static class set_debug_event_filter implements Function {
+//    public static class set_debug_event_filter extends AbstractFunction {
 //
 //        public String getName() {
 //            return "set_debug_event_filter";
@@ -324,9 +325,9 @@ public class Debug {
 //            return true;
 //        }
 //
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, line_num, f);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
 //            Set<Event.Type> set = new HashSet<Event.Type>();
 //            if (args[0] instanceof CString) {
@@ -339,19 +340,19 @@ public class Debug {
 //                        Event.Type t = Event.Type.valueOf(args[0].val().toUpperCase());
 //                        set.add(t);
 //                    } catch (IllegalArgumentException e) {
-//                        throw new ConfigRuntimeException(args[0].val() + " is not a valid filter type. The filter log has not been changed.", ExceptionType.FormatException, line_num, f);
+//                        throw new ConfigRuntimeException(args[0].val() + " is not a valid filter type. The filter log has not been changed.", ExceptionType.FormatException, t);
 //                    }
 //                }
 //            } else if (args[0] instanceof CArray) {
 //                for (String c : ((CArray) args[0]).keySet()) {
 //                    try {
-//                        set.add(Event.Type.valueOf(((CArray) args[0]).get(c, line_num, f).val().toUpperCase()));
+//                        set.add(Event.Type.valueOf(((CArray) args[0]).get(c, t).val().toUpperCase()));
 //                    } catch (IllegalArgumentException e) {
-//                        throw new ConfigRuntimeException(c + " is not a valid filter type. The filter log has not been changed.", ExceptionType.FormatException, line_num, f);
+//                        throw new ConfigRuntimeException(c + " is not a valid filter type. The filter log has not been changed.", ExceptionType.FormatException, t);
 //                    }
 //                }
 //            } else {
-//                throw new ConfigRuntimeException("The parameter specified to " + this.getName() + " must be an array (or a single string). The filter array has not been changed.", ExceptionType.CastException, line_num, f);
+//                throw new ConfigRuntimeException("The parameter specified to " + this.getName() + " must be an array (or a single string). The filter array has not been changed.", ExceptionType.CastException, t);
 //            }
 //            synchronized (EVENT_LOGGING_FILTER) {
 //                EVENT_LOGGING_FILTER.clear();
@@ -359,12 +360,12 @@ public class Debug {
 //                    EVENT_LOGGING_FILTER.add(t);
 //                }
 //            }
-//            return new CVoid(line_num, f);
+//            return new CVoid(t);
 //        }
 //    }
 
 //    @api
-//    public static class set_debug_plugin_filter implements Function {
+//    public static class set_debug_plugin_filter extends AbstractFunction {
 //
 //        public String getName() {
 //            return "set_debug_plugin_filter";
@@ -401,21 +402,21 @@ public class Debug {
 //            return false;
 //        }
 //
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
 //            if (!(Boolean) Static.getPreferences().getPreference("allow-debug-logging")) {
-//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, line_num, f);
+//                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
 //            if (args[0] instanceof CString) {
 //                EVENT_PLUGIN_FILTER.clear();
 //                EVENT_PLUGIN_FILTER.add(args[0].val().toUpperCase());
 //            } else if (args[0] instanceof CArray) {
 //                for (String c : ((CArray) args[0]).keySet()) {
-//                    EVENT_PLUGIN_FILTER.add(((CArray) args[0]).get(c, line_num, f).val().toUpperCase());
+//                    EVENT_PLUGIN_FILTER.add(((CArray) args[0]).get(c, t).val().toUpperCase());
 //                }
 //            } else {
-//                throw new ConfigRuntimeException(this.getName() + " expects the argument to be a single string, or an array of strings.", ExceptionType.CastException, line_num, f);
+//                throw new ConfigRuntimeException(this.getName() + " expects the argument to be a single string, or an array of strings.", ExceptionType.CastException, t);
 //            }
-//            return new CVoid(line_num, f);
+//            return new CVoid(t);
 //        }
 //    }
 }

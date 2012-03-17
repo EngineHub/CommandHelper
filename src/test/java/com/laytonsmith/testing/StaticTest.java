@@ -9,16 +9,14 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Token;
-import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,7 +53,6 @@ public class StaticTest {
         MCWorld fakeWorld = Mockito.mock(MCWorld.class);
         Mockito.when(fakePlayer.getServer()).thenReturn(fakeServer);
         Mockito.when(fakePlayer.getWorld()).thenReturn(fakeWorld);
-        System.out.println(name);
         //make sure that these functions don't throw an exception. Any other results
         //are fine
         f.isRestricted();
@@ -93,6 +90,15 @@ public class StaticTest {
             TestExec(f, fakePlayer);
             TestExec(f, null);
             TestExec(f, StaticTest.GetFakeConsoleCommandSender());
+        }
+        
+        //Let's make sure that if execs is defined in the class, useSpecialExec returns true.
+        for(Method method : f.getClass().getDeclaredMethods()){
+            if(method.getName().equals("execs")){
+                if(!f.useSpecialExec()){
+                    fail(f.getName() + " declares execs, but returns false for useSpecialExec.");
+                }
+            }
         }
 
         //now the only function left to test is exec. This cannot be abstracted, unfortunately.
@@ -154,7 +160,7 @@ public class StaticTest {
                     }
                 }
                 try {
-                    f.exec(0, null, env, con);
+                    f.exec(Target.UNKNOWN, env, con);
                 } catch (CancelCommandException e) {
                 } catch (ConfigRuntimeException e) {
                     if (e.getExceptionType() != null) {
@@ -179,7 +185,6 @@ public class StaticTest {
     }
 
     public static void TestClassDocs(String docs, Class container) {
-        System.out.println("docs for " + container.getSimpleName());
         if (docs.length() <= 0) {
             fail("The docs for the " + container.getSimpleName() + " class are missing");
         }
@@ -201,7 +206,7 @@ public class StaticTest {
      */
     public static void assertCEquals(Construct expected, Construct actual) throws CancelCommandException {
         equals e = new equals();
-        CBoolean ret = (CBoolean) e.exec(0, null, null, expected, actual);
+        CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
         if (ret.getBoolean() == false) {
             throw new AssertionError("Expected " + expected + " and " + actual + " to be equal to each other");
         }
@@ -215,7 +220,7 @@ public class StaticTest {
      */
     public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException {
         equals e = new equals();
-        CBoolean ret = (CBoolean) e.exec(0, null, null, expected, actual);
+        CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
         if (ret.getBoolean() == true) {
             throw new AssertionError("Did not expect " + expected + " and " + actual + " to be equal to each other");
         }
@@ -293,6 +298,7 @@ public class StaticTest {
         when(p.getName()).thenReturn(name);        
         when(p.getServer()).thenReturn(s); 
         when(p.instanceofPlayer()).thenReturn(true);
+        when(p.isOp()).thenReturn(true);
         if(s != null && s.getOnlinePlayers() != null){
             List<MCPlayer> online = new ArrayList<MCPlayer>(Arrays.asList(s.getOnlinePlayers()));
             boolean alreadyOnline = false;

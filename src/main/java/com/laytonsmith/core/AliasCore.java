@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -78,7 +79,7 @@ public class AliasCore {
         env.SetCommandSender(player);
 
         if (scripts == null) {
-            throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", 0, null);
+            throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", Target.UNKNOWN);
         }
 
         boolean match = false;

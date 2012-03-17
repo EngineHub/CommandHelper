@@ -10,6 +10,7 @@ import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.File;
@@ -28,7 +29,7 @@ public class IncludeCache {
         cache.put(file, tree);
     }
     
-    public static GenericTreeNode<Construct> get(File file, int line_num, File myFile){
+    public static GenericTreeNode<Construct> get(File file, Target t){
         if(!cache.containsKey(file)){
             //We have to pull the file from the FS, and compile it.
             if(Static.CheckSecurity(file.getAbsolutePath())){
@@ -39,14 +40,14 @@ public class IncludeCache {
                 } catch (ConfigCompileException ex) {
                     throw new ConfigRuntimeException("There was a compile error when trying to include the script at " + file
                             + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), 
-                            Exceptions.ExceptionType.IncludeException, line_num, myFile);
+                            Exceptions.ExceptionType.IncludeException, t);
                 } catch (IOException ex) {
                     throw new ConfigRuntimeException("The script at " + file + " could not be found or read in.", 
-                            Exceptions.ExceptionType.IOException, line_num, myFile);
+                            Exceptions.ExceptionType.IOException, t);
                 }
             } else {
                 throw new ConfigRuntimeException("The script cannot access " + file + " due to restrictions imposed by the base-dir setting.", 
-                        Exceptions.ExceptionType.SecurityException, line_num, myFile);
+                        Exceptions.ExceptionType.SecurityException, t);
             }
         }
         return cache.get(file);

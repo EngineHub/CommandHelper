@@ -8,6 +8,7 @@ import com.laytonsmith.core.Env;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -25,7 +26,7 @@ public class Crypto {
     }
 
     @api
-    public static class rot13 implements Function {
+    public static class rot13 extends AbstractFunction {
 
         public String getName() {
             return "rot13";
@@ -59,7 +60,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String s = args[0].val();
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < s.length(); i++) {
@@ -75,12 +76,12 @@ public class Crypto {
                 }
                 b.append(c);
             }
-            return new CString(b.toString(), line_num, f);
+            return new CString(b.toString(), t);
         }
     }
 
     @api
-    public static class md5 implements Function {
+    public static class md5 extends AbstractFunction {
 
         public String getName() {
             return "md5";
@@ -116,20 +117,20 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
                 digest.update(args[0].val().getBytes());
                 String hash = toHex(digest.digest()).toLowerCase();
-                return new CString(hash, line_num, f);
+                return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, line_num, f, ex);
+                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
             }
         }
     }
 
     @api
-    public static class sha1 implements Function {
+    public static class sha1 extends AbstractFunction {
 
         public String getName() {
             return "sha1";
@@ -164,14 +165,14 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
                 digest.update(args[0].val().getBytes());
                 String hash = toHex(digest.digest()).toLowerCase();
-                return new CString(hash, line_num, f);
+                return new CString(hash, t);
             } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, line_num, f, ex);
+                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
             }
         }
     }

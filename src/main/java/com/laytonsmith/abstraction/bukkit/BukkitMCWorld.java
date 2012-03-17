@@ -6,14 +6,8 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
-import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -129,9 +123,9 @@ public class BukkitMCWorld implements MCWorld {
         OCELOT, CAT, IRONGOLEM;
     }
 
-    public Construct spawnMob(String name, String subClass, int qty, MCLocation l, int line_num, File f) {
+    public Construct spawnMob(String name, String subClass, int qty, MCLocation l, Target t) {
         Class mobType = null;
-        CArray ids = new CArray(0, null);
+        CArray ids = new CArray(Target.UNKNOWN);
         try {
             switch (MOBS.valueOf(name.toUpperCase().replaceAll(" ", ""))) {
                 case CHICKEN:
@@ -209,7 +203,7 @@ public class BukkitMCWorld implements MCWorld {
                     net.minecraft.server.Entity giant = new net.minecraft.server.EntityGiantZombie(((CraftWorld) l.getWorld()).getHandle());
                     giant.setLocation(x, y, z, pitch, yaw);
                     ((CraftWorld) ((BukkitMCLocation)l)._Location().getWorld()).getHandle().addEntity(giant, SpawnReason.CUSTOM);
-                    return new CVoid(line_num, f);
+                    return new CVoid(t);
                 case SNOWGOLEM:
                     mobType = Snowman.class;
                     break;
@@ -222,7 +216,7 @@ public class BukkitMCWorld implements MCWorld {
             }
         } catch (IllegalArgumentException e) {
             throw new ConfigRuntimeException("No mob of type " + name + " exists",
-                    ExceptionType.FormatException, line_num, f);
+                    ExceptionType.FormatException, t);
         }
         for (int i = 0; i < qty; i++) {
             MCEntity e = l.getWorld().spawn(l, mobType);
@@ -240,7 +234,7 @@ public class BukkitMCWorld implements MCWorld {
                     s.setColor(DyeColor.valueOf(subClass.toUpperCase()));
                 } catch (IllegalArgumentException ex) {
                     throw new ConfigRuntimeException(subClass.toUpperCase() + " is not a valid color",
-                            ExceptionType.FormatException, line_num, f);
+                            ExceptionType.FormatException, t);
                 }
             }
             if(((BukkitMCEntity)e)._Entity() instanceof Ocelot){
@@ -252,10 +246,10 @@ public class BukkitMCWorld implements MCWorld {
                     o.setCatType(Ocelot.Type.valueOf(subClass.toUpperCase()));
                 } catch (IllegalArgumentException ex){
                     throw new ConfigRuntimeException(subClass.toUpperCase() + " is not a ocelot type",
-                            ExceptionType.FormatException, line_num, f);                    
+                            ExceptionType.FormatException, t);                    
                 }
             }
-            ids.push(new CInt(e.getEntityId(), line_num, f));
+            ids.push(new CInt(e.getEntityId(), t));
         }
         return ids;
     }

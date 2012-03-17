@@ -2,6 +2,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
@@ -86,7 +87,7 @@ public class EventBuilder {
                 if(constructor == null){
                     throw new ConfigRuntimeException("Cannot find an acceptable constructor that follows the format:"
                             + " public " + bindableEvent.getClass().getSimpleName() + "(" + o.getClass().getSimpleName() + " event)."
-                            + " Please notify the plugin author of this error.", null, 0, null);
+                            + " Please notify the plugin author of this error.", null, Target.UNKNOWN);
                 }
                 constructors.put((Class<BindableEvent>)clazz, constructor);
             }

@@ -115,12 +115,12 @@ public class FunctionList {
         if (c instanceof CFunction) {
             if(!functions.containsKey(c.val())){
                 throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist",
-                        c.getLineNum(), c.getFile());
+                        c.getTarget());
             } else {
                 return functions.get(c.val());
             }              
         }
-        throw new ConfigCompileException("Expecting CFunction type", c.getLineNum(), c.getFile());
+        throw new ConfigCompileException("Expecting CFunction type", c.getTarget());
     }
 
     public static List<Function> getFunctionList() {

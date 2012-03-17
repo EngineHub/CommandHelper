@@ -18,17 +18,17 @@ public class CDouble extends Construct implements Cloneable{
     public static final long serialVersionUID = 1L;
     final double val;
 
-    public CDouble(String value, int line_num, File file){
-        super(value, ConstructType.INT, line_num, file);
+    public CDouble(String value, Target t){
+        super(value, ConstructType.INT, t);
         try{
             val = Double.parseDouble(value);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not cast " + value + " to double", ExceptionType.FormatException, line_num, file);
+            throw new ConfigRuntimeException("Could not cast " + value + " to double", ExceptionType.FormatException, t);
         }
     }
 
-    public CDouble(double value, int line_num, File file){
-        super(Double.toString(value), ConstructType.DOUBLE, line_num, file);
+    public CDouble(double value, Target t){
+        super(Double.toString(value), ConstructType.DOUBLE, t);
         val = value;
     }
 

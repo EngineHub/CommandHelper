@@ -5,6 +5,7 @@
 
 package com.laytonsmith.core.exceptions;
 
+import com.laytonsmith.core.constructs.Target;
 import java.io.File;
 
 /**
@@ -13,14 +14,16 @@ import java.io.File;
  */
 public class ConfigCompileException extends Exception{
 
-    int line_num;
-    String message;
-    File file;
+    final String message;
+    final int line_num;
+    final File file;
+    final int col;
 
-    public ConfigCompileException(String message, int line_num, File f) {
+    public ConfigCompileException(String message, Target t) {
         this.message = message;
-        this.line_num = line_num;
-        this.file = f;
+        this.line_num = t.line();
+        this.file = t.file();
+        this.col = t.col();
     }
     
     @Override

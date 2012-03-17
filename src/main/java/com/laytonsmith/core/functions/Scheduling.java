@@ -8,10 +8,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
-import com.laytonsmith.core.constructs.CClosure;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -34,7 +31,7 @@ public class Scheduling {
     public static String docs(){
         return "This class contains methods for dealing with time and server scheduling.";
     }
-    @api public static class time implements Function{
+    @api public static class time extends AbstractFunction{
 
         public String getName() {
             return "time";
@@ -71,13 +68,13 @@ public class Scheduling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CInt(System.currentTimeMillis(), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CInt(System.currentTimeMillis(), t);
         }
         
     }
     
-    @api public static class nano_time implements Function{
+    @api public static class nano_time extends AbstractFunction{
 
         public String getName() {
             return "nano_time";
@@ -114,13 +111,13 @@ public class Scheduling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CInt(System.nanoTime(), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CInt(System.nanoTime(), t);
         }
         
     }
     
-    public static class sleep implements Function {
+    public static class sleep extends AbstractFunction {
 
         public String getName() {
             return "sleep";
@@ -155,10 +152,10 @@ public class Scheduling {
             return "3.1.0";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (Thread.currentThread().getName().equals("Server thread")) {
                 throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", 
-                        null, line_num, f);
+                        null, t);
             }
             Construct x = args[0];
             double time = Static.getNumber(x);
@@ -170,9 +167,9 @@ public class Scheduling {
                 }
             } else {
                 throw new ConfigRuntimeException("The value passed to sleep must be less than the server defined value of " + i + " seconds or less.", 
-                        ExceptionType.RangeException, line_num, f);
+                        ExceptionType.RangeException, t);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public Boolean runAsync() {
@@ -181,7 +178,7 @@ public class Scheduling {
         }
     }
     
-    @api public static class set_interval implements Function{
+    @api public static class set_interval extends AbstractFunction{
 
         public String getName() {
             return "set_interval";
@@ -216,7 +213,7 @@ public class Scheduling {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             long time = Static.getInt(args[0]);
             int offset = 0;
             long delay = time;
@@ -225,7 +222,7 @@ public class Scheduling {
                 delay = Static.getInt(args[1]);
             }            
             if(!(args[1 + offset] instanceof CClosure)){
-                throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
             }
             final CClosure c = (CClosure) args[1 + offset];     
             final AtomicInteger ret = new AtomicInteger(-1);
@@ -236,7 +233,7 @@ public class Scheduling {
                    c.execute(null);
                } 
             }));
-            return new CInt(ret.get(), line_num, f);
+            return new CInt(ret.get(), t);
         }
 
         public String since() {
@@ -245,7 +242,7 @@ public class Scheduling {
         
     }
     
-    @api public static class set_timeout implements Function{
+    @api public static class set_timeout extends AbstractFunction{
 
         public String getName() {
             return "set_timeout";
@@ -278,10 +275,10 @@ public class Scheduling {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             long time = Static.getInt(args[0]);
             if(!(args[1] instanceof CClosure)){
-                throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
             }
             final CClosure c = (CClosure) args[1];     
             final AtomicInteger ret = new AtomicInteger(-1);
@@ -291,7 +288,7 @@ public class Scheduling {
                    c.execute(null);
                } 
             }));
-            return new CInt(ret.get(), line_num, f);
+            return new CInt(ret.get(), t);
         }
 
         public String since() {
@@ -300,7 +297,7 @@ public class Scheduling {
         
     }
     
-    @api public static class clear_task implements Function{
+    @api public static class clear_task extends AbstractFunction{
 
         public String getName() {
             return "clear_task";
@@ -337,15 +334,15 @@ public class Scheduling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(args.length == 0 && environment.GetCustom("timeout-id") != null){
                 StaticLayer.ClearFutureRunnable((Integer)environment.GetCustom("timeout-id"));
             } else if(args.length == 1){
                 StaticLayer.ClearFutureRunnable((int)Static.getInt(args[0]));
             } else {
-                throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, line_num, f);
+                throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String since() {

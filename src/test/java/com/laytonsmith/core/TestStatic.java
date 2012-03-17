@@ -139,12 +139,12 @@ public class TestStatic {
     @Test
     public void testResolveConstruct() {
         System.out.println("resolveConstruct");
-        assertTrue(Static.resolveConstruct("1", 0, null) instanceof CInt);
-        assertTrue(Static.resolveConstruct("true", 0, null) instanceof CBoolean);
-        assertTrue(Static.resolveConstruct("false", 0, null) instanceof CBoolean);
-        assertTrue(Static.resolveConstruct("null", 0, null) instanceof CNull);
-        assertTrue(Static.resolveConstruct("1.1", 0, null) instanceof CDouble);
-        assertTrue(Static.resolveConstruct("string", 0, null) instanceof CString);
+        assertTrue(Static.resolveConstruct("1", Target.UNKNOWN) instanceof CInt);
+        assertTrue(Static.resolveConstruct("true", Target.UNKNOWN) instanceof CBoolean);
+        assertTrue(Static.resolveConstruct("false", Target.UNKNOWN) instanceof CBoolean);
+        assertTrue(Static.resolveConstruct("null", Target.UNKNOWN) instanceof CNull);
+        assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN) instanceof CDouble);
+        assertTrue(Static.resolveConstruct("string", Target.UNKNOWN) instanceof CString);
     }
         
 }

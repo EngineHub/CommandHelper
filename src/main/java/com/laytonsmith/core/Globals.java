@@ -4,10 +4,7 @@
  */
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.*;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,7 +26,7 @@ public class Globals {
         if(vars.containsKey(var.getName())){
             return vars.get(var.getName());
         } else {
-            IVariable v = new IVariable(var.getName(), new CString("", 0, null), 0, null);
+            IVariable v = new IVariable(var.getName(), new CString("", Target.UNKNOWN), Target.UNKNOWN);
             vars.put(v.getName(), v);
             return v;
         }
@@ -43,7 +40,7 @@ public class Globals {
         if(vars.containsKey(name)){
             return vars.get(name);
         } else {
-            return new CNull(0, null);
+            return new CNull();
         }
     }
     

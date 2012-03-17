@@ -64,47 +64,47 @@ public class WorldEdit {
                     + " the location is returned, it is returned as a 4 index array:(x, y, z, world)";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l = null;
             boolean setter = false;
-            Static.checkPlugin("WorldEdit", line_num, f);
+            Static.checkPlugin("WorldEdit", t);
             
             if(env.GetCommandSender() instanceof MCPlayer){
                 m = env.GetPlayer();
             }
             if(args.length == 2){
-                m = Static.GetPlayer(args[0].val(), line_num, f);
-                l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
+                l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), t);
                 setter = true;
             } else if(args.length == 1){
                 if(args[0] instanceof CArray){
-                    l = ObjectGenerator.GetGenerator().location(args[0], (m==null?null:m.getWorld()), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(args[0], (m==null?null:m.getWorld()), t);
                     setter = true;
                 } else {
-                    m = Static.GetPlayer(args[0].val(), line_num, f);
+                    m = Static.GetPlayer(args[0].val(), t);
                 }
             }
 
             if (m == null) {
-                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin(line_num, f).getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
+            RegionSelector sel = Static.getWorldEditPlugin(t).getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
             if (!(sel instanceof CuboidRegionSelector)) {
-                throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
+                throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
             }
             if(setter){
                 sel.selectPrimary(BukkitUtil.toVector(((BukkitMCLocation)l)._Location()));
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             } else {
                 Vector pt = ((CuboidRegion) sel.getIncompleteRegion()).getPos1();
-                if (pt == null) throw new ConfigRuntimeException("Point in " + this.getName() +  "undefined", line_num, f);
-                return new CArray(line_num, f,
-                        new CInt(pt.getBlockX(), line_num, f),
-                        new CInt(pt.getBlockY(), line_num, f),
-                        new CInt(pt.getBlockZ(), line_num, f),
-                        new CString(m.getWorld().getName(), line_num, f));
+                if (pt == null) throw new ConfigRuntimeException("Point in " + this.getName() +  "undefined", t);
+                return new CArray(t,
+                        new CInt(pt.getBlockX(), t),
+                        new CInt(pt.getBlockY(), t),
+                        new CInt(pt.getBlockZ(), t),
+                        new CString(m.getWorld().getName(), t));
             }
         }
     }
@@ -127,48 +127,48 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l = null;
             boolean setter = false;
-            Static.checkPlugin("WorldEdit", line_num, f);
+            Static.checkPlugin("WorldEdit", t);
 
             if (env.GetCommandSender() instanceof MCPlayer) {
                 m = env.GetPlayer();
             }
             if (args.length == 2){
-                m = Static.GetPlayer(args[0].val(), line_num, f);
-                l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
+                l = ObjectGenerator.GetGenerator().location(args[1], m.getWorld(), t);
                 setter = true;
             } else if (args.length == 1){
                 if (args[0] instanceof CArray) {
-                    l = ObjectGenerator.GetGenerator().location(args[0], (m==null?null:m.getWorld()), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(args[0], (m==null?null:m.getWorld()), t);
                     setter = true;
                 } else {
-                    m = Static.GetPlayer(args[0].val(), line_num, f);
+                    m = Static.GetPlayer(args[0].val(), t);
                 }
             }
 
             if (m == null) {
-                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
             }
 
-            RegionSelector sel = Static.getWorldEditPlugin(line_num, f).getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
+            RegionSelector sel = Static.getWorldEditPlugin(t).getSession(((BukkitMCPlayer)m)._Player()).getRegionSelector(BukkitUtil.getLocalWorld(((BukkitMCWorld)m.getWorld()).__World()));
             if (!(sel instanceof CuboidRegionSelector)) {
-                throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, line_num, f);
+                throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
             }
 
             if(setter){
                 sel.selectSecondary(BukkitUtil.toVector(((BukkitMCLocation)l)._Location()));
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             } else {
                 Vector pt = ((CuboidRegion)sel.getIncompleteRegion()).getPos2();
-                if (pt == null) throw new ConfigRuntimeException("Point in " + this.getName() +  "undefined", line_num, f);
-                return new CArray(line_num, f,
-                        new CInt(pt.getBlockX(), line_num, f),
-                        new CInt(pt.getBlockY(), line_num, f),
-                        new CInt(pt.getBlockZ(), line_num, f),
-                        new CString(m.getWorld().getName(), line_num, f));
+                if (pt == null) throw new ConfigRuntimeException("Point in " + this.getName() +  "undefined", t);
+                return new CArray(t,
+                        new CInt(pt.getBlockX(), t),
+                        new CInt(pt.getBlockY(), t),
+                        new CInt(pt.getBlockZ(), t),
+                        new CString(m.getWorld().getName(), t));
             }
         }
     }
@@ -192,9 +192,9 @@ public class WorldEdit {
 //            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 //        }
 //
-//        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-//            Static.checkPlugin("WorldEdit", line_num, f);
-//            return new CVoid(line_num, f);
+//        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+//            Static.checkPlugin("WorldEdit", t);
+//            return new CVoid(t);
 //        }
 //    }
 
@@ -224,7 +224,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
                 String regionName = args[0].val();
                 String worldName = args[1].val();
@@ -236,10 +236,10 @@ public class WorldEdit {
                 int priority = -1;
                 float volume = -1;
                 World world = Bukkit.getServer().getWorld(worldName);
-                if (world == null) throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, line_num, f);
-                RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
+                if (world == null) throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, t);
+                RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
                 ProtectedRegion region = mgr.getRegion(regionName);
-                if (region == null) throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, line_num, f);
+                if (region == null) throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, t);
                 
                 owners.addAll(region.getOwners().getPlayers());
                 members.addAll(region.getMembers().getPlayers());
@@ -261,30 +261,30 @@ public class WorldEdit {
                 }
                 
                 
-                CArray ret = new CArray(line_num, f);
+                CArray ret = new CArray(t);
                 
-                CArray pointSet = new CArray(line_num, f);
+                CArray pointSet = new CArray(t);
                 for(Location l : points){
-                    CArray point = new CArray(line_num, f);
-                    point.push(new CInt(l.getBlockX(), line_num, f));
-                    point.push(new CInt(l.getBlockY(), line_num, f));
-                    point.push(new CInt(l.getBlockZ(), line_num, f));
-                    point.push(new CString(l.getWorld().getName(), line_num, f));
+                    CArray point = new CArray(t);
+                    point.push(new CInt(l.getBlockX(), t));
+                    point.push(new CInt(l.getBlockY(), t));
+                    point.push(new CInt(l.getBlockZ(), t));
+                    point.push(new CString(l.getWorld().getName(), t));
                     pointSet.push(point);
                 }
-                CArray ownerSet = new CArray(line_num, f);
+                CArray ownerSet = new CArray(t);
                 for(String owner : owners){
-                    ownerSet.push(new CString(owner, line_num, f));
+                    ownerSet.push(new CString(owner, t));
                 }
-                CArray memberSet = new CArray(line_num, f);
+                CArray memberSet = new CArray(t);
                 for(String member : members){
-                    memberSet.push(new CString(member, line_num, f));
+                    memberSet.push(new CString(member, t));
                 }
-                CArray flagSet = new CArray(line_num, f);
+                CArray flagSet = new CArray(t);
                 for(Map.Entry<String, String> flag : flags.entrySet()){
-                    CArray fl = new CArray(line_num, f, 
-                            new CString(flag.getKey(), line_num, f), 
-                            new CString(flag.getValue(), line_num, f)
+                    CArray fl = new CArray(t, 
+                            new CString(flag.getKey(), t), 
+                            new CString(flag.getValue(), t)
                     );
                     flagSet.push(fl);
                 }
@@ -292,12 +292,12 @@ public class WorldEdit {
                 ret.push(ownerSet);
                 ret.push(memberSet);
                 ret.push(flagSet);
-                ret.push(new CInt(priority, line_num, f));
-                ret.push(new CDouble(volume, line_num, f));
+                ret.push(new CInt(priority, t));
+                ret.push(new CDouble(volume, t));
                 return ret;
                 
             } catch (NoClassDefFoundError e) {
-                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, line_num, f, e);
+                throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, t, e);
             }
         }
     }
@@ -320,33 +320,33 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String region1 = args[1].val();
             List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
-            Static.checkPlugin("WorldGuard", line_num, f);
+            Static.checkPlugin("WorldGuard", t);
             World world = Bukkit.getServer().getWorld(args[0].val());
-            if (world == null) throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, line_num, f);
-            RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
+            if (world == null) throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, t);
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
             if (args[2] instanceof CArray) {
                 CArray arg = (CArray)args[2];
                 for (int i = 0; i < arg.size(); i++) {
-                    ProtectedRegion region = mgr.getRegion(arg.get(i, line_num, f).val());
-                    if (region == null) throw new ConfigRuntimeException("Region " + arg.get(i, line_num, f).val() + " could not be found!", ExceptionType.PluginInternalException, line_num, f);
+                    ProtectedRegion region = mgr.getRegion(arg.get(i, t).val());
+                    if (region == null) throw new ConfigRuntimeException("Region " + arg.get(i, t).val() + " could not be found!", ExceptionType.PluginInternalException, t);
                     checkRegions.add(region);
                 }
             } else {
                 ProtectedRegion region = mgr.getRegion(args[2].val());
-                    if (region == null) throw new ConfigRuntimeException("Region " + args[2] + " could not be found!", ExceptionType.PluginInternalException, line_num, f);
+                    if (region == null) throw new ConfigRuntimeException("Region " + args[2] + " could not be found!", ExceptionType.PluginInternalException, t);
                     checkRegions.add(region);
             }
             
             ProtectedRegion region = mgr.getRegion(region1);
-            if (region == null) throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, line_num, f);
+            if (region == null) throw new ConfigRuntimeException("Region could not be found!", ExceptionType.PluginInternalException, t);
             
             try {
-                if (!region.getIntersectingRegions(checkRegions).isEmpty()) return new CBoolean(true, line_num, f);
+                if (!region.getIntersectingRegions(checkRegions).isEmpty()) return new CBoolean(true, t);
             } catch (Exception e) {}
-            return new CBoolean(false, line_num, f);
+            return new CBoolean(false, t);
         }
     }
 
@@ -368,10 +368,10 @@ public class WorldEdit {
             return new ExceptionType[]{};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Static.checkPlugin("WorldGuard", line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
             List<World> checkWorlds = null;
-            CArray arr = new CArray(line_num, f);
+            CArray arr = new CArray(t);
             if (args.length == 1) {
                 World world = Bukkit.getServer().getWorld(args[0].val());
                 if (world != null) checkWorlds = Arrays.asList(world);
@@ -379,9 +379,9 @@ public class WorldEdit {
             if (checkWorlds == null) {
                 checkWorlds = Bukkit.getServer().getWorlds();
             }
-            GlobalRegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager();
+            GlobalRegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager();
             for (World world : checkWorlds) {
-                for (String region : mgr.get(world).getRegions().keySet()) arr.push(new CString(region, line_num, f));
+                for (String region : mgr.get(world).getRegions().keySet()) arr.push(new CString(region, t));
             }
             return arr;
             
@@ -407,8 +407,8 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.PluginInternalException};
         }
         
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Static.checkPlugin("WorldGuard", line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
             World world;
             
             MCPlayer m = null;
@@ -417,20 +417,20 @@ public class WorldEdit {
                 m = env.GetPlayer();
             }
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
             }
             
             if (m == null) {
-                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
             }
             
             world = Bukkit.getServer().getWorld(m.getWorld().getName());
             
-            RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
             Vector pt = new Vector(m.getLocation().getBlockX(), m.getLocation().getBlockY(), m.getLocation().getBlockZ());
             ApplicableRegionSet set = mgr.getApplicableRegions(pt);
             
-            CArray regions = new CArray(line_num, f);
+            CArray regions = new CArray(t);
             
             List<ProtectedRegion> sortedRegions = new ArrayList<ProtectedRegion>();
             
@@ -449,14 +449,14 @@ public class WorldEdit {
             }
             
             for (ProtectedRegion region : sortedRegions) {
-                regions.push(new CString(region.getId(), line_num, f));
+                regions.push(new CString(region.getId(), t));
             }
             
             if (regions.size() > 0) {
                 return regions;
             }
             
-            return new CNull(line_num, f);
+            return new CNull(t);
         }
     }
     
@@ -477,25 +477,25 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
         
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Static.checkPlugin("WorldGuard", line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
             World world;
             
             world = Bukkit.getServer().getWorld(args[1].val());
             
-            RegionManager mgr = Static.getWorldGuardPlugin(line_num, f).getGlobalRegionManager().get(world);
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
             
             ProtectedRegion region = mgr.getRegion(args[0].val());
             
             if (region == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", args[0].val(), args[1].val()), ExceptionType.PluginInternalException, line_num, f);
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", args[0].val(), args[1].val()), ExceptionType.PluginInternalException, t);
             }
             
-            return new CInt(region.volume(), line_num, f);
+            return new CInt(region.volume(), t);
         }
     }
 
-    public static abstract class SKFunction implements Function {
+    public static abstract class SKFunction extends AbstractFunction {
 
         public boolean isRestricted() {
             return true;

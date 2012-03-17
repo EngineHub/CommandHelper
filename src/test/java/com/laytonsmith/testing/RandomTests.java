@@ -20,6 +20,10 @@ import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import static org.junit.Assert.*;
@@ -43,55 +47,68 @@ public class RandomTests {
      * this can be disabled in the StaticTest class, so that high quality test coverage can be measured.
      */
     @Test public void testAllBoilerplate(){
+        Map<String, Throwable> uhohs = new HashMap<String, Throwable>();
         for(Function f : FunctionList.getFunctionList()){
-            StaticTest.TestBoilerplate(f, f.getName());
-            Class upper = f.getClass().getEnclosingClass();
-            if(upper == null){
-                fail(f.getName() + " is not enclosed in an upper class.");
-            }
-            try {
-                Method m = upper.getMethod("docs", new Class[]{});
-                try{
-                    String docs = m.invoke(null, new Object[]{}).toString();
-                    StaticTest.TestClassDocs(docs, upper);
-                } catch (NullPointerException ex){
-                    fail(upper.getName() + "'s docs function should be static");
+            try{
+                StaticTest.TestBoilerplate(f, f.getName());
+                Class upper = f.getClass().getEnclosingClass();
+                if(upper == null){
+                    fail(f.getName() + " is not enclosed in an upper class.");
                 }
-            } catch (IllegalAccessException ex) {
-                Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (IllegalArgumentException ex) {
-                Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
-            } catch (InvocationTargetException ex) {
-                fail(upper.getName() + " throws an exception!");
-            } catch (NoSuchMethodException ex) {
-                fail(upper.getName() + " does not include a class level documentation function.");
-            } catch (SecurityException ex) {
-                Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
+                try {
+                    Method m = upper.getMethod("docs", new Class[]{});
+                    try{
+                        String docs = m.invoke(null, new Object[]{}).toString();
+                        StaticTest.TestClassDocs(docs, upper);
+                    } catch (NullPointerException ex){
+                        fail(upper.getName() + "'s docs function should be static");
+                    }
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalArgumentException ex) {
+                    Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (InvocationTargetException ex) {
+                    fail(upper.getName() + " throws an exception!");
+                } catch (NoSuchMethodException ex) {
+                    fail(upper.getName() + " does not include a class level documentation function.");
+                } catch (SecurityException ex) {
+                    Logger.getLogger(RandomTests.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } catch(Throwable t){
+                uhohs.put(f.getClass().getName(), t);
             }
+        }
+        if(!uhohs.isEmpty()){
+            StringBuilder b = new StringBuilder();
+            for(String key : uhohs.keySet()){
+                b.append(key).append(" threw: ").append(uhohs.get(key)).append("\n");
+            }
+            String output = ("There was/were " + uhohs.size() + " boilerplate failure(s). Output:\n" + b.toString());
+            System.out.println(output);
+            fail(output); 
         }
     }
     
     @Test public void testConstuctToString(){
-        System.out.println("Construct.toString");
-        assertEquals("hello", new CString("hello", 0, null).toString());
+        assertEquals("hello", new CString("hello", Target.UNKNOWN).toString());
     }
     
     @Test public void testClone() throws CloneNotSupportedException{
         CArray c1 = C.Array(C.Void(), C.Void()).clone();
         CBoolean c2 = C.Boolean(true).clone();
         CDouble c4 = C.Double(1).clone();
-        CFunction c5 = new CFunction("", 0, null).clone();
+        CFunction c5 = new CFunction("", Target.UNKNOWN).clone();
         CInt c6 = C.Int(1).clone();
         CNull c7 = C.Null().clone();
         CString c8 = C.String("").clone();
         CVoid c9 = C.Void().clone();
-        Command c10 = new Command("/c", 0, null).clone();
-        IVariable c12 = new IVariable("@name", C.Null(), 0, null).clone();
-        Variable c13 = new Variable("$name", "", false, false, 0, null);
+        Command c10 = new Command("/c", Target.UNKNOWN).clone();
+        IVariable c12 = new IVariable("@name", C.Null(), Target.UNKNOWN).clone();
+        Variable c13 = new Variable("$name", "", false, false, Target.UNKNOWN);
     }
     
     @Test public void testJSONEscapeString() throws MarshalException{
-        CArray ca = new CArray(0, null);
+        CArray ca = new CArray(Target.UNKNOWN);
         ca.push(C.Int(1));
         ca.push(C.Double(2.2));
         ca.push(C.String("string"));
@@ -100,14 +117,14 @@ public class RandomTests {
         ca.push(C.Boolean(false));
         ca.push(C.Null());
         ca.push(C.Void());
-        ca.push(new Command("/Command", 0, null));
-        ca.push(new CArray(0, null, new CInt(1, 0, null)));
+        ca.push(new Command("/Command", Target.UNKNOWN));
+        ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
         //[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
-        assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, 0, null));
+        assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
     }
     
     @Test public void testJSONDecodeString() throws MarshalException{
-        CArray ca = new CArray(0, null);
+        CArray ca = new CArray(Target.UNKNOWN);
         ca.push(C.Int(1));
         ca.push(C.Double(2.2));
         ca.push(C.String("string"));
@@ -116,9 +133,9 @@ public class RandomTests {
         ca.push(C.Boolean(false));
         ca.push(C.Null());
         ca.push(C.Void());
-        ca.push(new Command("/Command", 0, null));
-        ca.push(new CArray(0, null, new CInt(1, 0, null)));
-        StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", 0, null));
+        ca.push(new Command("/Command", Target.UNKNOWN));
+        ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
+        StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
     }
     
     @Test public void testReturnArrayFromProc() throws ConfigCompileException{
@@ -130,14 +147,14 @@ public class RandomTests {
         MCServer fakeServer = mock(MCServer.class);
         when(fakeServer.getWorld("world")).thenReturn(fakeWorld);
         CommandHelperPlugin.myServer = fakeServer;
-        CArray ca1 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3));
-        CArray ca2 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
-        CArray ca3 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
-        CArray ca4 = new CArray(0, null, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
-        MCLocation l1 = ObjectGenerator.GetGenerator().location(ca1, fakeWorld, 0, null);
-        MCLocation l2 = ObjectGenerator.GetGenerator().location(ca2, fakeWorld, 0, null);
-        MCLocation l3 = ObjectGenerator.GetGenerator().location(ca3, fakeWorld, 0, null);
-        MCLocation l4 = ObjectGenerator.GetGenerator().location(ca4, fakeWorld, 0, null);
+        CArray ca1 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3));
+        CArray ca2 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"));
+        CArray ca3 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct(45), C.onstruct(50));
+        CArray ca4 = new CArray(Target.UNKNOWN, C.onstruct(1), C.onstruct(2), C.onstruct(3), C.onstruct("world"), C.onstruct(45), C.onstruct(50));
+        MCLocation l1 = ObjectGenerator.GetGenerator().location(ca1, fakeWorld, Target.UNKNOWN);
+        MCLocation l2 = ObjectGenerator.GetGenerator().location(ca2, fakeWorld, Target.UNKNOWN);
+        MCLocation l3 = ObjectGenerator.GetGenerator().location(ca3, fakeWorld, Target.UNKNOWN);
+        MCLocation l4 = ObjectGenerator.GetGenerator().location(ca4, fakeWorld, Target.UNKNOWN);
         assertEquals(fakeWorld, l1.getWorld());
         assertEquals(fakeWorld, l2.getWorld());
         assertEquals(fakeWorld, l3.getWorld());

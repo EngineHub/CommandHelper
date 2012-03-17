@@ -20,7 +20,7 @@ public class InventoryManagement {
     }
     
     @api
-    public static class pinv implements Function {
+    public static class pinv extends AbstractFunction {
 
         public String getName() {
             return "pinv";
@@ -67,7 +67,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             Integer index = -1;
             boolean all = false;
@@ -91,23 +91,23 @@ public class InventoryManagement {
             }
 
             if(all){
-                CArray ret = new CArray(line_num, f);
+                CArray ret = new CArray(t);
                 ret.forceAssociativeMode();
                 for(int i = 0; i < 36; i++){
-                    ret.set(i, getInvSlot(m, i, line_num, f));
+                    ret.set(i, getInvSlot(m, i, t));
                 }
                 for(int i = 100; i < 104; i++){
-                    ret.set(i, getInvSlot(m, i, line_num, f));
+                    ret.set(i, getInvSlot(m, i, t));
                 }
                 return ret;
             } else {
-                return getInvSlot(m, index, line_num, f);
+                return getInvSlot(m, index, t);
             }
         }
 
-        private Construct getInvSlot(MCPlayer m, Integer slot, int line_num, File f) {
+        private Construct getInvSlot(MCPlayer m, Integer slot, Target t) {
             if(slot == null){
-                return ObjectGenerator.GetGenerator().item(m.getItemInHand(), line_num, f);
+                return ObjectGenerator.GetGenerator().item(m.getItemInHand(), t);
             }
             MCInventory inv = m.getInventory();
             if(slot.equals(36)){
@@ -134,14 +134,14 @@ public class InventoryManagement {
             } else if(slot.equals(103)){
                 is = inv.getHelmet();
             } else {
-                throw new ConfigRuntimeException("Slot index must be 0-35, or 100-103", Exceptions.ExceptionType.RangeException, line_num, f);
+                throw new ConfigRuntimeException("Slot index must be 0-35, or 100-103", Exceptions.ExceptionType.RangeException, t);
             }
-            return ObjectGenerator.GetGenerator().item(is, line_num, f);
+            return ObjectGenerator.GetGenerator().item(is, t);
         }
     }
 
     @api
-    public static class set_pinv implements Function {
+    public static class set_pinv extends AbstractFunction {
 
         public String getName() {
             return "set_pinv";
@@ -192,7 +192,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
@@ -205,10 +205,10 @@ public class InventoryManagement {
             } else if(args.length == 1){
                 arg = args[0];
             } else {
-                throw new ConfigRuntimeException("The old format for set_pinv has been deprecated. Please update your script.", line_num, f);
+                throw new ConfigRuntimeException("The old format for set_pinv has been deprecated. Please update your script.", t);
             }
             if(!(arg instanceof CArray)){
-                throw new ConfigRuntimeException("Expecting an array as argument " + (args.length==1?"1":"2"), Exceptions.ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Expecting an array as argument " + (args.length==1?"1":"2"), Exceptions.ExceptionType.CastException, t);
             }
             CArray array = (CArray)arg;
             for(String key : array.keySet()){
@@ -225,10 +225,10 @@ public class InventoryManagement {
                         }
                     }
                     if(index == -1){
-                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(""), line_num, f);
+                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(""), t);
                         m.setItemInHand(is);
                     } else {
-                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), line_num, f);
+                        MCItemStack is = ObjectGenerator.GetGenerator().item(array.get(index), t);
                         if(index >= 0 && index <= 35){
                             m.getInventory().setItem(index, is);
                         } else if(index == 100){
@@ -247,11 +247,11 @@ public class InventoryManagement {
                     ConfigRuntimeException.DoWarning("Expecting integer value for key in array passed to set_pinv(), but \"" + key + "\" was found. Ignoring.");
                 }
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
     
-    @api public static class phas_item implements Function{
+    @api public static class phas_item extends AbstractFunction{
 
         public String getName() {
             return "phas_item";
@@ -288,7 +288,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
             String item;
             if(args.length == 1){
@@ -297,7 +297,7 @@ public class InventoryManagement {
                 p = Static.GetPlayer(args[0]);
                 item = args[1].val();
             }
-            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, line_num, f);
+            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
             MCInventory inv = p.getInventory();
             int total = 0;
             for(int i = 0; i < 36; i++){
@@ -308,7 +308,7 @@ public class InventoryManagement {
             total += total(is, inv.getLeggings());
             total += total(is, inv.getChestplate());
             total += total(is, inv.getHelmet());
-            return new CInt(total, line_num, f);
+            return new CInt(total, t);
         }
         
         private int total(MCItemStack is, MCItemStack iis){
@@ -329,7 +329,7 @@ public class InventoryManagement {
         
     }
     
-    @api public static class pitem_slot implements Function{
+    @api public static class pitem_slot extends AbstractFunction{
 
         public String getName() {
             return "pitem_slot";
@@ -361,7 +361,7 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
             String item;
             if(args.length == 1){
@@ -370,25 +370,25 @@ public class InventoryManagement {
                 p = Static.GetPlayer(args[0]);
                 item = args[1].val();
             }
-            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, line_num, f);
+            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
             MCInventory inv = p.getInventory();
-            CArray ca = new CArray(line_num, f);
+            CArray ca = new CArray(t);
             for(int i = 0; i < 36; i++){
                 if(match(is, inv.getItem(i))){
-                    ca.push(new CInt(i, line_num, f));
+                    ca.push(new CInt(i, t));
                 }
             }
             if(match(is, inv.getBoots())){
-                ca.push(new CInt(100, line_num, f));
+                ca.push(new CInt(100, t));
             }
             if(match(is, inv.getLeggings())){
-                ca.push(new CInt(101, line_num, f));
+                ca.push(new CInt(101, t));
             }
             if(match(is, inv.getChestplate())){
-                ca.push(new CInt(102, line_num, f));
+                ca.push(new CInt(102, t));
             }
             if(match(is, inv.getHelmet())){
-                ca.push(new CInt(103, line_num, f));
+                ca.push(new CInt(103, t));
             }
             return ca;
         }
@@ -403,7 +403,7 @@ public class InventoryManagement {
         
     }
     
-    @api public static class pgive_item implements Function{
+    @api public static class pgive_item extends AbstractFunction{
 
         public String getName() {
             return "pgive_item";
@@ -441,14 +441,14 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
             MCItemStack is;
             if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), line_num, f);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
             } else {
                 p = Static.GetPlayer(args[0]);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), line_num, f);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), t);
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
@@ -486,7 +486,7 @@ public class InventoryManagement {
                     inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
                 }
             }
-            return new CInt(total - remaining, line_num, f);
+            return new CInt(total - remaining, t);
         }
        
         private boolean match(MCItemStack is, MCItemStack iis){
@@ -499,7 +499,7 @@ public class InventoryManagement {
         
     }
     
-    @api public static class ptake_item implements Function{
+    @api public static class ptake_item extends AbstractFunction{
 
         public String getName() {
             return "ptake_item";
@@ -532,14 +532,14 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
             MCItemStack is;
             if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), line_num, f);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
             } else {
                 p = Static.GetPlayer(args[0]);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), line_num, f);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), t);
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
@@ -561,7 +561,7 @@ public class InventoryManagement {
                     }
                 }
             }
-            return new CInt(total - remaining, line_num, f);
+            return new CInt(total - remaining, t);
             
         }
         
@@ -576,7 +576,7 @@ public class InventoryManagement {
     }
     
 //    @api
-//    public static class pinv_consolidate implements Function {
+//    public static class pinv_consolidate extends AbstractFunction {
 //        
 //        public String getName() {
 //            return "pinv_consolidate";
@@ -613,7 +613,7 @@ public class InventoryManagement {
 //            return false;
 //        }
 //        
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
 //            MCPlayer p = environment.GetPlayer();
 //            if(args.length == 1){
 //                p = Static.GetPlayer(args[0]);
@@ -623,7 +623,7 @@ public class InventoryManagement {
 //                //If the stack size is maxed out, we're done.
 //            }
 //            
-//            return new CVoid(line_num, f);
+//            return new CVoid(t);
 //        }
 //        
 //        public String since() {

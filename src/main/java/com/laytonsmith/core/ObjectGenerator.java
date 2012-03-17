@@ -36,13 +36,13 @@ public class ObjectGenerator {
      * @return
      */
     public CArray location(MCLocation l) {
-        CArray ca = new CArray(0, null);
-        Construct x = new CDouble(l.getX(), 0, null);
-        Construct y = new CDouble(l.getY(), 0, null);
-        Construct z = new CDouble(l.getZ(), 0, null);
-        Construct world = new CString(l.getWorld().getName(), 0, null);
-        Construct yaw = new CDouble(l.getYaw(), 0, null);
-        Construct pitch = new CDouble(l.getPitch(), 0, null);
+        CArray ca = new CArray(Target.UNKNOWN);
+        Construct x = new CDouble(l.getX(), Target.UNKNOWN);
+        Construct y = new CDouble(l.getY(), Target.UNKNOWN);
+        Construct z = new CDouble(l.getZ(), Target.UNKNOWN);
+        Construct world = new CString(l.getWorld().getName(), Target.UNKNOWN);
+        Construct yaw = new CDouble(l.getYaw(), Target.UNKNOWN);
+        Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
         ca.forceAssociativeMode();
         ca.set("0", x);
         ca.set("1", y);
@@ -69,9 +69,9 @@ public class ObjectGenerator {
      * specified world. <em>More conveniently: ([world], x, y, z, [yaw,
      * pitch])</em>
      */
-    public MCLocation location(Construct c, MCWorld w, int line_num, File f) {
+    public MCLocation location(Construct c, MCWorld w, Target t) {
         if (!(c instanceof CArray)) {
-            throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, line_num, f);
+            throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, t);
         }
         CArray array = (CArray) c;
         MCWorld world = w;
@@ -83,32 +83,32 @@ public class ObjectGenerator {
         if (!array.inAssociativeMode()) {
             if (array.size() == 3) {
                 //Just the xyz, with default yaw and pitch, and given world
-                x = Static.getNumber(array.get(0, line_num, f));
-                y = Static.getNumber(array.get(1, line_num, f));
-                z = Static.getNumber(array.get(2, line_num, f));
+                x = Static.getNumber(array.get(0, t));
+                y = Static.getNumber(array.get(1, t));
+                z = Static.getNumber(array.get(2, t));
             } else if (array.size() == 4) {
                 //x, y, z, world
-                x = Static.getNumber(array.get(0, line_num, f));
-                y = Static.getNumber(array.get(1, line_num, f));
-                z = Static.getNumber(array.get(2, line_num, f));
-                world = Static.getServer().getWorld(array.get(3, line_num, f).val());
+                x = Static.getNumber(array.get(0, t));
+                y = Static.getNumber(array.get(1, t));
+                z = Static.getNumber(array.get(2, t));
+                world = Static.getServer().getWorld(array.get(3, t).val());
             } else if (array.size() == 5) {
                 //x, y, z, yaw, pitch, with given world
-                x = Static.getNumber(array.get(0, line_num, f));
-                y = Static.getNumber(array.get(1, line_num, f));
-                z = Static.getNumber(array.get(2, line_num, f));
-                yaw = (float) Static.getNumber(array.get(3, line_num, f));
-                pitch = (float) Static.getNumber(array.get(4, line_num, f));
+                x = Static.getNumber(array.get(0, t));
+                y = Static.getNumber(array.get(1, t));
+                z = Static.getNumber(array.get(2, t));
+                yaw = (float) Static.getNumber(array.get(3, t));
+                pitch = (float) Static.getNumber(array.get(4, t));
             } else if (array.size() == 6) {
                 //All have been given
-                x = Static.getNumber(array.get(0, line_num, f));
-                y = Static.getNumber(array.get(1, line_num, f));
-                z = Static.getNumber(array.get(2, line_num, f));
-                world = Static.getServer().getWorld(array.get(3, line_num, f).val());
-                yaw = (float) Static.getNumber(array.get(4, line_num, f));
-                pitch = (float) Static.getNumber(array.get(5, line_num, f));
+                x = Static.getNumber(array.get(0, t));
+                y = Static.getNumber(array.get(1, t));
+                z = Static.getNumber(array.get(2, t));
+                world = Static.getServer().getWorld(array.get(3, t).val());
+                yaw = (float) Static.getNumber(array.get(4, t));
+                pitch = (float) Static.getNumber(array.get(5, t));
             } else {
-                throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, line_num, f);
+                throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, t);
             }
         }
         if (array.containsKey("x")) {
@@ -144,22 +144,22 @@ public class ObjectGenerator {
      * @param is
      * @return
      */
-    public Construct item(MCItemStack is, int line_num, File f) {
+    public Construct item(MCItemStack is, Target t) {
         if (is == null || is.getAmount() == 0) {
-            return new CNull(line_num, f);
+            return new CNull(t);
         }
         int type = is.getTypeId();
         int data = (is.getData() != null ? is.getData().getData() : 0);
         int qty = is.getAmount();
-        CArray enchants = new CArray(line_num, f);
+        CArray enchants = new CArray(t);
         for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
-            CArray enchObj = new CArray(line_num, f);
+            CArray enchObj = new CArray(t);
             enchObj.forceAssociativeMode();
-            enchObj.set("etype", new CString(entry.getKey().getName(), line_num, f));
-            enchObj.set("elevel", new CInt(entry.getValue(), line_num, f));
+            enchObj.set("etype", new CString(entry.getKey().getName(), t));
+            enchObj.set("elevel", new CInt(entry.getValue(), t));
             enchants.push(enchObj);
         }
-        CArray ret = new CArray(line_num, f);
+        CArray ret = new CArray(t);
         ret.forceAssociativeMode();
         ret.set("type", Integer.toString(type));
         ret.set("data", Integer.toString(data));
@@ -177,12 +177,12 @@ public class ObjectGenerator {
      * @param f
      * @return
      */
-    public MCItemStack item(Construct i, int line_num, File f) {
+    public MCItemStack item(Construct i, Target t) {
         if (i instanceof CNull) {
             return EmptyItem();
         }
         if (!(i instanceof CArray)) {
-            throw new ConfigRuntimeException("Expected an array!", ExceptionType.FormatException, line_num, f);
+            throw new ConfigRuntimeException("Expected an array!", ExceptionType.FormatException, t);
         }
         CArray item = (CArray) i;
         int type = 0;
@@ -200,16 +200,16 @@ public class ObjectGenerator {
                 }
                 type = Integer.parseInt(item.get("type").val());
             } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Could not get item information from given information (" + item.get("type").val() + ")", ExceptionType.FormatException, line_num, f, e);
+                throw new ConfigRuntimeException("Could not get item information from given information (" + item.get("type").val() + ")", ExceptionType.FormatException, t, e);
             }
         } else {
-            throw new ConfigRuntimeException("Could not find item type!", ExceptionType.FormatException, line_num, f);
+            throw new ConfigRuntimeException("Could not find item type!", ExceptionType.FormatException, t);
         }
         if (item.containsKey("data")) {
             try {
                 data = Integer.parseInt(item.get("data").val());
             } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Could not get item data from given information (" + item.get("data").val() + ")", ExceptionType.FormatException, line_num, f, e);
+                throw new ConfigRuntimeException("Could not get item data from given information (" + item.get("data").val() + ")", ExceptionType.FormatException, t, e);
             }
         }
         if (item.containsKey("qty")) {
@@ -221,7 +221,7 @@ public class ObjectGenerator {
             try {
                 qty = Integer.parseInt(sqty);
             } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Could not get qty from given information (" + sqty + ")", ExceptionType.FormatException, line_num, f, e);
+                throw new ConfigRuntimeException("Could not get qty from given information (" + sqty + ")", ExceptionType.FormatException, t, e);
             }
         }
 
@@ -235,7 +235,7 @@ public class ObjectGenerator {
                     throw new NullPointerException();
                 }
             } catch (Exception e) {
-                throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, line_num, f, e);
+                throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
             }
 
             for (String index : enchantArray.keySet()) {
@@ -251,18 +251,18 @@ public class ObjectGenerator {
                         selevel = enchantment.get("elevel").val();
                     }
                     if (setype == null || selevel == null) {
-                        throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, line_num, f);
+                        throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t);
                     }
                     int elevel = 0;
                     try {
                         elevel = Integer.parseInt(selevel);
                     } catch (NumberFormatException e) {
-                        throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, line_num, f);
+                        throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t);
                     }
                     MCEnchantment etype = StaticLayer.GetEnchantmentByName(setype);
                     enchants.put(etype, elevel);
                 } catch (ClassCastException e) {
-                    throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, line_num, f, e);
+                    throw new ConfigRuntimeException("Could not get enchantment data from given information.", ExceptionType.FormatException, t, e);
                 }
             }
         }

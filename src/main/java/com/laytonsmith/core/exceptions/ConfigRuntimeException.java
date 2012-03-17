@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.logging.Level;
@@ -21,6 +22,7 @@ import java.util.logging.Level;
  * @author layton
  */
 public class ConfigRuntimeException extends RuntimeException {
+
 
     /**
      * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
@@ -48,8 +50,14 @@ public class ConfigRuntimeException extends RuntimeException {
     }
 
     public void setLineNum(int line_num) {
-        if(this.line_num == 0){
+        if(this.line_num == -1){
             this.line_num = line_num;
+        }
+    }
+    
+    public void setColumn(int column){
+        if(this.column == -1){
+            this.column = column;
         }
     }
     
@@ -81,9 +89,57 @@ public class ConfigRuntimeException extends RuntimeException {
      * @return 
      */
     public static Reaction HandleUncaughtException(ConfigRuntimeException e){
-        //For now just return DEFAULT, but eventually, we will also see what the
+        //For now just return the default, but eventually, we will also see what the
         //bound events do for it
         return Reaction.REPORT;
+    }
+    
+    /**
+     * If there's nothing special you want to do with the exception, you can send it
+     * here, and it will take the default action for an uncaught exception.
+     * @param e
+     * @param r 
+     */
+    public static void React(ConfigRuntimeException e){
+        React(e, HandleUncaughtException(e), null);
+    }
+    
+    /**
+     * If there's nothing special you want to do with the exception, you can send it
+     * here, and it will take the default action for an uncaught exception.
+     * @param e
+     * @param r 
+     */
+    public static void React(ConfigRuntimeException e, Reaction r) {
+        React(e, r, null);
+    }
+    
+    /**
+     * If there's nothing special you want to do with the exception, you can send it
+     * here, and it will take the default action for an uncaught exception.
+     * @param e
+     * @param r 
+     */
+    public static void React(ConfigRuntimeException e, String optionalMessage){
+        React(e, HandleUncaughtException(e), optionalMessage);
+    }
+    
+    /**
+     * If there's nothing special you want to do with the exception, you can send it
+     * here, and it will take the default action for an uncaught exception.
+     * @param e
+     * @param r 
+     */
+    public static void React(ConfigRuntimeException e, Reaction r, String optionalMessage){        
+        if(r == Reaction.IGNORE){
+            //Welp, you heard the man.
+        } else if(r == ConfigRuntimeException.Reaction.REPORT){
+            ConfigRuntimeException.DoReport(e, optionalMessage);
+        } else if(r == ConfigRuntimeException.Reaction.FATAL){
+            ConfigRuntimeException.DoReport(e, optionalMessage);
+            //Well, here goes nothing
+            throw new Error(optionalMessage, e);
+        }
     }
     
     /**
@@ -187,8 +243,9 @@ public class ConfigRuntimeException extends RuntimeException {
     
     
     private ExceptionType ex;
-    private int line_num;
+    private int line_num = -1;
     private File file;
+    private int column = -1;
     private Env env;
     /**
      * Creates a new ConfigRuntimeException. If ex is not null, this exception can be caught
@@ -198,15 +255,16 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param line_num The line this exception is being thrown from
      * @param file The file this code resides in
      */
-    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num, File file){
-        this(msg, ex, line_num, file, null);
+    public ConfigRuntimeException(String msg, ExceptionType ex, Target t){
+        this(msg, ex, t, null);
     }
     
-    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num, File file, Throwable cause){
+    public ConfigRuntimeException(String msg, ExceptionType ex, Target t, Throwable cause){
         super(msg, cause);
         this.ex = ex;
-        this.line_num = line_num;
-        this.file = file;
+        this.line_num = t.line();
+        this.file = t.file();
+        this.column = t.col();
     }
     
 //    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
@@ -222,8 +280,8 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param line_num
      * @param file 
      */
-    public ConfigRuntimeException(String msg, int line_num, File file){
-        this(msg, null, line_num, file);
+    public ConfigRuntimeException(String msg, Target t){
+        this(msg, null, t);
     }
 
     /**

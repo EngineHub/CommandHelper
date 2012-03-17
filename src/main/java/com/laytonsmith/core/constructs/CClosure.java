@@ -28,13 +28,13 @@ public class CClosure extends Construct {
     String[] names;
     Construct[] defaults;
 
-    public CClosure(GenericTreeNode<Construct> node, Env env, String[] names, Construct[] defaults, int line_num, File file) {
-        super(node!=null?node.toString():"", ConstructType.CLOSURE, line_num, file);
+    public CClosure(GenericTreeNode<Construct> node, Env env, String[] names, Construct[] defaults, Target t) {
+        super(node!=null?node.toString():"", ConstructType.CLOSURE, t);
         this.node = node;
         try {
             this.env = env.clone();
         } catch (CloneNotSupportedException ex) {
-            throw new ConfigRuntimeException("A failure occured while trying to clone the environment.", line_num, file);
+            throw new ConfigRuntimeException("A failure occured while trying to clone the environment.", t);
         }
         this.names = names;
         this.defaults = defaults;
@@ -111,21 +111,25 @@ public class CClosure extends Construct {
                     } catch(Exception e) {
                         value = defaults[i].clone();
                     }
-                    environment.GetVarList().set(new IVariable(name, value, line_num, file));
+                    environment.GetVarList().set(new IVariable(name, value, target));
                 }
             }
-            CArray arguments = new CArray(node.data.getLineNum(), node.data.getFile());
+            CArray arguments = new CArray(node.data.target);
             if(values != null){
                 for(Construct value : values){
                     arguments.push(value);
                 }
             }
-            environment.GetVarList().set(new IVariable("@arguments", arguments, node.data.getLineNum(), node.data.getFile()));
-            GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", line_num, file));
+            environment.GetVarList().set(new IVariable("@arguments", arguments, node.data.target));
+            GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", target));
             List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
             children.add(node);
             newNode.setChildren(children);
-            MethodScriptCompiler.execute(newNode, environment, null, environment.GetScript());
+            try{
+                MethodScriptCompiler.execute(newNode, environment, null, environment.GetScript());                
+            } catch(ConfigRuntimeException e){
+                ConfigRuntimeException.React(e);
+            }
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
         }

@@ -40,7 +40,7 @@ public class Minecraft {
             Enumeration e = p1.propertyNames();
             while(e.hasMoreElements()){
                 String name = e.nextElement().toString();
-                DataValueLookup.put(name, new CString(p1.getProperty(name).toString(), 0, null));
+                DataValueLookup.put(name, new CString(p1.getProperty(name).toString(), Target.UNKNOWN));
             }
         } catch (IOException ex) {
             Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
@@ -52,14 +52,14 @@ public class Minecraft {
             Enumeration e = p2.propertyNames();
             while(e.hasMoreElements()){
                 String name = e.nextElement().toString();
-                DataNameLookup.put(name, new CString(p2.getProperty(name).toString(), 0, null));
+                DataNameLookup.put(name, new CString(p2.getProperty(name).toString(), Target.UNKNOWN));
             }
         } catch(IOException ex){
             Logger.getLogger(Minecraft.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     @api
-    public static class data_values implements Function {
+    public static class data_values extends AbstractFunction {
 
         public String getName() {
             return "data_values";
@@ -69,14 +69,14 @@ public class Minecraft {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0] instanceof CInt) {
-                return new CInt(Static.getInt(args[0]), line_num, f);
+                return new CInt(Static.getInt(args[0]), t);
             } else {
                 String c = args[0].val();
                 int number = StaticLayer.LookupItemId(c);
                 if(number != -1){
-                    return new CInt(number, line_num, f);
+                    return new CInt(number, t);
                 }
                 String changed = c;
                 if(changed.contains(":")){
@@ -92,11 +92,11 @@ public class Minecraft {
                 if(DataValueLookup.containsKey(changed)){
                     String split[] = DataValueLookup.get(changed).toString().split(":");
                     if(split[1].equals("0")){
-                        return new CInt(split[0], line_num, f);
+                        return new CInt(split[0], t);
                     }
-                    return new CString(split[0] + ":" + split[1], line_num, f);
+                    return new CString(split[0] + ":" + split[1], t);
                 }
-                return new CNull(line_num, f);
+                return new CNull(t);
             }
         }
 
@@ -129,7 +129,7 @@ public class Minecraft {
         }
     }
     
-    @api public static class data_name implements Function{
+    @api public static class data_name extends AbstractFunction{
 
         public String getName() {
             return "data_name";
@@ -166,7 +166,7 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             int i = -1;
             int i2 = -1;
             if(args[0] instanceof CString){
@@ -179,7 +179,7 @@ public class Minecraft {
                     } catch(NumberFormatException e){}
                 }
             } else if(args[0] instanceof CArray){
-                MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], line_num, f);
+                MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
                 i = is.getTypeId();
                 i2 = (int)is.getData().getData();
             }
@@ -195,9 +195,9 @@ public class Minecraft {
                 return DataNameLookup.get(i + "_0");
             } else {
                 try{
-                    return new CString(StaticLayer.LookupMaterialName(i), line_num, f);
+                    return new CString(StaticLayer.LookupMaterialName(i), t);
                 } catch(NullPointerException e){
-                    return new CNull(line_num, f);
+                    return new CNull(t);
                 }
             }
         }
@@ -205,7 +205,7 @@ public class Minecraft {
     }
     
     @api
-    public static class max_stack_size implements Function{
+    public static class max_stack_size extends AbstractFunction{
 
         public String getName() {
             return "max_stack_size";
@@ -240,10 +240,10 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], line_num, f);
-                return new CInt(is.getType().getMaxStackSize(), line_num, f);
+                MCItemStack is = ObjectGenerator.GetGenerator().item(args[0], t);
+                return new CInt(is.getType().getMaxStackSize(), t);
             } else {
                 String item = args[0].val();
                 if(item.contains(":")){
@@ -253,12 +253,12 @@ public class Minecraft {
                 try{
                     int iitem = Integer.parseInt(item);
                     int max = StaticLayer.GetItemStack(iitem, 1).getType().getMaxStackSize();
-                    return new CInt(max, line_num, f);
+                    return new CInt(max, t);
                 } catch(NumberFormatException e){
                     
                 }
             }
-            throw new ConfigRuntimeException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", ExceptionType.CastException, line_num, f);
+            throw new ConfigRuntimeException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", ExceptionType.CastException, t);
         }
 
         public String since() {
@@ -268,7 +268,7 @@ public class Minecraft {
     }
 
     @api
-    public static class get_worlds implements Function {
+    public static class get_worlds extends AbstractFunction {
 
         public String getName() {
             return "get_worlds";
@@ -305,18 +305,18 @@ public class Minecraft {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             List<MCWorld> worlds = env.GetCommandSender().getServer().getWorlds();
-            CArray c = new CArray(line_num, f);
+            CArray c = new CArray(t);
             for (MCWorld w : worlds) {
-                c.push(new CString(w.getName(), line_num, f));
+                c.push(new CString(w.getName(), t));
             }
             return c;
         }
     }
 
     @api
-    public static class spawn_mob implements Function {
+    public static class spawn_mob extends AbstractFunction {
 
         public String getName() {
             return "spawn_mob";
@@ -361,7 +361,7 @@ public class Minecraft {
 
         
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String mob = args[0].val();
             String secondary = "";
             if (mob.contains(":")) {
@@ -374,7 +374,7 @@ public class Minecraft {
             }
             if (qty > 50) {
                 throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
-                        ExceptionType.RangeException, line_num, f);
+                        ExceptionType.RangeException, t);
             }
             MCLocation l = null;
             if (env.GetCommandSender() instanceof MCPlayer) {
@@ -383,21 +383,21 @@ public class Minecraft {
             if (args.length > 2) {
                 if (args[2] instanceof CArray) {
                     CArray ca = (CArray) args[2];
-                    l = ObjectGenerator.GetGenerator().location(ca, (l != null?l.getWorld():null), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(ca, (l != null?l.getWorld():null), t);
                 } else {
                     throw new ConfigRuntimeException("Expected argument 3 to spawn_mob to be an array",
-                            ExceptionType.CastException, line_num, f);
+                            ExceptionType.CastException, t);
                 }
             }
             if(l.getWorld() != null){
-                return l.getWorld().spawnMob(mob, secondary, qty, l, line_num, f);
+                return l.getWorld().spawnMob(mob, secondary, qty, l, t);
             } else {
-                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
             }
         }
     }
     
-    @api public static class tame_mob implements Function{
+    @api public static class tame_mob extends AbstractFunction{
 
         public String getName() {
             return "tame_mob";
@@ -433,7 +433,7 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String player = environment.GetPlayer().getName();
             Construct entityID = null;
             if(args.length == 2){
@@ -449,23 +449,23 @@ public class Minecraft {
             int id = (int) Static.getInt(entityID);
             MCEntity e = Static.getEntity(id);
             if(e == null){
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             } else if(e.isTameable()){                
-                MCTameable t = e.getMCTameable();
+                MCTameable mct = e.getMCTameable();
                 if(player != null){
-                    t.setOwner(Static.getServer().getOfflinePlayer(player));
+                    mct.setOwner(Static.getServer().getOfflinePlayer(player));
                 } else {
-                    t.setOwner(null);
+                    mct.setOwner(null);
                 }
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             } else {
-                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, line_num, f);
+                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
             }
         }
         
     }
     
-    @api public static class get_mob_owner implements Function{
+    @api public static class get_mob_owner extends AbstractFunction{
 
         public String getName() {
             return "get_mob_owner";
@@ -500,28 +500,28 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             int id = (int)Static.getInt(args[0]);
             MCEntity e = Static.getEntity(id);
             if(e == null){
-                return new CNull(line_num, f);
+                return new CNull(t);
             } else if(e instanceof MCTameable){
                 MCAnimalTamer at = ((MCTameable)e).getOwner();
                 if(at instanceof HumanEntity){
-                    return new CString(((HumanEntity)at).getName(), line_num, f);
+                    return new CString(((HumanEntity)at).getName(), t);
                 } else if(at instanceof OfflinePlayer){
-                    return new CString(((OfflinePlayer)at).getName(), line_num, f);
+                    return new CString(((OfflinePlayer)at).getName(), t);
                 } else {
-                    return new CNull(line_num, f);
+                    return new CNull(t);
                 }
             } else {
-                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, line_num, f);
+                throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);
             }
         }
         
     }
     
-    @api public static class is_tameable implements Function{
+    @api public static class is_tameable extends AbstractFunction{
 
         public String getName() {
             return "is_tameable";
@@ -555,7 +555,7 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             int id = (int)Static.getInt(args[0]);
             MCEntity e = Static.getEntity(id);
             boolean ret = false;
@@ -566,12 +566,12 @@ public class Minecraft {
             } else {
                 ret = false;
             }
-            return new CBoolean(ret, line_num, f);
+            return new CBoolean(ret, t);
         }
         
     }
     
-    @api public static class make_effect implements Function{
+    @api public static class make_effect extends AbstractFunction{
 
         public String getName() {
             return "make_effect";
@@ -609,8 +609,8 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), t);
             MCEffect e = null;
             try{
                 e = MCEffect.valueOf(args[1].val().toUpperCase());
@@ -618,7 +618,7 @@ public class Minecraft {
                     throw new IllegalArgumentException();
                 }
             } catch(IllegalArgumentException ex){
-                throw new ConfigRuntimeException("The effect type " + args[1].val() + " is not valid", ExceptionType.FormatException, line_num, f);
+                throw new ConfigRuntimeException("The effect type " + args[1].val() + " is not valid", ExceptionType.FormatException, t);
             }
             int data = 0;
             int radius = 64;
@@ -626,12 +626,12 @@ public class Minecraft {
                 radius = (int) Static.getInt(args[2]);
             }
             l.getWorld().playEffect(l, e, data, radius);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
-    @api public static class set_entity_health implements Function{
+    @api public static class set_entity_health extends AbstractFunction{
 
         public String getName() {
             return "set_entity_health";
@@ -666,7 +666,7 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCEntity e = Static.getEntity((int)Static.getInt(args[0]));
             if(e instanceof MCLivingEntity){
                 int health = (int)((double)Static.getInt(args[1])/100.0*(double)((LivingEntity)e).getMaxHealth());
@@ -676,12 +676,12 @@ public class Minecraft {
                     ((MCLivingEntity)e).damage(9001); //His power level is over 9000!
                 }
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
-    @api public static class get_entity_health implements Function{
+    @api public static class get_entity_health extends AbstractFunction{
 
         public String getName() {
             return "get_entity_health";
@@ -716,20 +716,20 @@ public class Minecraft {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCEntity e = Static.getEntity((int)Static.getInt(args[0]));
             if(e instanceof MCLivingEntity){
                 int h = (int)(((double)((MCLivingEntity)e).getHealth()/(double)((MCLivingEntity)e).getMaxHealth())*100);
-                return new CInt(h, line_num, f);
+                return new CInt(h, t);
             } else {
-                throw new ConfigRuntimeException("Not a valid entity id", ExceptionType.FormatException, line_num, f);
+                throw new ConfigRuntimeException("Not a valid entity id", ExceptionType.FormatException, t);
             }
         }
         
     }
 
     @api
-    public static class get_server_info implements Function {
+    public static class get_server_info extends AbstractFunction {
 
         public String getName() {
             return "get_server_info";
@@ -776,7 +776,7 @@ public class Minecraft {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCServer server = env.GetCommandSender().getServer();
 
 
@@ -789,7 +789,7 @@ public class Minecraft {
 
             if (index < -1 || index > 8) {
                 throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 10",
-                        ExceptionType.RangeException, line_num, f);
+                        ExceptionType.RangeException, t);
             }
 
             assert index >= -1 && index <= 8;
@@ -797,46 +797,46 @@ public class Minecraft {
 
             if (index == 0 || index == -1) {
                 //Server name
-                retVals.add(new CString(server.getServerName(), line_num, f));
+                retVals.add(new CString(server.getServerName(), t));
             }
 
             if (index == 1 || index == -1) {
                 //Server Version
-                retVals.add(new CString(server.getVersion(), line_num, f));
+                retVals.add(new CString(server.getVersion(), t));
             }
             if (index == 2 || index == -1) {
                 //Bukkit Version
-                retVals.add(new CString(server.getModVersion(), line_num, f));
+                retVals.add(new CString(server.getModVersion(), t));
             }
             if (index == 3 || index == -1) {
                 //Allow flight
-                retVals.add(new CBoolean(server.getAllowFlight(), line_num, f));
+                retVals.add(new CBoolean(server.getAllowFlight(), t));
             }
             if (index == 4 || index == -1) {
                 //Allow nether
-                retVals.add(new CBoolean(server.getAllowNether(), line_num, f));
+                retVals.add(new CBoolean(server.getAllowNether(), t));
             }
             if (index == 5 || index == -1) {
                 //Allow end
-                retVals.add(new CBoolean(server.getAllowEnd(), line_num, f));
+                retVals.add(new CBoolean(server.getAllowEnd(), t));
             }
             if (index == 6 || index == -1) {
                 //World container
-                retVals.add(new CString(server.getWorldContainer(), line_num, f));
+                retVals.add(new CString(server.getWorldContainer(), t));
             }
             if (index == 7 || index == -1) {
                 //Max player limit
-                retVals.add(new CInt(server.getMaxPlayers(), line_num, f));
+                retVals.add(new CInt(server.getMaxPlayers(), t));
             }
             if (index == 8 || index == -1) {
                 //Array of op's
-                CArray co = new CArray(line_num, f);
+                CArray co = new CArray(t);
                 List<MCOfflinePlayer> so = server.getOperators();
                 for(MCOfflinePlayer o : so) {
                     if(o == null) {
                         continue;
                     }
-                    CString os = new CString(o.getName(), line_num, f);
+                    CString os = new CString(o.getName(), t);
                     co.push(os);
                 }
                 retVals.add(co);
@@ -845,7 +845,7 @@ public class Minecraft {
             if (retVals.size() == 1) {
                 return retVals.get(0);
             } else {
-                CArray ca = new CArray(line_num, f);
+                CArray ca = new CArray(t);
                 for (Construct c : retVals) {
                     ca.push(c);
                 }
@@ -855,7 +855,7 @@ public class Minecraft {
     }
 
     @api
-    public static class get_banned_players implements Function {
+    public static class get_banned_players extends AbstractFunction {
 
         public String getName() {
             return "get_banned_players";
@@ -892,16 +892,16 @@ public class Minecraft {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCServer server = env.GetCommandSender().getServer();
 
-            CArray co = new CArray(line_num, f);
+            CArray co = new CArray(t);
             List<MCOfflinePlayer> so = server.getBannedPlayers();
             for(MCOfflinePlayer o : so) {
                 if(o == null) {
                     continue;
                 }
-                CString os = new CString(o.getName(), line_num, f);
+                CString os = new CString(o.getName(), t);
                 co.push(os);
             }
             return co;
@@ -909,7 +909,7 @@ public class Minecraft {
     }
 
     @api
-    public static class get_whitelisted_players implements Function {
+    public static class get_whitelisted_players extends AbstractFunction {
 
         public String getName() {
             return "get_whitelisted_players";
@@ -946,16 +946,16 @@ public class Minecraft {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCServer server = env.GetCommandSender().getServer();
 
-            CArray co = new CArray(line_num, f);
+            CArray co = new CArray(t);
             List<MCOfflinePlayer> so = server.getWhitelistedPlayers();
             for(MCOfflinePlayer o : so) {
                 if(o == null) {
                     continue;
                 }
-                CString os = new CString(o.getName(), line_num, f);
+                CString os = new CString(o.getName(), t);
                 co.push(os);
             }
             return co;

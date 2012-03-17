@@ -14,8 +14,14 @@ import java.io.File;
 public class CNull extends Construct implements Cloneable{
     
     public static final long serialVersionUID = 1L;
-    public CNull(int line_num, File file){
-        super("null", ConstructType.NULL, line_num, file);
+    
+    //Nulls are often manufactured
+    public CNull(){
+        this(Target.UNKNOWN);
+    }
+    
+    public CNull(Target t){
+        super("null", ConstructType.NULL, t);
     }
     
     @Override

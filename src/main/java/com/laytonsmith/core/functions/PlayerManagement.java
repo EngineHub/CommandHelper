@@ -30,7 +30,7 @@ public class PlayerManagement {
     }
 
     @api
-    public static class player implements Function {
+    public static class player extends AbstractFunction {
 
         public String getName() {
             return "player";
@@ -40,10 +40,10 @@ public class PlayerManagement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             if(p == null){
-                return new CNull(line_num, f);
+                return new CNull(t);
             }
             
             if (args.length == 1) {
@@ -51,11 +51,11 @@ public class PlayerManagement {
             }
             
             if (p != null && p.instanceofPlayer()) {
-                return new CString(((MCPlayer) p).getName(), line_num, f);
+                return new CString(((MCPlayer) p).getName(), t);
             } else if (p != null && p.instanceofMCConsoleCommandSender()) {
-                return new CString("~console", line_num, f);
+                return new CString("~console", t);
             } else {
-                return new CNull(line_num, f);
+                return new CNull(t);
             }
         }
 
@@ -91,7 +91,7 @@ public class PlayerManagement {
     }
 
     @api
-    public static class all_players implements Function {
+    public static class all_players extends AbstractFunction {
 
         public String getName() {
             return "all_players";
@@ -101,13 +101,13 @@ public class PlayerManagement {
             return new Integer[]{0};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer[] pa = Static.getServer().getOnlinePlayers();
             CString[] sa = new CString[pa.length];
             for (int i = 0; i < pa.length; i++) {
-                sa[i] = new CString(pa[i].getName(), line_num, f);
+                sa[i] = new CString(pa[i].getName(), t);
             }
-            return new CArray(line_num, f, sa);
+            return new CArray(t, sa);
         }
 
         public String docs() {
@@ -139,7 +139,7 @@ public class PlayerManagement {
     }
 
     @api
-    public static class ploc implements Function {
+    public static class ploc extends AbstractFunction {
 
         public String getName() {
             return "ploc";
@@ -149,7 +149,7 @@ public class PlayerManagement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
@@ -159,15 +159,15 @@ public class PlayerManagement {
                 m = Static.GetPlayer(args[0]);
             }
             if (m == null) {
-                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, t);
             }
             MCLocation l = m.getLocation();
             MCWorld w = m.getWorld();
-            return new CArray(line_num, f,
-                    new CDouble(l.getX(), line_num, f),
-                    new CDouble(l.getY() - 1, line_num, f),
-                    new CDouble(l.getZ(), line_num, f),
-                    new CString(w.getName(), line_num, f));
+            return new CArray(t,
+                    new CDouble(l.getX(), t),
+                    new CDouble(l.getY() - 1, t),
+                    new CDouble(l.getZ(), t),
+                    new CString(w.getName(), t));
         }
 
         public String docs() {
@@ -200,7 +200,7 @@ public class PlayerManagement {
     }
 
     @api
-    public static class set_ploc implements Function {
+    public static class set_ploc extends AbstractFunction {
 
         public String getName() {
             return "set_ploc";
@@ -240,7 +240,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             String MCPlayer = null;
             double x;
@@ -251,29 +251,29 @@ public class PlayerManagement {
             if (args.length == 1) {
                 if (args[0] instanceof CArray) {
                     CArray ca = (CArray) args[0];
-                    l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), line_num, f);
-                    x = Static.getNumber(ca.get(0, line_num, f));
-                    y = Static.getNumber(ca.get(1, line_num, f));
-                    z = Static.getNumber(ca.get(2, line_num, f));
+                    l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), t);
+                    x = Static.getNumber(ca.get(0, t));
+                    y = Static.getNumber(ca.get(1, t));
+                    z = Static.getNumber(ca.get(2, t));
                     if (p instanceof MCPlayer) {
                         m = ((MCPlayer) p);
                     }
 
                 } else {
                     throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_ploc",
-                            ExceptionType.CastException, line_num, f);
+                            ExceptionType.CastException, t);
                 }
             } else if (args.length == 2) {
                 if (args[1] instanceof CArray) {
                     CArray ca = (CArray) args[1];
                     MCPlayer = args[0].val();
-                    l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer, line_num, f).getWorld(), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer, t).getWorld(), t);
                     x = l.getX();
                     y = l.getY();
                     z = l.getZ();
                 } else {
                     throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_ploc",
-                            ExceptionType.CastException, line_num, f);
+                            ExceptionType.CastException, t);
                 }
             } else if (args.length == 3) {
                 if (p instanceof MCPlayer) {
@@ -288,18 +288,18 @@ public class PlayerManagement {
                 x = Static.getNumber(args[1]);
                 y = Static.getNumber(args[2]);
                 z = Static.getNumber(args[3]);
-                l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer, line_num, f).getWorld(), x, y, z, 0, 0);
+                l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer, t).getWorld(), x, y, z, 0, 0);
             }
             if (m == null && MCPlayer != null) {
-                m = Static.GetPlayer(MCPlayer, line_num, f);
+                m = Static.GetPlayer(MCPlayer, t);
             }
 
-            return new CBoolean(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), line_num, f);
+            return new CBoolean(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), t);
         }
     }
 
     @api
-    public static class pcursor implements Function {
+    public static class pcursor extends AbstractFunction {
 
         public String getName() {
             return "pcursor";
@@ -334,7 +334,7 @@ public class PlayerManagement {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (args.length == 0) {
@@ -348,14 +348,14 @@ public class PlayerManagement {
                 MCBlock b = m.getTargetBlock(null, 10000);
                 if (b == null) {
                     throw new ConfigRuntimeException("No block in sight, or block too far",
-                            ExceptionType.RangeException, line_num, f);
+                            ExceptionType.RangeException, t);
                 }
-                return new CArray(line_num, f, new CInt(b.getX(), line_num, f),
-                        new CInt(b.getY(), line_num, f),
-                        new CInt(b.getZ(), line_num, f),
-                        new CString(b.getWorld().getName(), line_num, f));
+                return new CArray(t, new CInt(b.getX(), t),
+                        new CInt(b.getY(), t),
+                        new CInt(b.getZ(), t),
+                        new CString(b.getWorld().getName(), t));
             } else {
-                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, t);
             }
         }
 
@@ -365,7 +365,7 @@ public class PlayerManagement {
     }
 
     @api
-    public static class kill implements Function {
+    public static class kill extends AbstractFunction {
 
         public String getName() {
             return "kill";
@@ -375,7 +375,7 @@ public class PlayerManagement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (args.length == 1) {
@@ -386,7 +386,7 @@ public class PlayerManagement {
                 }
             }
             m.setHealth(0);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String docs() {
@@ -418,7 +418,7 @@ public class PlayerManagement {
     }
 
     @api
-    public static class pgroup implements Function {
+    public static class pgroup extends AbstractFunction {
 
         public String getName() {
             return "pgroup";
@@ -428,7 +428,7 @@ public class PlayerManagement {
             return new Integer[]{0, 1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (args.length == 0) {
@@ -440,15 +440,15 @@ public class PlayerManagement {
             }
 
             if (m == null) {
-                throw new ConfigRuntimeException("player was not specified, or is offline", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("player was not specified, or is offline", ExceptionType.PlayerOfflineException, t);
             }
             
             String[] sa = Static.getPermissionsResolverManager().getGroups(m.getName());
             Construct[] ca = new Construct[sa.length];
             for (int i = 0; i < sa.length; i++) {
-                ca[i] = new CString(sa[i], line_num, f);
+                ca[i] = new CString(sa[i], t);
             }
-            CArray a = new CArray(line_num, f, ca);
+            CArray a = new CArray(t, ca);
             return a;
         }
 
@@ -481,7 +481,7 @@ public class PlayerManagement {
     }
 
     @api
-    public static class pinfo implements Function {
+    public static class pinfo extends AbstractFunction {
 
         public String getName() {
             return "pinfo";
@@ -529,7 +529,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender m = env.GetCommandSender();
             String player = "";
             int index = -1;
@@ -544,45 +544,45 @@ public class PlayerManagement {
                 index = (int) Static.getInt(args[1]);
             }
             if (player == null) {
-                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, t);
             }
-            MCPlayer p = Static.GetPlayer(player, line_num, f);
+            MCPlayer p = Static.GetPlayer(player, t);
 
             if (index < -1 || index > 11) {
                 throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 11",
-                        ExceptionType.RangeException, line_num, f);
+                        ExceptionType.RangeException, t);
             }
             assert index >= -1 && index <= 11;
             ArrayList<Construct> retVals = new ArrayList<Construct>();
             if (index == 0 || index == -1) {
                 //MCPlayer name 
-                retVals.add(new CString(p.getName(), line_num, f));
+                retVals.add(new CString(p.getName(), t));
             }
             if (index == 1 || index == -1) {
                 //MCPlayer location
-                retVals.add(new CArray(line_num, f, new CDouble(p.getLocation().getX(), line_num, f),
-                        new CDouble(p.getLocation().getY() - 1, line_num, f), new CDouble(p.getLocation().getZ(), line_num, f)));
+                retVals.add(new CArray(t, new CDouble(p.getLocation().getX(), t),
+                        new CDouble(p.getLocation().getY() - 1, t), new CDouble(p.getLocation().getZ(), t)));
             }
             if (index == 2 || index == -1) {
                 //MCPlayer cursor
                 MCBlock b = p.getTargetBlock(null, 200);
                 if (b == null) {
-                    retVals.add(new CNull(line_num, f));
+                    retVals.add(new CNull(t));
                 } else {
-                    retVals.add(new CArray(line_num, f, new CInt(b.getX(), line_num, f), new CInt(b.getY(), line_num, f), new CInt(b.getZ(), line_num, f)));
+                    retVals.add(new CArray(t, new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
                 }
             }
             if (index == 3 || index == -1) {
                 //MCPlayer IP                
-                retVals.add(new CString(p.getAddress().getAddress().getHostAddress(), line_num, f));
+                retVals.add(new CString(p.getAddress().getAddress().getHostAddress(), t));
             }
             if (index == 4 || index == -1) {
                 //Display name
-                retVals.add(new CString(p.getDisplayName(), line_num, f));
+                retVals.add(new CString(p.getDisplayName(), t));
             }
             if (index == 5 || index == -1) {
                 //MCPlayer health
-                retVals.add(new CInt((long) p.getHealth(), line_num, f));
+                retVals.add(new CInt((long) p.getHealth(), t));
             }
             if (index == 6 || index == -1) {
                 //Item in hand
@@ -591,24 +591,24 @@ public class PlayerManagement {
                 if (is.getData() != null) {
                     data = is.getData().getData();
                 }
-                retVals.add(new CString(is.getTypeId() + ":" + data, line_num, f));
+                retVals.add(new CString(is.getTypeId() + ":" + data, t));
             }
             if (index == 7 || index == -1) {
                 //World name
-                retVals.add(new CString(p.getWorld().getName(), line_num, f));
+                retVals.add(new CString(p.getWorld().getName(), t));
             }
             if (index == 8 || index == -1) {
                 //Is op
-                retVals.add(new CBoolean(p.isOp(), line_num, f));
+                retVals.add(new CBoolean(p.isOp(), t));
             }
             if (index == 9 || index == -1) {
                 //MCPlayer groups
                 String[] sa = Static.getPermissionsResolverManager().getGroups(p.getName());
                 Construct[] ca = new Construct[sa.length];
                 for (int i = 0; i < sa.length; i++) {
-                    ca[i] = new CString(sa[i], line_num, f);
+                    ca[i] = new CString(sa[i], t);
                 }
-                CArray a = new CArray(line_num, f, ca);
+                CArray a = new CArray(t, ca);
                 retVals.add(a);
             }
             if (index == 10 || index == -1) {
@@ -616,15 +616,15 @@ public class PlayerManagement {
                 if(CommandHelperPlugin.hostnameLookupCache.containsKey(p.getName())){
                     hostname = CommandHelperPlugin.hostnameLookupCache.get(p.getName());
                 }
-                retVals.add(new CString(hostname, line_num, f));
+                retVals.add(new CString(hostname, t));
             }
             if(index == 11 || index == -1){
-                retVals.add(new CBoolean(p.isSneaking(), line_num, f));
+                retVals.add(new CBoolean(p.isSneaking(), t));
             }
             if (retVals.size() == 1) {
                 return retVals.get(0);
             } else {
-                CArray ca = new CArray(line_num, f);
+                CArray ca = new CArray(t);
                 for (Construct c : retVals) {
                     ca.push(c);
                 }
@@ -634,7 +634,7 @@ public class PlayerManagement {
     }
 
     @api
-    public static class pworld implements Function {
+    public static class pworld extends AbstractFunction {
 
         public String getName() {
             return "pworld";
@@ -671,7 +671,7 @@ public class PlayerManagement {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (args.length == 0) {
@@ -681,12 +681,12 @@ public class PlayerManagement {
             } else {
                 m = Static.GetPlayer(args[0]);
             }
-            return new CString(m.getWorld().getName(), line_num, f);
+            return new CString(m.getWorld().getName(), t);
         }
     }
 
     @api
-    public static class kick implements Function {
+    public static class kick extends AbstractFunction {
 
         public String getName() {
             return "kick";
@@ -724,7 +724,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             String message = "You have been kicked";
             MCPlayer m = null;
@@ -741,12 +741,12 @@ public class PlayerManagement {
             }
             MCPlayer ptok = m;
             ptok.kickPlayer(message);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class set_display_name implements Function {
+    public static class set_display_name extends AbstractFunction {
 
         public String getName() {
             return "set_display_name";
@@ -785,7 +785,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer MCPlayer = null;
             String name;
@@ -800,12 +800,12 @@ public class PlayerManagement {
             }
 
             MCPlayer.setDisplayName(name);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class reset_display_name implements Function {
+    public static class reset_display_name extends AbstractFunction {
 
         public String getName() {
             return "reset_display_name";
@@ -843,7 +843,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer MCPlayer = null;
             if (args.length == 0) {
@@ -855,12 +855,12 @@ public class PlayerManagement {
             }
 
             MCPlayer.setDisplayName(MCPlayer.getName());
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class pfacing implements Function {
+    public static class pfacing extends AbstractFunction {
 
         public String getName() {
             return "pfacing";
@@ -906,7 +906,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             //Getter
             if (args.length == 0 || args.length == 1) {
@@ -931,7 +931,7 @@ public class PlayerManagement {
                     if (yaw < 0) {
                         yaw = (((yaw) % 360) + 360);
                     }
-                    return new CArray(line_num, f, new CDouble(yaw, line_num, f), new CDouble(pitch, line_num, f));
+                    return new CArray(t, new CDouble(yaw, t), new CDouble(pitch, t));
                 }
             }
             //Setter
@@ -947,7 +947,7 @@ public class PlayerManagement {
                 int g = (int) Static.getInt(args[0]);
                 if (g < 0 || g > 3) {
                     throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
-                            ExceptionType.RangeException, line_num, f);
+                            ExceptionType.RangeException, t);
                 }
                 yaw = g * 90;
             } else if (args.length == 2) {
@@ -968,7 +968,7 @@ public class PlayerManagement {
                     int g = (int) Static.getInt(args[1]);
                     if (g < 0 || g > 3) {
                         throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
-                                ExceptionType.RangeException, line_num, f);
+                                ExceptionType.RangeException, t);
                     }
                     yaw = g * 90;
                 }
@@ -982,18 +982,18 @@ public class PlayerManagement {
             //Error check our data
             if (pitch > 90 || pitch < -90) {
                 throw new ConfigRuntimeException("pitch must be between -90 and 90",
-                        ExceptionType.RangeException, line_num, f);
+                        ExceptionType.RangeException, t);
             }
             MCLocation l = toSet.getLocation().clone();
             l.setPitch(pitch);
             l.setYaw(yaw);
             toSet.teleport(l);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }    
 
     @api
-    public static class pmode implements Function {
+    public static class pmode extends AbstractFunction {
 
         public String getName() {
             return "pmode";
@@ -1030,7 +1030,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
@@ -1041,12 +1041,12 @@ public class PlayerManagement {
             }
 
             String mode = m.getGameMode().name();
-            return new CString(mode, line_num, f);
+            return new CString(mode, t);
         }
     }
 
     @api
-    public static class set_pmode implements Function {
+    public static class set_pmode extends AbstractFunction {
 
         public String getName() {
             return "set_pmode";
@@ -1084,7 +1084,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             String mode = "";
@@ -1102,15 +1102,15 @@ public class PlayerManagement {
             try {
                 gm = MCGameMode.valueOf(mode.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new ConfigRuntimeException("Mode must be either 'CREATIVE' or 'SURVIVAL'", ExceptionType.FormatException, line_num, f);
+                throw new ConfigRuntimeException("Mode must be either 'CREATIVE' or 'SURVIVAL'", ExceptionType.FormatException, t);
             }
             m.setGameMode(gm);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class pexp implements Function {
+    public static class pexp extends AbstractFunction {
 
         public String getName() {
             return "pexp";
@@ -1148,22 +1148,22 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
                 m = (MCPlayer) p;
             }
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
             }
 
-            return new CInt((int) (m.getExp() * 100), line_num, f);
+            return new CInt((int) (m.getExp() * 100), t);
         }
     }
 
     @api
-    public static class set_pexp implements Function {
+    public static class set_pexp extends AbstractFunction {
 
         public String getName() {
             return "set_pexp";
@@ -1200,7 +1200,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             int xp = 0;
@@ -1208,19 +1208,19 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 2) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 xp = (int) Static.getInt(args[1]);
             } else {
                 xp = (int) Static.getInt(args[0]);
             }
 
             m.setExp(((float) xp) / 100.0F);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class give_pexp implements Function {
+    public static class give_pexp extends AbstractFunction {
 
         public String getName() {
             return "give_pexp";
@@ -1254,7 +1254,7 @@ public class PlayerManagement {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = environment.GetCommandSender();
             MCPlayer m = null;
             int xp = 0;
@@ -1262,7 +1262,7 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 2) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 xp = (int) Static.getInt(args[1]);
             } else {
                 xp = (int) Static.getInt(args[0]);
@@ -1270,12 +1270,12 @@ public class PlayerManagement {
 
             m.giveExp(xp);
 
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class plevel implements Function {
+    public static class plevel extends AbstractFunction {
 
         public String getName() {
             return "plevel";
@@ -1312,22 +1312,22 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
                 m = (MCPlayer) p;
             }
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
             }
 
-            return new CInt(m.getLevel(), line_num, f);
+            return new CInt(m.getLevel(), t);
         }
     }
 
     @api
-    public static class set_plevel implements Function {
+    public static class set_plevel extends AbstractFunction {
 
         public String getName() {
             return "set_plevel";
@@ -1364,7 +1364,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             int level = 0;
@@ -1372,19 +1372,19 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 2) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 level = (int) Static.getInt(args[1]);
             } else {
                 level = (int) Static.getInt(args[0]);
             }
 
             m.setLevel(level);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class ptexp implements Function {
+    public static class ptexp extends AbstractFunction {
 
         public String getName() {
             return "ptexp";
@@ -1421,22 +1421,22 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
                 m = (MCPlayer) p;
             }
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
             }
 
-            return new CInt(m.getTotalExperience(), line_num, f);
+            return new CInt(m.getTotalExperience(), t);
         }
     }
 
     @api
-    public static class set_ptexp implements Function {
+    public static class set_ptexp extends AbstractFunction {
 
         public String getName() {
             return "set_ptexp";
@@ -1473,7 +1473,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             int xp = 0;
@@ -1481,7 +1481,7 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 2) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 xp = (int) Static.getInt(args[1]);
             } else {
                 xp = (int) Static.getInt(args[0]);
@@ -1492,12 +1492,12 @@ public class PlayerManagement {
 //            m.setExp(0);
 //            m.setTotalExperience(0);
 //            m.giveExp(xp);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class pfood implements Function {
+    public static class pfood extends AbstractFunction {
 
         public String getName() {
             return "pfood";
@@ -1534,22 +1534,22 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
                 m = (MCPlayer) p;
             }
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
             }
 
-            return new CInt(m.getFoodLevel(), line_num, f);
+            return new CInt(m.getFoodLevel(), t);
         }
     }
 
     @api
-    public static class set_pfood implements Function {
+    public static class set_pfood extends AbstractFunction {
 
         public String getName() {
             return "set_pfood";
@@ -1586,7 +1586,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             int level = 0;
@@ -1594,19 +1594,19 @@ public class PlayerManagement {
                 m = (MCPlayer) p;
             }
             if (args.length == 2) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 level = (int) Static.getInt(args[1]);
             } else {
                 level = (int) Static.getInt(args[0]);
             }
 
             m.setFoodLevel(level);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class set_peffect implements Function {
+    public static class set_peffect extends AbstractFunction {
 
         public String getName() {
             return "set_peffect";
@@ -1650,15 +1650,15 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            MCPlayer m = Static.GetPlayer(args[0].val(), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
             int effect = (int) Static.getInt(args[1]);
             //To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
             //otherwise the client crashes, and requires deletion of
             //player data to fix.
             if(effect < 1 || effect > 19){
-                throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-19", ExceptionType.RangeException, line_num, f);
+                throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-19", ExceptionType.RangeException, t);
             }
             int strength = (int) Static.getInt(args[2]);
             int seconds = 30;
@@ -1666,16 +1666,16 @@ public class PlayerManagement {
                 seconds = (int) Static.getInt(args[3]);
             }
             if(seconds == 0 || strength == 0){
-                return new CBoolean(m.removeEffect(effect), line_num, f);
+                return new CBoolean(m.removeEffect(effect), t);
             } else {
                 m.addEffect(effect, strength, seconds);
             }
-            return new CBoolean(true, line_num, f);
+            return new CBoolean(true, t);
         }
     }
 
     @api
-    public static class set_phealth implements Function {
+    public static class set_phealth extends AbstractFunction {
 
         public String getName() {
             return "set_phealth";
@@ -1712,7 +1712,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
@@ -1720,21 +1720,21 @@ public class PlayerManagement {
             }
             int health = 0;
             if (args.length == 2) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 health = (int) Static.getInt(args[1]);
             } else {
                 health = (int) Static.getInt(args[0]);
             }
             if (health < 0 || health > 20) {
-                throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, line_num, f);
+                throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, t);
             }
             m.setHealth(health);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class ponline implements Function {
+    public static class ponline extends AbstractFunction {
 
         public String getName() {
             return "ponline";
@@ -1773,17 +1773,17 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             //We have to use this method here, because we might be in the midst
             //of an event, in which the player is offline, but not really. It will
             //throw an exception if the player doesn't exist
             MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());
-            return new CBoolean(player.isOnline(), line_num, f);
+            return new CBoolean(player.isOnline(), t);
         }
     }
 
     @api
-    public static class pwhitelisted implements Function {
+    public static class pwhitelisted extends AbstractFunction {
 
         public String getName() {
             return "pwhitelisted";
@@ -1821,14 +1821,14 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
-            return new CBoolean(pl.isWhitelisted(), line_num, f);
+            return new CBoolean(pl.isWhitelisted(), t);
         }
     }
 
     @api
-    public static class set_pwhitelisted implements Function {
+    public static class set_pwhitelisted extends AbstractFunction {
 
         public String getName() {
             return "set_pwhitelisted";
@@ -1866,16 +1866,16 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
             boolean whitelist = Static.getBoolean(args[1]);
             pl.setWhitelisted(whitelist);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class pbanned implements Function {
+    public static class pbanned extends AbstractFunction {
 
         public String getName() {
             return "pbanned";
@@ -1916,14 +1916,14 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
-            return new CBoolean(pl.isBanned(), line_num, f);
+            return new CBoolean(pl.isBanned(), t);
         }
     }
 
     @api
-    public static class set_pbanned implements Function {
+    public static class set_pbanned extends AbstractFunction {
 
         public String getName() {
             return "set_pbanned";
@@ -1964,16 +1964,16 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
             boolean ban = Static.getBoolean(args[1]);
             pl.setBanned(ban);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class pisop implements Function {
+    public static class pisop extends AbstractFunction {
 
         public String getName() {
             return "pisop";
@@ -2008,19 +2008,19 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
             }
             if (m == null) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, t);
             }
-            return new CBoolean(m.isOp(), line_num, f);
+            return new CBoolean(m.isOp(), t);
         }
     }
     
-    @api public static class set_compass_target implements Function{
+    @api public static class set_compass_target extends AbstractFunction{
 
         public String getName() {
             return "set_compass_target";
@@ -2054,17 +2054,17 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l;
             if(args.length == 1){
-                l = ObjectGenerator.GetGenerator().location(args[0], null, line_num, f);
+                l = ObjectGenerator.GetGenerator().location(args[0], null, t);
             } else {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
-                l = ObjectGenerator.GetGenerator().location(args[1], null, line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
+                l = ObjectGenerator.GetGenerator().location(args[1], null, t);
             }
             if (m == null) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, t);
             }
             MCLocation old = m.getCompassTarget();
             m.setCompassTarget(l);
@@ -2073,7 +2073,7 @@ public class PlayerManagement {
         
     }
     
-    @api public static class get_compass_target implements Function{
+    @api public static class get_compass_target extends AbstractFunction{
 
         public String getName() {
             return "get_compass_target";
@@ -2107,20 +2107,20 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             if(args.length == 1){
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
             }
             if (m == null) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, line_num, f);
+                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, t);
             }
             return ObjectGenerator.GetGenerator().location(m.getCompassTarget());
         }
         
     }
     
-    @api public static class ponfire implements Function{
+    @api public static class ponfire extends AbstractFunction{
 
         public String getName() {
             return "ponfire";
@@ -2156,18 +2156,18 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
             if(args.length == 1){
                 p = Static.GetPlayer(args[0]);
             }
             int left = p.getRemainingFireTicks();
-            return new CInt(left, line_num, f);
+            return new CInt(left, t);
         }
         
     }
     
-    @api public static class set_ponfire implements Function{
+    @api public static class set_ponfire extends AbstractFunction{
 
         public String getName() {
             return "set_ponfire";
@@ -2202,7 +2202,7 @@ public class PlayerManagement {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
             Construct ticks;
             if(args.length == 2){
@@ -2221,13 +2221,13 @@ public class PlayerManagement {
                 tick = (int) Static.getInt(ticks);
             }
             p.setRemainingFireTicks(tick);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
     //Disabled until bukkit fixes their bug
-//    @api public static class pvelocity implements Function{
+//    @api public static class pvelocity extends AbstractFunction{
 //
 //        public String getName() {
 //            return "pvelocity";
@@ -2260,18 +2260,18 @@ public class PlayerManagement {
 //            return false;
 //        }
 //
-//        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
 //            MCPlayer p = environment.GetPlayer();
 //            if(args.length == 1){
 //                p = Static.GetPlayer(args[0]);
 //            }
-//            CArray vector = new CArray(line_num, f);
+//            CArray vector = new CArray(t);
 //            vector.forceAssociativeMode();
 //            MCPlayer.Velocity velocity = p.getVelocity();
-//            vector.set("magnitude", new CDouble(velocity.magnitute, line_num, f));
-//            vector.set("x", new CDouble(velocity.x, line_num, f));
-//            vector.set("y", new CDouble(velocity.y, line_num, f));
-//            vector.set("z", new CDouble(velocity.z, line_num, f));
+//            vector.set("magnitude", new CDouble(velocity.magnitute, t));
+//            vector.set("x", new CDouble(velocity.x, t));
+//            vector.set("y", new CDouble(velocity.y, t));
+//            vector.set("z", new CDouble(velocity.z, t));
 //            return vector;
 //        }
 //

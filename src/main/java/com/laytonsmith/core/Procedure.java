@@ -27,7 +27,7 @@ public class Procedure implements Cloneable {
     private GenericTreeNode<Construct> tree;
 
     
-    public Procedure(String name, List<IVariable> varList, GenericTreeNode<Construct> tree, CFunction f){
+    public Procedure(String name, List<IVariable> varList, GenericTreeNode<Construct> tree, Target t){
         this.name = name;        
         this.varList = new HashMap<String, IVariable>();
         for(IVariable var : varList){
@@ -37,7 +37,7 @@ public class Procedure implements Cloneable {
         }        
         this.tree = tree;
         if(!this.name.matches("^_[^_].*")){
-            throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, f.getLineNum(), f.getFile());
+            throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, t);
         }
     }
     
@@ -59,10 +59,10 @@ public class Procedure implements Cloneable {
     }
     public Construct execute(List<Construct> args, Env env){
         env.SetVarList(new IVariableList());
-        CArray array = new CArray(0, null);        
+        CArray array = new CArray(Target.UNKNOWN);        
         for(String key : originals.keySet()){
             Construct c = originals.get(key);
-            env.GetVarList().set(new IVariable(key, c, 0, null));
+            env.GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
             array.push(c);
         }
         GenericTree<Construct> root = new GenericTree<Construct>();
@@ -73,17 +73,17 @@ public class Procedure implements Cloneable {
             array.set(i, c);
             if(varIndex.size() > i){
                 String varname = varIndex.get(i).getName();
-                env.GetVarList().set(new IVariable(varname, c, c.getLineNum(), c.getFile()));
+                env.GetVarList().set(new IVariable(varname, c, c.getTarget()));
             }
         }
-        env.GetVarList().set(new IVariable("@arguments", array, 0, null));
+        env.GetVarList().set(new IVariable("@arguments", array, Target.UNKNOWN));
         
         try{
             fakeScript.eval(tree, env);
         } catch(FunctionReturnException e){
             return e.getReturn();
         }
-        return new CVoid(0, null);
+        return new CVoid(Target.UNKNOWN);
     }
     
     @Override

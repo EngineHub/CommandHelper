@@ -5,10 +5,7 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CDouble;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -58,17 +55,17 @@ public class Prefilters {
     
     public static void match(Map<String, Construct> map, String key,
             String actualValue, PrefilterType type) throws PrefilterNonMatchException{
-        match(map, key, new CString(actualValue, 0, null), type);
+        match(map, key, new CString(actualValue, Target.UNKNOWN), type);
     }
     
     public static void match(Map<String, Construct> map, String key,
             int actualValue, PrefilterType type) throws PrefilterNonMatchException{
-        match(map, key, new CInt(actualValue, 0, null), type);
+        match(map, key, new CInt(actualValue, Target.UNKNOWN), type);
     }
     
     public static void match(Map<String, Construct> map, String key,
             double actualValue, PrefilterType type) throws PrefilterNonMatchException{
-        match(map, key, new CDouble(actualValue, 0, null), type);
+        match(map, key, new CDouble(actualValue, Target.UNKNOWN), type);
     }
     
     /**
@@ -157,14 +154,13 @@ public class Prefilters {
                 }
             } catch(ExpressionException e){
                 throw new ConfigRuntimeException("Your expression is invalidly formatted", 
-                        ExceptionType.FormatException, expression.getLineNum(), expression.getFile());
+                        ExceptionType.FormatException, expression.getTarget());
             }
         } else {
             throw new ConfigRuntimeException("Prefilter expecting expression type, and \"" 
                     + expression.val() + "\" does not follow expression format. "
                     + "(Did you surround it in parenthesis?)", 
-                    ExceptionType.FormatException, expression.getLineNum(), 
-                    expression.getFile());
+                    ExceptionType.FormatException, expression.getTarget());
         }
     }
     
@@ -176,7 +172,7 @@ public class Prefilters {
             }
         } else {
             throw new ConfigRuntimeException("Prefilter expecting regex type, and \"" 
-                    + expression.val() + "\" does not follow regex format", ExceptionType.FormatException, expression.getLineNum(), expression.getFile());
+                    + expression.val() + "\" does not follow regex format", ExceptionType.FormatException, expression.getTarget());
         }
     }
     
@@ -191,7 +187,6 @@ public class Prefilters {
     }
     
     private static Construct MathReplace(String key, Construct expression, Construct value){
-        return new CString(expression.val().replaceAll(key, value.val()), expression.getLineNum(),
-                expression.getFile());
+        return new CString(expression.val().replaceAll(key, value.val()), expression.getTarget());
     }
 }

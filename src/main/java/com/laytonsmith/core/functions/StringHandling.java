@@ -5,10 +5,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ZipReader;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.GenericTreeNode;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -31,7 +28,7 @@ public class StringHandling {
     }
     
     //@api
-    public static class cc implements Function{
+    public static class cc extends AbstractFunction{
 
         public String getName() {
             return "cc";
@@ -66,14 +63,14 @@ public class StringHandling {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             throw new UnsupportedOperationException("Not supported yet.");
         }
         
     }
 
     @api
-    public static class concat implements Function {
+    public static class concat extends AbstractFunction {
 
         public String getName() {
             return "concat";
@@ -87,12 +84,12 @@ public class StringHandling {
             return new ExceptionType[]{};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
                 b.append(args[i].val());
             }
-            return new CString(b.toString(), line_num, f);
+            return new CString(b.toString(), t);
         }
 
         public String docs() {
@@ -120,7 +117,7 @@ public class StringHandling {
     }
 
     @api
-    public static class sconcat implements Function {
+    public static class sconcat extends AbstractFunction {
 
         public String getName() {
             return "sconcat";
@@ -130,16 +127,17 @@ public class StringHandling {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return null;
-        }
+        }        
 
-        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> nodes) throws CancelCommandException, ConfigRuntimeException {
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
             StringBuilder b = new StringBuilder();
             boolean centry = false;
             Construct key = null;
-            for (int i = 0; i < nodes.size(); i++) {
-                Construct c = env.GetScript().preResolveVariable(env.GetScript().eval(nodes.get(i), env));
+            for (int i = 0; i < nodes.length; i++) {
+                Construct c = parent.seval(nodes[i], env);
                 if (i == 0) {
                     if (c instanceof CLabel) {
                         key = c;
@@ -156,24 +154,23 @@ public class StringHandling {
             }
             if (centry) {
                 Construct value;
-                if (nodes.subList(1, nodes.size()).size() > 1) {
+                if (nodes.length > 2) {
                     //it's a string
                     StringBuilder c = new StringBuilder();
-                    for (int i = 1; i < nodes.size(); i++) {
-                        Construct d = env.GetScript().preResolveVariable(env.GetScript().eval(nodes.get(i), env));
+                    for (int i = 1; i < nodes.length; i++) {
+                        Construct d = parent.seval(nodes[i], env);
                         if (i > 1) {
                             c.append(" ");
                         }
                         c.append(d.val());                        
                     }
-                    value = new CString(c.toString(), line_num, f);
+                    value = new CString(c.toString(), t);
                 } else {
-                    value = env.GetScript().eval(nodes.subList(1, nodes.size()).get(0), env);
+                    value = parent.seval(nodes[1], env);
                 }
-                value = env.GetScript().preResolveVariable(value);
-                return new CEntry(key, value, line_num, f);
+                return new CEntry(key, value, t);
             } else {
-                return new CString(b.toString(), line_num, f);
+                return new CString(b.toString(), t);
             }
         }
 
@@ -203,10 +200,15 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
 
     @api
-    public static class read implements Function {
+    public static class read extends AbstractFunction {
 
         public static String file_get_contents(String file_location) throws Exception {
             return new ZipReader(new File(file_location)).getFileContents();
@@ -220,23 +222,23 @@ public class StringHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String location = args[0].val();
-            location = new File(f.getParentFile(), location).getAbsolutePath();
+            location = new File(t.file().getParentFile(), location).getAbsolutePath();
             //Verify this file is not above the craftbukkit directory (or whatever directory the user specified
             if (!Static.CheckSecurity(location)) {
                 throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
-                        ExceptionType.SecurityException, line_num, f);
+                        ExceptionType.SecurityException, t);
             }
             try {
                 String s = file_get_contents(location);
                 s = s.replaceAll("\n|\r\n", "\n");
-                return new CString(s, line_num, f);
+                return new CString(s, t);
             } catch (Exception ex) {
                 Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + new File(location).getAbsolutePath()
                         + "\nFile " + (new File(location).exists() ? "exists" : "does not exist"));
                 throw new ConfigRuntimeException("File could not be read in.",
-                        ExceptionType.IOException, line_num, f);
+                        ExceptionType.IOException, t);
             }
         }
 
@@ -273,7 +275,7 @@ public class StringHandling {
     }
 
     @api
-    public static class replace implements Function {
+    public static class replace extends AbstractFunction {
 
         public String getName() {
             return "replace";
@@ -283,11 +285,11 @@ public class StringHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String thing = args[0].val();
             String what = args[1].val();
             String that = args[2].val();
-            return new CString(thing.replace(what, that), line_num, f);
+            return new CString(thing.replace(what, that), t);
         }
 
         public String docs() {
@@ -319,7 +321,7 @@ public class StringHandling {
     }
 
     @api
-    public static class parse_args implements Function {
+    public static class parse_args extends AbstractFunction {
 
         public String getName() {
             return "parse_args";
@@ -329,19 +331,19 @@ public class StringHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String[] sa = args[0].val().split(" ");
             ArrayList<Construct> a = new ArrayList<Construct>();
             for (String s : sa) {
                 if (!s.trim().equals("")) {
-                    a.add(new CString(s.trim(), line_num, f));
+                    a.add(new CString(s.trim(), t));
                 }
             }
             Construct[] csa = new Construct[a.size()];
             for (int i = 0; i < a.size(); i++) {
                 csa[i] = a.get(i);
             }
-            return new CArray(line_num, f, csa);
+            return new CArray(t, csa);
         }
 
         public String docs() {
@@ -375,7 +377,7 @@ public class StringHandling {
     }
 
     @api
-    public static class trim implements Function {
+    public static class trim extends AbstractFunction {
 
         public String getName() {
             return "trim";
@@ -408,8 +410,8 @@ public class StringHandling {
             return "3.0.1";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CString(args[0].val().trim(), args[0].getLineNum(), args[0].getFile());
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(args[0].val().trim(), args[0].getTarget());
         }
 
         public Boolean runAsync() {
@@ -418,7 +420,7 @@ public class StringHandling {
     }
 
     @api
-    public static class length implements Function {
+    public static class length extends AbstractFunction {
 
         public String getName() {
             return "length";
@@ -455,17 +457,17 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0] instanceof CArray) {
-                return new CInt(((CArray) args[0]).size(), line_num, f);
+                return new CInt(((CArray) args[0]).size(), t);
             } else {
-                return new CInt(args[0].val().length(), line_num, f);
+                return new CInt(args[0].val().length(), t);
             }
         }
     }
 
     @api
-    public static class to_upper implements Function {
+    public static class to_upper extends AbstractFunction {
 
         public String getName() {
             return "to_upper";
@@ -502,13 +504,13 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CString(args[0].val().toUpperCase(), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(args[0].val().toUpperCase(), t);
         }
     }
 
     @api
-    public static class to_lower implements Function {
+    public static class to_lower extends AbstractFunction {
 
         public String getName() {
             return "to_lower";
@@ -545,13 +547,13 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CString(args[0].val().toLowerCase(), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(args[0].val().toLowerCase(), t);
         }
     }
 
     @api
-    public static class substr implements Function {
+    public static class substr extends AbstractFunction {
 
         public String getName() {
             return "substr";
@@ -591,7 +593,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
                 String s = args[0].val();
                 int begin = (int) Static.getInt(args[1]);
@@ -601,10 +603,10 @@ public class StringHandling {
                 } else {
                     end = s.length();
                 }
-                return new CString(s.substring(begin, end), line_num, f);
+                return new CString(s.substring(begin, end), t);
             } catch (IndexOutOfBoundsException e) {
                 throw new ConfigRuntimeException("The indices given are not valid for string '" + args[0].val() + "'",
-                        ExceptionType.RangeException, line_num, f);
+                        ExceptionType.RangeException, t);
             }
         }
     }

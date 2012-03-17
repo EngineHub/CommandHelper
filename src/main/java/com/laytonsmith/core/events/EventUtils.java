@@ -7,6 +7,7 @@ package com.laytonsmith.core.events;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.BoundEvent.Priority;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
@@ -109,9 +110,7 @@ public class EventUtils {
                             try{
                                 convertedEvent = driver.convert(object);
                             } catch(ConfigRuntimeException e){
-                                if(ConfigRuntimeException.HandleUncaughtException(e) == ConfigRuntimeException.Reaction.REPORT){
-                                    ConfigRuntimeException.DoReport(e, "Did you include all the event parameters?");
-                                }
+                                ConfigRuntimeException.React(e, "Did you include all the event parameters?");
                                 continue;
                             }
                             if (driver.matches(b.getPrefilter(), convertedEvent)) {
@@ -133,7 +132,7 @@ public class EventUtils {
                 }
             } else {
                 //They have fired a non existant event
-                ConfigRuntimeException.DoWarning(new ConfigRuntimeException("Non existant event is being triggered: " + eventName, object.getLineNum(), object.getFile()));
+                ConfigRuntimeException.DoWarning(new ConfigRuntimeException("Non existant event is being triggered: " + eventName, object.getTarget()));
             }
         }
     }
@@ -181,7 +180,7 @@ public class EventUtils {
                 } catch (FunctionReturnException ex){
                     //We also know how to deal with this
                 } catch (EventException ex) {
-                    throw new ConfigRuntimeException(ex.getMessage(), null, 0, null);
+                    throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
                 } catch(ConfigRuntimeException ex){
                     //An exception has bubbled all the way up
                     switch(ConfigRuntimeException.HandleUncaughtException(ex)){
@@ -206,13 +205,13 @@ public class EventUtils {
     }
 
     public static Construct DumpEvents() {
-        CArray ca = new CArray(0, null);
+        CArray ca = new CArray(Target.UNKNOWN);
         for (Driver type : event_handles.keySet()) {
             SortedSet<BoundEvent> set = event_handles.get(type);
             Iterator<BoundEvent> i = set.iterator();
             while (i.hasNext()) {
                 BoundEvent b = i.next();
-                ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), 0, null));
+                ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN));
             }
         }
         return ca;

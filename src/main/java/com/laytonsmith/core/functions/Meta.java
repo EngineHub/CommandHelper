@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.wepif.PermissionsResolverManager;
@@ -30,7 +31,7 @@ public class Meta {
     }
 
     @api
-    public static class runas implements Function {
+    public static class runas extends AbstractFunction {
 
         public String getName() {
             return "runas";
@@ -40,18 +41,18 @@ public class Meta {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, final Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, final Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[1].nval() == null || args[1].val().length() <= 0 || args[1].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
-                        ExceptionType.FormatException, line_num, f);
+                        ExceptionType.FormatException, t);
             }
             String cmd = args[1].val().substring(1);
             if (args[0] instanceof CArray) {
                 CArray u = (CArray) args[0];
                 for (int i = 0; i < u.size(); i++) {
-                    exec(line_num, f, env, new Construct[]{new CString(u.get(i, line_num, f).val(), line_num, f), args[1]});
+                    exec(t, env, new Construct[]{new CString(u.get(i, t).val(), t), args[1]});
                 }
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             }
             if (args[0].val().equals("~op")) {
                 //Store their current op status
@@ -88,10 +89,10 @@ public class Meta {
                     Static.getServer().dispatchCommand(m, cmd);
                 } else {
                     throw new ConfigRuntimeException("The player " + args[0].val() + " is not online",
-                            ExceptionType.PlayerOfflineException, line_num, f);
+                            ExceptionType.PlayerOfflineException, t);
                 }
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public ExceptionType[] thrown() {
@@ -164,7 +165,7 @@ public class Meta {
     }
 
     @api
-    public static class run implements Function {
+    public static class run extends AbstractFunction {
 
         public String getName() {
             return "run";
@@ -174,10 +175,10 @@ public class Meta {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
                 throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
-                        ExceptionType.FormatException, line_num, f);
+                        ExceptionType.FormatException, t);
             }
             String cmd = args[0].val().substring(1);
             if (Prefs.DebugMode()) {
@@ -189,7 +190,7 @@ public class Meta {
             }
             //p.chat(cmd);
             Static.getServer().dispatchCommand(env.GetCommandSender(), cmd);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String docs() {
@@ -222,7 +223,7 @@ public class Meta {
     }
 
     @api
-    public static class g implements Function {
+    public static class g extends AbstractFunction {
 
         public String getName() {
             return "g";
@@ -232,11 +233,11 @@ public class Meta {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             for (int i = 0; i < args.length; i++) {
                 args[i].val();
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String docs() {
@@ -268,7 +269,7 @@ public class Meta {
     }
 
     @api
-    public static class p implements Function {
+    public static class p extends AbstractFunction {
 
         public String getName() {
             return "p";
@@ -305,13 +306,13 @@ public class Meta {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return args[0];
         }
     }
 
     @api
-    public static class eval implements Function {
+    public static class eval extends AbstractFunction {
 
         public String getName() {
             return "eval";
@@ -343,20 +344,48 @@ public class Meta {
 
         public String since() {
             return "3.1.0";
+        }      
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            GenericTreeNode<Construct> node = nodes[0];
+            try{
+                GenericTreeNode<Construct> root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(node.getData().val(), t.file()));
+                StringBuilder b = new StringBuilder();
+                int count = 0;
+                for (GenericTreeNode<Construct> child : root.getChildren()) {
+                    Construct s = parent.seval(child, env);
+                    if (!s.val().trim().equals("")) {
+                        if(count > 0){
+                            b.append(" ");
+                        }
+                        b.append(s.val());
+                    }
+                    count++;
+                }
+                return new CString(b.toString(), t);
+            } catch(ConfigCompileException e){
+                throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
+            }
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CVoid(line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CVoid(t);
         }
         //Doesn't matter, run out of state anyways
 
         public Boolean runAsync() {
             return null;
         }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
 
     @api
-    public static class call_alias implements Function {
+    public static class call_alias extends AbstractFunction {
 
         public String getName() {
             return "call_alias";
@@ -396,7 +425,7 @@ public class Meta {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             boolean doRemoval = true;
             if(!Static.getAliasCore().hasPlayerReference(env.GetCommandSender())){
                 doRemoval = false;
@@ -408,11 +437,11 @@ public class Meta {
             if(doRemoval){
                 Static.getAliasCore().addPlayerReference(env.GetCommandSender());
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
     
-    @api public static class scriptas implements Function{
+    @api public static class scriptas extends AbstractFunction{
 
         public String getName() {
             return "scriptas";
@@ -449,31 +478,37 @@ public class Meta {
             return null;
         }
         
-        public Construct exec(int line_num, File f, Env environment, Construct... args){
+        public Construct exec(Target t, Env environment, Construct... args){
             return null;
         }
 
-        public Construct execs(int line_num, File f, Env environment, List<GenericTreeNode<Construct>> args) throws ConfigRuntimeException {
-            MCPlayer p = Static.GetPlayer(environment.GetScript().seval(args.get(0), environment).val(), line_num, f);
+        @Override
+        public Construct execs(Target t, Env environment, Script parent, GenericTreeNode<Construct> ... nodes) throws ConfigRuntimeException {
+            MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
             MCCommandSender originalPlayer = environment.GetCommandSender();
             int offset = 0;
             String originalLabel = environment.GetLabel();
-            if(args.size() == 3){
+            if(nodes.length == 3){
                 offset++;
-                String label = environment.GetScript().seval(args.get(1), environment).val();
+                String label = environment.GetScript().seval(nodes[1], environment).val();
                 environment.SetLabel(label);
             }
             environment.SetPlayer(p);
-            GenericTreeNode<Construct> tree = args.get(1 + offset);
+            GenericTreeNode<Construct> tree = nodes[1 + offset];
             environment.GetScript().eval(tree, environment);
             environment.SetCommandSender(originalPlayer);
             environment.SetLabel(originalLabel);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
+        }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
         }
         
     }
     
-    @api public static class has_permission implements Function{
+    @api public static class has_permission extends AbstractFunction{
 
         public String getName() {
             return "has_permission";
@@ -511,12 +546,12 @@ public class Meta {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String player = null;
             String permission = null;
             if(environment.GetCommandSender().instanceofMCConsoleCommandSender()){
                 //Console always has permission
-                return new CBoolean(true, line_num, f);
+                return new CBoolean(true, t);
             }
             if(args.length == 1){
                 player = environment.GetPlayer().getName();
@@ -526,18 +561,18 @@ public class Meta {
                 permission = args[1].val();
             }
             if(environment.GetPlayer() != null && !environment.GetPlayer().getName().equals(player)){
-                if(!Static.hasCHPermission(this.getName(), environment)){
-                    throw new ConfigRuntimeException("You do not have permission to use the " + f.getName() + " function.",
-                                ExceptionType.InsufficientPermissionException, line_num, f);
+                if(!Static.hasCHPermission(getName(), environment)){
+                    throw new ConfigRuntimeException("You do not have permission to use the " + getName() + " function.",
+                                ExceptionType.InsufficientPermissionException, t);
                 }
             }
             PermissionsResolverManager perms = Static.getPermissionsResolverManager();
-            return new CBoolean(perms.hasPermission(player, permission), line_num, f);
+            return new CBoolean(perms.hasPermission(player, permission), t);
         }
         
     }
     
-    @api public static class get_cmd implements Function{
+    @api public static class get_cmd extends AbstractFunction{
 
         public String getName() {
             return "get_cmd";
@@ -569,11 +604,11 @@ public class Meta {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(environment.GetCommand() == null){
-                return new CNull(line_num, f);
+                return new CNull(t);
             } else {
-                return new CString(environment.GetCommand(), line_num, f);
+                return new CString(environment.GetCommand(), t);
             }
         }
 

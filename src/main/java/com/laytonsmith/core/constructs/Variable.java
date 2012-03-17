@@ -22,17 +22,17 @@ public class Variable extends Construct {
     private Construct var_value;
     
 
-    public Variable(String name, String def, boolean optional, boolean final_var, int line_num, File file) {
-        super(name, ConstructType.VARIABLE, line_num, file);
+    public Variable(String name, String def, boolean optional, boolean final_var, Target t) {
+        super(name, ConstructType.VARIABLE, t);
         this.name = name;
         this.def = def;
         this.final_var = final_var;
         this.optional = optional;
-        this.var_value = Static.resolveConstruct(def, line_num, file);
+        this.var_value = Static.resolveConstruct(def, t);
     }
     
-    public Variable(String name, String def, int line_num, File file){
-        this(name, def, false, false, line_num, file);
+    public Variable(String name, String def, Target t){
+        this(name, def, false, false, t);
     }
 
     @Override

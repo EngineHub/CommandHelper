@@ -34,7 +34,7 @@ public class World {
         return "Provides functions for manipulating a world";
     }
     
-    @api public static class get_spawn implements Function{
+    @api public static class get_spawn extends AbstractFunction{
 
         public String getName() {
             return "get_spawn";
@@ -68,7 +68,7 @@ public class World {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String world;
             if(args.length == 1){
                 world = environment.GetPlayer().getWorld().getName();
@@ -80,7 +80,7 @@ public class World {
         
     }
     
-    @api public static class refresh_chunk implements Function{
+    @api public static class refresh_chunk extends AbstractFunction{
 
         public String getName() {
             return "refresh_chunk";
@@ -115,14 +115,14 @@ public class World {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             MCWorld world;
             int x;
             int z;
             if(args.length == 1){
                 //Location array provided                
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m!=null?m.getWorld():null, line_num, f);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m!=null?m.getWorld():null, t);
                 world = l.getWorld();
                 x = l.getBlockX();
                 z = l.getBlockZ();
@@ -130,12 +130,12 @@ public class World {
                 //Either location array and world provided, or x and z. Test for array at pos 2
                 if(args[1] instanceof CArray){
                     world = Static.getServer().getWorld(args[0].val());
-                    MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, line_num, f);
+                    MCLocation l = ObjectGenerator.GetGenerator().location(args[1], null, t);
                     x = l.getBlockX();
                     z = l.getBlockZ();
                 } else {
                     if(m == null){
-                        throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, line_num, f);
+                        throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
                     }
                     world = m.getWorld();
                     x = (int)Static.getInt(args[0]);
@@ -148,7 +148,7 @@ public class World {
                 z = (int)Static.getInt(args[2]);
             }
             world.refreshChunk(x, z);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
@@ -161,14 +161,14 @@ public class World {
             Enumeration e = p.propertyNames();
             while(e.hasMoreElements()){
                 String name = e.nextElement().toString();
-                TimeLookup.put(name, new CString(p.getProperty(name).toString(), 0, null));
+                TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
             }
         } catch (IOException ex) {
             Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    @api public static class set_world_time implements Function{
+    @api public static class set_world_time extends AbstractFunction{
 
         public String getName() {
             return "set_world_time";
@@ -212,7 +212,7 @@ public class World {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCWorld w = null;
             if(environment.GetPlayer() != null){
                 w = environment.GetPlayer().getWorld();
@@ -221,7 +221,7 @@ public class World {
                 w = Static.getServer().getWorld(args[0].val());                
             }
             if(w == null){
-                throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
             }
             long time = 0;
             String stime = (args.length == 1?args[0]:args[1]).val().toLowerCase();
@@ -243,10 +243,10 @@ public class World {
                 }
                 if(hour == 24) hour = 0;
                 if(hour > 24){
-                    throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, line_num, f);
+                    throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
                 }
                 if(minute > 59){
-                    throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, line_num, f);                    
+                    throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);                    
                 }
                 hour -= 6;
                 hour = hour % 24;
@@ -257,16 +257,16 @@ public class World {
             try{
                 Long.valueOf(stime);
             } catch(NumberFormatException e){
-                throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, line_num, f);
+                throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
             }
             time = Long.parseLong(stime);
             w.setTime(time);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
-    @api public static class get_world_time implements Function{
+    @api public static class get_world_time extends AbstractFunction{
 
         public String getName() {
             return "get_world_time";
@@ -301,7 +301,7 @@ public class World {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCWorld w = null;
             if(environment.GetPlayer() != null){
                 w = environment.GetPlayer().getWorld();
@@ -310,9 +310,9 @@ public class World {
                 w = Static.getServer().getWorld(args[0].val());                
             }
             if(w == null){
-                throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
             }
-            return new CInt(w.getTime(), line_num, f);
+            return new CInt(w.getTime(), t);
         }
         
     }

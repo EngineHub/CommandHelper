@@ -4,15 +4,16 @@
  */
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors.SYS;
 import static com.laytonsmith.PureUtilities.TermColors.*;
-import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.awt.Color;
 import java.io.File;
@@ -261,7 +262,7 @@ public class Manager {
     public static boolean doAddEdit(String key, String valueScript){
         try {
             Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null)), new Env(), null, null);
-            String value = Construct.json_encode(c, 0, null);
+            String value = Construct.json_encode(c, Target.UNKNOWN);
             pl(CYAN + "Adding: " + WHITE + value);
             Persistance db = GetDB();
             db.setValue(new String[]{key}, value);

@@ -15,7 +15,7 @@ public class CArrayReference extends Construct{
     public Construct index;
     public IVariable name = null;
     public CArrayReference(Construct array, Construct index, Env env){
-        super("", ConstructType.ARRAY, 0, null);
+        super("", ConstructType.ARRAY, Target.UNKNOWN);
         this.array = array;
         if(array instanceof CArrayReference){
             this.name = ((CArrayReference)array).name;
@@ -23,14 +23,14 @@ public class CArrayReference extends Construct{
         if(!(array instanceof CArray) && !(array instanceof CArrayReference)){
             if(array instanceof IVariable){
                 name = (IVariable)array;
-                Construct ival = env.GetVarList().get(name.getName(), name.getLineNum(), name.getFile()).ival();
+                Construct ival = env.GetVarList().get(name.getName(), name.getTarget()).ival();
                 if(ival instanceof CArray){
                     this.array = ival;
                 } else {
-                    this.array = new CArray(line_num, file);
+                    this.array = new CArray(target);
                 }
             } else {
-                this.array = new CArray(line_num, file);
+                this.array = new CArray(target);
             }
         }
         this.index = index;

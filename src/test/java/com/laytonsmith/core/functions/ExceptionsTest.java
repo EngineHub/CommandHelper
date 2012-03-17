@@ -23,7 +23,7 @@ import static org.mockito.Mockito.*;
  * @author layton
  */
 public class ExceptionsTest {
-    
+
     MCServer fakeServer;
     MCPlayer fakePlayer;
     Env env = new Env();
@@ -52,7 +52,8 @@ public class ExceptionsTest {
     public void tearDown() {
     }
 
-    @Test public void testTryCatch1() throws ConfigCompileException{
+    @Test(timeout = 10000)
+    public void testTryCatch1() throws ConfigCompileException {
         String script =
                 "try(\n"
                 + "ploc('offlineplayer'),\n"
@@ -63,13 +64,14 @@ public class ExceptionsTest {
                 + "msg(@ex[3])\n"
                 + ")";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
-        verify(fakePlayer).sendMessage("InsufficientPermissionException");
-        verify(fakePlayer).sendMessage("You do not have permission to use the ploc function.");
+        verify(fakePlayer).sendMessage("PlayerOfflineException");
+        verify(fakePlayer).sendMessage("The specified player (offlineplayer) is not online");
         verify(fakePlayer).sendMessage("null");
         verify(fakePlayer).sendMessage("2");
     }
-    
-    @Test public void testTryCatch2() throws ConfigCompileException{
+
+    @Test(timeout = 10000)
+    public void testTryCatch2() throws ConfigCompileException {
         String script =
                 "try(\n"
                 + "throw(PlayerOfflineException, This is a message),\n"
@@ -77,7 +79,7 @@ public class ExceptionsTest {
                 + "msg(@ex[0])\n"
                 + "msg(@ex[1])\n"
                 + "msg(@ex[2])\n"
-                + "msg(@ex[3])\n"               
+                + "msg(@ex[3])\n"
                 + ")";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
         verify(fakePlayer).sendMessage("PlayerOfflineException");
@@ -85,7 +87,9 @@ public class ExceptionsTest {
         verify(fakePlayer).sendMessage("null");
         verify(fakePlayer).sendMessage("2");
     }
-    @Test public void testTryCatch3() throws ConfigCompileException{
+
+    @Test(timeout = 10000)
+    public void testTryCatch3() throws ConfigCompileException {
         String script =
                 "try(try(\n"
                 + "throw(null, This is a message),\n"
@@ -93,12 +97,12 @@ public class ExceptionsTest {
                 + "msg(@ex[0])\n"
                 + "msg(@ex[1])\n"
                 + "msg(@ex[2])\n"
-                + "msg(@ex[3])\n"               
+                + "msg(@ex[3])\n"
                 + "), @ex, msg('2'))";
-        try{
+        try {
             MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("file.txt"))), env, null, null);
             fail("This test was supposed to throw an exception");
-        }catch(ConfigRuntimeException e){
+        } catch (ConfigRuntimeException e) {
             //Pass
         }
         verify(fakePlayer, never()).sendMessage("2");

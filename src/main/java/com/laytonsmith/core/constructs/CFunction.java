@@ -14,8 +14,8 @@ public class CFunction extends Construct {
     
     public static final long serialVersionUID = 1L;
 
-    public CFunction(String name, int line_num, File file) {
-        super(name, ConstructType.FUNCTION, line_num, file);
+    public CFunction(String name, Target t) {
+        super(name, ConstructType.FUNCTION, t);
     }
 
     public String toString() {

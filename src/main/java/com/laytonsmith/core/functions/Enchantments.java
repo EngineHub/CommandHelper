@@ -147,7 +147,7 @@ public class Enchantments {
     }
 
     @api
-    public static class enchant_inv implements Function {
+    public static class enchant_inv extends AbstractFunction {
 
         public String getName() {
             return "enchant_inv";
@@ -186,11 +186,11 @@ public class Enchantments {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             int offset = 1;
             if (args.length == 4) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
             MCItemStack is = null;
@@ -200,43 +200,43 @@ public class Enchantments {
                 int slot = (int) Static.getInt(args[1 - offset]);
                 is = m.getInventory().getItem(slot);
             }
-            CArray enchantArray = new CArray(line_num, f);
+            CArray enchantArray = new CArray(t);
             if (!(args[2 - offset] instanceof CArray)) {
                 enchantArray.push(args[2 - offset]);
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
 
-            CArray levelArray = new CArray(line_num, f);
+            CArray levelArray = new CArray(t);
             if (!(args[3 - offset] instanceof CArray)) {
                 levelArray.push(args[3 - offset]);
             } else {
                 levelArray = (CArray) args[3 - offset];
             }
             for (String key : enchantArray.keySet()) {
-                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, line_num, f).val()).toUpperCase());
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
                 if(e == null){
-                    throw new ConfigRuntimeException(enchantArray.get(key, line_num, f).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, line_num, f);
+                    throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
                 }
                 if (e.canEnchantItem(is)) {
-                    int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num, f).val()), line_num, f));
+                    int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t));
                     if (e.getMaxLevel() >= level && level > 0) {
                         is.addEnchantment(e, level);
                     } else {
-                        throw new ConfigRuntimeException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, ExceptionType.RangeException, line_num, f);
+                        throw new ConfigRuntimeException("Level must be greater than 0, and less than " + e.getMaxLevel() + " but was " + level, ExceptionType.RangeException, t);
                     }
                 } else {
-                    throw new ConfigRuntimeException(enchantArray.get(key, line_num, f).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, line_num, f);
+                    throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " cannot be applied to this item", ExceptionType.EnchantmentException, t);
                 }
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
     
     
 
     @api
-    public static class enchant_rm_inv implements Function {
+    public static class enchant_rm_inv extends AbstractFunction {
 
         public String getName() {
             return "enchant_rm_inv";
@@ -272,11 +272,11 @@ public class Enchantments {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             int offset = 1;
             if (args.length == 3) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
             MCItemStack is = null;
@@ -287,7 +287,7 @@ public class Enchantments {
                 is = m.getInventory().getItem(slot);
             }
 
-            CArray enchantArray = new CArray(line_num, f);
+            CArray enchantArray = new CArray(t);
             if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
                 enchantArray.push(args[2 - offset]);
             } else if (args[2 - offset] instanceof CNull) {
@@ -298,14 +298,14 @@ public class Enchantments {
                 enchantArray = (CArray) args[2 - offset];
             }
             for (String key : enchantArray.keySet()) {
-                MCEnchantment e = StaticLayer.GetEnchantmentByName(enchantArray.get(key, line_num, f).val().toUpperCase());
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(enchantArray.get(key, t).val().toUpperCase());
                 is.removeEnchantment(e);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
     
-    @api public static class get_enchant_inv implements Function{
+    @api public static class get_enchant_inv extends AbstractFunction{
 
         public String getName() {
             return "get_enchant_inv";
@@ -340,11 +340,11 @@ public class Enchantments {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             Construct slot;
             if(args.length == 2){
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 slot = args[1];
             } else {
                 slot = args[0];
@@ -356,21 +356,21 @@ public class Enchantments {
                 int slotID = (int) Static.getInt(slot);
                 is = m.getInventory().getItem(slotID);
             }
-            CArray enchants = new CArray(line_num, f);
-            CArray levels = new CArray(line_num, f);
+            CArray enchants = new CArray(t);
+            CArray levels = new CArray(t);
             for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()){
                 MCEnchantment e = entry.getKey();
                 Integer l = entry.getValue();
-                enchants.push(new CString(e.getName(), line_num, f));
-                levels.push(new CInt(l, line_num, f));
+                enchants.push(new CString(e.getName(), t));
+                levels.push(new CInt(l, t));
             }
             
-            return new CArray(line_num, f, enchants, levels);
+            return new CArray(t, enchants, levels);
         }
         
     }
     
-    @api public static class can_enchant_target implements Function{
+    @api public static class can_enchant_target extends AbstractFunction{
 
         public String getName() {
             return "can_enchant_target";
@@ -407,16 +407,16 @@ public class Enchantments {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String name = Enchantments.ConvertName(args[0].val().toUpperCase());
             MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
-            MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, line_num, f);
-            return new CBoolean(e.canEnchantItem(is), line_num, f);
+            MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
+            return new CBoolean(e.canEnchantItem(is), t);
         }
         
     }
     
-    @api public static class get_enchant_max implements Function{
+    @api public static class get_enchant_max extends AbstractFunction{
 
         public String getName() {
             return "get_enchant_max";
@@ -451,15 +451,15 @@ public class Enchantments {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String name = Enchantments.ConvertName(args[0].val().toUpperCase());
             MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
-            return new CInt(e.getMaxLevel(), line_num, f);
+            return new CInt(e.getMaxLevel(), t);
         }
         
     }
     
-    @api public static class get_enchants implements Function{
+    @api public static class get_enchants extends AbstractFunction{
         
         private static Map<String, CArray> cache = new HashMap<String, CArray>();
 
@@ -496,8 +496,8 @@ public class Enchantments {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, t);
             /**
              * Because enchantment types won't change from run to run, we can
              * cache here, and save time on duplicate lookups.
@@ -506,26 +506,26 @@ public class Enchantments {
                 try {
                     return cache.get(args[0].val()).clone();
                 } catch (CloneNotSupportedException ex) {
-                    throw new ConfigRuntimeException(ex.getMessage(), null, line_num, f, ex);
+                    throw new ConfigRuntimeException(ex.getMessage(), null, t, ex);
                 }
             }
-            CArray ca = new CArray(line_num, f);
+            CArray ca = new CArray(t);
             for(MCEnchantment e : StaticLayer.GetEnchantmentValues()){
                 if(e.canEnchantItem(is)){
-                    ca.push(new CString(e.getName(), line_num, f));
+                    ca.push(new CString(e.getName(), t));
                 }
             }
             cache.put(args[0].val(), ca);
             try {
                 return ca.clone();
             } catch (CloneNotSupportedException ex) {
-                throw new ConfigRuntimeException(ex.getMessage(), null, line_num, f, ex);
+                throw new ConfigRuntimeException(ex.getMessage(), null, t, ex);
             }
         }
         
     }
     
-    @api public static class is_enchantment implements Function{
+    @api public static class is_enchantment extends AbstractFunction{
 
         public String getName() {
             return "is_enchantment";
@@ -560,9 +560,9 @@ public class Enchantments {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
-            return new CBoolean(e != null, line_num, f);
+            return new CBoolean(e != null, t);
         }
         
     }

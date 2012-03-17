@@ -20,8 +20,6 @@ import org.json.simple.JSONValue;
  */
 public abstract class Construct implements Cloneable, Comparable<Construct> {
 
-    public static final long serialVersionUID = 1L;
-
     public enum ConstructType {
 
         TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
@@ -29,8 +27,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
     }
     protected ConstructType ctype;
     protected String value;
-    protected int line_num;
-    transient protected File file;
+
+    protected Target target;
 
     public ConstructType getCType() {
         return ctype;
@@ -41,18 +39,31 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
     }
 
     public int getLineNum() {
-        return line_num;
+        return target.line();
     }
 
     public File getFile() {
-        return file;
+        return target.file();
+    }
+    
+    public int getColumn(){
+        return target.col();
+    }
+    
+    public Target getTarget(){
+        return target;
     }
 
-    public Construct(String value, ConstructType ctype, int line_num, File file) {
+    public Construct(String value, ConstructType ctype, int line_num, File file, int column) {
         this.value = value;
         this.ctype = ctype;
-        this.line_num = line_num;
-        this.file = file;
+        this.target = new Target(line_num, file, column);
+    }
+    
+    public Construct(String value, ConstructType ctype, Target t){
+        this.value = value;
+        this.ctype = ctype;
+        this.target = t;
     }
 
     /**
@@ -100,8 +111,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
      * @param c
      * @return 
      */
-    public static String json_encode(Construct c, int line_num, File f) throws MarshalException{
-        return json_encode(c, false, line_num, f);
+    public static String json_encode(Construct c, Target t) throws MarshalException{
+        return json_encode(c, false, t);
     }
 
     /**
@@ -116,11 +127,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
      * @deprecated
      */
     @Deprecated
-    public static String json_encode(Construct c, boolean raw, int line_num, File f) throws MarshalException {
-        return JSONValue.toJSONString(json_encode0(c, line_num, f));
+    public static String json_encode(Construct c, boolean raw, Target t) throws MarshalException {
+        return JSONValue.toJSONString(json_encode0(c, t));
     }
     
-    private static Object json_encode0(Construct c, int line_num, File f) throws MarshalException{
+    private static Object json_encode0(Construct c, Target t) throws MarshalException{
         if (c instanceof CString || c instanceof Command) {
             return c.val();
         } else if (c instanceof CVoid) {
@@ -138,13 +149,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
             if (!ca.inAssociativeMode()) {
                 List<Object> list = new ArrayList<Object>();
                 for(int i = 0; i < ca.size(); i++){
-                    list.add(json_encode0(ca.get(i, line_num, f), line_num, f));
+                    list.add(json_encode0(ca.get(i, t), t));
                 }
                 return list;
             } else {
                 Map<String, Object> map = new HashMap<String, Object>();
                 for(String key : ca.keySet()){
-                    map.put(key, json_encode0(ca.get(key, line_num, f), line_num, f));
+                    map.put(key, json_encode0(ca.get(key, t), t));
                 }
                 return map;
             }
@@ -157,23 +168,23 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
      * @param s
      * @return 
      */
-    public static Construct json_decode(String s, int line_num, File f) throws MarshalException {
+    public static Construct json_decode(String s, Target t) throws MarshalException {
         if (s.startsWith("{")) {
             //Object
             JSONObject obj = (JSONObject) JSONValue.parse(s);
-            CArray ca = new CArray(line_num, f);
+            CArray ca = new CArray(t);
             ca.forceAssociativeMode();
             for(Object key : obj.keySet()){
-                ca.set(convertJSON(key, line_num, f), 
-                        convertJSON(obj.get(key), line_num, f));
+                ca.set(convertJSON(key, t), 
+                        convertJSON(obj.get(key), t));
             }
             return ca;
         } else if (s.startsWith("[")) {
             //It's an array
             JSONArray array = (JSONArray) JSONValue.parse(s);
-            CArray carray = new CArray(line_num, f);
+            CArray carray = new CArray(t);
             for (int i = 0; i < array.size(); i++) {
-                carray.push(convertJSON(array.get(i), line_num, f));
+                carray.push(convertJSON(array.get(i), t));
             }
             return carray;
         } else {
@@ -181,39 +192,39 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
             s = "[" + s + "]";
             JSONArray array = (JSONArray) JSONValue.parse(s);
             Object o = array.get(0);
-            return convertJSON(o, line_num, f);
+            return convertJSON(o, t);
         }
     }
 
-    private static Construct convertJSON(Object o, int line_num, File f) throws MarshalException {
+    private static Construct convertJSON(Object o, Target t) throws MarshalException {
         if (o instanceof String) {
-            return new CString((String) o, 0, null);
+            return new CString((String) o, Target.UNKNOWN);
         } else if (o instanceof Number) {
             Number n = (Number) o;
             if (n.longValue() == n.doubleValue()) {
                 //It's an int
-                return new CInt(n.longValue(), 0, null);
+                return new CInt(n.longValue(), Target.UNKNOWN);
             } else {
                 //It's a double
-                return new CDouble(n.doubleValue(), 0, null);
+                return new CDouble(n.doubleValue(), Target.UNKNOWN);
             }
         } else if (o instanceof Boolean) {
-            return new CBoolean(((Boolean) o).booleanValue(), 0, null);
+            return new CBoolean(((Boolean) o).booleanValue(), Target.UNKNOWN);
         } else if (o instanceof java.util.List) {
             java.util.List l = (java.util.List) o;
-            CArray ca = new CArray(line_num, f);
+            CArray ca = new CArray(t);
             for (int i = 0; i < l.size(); i++) {
-                ca.push(convertJSON(l.get(i), line_num, f));
+                ca.push(convertJSON(l.get(i), t));
             }
             return ca;
         } else if (o == null) {
-            return new CNull(0, null);
+            return new CNull();
         } else if(o instanceof java.util.Map){
-            CArray ca = new CArray(line_num, f);
+            CArray ca = new CArray(t);
             ca.forceAssociativeMode();
             for(Object key : ((java.util.Map)o).keySet()){
-                ca.set(convertJSON(key, line_num, f), 
-                        convertJSON(((java.util.Map)o).get(key), line_num, f));
+                ca.set(convertJSON(key, t), 
+                        convertJSON(((java.util.Map)o).get(key), t));
             }
             return ca;
         } else {

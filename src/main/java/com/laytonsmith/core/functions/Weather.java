@@ -15,6 +15,7 @@ import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -29,7 +30,7 @@ public class Weather {
         return "Provides functions to control the weather";
     }
     
-    @api public static class lightning implements Function{
+    @api public static class lightning extends AbstractFunction{
 
         public String getName() {
             return "lightning";
@@ -43,7 +44,7 @@ public class Weather {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.FormatException};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int x;
             int y;
             int z;
@@ -52,7 +53,7 @@ public class Weather {
             int safeIndex = 1;
             if(args[0] instanceof CArray){
                 CArray a = (CArray)args[0];
-                MCLocation l = ObjectGenerator.GetGenerator().location(a, (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), line_num, f);
+                MCLocation l = ObjectGenerator.GetGenerator().location(a, (env.GetCommandSender() instanceof MCPlayer?env.GetPlayer().getWorld():null), t);
                 x = (int)java.lang.Math.floor(l.getX());
                 y = (int)java.lang.Math.floor(l.getY());
                 z = (int)java.lang.Math.floor(l.getZ());
@@ -73,10 +74,10 @@ public class Weather {
                     w.strikeLightningEffect(StaticLayer.GetLocation(w, x, y + 1, z));
                 }
             } else {
-                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
             }
             
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String docs() {
@@ -101,7 +102,7 @@ public class Weather {
         }
     }
     
-    @api public static class storm implements Function{
+    @api public static class storm extends AbstractFunction{
 
         public String getName() {
             return "storm";
@@ -111,7 +112,7 @@ public class Weather {
             return new Integer[]{1, 2};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             boolean b = Static.getBoolean(args[0]);
             MCWorld w = null;
             if(env.GetCommandSender() instanceof MCPlayer){
@@ -123,9 +124,9 @@ public class Weather {
             if(w != null){
                 w.setStorm(b);
             } else {
-                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String docs() {

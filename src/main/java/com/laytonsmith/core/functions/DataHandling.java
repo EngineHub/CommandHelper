@@ -20,10 +20,13 @@ import java.util.logging.Logger;
  * @author Layton
  */
 public class DataHandling {
-    public static String docs(){
+
+    public static String docs() {
         return "This class provides various methods to control script data and program flow.";
     }
-    @api public static class array implements Function{
+
+    @api
+    public static class array extends AbstractFunction {
 
         public String getName() {
             return "array";
@@ -33,11 +36,11 @@ public class DataHandling {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CArray(line_num, f, args);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CArray(t, args);
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{};
         }
 
@@ -49,20 +52,25 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
         }
+
         public String since() {
             return "3.0.1";
         }
+
         public Boolean runAsync() {
             return null;
         }
     }
-    
-    @api public static class assign implements Function{
+
+    @api
+    public static class assign extends AbstractFunction {
+
         public String getName() {
             return "assign";
         }
@@ -71,69 +79,72 @@ public class DataHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Construct c = args[1];
-            while(c instanceof IVariable){
-                IVariable cur = (IVariable)c;
-                c = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();
+            while (c instanceof IVariable) {
+                IVariable cur = (IVariable) c;
+                c = env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
             }
-            if(args[0] instanceof IVariable){
-                IVariable v = new IVariable(((IVariable)args[0]).getName(), c, line_num, f);
+            if (args[0] instanceof IVariable) {
+                IVariable v = new IVariable(((IVariable) args[0]).getName(), c, t);
                 env.GetVarList().set(v);
                 return v;
             }
-            throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, line_num, f);
+            throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
         }
+
         private static class Chain {
+
             ArrayList<Construct> indexChain = new ArrayList<Construct>();
         }
-        private void prepare(CArrayReference container, Chain c){
-            if(container.array instanceof CArrayReference){
-                prepare((CArrayReference)container.array, c);
+
+        private void prepare(CArrayReference container, Chain c) {
+            if (container.array instanceof CArrayReference) {
+                prepare((CArrayReference) container.array, c);
                 c.indexChain.add(container.index);
             } else {
-                c.indexChain.add(container.index);               
+                c.indexChain.add(container.index);
             }
         }
-        
-        public Construct array_assign(int line_num, File f, Env env, Construct arrayAndIndex, Construct toSet){
+
+        public Construct array_assign(Target t, Env env, Construct arrayAndIndex, Construct toSet) {
             Construct ival = toSet;
-            while(ival instanceof IVariable){
-                IVariable cur = (IVariable)ival;
-                ival = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();
+            while (ival instanceof IVariable) {
+                IVariable cur = (IVariable) ival;
+                ival = env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
             }
             Chain c = new Chain();
-            prepare((CArrayReference)arrayAndIndex, c);
-            CArray inner = (CArray)((CArrayReference)arrayAndIndex).getInternalArray();
-            for(int i = 0; i < c.indexChain.size(); i++){
-                if(i == c.indexChain.size() - 1){
+            prepare((CArrayReference) arrayAndIndex, c);
+            CArray inner = (CArray) ((CArrayReference) arrayAndIndex).getInternalArray();
+            for (int i = 0; i < c.indexChain.size(); i++) {
+                if (i == c.indexChain.size() - 1) {
                     //Last one, set it
                     inner.set(c.indexChain.get(i), ival);
                 } else {
                     boolean makeIt = false;
-                    Construct t = null;
-                    if(!inner.containsKey(c.indexChain.get(i).val())){
+                    Construct ct = null;
+                    if (!inner.containsKey(c.indexChain.get(i).val())) {
                         makeIt = true;
                     } else {
-                        t = inner.get(c.indexChain.get(i), line_num, f);
-                        if(!(t instanceof CArray)){
+                        ct = inner.get(c.indexChain.get(i), t);
+                        if (!(ct instanceof CArray)) {
                             makeIt = true;
                         }
                     }
-                    if(makeIt){
-                        Construct newArray = new CArray(line_num, f);
+                    if (makeIt) {
+                        Construct newArray = new CArray(t);
                         inner.set(c.indexChain.get(i), newArray);
-                        t = newArray;
+                        ct = newArray;
                     }
-                    inner = (CArray)t;
+                    inner = (CArray) ct;
                 }
             }
-            String name = ((CArrayReference)arrayAndIndex).name.getName();
-            env.GetVarList().set(new IVariable(name, (CArray)((CArrayReference)arrayAndIndex).getInternalArray(), line_num, f));
-            return new IVariable("=anon", ival, line_num, f);
+            String name = ((CArrayReference) arrayAndIndex).name.getName();
+            env.GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
+            return new IVariable("=anon", ival, t);
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException};
         }
 
@@ -148,15 +159,19 @@ public class DataHandling {
         public boolean preResolveVariables() {
             return false;
         }
+
         public String since() {
             return "3.0.1";
         }
+
         public Boolean runAsync() {
             return null;
         }
     }
-    
-    @api public static class _for implements Function{
+
+    @api
+    public static class _for extends AbstractFunction {
+
         public String getName() {
             return "for";
         }
@@ -164,51 +179,59 @@ public class DataHandling {
         public Integer[] numArgs() {
             return new Integer[]{4};
         }
-        public Construct execs(int line_num, File f, Env env, Script parent, GenericTreeNode<Construct> assign, 
-                GenericTreeNode<Construct> condition, GenericTreeNode<Construct> expression, 
-                GenericTreeNode<Construct> runnable) throws CancelCommandException{
+
+        public Construct exec(Target t, Env env, Construct... args) {
+            return new CVoid(t);
+        }
+
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            GenericTreeNode<Construct> assign = nodes[0];
+            GenericTreeNode<Construct> condition = nodes[1];
+            GenericTreeNode<Construct> expression = nodes[2];
+            GenericTreeNode<Construct> runnable = nodes[3];
+
             Construct counter = parent.eval(assign, env);
-            if(!(counter instanceof IVariable)){
-                throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, line_num, f);
+            if (!(counter instanceof IVariable)) {
+                throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, t);
             }
             int _continue = 0;
-            while(true){
-                Construct cond = Static.resolveConstruct(parent.eval(condition, env).val(), line_num, f);
-                if(!(cond instanceof CBoolean)){
-                    throw new ConfigRuntimeException("Second parameter of for must return a boolean", ExceptionType.CastException, line_num, f);
-                }
-                CBoolean bcond = ((CBoolean) cond);
-                if(bcond.getBoolean() == false){
+            while (true) {
+                boolean cond = Static.getBoolean(parent.seval(condition, env));
+                if (cond == false) {
                     break;
                 }
-                if(_continue >= 1){
-                    --_continue;                    
+                if (_continue >= 1) {
+                    --_continue;
                     parent.eval(expression, env);
                     continue;
                 }
-                try{
-                    Static.resolveConstruct(parent.eval(runnable, env).val(), line_num, f);
-                } catch(LoopBreakException e){
+                try {
+                    parent.eval(runnable, env);
+                } catch (LoopBreakException e) {
                     int num = e.getTimes();
-                    if(num > 1){
+                    if (num > 1) {
                         e.setTimes(--num);
                         throw e;
                     }
-                    return new CVoid(line_num, f);
-                } catch(LoopContinueException e){
-                    _continue = e.getTimes() - 1;                    
+                    return new CVoid(t);
+                } catch (LoopContinueException e) {
+                    _continue = e.getTimes() - 1;
                     parent.eval(expression, env);
                     continue;
                 }
                 parent.eval(expression, env);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException};
-        }
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return null;
         }
 
         public String docs() {
@@ -223,18 +246,23 @@ public class DataHandling {
         }
 
         public boolean preResolveVariables() {
-            return false;
+            return true;
         }
+
         public String since() {
             return "3.0.1";
         }
         //Doesn't matter, run out of state
+
         public Boolean runAsync() {
             return null;
         }
+       
     }
-    
-    @api public static class foreach implements Function{
+
+    @api
+    public static class foreach extends AbstractFunction {
+
         public String getName() {
             return "foreach";
         }
@@ -243,71 +271,70 @@ public class DataHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CVoid(line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CVoid(t);
         }
-        
-        public Construct execs(int line_num, File f, Env env, Script that, GenericTreeNode<Construct> array, 
-                GenericTreeNode<Construct> ivar, GenericTreeNode<Construct> code) throws CancelCommandException{
-            
-            Construct arr = that.eval(array, env);
-            if(arr instanceof IVariable){
-                IVariable cur = (IVariable)arr;
-                arr = env.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()).ival();
-            }
+
+        @Override
+        public Construct execs(Target t, Env env, Script that, GenericTreeNode<Construct>... nodes) {
+            GenericTreeNode<Construct> array = nodes[0];
+            GenericTreeNode<Construct> ivar = nodes[1];
+            GenericTreeNode<Construct> code = nodes[2];
+
+            Construct arr = that.seval(array, env);
             Construct iv = that.eval(ivar, env);
-            
-            if(arr instanceof CArray){
-                if(iv instanceof IVariable){
-                    CArray one = (CArray)arr;
-                    IVariable two = (IVariable)iv;
-                    if(!one.inAssociativeMode()){
-                        for(int i = 0; i < one.size(); i++){
-                            env.GetVarList().set(new IVariable(two.getName(), one.get(i, line_num, f), line_num, f));
-                            try{
+
+            if (arr instanceof CArray) {
+                if (iv instanceof IVariable) {
+                    CArray one = (CArray) arr;
+                    IVariable two = (IVariable) iv;
+                    if (!one.inAssociativeMode()) {
+                        for (int i = 0; i < one.size(); i++) {
+                            env.GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
+                            try {
                                 that.eval(code, env);
-                            } catch(LoopBreakException e){
+                            } catch (LoopBreakException e) {
                                 int num = e.getTimes();
-                                if(num > 1){
+                                if (num > 1) {
                                     e.setTimes(--num);
                                     throw e;
                                 }
-                                return new CVoid(line_num, f);
-                            } catch(LoopContinueException e){
+                                return new CVoid(t);
+                            } catch (LoopContinueException e) {
                                 i += e.getTimes() - 1;
                                 continue;
                             }
                         }
                     } else {
-                        for(int i = 0; i < one.size(); i++){
+                        for (int i = 0; i < one.size(); i++) {
                             String index = one.keySet().toArray(new String[]{})[i];
-                            env.GetVarList().set(new IVariable(two.getName(), one.get(index, line_num, f), line_num, f));
-                            try{
+                            env.GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
+                            try {
                                 that.eval(code, env);
-                            } catch(LoopBreakException e){
+                            } catch (LoopBreakException e) {
                                 int num = e.getTimes();
-                                if(num > 1){
+                                if (num > 1) {
                                     e.setTimes(--num);
                                     throw e;
                                 }
-                                return new CVoid(line_num, f);
-                            } catch(LoopContinueException e){
+                                return new CVoid(t);
+                            } catch (LoopContinueException e) {
                                 i += e.getTimes() - 1;
                                 continue;
                             }
                         }
                     }
                 } else {
-                    throw new ConfigRuntimeException("Parameter 2 of foreach must be an ivariable", ExceptionType.CastException, line_num, f);
+                    throw new ConfigRuntimeException("Parameter 2 of foreach must be an ivariable", ExceptionType.CastException, t);
                 }
             } else {
-                throw new ConfigRuntimeException("Parameter 1 of foreach must be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Parameter 1 of foreach must be an array", ExceptionType.CastException, t);
             }
-            
-            return new CVoid(line_num, f);
+
+            return new CVoid(t);
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException};
         }
 
@@ -320,25 +347,33 @@ public class DataHandling {
         }
 
         public boolean preResolveVariables() {
-            return false;
+            return true;
         }
+
         public String since() {
             return "3.0.1";
         }
         //Doesn't matter, runs out of state anyways
-        public Boolean runAsync(){
+
+        public Boolean runAsync() {
             return null;
         }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
-    
-    @api public static class _break implements Function{
+
+    @api
+    public static class _break extends AbstractFunction {
 
         public String getName() {
             return "break";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{0,1};
+            return new Integer[]{0, 1};
         }
 
         public String docs() {
@@ -347,8 +382,8 @@ public class DataHandling {
                     + " (or the number specified would cause the break to travel up further than any loops are defined), the function will fail. If no"
                     + " argument is specified, it is the same as calling break(1).";
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException};
         }
 
@@ -356,7 +391,8 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -370,17 +406,17 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int num = 1;
-            if(args.length == 1){
-                num = (int)Static.getInt(args[0]);
+            if (args.length == 1) {
+                num = (int) Static.getInt(args[0]);
             }
             throw new LoopBreakException(num);
         }
-        
     }
-    
-    @api public static class _continue implements Function{
+
+    @api
+    public static class _continue extends AbstractFunction {
 
         public String getName() {
             return "continue";
@@ -395,8 +431,8 @@ public class DataHandling {
                     + " is called outside of a loop, the command will fail. If int is set, it will skip 'int' repetitions. If no argument is specified,"
                     + " 1 is used.";
         }
-        
-        public ExceptionType[] thrown(){
+
+        public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException};
         }
 
@@ -404,7 +440,8 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -418,17 +455,17 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             int num = 1;
-            if(args.length == 1){
-                num = (int)Static.getInt(args[0]);
+            if (args.length == 1) {
+                num = (int) Static.getInt(args[0]);
             }
             throw new LoopContinueException(num);
         }
-        
     }
-    
-    @api public static class is_string implements Function{
+
+    @api
+    public static class is_string extends AbstractFunction {
 
         public String getName() {
             return "is_string";
@@ -450,7 +487,8 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -464,13 +502,13 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(!(args[0] instanceof CArray), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(!(args[0] instanceof CArray), t);
         }
-        
     }
-    
-    @api public static class is_array implements Function{
+
+    @api
+    public static class is_array extends AbstractFunction {
 
         public String getName() {
             return "is_array";
@@ -504,13 +542,13 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(args[0] instanceof CArray, line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CArray, t);
         }
-        
     }
-    
-    @api public static class is_double implements Function{
+
+    @api
+    public static class is_double extends AbstractFunction {
 
         public String getName() {
             return "is_double";
@@ -546,13 +584,13 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(args[0] instanceof CDouble, line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CDouble, t);
         }
-        
     }
-    
-    @api public static class is_integer implements Function{
+
+    @api
+    public static class is_integer extends AbstractFunction {
 
         public String getName() {
             return "is_integer";
@@ -576,7 +614,8 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -590,13 +629,13 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(args[0] instanceof CInt, line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CInt, t);
         }
-        
     }
-    
-    @api public static class is_boolean implements Function{
+
+    @api
+    public static class is_boolean extends AbstractFunction {
 
         public String getName() {
             return "is_boolean";
@@ -619,7 +658,8 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -633,13 +673,13 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(args[0] instanceof CBoolean, line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CBoolean, t);
         }
-        
     }
-    
-    @api public static class is_null implements Function{
+
+    @api
+    public static class is_null extends AbstractFunction {
 
         public String getName() {
             return "is_null";
@@ -661,7 +701,8 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -675,13 +716,13 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(args[0] instanceof CNull, line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CNull, t);
         }
-        
     }
-    
-    @api public static class is_numeric implements Function{
+
+    @api
+    public static class is_numeric extends AbstractFunction {
 
         public String getName() {
             return "is_numeric";
@@ -712,23 +753,23 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             boolean b = true;
-            try{
+            try {
                 Static.getNumber(args[0]);
-            } catch(ConfigRuntimeException e){
+            } catch (ConfigRuntimeException e) {
                 b = false;
             }
-            return new CBoolean(b, line_num, f);
+            return new CBoolean(b, t);
         }
 
         public String since() {
             return "3.3.0";
         }
-        
     }
-    
-    @api public static class is_integral implements Function{
+
+    @api
+    public static class is_integral extends AbstractFunction {
 
         public String getName() {
             return "is_integral";
@@ -763,23 +804,23 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             double d;
-            try{
+            try {
                 d = Static.getDouble(args[0]);
-            } catch(ConfigRuntimeException e){
-                return new CBoolean(false, line_num, f);
+            } catch (ConfigRuntimeException e) {
+                return new CBoolean(false, t);
             }
-            return new CBoolean((long)d == d, line_num, f);
+            return new CBoolean((long) d == d, t);
         }
 
         public String since() {
             return "3.3.0";
         }
-        
     }
-    
-    @api public static class proc implements Function{
+
+    @api
+    public static class proc extends AbstractFunction {
 
         public String getName() {
             return "proc";
@@ -813,14 +854,49 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
-        
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CVoid(line_num, f);
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            String name = "";
+            List<IVariable> vars = new ArrayList<IVariable>();
+            GenericTreeNode<Construct> tree = null;
+            for (int i = 0; i < nodes.length; i++) {
+                if (i == nodes.length - 1) {
+                    tree = nodes[i];
+                } else {
+                    Construct cons = parent.eval(nodes[i], env);
+                    if (i == 0 && cons instanceof IVariable) {
+                        throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, t);
+                    } else {
+                        if (i == 0 && !(cons instanceof IVariable)) {
+                            name = cons.val();
+                        } else {
+                            if (!(cons instanceof IVariable)) {
+                                throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, t);
+                            } else {
+                                vars.add((IVariable) cons);
+                            }
+                        }
+                    }
+                }
+            }
+            Procedure myProc = new Procedure(name, vars, tree, t);
+            env.GetProcs().put(name, myProc);
+            return new CVoid(t);
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(t);
         }
         
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
 
-    @api public static class _return implements Function{
+    @api
+    public static class _return extends AbstractFunction {
 
         public String getName() {
             return "return";
@@ -842,7 +918,8 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -856,14 +933,14 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Construct ret = (args.length == 1?args[0]:new CVoid(line_num, f));
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            Construct ret = (args.length == 1 ? args[0] : new CVoid(t));
             throw new FunctionReturnException(ret);
         }
-        
     }
-    
-    @api public static class include implements Function{
+
+    @api
+    public static class include extends AbstractFunction {
 
         public String getName() {
             return "include";
@@ -885,7 +962,8 @@ public class DataHandling {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -899,23 +977,27 @@ public class DataHandling {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CVoid(line_num, f);
-        }
-        
-        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> children, Script parent){
-            GenericTreeNode<Construct> tree = children.get(0);
-            Construct arg = parent.eval(tree, env);
-            arg = parent.preResolveVariables(new Construct[]{arg})[0];
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(t);
+        }                
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            GenericTreeNode<Construct> tree = nodes[0];
+            Construct arg = parent.seval(tree, env);
             String location = arg.val();
-            GenericTreeNode<Construct> include = IncludeCache.get(new File(f.getParent(), location), line_num, f);
+            GenericTreeNode<Construct> include = IncludeCache.get(new File(t.file().getParent(), location), t);
             parent.eval(include.getChildAt(0), env);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
-        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
-    
-    @api public static class call_proc implements Function{
+
+    @api
+    public static class call_proc extends AbstractFunction {
 
         public String getName() {
             return "call_proc";
@@ -939,7 +1021,8 @@ public class DataHandling {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -953,24 +1036,37 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CVoid(line_num, f);
-        }
-        
-        public Construct execs(int line_num, File f, Env env, Construct ... args){
-            Procedure proc = env.GetProcs().get(args[0].val());
-            if(proc != null){
-                List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
-                vars.remove(0);                
-                return proc.execute(vars, env);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(t);
+        }        
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            if(nodes.length < 1){
+                throw new ConfigRuntimeException("Expecting at least one argument to call_proc", ExceptionType.InsufficientArgumentsException, t);
             }            
-            throw new ConfigRuntimeException("Unknown procedure \"" + args[0].val() + "\"", 
-                    ExceptionType.InvalidProcedureException, line_num, f);
+            Construct[] args = new Construct[nodes.length];
+            for (int i = 0; i < nodes.length; i++) {
+                args[i] = parent.seval(nodes[i], env);
+            }
+            
+            Procedure proc = env.GetProcs().get(args[0].val());
+            if (proc != null) {
+                List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
+                vars.remove(0);
+                return proc.execute(vars, env);
+            }
+            throw new ConfigRuntimeException("Unknown procedure \"" + args[0].val() + "\"",
+                    ExceptionType.InvalidProcedureException, t);
         }
-        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
-    
-    @api public static class is_proc implements Function{
+
+    @api
+    public static class is_proc extends AbstractFunction {
 
         public String getName() {
             return "is_proc";
@@ -993,7 +1089,8 @@ public class DataHandling {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1006,14 +1103,14 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
-        
-        public Construct exec(int line_num, File f, Env env, Construct ... args){
-            return new CBoolean(env.GetProcs().get(args[0].val())==null?false:true, line_num, f);
+
+        public Construct exec(Target t, Env env, Construct... args) {
+            return new CBoolean(env.GetProcs().get(args[0].val()) == null ? false : true, t);
         }
-        
     }
-    
-    @api public static class is_associative implements Function{
+
+    @api
+    public static class is_associative extends AbstractFunction {
 
         public String getName() {
             return "is_associative";
@@ -1035,7 +1132,8 @@ public class DataHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
+        public void varList(IVariableList varList) {
+        }
 
         public boolean preResolveVariables() {
             return true;
@@ -1049,17 +1147,17 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            if(args[0] instanceof CArray){
-                return new CBoolean(((CArray)args[0]).inAssociativeMode(), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            if (args[0] instanceof CArray) {
+                return new CBoolean(((CArray) args[0]).inAssociativeMode(), t);
             } else {
-                throw new ConfigRuntimeException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, t);
             }
         }
-        
-    }   
-    
-    @api public static class is_closure implements Function{
+    }
+
+    @api
+    public static class is_closure extends AbstractFunction {
 
         public String getName() {
             return "is_closure";
@@ -1090,17 +1188,17 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(args[0] instanceof CClosure, line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(args[0] instanceof CClosure, t);
         }
 
         public String since() {
             return "3.3.1";
         }
-        
     }
-    
-    @api public static class _import implements Function{
+
+    @api
+    public static class _import extends AbstractFunction {
 
         public String getName() {
             return "import";
@@ -1141,22 +1239,22 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
-
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            if(args[0] instanceof IVariable){
+        
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            if (args[0] instanceof IVariable) {
                 //Mode 1     
-                IVariable var = (IVariable)args[0];
+                IVariable var = (IVariable) args[0];
                 environment.GetVarList().set(Globals.GetGlobalIVar(var));
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             } else {
                 //Mode 2
                 return Globals.GetGlobalConstruct(args[0].val());
             }
         }
-        
     }
-    
-    @api public static class _export implements Function{
+
+    @api
+    public static class _export extends AbstractFunction {
 
         public String getName() {
             return "export";
@@ -1195,23 +1293,23 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            if(args.length == 1){
-                if(args[0] instanceof IVariable){
-                    IVariable cur = (IVariable)args[0];
-                    Globals.SetGlobal(environment.GetVarList().get(cur.getName(), cur.getLineNum(), cur.getFile()));
-                } else { 
-                    throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            if (args.length == 1) {
+                if (args[0] instanceof IVariable) {
+                    IVariable cur = (IVariable) args[0];
+                    Globals.SetGlobal(environment.GetVarList().get(cur.getName(), cur.getTarget()));
+                } else {
+                    throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
                 }
             } else {
                 Globals.SetGlobal(args[0].val(), args[1]);
-            }         
-            return new CVoid(line_num, f);
+            }
+            return new CVoid(t);
         }
-        
     }
-    
-    @api public static class closure implements Function{
+
+    @api
+    public static class closure extends AbstractFunction {
 
         public String getName() {
             return "closure";
@@ -1252,41 +1350,46 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CVoid(line_num, f);
-        }
-        
-        public Construct execs(int line_num, File f, Env env, List<GenericTreeNode<Construct>> nodes){
-            String[] names = new String[nodes.size() - 1];
-            Construct[] defaults = new Construct[nodes.size() - 1];
-            for(int i = 0; i < nodes.size() - 1; i++){
-                GenericTreeNode<Construct> node = nodes.get(i);
-                GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", line_num, f));
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(t);
+        }       
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            String[] names = new String[nodes.length - 1];
+            Construct[] defaults = new Construct[nodes.length - 1];
+            for (int i = 0; i < nodes.length - 1; i++) {
+                GenericTreeNode<Construct> node = nodes[i];
+                GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", t));
                 List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
                 children.add(node);
                 newNode.setChildren(children);
                 Construct ret = MethodScriptCompiler.execute(newNode, env, null, null);
-                if(!(ret instanceof IVariable)){
-                    throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, line_num, f);
+                if (!(ret instanceof IVariable)) {
+                    throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, t);
                 }
-                names[i] = ((IVariable)ret).getName();
+                names[i] = ((IVariable) ret).getName();
                 try {
-                    defaults[i] = ((IVariable)ret).ival().clone();
+                    defaults[i] = ((IVariable) ret).ival().clone();
                 } catch (CloneNotSupportedException ex) {
                     Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
                 }
             }
-            CClosure closure = new CClosure(nodes.get(nodes.size() - 1), env, names, defaults, line_num, f);
+            CClosure closure = new CClosure(nodes[nodes.length - 1], env, names, defaults, t);
             return closure;
         }
 
         public String since() {
             return "3.3.0";
         }
-        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
-    
-    @api public static class execute implements Function{
+
+    @api
+    public static class execute extends AbstractFunction {
 
         public String getName() {
             return "execute";
@@ -1318,25 +1421,25 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            if(args[args.length - 1] instanceof CClosure){
-                Construct [] vals = new Construct[args.length - 1];
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            if (args[args.length - 1] instanceof CClosure) {
+                Construct[] vals = new Construct[args.length - 1];
                 System.arraycopy(args, 0, vals, 0, args.length - 1);
-                CClosure closure = (CClosure)args[args.length - 1];
+                CClosure closure = (CClosure) args[args.length - 1];
                 closure.execute(vals);
             } else {
-                throw new ConfigRuntimeException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Only a closure (created from the closure function) can be sent to execute()", ExceptionType.CastException, t);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String since() {
             return "3.3.1";
         }
-        
     }
-    
-    @api public static class _boolean implements Function{
+
+    @api
+    public static class _boolean extends AbstractFunction {
 
         public String getName() {
             return "boolean";
@@ -1368,17 +1471,17 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(Static.getBoolean(args[0]), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(Static.getBoolean(args[0]), t);
         }
 
         public String since() {
             return "3.3.0";
         }
-        
     }
-    
-    @api public static class _integer implements Function{
+
+    @api
+    public static class _integer extends AbstractFunction {
 
         public String getName() {
             return "integer";
@@ -1413,17 +1516,17 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CInt((long)Static.getDouble(args[0]), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CInt((long) Static.getDouble(args[0]), t);
         }
 
         public String since() {
             return "3.3.0";
         }
-        
     }
-    
-    @api public static class _double implements Function{
+
+    @api
+    public static class _double extends AbstractFunction {
 
         public String getName() {
             return "double";
@@ -1455,17 +1558,17 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CDouble(Static.getDouble(args[0]), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CDouble(Static.getDouble(args[0]), t);
         }
 
         public String since() {
             return "3.3.0";
         }
-        
     }
-    
-    @api public static class _string implements Function{
+
+    @api
+    public static class _string extends AbstractFunction {
 
         public String getName() {
             return "string";
@@ -1498,14 +1601,12 @@ public class DataHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CString(args[0].val(), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CString(args[0].val(), t);
         }
 
         public String since() {
             return "3.3.0";
         }
-        
     }
-    
 }

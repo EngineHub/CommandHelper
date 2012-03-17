@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
@@ -22,59 +23,63 @@ import static org.mockito.Mockito.when;
  * @author Layton
  */
 public class EchoesTest {
-    
+
     MCServer fakeServer;
     MCPlayer fakePlayer;
     Env env = new Env();
-    
+
     public EchoesTest() {
     }
 
     @BeforeClass
-    public static void setUpClass() throws Exception {        
+    public static void setUpClass() throws Exception {
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
     }
-    
+
     @Before
     public void setUp() {
         fakeServer = GetFakeServer();
         fakePlayer = GetOnlinePlayer(fakeServer);
         env.SetPlayer(fakePlayer);
     }
-    
+
     @After
     public void tearDown() {
     }
 
-    @Test
+    @Test(timeout = 10000)
     public void testDocs() {
         TestClassDocs(Echoes.docs(), Echoes.class);
     }
-    
-    @Test public void testChat() throws CancelCommandException{
-        Echoes.chat a = new Echoes.chat();     
-        a.exec(0, null, env, C.onstruct("Hello World!"));
+
+    @Test(timeout = 10000)
+    public void testChat() throws CancelCommandException {
+        Echoes.chat a = new Echoes.chat();
+        a.exec(Target.UNKNOWN, env, C.onstruct("Hello World!"));
         verify(fakePlayer).chat("Hello World!");
     }
-    
-    @Test public void testBroadcast() throws NoSuchFieldException, InstantiationException, 
-            IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, CancelCommandException{
+
+    @Test(timeout = 10000)
+    public void testBroadcast() throws NoSuchFieldException, InstantiationException,
+            IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException, CancelCommandException {
         Echoes.broadcast a = new Echoes.broadcast();
         when(fakePlayer.getServer()).thenReturn(fakeServer);
         CommandHelperPlugin.myServer = fakeServer;
-        a.exec(0, null, env, C.onstruct("Hello World!"));
-        verify(fakeServer).broadcastMessage("Hello World!");        
+        a.exec(Target.UNKNOWN, env, C.onstruct("Hello World!"));
+        verify(fakeServer).broadcastMessage("Hello World!");
     }
-    
-    @Test public void testLongStringMsgd() throws ConfigCompileException{
+
+    @Test(timeout = 10000)
+    public void testLongStringMsgd() throws ConfigCompileException {
         SRun("msg('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')", fakePlayer);
         verify(fakePlayer).sendMessage("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
-    
-    @Test public void testChatas() throws CancelCommandException, ConfigCompileException{
+
+    @Test(timeout = 10000)
+    public void testChatas() throws CancelCommandException, ConfigCompileException {
         //TODO: Can't get this to work right, though it does work in game
 //        String script = "chatas('wraithguard02', 'Hello World!')";
 //        Player wraithguard02 = GetOnlinePlayer("wraithguard02", fakeServer);
@@ -85,9 +90,7 @@ public class EchoesTest {
 //        Player wraithguard01 = GetOnlinePlayer("wraithguard02", fakeServer);
 //        when(fakePlayer.getServer()).thenReturn(fakeServer);
 //        when(fakeServer.getPlayer("wraithguard01")).thenReturn(wraithguard01);
-//        a.exec(0, null, fakePlayer, C.onstruct("wraithguard02"), C.onstruct("Hello World!"));
+//        a.exec(Target.UNKNOWN, fakePlayer, C.onstruct("wraithguard02"), C.onstruct("Hello World!"));
 //        verify(wraithguard01).chat("Hello World!");        
     }
-    
-    
 }

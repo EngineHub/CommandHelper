@@ -6,7 +6,10 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -89,22 +92,37 @@ public interface Function extends Documentation {
     public Boolean runAsync();
 
     /**
-     * This function is invoked when the alias is run. The line number is provided so that if there is an error,
-     * the function can provide a more specific error message for the user. The function can throw a CancelCommandException
-     * which indicates that the command was purposefully canceled. If the command was canceled due to a fatal error
-     * in the syntax of the user input or some similar situation, it is better to throw a ConfigRuntimeException instead.
-     * Throwing either Exception will prevent the command from completing, however functions that had been run earlier will
-     * may have already completed successfully, so there is no guarantee of atomicity. All parameters sent to the
-     * function have already been resolved into an atomic value though, so functions do not have to worry about
+     * This function is invoked when the script is run. The line number is provided so that if there is an error,
+     * the function can provide a more specific error message for the user. If the function was canceled due to a fatal error
+     * in the syntax of the user input or some similar situation, it should throw a ConfigRuntimeException.
+     * All parameters sent to the
+     * function have already been resolved into an atomic value, so functions do not have to worry about
      * resolving parameters. There is an explicit check made before calling exec to ensure that Construct ... args
-     * will only be one of the following:
-     * CBoolean, CDouble, CInt, CNull, CString, CVoid, or IVariable. If you care, you'll need to do further checks
-     * on the datatype to verify what the type actually is.
+     * will only be one of the atomic Constructs. If a code tree is needed instead of a resolved construct,
+     * the function should indicate so, and {@code execs} will be called instead. If exec is needed,
+     * execs should return CVoid.
      * @param line_num The line that this function call is being run from
      * @param f The file that this function call is being run from
      * @param args An array of evaluated Constructs
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException;
+    public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException;
+    
+    /**
+     * If a function needs a code tree instead of a resolved construct, it should return true here. Most
+     * functions will return false for this value.
+     * @return 
+     */
+    public boolean useSpecialExec();
+    
+    /**
+     * If useSpecialExec indicates it needs the code tree instead of the resolved constructs,
+     * this gets called instead of exec. If execs is needed, exec should return CVoid.
+     * @param t
+     * @param env
+     * @param nodes
+     * @return 
+     */
+    public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes);
 }

@@ -35,8 +35,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private final GenericTreeNode<Construct> tree; //The code closure for this event
     private final Driver driver; //For efficiency sake, cache it here
     private static int EventID = 0;
-    private final int line_num;
-    private final File file;
+    private final Target target;
 
     /**
      * Returns a unique ID that can be used to identify an event.
@@ -115,7 +114,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * @throws EventException If the priority or id are improperly specified
      */
     public BoundEvent(String name, CArray options, CArray prefilter, String eventObjName,
-            Env env, GenericTreeNode<Construct> tree, int line_num, File file) throws EventException {
+            Env env, GenericTreeNode<Construct> tree, Target t) throws EventException {
         this.eventName = name;
 
         if (options != null && options.containsKey("id")) {
@@ -140,7 +139,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         this.prefilter = new HashMap<String, Construct>();
         if (prefilter != null) {
             for (String key : prefilter.keySet()) {
-                this.prefilter.put(key, prefilter.get(key, 0, null));
+                this.prefilter.put(key, prefilter.get(key, Target.UNKNOWN));
             }
         }
 
@@ -153,17 +152,24 @@ public class BoundEvent implements Comparable<BoundEvent> {
         this.driver = EventList.getEvent(this.eventName).driver();
         this.eventObjName = eventObjName;
         
-        this.line_num = line_num;
-        this.file = file;
+        this.target = t;
 
     }
 
     public int getLineNum(){
-        return line_num;
+        return target.line();
     }
     
     public File getFile(){
-        return file;
+        return target.file();
+    }
+    
+    public int getCol(){
+        return target.col();
+    }
+    
+    public Target getTarget(){
+        return target;
     }
     
     public String getEventName() {
@@ -218,9 +224,9 @@ public class BoundEvent implements Comparable<BoundEvent> {
     //        GenericTree<Construct> root = new GenericTree<Construct>();
     //        root.setRoot(tree);
             Env env = originalEnv.clone();
-            CArray ca = new CArray(0, null);
+            CArray ca = new CArray(Target.UNKNOWN);
             for (String key : activeEvent.parsedEvent.keySet()) {
-                ca.set(new CString(key, 0, null), activeEvent.parsedEvent.get(key));
+                ca.set(new CString(key, Target.UNKNOWN), activeEvent.parsedEvent.get(key));
             }
             if(activeEvent.parsedEvent.containsKey("player")){
                 try{
@@ -236,7 +242,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
                     //or the event will add it later, manually.
                 }
             }
-            env.GetVarList().set(new IVariable(eventObjName, ca, 0, null));
+            env.GetVarList().set(new IVariable(eventObjName, ca, Target.UNKNOWN));
             env.SetEvent(activeEvent);
             activeEvent.addHistory("Triggering bound event: " + this);
             try{
@@ -260,10 +266,10 @@ public class BoundEvent implements Comparable<BoundEvent> {
     public void manual_trigger(CArray event) throws EventException{
         try {
             Env env = originalEnv.clone();
-            env.GetVarList().set(new IVariable(eventObjName, event, 0, null));
+            env.GetVarList().set(new IVariable(eventObjName, event, Target.UNKNOWN));
             Map<String, Construct> map = new HashMap<String, Construct>();
             for(String key : event.keySet()){
-                map.put(key, event.get(key, 0, null));
+                map.put(key, event.get(key, Target.UNKNOWN));
             }
             ActiveEvent activeEvent = new ActiveEvent(null);
             activeEvent.setParsedEvent(map);

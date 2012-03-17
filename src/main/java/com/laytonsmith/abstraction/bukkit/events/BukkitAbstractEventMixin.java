@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
@@ -49,7 +50,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
     @Override
     public Map<String, Construct> evaluate_helper(BindableEvent event) throws EventException{
         Map<String, Construct> map = new HashMap<String, Construct>();
-        map.put("type", new CString(mySuper.getName(), 0, null));
+        map.put("type", new CString(mySuper.getName(), Target.UNKNOWN));
         String macro;
         Object e = event._GetObject();
         if(e instanceof BlockEvent){
@@ -58,12 +59,12 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
             macro = "entity";
             if(((EntityEvent)e).getEntity() instanceof Player){
                 Entity entity = ((EntityEvent)e).getEntity();
-                map.put("player", new CString(((Player)entity).getName(), 0, null));
+                map.put("player", new CString(((Player)entity).getName(), Target.UNKNOWN));
             }
         } else if(e instanceof FurnaceBurnEvent || e instanceof FurnaceSmeltEvent){
             macro = "inventory";
         } else if(e instanceof PlayerEvent){
-            map.put("player", new CString(((PlayerEvent)e).getPlayer().getName(), 0, null));
+            map.put("player", new CString(((PlayerEvent)e).getPlayer().getName(), Target.UNKNOWN));
             macro = "player";
         } else if(e instanceof ServerEvent){
             macro = "server";
@@ -76,7 +77,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
         } else {
             macro = "custom";
         }
-        map.put("macrotype", new CString(macro, 0, null));
+        map.put("macrotype", new CString(macro, Target.UNKNOWN));
         return map;
     }
     

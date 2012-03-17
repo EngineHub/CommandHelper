@@ -17,17 +17,17 @@ public class CInt extends Construct implements Cloneable{
     
     public static final long serialVersionUID = 1L;
     final long val;
-    public CInt(String value, int line_num, File file){
-        super(value, ConstructType.INT, line_num, file);
+    public CInt(String value, Target t){
+        super(value, ConstructType.INT, t);
         try{
             val = Long.parseLong(value);
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, line_num, file);
+            throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, t);
         }
     }
     
-    public CInt(long value, int line_num, File file){
-        super(Long.toString(value), ConstructType.INT, line_num, file);
+    public CInt(long value, Target t){
+        super(Long.toString(value), ConstructType.INT, t);
         val = value;
     }
 

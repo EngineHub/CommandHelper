@@ -81,8 +81,8 @@ public class PlayerEvents {
             if(e instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                //map.put("player", new CString(ple.getPlayer().getName(), 0, null));
-                map.put("join_message", new CString(ple.getJoinMessage(), 0, null));
+                //map.put("player", new CString(ple.getPlayer().getName(), Target.UNKNOWN));
+                map.put("join_message", new CString(ple.getJoinMessage(), Target.UNKNOWN));
                 return map;
             } else{
                 throw new EventException("Cannot convert e to PlayerLoginEvent");
@@ -106,7 +106,7 @@ public class PlayerEvents {
         }
         
         public BindableEvent convert(CArray manual){
-            MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player").val(), 0, null), manual.get("join_message").val());
+            MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN), manual.get("join_message").val());
             return e;
         }
         
@@ -176,23 +176,23 @@ public class PlayerEvents {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                //map.put("player", new CString(pie.getPlayer().getName(), 0, null));
+                //map.put("player", new CString(pie.getPlayer().getName(), Target.UNKNOWN));
                 MCAction a = pie.getAction();
-                map.put("action", new CString(a.name().toLowerCase(), 0, null));
-                map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), 0, null));
+                map.put("action", new CString(a.name().toLowerCase(), Target.UNKNOWN));
+                map.put("block", new CString(Static.ParseItemNotation(pie.getClickedBlock()), Target.UNKNOWN));
                 if(a == MCAction.LEFT_CLICK_AIR || a == MCAction.LEFT_CLICK_BLOCK){
-                    map.put("button", new CString("left", 0, null));
+                    map.put("button", new CString("left", Target.UNKNOWN));
                 } else {
-                    map.put("button", new CString("right", 0, null));
+                    map.put("button", new CString("right", Target.UNKNOWN));
                 }
                 if(a == MCAction.LEFT_CLICK_BLOCK || a == MCAction.RIGHT_CLICK_BLOCK){
-                    map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), 0, null));
+                    map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), Target.UNKNOWN));
                     MCBlock b = pie.getClickedBlock();
-                    map.put("location", new CArray(0, null, new CInt(b.getX(), 0, null),
-                            new CInt(b.getY(), 0, null), new CInt(b.getZ(), 0, null), 
-                            new CString(b.getWorld().getName(), 0, null)));
+                    map.put("location", new CArray(Target.UNKNOWN, new CInt(b.getX(), Target.UNKNOWN),
+                            new CInt(b.getY(), Target.UNKNOWN), new CInt(b.getZ(), Target.UNKNOWN), 
+                            new CString(b.getWorld().getName(), Target.UNKNOWN)));
                 }
-                map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), 0, null));
+                map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
                 return map;
             } else {
                 throw new EventException("Cannot convert e to PlayerInteractEvent");
@@ -201,10 +201,10 @@ public class PlayerEvents {
         
         @Override
         public BindableEvent convert(CArray manual){
-            MCPlayer p = Static.GetPlayer(manual.get("player"), 0, null);
+            MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
             MCAction a = MCAction.valueOf(manual.get("action").val().toUpperCase());
-            MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item").val(), 1, 0, null);
-            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, 0, null).getBlock();
+            MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item").val(), 1, Target.UNKNOWN);
+            MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, Target.UNKNOWN).getBlock();
             MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing").val());
             MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);            
             return e;
@@ -274,7 +274,7 @@ public class PlayerEvents {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
             MCPlayer p = Static.GetPlayer(manual.get("player"));
-            MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location"), p.getWorld(), 0, null);
+            MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location"), p.getWorld(), Target.UNKNOWN);
             MCPlayerRespawnEvent e = EventBuilder.instantiate(MCPlayerRespawnEvent.class, p, l, false);
             return e;
         }
@@ -284,7 +284,7 @@ public class PlayerEvents {
                 MCPlayerRespawnEvent e = (MCPlayerRespawnEvent) event;
                 if (key.equals("location")) {
                     //Change this parameter in e to value
-                    e.setRespawnLocation(ObjectGenerator.GetGenerator().location(value, e.getPlayer().getWorld(), 0, null));                    
+                    e.setRespawnLocation(ObjectGenerator.GetGenerator().location(value, e.getPlayer().getWorld(), Target.UNKNOWN));                    
                     return true;
                 }
             }
@@ -352,20 +352,20 @@ public class PlayerEvents {
             if (e instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                CArray ca = new CArray(0, null);
+                CArray ca = new CArray(Target.UNKNOWN);
                 for(MCItemStack is : event.getDrops()){                    
-                    ca.push(ObjectGenerator.GetGenerator().item(is, 0, null));
+                    ca.push(ObjectGenerator.GetGenerator().item(is, Target.UNKNOWN));
                 }
                 MCPlayer p = (MCPlayer)event.getEntity();
                 map.put("drops", ca);
-                map.put("xp", new CInt(event.getDroppedExp(), 0, null));
+                map.put("xp", new CInt(event.getDroppedExp(), Target.UNKNOWN));
                 if(event instanceof MCPlayerDeathEvent){
-                    map.put("death_message", new CString(((MCPlayerDeathEvent)event).getDeathMessage(), 0, null));
+                    map.put("death_message", new CString(((MCPlayerDeathEvent)event).getDeathMessage(), Target.UNKNOWN));
                 }
                 try{
-                    map.put("cause", new CString(event.getEntity().getLastDamageCause().name(), 0, null));
+                    map.put("cause", new CString(event.getEntity().getLastDamageCause().name(), Target.UNKNOWN));
                 } catch(NullPointerException ex){
-                    map.put("cause", new CString(MCDamageCause.CUSTOM.name(), 0, null));
+                    map.put("cause", new CString(MCDamageCause.CUSTOM.name(), Target.UNKNOWN));
                 }
                 map.put("location", ObjectGenerator.GetGenerator().location(p.getLocation()));
                 return map;
@@ -382,9 +382,9 @@ public class PlayerEvents {
             String deathMessage = manual.get("death_message").val();
             CArray clist = (CArray)manual.get("drops");
             for(String key : clist.keySet()){
-                list.add(ObjectGenerator.GetGenerator().item(clist.get(key), clist.getLineNum(), clist.getFile()));
+                list.add(ObjectGenerator.GetGenerator().item(clist.get(key), clist.getTarget()));
             }            
-            MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer, 0, null), list,
+            MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer, Target.UNKNOWN), list,
                     0, deathMessage);
             return e;
         }
@@ -400,15 +400,15 @@ public class PlayerEvents {
                 }
                 if(key.equals("drops")){
                     if(value instanceof CNull){
-                        value = new CArray(0, null);
+                        value = new CArray(Target.UNKNOWN);
                     }
                     if(!(value instanceof CArray)){
-                        throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getLineNum(), value.getFile());
+                        throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
                     }
                     e.clearDrops();
                     CArray drops = (CArray) value;
                     for(String dropID : drops.keySet()){
-                        e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID), 0, null));
+                        e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID), Target.UNKNOWN));
                     }
                     return true;
                 }
@@ -475,10 +475,10 @@ public class PlayerEvents {
                 MCPlayerChatEvent event = (MCPlayerChatEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 //Fill in the event parameters
-                map.put("message", new CString(event.getMessage(), 0, null));
-                CArray ca = new CArray(0, null);
+                map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
+                CArray ca = new CArray(Target.UNKNOWN);
                 for(MCPlayer recipient : event.getRecipients()){
-                    ca.push(new CString(recipient.getName(), 0, null));
+                    ca.push(new CString(recipient.getName(), Target.UNKNOWN));
                 }
                 map.put("recipients", ca);
                 return map;
@@ -506,7 +506,7 @@ public class PlayerEvents {
                         }
                         e.setRecipients(list);
                     } else {
-                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getLineNum(), value.getFile());
+                        throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
                     }
                 }
                 return true;

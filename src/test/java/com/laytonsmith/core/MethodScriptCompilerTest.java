@@ -7,6 +7,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -63,13 +64,13 @@ public class MethodScriptCompilerTest {
         List e = null;
         e = new ArrayList();
         //This is the decomposed version of the above config
-        e.add(new Token(Token.TType.COMMAND, "/cmd", 1, null));
-        e.add(new Token(Token.TType.ALIAS_END, "=", 1, null));
-        e.add(new Token(Token.TType.FUNC_NAME, "msg", 1, null));
-        e.add(new Token(Token.TType.FUNC_START, "(", 1, null));
-        e.add(new Token(Token.TType.STRING, "string", 1, null));
-        e.add(new Token(Token.TType.FUNC_END, ")", 1, null));
-        e.add(new Token(Token.TType.NEWLINE, "\n", 2, null));
+        e.add(new Token(Token.TType.COMMAND, "/cmd", Target.UNKNOWN));
+        e.add(new Token(Token.TType.ALIAS_END, "=", Target.UNKNOWN));
+        e.add(new Token(Token.TType.FUNC_NAME, "msg", Target.UNKNOWN));
+        e.add(new Token(Token.TType.FUNC_START, "(", Target.UNKNOWN));
+        e.add(new Token(Token.TType.STRING, "string", Target.UNKNOWN));
+        e.add(new Token(Token.TType.FUNC_END, ")", Target.UNKNOWN));
+        e.add(new Token(Token.TType.NEWLINE, "\n", Target.UNKNOWN));
 
         List result = MethodScriptCompiler.lex(config, null);
         assertEquals(e, result);
@@ -477,12 +478,12 @@ public class MethodScriptCompilerTest {
 //                + "msg($one) \\ msg($)"
 //                + "<<<";
 //        
-//        RunVars(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, 0, null),
-//            new Variable("$", "several variables", false, true, 0, null)}), config, fakePlayer);
+//        RunVars(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, Target.UNKNOWN),
+//            new Variable("$", "several variables", false, true, Target.UNKNOWN)}), config, fakePlayer);
 //        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
 //        s.compile();
-//        s.run(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, 0, null),
-//            new Variable("$", "several variables", false, true, 0, null)}), env, null);
+//        s.run(Arrays.asList(new Variable[]{new Variable("$one", "first", false, false, Target.UNKNOWN),
+//            new Variable("$", "several variables", false, true, Target.UNKNOWN)}), env, null);
 //        verify(fakePlayer).sendMessage("first");
 //        verify(fakePlayer).sendMessage("several variables");
 //    }
@@ -495,7 +496,7 @@ public class MethodScriptCompilerTest {
 //        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
 //        s.compile();
 //        assertTrue(s.match("/test 2"));
-//        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), env, null);
+//        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
 //        verify(fakePlayer).sendMessage("2");
 //        assertTrue(s.match("/test"));
 //        s.run(new ArrayList<Variable>(), env, null);
@@ -511,7 +512,7 @@ public class MethodScriptCompilerTest {
         s.compile();
         assertTrue(s.match("/test 2"));
         assertFalse(s.match("/test"));
-        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), env, null);
+        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
     }
     
     //TODO: Make this test possible
@@ -529,7 +530,7 @@ public class MethodScriptCompilerTest {
 //        s.compile();
 //        assertEquals("safe", s.getLabel());
 //        assertTrue(s.match("/test 2"));
-//        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, 0, null)}), env, null);
+//        s.run(Arrays.asList(new Variable[]{new Variable("$var", "2", true, false, Target.UNKNOWN)}), env, null);
 //        verify(fakePlayer).sendMessage("2");
 //        verify(CommandHelperPlugin.perms).hasPermission(fakePlayer.getName(), "ch.alias.safe");
 //    }

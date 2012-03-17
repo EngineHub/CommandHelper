@@ -33,7 +33,7 @@ public class Persistance {
                 + " with no side effects.";
     }
     
-    @api public static class store_value implements Function{
+    @api public static class store_value extends AbstractFunction{
 
         public String getName() {
             return "store_value";
@@ -67,13 +67,13 @@ public class Persistance {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            String key = GetNamespace(args, args.length - 1, getName(), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String key = GetNamespace(args, args.length - 1, getName(), t);
             String value = null;
             try{
-                value = Construct.json_encode(args[args.length - 1], line_num, f);
+                value = Construct.json_encode(args[args.length - 1], t);
             } catch(MarshalException e){
-                throw new ConfigRuntimeException(e.getMessage(), line_num, f);
+                throw new ConfigRuntimeException(e.getMessage(), t);
             }
             char pc = '.';
             for(int i = 0; i < key.length(); i++){
@@ -82,11 +82,11 @@ public class Persistance {
                     pc = key.charAt(i - 1);
                 }
                 if((i == 0 || i == key.length() - 1 || pc == '.') && c == '.'){
-                    throw new ConfigRuntimeException("Periods may only be used as seperators between namespaces.", ExceptionType.FormatException, line_num, f);
+                    throw new ConfigRuntimeException("Periods may only be used as seperators between namespaces.", ExceptionType.FormatException, t);
                 }
                 if(c != '_' && c != '.' && !Character.isLetterOrDigit(c)){
                     throw new ConfigRuntimeException("Param 1 in store_value must only contain letters, digits, underscores, or dots, (which denote namespaces).",
-                            ExceptionType.FormatException, line_num, f);
+                            ExceptionType.FormatException, t);
                 }
             }
             Static.getPersistance().setValue(new String[]{"storage", key}, value);
@@ -94,9 +94,9 @@ public class Persistance {
                 Static.getPersistance().save();
             } catch (Exception ex) {
                 Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
-                throw new ConfigRuntimeException(ex.getMessage(), null, line_num, f, ex);
+                throw new ConfigRuntimeException(ex.getMessage(), null, t, ex);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
         public Boolean runAsync(){
@@ -106,7 +106,7 @@ public class Persistance {
         
     }
     
-    @api public static class get_value implements Function{
+    @api public static class get_value extends AbstractFunction{
 
         public String getName() {
             return "get_value";
@@ -140,21 +140,21 @@ public class Persistance {
             return "3.0.2";
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
             Object o;
             try {
-                Object obj = Static.getPersistance().getValue(new String[]{"storage", GetNamespace(args, null, getName(), line_num, f)});
+                Object obj = Static.getPersistance().getValue(new String[]{"storage", GetNamespace(args, null, getName(), t)});
                 if(obj == null){
-                    return new CNull(line_num, f);
+                    return new CNull(t);
                 }
-                o = Construct.json_decode(obj.toString(), line_num, f);
+                o = Construct.json_decode(obj.toString(), t);
             } catch (MarshalException ex) {
-                throw new ConfigRuntimeException(ex.getMessage(), line_num, f);
+                throw new ConfigRuntimeException(ex.getMessage(), t);
             }
             try{
                 return (Construct)o;
             } catch(ClassCastException e){
-                return new CNull(line_num, f);
+                return new CNull(t);
             }
         }
         public Boolean runAsync(){
@@ -164,7 +164,7 @@ public class Persistance {
         
     }
     
-    @api public static class get_values implements Function{
+    @api public static class get_values extends AbstractFunction{
 
         public String getName() {
             return "get_values";
@@ -200,18 +200,18 @@ public class Persistance {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             com.laytonsmith.PureUtilities.Persistance p = Static.getPersistance();
             List<String> keyChain = new ArrayList<String>();
             keyChain.add("storage");
-            keyChain.addAll(Arrays.asList(GetNamespace(args, null, getName(), line_num, f).split("\\.")));
+            keyChain.addAll(Arrays.asList(GetNamespace(args, null, getName(), t).split("\\.")));
             List<Map.Entry<String, Object>> list = p.getNamespaceValues(keyChain.toArray(new String[]{}));
-            CArray ca = new CArray(line_num, f);
+            CArray ca = new CArray(t);
             for(Map.Entry<String, Object> e : list){
                 try {
                     String key = ((String)e.getKey()).replaceFirst("storage\\.", ""); //Get that junk out of here
-                    ca.set(new CString(key, line_num, f), 
-                            Construct.json_decode(e.getValue().toString(), line_num, f));
+                    ca.set(new CString(key, t), 
+                            Construct.json_decode(e.getValue().toString(), t));
                 } catch (MarshalException ex) {
                     Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
                 }
@@ -225,7 +225,7 @@ public class Persistance {
         
     }
     
-    @api public static class has_value implements Function{
+    @api public static class has_value extends AbstractFunction{
 
         public String getName() {
             return "has_value";
@@ -261,13 +261,13 @@ public class Persistance {
             return true;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CBoolean(Static.getPersistance().isKeySet(new String[]{"storage", GetNamespace(args, null, getName(), line_num, f)}), line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(Static.getPersistance().isKeySet(new String[]{"storage", GetNamespace(args, null, getName(), t)}), t);
         }
         
     }
     
-    @api public static class clear_value implements Function{
+    @api public static class clear_value extends AbstractFunction{
 
         public String getName() {
             return "clear_value";
@@ -301,9 +301,9 @@ public class Persistance {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            Static.getPersistance().setValue(new String[]{"storage", GetNamespace(args, null, getName(), line_num, f)}, null);
-            return new CVoid(line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            Static.getPersistance().setValue(new String[]{"storage", GetNamespace(args, null, getName(), t)}, null);
+            return new CVoid(t);
         }
         
     }
@@ -316,9 +316,9 @@ public class Persistance {
      * @param exclude
      * @return 
      */
-    private static String GetNamespace(Construct [] args, Integer exclude, String name, int line_num, File f){
+    private static String GetNamespace(Construct [] args, Integer exclude, String name, Target t){
         if(exclude != null && args.length < 2 || exclude == null && args.length < 1){
-            throw new ConfigRuntimeException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, line_num, f);
+            throw new ConfigRuntimeException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, t);
         }
         boolean first = true;
         StringBuilder b = new StringBuilder();

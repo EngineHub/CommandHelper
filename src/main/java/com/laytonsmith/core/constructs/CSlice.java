@@ -12,11 +12,11 @@ import java.io.File;
 public class CSlice extends Construct {
     private long start;
     private long finish;
-    public CSlice(String slice, int line_num, File f) throws ConfigCompileException{
-        super(slice, ConstructType.SLICE, line_num, f);
+    public CSlice(String slice, Target t) throws ConfigCompileException{
+        super(slice, ConstructType.SLICE, t);
         String [] split = slice.split("\\.\\.");
         if(split.length > 2){
-            throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", line_num, file);
+            throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", t);
         }
         
         String sstart;
@@ -37,12 +37,12 @@ public class CSlice extends Construct {
             start = Long.parseLong(sstart.trim());
             finish = Long.parseLong(sfinish.trim());
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + split[0] + " and " + split[1], line_num, file);
+            throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + split[0] + " and " + split[1], t);
         }
     }
     
-    public CSlice(long from, long to, int line_num, File f){
-        super(from + ".." + to, ConstructType.SLICE, line_num, f);
+    public CSlice(long from, long to, Target t){
+        super(from + ".." + to, ConstructType.SLICE, t);
         this.start = from;
         this.finish = to;
     }

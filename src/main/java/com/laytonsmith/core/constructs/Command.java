@@ -12,8 +12,8 @@ import java.io.File;
  */
 public class Command extends Construct implements Cloneable {
     
-    public Command(String name, int line_num, File file) {
-        super(name, ConstructType.COMMAND, line_num, file);
+    public Command(String name, Target t) {
+        super(name, ConstructType.COMMAND, t);
     }
 
     @Override

@@ -2,10 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.api;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -26,7 +23,7 @@ public class Reflection {
                 + " if you are not familiar with the language.";
     }
     
-    @api public static class reflect_pull implements Function{
+    @api public static class reflect_pull extends AbstractFunction{
 
         public String getName() {
             return "reflect_pull";
@@ -47,6 +44,7 @@ public class Reflection {
                     + " is provided, the currently set value is instead returned.</td></tr>"
                     + "<tr><td>line_num</td><td></td><td>The current line number</td></tr>"
                     + "<tr><td>file</td><td></td><td>The absolute path to the current file</td></tr>"
+                    + "<tr><td>col</td><td></td><td>The current column number</td></tr>"
                     
                     + "</tbody></table>";
                     //+ "<tr><td></td><td></td><td></td></tr>"
@@ -68,41 +66,43 @@ public class Reflection {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             if(args.length < 1){
-                throw new ConfigRuntimeException("Not enough parameters was sent to " + getName(), ExceptionType.InsufficientArgumentsException, line_num, f);
+                throw new ConfigRuntimeException("Not enough parameters was sent to " + getName(), ExceptionType.InsufficientArgumentsException, t);
             }
             
             String param = args[0].val();
             if("label".equalsIgnoreCase(param)){
-                return new CString(env.GetLabel(), line_num, f);
+                return new CString(env.GetLabel(), t);
             } else if("command".equalsIgnoreCase(param)){
-                return new CString(env.GetCommand(), line_num, f);
+                return new CString(env.GetCommand(), t);
             } else if("varlist".equalsIgnoreCase(param)){
                 if(args.length == 1){
                     //No name provided
-                    CArray ca = new CArray(line_num, f);
+                    CArray ca = new CArray(t);
                     for(String name : env.GetVarList().keySet()){
-                        ca.push(new CString(name, line_num, f));
+                        ca.push(new CString(name, t));
                     }
                     return ca;
                 } else if(args.length == 2){
                     //The name was provided
                     String name = args[1].val();
-                    return env.GetVarList().get(name, line_num, f).ival();
+                    return env.GetVarList().get(name, t).ival();
                 }
             } else if("line_num".equalsIgnoreCase(param)){
-                return new CInt(line_num, line_num, f);
+                return new CInt(t.line(), t);
             } else if("file".equalsIgnoreCase(param)){
-                if(f == null){
-                    return new CString("Unknown (maybe the interpreter?)", line_num, f);
+                if(t.file() == null){
+                    return new CString("Unknown (maybe the interpreter?)", t);
                 } else {
-                    return new CString(f.getAbsolutePath(), line_num, f);
+                    return new CString(t.file().getAbsolutePath(), t);
                 }
+            } else if("col".equalsIgnoreCase(param)){
+                return new CInt(t.col(), t);
             }
             
             throw new ConfigRuntimeException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.", 
-                    ExceptionType.FormatException, line_num, f);
+                    ExceptionType.FormatException, t);
         }
 
         public String since() {

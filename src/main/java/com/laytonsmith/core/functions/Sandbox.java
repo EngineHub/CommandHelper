@@ -22,7 +22,7 @@ public class Sandbox {
 
     //This broke as of 1.1
 //    @api
-//    public static class plugin_cmd implements Function {
+//    public static class plugin_cmd extends AbstractFunction {
 //
 //        public String getName() {
 //            return "plugin_cmd";
@@ -59,7 +59,7 @@ public class Sandbox {
 //            return false;
 //        }
 //
-//        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
 //            Object o = AliasCore.parent.getServer().getPluginManager();
 //            if (o instanceof SimplePluginManager) {
 //                SimplePluginManager spm = (SimplePluginManager) o;
@@ -104,12 +104,12 @@ public class Sandbox {
 //                }
 //            }
 //
-//            return new CVoid(line_num, f);
+//            return new CVoid(t);
 //        }
 //    }
 
     @api
-    public static class item_drop implements Function {
+    public static class item_drop extends AbstractFunction {
 
         public String getName() {
             return "item_drop";
@@ -149,7 +149,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
 
             MCLocation l = null;
             int qty = 1;
@@ -160,37 +160,37 @@ public class Sandbox {
             }
             if (args.length == 1) {
                 //It is just the item
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, line_num, f);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, t);
                 natural = true;
             } else if (args.length == 2) {
                 //If args[0] starts with a number, it's the (item, qty) version, otherwise it's
                 //(player, item)
                 if (args[0].val().matches("\\d.*")) {
                     qty = (int) Static.getInt(args[1]);
-                    is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, line_num, f);
+                    is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, t);
                     natural = true;
                 } else {
                     if (args[0] instanceof CArray) {
-                        l = ObjectGenerator.GetGenerator().location(args[0], (l != null ? l.getWorld() : null), line_num, f);
+                        l = ObjectGenerator.GetGenerator().location(args[0], (l != null ? l.getWorld() : null), t);
                         natural = false;
                     } else {
-                        l = Static.GetPlayer(args[0].val(), line_num, f).getLocation();
+                        l = Static.GetPlayer(args[0].val(), t).getLocation();
                         natural = true;
                     }
-                    is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, line_num, f);
+                    is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, t);
 
                 }
             } else if (args.length == 3) {
                 //We are specifying all 3
                 if (args[0] instanceof CArray) {
-                    l = ObjectGenerator.GetGenerator().location(args[0], (l != null ? l.getWorld() : null), line_num, f);
+                    l = ObjectGenerator.GetGenerator().location(args[0], (l != null ? l.getWorld() : null), t);
                     natural = false;
                 } else {
-                    l = Static.GetPlayer(args[0].val(), line_num, f).getLocation();
+                    l = Static.GetPlayer(args[0].val(), t).getLocation();
                     natural = true;
                 }
                 qty = (int) Static.getInt(args[2]);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, line_num, f);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, t);
             }
             if (l.getWorld() != null) {
                 if (natural) {
@@ -199,15 +199,15 @@ public class Sandbox {
                     l.getWorld().dropItem(l, is);
                 }
             } else {
-                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, line_num, f);
+                throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
             }
 
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
 
     @api
-    public static class npe implements Function {
+    public static class npe extends AbstractFunction {
 
         public String getName() {
             return "npe";
@@ -244,14 +244,14 @@ public class Sandbox {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             Object o = null;
             o.toString();
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
     
-    @api public static class super_cancel implements Function{
+    @api public static class super_cancel extends AbstractFunction{
 
         public String getName() {
             return "super_cancel";
@@ -290,10 +290,10 @@ public class Sandbox {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.GetEvent();
             if(original == null){
-                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, line_num, f);
+                throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
             }
             if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable 
                     && original.getUnderlyingEvent() instanceof org.bukkit.event.Event){
@@ -301,13 +301,13 @@ public class Sandbox {
                 BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event)original.getUnderlyingEvent());
             }
             environment.GetEvent().setCancelled(true);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
     @api
-    public static class enchant_inv_unsafe implements Function{
+    public static class enchant_inv_unsafe extends AbstractFunction{
         public String getName() {
             return "enchant_inv_unsafe";
         }
@@ -343,11 +343,11 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             int offset = 1;
             if (args.length == 4) {
-                m = Static.GetPlayer(args[0].val(), line_num, f);
+                m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
             MCItemStack is = null;
@@ -357,33 +357,33 @@ public class Sandbox {
                 int slot = (int) Static.getInt(args[1 - offset]);
                 is = m.getInventory().getItem(slot);
             }
-            CArray enchantArray = new CArray(line_num, f);
+            CArray enchantArray = new CArray(t);
             if (!(args[2 - offset] instanceof CArray)) {
                 enchantArray.push(args[2 - offset]);
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
 
-            CArray levelArray = new CArray(line_num, f);
+            CArray levelArray = new CArray(t);
             if (!(args[3 - offset] instanceof CArray)) {
                 levelArray.push(args[3 - offset]);
             } else {
                 levelArray = (CArray) args[3 - offset];
             }
             for (String key : enchantArray.keySet()) {
-                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, line_num, f).val()).toUpperCase());
+                MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
                 if(e == null){
-                    throw new ConfigRuntimeException(enchantArray.get(key, line_num, f).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, line_num, f);
+                    throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
                 }
-                int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, line_num, f).val()), line_num, f));
+                int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t));
                 
                 is.addUnsafeEnchantment(e, level);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
     }
     
-    @api public static class raw_set_pvanish implements Function{
+    @api public static class raw_set_pvanish extends AbstractFunction{
 
         public String getName() {
             return "raw_set_pvanish";
@@ -417,7 +417,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer me;
             boolean isVanished;
             MCPlayer other;
@@ -433,7 +433,7 @@ public class Sandbox {
             
             other.setVanished(isVanished, me);
             
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
 
         public String since() {
@@ -442,7 +442,7 @@ public class Sandbox {
         
     }
     
-    @api public static class raw_pcan_see implements Function{
+    @api public static class raw_pcan_see extends AbstractFunction{
 
         public String getName() {
             return "raw_pcan_see";
@@ -474,7 +474,7 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer me;
             MCPlayer other;
             if(args.length == 1){
@@ -484,7 +484,7 @@ public class Sandbox {
                 me = Static.GetPlayer(args[0]);
                 other = Static.GetPlayer(args[1]);
             }
-            return new CBoolean(me.canSee(other), line_num, f);
+            return new CBoolean(me.canSee(other), t);
         }
 
         public String since() {

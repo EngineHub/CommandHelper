@@ -12,12 +12,16 @@ import java.io.File;
  */
 public class CString extends Construct implements Cloneable{
     
-    public CString(String value, int line_num, File file){
-        super(value, ConstructType.STRING, line_num, file);
+    public CString(String value, Target t){
+        super(value, ConstructType.STRING, t);
     }
     
-    public CString(char value, int line_num, File file){
-        this(Character.toString(value), line_num, file);
+    public CString(char value, Target t){
+        this(Character.toString(value), t);
+    }
+    
+    public CString(CharSequence value, Target t){
+        this(value.toString(), t);
     }
     
     @Override

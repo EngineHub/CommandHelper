@@ -6,6 +6,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
@@ -55,7 +56,7 @@ public class UserManager {
         try{
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias")), new Env()).get(0).compile();
         } catch(IndexOutOfBoundsException e){
-            throw new ConfigCompileException("Improperly formatted alias", 0, new File("User Alias"));
+            throw new ConfigCompileException("Improperly formatted alias", new Target(0, new File("User Alias"), 0));
         }
         Persistance persist = Static.getPersistance();
         List<Map.Entry<String, Object>> list = persist.getNamespaceValues(new String[]{"user", name, "aliases"});
@@ -79,7 +80,7 @@ public class UserManager {
     
     private Script getAlias(String alias) throws ConfigCompileException{
         Env env = new Env();
-        env.SetPlayer(Static.GetPlayer(name, 0, null));            
+        env.SetPlayer(Static.GetPlayer(name, Target.UNKNOWN));            
         List<Token> tokens;
         if(script_cache.containsKey(alias)){
             tokens = script_cache.get(alias);

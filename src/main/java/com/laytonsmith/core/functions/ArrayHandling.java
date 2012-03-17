@@ -24,7 +24,7 @@ public class ArrayHandling {
         return "This class contains functions that provide a way to manipulate arrays. To create an array, use the <code>array</code> function."
                 + " For more detailed information on array usage, see the page on [[CommandHelper/Arrays|arrays]]";
     }
-    @api public static class array_size implements Function{
+    @api public static class array_size extends AbstractFunction{
 
         public String getName() {
             return "array_size";
@@ -34,11 +34,11 @@ public class ArrayHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
-                return new CInt(((CArray)args[0]).size(), line_num, f);
+                return new CInt(((CArray)args[0]).size(), t);
             }
-            throw new ConfigRuntimeException("Argument 1 of array_size must be an array", ExceptionType.CastException, line_num, f);
+            throw new ConfigRuntimeException("Argument 1 of array_size must be an array", ExceptionType.CastException, t);
         }
         
         public ExceptionType[] thrown(){
@@ -69,7 +69,7 @@ public class ArrayHandling {
         
     }
     
-    @api public static class array_get implements Function{
+    @api public static class array_get extends AbstractFunction{
 
         public String getName() {
             return "array_get";
@@ -79,8 +79,8 @@ public class ArrayHandling {
             return new Integer[]{1, 2};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Construct index = new CSlice(0, -1, line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Construct index = new CSlice(0, -1, t);
             if(args.length == 2){
                 index = args[1];
             }
@@ -95,18 +95,18 @@ public class ArrayHandling {
                     if(ca.inAssociativeMode()){
                         if(((CSlice)index).getStart() == 0 && ((CSlice)index).getFinish() == -1){
                             //Special exception, we want to clone the whole array
-                            CArray na = new CArray(line_num, f);
+                            CArray na = new CArray(t);
                             na.forceAssociativeMode();
                             for(String key : ca.keySet()){                                
                                 try {
-                                    na.set(key, ca.get(key, line_num, f).clone());
+                                    na.set(key, ca.get(key, t).clone());
                                 } catch (CloneNotSupportedException ex) {
-                                    na.set(key, ca.get(key, line_num, f));
+                                    na.set(key, ca.get(key, t));
                                 }
                             }
                             return na;
                         }
-                        throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, line_num, f);
+                        throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, t);
                     }
                     //It's a range
                     long start = ((CSlice)index).getStart();
@@ -119,21 +119,21 @@ public class ArrayHandling {
                         if(finish < 0){
                             finish = ca.size() + finish;
                         }
-                        CArray na = new CArray(line_num, f);
+                        CArray na = new CArray(t);
                         if(finish < start){
                             //return an empty array in cases where the indexes don't make sense
                             return na;
                         }
                         for(long i = start; i <= finish; i++){
                             try{
-                                na.push(ca.get((int)i, line_num, f).clone());
+                                na.push(ca.get((int)i, t).clone());
                             } catch(CloneNotSupportedException e){
-                                na.push(ca.get((int)i, line_num, f));
+                                na.push(ca.get((int)i, t));
                             }
                         }
                         return na;
                     } catch(NumberFormatException e){
-                        throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, line_num, f);
+                        throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
                     }
                 } else {
                     if(!ca.inAssociativeMode()){
@@ -142,9 +142,9 @@ public class ArrayHandling {
                             //negative index, convert to positive index
                             iindex = ca.size() + iindex;
                         }
-                        return ca.get(iindex, line_num, f);
+                        return ca.get(iindex, t);
                     } else {
-                        return ca.get(args[1], line_num, f);
+                        return ca.get(args[1], t);
                     }
                 }
             } else if(args[0] instanceof CString){
@@ -160,25 +160,25 @@ public class ArrayHandling {
                         if(finish < 0){
                             finish = args[0].val().length() + finish;
                         }
-                        CArray na = new CArray(line_num, f);
+                        CArray na = new CArray(t);
                         if(finish < start){
                             //return an empty array in cases where the indexes don't make sense
-                            return new CString("", line_num, f);
+                            return new CString("", t);
                         }
                         StringBuilder b = new StringBuilder();
                         String val = args[0].val();
                         for(long i = start; i <= finish; i++){
                             b.append(val.charAt((int)i));
                         }
-                        return new CString(b.toString(), line_num, f);
+                        return new CString(b.toString(), t);
                     } catch(NumberFormatException e){
-                        throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, line_num, f);
+                        throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
                     }
                 } else {
-                    return new CString(args[0].val().charAt((int)Static.getInt(index)), line_num, f);
+                    return new CString(args[0].val().charAt((int)Static.getInt(index)), t);
                 }
             } else{
-                throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
             }
         }
         
@@ -214,7 +214,7 @@ public class ArrayHandling {
         
     }
     
-    @api public static class array_set implements Function{
+    @api public static class array_set extends AbstractFunction{
 
         public String getName() {
             return "array_set";
@@ -224,16 +224,16 @@ public class ArrayHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 try{
                 ((CArray)args[0]).set(args[1], args[2]);
                 } catch(IndexOutOfBoundsException e){
-                    throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, line_num, f);
+                    throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
                 }
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             }
-            throw new ConfigRuntimeException("Argument 1 of array_set must be an array, and argument 2 must be an integer", ExceptionType.CastException, line_num, f);        
+            throw new ConfigRuntimeException("Argument 1 of array_set must be an array, and argument 2 must be an integer", ExceptionType.CastException, t);        
         }
 
         public ExceptionType[] thrown(){
@@ -263,7 +263,7 @@ public class ArrayHandling {
         }
     }
     
-    @api public static class array_push implements Function{
+    @api public static class array_push extends AbstractFunction{
 
         public String getName() {
             return "array_push";
@@ -273,17 +273,17 @@ public class ArrayHandling {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 if(args.length < 2){
-                    throw new ConfigRuntimeException("At least 2 arguments must be provided to array_push", ExceptionType.InsufficientArgumentsException, line_num, f);
+                    throw new ConfigRuntimeException("At least 2 arguments must be provided to array_push", ExceptionType.InsufficientArgumentsException, t);
                 }
                 for(int i = 1; i < args.length; i++){
                     ((CArray)args[0]).push(args[i]);
                 }
-                return new CVoid(line_num, f);
+                return new CVoid(t);
             }
-            throw new ConfigRuntimeException("Argument 1 of array_push must be an array", ExceptionType.CastException, line_num, f);
+            throw new ConfigRuntimeException("Argument 1 of array_push must be an array", ExceptionType.CastException, t);
         }
         
         public ExceptionType[] thrown(){
@@ -312,7 +312,7 @@ public class ArrayHandling {
         }
         
     }
-    @api public static class array_contains implements Function {
+    @api public static class array_contains extends AbstractFunction {
 
         public String getName() {
             return "array_contains";
@@ -322,18 +322,18 @@ public class ArrayHandling {
             return new Integer[]{2};
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             equals e = new equals();
             if(args[0] instanceof CArray){
                 CArray ca = (CArray) args[0];
                 for(int i = 0; i < ca.size(); i++){
-                    if(((CBoolean)e.exec(line_num, f, env, ca.get(i, line_num, f), args[1])).getBoolean()){
-                        return new CBoolean(true, line_num, f);
+                    if(((CBoolean)e.exec(t, env, ca.get(i, t), args[1])).getBoolean()){
+                        return new CBoolean(true, t);
                     }
                 }
-                return new CBoolean(false, line_num, f);
+                return new CBoolean(false, t);
             } else {
-                throw new ConfigRuntimeException("Argument 1 of array_contains must be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Argument 1 of array_contains must be an array", ExceptionType.CastException, t);
             }
         }
         
@@ -364,7 +364,7 @@ public class ArrayHandling {
         
     }
     
-    @api public static class array_contains_ic implements Function{
+    @api public static class array_contains_ic extends AbstractFunction{
 
         public String getName() {
             return "array_contains_ic";
@@ -398,24 +398,24 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             equals_ic e = new equals_ic();
             if(args[0] instanceof CArray){
                 CArray ca = (CArray) args[0];
                 for(int i = 0; i < ca.size(); i++){
-                    if(((CBoolean)e.exec(line_num, f, environment, ca.get(i, line_num, f), args[1])).getBoolean()){
-                        return new CBoolean(true, line_num, f);
+                    if(((CBoolean)e.exec(t, environment, ca.get(i, t), args[1])).getBoolean()){
+                        return new CBoolean(true, t);
                     }
                 }
-                return new CBoolean(false, line_num, f);
+                return new CBoolean(false, t);
             } else {
-                throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, t);
             }
         }
         
     }
     
-    @api public static class array_index_exists implements Function{
+    @api public static class array_index_exists extends AbstractFunction{
 
         public String getName() {
             return "array_index_exists";
@@ -451,29 +451,29 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 if(!((CArray)args[0]).inAssociativeMode()){
                     try{
                         int index = (int)Static.getInt(args[1]);                    
                         CArray ca = (CArray)args[0];
-                        return new CBoolean(index <= ca.size() - 1, line_num, f);
+                        return new CBoolean(index <= ca.size() - 1, t);
                     } catch(ConfigRuntimeException e){
                         //They sent a key that is a string. Obviously it doesn't exist.
-                        return new CBoolean(false, line_num, f);
+                        return new CBoolean(false, t);
                     }
                 } else {
                     CArray ca = (CArray)args[0];
-                    return new CBoolean(ca.containsKey(args[1].val()), line_num, f);
+                    return new CBoolean(ca.containsKey(args[1].val()), t);
                 }
             } else {
-                throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
             }
         }
         
     }
     
-    @api public static class array_resize implements Function{
+    @api public static class array_resize extends AbstractFunction{
 
         public String getName() {
             return "array_resize";
@@ -511,11 +511,11 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray && args[1] instanceof CInt){
                 CArray original = (CArray)args[0];
                 int size = (int)((CInt)args[1]).getInt();
-                Construct fill = new CNull(line_num, f);
+                Construct fill = new CNull(t);
                 if(args.length == 3){
                     fill = args[2];
                 }
@@ -523,14 +523,14 @@ public class ArrayHandling {
                     original.push(fill);
                 }
             } else {
-                throw new ConfigRuntimeException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", ExceptionType.CastException, t);
             }
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }
     
-    @api public static class range implements Function{
+    @api public static class range extends AbstractFunction{
 
         public String getName() {
             return "range";
@@ -568,7 +568,7 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             long start = 0;
             long finish = 0;
             long increment = 1;
@@ -583,18 +583,18 @@ public class ArrayHandling {
                 increment = Static.getInt(args[2]);
             }
             if(start < finish && increment < 0 || start > finish && increment > 0  || increment == 0){
-                return new CArray(line_num, f);
+                return new CArray(t);
             }
-            CArray ret = new CArray(line_num, f);
+            CArray ret = new CArray(t);
             for(long i = start; (increment > 0?i < finish:i > finish); i = i + increment){
-                ret.push(new CInt(i, line_num, f));
+                ret.push(new CInt(i, t));
             }
             return ret;
         }
         
     }
     
-    @api public static class array_keys implements Function{
+    @api public static class array_keys extends AbstractFunction{
 
         public String getName() {
             return "array_keys";
@@ -631,22 +631,22 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
-                CArray ca2 = new CArray(line_num, f);
+                CArray ca2 = new CArray(t);
                 for(String c : ca.keySet()){
-                    ca2.push(new CString(c, line_num, f));
+                    ca2.push(new CString(c, t));
                 }
                 return ca2;
             } else {
-                throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
             }
         }
         
     }
     
-    @api public static class array_normalize implements Function{
+    @api public static class array_normalize extends AbstractFunction{
 
         public String getName() {
             return "array_normalize";
@@ -683,22 +683,22 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
-                CArray ca2 = new CArray(line_num, f);
+                CArray ca2 = new CArray(t);
                 for(String c : ca.keySet()){
-                    ca2.push(ca.get(c, line_num, f));
+                    ca2.push(ca.get(c, t));
                 }
                 return ca2;
             } else {
-                throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
             }
         }
         
     }
     
-    @api public static class array_merge implements Function{
+    @api public static class array_merge extends AbstractFunction{
 
         public String getName() {
             return "array_merge";
@@ -734,25 +734,25 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            CArray newArray = new CArray(line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            CArray newArray = new CArray(t);
             if(args.length < 2){
-                throw new ConfigRuntimeException("array_merge must be called with at least two parameters", ExceptionType.InsufficientArgumentsException, line_num, f);
+                throw new ConfigRuntimeException("array_merge must be called with at least two parameters", ExceptionType.InsufficientArgumentsException, t);
             }
             for(int i = 0; i < args.length; i++){
                 if(args[i] instanceof CArray){
                     CArray cur = (CArray)args[i];
                     if(!cur.inAssociativeMode()){
                         for(int j = 0; j < cur.size(); j++){
-                            newArray.push(cur.get(j, line_num, f));
+                            newArray.push(cur.get(j, t));
                         }
                     } else {
                         for(String key : cur.keySet()){
-                            newArray.set(key, cur.get(key, line_num, f));
+                            newArray.set(key, cur.get(key, t));
                         }
                     }
                 } else {
-                    throw new ConfigRuntimeException("All arguments to array_merge must be arrays", ExceptionType.CastException, line_num, f);
+                    throw new ConfigRuntimeException("All arguments to array_merge must be arrays", ExceptionType.CastException, t);
                 }
             }
             return newArray;
@@ -760,7 +760,7 @@ public class ArrayHandling {
         
     }
     
-    @api public static class array_remove implements Function{
+    @api public static class array_remove extends AbstractFunction{
 
         public String getName() {
             return "array_remove";
@@ -797,18 +797,18 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(args[0] instanceof CArray){
                 CArray ca = (CArray)args[0];
                 return ca.remove(args[1]);
             } else {
-                throw new ConfigRuntimeException("Argument 1 of array_remove should be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Argument 1 of array_remove should be an array", ExceptionType.CastException, t);
             }
         }
         
     }
     
-    @api public static class array_implode implements Function{
+    @api public static class array_implode extends AbstractFunction{
 
         public String getName() {
             return "array_implode";
@@ -840,9 +840,9 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(!(args[0] instanceof CArray)){
-                throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, line_num, f);
+                throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
             }
             StringBuilder b = new StringBuilder();
             CArray ca = (CArray)args[0];
@@ -852,7 +852,7 @@ public class ArrayHandling {
             }
             boolean first = true;
             for(String key : ca.keySet()){
-                Construct value = ca.get(key, line_num, f);
+                Construct value = ca.get(key, t);
                 if(!first){
                     b.append(glue).append(value.val());
                 } else {
@@ -860,7 +860,7 @@ public class ArrayHandling {
                     first = false;
                 }
             }
-            return new CString(b.toString(), line_num, f);
+            return new CString(b.toString(), t);
         }
 
         public String since() {
@@ -869,7 +869,7 @@ public class ArrayHandling {
         
     }
     
-    @api public static class cslice implements Function{
+    @api public static class cslice extends AbstractFunction{
 
         public String getName() {
             return "cslice";
@@ -902,8 +902,8 @@ public class ArrayHandling {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CSlice(Static.getInt(args[0]), Static.getInt(args[1]), line_num, f);
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CSlice(Static.getInt(args[0]), Static.getInt(args[1]), t);
         }
 
         public String since() {

@@ -23,6 +23,7 @@ import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlayerListener;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -93,7 +94,7 @@ public class CommandHelperListener implements Listener {
 //        }
         
         if (Implementation.GetServerType() == Implementation.Type.BUKKIT) {
-            WorldGuardPlugin wgp = Static.getWorldGuardPlugin(0, null);
+            WorldGuardPlugin wgp = Static.getWorldGuardPlugin(Target.UNKNOWN);
             //This will cancel the command if the player isn't supposed to run it in this region
             if(wgp != null){
                 WorldGuardPlayerListener wgpl = new WorldGuardPlayerListener(wgp);

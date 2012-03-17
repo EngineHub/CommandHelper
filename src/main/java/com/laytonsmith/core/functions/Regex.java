@@ -25,7 +25,7 @@ public class Regex {
                 + "[[CommandHelper/Regex|regular expressions]]";
     }
     
-    @api public static class reg_match implements Function{
+    @api public static class reg_match extends AbstractFunction{
 
         public String getName() {
             return "reg_match";
@@ -64,19 +64,19 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Pattern pattern = getPattern(args[0], line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
-            CArray ret = new CArray(line_num, f);
+            CArray ret = new CArray(t);
             Matcher m = pattern.matcher(subject);
             if(m.find()){
-                ret.push(new CString(m.group(0), line_num, f));
+                ret.push(new CString(m.group(0), t));
 
                 for(int i = 1; i <= m.groupCount(); i++){
                     if(m.group(i) == null){
-                        ret.push(new CNull(line_num, f));
+                        ret.push(new CNull(t));
                     } else {
-                        ret.push(Static.resolveConstruct(m.group(i), line_num, f));
+                        ret.push(Static.resolveConstruct(m.group(i), t));
                     }
                 }
             }
@@ -85,7 +85,7 @@ public class Regex {
         
     }
     
-    @api public static class reg_match_all implements Function{
+    @api public static class reg_match_all extends AbstractFunction{
 
         public String getName() {
             return "reg_match_all";
@@ -122,17 +122,17 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Pattern pattern = getPattern(args[0], line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
-            CArray fret = new CArray(line_num, f);
+            CArray fret = new CArray(t);
             Matcher m = pattern.matcher(subject);
             while(m.find()){
-                CArray ret = new CArray(line_num, f);
-                ret.push(new CString(m.group(0), line_num, f));
+                CArray ret = new CArray(t);
+                ret.push(new CString(m.group(0), t));
 
                 for(int i = 1; i <= m.groupCount(); i++){
-                    ret.push(new CString(m.group(i), line_num, f));
+                    ret.push(new CString(m.group(i), t));
                 }
                 fret.push(ret);
             }
@@ -141,7 +141,7 @@ public class Regex {
         
     }
     
-    @api public static class reg_replace implements Function{
+    @api public static class reg_replace extends AbstractFunction{
 
         public String getName() {
             return "reg_replace";
@@ -178,20 +178,20 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Pattern pattern = getPattern(args[0], line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            Pattern pattern = getPattern(args[0], t);
             String replacement = args[1].val();
             String subject = args[2].val();
             String ret = "";
             
             ret = pattern.matcher(subject).replaceAll(replacement);
             
-            return new CString(ret, line_num, f);
+            return new CString(ret, t);
         }
         
     }
     
-    @api public static class reg_split implements Function{
+    @api public static class reg_split extends AbstractFunction{
 
         public String getName() {
             return "reg_split";
@@ -228,13 +228,13 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Pattern pattern = getPattern(args[0], line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             String [] rsplit = pattern.split(subject);
-            CArray ret = new CArray(line_num, f);
+            CArray ret = new CArray(t);
             for(String split : rsplit){
-                ret.push(new CString(split, line_num, f));
+                ret.push(new CString(split, t));
             }
             return ret;
         }
@@ -242,7 +242,7 @@ public class Regex {
         
     }  
     
-    @api public static class reg_count implements Function{
+    @api public static class reg_count extends AbstractFunction{
 
         public String getName() {
             return "reg_count";
@@ -278,27 +278,27 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env env, Construct... args) throws ConfigRuntimeException {
-            Pattern pattern = getPattern(args[0], line_num, f);
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             long ret = 0;
             Matcher m = pattern.matcher(subject);
             while(m.find()){
                 ret++;
             }
-            return new CInt(ret, line_num, f);
+            return new CInt(ret, t);
         }
         
     }
     
-    private static Pattern getPattern(Construct c, int line_num, File f){
+    private static Pattern getPattern(Construct c, Target t){
         String regex = "";
         int flags = 0;
         String sflags = "";
         if(c instanceof CArray){
             CArray ca = (CArray)c;
-            regex = ca.get(0, line_num, f).val();
-            sflags = ca.get(1, line_num, f).val();
+            regex = ca.get(0, t).val();
+            sflags = ca.get(1, t).val();
             for(int i = 0; i < sflags.length(); i++){
                 if(sflags.toLowerCase().charAt(i) == 'i'){
                     flags |= Pattern.CASE_INSENSITIVE;
@@ -307,7 +307,7 @@ public class Regex {
                 } else if(sflags.toLowerCase().charAt(i) == 's'){
                     flags |= Pattern.DOTALL;
                 } else {
-                    throw new ConfigRuntimeException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), ExceptionType.FormatException, line_num, f);
+                    throw new ConfigRuntimeException("Unrecognized flag: " + sflags.toLowerCase().charAt(i), ExceptionType.FormatException, t);
                 }
             }
         } else {

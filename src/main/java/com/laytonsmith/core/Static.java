@@ -59,7 +59,7 @@ public class Static {
                 d = Double.parseDouble(c.val());
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
-                        ExceptionType.CastException, c.getLineNum(), c.getFile());
+                        ExceptionType.CastException, c.getTarget());
             }
         } else if(c instanceof CBoolean){
             if(((CBoolean)c).getBoolean()){
@@ -69,7 +69,7 @@ public class Static {
             }
         } else {
             throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
-                    ExceptionType.CastException, c.getLineNum(), c.getFile());
+                    ExceptionType.CastException, c.getTarget());
         }
         return d;
     }
@@ -84,7 +84,7 @@ public class Static {
             return getNumber(c);
         } catch (ConfigRuntimeException e) {
             throw new ConfigRuntimeException("Expecting a double, but received " + c.val() + " instead",
-                    ExceptionType.CastException, c.getLineNum(), c.getFile());
+                    ExceptionType.CastException, c.getTarget());
         }
     }
 
@@ -112,7 +112,7 @@ public class Static {
                 i = Long.parseLong(c.val());
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting an integer, but received " + c.val() + " instead",
-                        ExceptionType.CastException, c.getLineNum(), c.getFile());
+                        ExceptionType.CastException, c.getTarget());
             }
         }
         return i;
@@ -363,9 +363,9 @@ public class Static {
                 .replaceAll("%m", minute).replaceAll("%s", second);
     }
 
-    public static WorldEditPlugin getWorldEditPlugin(int line_num, File file) {
+    public static WorldEditPlugin getWorldEditPlugin(Target t) {
         if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
-            throw new ConfigRuntimeException("Trying to use WorldEdit on non-bukkit server.", ExceptionType.InvalidPluginException, line_num, file);
+            throw new ConfigRuntimeException("Trying to use WorldEdit on non-bukkit server.", ExceptionType.InvalidPluginException, t);
         }
         if (CommandHelperPlugin.wep == null) {
             MCPlugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
@@ -376,9 +376,9 @@ public class Static {
         return CommandHelperPlugin.wep;
     }
 
-    public static WorldGuardPlugin getWorldGuardPlugin(int line_num, File file) {
+    public static WorldGuardPlugin getWorldGuardPlugin(Target t) {
         if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
-            throw new ConfigRuntimeException("Trying to use WorldGuard on non-bukkit server.", ExceptionType.InvalidPluginException, line_num, file);
+            throw new ConfigRuntimeException("Trying to use WorldGuard on non-bukkit server.", ExceptionType.InvalidPluginException, t);
         }
         MCPlugin pwgp = getServer().getPluginManager().getPlugin("WorldGuard");
         if (pwgp != null && pwgp.isEnabled() && pwgp.isInstanceOf(WorldGuardPlugin.class) && pwgp instanceof BukkitMCPlugin) {
@@ -387,10 +387,10 @@ public class Static {
         return null;
     }
 
-    public static void checkPlugin(String name, int line_number, File f) throws ConfigRuntimeException {
+    public static void checkPlugin(String name, Target t) throws ConfigRuntimeException {
         if (Static.getServer().getPluginManager().getPlugin(name) == null) {
             throw new ConfigRuntimeException("Needed plugin " + name + " not found!",
-                    ExceptionType.InvalidPluginException, line_number, f);
+                    ExceptionType.InvalidPluginException, t);
         }
     }
 
@@ -401,32 +401,32 @@ public class Static {
      * @param line_num
      * @return 
      */
-    public static Construct resolveConstruct(String val, int line_num, File file) {
+    public static Construct resolveConstruct(String val, Target t) {
         if (val == null) {
-            return new CString("", line_num, file);
+            return new CString("", t);
         }
         if (val.equalsIgnoreCase("null")) {
-            return new CNull(line_num, file);
+            return new CNull(t);
         } else if (val.equalsIgnoreCase("true")) {
-            return new CBoolean(true, line_num, file);
+            return new CBoolean(true, t);
         } else if (val.equalsIgnoreCase("false")) {
-            return new CBoolean(false, line_num, file);
+            return new CBoolean(false, t);
         } else {
             try {
-                return new CInt(Integer.parseInt(val), line_num, file);
+                return new CInt(Integer.parseInt(val), t);
             } catch (NumberFormatException e) {
                 try {
                     if (val.contains(" ") || val.contains("\t")) {
                         //Interesting behavior in Double.parseDouble causes it to "trim" strings first, then
                         //try to parse them, which is not desireable in our case. So, if the value contains
                         //any characters other than [\-0-9\.], we want to make it a string instead
-                        return new CString(val, line_num, file);
+                        return new CString(val, t);
                     }
-                    return new CDouble(Double.parseDouble(val), line_num, file);
+                    return new CDouble(Double.parseDouble(val), t);
                 } catch (NumberFormatException g) {
                     //It's a literal, but not a keyword. Push it in as a string to standardize everything
                     //later
-                    return new CString(val, line_num, file);
+                    return new CString(val, t);
                 }
             }
         }
@@ -434,15 +434,15 @@ public class Static {
 
     public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
         if(variable == null){
-            return new CNull(0, null);
+            return new CNull();
         }
         if (variable.getCType() == Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {
                 if (var.getName().equals(((Variable) variable).getName())) {
-                    return Static.resolveConstruct(var.val(), var.getLineNum(), var.getFile());
+                    return Static.resolveConstruct(var.val(), var.getTarget());
                 }
             }
-            return Static.resolveConstruct(((Variable) variable).getDefault(), variable.getLineNum(), variable.getFile());
+            return Static.resolveConstruct(((Variable) variable).getDefault(), variable.getTarget());
         } else {
             return variable;
         }
@@ -471,14 +471,14 @@ public class Static {
      * @param p
      * @param msg 
      */
-    public static void SendMessage(final MCCommandSender m, String msg, final int line_num, final File f) {
+    public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
         SendMessage(new LineCallback() {
 
             public void run(String line) {
                 if (m instanceof MCPlayer) {
                     MCPlayer p = (MCPlayer) m;
                     if (p == null) {
-                        throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, line_num, f);
+                        throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, t);
                     }
                     p.sendMessage(line);
                 } else {
@@ -550,7 +550,7 @@ public class Static {
      * @throws ConfigRuntimeException FormatException if the notation is invalid.
      * @return 
      */
-    public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, int line_num, File f) {
+    public static MCItemStack ParseItemNotation(String functionName, String notation, int qty, Target t) {
         int type = 0;
         byte data = 0;
         MCItemStack is = null;
@@ -562,10 +562,10 @@ public class Static {
                     data = (byte) Integer.parseInt(sData[1]);
                 }
             } catch (NumberFormatException e) {
-                throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation, ExceptionType.FormatException, line_num, f);
+                throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation, ExceptionType.FormatException, t);
             }
         } else {
-            type = (int) Static.getInt(Static.resolveConstruct(notation, line_num, f));
+            type = (int) Static.getInt(Static.resolveConstruct(notation, t));
         }
 
         is = StaticLayer.GetItemStack(type, qty);
@@ -600,23 +600,23 @@ public class Static {
     }
 
     private static Map<String, MCPlayer> injectedPlayers = new HashMap<String, MCPlayer>();
-    public static MCPlayer GetPlayer(String player, int line_num, File f) throws ConfigRuntimeException {        
+    public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {        
         MCPlayer m = Static.getServer().getPlayer(player);
         if(injectedPlayers.containsKey(player)){
             m = injectedPlayers.get(player);
         }
         if (m == null || (!m.isOnline() && !injectedPlayers.containsKey(player))) {
-            throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, line_num, f);
+            throw new ConfigRuntimeException("The specified player (" + player + ") is not online", ExceptionType.PlayerOfflineException, t);
         }
         return m;
     }
 
-    public static MCPlayer GetPlayer(Construct player, int line_num, File f) throws ConfigRuntimeException {
-        return GetPlayer(player.val(), line_num, f);
+    public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
+        return GetPlayer(player.val(), t);
     }
 
     public static MCPlayer GetPlayer(Construct player) {
-        return GetPlayer(player, player.getLineNum(), player.getFile());
+        return GetPlayer(player, player.getTarget());
     }
 
     public static boolean isNull(Construct construct) {

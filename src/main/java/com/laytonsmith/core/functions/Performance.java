@@ -10,6 +10,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -38,7 +39,7 @@ public class Performance {
         }
     }
     
-    @api public static class enable_performance_logging implements Function{
+    @api public static class enable_performance_logging extends AbstractFunction{
 
         public String getName() {
             return "enable_performance_logging";
@@ -76,12 +77,12 @@ public class Performance {
             return null;
         }
 
-        public Construct exec(int line_num, File f, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if(!Prefs.AllowProfiling()){
-                throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, line_num, f);
+                throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, t);
             }
             PERFORMANCE_LOGGING = Static.getBoolean(args[0]);
-            return new CVoid(line_num, f);
+            return new CVoid(t);
         }
         
     }

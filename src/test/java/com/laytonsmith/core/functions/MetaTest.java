@@ -20,11 +20,10 @@ import static org.mockito.Mockito.*;
  * @author layton
  */
 public class MetaTest {
-    
+
     MCServer fakeServer;
     MCPlayer fakePlayer;
     Env env = new Env();
-    
 
     public MetaTest() {
     }
@@ -50,8 +49,9 @@ public class MetaTest {
     public void tearDown() {
     }
 
-    @Test public void testRunas1() throws ConfigCompileException{
-        String script = 
+    @Test(timeout = 10000)
+    public void testRunas1() throws ConfigCompileException {
+        String script =
                 "runas('wraithguard02', '/cmd yay')";
         MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("wraithguard02", fakeServer);
         when(fakeServer.getPlayer("wraithguard02")).thenReturn(fakePlayer2);
@@ -62,7 +62,8 @@ public class MetaTest {
     }
     //:( I can't get this to work right, because AlwaysOpPlayer is different than
     //fakePlayer, so I can't get my test to activate when the function is called.
-//    @Test public void testRunas2() throws ConfigCompileException{
+//    @Test(timeout=10000)
+//    public void testRunas2() throws ConfigCompileException {
 //        final AtomicBoolean bool = new AtomicBoolean(false); 
 //        String script = 
 //                "runas(~op, '/cmd yay')";
@@ -79,5 +80,4 @@ public class MetaTest {
 //        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), fakePlayer, null, null);
 //        assertTrue(bool.get());
 //    }
-    
-}
+    }
