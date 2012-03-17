@@ -556,7 +556,7 @@ public class MethodScriptCompiler {
                     //We need to autoconcat some stuff
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
-                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", Target.UNKNOWN));
+                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
                     List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
                     for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
                         subChildren.add(tree.getChildAt(b));
@@ -597,7 +597,7 @@ public class MethodScriptCompiler {
                 if(constructCount.peek().get() > 1){
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
-                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("sconcat", Target.UNKNOWN));
+                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
                     List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
                     for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
                         subChildren.add(tree.getChildAt(b));

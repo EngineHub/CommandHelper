@@ -4,6 +4,7 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -491,6 +492,61 @@ public class Sandbox {
             return "3.3.0";
         }
         
+    }
+    
+    @api
+    public static class __autoconcat__ extends AbstractFunction {
+
+        public String getName() {
+            return "__autoconcat__";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return null;
+        }        
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            StringHandling.sconcat sc = new StringHandling.sconcat();
+            return sc.execs(t, env, parent, nodes);
+        }
+
+        public String docs() {
+            return "string {var1, [var2...]} This function should only be used by the compiler, behavior"
+                    + " may be undefined if it is used in code.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public String since() {
+            return "3.0.1";
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+        
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
     }
 
     

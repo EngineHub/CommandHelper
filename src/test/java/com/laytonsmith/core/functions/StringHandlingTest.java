@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.google.common.util.concurrent.FakeTimeLimiter;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
@@ -104,5 +105,10 @@ public class StringHandlingTest {
         StringHandling.trim a = new StringHandling.trim();
         assertCEquals(C.onstruct("test 123"), a.exec(Target.UNKNOWN, null, C.onstruct("    test 123    ")));
         assertCEquals(C.onstruct("test   123"), a.exec(Target.UNKNOWN, null, C.onstruct("test   123")));
+    }
+    
+    @Test(timeout = 10000)
+    public void testCC() throws ConfigCompileException{
+        assertEquals("Thisshouldbeamess", SRun("cc(This should be a mess)", null));
     }
 }

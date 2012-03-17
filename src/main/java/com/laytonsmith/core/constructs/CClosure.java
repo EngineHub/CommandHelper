@@ -52,11 +52,9 @@ public class CClosure extends Construct {
             b.append(((CFunction)node.data).val()).append("(");
             for(int i = 0; i < node.children.size(); i++){
                 condense(node.children.get(i), b);
-                if(i > 0 && !((CFunction)node.data).val().equals("sconcat")){
-                    //sconcat handles itself in the reversal
+                if(i > 0 && !((CFunction)node.data).val().equals("__autoconcat__")){
                     b.append(",");
                 }
-                //TODO: optimize concat and sconcat
             }
             b.append(")");
         } else if(node.data instanceof CString){

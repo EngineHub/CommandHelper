@@ -27,7 +27,7 @@ public class StringHandling {
         return "These class provides functions that allow strings to be manipulated";
     }
     
-    //@api
+    @api
     public static class cc extends AbstractFunction{
 
         public String getName() {
@@ -40,32 +40,60 @@ public class StringHandling {
 
         public String docs() {
             return "string {args...} The cousin to <strong>c</strong>on<strong>c</strong>at, this function does some magic under the covers"
-                    + " to remove the auto-concatenation effect in bare strings. Take the following examples.";
+                    + " to remove the auto-concatenation effect in bare strings. Take the following example: cc(bare string) -> barestring";
         }
 
         public ExceptionType[] thrown() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return null;
         }
 
         public boolean isRestricted() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return false;
         }
 
         public boolean preResolveVariables() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return false;
         }
 
         public String since() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return "3.3.1";
         }
 
         public Boolean runAsync() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return null;
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            throw new UnsupportedOperationException("Not supported yet.");
+            return new CVoid(t);
         }
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            //if any of the nodes are __autoconcat__, move their children up a level
+            List<GenericTreeNode<Construct>> list = new ArrayList<GenericTreeNode<Construct>>();
+            for(GenericTreeNode<Construct> node : nodes){
+                if(node.getData().val().equals("__autoconcat__")){
+                    for(GenericTreeNode<Construct> sub : node.getChildren()){
+                        list.add(sub);
+                    }
+                } else {
+                    list.add(node);
+                }
+            }
+            
+            StringBuilder b = new StringBuilder();
+            for(GenericTreeNode<Construct> node : list){
+                Construct c = parent.seval(node, env);
+                b.append(c.val());
+            }
+            return new CString(b.toString(), t);
+        }
+
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
+                
         
     }
 

@@ -10,32 +10,11 @@ import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.*;
-import com.laytonsmith.core.functions.BasicLogic._if;
-import com.laytonsmith.core.functions.BasicLogic._switch;
-import com.laytonsmith.core.functions.BasicLogic.and;
-import com.laytonsmith.core.functions.BasicLogic.ifelse;
-import com.laytonsmith.core.functions.BasicLogic.nand;
-import com.laytonsmith.core.functions.BasicLogic.nor;
-import com.laytonsmith.core.functions.BasicLogic.or;
-import com.laytonsmith.core.functions.DataHandling._for;
 import com.laytonsmith.core.functions.DataHandling.assign;
-import com.laytonsmith.core.functions.DataHandling.call_proc;
-import com.laytonsmith.core.functions.DataHandling.closure;
-import com.laytonsmith.core.functions.DataHandling.foreach;
-import com.laytonsmith.core.functions.DataHandling.include;
-import com.laytonsmith.core.functions.DataHandling.proc;
-import com.laytonsmith.core.functions.EventBinding.bind;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.core.functions.Exceptions._try;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.functions.IVariableList;
-import com.laytonsmith.core.functions.IncludeCache;
-import com.laytonsmith.core.functions.Meta.eval;
-import com.laytonsmith.core.functions.Meta.scriptas;
-import com.laytonsmith.core.functions.StringHandling.sconcat;
 import com.sk89q.wepif.PermissionsResolverManager;
-import java.io.File;
 import java.util.*;
 
 /**
@@ -288,7 +267,7 @@ public class Script {
                             || ca[i] instanceof CInt || ca[i] instanceof CNull
                             || ca[i] instanceof CString || ca[i] instanceof CVoid 
                             || ca[i] instanceof IVariable || ca[i] instanceof CEntry)
-                            && (!f.getName().equals("sconcat") && (ca[i] instanceof CLabel))) {
+                            && (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
                         throw new ConfigRuntimeException("Invalid Construct (" 
                                 + ca[i].getClass() + ") being passed as an argument to a function (" 
                                 + f.getName() + ")", null, m.getTarget());
