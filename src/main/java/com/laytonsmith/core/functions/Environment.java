@@ -201,7 +201,6 @@ public class Environment {
             int ix = (int) x;
             int iy = (int) y;
             int iz = (int) z;
-            System.out.println("Setting block at " + ix + "," + iy + "," + iz);
             MCBlock b = w.getBlockAt(ix, iy, iz);
             StringBuilder data = new StringBuilder();
             StringBuilder meta = new StringBuilder();
