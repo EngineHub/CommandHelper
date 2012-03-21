@@ -7,6 +7,9 @@ import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import org.bukkit.event.Cancellable;
 
 /**
@@ -107,7 +110,6 @@ public class Sandbox {
 //            return new CVoid(t);
 //        }
 //    }
-
     @api
     public static class item_drop extends AbstractFunction {
 
@@ -250,8 +252,9 @@ public class Sandbox {
             return new CVoid(t);
         }
     }
-    
-    @api public static class super_cancel extends AbstractFunction{
+
+    @api
+    public static class super_cancel extends AbstractFunction {
 
         public String getName() {
             return "super_cancel";
@@ -292,22 +295,22 @@ public class Sandbox {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             BoundEvent.ActiveEvent original = environment.GetEvent();
-            if(original == null){
+            if (original == null) {
                 throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
             }
-            if(original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable 
-                    && original.getUnderlyingEvent() instanceof org.bukkit.event.Event){
-                ((Cancellable)original.getUnderlyingEvent()).setCancelled(true);
-                BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event)original.getUnderlyingEvent());
+            if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
+                    && original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
+                ((Cancellable) original.getUnderlyingEvent()).setCancelled(true);
+                BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
             }
             environment.GetEvent().setCancelled(true);
             return new CVoid(t);
         }
-        
     }
-    
+
     @api
-    public static class enchant_inv_unsafe extends AbstractFunction{
+    public static class enchant_inv_unsafe extends AbstractFunction {
+
         public String getName() {
             return "enchant_inv_unsafe";
         }
@@ -372,18 +375,19 @@ public class Sandbox {
             }
             for (String key : enchantArray.keySet()) {
                 MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
-                if(e == null){
+                if (e == null) {
                     throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
                 }
                 int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t));
-                
+
                 is.addUnsafeEnchantment(e, level);
             }
             return new CVoid(t);
         }
     }
-    
-    @api public static class raw_set_pvanish extends AbstractFunction{
+
+    @api
+    public static class raw_set_pvanish extends AbstractFunction {
 
         public String getName() {
             return "raw_set_pvanish";
@@ -421,7 +425,7 @@ public class Sandbox {
             MCPlayer me;
             boolean isVanished;
             MCPlayer other;
-            if(args.length == 2){
+            if (args.length == 2) {
                 me = environment.GetPlayer();
                 isVanished = Static.getBoolean(args[0]);
                 other = Static.GetPlayer(args[1]);
@@ -430,19 +434,19 @@ public class Sandbox {
                 isVanished = Static.getBoolean(args[1]);
                 other = Static.GetPlayer(args[2]);
             }
-            
+
             other.setVanished(isVanished, me);
-            
+
             return new CVoid(t);
         }
 
         public String since() {
             return "3.3.0";
         }
-        
     }
-    
-    @api public static class raw_pcan_see extends AbstractFunction{
+
+    @api
+    public static class raw_pcan_see extends AbstractFunction {
 
         public String getName() {
             return "raw_pcan_see";
@@ -477,7 +481,7 @@ public class Sandbox {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer me;
             MCPlayer other;
-            if(args.length == 1){
+            if (args.length == 1) {
                 me = environment.GetPlayer();
                 other = Static.GetPlayer(args[0]);
             } else {
@@ -490,9 +494,8 @@ public class Sandbox {
         public String since() {
             return "3.3.0";
         }
-        
     }
-    
+
     @api
     public static class __autoconcat__ extends AbstractFunction {
 
@@ -506,12 +509,196 @@ public class Sandbox {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return null;
-        }        
+        }
 
         @Override
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            //If any of our nodes are CSymbols, we have different behavior
+            List<GenericTreeNode<Construct>> list = new ArrayList<GenericTreeNode<Construct>>(Arrays.asList(nodes));
+            boolean inSymbolMode = false; //catching this can save Xn
+
+            //postfix
+            for (int i = 0; i < list.size(); i++) {
+                GenericTreeNode<Construct> node = list.get(i);
+                if (node.data instanceof CSymbol) {
+                    inSymbolMode = true;
+                }
+                if (node.data instanceof CSymbol && ((CSymbol) node.data).isPostfix()) {
+                    CSymbol sy = (CSymbol) node.data;                    
+                    GenericTreeNode<Construct> conversion;
+                    if(sy.val().equals("++")){
+                        conversion = new GenericTreeNode<Construct>(new CFunction("postinc", t));
+                    } else {
+                        conversion = new GenericTreeNode<Construct>(new CFunction("postdec", t));                        
+                    }
+                    conversion.addChild(list.get(i - 1));
+                    list.set(i - 1, conversion);
+                    list.remove(i);
+                    i--;
+                }
+            }
+            if (inSymbolMode) {
+                //look for unary operators
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> node = list.get(i);
+                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isUnary()) {
+                        GenericTreeNode<Construct> conversion;
+                        if (node.data.val().equals("-") || node.data.val().equals("+")) {
+                            //These are special, because if the values to the left isn't a symbol,
+                            //it's not unary
+                            if (i == 0 || list.get(i - 1).data instanceof CSymbol) {
+                                if (node.data.val().equals("-")) {
+                                    //We have to negate it
+                                    conversion = new GenericTreeNode<Construct>(new CFunction("neg", t));
+                                } else {
+                                    conversion = new GenericTreeNode<Construct>(new CFunction("p", t));
+                                }
+                            } else {
+                                continue;
+                            }
+                        } else {
+                            conversion = new GenericTreeNode<Construct>(new CFunction(((CSymbol) node.data).convert(), t));
+                        }
+                        conversion.addChild(list.get(i + 1));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+
+                //Multiplicative
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> next = list.get(i + 1);
+                    if (next.data instanceof CSymbol) {
+                        if (((CSymbol) next.data).isMultaplicative()) {
+                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(((CSymbol) next.data).convert(), t));
+                            conversion.addChild(list.get(i));
+                            conversion.addChild(list.get(i + 2));
+                            list.set(i, conversion);
+                            list.remove(i + 1);
+                            list.remove(i + 1);
+                            i--;
+                        }
+                    }
+                }
+                //Additive
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> next = list.get(i + 1);
+                    if (next.data instanceof CSymbol && ((CSymbol)next.data).isAdditive()) {
+                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(((CSymbol) next.data).convert(), t));
+                        conversion.addChild(list.get(i));
+                        conversion.addChild(list.get(i + 2));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+                //relational
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> node = list.get(i + 1);
+                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isRelational()) {
+                        CSymbol sy = (CSymbol) node.data;
+                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        conversion.addChild(list.get(i));
+                        conversion.addChild(list.get(i + 2));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+                //equality
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> node = list.get(i + 1);
+                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isEquality()) {
+                        CSymbol sy = (CSymbol) node.data;
+                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        conversion.addChild(list.get(i));
+                        conversion.addChild(list.get(i + 2));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+                //bitwise and
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> node = list.get(i + 1);
+                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isBitwiseAnd()) {
+                        CSymbol sy = (CSymbol) node.data;
+                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        conversion.addChild(list.get(i));
+                        conversion.addChild(list.get(i + 2));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+                //bitwise xor
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> node = list.get(i + 1);
+                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isBitwiseXor()) {
+                        CSymbol sy = (CSymbol) node.data;
+                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        conversion.addChild(list.get(i));
+                        conversion.addChild(list.get(i + 2));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+                //bitwise or
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> node = list.get(i + 1);
+                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isBitwiseOr()) {
+                        CSymbol sy = (CSymbol) node.data;
+                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        conversion.addChild(list.get(i));
+                        conversion.addChild(list.get(i + 2));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+                //logical and
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> node = list.get(i + 1);
+                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isLogicalAnd()) {
+                        CSymbol sy = (CSymbol) node.data;
+                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        conversion.addChild(list.get(i));
+                        conversion.addChild(list.get(i + 2));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+                //logical or
+                for (int i = 0; i < list.size() - 1; i++) {
+                    GenericTreeNode<Construct> node = list.get(i + 1);
+                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isLogicalOr()) {
+                        CSymbol sy = (CSymbol) node.data;
+                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        conversion.addChild(list.get(i));
+                        conversion.addChild(list.get(i + 2));
+                        list.set(i, conversion);
+                        list.remove(i + 1);
+                        list.remove(i + 1);
+                        i--;
+                    }
+                }
+            }
+            if (list.size() == 1) {
+                //We condensed down to the point that we no longer need to concat
+                return parent.eval(list.get(0), env);
+            }
             StringHandling.sconcat sc = new StringHandling.sconcat();
-            return sc.execs(t, env, parent, nodes);
+            return sc.execs(t, env, parent, list.toArray(new GenericTreeNode[]{}));
         }
 
         public String docs() {
@@ -541,12 +728,10 @@ public class Sandbox {
         public Boolean runAsync() {
             return null;
         }
-        
+
         @Override
         public boolean useSpecialExec() {
             return true;
         }
     }
-
-    
 }

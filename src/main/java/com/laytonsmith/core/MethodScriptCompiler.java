@@ -25,9 +25,9 @@ public class MethodScriptCompiler {
         List<Token> token_list = new ArrayList<Token>();
         //Set our state variables
         boolean state_in_quote = false;
-            boolean in_smart_quote = false;
+        boolean in_smart_quote = false;
         boolean in_comment = false;
-            boolean comment_is_block = false;
+        boolean comment_is_block = false;
         boolean in_opt_var = false;
         StringBuffer buf = new StringBuffer();
         int line_num = 1;
@@ -38,10 +38,14 @@ public class MethodScriptCompiler {
         for (int i = 0; i < config.length(); i++) {
             Character c = config.charAt(i);
             Character c2 = null;
+            Character c3 = null;
             if (i < config.length() - 1) {
                 c2 = config.charAt(i + 1);
             }
-            
+            if(i < config.length() - 2){
+                c3 = config.charAt(i + 2);
+            }
+
             column += i - lastColumn;
             lastColumn = i;
             if (c == '\n') {
@@ -51,26 +55,27 @@ public class MethodScriptCompiler {
             target = new Target(line_num, file, column);
 //            if ((token_list.isEmpty() || token_list.get(token_list.size() - 1).type.equals(TType.NEWLINE))
 //                    && c == '#') {
-            if((c == '#' || (c == '/' && (c2 == '*'))) && !in_comment && !state_in_quote){
+            if ((c == '#' || (c == '/' && (c2 == '*'))) && !in_comment && !state_in_quote) {
                 in_comment = true;
-                if(c == '/' && c2 == '*'){
+                if (c == '/' && c2 == '*') {
                     comment_is_block = true;
                     i++;
                 }
                 continue;
             }
-            if (in_comment){                
-                if(!comment_is_block && c != '\n' || comment_is_block && c != '*' && (c2 != null && c2 != '/')){
+            if (in_comment) {
+                if (!comment_is_block && c != '\n' || comment_is_block && c != '*' && (c2 != null && c2 != '/')) {
                     continue;
                 }
             }
-            if(c == '*' && c2 == '/' && in_comment && comment_is_block){
+            if (c == '*' && c2 == '/' && in_comment && comment_is_block) {
                 in_comment = false;
                 comment_is_block = false;
                 i++;
                 continue;
             }
-            if(c == '-' && c2 == '>' && !state_in_quote){
+            //This has to come before subtraction and greater than
+            if (c == '-' && c2 == '>' && !state_in_quote) {
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
                     buf = new StringBuffer();
@@ -79,7 +84,211 @@ public class MethodScriptCompiler {
                 i++;
                 continue;
             }
-            if(c == '.' && c2 == '.' && !state_in_quote){
+            //Increment and decrement must come before plus and minus
+            if(c == '+' && c2 == '+' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.INCREMENT, "++", target));
+                i++;
+                continue;                
+            }
+            if(c == '-' && c2 == '-' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.DECREMENT, "--", target));
+                i++;
+                continue;                
+            }
+            
+            if(c == '%' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.MODULO, "%", target));
+                continue;                                
+            }
+            
+            //Math symbols must come after comment parsing, due to /* and */ block comments
+            if(c == '*' && !state_in_quote){ //Block comments are caught above
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.MULTIPLICATION, "*", target));
+                continue;
+            }
+            if(c == '+' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.ADDITION, "+", target));
+                continue;
+            }
+            if(c == '-' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.SUBTRACTION, "-", target));  
+                continue;
+            }
+            //Protect against commands
+            if(c == '/' && !Character.isLetter(c2) && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.DIVISION, "/", target));  
+                continue;
+            }
+            //Logic symbols
+            if(c == '>' && c2 == '=' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.GTE, ">=", target));  
+                i++;
+                continue;
+            }
+            if(c == '<' && c2 == '=' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.LTE, "<=", target));  
+                i++;
+                continue;
+            }
+            //multiline has to come before gt/lt
+            if(c == '<' && c2 == '<' && c3 == '<' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.MULTILINE_END, "<<<", target));  
+                i++; i++;
+                continue;
+            }
+            if(c == '>' && c2 == '>' && c3 == '>' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.MULTILINE_START, ">>>", target));  
+                i++; i++;
+                continue;
+            }
+            if(c == '<' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.LT, "<", target));  
+                continue;
+            }
+            if(c == '>' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.GT, ">", target));  
+                continue;
+            }
+            if(c == '=' && c2 == '=' && c3 == '=' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.STRICT_EQUALS, "===", target));  
+                i++; i++;
+                continue;
+            }
+            if(c == '!' && c2 == '=' && c3 == '=' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.STRICT_NOT_EQUALS, "!==", target));  
+                i++; i++;
+                continue;
+            }
+            if(c == '=' && c2 == '=' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.EQUALS, "==", target));  
+                i++; i++;
+                continue;
+            }
+            if(c == '!' && c2 == '=' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.NOT_EQUALS, "!=", target));  
+                i++; i++;
+                continue;
+            }
+            if(c == '&' && c2 == '&' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.LOGICAL_AND, "&&", target));  
+                i++;
+                continue;
+            }
+            if(c == '|' && c2 == '|' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.LOGICAL_OR, "||", target));  
+                i++;
+                continue;
+            }
+            if(c == '!' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.LOGICAL_NOT, "!", target));  
+                continue;
+            }
+            if(c == '&' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.BIT_AND, "&", target));  
+                continue;
+            }
+            if(c == '|' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.BIT_OR, "|", target));  
+                continue;
+            }
+            if(c == '^' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.BIT_XOR, "^", target));  
+                continue;
+            }
+            
+            if (c == '.' && c2 == '.' && !state_in_quote) {
                 //This one has to come before plain .
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
@@ -89,7 +298,7 @@ public class MethodScriptCompiler {
                 i++;
                 continue;
             }
-            if(c == '.' && !Character.isDefined(c2) && !state_in_quote){
+            if (c == '.' && !Character.isDigit(c2) && !state_in_quote) {
                 //if it's a number after this, it's a decimal
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
@@ -98,7 +307,7 @@ public class MethodScriptCompiler {
                 token_list.add(new Token(TType.DEREFERENCE, ".", target));
                 continue;
             }
-            if(c == ':' && c2 == ':' && !state_in_quote){
+            if (c == ':' && c2 == ':' && !state_in_quote) {
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
                     buf = new StringBuffer();
@@ -116,6 +325,7 @@ public class MethodScriptCompiler {
                 in_opt_var = true;
                 continue;
             }
+            //This has to come after == and ===
             if (c == '=' && !state_in_quote) {
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
@@ -160,13 +370,13 @@ public class MethodScriptCompiler {
                 } else {
                     //The previous token, if unknown, should be changed to a FUNC_NAME. If it's not
                     //unknown, we may be doing standalone parenthesis, so auto tack on the p function
-                    try{
-                        if(token_list.get(token_list.size() - 1).type == TType.UNKNOWN){
+                    try {
+                        if (token_list.get(token_list.size() - 1).type == TType.UNKNOWN) {
                             token_list.get(token_list.size() - 1).type = TType.FUNC_NAME;
-                        } else {                            
+                        } else {
                             token_list.add(new Token(TType.FUNC_NAME, "p", target));
                         }
-                    } catch(IndexOutOfBoundsException e){
+                    } catch (IndexOutOfBoundsException e) {
                         //This is the first element on the list, so, it's another p.
                         token_list.add(new Token(TType.FUNC_NAME, "p", target));
                     }
@@ -194,7 +404,7 @@ public class MethodScriptCompiler {
                     buf = new StringBuffer();
                     state_in_quote = false;
                     continue;
-                } else if(!state_in_quote){
+                } else if (!state_in_quote) {
                     state_in_quote = true;
                     in_smart_quote = false;
                     if (buf.length() > 0) {
@@ -206,16 +416,17 @@ public class MethodScriptCompiler {
                     //we're in a smart quote
                     buf.append("'");
                 }
-            } else if (c == '"'){
-                if(state_in_quote && in_smart_quote){
+            } else if (c == '"') {
+                if (state_in_quote && in_smart_quote) {
                     //For now, since this feature isn't fully implemented, just throw an exception
-                    if(true)
+                    if (true) {
                         throw new ConfigCompileException("Doubly quoted strings are not yet supported.", target);
+                    }
                     token_list.add(new Token(TType.SMART_STRING, buf.toString(), target));
                     buf = new StringBuffer();
                     state_in_quote = false;
                     continue;
-                } else if(!state_in_quote){
+                } else if (!state_in_quote) {
                     state_in_quote = true;
                     in_smart_quote = true;
                     if (buf.length() > 0) {
@@ -234,22 +445,22 @@ public class MethodScriptCompiler {
                         buf.append("\\");
                     } else if (c2 == '\'' && !in_smart_quote) {
                         buf.append("'");
-                    } else if(c2 == '"' && in_smart_quote){
+                    } else if (c2 == '"' && in_smart_quote) {
                         buf.append('"');
-                    } else if(c2 == 'n'){
+                    } else if (c2 == 'n') {
                         buf.append("\n");
-                    } else if(c2 == 'u'){
+                    } else if (c2 == 'u') {
                         //Grab the next 4 characters, and check to see if they are numbers
                         StringBuilder unicode = new StringBuilder();
-                        for(int m = 0; m < 4; m++){
+                        for (int m = 0; m < 4; m++) {
                             unicode.append(config.charAt(i + 2 + m));
                         }
-                        try{
+                        try {
                             Integer.parseInt(unicode.toString(), 16);
-                        } catch(NumberFormatException e){
+                        } catch (NumberFormatException e) {
                             throw new ConfigCompileException("Unrecognized unicode escape sequence", target);
                         }
-                        buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));                        
+                        buf.append(Character.toChars(Integer.parseInt(unicode.toString(), 16)));
                         i += 4;
                     } else {
                         //Since we might expand this list later, don't let them
@@ -280,14 +491,28 @@ public class MethodScriptCompiler {
                 continue;
             }
         } //end lexing
-        if(state_in_quote){
+        if (state_in_quote) {
             throw new ConfigCompileException("Unended string literal", target);
         }
-        if(in_comment || comment_is_block){
+        if (in_comment || comment_is_block) {
             throw new ConfigCompileException("Unended comment", target);
         }
-                //look at the tokens, and get meaning from them
-        for (Token t : token_list) {
+        //look at the tokens, and get meaning from them. Also, look for improper symbol locations,
+        //and go ahead and absorb unary +- into the token
+        for (int i = 0; i < token_list.size(); i++) {
+            Token t = token_list.get(i);
+            Token prev2 = i - 2 >= 0 ? token_list.get(i - 2) : new Token(TType.UNKNOWN, "", t.target);
+            Token prev1 = i - 1 >= 0 ? token_list.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
+            Token next = i + 1 < token_list.size() ? token_list.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
+            
+            if(t.type == TType.UNKNOWN && prev1.type.isPlusMinus() &&
+                    !prev2.type.isIdentifier()){
+                //It is a negative/positive number. Absorb the sign
+                t.value = prev1.value + t.value;
+                token_list.remove(i - 1);
+                i--;
+            }
+            
             if (t.type.equals(TType.UNKNOWN)) {
                 if (t.val().matches("/.*")) {
                     t.type = TType.COMMAND;
@@ -303,15 +528,25 @@ public class MethodScriptCompiler {
                     t.type = TType.LIT;
                 }
             }
+            if(t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()){
+                if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
+                || next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
+                || prev1.type.isSymbol() || next.type.isSymbol()){
+                    throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", target);                    
+                }
+            }                            
+            
         }
         return token_list;
     }
 
     /**
-     * This function breaks the token stream into parts, seperating the aliases/MethodScript from the command triggers
+     * This function breaks the token stream into parts, seperating the
+     * aliases/MethodScript from the command triggers
+     *
      * @param tokenStream
      * @return
-     * @throws ConfigCompileException 
+     * @throws ConfigCompileException
      */
     public static List<Script> preprocess(List<Token> tokenStream, Env env) throws ConfigCompileException {
         //First, pull out the duplicate newlines
@@ -357,7 +592,7 @@ public class MethodScriptCompiler {
                 inside_multiline = false;
                 continue;
             }
-            if(thisToken.val().equals(">>>") && inside_multiline){
+            if (thisToken.val().equals(">>>") && inside_multiline) {
                 throw new ConfigCompileException("Did not expect a multiline start symbol here, are you missing a multiline end symbol above this line?", thisToken.target);
             }
             if (thisToken.val().equals(">>>") && !prevToken.type.equals(TType.ALIAS_END)) {
@@ -370,8 +605,8 @@ public class MethodScriptCompiler {
                 tokens1_1.add(thisToken);
             }
         }
-        
-        if(inside_multiline){
+
+        if (inside_multiline) {
             throw new ConfigCompileException("Expecting a multiline end symbol, but your last multiline alias appears to be missing one.", thisToken.target);
         }
 
@@ -425,6 +660,9 @@ public class MethodScriptCompiler {
     }
 
     public static GenericTreeNode<Construct> compile(List<Token> stream) throws ConfigCompileException {
+        stream.add(0, new Token(TType.FUNC_NAME, "p", Target.UNKNOWN));
+        stream.add(1, new Token(TType.FUNC_START, "(", Target.UNKNOWN));
+        stream.add(new Token(TType.FUNC_END, ")", Target.UNKNOWN));
         GenericTreeNode<Construct> tree = new GenericTreeNode<Construct>();
         tree.setData(new CNull(Target.UNKNOWN));
         Stack<GenericTreeNode> parents = new Stack<GenericTreeNode>();
@@ -437,55 +675,63 @@ public class MethodScriptCompiler {
         Token t = null;
         for (int i = 0; i < stream.size(); i++) {
             t = stream.get(i);
-            Token prev = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
-            Token next = i + 1 < stream.size() ? stream.get(i + 1) : new Token(TType.UNKNOWN, "", t.target); 
-            Token afterNext = i + 2 < stream.size() ? stream.get(i + 2) : new Token(TType.UNKNOWN, "", t.target);
-                
+            //Token prev2 = i - 2 >= 0 ? stream.get(i - 2) : new Token(TType.UNKNOWN, "", t.target);
+            Token prev1 = i - 1 >= 0 ? stream.get(i - 1) : new Token(TType.UNKNOWN, "", t.target);
+            Token next1 = i + 1 < stream.size() ? stream.get(i + 1) : new Token(TType.UNKNOWN, "", t.target);
+            Token next2 = i + 2 < stream.size() ? stream.get(i + 2) : new Token(TType.UNKNOWN, "", t.target);
+            //Token next3 = i + 3 < stream.size() ? stream.get(i + 3) : new Token(TType.UNKNOWN, "", t.target);
+
             //Associative array handling
-            if(next.type.equals(TType.IDENT)){
+            if (next1.type.equals(TType.IDENT)) {
                 tree.addChild(new GenericTreeNode<Construct>(new CLabel(Static.resolveConstruct(t.val(), t.target))));
                 constructCount.peek().incrementAndGet();
                 i++;
                 continue;
-            }          
+            }
             //Slice notation handling
-            if(next.type.equals(TType.SLICE)){
+            if (next1.type.equals(TType.SLICE)) {
                 CSlice slice;
-                if(t.value.equals("[")){
+                if (t.value.equals("[")) {
                     //empty first
-                    slice = new CSlice(".." + afterNext.value, afterNext.target);
+                    slice = new CSlice(".." + next2.value, next2.target);
                     arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
-                } else if(afterNext.value.equals("]")){
+                    i++;
+                } else if (next2.value.equals("]")) {
                     //empty last
                     slice = new CSlice(t.value + "..", t.target);
                 } else {
                     //both are provided
-                    slice = new CSlice(t.value + ".." + afterNext.value, t.target);
+                    slice = new CSlice(t.value + ".." + next2.value, t.target);
                     i++;
                 }
                 i++;
-                tree.addChild(new GenericTreeNode<Construct>(slice));                
+                tree.addChild(new GenericTreeNode<Construct>(slice));
                 continue;
             }
             //Array notation handling
-            if(t.type.equals(TType.LSQUARE_BRACKET)){                
+            if (t.type.equals(TType.LSQUARE_BRACKET)) {
                 arrayStack.push(new AtomicInteger(tree.getChildren().size() - 1));
                 continue;
-            } else if(t.type.equals(TType.RSQUARE_BRACKET)){
+            } else if (t.type.equals(TType.RSQUARE_BRACKET)) {
                 boolean emptyArray = false;
-                if(prev.type.equals(TType.LSQUARE_BRACKET)){
+                if (prev1.type.equals(TType.LSQUARE_BRACKET)) {
                     //throw new ConfigCompileException("Empty array_get operator ([])", t.line_num); 
                     emptyArray = true;
                 }
-                if(arrayStack.size() == 1){
+                if (arrayStack.size() == 1) {
                     throw new ConfigCompileException("Mismatched square bracket", t.target);
                 }
+                //array is the location of the array
                 int array = arrayStack.pop().get();
+                //index is the location of the first node with the index
                 int index = array + 1;
                 GenericTreeNode<Construct> myArray = tree.getChildAt(array);
                 GenericTreeNode<Construct> myIndex;
-                if(!emptyArray){
-                    myIndex = tree.getChildAt(index);
+                if (!emptyArray) {
+                    myIndex = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
+                    for(int j = index; j < tree.getNumberOfChildren(); j++){
+                        myIndex.addChild(tree.getChildAt(j));
+                    }
                 } else {
                     myIndex = new GenericTreeNode<Construct>(new CSlice("0..-1", t.target));
                 }
@@ -494,11 +740,12 @@ public class MethodScriptCompiler {
                 arrayGet.addChild(myArray);
                 arrayGet.addChild(myIndex);
                 tree.addChild(arrayGet);
-                constructCount.peek().decrementAndGet();
+                constructCount.peek().set(constructCount.peek().get() - myIndex.getNumberOfChildren());
+                continue;
             }
-            
+
             //Smart strings
-            if(t.type == TType.SMART_STRING){
+            if (t.type == TType.SMART_STRING) {
                 GenericTreeNode<Construct> function = new GenericTreeNode<Construct>();
                 function.setData(new CFunction("smart_string", t.target));
                 GenericTreeNode<Construct> string = new GenericTreeNode<Construct>();
@@ -507,13 +754,13 @@ public class MethodScriptCompiler {
                 tree.addChild(function);
                 continue;
             }
-            
-            if(t.type == TType.DEREFERENCE){
+
+            if (t.type == TType.DEREFERENCE) {
                 //Currently unimplemented, but going ahead and making it strict
                 throw new ConfigCompileException("The '" + t.val() + "' symbol is not currently allowed in raw strings. You must quote all"
                         + " symbols.", t.target);
             }
-            
+
             if (t.type == TType.LIT) {
                 tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
@@ -523,8 +770,11 @@ public class MethodScriptCompiler {
             } else if (t.type.equals(TType.IVARIABLE)) {
                 tree.addChild(new GenericTreeNode<Construct>(new IVariable(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
-            } else if(t.type.equals(TType.UNKNOWN)){
+            } else if (t.type.equals(TType.UNKNOWN)) {
                 tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.target)));
+                constructCount.peek().incrementAndGet();
+            } else if(t.type.isSymbol()){ //Logic and math symbols
+                tree.addChild(new GenericTreeNode<Construct>(new CSymbol(t.val(), t.type, t.target)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                 tree.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target)));
@@ -533,7 +783,7 @@ public class MethodScriptCompiler {
             } else if (t.type.equals(TType.FUNC_NAME)) {
                 CFunction func = new CFunction(t.val(), t.target);
                 //This will throw an exception for us if the function doesn't exist
-                if(!func.val().matches("^_[^_].*")){
+                if (!func.val().matches("^_[^_].*")) {
                     FunctionList.getFunction(func);
                 }
                 GenericTreeNode<Construct> f = new GenericTreeNode<Construct>(func);
@@ -542,7 +792,7 @@ public class MethodScriptCompiler {
                 tree = f;
                 parents.push(f);
             } else if (t.type.equals(TType.FUNC_START)) {
-                if (!prev.type.equals(TType.FUNC_NAME)) {
+                if (!prev1.type.equals(TType.FUNC_NAME)) {
                     throw new ConfigCompileException("Unexpected parenthesis", t.target);
                 }
                 parens++;
@@ -552,19 +802,19 @@ public class MethodScriptCompiler {
                 }
                 parens--;
                 parents.pop();
-                if(constructCount.peek().get() > 1){
+                if (constructCount.peek().get() > 1) {
                     //We need to autoconcat some stuff
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
                     GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
                     List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
-                    for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
+                    for (int b = replaceAt; b < tree.getNumberOfChildren(); b++) {
                         subChildren.add(tree.getChildAt(b));
                     }
-                    c.setChildren(subChildren);                    
-                    if(replaceAt > 0){
+                    c.setChildren(subChildren);
+                    if (replaceAt > 0) {
                         List<GenericTreeNode<Construct>> firstChildren = new ArrayList<GenericTreeNode<Construct>>();
-                        for(int d = 0; d < replaceAt; d++){
+                        for (int d = 0; d < replaceAt; d++) {
                             firstChildren.add(tree.getChildAt(d));
                         }
                         tree.setChildren(firstChildren);
@@ -574,87 +824,89 @@ public class MethodScriptCompiler {
                     tree.addChild(c);
                 }
                 //Check argument number now
-                if(tree.getData().val() != null){
-                    if(!tree.getData().val().matches("^_[^_].*")){
-                        Integer [] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
-                        if(!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())){
+                if (tree.getData().val() != null) {
+                    if (!tree.getData().val().matches("^_[^_].*")) {
+                        Integer[] numArgs = FunctionList.getFunction(tree.getData()).numArgs();
+                        if (!Arrays.asList(numArgs).contains(Integer.MAX_VALUE) && !Arrays.asList(numArgs).contains(tree.getChildren().size())) {
                             throw new ConfigCompileException("Incorrect number of arguments passed to " + tree.getData().val(), tree.getData().getTarget());
                         }
                     }
                 }
                 constructCount.pop();
-                try{
+                try {
                     constructCount.peek().incrementAndGet();
-                } catch(EmptyStackException e){                    
+                } catch (EmptyStackException e) {
                     throw new ConfigCompileException("Unexpected end parenthesis", t.target);
                 }
-                try{
+                try {
                     tree = parents.peek();
-                } catch(EmptyStackException e){
+                } catch (EmptyStackException e) {
                     throw new ConfigCompileException("Unexpected end parenthesis", t.target);
                 }
             } else if (t.type.equals(TType.COMMA)) {
-                if(constructCount.peek().get() > 1){
+                if (constructCount.peek().get() > 1) {
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
                     GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
                     List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
-                    for(int b = replaceAt; b < tree.getNumberOfChildren(); b++){
+                    for (int b = replaceAt; b < tree.getNumberOfChildren(); b++) {
                         subChildren.add(tree.getChildAt(b));
                     }
-                    c.setChildren(subChildren);                    
-                    if(replaceAt > 0){
+                    c.setChildren(subChildren);
+                    if (replaceAt > 0) {
                         List<GenericTreeNode<Construct>> firstChildren = new ArrayList<GenericTreeNode<Construct>>();
-                        for(int d = 0; d < replaceAt; d++){
+                        for (int d = 0; d < replaceAt; d++) {
                             firstChildren.add(tree.getChildAt(d));
                         }
                         tree.setChildren(firstChildren);
                     } else {
                         tree.removeChildren();
                     }
-                    tree.addChild(c);                   
+                    tree.addChild(c);
                 }
                 constructCount.peek().set(0);
                 continue;
-            }
+            } 
         }
-        if(arrayStack.size() != 1){
+        if (arrayStack.size() != 1) {
             throw new ConfigCompileException("Mismatched square brackets", t.target);
         }
         if (parens != 0) {
             throw new ConfigCompileException("Mismatched parenthesis", t.target);
         }
         return tree;
-    }      
-    
+    }
+
     /**
-     * Executes a pre-compiled MethodScript, given the specified Script environment. Both done and script 
-     * may be null, and if so, reasonable defaults will be provided. The value sent to done will also
-     * be returned, as a Construct, so this one function may be used synchronously also.
+     * Executes a pre-compiled MethodScript, given the specified Script
+     * environment. Both done and script may be null, and if so, reasonable
+     * defaults will be provided. The value sent to done will also be returned,
+     * as a Construct, so this one function may be used synchronously also.
+     *
      * @param root
      * @param done
-     * @param script 
+     * @param script
      */
-    public static Construct execute(GenericTreeNode<Construct> root, Env env, MethodScriptComplete done, Script script){
-        if(script == null){
+    public static Construct execute(GenericTreeNode<Construct> root, Env env, MethodScriptComplete done, Script script) {
+        if (script == null) {
             script = new Script(null, null);
         }
         StringBuilder b = new StringBuilder();
         Construct returnable = null;
         for (GenericTreeNode<Construct> gg : root.getChildren()) {
             Construct retc = script.eval(gg, env);
-            if(root.getNumberOfChildren() == 1){
+            if (root.getNumberOfChildren() == 1) {
                 returnable = retc;
             }
-            String ret = retc instanceof CNull?"null":retc.val();
+            String ret = retc instanceof CNull ? "null" : retc.val();
             if (ret != null && !ret.trim().equals("")) {
                 b.append(ret).append(" ");
             }
         }
-        if(done != null){
+        if (done != null) {
             done.done(b.toString().trim());
         }
-        if(returnable != null){
+        if (returnable != null) {
             return returnable;
         }
         return Static.resolveConstruct(b.toString().trim(), Target.UNKNOWN);
@@ -665,9 +917,56 @@ public class MethodScriptCompiler {
         if (auto_include.exists()) {
             MethodScriptCompiler.execute(IncludeCache.get(auto_include, new Target(0, auto_include, 0)), env, null, s);
         }
-        
-        for(File f : Static.getAliasCore().autoIncludes){
-            MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);            
-        }        
+
+        for (File f : Static.getAliasCore().autoIncludes) {
+            MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
+        }
+    }
+
+    public static class ConvertInfixToPrefix {
+
+        public static String[] operators = {"+", "-", "/", "*", "^"};
+
+        public ConvertInfixToPrefix() {
+        }
+
+        public String convert(String infix) {
+            StringBuffer sb = new StringBuffer(infix);
+            int index = sb.length();
+            String operand = "";
+            int steps = 0;
+            for (int i = 0; i < sb.length(); i++) {
+                for (int x = 0; x < operators.length; x++) {
+                    int tempIndex = sb.indexOf(operators[x], i);
+                    if (tempIndex < index && tempIndex >= 0) {
+                        index = tempIndex;
+                        operand = operators[x];
+                    }
+                }
+                if (index == sb.length()) {
+                    break;
+                }
+                sb.delete(index, index + operand.length() + 1);
+                for (int x = index - 1; x >= 0; x--) {
+                    if (sb.charAt(x) == '(' && steps == 0) {
+                        sb.insert(x, operand);
+                        break;
+                    } else if (sb.charAt(x) == '(') {
+                        steps--;
+                    } else if (sb.charAt(x) == ')') {
+                        steps++;
+                    }
+                }
+                i = index;
+                index = sb.length();
+            }
+            return sb.toString();
+        }
+
+    }
+    public static void main(String[] args) {
+        String infix = "((A * ( B + C ))/ D)";
+        ConvertInfixToPrefix ConvertInfixToPrefix = new ConvertInfixToPrefix();
+        System.out.println(ConvertInfixToPrefix.convert(infix));
     }
 }

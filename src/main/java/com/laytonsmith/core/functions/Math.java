@@ -16,6 +16,8 @@ import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -330,7 +332,7 @@ public class Math {
         }
 
         public String docs() {
-            return "ivar {var} Adds 1 to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
+            return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
                     + " returns the ivar.";
         }
         
@@ -351,6 +353,73 @@ public class Math {
         public Boolean runAsync(){
             return null;
         }
+    }
+    
+    @api public static class postinc extends AbstractFunction{
+
+        public String getName() {
+            return "postinc";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args[0] instanceof IVariable){
+                IVariable cur = (IVariable)args[0];
+                IVariable v = env.GetVarList().get(cur.getName(), cur.getTarget());
+                Construct newVal;
+                long value = 1;
+                if(args.length == 2){
+                    if(args[1] instanceof IVariable){
+                        IVariable cur2 = (IVariable)args[1];
+                        args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
+                    }
+                    value = Static.getInt(args[1]);
+                }
+                if(Static.anyDoubles(v.ival())){
+                    newVal = new CDouble(Static.getDouble(v.ival()) + value, t);
+                } else {
+                    newVal = new CInt(Static.getInt(v.ival()) + value, t);
+                }
+                Construct oldVal = null;
+                try {
+                    oldVal = v.ival().clone();
+                } catch (CloneNotSupportedException ex) {
+                    Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                v = new IVariable(v.getName(), newVal, t);
+                env.GetVarList().set(v);
+                return oldVal;
+            }
+            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", 
+                    ExceptionType.CastException, t);
+        }
+
+        public String docs() {
+            return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to var++ in other languages. Expects ivar to be a variable, then"
+                    + " returns a copy of the old ivar.";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+        public String since() {
+            return "3.3.1";
+        }
+        public Boolean runAsync(){
+            return null;
+        }
+        
     }
     
     @api public static class dec extends AbstractFunction{
@@ -411,6 +480,73 @@ public class Math {
         public Boolean runAsync(){
             return null;
         }
+    }
+    
+    @api public static class postdec extends AbstractFunction{
+
+        public String getName() {
+            return "postdec";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args[0] instanceof IVariable){
+                IVariable cur = (IVariable)args[0];
+                IVariable v = env.GetVarList().get(cur.getName(), cur.getTarget());
+                Construct newVal;
+                long value = 1;
+                if(args.length == 2){
+                    if(args[1] instanceof IVariable){
+                        IVariable cur2 = (IVariable)args[1];
+                        args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
+                    }
+                    value = Static.getInt(args[1]);
+                }
+                if(Static.anyDoubles(v.ival())){
+                    newVal = new CDouble(Static.getDouble(v.ival()) - value, t);
+                } else {
+                    newVal = new CInt(Static.getInt(v.ival()) - value, t);
+                }
+                Construct oldVal = null;
+                try {
+                    oldVal = v.ival().clone();
+                } catch (CloneNotSupportedException ex) {
+                    Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
+                }
+                v = new IVariable(v.getName(), newVal, t);
+                env.GetVarList().set(v);
+                return oldVal;
+            }
+            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", 
+                    ExceptionType.CastException, t);
+        }
+
+        public String docs() {
+            return "ivar {var, [x]} Subtracts x from var, and stores the new value. Equivalent to var-- in other languages. Expects ivar to be a variable, then"
+                    + " returns a copy of the old ivar.";
+        }
+        
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+        public String since() {
+            return "3.3.1";
+        }
+        public Boolean runAsync(){
+            return null;
+        }
+        
     }
     
     @api public static class rand extends AbstractFunction{
@@ -1301,6 +1437,50 @@ public class Math {
             } catch (ExpressionException ex) {
                 throw new ConfigRuntimeException("Your expression was invalidly formatted", ExceptionType.PluginInternalException, t, ex);
             }
+        }
+        
+    }
+    
+    @api public static class neg extends AbstractFunction{
+
+        public String getName() {
+            return "neg";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "number {number} Negates a number, essentially multiplying the number by -1";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(args[0] instanceof CInt){
+                return new CInt(-(Static.getInt(args[0])), t);
+            } else {
+                return new CDouble(-(Static.getDouble(args[0])), t);
+            }
+        }
+
+        public String since() {
+            return "3.3.1";
         }
         
     }

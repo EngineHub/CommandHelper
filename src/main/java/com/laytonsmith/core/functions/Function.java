@@ -124,4 +124,10 @@ public interface Function extends Documentation {
      * @return 
      */
     public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes);
+    
+    /**
+     * Some functions don't need to show up in documentation. Maybe they are experimental, or magic
+     * functions. If they shouldn't show up in the normal API documentation, return false.
+     */
+    public boolean appearInDocumentation();
 }

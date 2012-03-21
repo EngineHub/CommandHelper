@@ -351,6 +351,46 @@ public class BasicLogic {
         
     }
     
+    @api public static class snequals extends AbstractFunction{
+
+        public String getName() {
+            return "snequals";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {val1, val2} Equivalent to not(sequals(val1, val2))";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CBoolean(!((CBoolean)new sequals().exec(t, environment, args)).getBoolean(), t);
+        }
+
+        public String since() {
+            return "3.3.1";
+        }
+        
+    }
+    
     @api public static class nequals extends AbstractFunction{
 
         public String getName() {

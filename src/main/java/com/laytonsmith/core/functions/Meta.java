@@ -274,11 +274,11 @@ public class Meta {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "mixed {c} Used internally by the compiler.";
+            return "mixed {c...} Used internally by the compiler. You shouldn't use it.";
         }
 
         public ExceptionType[] thrown() {
@@ -303,9 +303,23 @@ public class Meta {
         public Boolean runAsync() {
             return null;
         }
+       
 
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }                
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            if(nodes.length == 1){
+                return parent.eval(nodes[0], env);
+            } else {
+                return new Sandbox.__autoconcat__().execs(t, env, parent, nodes);
+            }
+        }
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
-            return args[0];
+            return new CVoid(t);
         }
     }
 

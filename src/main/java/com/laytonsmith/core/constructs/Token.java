@@ -23,7 +23,81 @@ public class Token {
 
         UNKNOWN, LSQUARE_BRACKET, RSQUARE_BRACKET, OPT_VAR_ASSIGN, ALIAS_END, COMMA, FUNC_NAME, FUNC_START,
         FUNC_END, STRING, NEWLINE, MULTILINE_START, MULTILINE_END, COMMAND, SEPERATOR, VARIABLE,
-        IVARIABLE, FINAL_VAR, LIT, ROOT, IDENT, DEREFERENCE, SMART_STRING, SLICE}
+        IVARIABLE, FINAL_VAR, LIT, ROOT, IDENT, DEREFERENCE, SMART_STRING, SLICE, 
+        MULTIPLICATION, SUBTRACTION, DIVISION, ADDITION, NOT_EQUALS, EQUALS, STRICT_NOT_EQUALS, 
+        STRICT_EQUALS, GT, LT, LTE, GTE, LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT, BIT_AND, BIT_OR, BIT_XOR,
+        INCREMENT, DECREMENT, MODULO;
+
+        public boolean isSymbol() {
+            if(this.equals(TType.ADDITION) || this.equals(TType.SUBTRACTION) || this.equals(TType.MULTIPLICATION) 
+                    || this.equals(TType.DIVISION) || this.equals(TType.EQUALS) || this.equals(TType.NOT_EQUALS) ||
+                    this.equals(TType.STRICT_EQUALS) || this.equals(TType.STRICT_NOT_EQUALS) || this.equals(TType.GT) ||
+                    this.equals(TType.LT) || this.equals(TType.GTE) || this.equals(TType.LTE)
+                    || this.equals(TType.LOGICAL_AND) || this.equals(TType.LOGICAL_OR) || this.equals(TType.LOGICAL_NOT)
+                    || this.equals(TType.BIT_AND) || this.equals(TType.BIT_OR) || this == BIT_XOR
+                    || this == INCREMENT || this == DECREMENT || this == MODULO){
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        public boolean isPostfix(){
+            return (this == INCREMENT || this == DECREMENT);
+        }
+        
+        public boolean isUnary() {
+            return (this == LOGICAL_NOT || this == ADDITION || this == SUBTRACTION
+                    || this == INCREMENT || this == DECREMENT);
+        }
+
+        public boolean isMultaplicative() {
+            return (this == MULTIPLICATION || this == DIVISION || this == MODULO);
+        }
+        
+        public boolean isAdditive(){
+            return (this == ADDITION || this == SUBTRACTION);
+        }
+        
+        public boolean isRelational(){
+            return (this == LT || this == GT || this == LTE || this == GTE);
+        }
+        
+        public boolean isEquality(){
+            return (this == STRICT_EQUALS || this == STRICT_NOT_EQUALS || this == EQUALS || this == NOT_EQUALS);
+        }
+        
+        public boolean isBitwiseAnd(){
+            return (this == BIT_AND);
+        }
+        
+        public boolean isBitwiseXor(){
+            return (this == BIT_XOR);
+        }
+        
+        public boolean isBitwiseOr(){
+            return (this == BIT_OR);
+        }
+        
+        public boolean isLogicalAnd(){
+            return this == LOGICAL_AND;
+        }
+        
+        public boolean isLogicalOr(){
+            return this == LOGICAL_OR;
+        }
+
+        public boolean isPlusMinus() {
+            return this == ADDITION || this == SUBTRACTION;
+        }
+
+        public boolean isIdentifier() {
+            return this == UNKNOWN || this == LIT || this == IVARIABLE 
+                    || this == VARIABLE || this == FINAL_VAR || this == STRING
+                    || this == SMART_STRING;
+        }
+        
+    }
 
     public Token(TType type, String value, Target t) {
         this.type = type;

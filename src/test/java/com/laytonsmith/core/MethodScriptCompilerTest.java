@@ -119,13 +119,6 @@ public class MethodScriptCompilerTest {
             //passed
         }
         try {
-            //extra parenthesis
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg((this is a string, if(true, and, another) function))", null), env).get(0).compileRight();
-            fail("Did not expect test to pass");
-        } catch (ConfigCompileException e) {
-            //passed
-        }
-        try {
             //extra multiline end construct
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function) <<<", null), env).get(0).compileRight();
             fail("Did not expect test to pass");
@@ -549,5 +542,65 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("€");
     }
     
+    @Test public void testInfixMath1() throws ConfigCompileException{
+        assertEquals("4", SRun("2 + 2", fakePlayer));
+        assertEquals("4", SRun("8 - 4", fakePlayer));
+        assertEquals("4", SRun("2 * 2", fakePlayer));
+        assertEquals("4", SRun("16/4", fakePlayer));        
+    }
+    
+    @Test public void testInfixMath2() throws ConfigCompileException{
+        assertEquals("2", SRun("-2 + 2 + 2", fakePlayer));
+        assertEquals("18", SRun("(2 + 4) * 3", fakePlayer));
+        assertEquals("14", SRun("2 + 4 * 3", fakePlayer));
+    }
+    
+    @Test public void testUnary() throws ConfigCompileException{
+        assertEquals("1", SRun("2 + - 1", fakePlayer));
+    }
+    
+    @Test public void testSymbolicLogic1() throws ConfigCompileException{
+        assertEquals("true", SRun("2 <= 5", fakePlayer));
+        assertEquals("false", SRun("2 === '2'", fakePlayer));
+        assertEquals("true", SRun("g(assign(@var, false)) !@var", fakePlayer));        
+    }
+    
+    @Test public void testSymbolicLogic2() throws ConfigCompileException{
+        assertEquals("true", SRun("true || true", fakePlayer));
+        assertEquals("false", SRun("true && false", fakePlayer));
+    }
+    
+    @Test public void testComplexSymbolicLogic() throws ConfigCompileException{
+        assertEquals("true", SRun("2 == 2 && true", fakePlayer));
+    }
+    
+    @Test public void testBitwiseSymbols() throws ConfigCompileException{
+        assertEquals("0", SRun("1 & 2", fakePlayer));
+        assertEquals("3", SRun("1 | 2", fakePlayer));
+    }
+    
+    @Test public void testSymbolCompileError(){
+        try{
+            SRun("(+ * 2)", fakePlayer);
+            fail("Did not expect test to pass");
+        } catch(ConfigCompileException e){
+            //pass
+        }
+    }        
+    
+    @Test public void testComplexSymbols() throws ConfigCompileException{
+        SRun("assign(@var, 2) if((@var + 2) == 4, msg('Success!'))", fakePlayer);
+        verify(fakePlayer).sendMessage("Success!");
+    }
+    
+    @Test public void testPostfix() throws ConfigCompileException{
+        SRun("assign(@var, 2) msg(@var++) msg(@var)", fakePlayer);
+        verify(fakePlayer).sendMessage("2");
+        verify(fakePlayer).sendMessage("3");
+    }
+    
+    @Test public void testModulo() throws ConfigCompileException{
+        assertEquals(Integer.toString(2 % 3), SRun("2 % 3", fakePlayer));
+    }
     
 }

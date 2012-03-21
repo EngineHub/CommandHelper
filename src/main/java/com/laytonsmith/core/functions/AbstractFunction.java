@@ -32,4 +32,12 @@ public abstract class AbstractFunction implements Function{
         return false;
     }
 
+    /**
+     * Most functions should show up in the normal documentation.
+     * @return 
+     */
+    public boolean appearInDocumentation() {
+        return true;
+    }            
+
 }
