@@ -255,7 +255,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         UserManager um = UserManager.GetUserManager(player.getName());
         // Repeat command
         if (cmd.equals("repeat")) {
-            if(perms.hasPermission(player.getName(), "commandhelper.repeat") ||
+            if(player.isOp() || perms.hasPermission(player.getName(), "commandhelper.repeat") ||
                     perms.hasPermission(player.getName(), "ch.repeat")){
                 //Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
                 //an infinite loop though, because the preprocessor won't try to fire off a repeat command
