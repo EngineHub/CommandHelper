@@ -524,17 +524,19 @@ public class Sandbox {
                     inSymbolMode = true;
                 }
                 if (node.data instanceof CSymbol && ((CSymbol) node.data).isPostfix()) {
-                    CSymbol sy = (CSymbol) node.data;                    
-                    GenericTreeNode<Construct> conversion;
-                    if(sy.val().equals("++")){
-                        conversion = new GenericTreeNode<Construct>(new CFunction("postinc", t));
-                    } else {
-                        conversion = new GenericTreeNode<Construct>(new CFunction("postdec", t));                        
+                    if(i - 1 >=0 && list.get(i - 1).data instanceof IVariable){
+                        CSymbol sy = (CSymbol) node.data;                    
+                        GenericTreeNode<Construct> conversion;
+                        if(sy.val().equals("++")){
+                            conversion = new GenericTreeNode<Construct>(new CFunction("postinc", t));
+                        } else {
+                            conversion = new GenericTreeNode<Construct>(new CFunction("postdec", t));                        
+                        }
+                        conversion.addChild(list.get(i - 1));
+                        list.set(i - 1, conversion);
+                        list.remove(i);
+                        i--;
                     }
-                    conversion.addChild(list.get(i - 1));
-                    list.set(i - 1, conversion);
-                    list.remove(i);
-                    i--;
                 }
             }
             if (inSymbolMode) {

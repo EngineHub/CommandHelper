@@ -70,6 +70,12 @@ public class CSymbol extends Construct {
             case MODULO:
                 conversion = "mod";
                 break;
+            case INCREMENT:
+                conversion = "inc";
+                break;
+            case DECREMENT:
+                conversion = "dec";
+                break;
             default:
                 conversion = "";
                 break;

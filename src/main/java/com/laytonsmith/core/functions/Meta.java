@@ -362,7 +362,8 @@ public class Meta {
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
             GenericTreeNode<Construct> node = nodes[0];
             try{
-                GenericTreeNode<Construct> root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(node.getData().val(), t.file()));
+                Construct script = parent.seval(node, env);
+                GenericTreeNode<Construct> root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file()));
                 StringBuilder b = new StringBuilder();
                 int count = 0;
                 for (GenericTreeNode<Construct> child : root.getChildren()) {

@@ -125,7 +125,7 @@ public class BasicLogic {
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
             Construct value = env.GetScript().eval(nodes[0], env);
             equals equals = new equals();
-            for(int i = 1; i < nodes.length - 2; i+=2){
+            for(int i = 1; i <= nodes.length - 2; i+=2){
                 GenericTreeNode<Construct> statement = nodes[i];
                 GenericTreeNode<Construct> code = nodes[i + 1];
                 Construct evalStatement = parent.seval(statement, env);

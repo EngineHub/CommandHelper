@@ -10,7 +10,7 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.testing.StaticTest;
+import static com.laytonsmith.testing.StaticTest.*;
 import com.sk89q.wepif.PermissionsResolverManager;
 import org.junit.*;
 import static org.mockito.Mockito.*;
@@ -38,8 +38,8 @@ public class MetaTest {
 
     @Before
     public void setUp() {
-        fakePlayer = StaticTest.GetOnlinePlayer();
-        fakeServer = StaticTest.GetFakeServer();
+        fakePlayer = GetOnlinePlayer();
+        fakeServer = GetFakeServer();
         CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
         CommandHelperPlugin.myServer = fakeServer;
         env.SetPlayer(fakePlayer);
@@ -53,12 +53,22 @@ public class MetaTest {
     public void testRunas1() throws ConfigCompileException {
         String script =
                 "runas('wraithguard02', '/cmd yay')";
-        MCPlayer fakePlayer2 = StaticTest.GetOnlinePlayer("wraithguard02", fakeServer);
+        MCPlayer fakePlayer2 = GetOnlinePlayer("wraithguard02", fakeServer);
         when(fakeServer.getPlayer("wraithguard02")).thenReturn(fakePlayer2);
         when(fakePlayer.isOp()).thenReturn(true);
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
         //verify(fakePlayer2).performCommand("cmd yay");
         verify(fakeServer).dispatchCommand(fakePlayer2, "cmd yay");
+    }
+    
+    @Test public void testEval() throws ConfigCompileException{
+        SRun("eval('msg(\\'Hello World!\\')')", fakePlayer);
+        verify(fakePlayer).sendMessage("Hello World!");
+    }
+    
+    @Test public void testEval2() throws ConfigCompileException{
+        SRun("assign(@e, 'msg(\\'Hello World!\\')') eval(@e)", fakePlayer);
+        verify(fakePlayer).sendMessage("Hello World!");
     }
     //:( I can't get this to work right, because AlwaysOpPlayer is different than
     //fakePlayer, so I can't get my test to activate when the function is called.

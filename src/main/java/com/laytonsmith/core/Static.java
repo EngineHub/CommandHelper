@@ -130,7 +130,9 @@ public class Static {
         } else if (c instanceof CString) {
             b = (c.val().length() > 0);
         } else if (c instanceof CInt || c instanceof CDouble) {
-            b = (getNumber(c) > 0 || getNumber(c) < 0);
+            b = !(getNumber(c) == 0);
+        } else if(c instanceof CArray){
+            b = ((CArray)c).size() != 0;
         }
         return b;
     }

@@ -1776,8 +1776,17 @@ public class PlayerManagement {
             //We have to use this method here, because we might be in the midst
             //of an event, in which the player is offline, but not really. It will
             //throw an exception if the player doesn't exist
-            MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());
-            return new CBoolean(player.isOnline(), t);
+            MCPlayer p = Static.GetPlayer(args[0]);
+            //If the player we grabbed doesn't match exactly, we're referring to another player
+            //However, we had to check with Static.GetPlayer first, in case this is an injected player.
+            //Otherwise, we need to use the player returned from Static.GetPlayer, not the one returned
+            //from the server directly
+            if(p != null && !p.getName().equals(args[0].val())){
+                MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());                
+                return new CBoolean(player.isOnline(), t);
+            } else {
+                return new CBoolean(p.isOnline(), t);
+            }
         }
     }
 

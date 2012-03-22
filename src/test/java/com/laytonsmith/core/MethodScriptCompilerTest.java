@@ -599,8 +599,24 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("3");
     }
     
+    @Test public void testPrefix() throws ConfigCompileException{
+        SRun("assign(@var, 2) msg(++@var) msg(@var)", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("3");        
+    }
+    
     @Test public void testModulo() throws ConfigCompileException{
         assertEquals(Integer.toString(2 % 3), SRun("2 % 3", fakePlayer));
     }
+    
+    @Test public void TestOperationsWithFunction() throws ConfigCompileException{
+        SRun("if(!and(false, false), msg('yes'))", fakePlayer);
+        verify(fakePlayer).sendMessage("yes");
+    }
+    
+    @Test public void testArrayBooleanType() throws ConfigCompileException{
+        assertEquals("true", SRun("boolean(array(1))", null));
+        assertEquals("false", SRun("boolean(array())", null));
+    }
+    
     
 }

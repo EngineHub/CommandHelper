@@ -345,6 +345,11 @@ public class BasicLogicTest {
                 + "3, wrong,"
                 + "correct)", null));
     }
+    
+    @Test public void testSwitch2() throws ConfigCompileException{
+        SRun("switch(2, 1, msg('nope'), 2, msg('yep'))", fakePlayer);
+        verify(fakePlayer).sendMessage("yep");
+    }
 
     @Test(timeout = 10000)
     public void testSwitchWithArray() throws ConfigCompileException {
