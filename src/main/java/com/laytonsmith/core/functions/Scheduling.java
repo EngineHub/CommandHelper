@@ -11,6 +11,7 @@ import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -227,7 +228,15 @@ public class Scheduling {
             ret.set(StaticLayer.SetFutureRepeater(time, delay, new Runnable(){
                public void run(){
                    c.getEnv().SetCustom("timeout-id", ret.get());
-                   c.execute(null);
+                   try{
+                       c.execute(null);
+                   } catch(ConfigRuntimeException e){
+                       ConfigRuntimeException.React(e);
+                   } catch(CancelCommandException e){
+                       //Ok
+                   } catch(ProgramFlowManipulationException e){
+                       ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
+                   }
                } 
             }));
             return new CInt(ret.get(), t);
@@ -282,7 +291,15 @@ public class Scheduling {
             ret.set(StaticLayer.SetFutureRunnable(time, new Runnable(){
                public void run(){
                    c.getEnv().SetCustom("timeout-id", ret.get());
-                   c.execute(null);
+                   try{
+                       c.execute(null);
+                   } catch(ConfigRuntimeException e){
+                       ConfigRuntimeException.React(e);
+                   } catch(CancelCommandException e){
+                       //Ok
+                   } catch(ProgramFlowManipulationException e){
+                       ConfigRuntimeException.DoWarning("Using a program flow manipulation construct improperly! " + e.getClass().getSimpleName());
+                   }
                } 
             }));
             return new CInt(ret.get(), t);

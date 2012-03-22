@@ -8,7 +8,7 @@ package com.laytonsmith.core.exceptions;
  *
  * @author Layton
  */
-public class LoopBreakException extends RuntimeException{
+public class LoopBreakException extends ProgramFlowManipulationException{
     int number;
     public LoopBreakException(int times){
         number = times;
