@@ -1776,7 +1776,12 @@ public class PlayerManagement {
             //We have to use this method here, because we might be in the midst
             //of an event, in which the player is offline, but not really. It will
             //throw an exception if the player doesn't exist
-            MCPlayer p = Static.GetPlayer(args[0]);
+            MCPlayer p = null;
+            try{
+                p = Static.GetPlayer(args[0]);
+            } catch(ConfigRuntimeException e){
+                //They aren't in the player list
+            }
             //If the player we grabbed doesn't match exactly, we're referring to another player
             //However, we had to check with Static.GetPlayer first, in case this is an injected player.
             //Otherwise, we need to use the player returned from Static.GetPlayer, not the one returned
