@@ -78,8 +78,8 @@ public class StaticTest {
 
         //if creating a version string from this yeilds bogus data, it will throw an
         //exception for us.
-        if (f.since().length() <= 0) {
-            Version v = new Version(f.since());
+        if (f.since().getVersionString().length() <= 0) {
+            Version v = f.since().getVersion();
         }
         if (f.numArgs().length == 0) {
             fail("numArgs must return an Integer array with more than zero values");
