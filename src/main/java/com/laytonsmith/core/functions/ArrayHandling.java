@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
@@ -58,8 +59,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -203,8 +204,8 @@ public class ArrayHandling {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         
         public Boolean runAsync() {
@@ -253,8 +254,8 @@ public class ArrayHandling {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         
         public Boolean runAsync() {
@@ -302,8 +303,8 @@ public class ArrayHandling {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         
         public Boolean runAsync() {
@@ -353,8 +354,8 @@ public class ArrayHandling {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         
         public Boolean runAsync() {
@@ -389,8 +390,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -442,8 +443,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -502,8 +503,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -559,8 +560,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -622,8 +623,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -674,8 +675,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -725,8 +726,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -788,8 +789,8 @@ public class ArrayHandling {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -862,8 +863,8 @@ public class ArrayHandling {
             return new CString(b.toString(), t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
     }
@@ -905,8 +906,8 @@ public class ArrayHandling {
             return new CSlice(Static.getInt(args[0]), Static.getInt(args[1]), t);
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
     }

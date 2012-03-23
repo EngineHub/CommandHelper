@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
@@ -64,8 +65,8 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -111,8 +112,8 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -158,8 +159,8 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -205,8 +206,8 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -246,8 +247,8 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -287,8 +288,8 @@ public class Math {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -347,8 +348,8 @@ public class Math {
         public boolean preResolveVariables() {
             return false;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -413,8 +414,8 @@ public class Math {
         public boolean preResolveVariables() {
             return false;
         }
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         public Boolean runAsync(){
             return null;
@@ -474,8 +475,8 @@ public class Math {
         public boolean preResolveVariables() {
             return false;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -540,8 +541,8 @@ public class Math {
         public boolean preResolveVariables() {
             return false;
         }
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         public Boolean runAsync(){
             return null;
@@ -580,8 +581,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -643,8 +644,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -686,8 +687,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -728,8 +729,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -773,8 +774,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -825,8 +826,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -898,8 +899,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -970,8 +971,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1012,8 +1013,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1054,8 +1055,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1096,8 +1097,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1138,8 +1139,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1180,8 +1181,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1222,8 +1223,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1264,8 +1265,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1310,8 +1311,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1352,8 +1353,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1397,8 +1398,8 @@ public class Math {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1479,8 +1480,8 @@ public class Math {
             }
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
     }

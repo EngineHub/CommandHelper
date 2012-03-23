@@ -372,5 +372,13 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer, M
         return new Velocity(vec.length(), vec.getX(), vec.getY(), vec.getZ());
     }
     
+    public boolean getAllowFlight(){
+        return p.getAllowFlight();
+    }
+    
+    public void setAllowFlight(boolean flight){
+        p.setAllowFlight(flight);
+    }
+    
     
 }

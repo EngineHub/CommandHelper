@@ -618,5 +618,9 @@ public class MethodScriptCompilerTest {
         assertEquals("false", SRun("boolean(array())", null));
     }
     
+    @Test public void testParenthesisAfterQuotedString() throws ConfigCompileException{
+        assertEquals("2 + 2 is 4", SRun("'2 + 2 is' (2 + 2)", fakePlayer));
+    }
+    
     
 }

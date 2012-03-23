@@ -53,8 +53,8 @@ public class StringHandling {
             return false;
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
 
         public Boolean runAsync() {
@@ -133,8 +133,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -219,8 +219,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -290,8 +290,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -337,8 +337,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -393,8 +393,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -432,8 +432,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -475,8 +475,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -522,8 +522,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -565,8 +565,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -611,8 +611,8 @@ public class StringHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {

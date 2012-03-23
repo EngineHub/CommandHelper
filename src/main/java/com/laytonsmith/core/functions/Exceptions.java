@@ -139,8 +139,8 @@ public class Exceptions {
             return false;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -262,8 +262,8 @@ public class Exceptions {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {

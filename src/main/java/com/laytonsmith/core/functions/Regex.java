@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
@@ -55,8 +56,8 @@ public class Regex {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -113,8 +114,8 @@ public class Regex {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -169,8 +170,8 @@ public class Regex {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -219,8 +220,8 @@ public class Regex {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -269,8 +270,8 @@ public class Regex {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {

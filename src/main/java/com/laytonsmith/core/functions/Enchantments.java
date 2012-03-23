@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
@@ -177,8 +178,8 @@ public class Enchantments {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -263,8 +264,8 @@ public class Enchantments {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -331,8 +332,8 @@ public class Enchantments {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -398,8 +399,8 @@ public class Enchantments {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -442,8 +443,8 @@ public class Enchantments {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -487,8 +488,8 @@ public class Enchantments {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -551,8 +552,8 @@ public class Enchantments {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {

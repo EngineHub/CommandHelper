@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CString;
@@ -51,8 +52,8 @@ public class Crypto {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -108,8 +109,8 @@ public class Crypto {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -156,8 +157,8 @@ public class Crypto {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {

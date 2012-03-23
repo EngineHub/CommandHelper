@@ -134,6 +134,12 @@
             <groupId>com.sk89q</groupId>
             <artifactId>worldedit</artifactId>
             <version>5.3-SNAPSHOT</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.spout</groupId>
+                    <artifactId>spoutapi</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
     
         <!-- Bukkit -->
@@ -449,6 +455,14 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.4</version>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-checkstyle-plugin</artifactId>
+                <version>1.0.0</version>
+                <configuration>
+                    <configLocation>config/sun_checks.xml</configLocation>
+                </configuration>
             </plugin>
         </plugins>
     </reporting>

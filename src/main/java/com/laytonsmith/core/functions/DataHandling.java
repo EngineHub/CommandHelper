@@ -59,8 +59,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -160,8 +160,8 @@ public class DataHandling {
             return false;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -249,8 +249,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         //Doesn't matter, run out of state
 
@@ -350,8 +350,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         //Doesn't matter, runs out of state anyways
 
@@ -398,8 +398,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -447,8 +447,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -494,8 +494,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -534,8 +534,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -576,8 +576,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -621,8 +621,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -665,8 +665,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -708,8 +708,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -763,8 +763,8 @@ public class DataHandling {
             return new CBoolean(b, t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
     }
 
@@ -814,8 +814,8 @@ public class DataHandling {
             return new CBoolean((long) d == d, t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
     }
 
@@ -847,8 +847,8 @@ public class DataHandling {
             return false;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -925,8 +925,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -969,8 +969,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -1028,8 +1028,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -1096,8 +1096,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -1139,8 +1139,8 @@ public class DataHandling {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1192,8 +1192,8 @@ public class DataHandling {
             return new CBoolean(args[0] instanceof CClosure, t);
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
     }
 
@@ -1232,8 +1232,8 @@ public class DataHandling {
             return false;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1285,8 +1285,8 @@ public class DataHandling {
             return false;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1379,8 +1379,8 @@ public class DataHandling {
             return closure;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         @Override
         public boolean useSpecialExec() {
@@ -1433,8 +1433,8 @@ public class DataHandling {
             return new CVoid(t);
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
     }
 
@@ -1475,8 +1475,8 @@ public class DataHandling {
             return new CBoolean(Static.getBoolean(args[0]), t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
     }
 
@@ -1520,8 +1520,8 @@ public class DataHandling {
             return new CInt((long) Static.getDouble(args[0]), t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
     }
 
@@ -1562,8 +1562,8 @@ public class DataHandling {
             return new CDouble(Static.getDouble(args[0]), t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
     }
 
@@ -1605,8 +1605,8 @@ public class DataHandling {
             return new CString(args[0].val(), t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
     }
 }

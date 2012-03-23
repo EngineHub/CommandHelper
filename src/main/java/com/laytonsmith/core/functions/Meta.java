@@ -114,8 +114,8 @@ public class Meta {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -211,8 +211,8 @@ public class Meta {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -257,8 +257,8 @@ public class Meta {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -296,8 +296,8 @@ public class Meta {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -354,8 +354,8 @@ public class Meta {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }      
 
         @Override
@@ -430,8 +430,8 @@ public class Meta {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -483,8 +483,8 @@ public class Meta {
             return false;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -551,8 +551,8 @@ public class Meta {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -625,8 +625,8 @@ public class Meta {
             }
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
     }

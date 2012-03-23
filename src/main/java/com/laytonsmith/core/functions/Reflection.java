@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
@@ -104,8 +105,8 @@ public class Reflection {
                     ExceptionType.FormatException, t);
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
     }

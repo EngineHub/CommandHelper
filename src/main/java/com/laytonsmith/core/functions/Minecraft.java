@@ -5,10 +5,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -119,8 +116,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -157,8 +154,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -260,8 +257,8 @@ public class Minecraft {
             throw new ConfigRuntimeException("Improper value passed to max_stack. Expecting a number, or an item array, but received \"" + args[0].val() + "\"", ExceptionType.CastException, t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
     }
@@ -296,8 +293,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -350,8 +347,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -424,8 +421,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -491,8 +488,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -546,8 +543,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -600,8 +597,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -657,8 +654,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -707,8 +704,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -767,8 +764,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.4.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
 
         public Boolean runAsync() {
@@ -883,8 +880,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.4.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
 
         public Boolean runAsync() {
@@ -937,8 +934,8 @@ public class Minecraft {
             return true;
         }
 
-        public String since() {
-            return "3.4.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
 
         public Boolean runAsync() {

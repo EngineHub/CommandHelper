@@ -5,6 +5,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
@@ -58,8 +59,8 @@ public class Scheduling {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -101,8 +102,8 @@ public class Scheduling {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -146,8 +147,8 @@ public class Scheduling {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -242,8 +243,8 @@ public class Scheduling {
             return new CInt(ret.get(), t);
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
     }
@@ -305,8 +306,8 @@ public class Scheduling {
             return new CInt(ret.get(), t);
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
     }
@@ -359,8 +360,8 @@ public class Scheduling {
             return new CVoid(t);
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
     }    

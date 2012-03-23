@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.LineCallback;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
@@ -64,8 +65,8 @@ public class Echoes {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return false;
@@ -115,8 +116,8 @@ public class Echoes {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return false;
@@ -173,8 +174,8 @@ public class Echoes {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return false;
@@ -242,8 +243,8 @@ public class Echoes {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return null;
@@ -276,8 +277,8 @@ public class Echoes {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -331,8 +332,8 @@ public class Echoes {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
             return false;
@@ -369,8 +370,8 @@ public class Echoes {
             return true;
         }
 
-        public String since() {
-            return "3.0.2";
+        public CHVersion since() {
+            return CHVersion.V3_0_2;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -420,8 +421,8 @@ public class Echoes {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -472,8 +473,8 @@ public class Echoes {
             return true;
         }
 
-        public String since() {
-            return "3.0.2";
+        public CHVersion since() {
+            return CHVersion.V3_0_2;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {

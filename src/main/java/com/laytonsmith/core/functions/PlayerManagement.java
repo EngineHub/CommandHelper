@@ -7,10 +7,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -80,8 +77,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -128,8 +125,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -189,8 +186,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -231,8 +228,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -329,8 +326,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.0.2";
+        public CHVersion since() {
+            return CHVersion.V3_0_2;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -407,8 +404,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -470,8 +467,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -520,8 +517,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -662,8 +659,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -715,8 +712,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.0";
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
         }
 
         public Boolean runAsync() {
@@ -776,8 +773,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -834,8 +831,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.2";
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
         }
 
         public Boolean runAsync() {
@@ -897,8 +894,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1021,8 +1018,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1075,8 +1072,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1139,8 +1136,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1191,8 +1188,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1245,8 +1242,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1303,8 +1300,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1355,8 +1352,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1412,8 +1409,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1464,8 +1461,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1525,8 +1522,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1577,8 +1574,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -1641,8 +1638,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1703,8 +1700,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -1764,8 +1761,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1826,8 +1823,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1871,8 +1868,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1921,8 +1918,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1969,8 +1966,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -2013,8 +2010,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -2059,8 +2056,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -2112,8 +2109,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -2161,8 +2158,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -2207,8 +2204,8 @@ public class PlayerManagement {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -2235,6 +2232,99 @@ public class PlayerManagement {
             }
             p.setRemainingFireTicks(tick);
             return new CVoid(t);
+        }
+        
+    }
+    
+    @api public static class phas_flight extends AbstractFunction{
+
+        public String getName() {
+            return "phas_flight";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "boolean {[player]} Returns whether or not the player has the ability to fly";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            if(args.length == 1){
+                p = Static.GetPlayer(args[0]);
+            }
+            return new CBoolean(p.getAllowFlight(), t);
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
+    
+    @api public static class pset_flight extends AbstractFunction{
+
+        public String getName() {
+            return "pset_flight";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], flight} Sets whether or not this player is allowed to fly";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            boolean flight;
+            if(args.length == 1){
+                flight = Static.getBoolean(args[0]);
+            } else {
+                p = Static.GetPlayer(args[0]);
+                flight = Static.getBoolean(args[1]);
+            }
+            p.setAllowFlight(flight);
+            return new CVoid(t);
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
     }
@@ -2288,8 +2378,8 @@ public class PlayerManagement {
 //            return vector;
 //        }
 //
-//        public String since() {
-//            return "3.3.0";
+//        public CHVersion since() {
+//            return CHVersion.V3_3_0;
 //        }
 //        
 //    }

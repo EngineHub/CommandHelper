@@ -1,10 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
@@ -57,8 +54,8 @@ public class InventoryManagement {
             return true;
         }
 
-        public String since() {
-            return "3.1.3";
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
         }
 
         public Boolean runAsync() {
@@ -182,8 +179,8 @@ public class InventoryManagement {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -321,8 +318,8 @@ public class InventoryManagement {
             return 0;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
     }
@@ -395,8 +392,8 @@ public class InventoryManagement {
             return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
     }
@@ -491,8 +488,8 @@ public class InventoryManagement {
             return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
         }
         
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
     }
@@ -567,8 +564,8 @@ public class InventoryManagement {
             return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
     }
@@ -624,8 +621,8 @@ public class InventoryManagement {
 //            return new CVoid(t);
 //        }
 //        
-//        public String since() {
-//            return "3.3.1";
+//        public CHVersion since() {
+//            return CHVersion.V3_3_1;
 //        }
 //    }
 }

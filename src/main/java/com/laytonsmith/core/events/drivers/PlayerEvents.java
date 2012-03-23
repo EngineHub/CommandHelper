@@ -12,10 +12,7 @@ import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
 import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
 import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.ObjectGenerator;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.*;
@@ -55,8 +52,8 @@ public class PlayerEvents {
                     + "{player|join_message}";
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
         public Driver driver(){
@@ -136,8 +133,8 @@ public class PlayerEvents {
                     + "{player|action|item|location|facing}";
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Driver driver() {
@@ -240,8 +237,8 @@ public class PlayerEvents {
             return Driver.PLAYER_SPAWN;
         }
         
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
@@ -333,8 +330,8 @@ public class PlayerEvents {
             return Driver.PLAYER_DEATH;
         }
         
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
@@ -443,8 +440,8 @@ public class PlayerEvents {
             return Driver.PLAYER_CHAT;
         }
         
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
         
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {

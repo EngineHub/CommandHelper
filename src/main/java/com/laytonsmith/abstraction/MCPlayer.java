@@ -74,6 +74,9 @@ public interface MCPlayer extends MCCommandSender, MCOfflinePlayer{
     
     public Velocity getVelocity();
     
+    public boolean getAllowFlight();
+    public void setAllowFlight(boolean flight);
+    
     
     
     public static class Velocity{

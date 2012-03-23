@@ -161,7 +161,7 @@ public class DocGen {
                     }
                 }
 
-                String since = f.since();
+                String since = f.since().getVersionString();
                 Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
                 Matcher m = p.matcher(doc);
                 if (m.find()) {
@@ -266,7 +266,7 @@ public class DocGen {
                 String eventData = EventData.Get(m.group(3).split("\\|"), type);
                 String mutability = MutabilityData.Get(m.group(4).split("\\|"), type);
                 //String manualTrigger = ManualTriggerData.Get(m.group(5).split("\\|"), type);
-                String since = d.since();
+                String since = d.since().getVersionString();
 
                 if (type.equals("html")) {
                     doc.append("<tr><td style=\"vertical-align:top\">").append(name).append("</td><td style=\"vertical-align:top\">").append(description).append("</td><td style=\"vertical-align:top\">").append(prefilter).append("</td><td style=\"vertical-align:top\">").append(eventData).append("</td><td style=\"vertical-align:top\">").append(mutability).append("</td><td style=\"vertical-align:top\">").append(since).append("</td></tr>");

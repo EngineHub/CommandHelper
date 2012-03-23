@@ -54,7 +54,7 @@ public class Sandbox {
 //            return true;
 //        }
 //
-//        public String since() {
+//        public CHVersion since() {
 //            return "0.0.0";
 //        }
 //
@@ -143,8 +143,8 @@ public class Sandbox {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -238,8 +238,8 @@ public class Sandbox {
             return true;
         }
 
-        public String since() {
-            return "0.0.0";
+        public CHVersion since() {
+            return CHVersion.V0_0_0;
         }
 
         public Boolean runAsync() {
@@ -285,8 +285,8 @@ public class Sandbox {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -338,8 +338,8 @@ public class Sandbox {
             return true;
         }
 
-        public String since() {
-            return "0.0.0";
+        public CHVersion since() {
+            return CHVersion.V0_0_0;
         }
 
         public Boolean runAsync() {
@@ -440,8 +440,8 @@ public class Sandbox {
             return new CVoid(t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
     }
 
@@ -491,8 +491,8 @@ public class Sandbox {
             return new CBoolean(me.canSee(other), t);
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
     }
 
@@ -723,8 +723,8 @@ public class Sandbox {
             return true;
         }
 
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {

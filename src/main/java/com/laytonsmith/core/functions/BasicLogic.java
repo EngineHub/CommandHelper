@@ -66,8 +66,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         //Doesn't matter, this function is run out of state
         public Boolean runAsync() {
@@ -109,8 +109,8 @@ public class BasicLogic {
             return false;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -183,8 +183,8 @@ public class BasicLogic {
             return false;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -293,8 +293,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync() {
             return null;
@@ -331,8 +331,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -385,8 +385,8 @@ public class BasicLogic {
             return new CBoolean(!((CBoolean)new sequals().exec(t, environment, args)).getBoolean(), t);
         }
 
-        public String since() {
-            return "3.3.1";
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
     }
@@ -418,8 +418,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -463,8 +463,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.2.0";
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
         }
 
         public Boolean runAsync() {
@@ -545,8 +545,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -593,8 +593,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync() {
             return null;
@@ -634,8 +634,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         
         public Boolean runAsync() {
@@ -676,8 +676,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync() {
             return null;
@@ -717,8 +717,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync() {
             return null;
@@ -768,8 +768,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync() {
             return null;
@@ -824,8 +824,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync() {
             return null;
@@ -867,8 +867,8 @@ public class BasicLogic {
         public boolean preResolveVariables() {
             return true;
         }
-        public String since() {
-            return "3.0.1";
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
         }
         public Boolean runAsync() {
             return null;
@@ -901,8 +901,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -943,8 +943,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -994,8 +994,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1045,8 +1045,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1087,8 +1087,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1134,8 +1134,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1181,8 +1181,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1221,8 +1221,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1263,8 +1263,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {
@@ -1306,8 +1306,8 @@ public class BasicLogic {
             return true;
         }
 
-        public String since() {
-            return "3.3.0";
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
         }
 
         public Boolean runAsync() {

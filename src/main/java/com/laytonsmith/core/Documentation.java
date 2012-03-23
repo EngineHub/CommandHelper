@@ -28,5 +28,5 @@ public interface Documentation {
      * follow the format 0.0.0
      * @return 
      */
-    public String since();
+    public CHVersion since();
 }
