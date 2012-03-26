@@ -1111,7 +1111,7 @@ public class DataHandling {
             //We can't optimize per se, but if the path is constant, and the code is uncompilable, we
             //can give a warning, and go ahead and cache the tree.
             String path = args[0].val();
-            IncludeCache.get(new File(path), t);
+            IncludeCache.get(new File(t.file().getParent(), path), t);
             return null;
         }
     }
