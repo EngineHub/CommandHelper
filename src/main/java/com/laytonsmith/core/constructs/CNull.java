@@ -36,5 +36,10 @@ public class CNull extends Construct implements Cloneable{
     public String nval(){
         return null;
     }
+
+    @Override
+    public boolean isDynamic() {
+        return false;
+    }
     
 }

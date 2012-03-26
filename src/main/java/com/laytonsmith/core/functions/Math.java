@@ -71,6 +71,16 @@ public class Math {
         public Boolean runAsync(){
             return null;
         }
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }                
     }
     
     @api public static class subtract extends AbstractFunction{
@@ -117,6 +127,16 @@ public class Math {
         }
         public Boolean runAsync(){
             return null;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
     }
     
@@ -165,6 +185,16 @@ public class Math {
         public Boolean runAsync(){
             return null;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
     }
     
     @api public static class divide extends AbstractFunction{
@@ -180,7 +210,11 @@ public class Math {
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double tally = Static.getNumber(args[0]);
             for(int i = 1; i < args.length; i++){
-                tally /= Static.getNumber(args[i]);
+                double next = Static.getNumber(args[i]);
+                if(next == 0){
+                    throw new ConfigRuntimeException("Division by 0!", ExceptionType.RangeException, t);
+                }
+                tally /= next;
             }
             if(tally == (int)tally){
                 return new CInt((long)tally, t);
@@ -190,7 +224,7 @@ public class Math {
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
         }
 
         public String docs() {
@@ -211,6 +245,14 @@ public class Math {
         }
         public Boolean runAsync(){
             return null;
+        }
+        
+        public boolean canOptimize(){
+            return true;
+        }
+        
+        public Construct optimize(Target t, Construct ... args){
+            return exec(t, null, args);
         }
     }
     
@@ -253,6 +295,16 @@ public class Math {
         public Boolean runAsync(){
             return null;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
     }
     
     @api public static class pow extends AbstractFunction{
@@ -294,6 +346,16 @@ public class Math {
         public Boolean runAsync(){
             return null;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
     }
     
     @api public static class inc extends AbstractFunction{
@@ -307,18 +369,18 @@ public class Math {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            long value = 1;
+            if(args.length == 2){
+                if(args[1] instanceof IVariable){
+                    IVariable cur2 = (IVariable)args[1];
+                    args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
+                }
+                value = Static.getInt(args[1]);
+            }
             if(args[0] instanceof IVariable){
                 IVariable cur = (IVariable)args[0];
                 IVariable v = env.GetVarList().get(cur.getName(), cur.getTarget());
                 Construct newVal;
-                long value = 1;
-                if(args.length == 2){
-                    if(args[1] instanceof IVariable){
-                        IVariable cur2 = (IVariable)args[1];
-                        args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
-                    }
-                    value = Static.getInt(args[1]);
-                }
                 if(Static.anyDoubles(v.ival())){
                     newVal = new CDouble(Static.getDouble(v.ival()) + value, t);
                 } else {
@@ -327,14 +389,19 @@ public class Math {
                 v = new IVariable(v.getName(), newVal, t);
                 env.GetVarList().set(v);
                 return v;
+            } else {
+                if(Static.anyDoubles(args[0])){
+                    return new CDouble(Static.getNumber(args[0]) + value, t);
+                } else {
+                    return new CInt(Static.getInt(args[0]) + value, t);
+                }
             }
-            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", 
-                    ExceptionType.CastException, t);
+            
         }
 
         public String docs() {
             return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
-                    + " returns the ivar.";
+                    + " returns the ivar, or, if var is a constant number, simply adds x to it, and returns the new number.";
         }
         
         public ExceptionType[] thrown(){
@@ -354,6 +421,19 @@ public class Math {
         public Boolean runAsync(){
             return null;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            if(args[0] instanceof IVariable){
+                return null; //Can't optimize this
+            }
+            return exec(t, null, args);
+        }
     }
     
     @api public static class postinc extends AbstractFunction{
@@ -367,18 +447,18 @@ public class Math {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            long value = 1;
+            if(args.length == 2){
+                if(args[1] instanceof IVariable){
+                    IVariable cur2 = (IVariable)args[1];
+                    args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
+                }
+                value = Static.getInt(args[1]);
+            }
             if(args[0] instanceof IVariable){
                 IVariable cur = (IVariable)args[0];
                 IVariable v = env.GetVarList().get(cur.getName(), cur.getTarget());
                 Construct newVal;
-                long value = 1;
-                if(args.length == 2){
-                    if(args[1] instanceof IVariable){
-                        IVariable cur2 = (IVariable)args[1];
-                        args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
-                    }
-                    value = Static.getInt(args[1]);
-                }
                 if(Static.anyDoubles(v.ival())){
                     newVal = new CDouble(Static.getDouble(v.ival()) + value, t);
                 } else {
@@ -393,14 +473,18 @@ public class Math {
                 v = new IVariable(v.getName(), newVal, t);
                 env.GetVarList().set(v);
                 return oldVal;
+            } else {
+                if(Static.anyDoubles(args[0])){
+                    return new CDouble(Static.getNumber(args[0]) + value, t);
+                } else {
+                    return new CInt(Static.getInt(args[0]) + value, t);
+                }
             }
-            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", 
-                    ExceptionType.CastException, t);
         }
 
         public String docs() {
             return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to var++ in other languages. Expects ivar to be a variable, then"
-                    + " returns a copy of the old ivar.";
+                    + " returns a copy of the old ivar, or, if var is a constant number, simply adds x to it, and returns the new number.";
         }
         
         public ExceptionType[] thrown(){
@@ -419,6 +503,19 @@ public class Math {
         }
         public Boolean runAsync(){
             return null;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            if(args[0] instanceof IVariable){
+                return null; //Can't optimize this
+            }
+            return exec(t, null, args);
         }
         
     }
@@ -434,17 +531,17 @@ public class Math {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            long value = 1;
+            if(args.length == 2){
+                if(args[1] instanceof IVariable){
+                    IVariable cur2 = (IVariable)args[1];
+                    args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
+                }
+                value = Static.getInt(args[1]);
+            }
             if(args[0] instanceof IVariable){
                 IVariable cur = (IVariable)args[0];
                 IVariable v = env.GetVarList().get(cur.getName(), cur.getTarget());
-                long value = 1;
-                if(args.length == 2){
-                    if(args[1] instanceof IVariable){
-                        IVariable cur2 = (IVariable)args[1];
-                        args[1] = env.GetVarList().get(cur.getName(), cur.getTarget());
-                    }
-                    value = Static.getInt(args[1]);
-                }
                 Construct newVal;
                 if(Static.anyDoubles(v.ival())){
                     newVal = new CDouble(Static.getDouble(v.ival()) - value, t);
@@ -454,14 +551,18 @@ public class Math {
                 v = new IVariable(v.getName(), newVal, t);
                 env.GetVarList().set(v);
                 return v;
+            } else {
+                if(Static.anyDoubles(args[0])){
+                    return new CDouble(Static.getNumber(args[0]) + value, t);
+                } else {
+                    return new CInt(Static.getInt(args[0]) + value, t);
+                }
             }
-            throw new ConfigRuntimeException("dec expects argument 1 to be an ivar", 
-                    ExceptionType.CastException, t);
         }
 
         public String docs() {
             return "ivar {var, [value]} Subtracts value from var, and stores the new value. Value defaults to 1. Equivalent to --var (or var -= value) in other languages. Expects ivar to be a variable, then"
-                    + " returns the ivar.";
+                    + " returns the ivar, , or, if var is a constant number, simply adds x to it, and returns the new number.";
         }
         
         public ExceptionType[] thrown(){
@@ -481,6 +582,19 @@ public class Math {
         public Boolean runAsync(){
             return null;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            if(args[0] instanceof IVariable){
+                return null; //Can't optimize this
+            }
+            return exec(t, null, args);
+        }
     }
     
     @api public static class postdec extends AbstractFunction{
@@ -494,18 +608,18 @@ public class Math {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            long value = 1;
+            if(args.length == 2){
+                if(args[1] instanceof IVariable){
+                    IVariable cur2 = (IVariable)args[1];
+                    args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
+                }
+                value = Static.getInt(args[1]);
+            }
             if(args[0] instanceof IVariable){
                 IVariable cur = (IVariable)args[0];
                 IVariable v = env.GetVarList().get(cur.getName(), cur.getTarget());
                 Construct newVal;
-                long value = 1;
-                if(args.length == 2){
-                    if(args[1] instanceof IVariable){
-                        IVariable cur2 = (IVariable)args[1];
-                        args[1] = env.GetVarList().get(cur2.getName(), cur2.getTarget());
-                    }
-                    value = Static.getInt(args[1]);
-                }
                 if(Static.anyDoubles(v.ival())){
                     newVal = new CDouble(Static.getDouble(v.ival()) - value, t);
                 } else {
@@ -520,14 +634,18 @@ public class Math {
                 v = new IVariable(v.getName(), newVal, t);
                 env.GetVarList().set(v);
                 return oldVal;
+            } else {
+                if(Static.anyDoubles(args[0])){
+                    return new CDouble(Static.getNumber(args[0]) + value, t);
+                } else {
+                    return new CInt(Static.getInt(args[0]) + value, t);
+                }
             }
-            throw new ConfigRuntimeException("inc expects argument 1 to be an ivar", 
-                    ExceptionType.CastException, t);
         }
 
         public String docs() {
             return "ivar {var, [x]} Subtracts x from var, and stores the new value. Equivalent to var-- in other languages. Expects ivar to be a variable, then"
-                    + " returns a copy of the old ivar.";
+                    + " returns a copy of the old ivar, , or, if var is a constant number, simply adds x to it, and returns the new number.";
         }
         
         public ExceptionType[] thrown(){
@@ -546,6 +664,19 @@ public class Math {
         }
         public Boolean runAsync(){
             return null;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            if(args[0] instanceof IVariable){
+                return null; //Can't optimize this
+            }
+            return exec(t, null, args);
         }
         
     }
@@ -657,6 +788,16 @@ public class Math {
             return new CDouble(java.lang.Math.abs(d), t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class floor extends AbstractFunction{
@@ -697,6 +838,16 @@ public class Math {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CInt((long)java.lang.Math.floor(Static.getNumber(args[0])), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
         
     }
@@ -741,6 +892,16 @@ public class Math {
             return new CInt((long)java.lang.Math.ceil(Static.getNumber(args[0])), t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class sqrt extends AbstractFunction{
@@ -755,7 +916,7 @@ public class Math {
 
         public String docs() {
             return "number {number} Returns the square root of a number. Note that this is mathematically equivalent to pow(number, .5)."
-                    + " Imaginary numbers are not supported at this time, so number must be positive.";
+                    + " Imaginary numbers are not supported, so number must be positive.";
         }
 
         public ExceptionType[] thrown() {
@@ -793,6 +954,16 @@ public class Math {
             } else {
                 return new CDouble(m, t);
             }
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
         
     }
@@ -868,6 +1039,16 @@ public class Math {
             return list;
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class max extends AbstractFunction{
@@ -941,6 +1122,16 @@ public class Math {
             return list;
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class sin extends AbstractFunction{
@@ -981,6 +1172,16 @@ public class Math {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CDouble(java.lang.Math.sin(Static.getNumber(args[0])), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
         
     }
@@ -1025,6 +1226,16 @@ public class Math {
             return new CDouble(java.lang.Math.cos(Static.getNumber(args[0])), t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class tan extends AbstractFunction{
@@ -1065,6 +1276,16 @@ public class Math {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CDouble(java.lang.Math.tan(Static.getNumber(args[0])), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
         
     }
@@ -1109,6 +1330,16 @@ public class Math {
             return new CDouble(java.lang.Math.asin(Static.getNumber(args[0])), t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class acos extends AbstractFunction{
@@ -1149,6 +1380,16 @@ public class Math {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CDouble(java.lang.Math.acos(Static.getNumber(args[0])), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
         
     }
@@ -1193,6 +1434,16 @@ public class Math {
             return new CDouble(java.lang.Math.atan(Static.getNumber(args[0])), t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class to_radians extends AbstractFunction{
@@ -1235,6 +1486,16 @@ public class Math {
             return new CDouble(java.lang.Math.toRadians(Static.getNumber(args[0])), t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class to_degrees extends AbstractFunction{
@@ -1275,6 +1536,16 @@ public class Math {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CDouble(java.lang.Math.toDegrees(Static.getNumber(args[0])), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
         
     }
@@ -1323,6 +1594,16 @@ public class Math {
             return new CDouble(java.lang.Math.atan2(Static.getNumber(args[0]), Static.getNumber(args[1])), t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class round extends AbstractFunction{
@@ -1363,6 +1644,16 @@ public class Math {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CInt(java.lang.Math.round(Static.getNumber(args[0])), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
         
     }
@@ -1440,6 +1731,16 @@ public class Math {
             }
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class neg extends AbstractFunction{
@@ -1482,6 +1783,16 @@ public class Math {
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
         }
         
     }

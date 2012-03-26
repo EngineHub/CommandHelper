@@ -38,4 +38,9 @@ public class CInt extends Construct implements Cloneable{
         return (CInt) super.clone();
     }
 
+    @Override
+    public boolean isDynamic() {
+        return false;
+    }
+
 }

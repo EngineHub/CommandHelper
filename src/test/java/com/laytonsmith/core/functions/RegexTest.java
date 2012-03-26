@@ -46,7 +46,7 @@ public class RegexTest {
         try {
             SRun("reg_match(array(word, l), hi)", null);
             fail();
-        } catch (ConfigRuntimeException e) {
+        } catch (ConfigCompileException e) {
             //Pass
         }
     }

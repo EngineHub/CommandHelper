@@ -25,7 +25,7 @@ public class Token {
         FUNC_END, STRING, NEWLINE, MULTILINE_START, MULTILINE_END, COMMAND, SEPERATOR, VARIABLE,
         IVARIABLE, FINAL_VAR, LIT, ROOT, IDENT, DEREFERENCE, SMART_STRING, SLICE, 
         MULTIPLICATION, SUBTRACTION, DIVISION, ADDITION, NOT_EQUALS, EQUALS, STRICT_NOT_EQUALS, 
-        STRICT_EQUALS, GT, LT, LTE, GTE, LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT, BIT_AND, BIT_OR, BIT_XOR,
+        STRICT_EQUALS, GT, LT, LTE, GTE, LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT,
         INCREMENT, DECREMENT, MODULO;
 
         public boolean isSymbol() {
@@ -34,7 +34,7 @@ public class Token {
                     this.equals(TType.STRICT_EQUALS) || this.equals(TType.STRICT_NOT_EQUALS) || this.equals(TType.GT) ||
                     this.equals(TType.LT) || this.equals(TType.GTE) || this.equals(TType.LTE)
                     || this.equals(TType.LOGICAL_AND) || this.equals(TType.LOGICAL_OR) || this.equals(TType.LOGICAL_NOT)
-                    || this.equals(TType.BIT_AND) || this.equals(TType.BIT_OR) || this == BIT_XOR
+                    //|| this.equals(TType.BIT_AND) || this.equals(TType.BIT_OR) || this == BIT_XOR
                     || this == INCREMENT || this == DECREMENT || this == MODULO){
                 return true;
             } else {
@@ -67,17 +67,17 @@ public class Token {
             return (this == STRICT_EQUALS || this == STRICT_NOT_EQUALS || this == EQUALS || this == NOT_EQUALS);
         }
         
-        public boolean isBitwiseAnd(){
-            return (this == BIT_AND);
-        }
-        
-        public boolean isBitwiseXor(){
-            return (this == BIT_XOR);
-        }
-        
-        public boolean isBitwiseOr(){
-            return (this == BIT_OR);
-        }
+//        public boolean isBitwiseAnd(){
+//            return (this == BIT_AND);
+//        }
+//        
+//        public boolean isBitwiseXor(){
+//            return (this == BIT_XOR);
+//        }
+//        
+//        public boolean isBitwiseOr(){
+//            return (this == BIT_OR);
+//        }
         
         public boolean isLogicalAnd(){
             return this == LOGICAL_AND;

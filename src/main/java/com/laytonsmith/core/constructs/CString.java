@@ -26,4 +26,9 @@ public class CString extends Construct implements Cloneable{
     public CString clone() throws CloneNotSupportedException{
         return (CString) super.clone();
     }
+
+    @Override
+    public boolean isDynamic() {
+        return false;
+    }
 }

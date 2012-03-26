@@ -10,6 +10,7 @@ import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.math.BigInteger;
@@ -78,6 +79,16 @@ public class Crypto {
             }
             return new CString(b.toString(), t);
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -127,6 +138,16 @@ public class Crypto {
                 throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
             }
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -174,6 +195,16 @@ public class Crypto {
             } catch (NoSuchAlgorithmException ex) {
                 throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
             }
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 

@@ -8,6 +8,7 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -67,10 +68,10 @@ public class StringHandling {
 
         @Override
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            //if any of the nodes are __autoconcat__, move their children up a level
+            //if any of the nodes are sconcat, move their children up a level
             List<GenericTreeNode<Construct>> list = new ArrayList<GenericTreeNode<Construct>>();
             for(GenericTreeNode<Construct> node : nodes){
-                if(node.getData().val().equals("__autoconcat__")){
+                if(node.getData().val().equals("sconcat")){
                     for(GenericTreeNode<Construct> sub : node.getChildren()){
                         list.add(sub);
                     }
@@ -90,6 +91,10 @@ public class StringHandling {
         @Override
         public boolean useSpecialExec() {
             return true;
+        }
+
+        public GenericTreeNode<Construct> optimizeSpecial(Target target, List<GenericTreeNode<Construct>> children) {
+            throw new UnsupportedOperationException("Not yet implemented");
         }
                 
         
@@ -140,6 +145,16 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }                
     }
 
     @api
@@ -154,51 +169,58 @@ public class StringHandling {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return null;
+            StringBuilder b = new StringBuilder();
+            for(int i = 0; i < args.length; i++){
+                if(i > 0){
+                    b.append(" ");
+                }
+                b.append(args[i].val());
+            }
+            return new CString(b.toString(), t);
         }        
 
-        @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            StringBuilder b = new StringBuilder();
-            boolean centry = false;
-            Construct key = null;
-            for (int i = 0; i < nodes.length; i++) {
-                Construct c = parent.seval(nodes[i], env);
-                if (i == 0) {
-                    if (c instanceof CLabel) {
-                        key = c;
-                        centry = true;
-                        break;
-                    }
-                }
-                if (!centry) {
-                    if (i > 1 || i > 0 && !centry) {
-                        b.append(" ");
-                    }
-                    b.append(c.val());
-                }
-            }
-            if (centry) {
-                Construct value;
-                if (nodes.length > 2) {
-                    //it's a string
-                    StringBuilder c = new StringBuilder();
-                    for (int i = 1; i < nodes.length; i++) {
-                        Construct d = parent.seval(nodes[i], env);
-                        if (i > 1) {
-                            c.append(" ");
-                        }
-                        c.append(d.val());                        
-                    }
-                    value = new CString(c.toString(), t);
-                } else {
-                    value = parent.seval(nodes[1], env);
-                }
-                return new CEntry(key, value, t);
-            } else {
-                return new CString(b.toString(), t);
-            }
-        }
+//        @Override
+//        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+//            StringBuilder b = new StringBuilder();
+//            boolean centry = false;
+//            Construct key = null;
+//            for (int i = 0; i < nodes.length; i++) {
+//                Construct c = parent.seval(nodes[i], env);
+//                if (i == 0) {
+//                    if (c instanceof CLabel) {
+//                        key = c;
+//                        centry = true;
+//                        break;
+//                    }
+//                }
+//                if (!centry) {
+//                    if (i > 1 || i > 0 && !centry) {
+//                        b.append(" ");
+//                    }
+//                    b.append(c.val());
+//                }
+//            }
+//            if (centry) {
+//                Construct value;
+//                if (nodes.length > 2) {
+//                    //it's a string
+//                    StringBuilder c = new StringBuilder();
+//                    for (int i = 1; i < nodes.length; i++) {
+//                        Construct d = parent.seval(nodes[i], env);
+//                        if (i > 1) {
+//                            c.append(" ");
+//                        }
+//                        c.append(d.val());                        
+//                    }
+//                    value = new CString(c.toString(), t);
+//                } else {
+//                    value = parent.seval(nodes[1], env);
+//                }
+//                return new CEntry(key, value, t);
+//            } else {
+//                return new CString(b.toString(), t);
+//            }
+//        }
 
         public String docs() {
             return "string {var1, [var2...]} Concatenates any number of arguments together, but puts a space between elements";
@@ -225,12 +247,17 @@ public class StringHandling {
 
         public Boolean runAsync() {
             return null;
-        }
+        }      
         
         @Override
-        public boolean useSpecialExec() {
+        public boolean canOptimize() {
             return true;
         }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }  
     }
 
     @api
@@ -344,6 +371,16 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -400,6 +437,16 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -442,6 +489,16 @@ public class StringHandling {
 
         public Boolean runAsync() {
             return null;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -490,6 +547,16 @@ public class StringHandling {
                 return new CInt(args[0].val().length(), t);
             }
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -533,6 +600,16 @@ public class StringHandling {
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().toUpperCase(), t);
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -575,6 +652,16 @@ public class StringHandling {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().toLowerCase(), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -634,6 +721,16 @@ public class StringHandling {
                 throw new ConfigRuntimeException("The indices given are not valid for string '" + args[0].val() + "'",
                         ExceptionType.RangeException, t);
             }
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 }

@@ -18,4 +18,9 @@ public class CVoid extends Construct implements Cloneable{
     public CVoid clone() throws CloneNotSupportedException{
         return (CVoid) super.clone();
     }
+
+    @Override
+    public boolean isDynamic() {
+        return false;
+    }
 }

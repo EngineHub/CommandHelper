@@ -266,7 +266,7 @@ public class Script {
                     if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
                             || ca[i] instanceof CInt || ca[i] instanceof CNull
                             || ca[i] instanceof CString || ca[i] instanceof CVoid 
-                            || ca[i] instanceof IVariable || ca[i] instanceof CEntry)
+                            || ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
                             && (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
                         throw new ConfigRuntimeException("Invalid Construct (" 
                                 + ca[i].getClass() + ") being passed as an argument to a function (" 

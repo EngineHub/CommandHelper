@@ -52,4 +52,9 @@ public class CSlice extends Construct {
     public long getFinish(){
         return finish;
     }
+
+    @Override
+    public boolean isDynamic() {
+        return false;
+    }
 }

@@ -52,4 +52,9 @@ public class IVariable extends Construct implements Cloneable{
         return (IVariable) clone;
     }
 
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
+
 }

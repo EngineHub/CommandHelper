@@ -10,6 +10,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
@@ -910,5 +911,60 @@ public class ArrayHandling {
             return CHVersion.V3_3_1;
         }
         
+    }
+    
+    @api public static class centry extends AbstractFunction{
+
+        public String getName() {
+            return "centry";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
+                    + "compiler.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CEntry(args[0], args[1], t);
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        @Override
+        public boolean appearInDocumentation() {
+            return false;
+        }
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }                
     }
 }

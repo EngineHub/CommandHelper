@@ -106,7 +106,7 @@ public class StringHandlingTest {
         assertCEquals(C.onstruct("test   123"), a.exec(Target.UNKNOWN, null, C.onstruct("test   123")));
     }
     
-    @Test(timeout = 10000)
+    @Test
     public void testCC() throws ConfigCompileException{
         assertEquals("Thisshouldbeamess", SRun("cc(This should be a mess)", null));
     }

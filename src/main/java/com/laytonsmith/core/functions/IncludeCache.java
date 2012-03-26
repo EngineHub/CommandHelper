@@ -23,7 +23,7 @@ import java.util.HashMap;
 public class IncludeCache {
     private static HashMap<File, GenericTreeNode<Construct>> cache = new HashMap<File, GenericTreeNode<Construct>>();
     
-    public static void add(File file, GenericTreeNode<Construct> tree){
+    private static void add(File file, GenericTreeNode<Construct> tree){
         cache.put(file, tree);
     }
     

@@ -255,6 +255,7 @@ public class ConfigRuntimeException extends RuntimeException {
     private File file;
     private int column = -1;
     private Env env;
+    private Target target;
     /**
      * Creates a new ConfigRuntimeException. If ex is not null, this exception can be caught
      * by user level code. Otherwise, it will be ignored by the try() function.
@@ -273,6 +274,7 @@ public class ConfigRuntimeException extends RuntimeException {
         this.line_num = t.line();
         this.file = t.file();
         this.column = t.col();
+        this.target = t;
     }
     
 //    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
@@ -291,14 +293,6 @@ public class ConfigRuntimeException extends RuntimeException {
     public ConfigRuntimeException(String msg, Target t){
         this(msg, null, t);
     }
-
-    /**
-     * Constructs an instance of <code>ConfigRuntimeException</code> with the specified detail message.
-     * @param msg the detail message.
-     */
-    private ConfigRuntimeException(String msg) {
-        super(msg);
-    }
     
     public ExceptionType getExceptionType(){
         return this.ex;
@@ -310,6 +304,14 @@ public class ConfigRuntimeException extends RuntimeException {
     
     public File getFile(){
         return this.file;
+    }
+    
+    public int getCol(){
+        return this.column;
+    }
+    
+    public Target getTarget(){
+        return this.target;
     }
     
     public String getSimpleFile(){

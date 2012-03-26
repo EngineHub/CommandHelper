@@ -9,6 +9,7 @@ import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.regex.Matcher;
@@ -83,6 +84,16 @@ public class Regex {
             return ret;
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class reg_match_all extends AbstractFunction{
@@ -139,6 +150,16 @@ public class Regex {
             return fret;
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class reg_replace extends AbstractFunction{
@@ -187,6 +208,16 @@ public class Regex {
             ret = pattern.matcher(subject).replaceAll(replacement);
             
             return new CString(ret, t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
         
     }
@@ -239,6 +270,16 @@ public class Regex {
             return ret;
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+        
         
     }  
     
@@ -287,6 +328,16 @@ public class Regex {
                 ret++;
             }
             return new CInt(ret, t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
         
     }

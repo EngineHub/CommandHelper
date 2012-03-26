@@ -92,7 +92,6 @@ public class MathTest {
         assertCEquals(C.onstruct(2.5), a.exec(Target.UNKNOWN, env, C.onstruct(5), C.onstruct(2)));
         assertCEquals(C.onstruct(1), a.exec(Target.UNKNOWN, env, C.onstruct(3), C.onstruct(3)));
         assertCEquals(C.onstruct(3), a.exec(Target.UNKNOWN, env, C.onstruct(-3), C.onstruct(-1)));
-        assertCEquals(C.onstruct(Double.POSITIVE_INFINITY), a.exec(Target.UNKNOWN, env, C.onstruct(1), C.onstruct(0)));
     }
 
     @Test(timeout = 10000)
@@ -191,7 +190,7 @@ public class MathTest {
         try {
             StaticTest.SRun("sqrt(-1)", fakePlayer);
             fail("Did not expect to pass");
-        } catch (ConfigRuntimeException e) {
+        } catch (ConfigCompileException e) {
             //pass
         }
     }

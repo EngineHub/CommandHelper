@@ -396,4 +396,16 @@ public class CArray extends Construct {
         }
         
     };
+
+    @Override
+    public boolean isDynamic() {
+        //The CArray is static, despite what you might first think.
+        //The only way to get a static array is to use the array function,
+        //which WILL return a static array. A function that takes an array
+        //as an argument will accept the static array, and can be optimized possibly,
+        //however, it is likely that the array is stored in a variable, which of couse
+        //is NOT static. So, if just the array function is run, it's static, if the static
+        //array is put into a variable, the staticness is lost (as it is with a number or string)
+        return false;
+    }
 }

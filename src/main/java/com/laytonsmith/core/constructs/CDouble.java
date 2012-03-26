@@ -39,4 +39,9 @@ public class CDouble extends Construct implements Cloneable{
     public CDouble clone() throws CloneNotSupportedException{
         return (CDouble) super.clone();
     }
+
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
 }

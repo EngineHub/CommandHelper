@@ -5,6 +5,7 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
@@ -508,13 +509,65 @@ public class Sandbox {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            throw new Error("Should not have gotten here");
+        }                
+
+        public String docs() {
+            return "string {var1, [var2...]} This function should only be used by the compiler, behavior"
+                    + " may be undefined if it is used in code.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V0_0_0;
+        }
+
+        public Boolean runAsync() {
             return null;
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public boolean canOptimize() {
+            return true;
+        }
+                
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            //This function is tightly coupled with MethodScriptCompiler. It should call
+            //the special function during optimization.
+            throw new Error("Should not have gotten here");
+        }
+
+        public GenericTreeNode<Construct> optimizeSpecial(Target t, List<GenericTreeNode<Construct>> list) throws ConfigCompileException{
+            return optimizeSpecial(t, list, true);
+        }
+        /**
+         * __autoconcat__ has special optimization techniques needed, since it's really a part
+         * of the compiler itself, and not so much a function. It being a function is merely
+         * a convenience, so we can defer processing until after parsing. While it is
+         * tightly coupled with the compiler, this is ok, since it's really a compiler mechanism
+         * more than a function.
+         * @param t
+         * @param list
+         * @return 
+         */
+        public GenericTreeNode<Construct> optimizeSpecial(Target t, List<GenericTreeNode<Construct>> list, boolean returnSConcat) throws ConfigCompileException{
             //If any of our nodes are CSymbols, we have different behavior
-            List<GenericTreeNode<Construct>> list = new ArrayList<GenericTreeNode<Construct>>(Arrays.asList(nodes));
             boolean inSymbolMode = false; //catching this can save Xn
 
             //postfix
@@ -624,48 +677,6 @@ public class Sandbox {
                         i--;
                     }
                 }
-                //bitwise and
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> node = list.get(i + 1);
-                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isBitwiseAnd()) {
-                        CSymbol sy = (CSymbol) node.data;
-                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
-                        conversion.addChild(list.get(i));
-                        conversion.addChild(list.get(i + 2));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        list.remove(i + 1);
-                        i--;
-                    }
-                }
-                //bitwise xor
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> node = list.get(i + 1);
-                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isBitwiseXor()) {
-                        CSymbol sy = (CSymbol) node.data;
-                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
-                        conversion.addChild(list.get(i));
-                        conversion.addChild(list.get(i + 2));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        list.remove(i + 1);
-                        i--;
-                    }
-                }
-                //bitwise or
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> node = list.get(i + 1);
-                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isBitwiseOr()) {
-                        CSymbol sy = (CSymbol) node.data;
-                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
-                        conversion.addChild(list.get(i));
-                        conversion.addChild(list.get(i + 2));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        list.remove(i + 1);
-                        i--;
-                    }
-                }
                 //logical and
                 for (int i = 0; i < list.size() - 1; i++) {
                     GenericTreeNode<Construct> node = list.get(i + 1);
@@ -695,45 +706,36 @@ public class Sandbox {
                     }
                 }
             }
-            if (list.size() == 1) {
-                //We condensed down to the point that we no longer need to concat
-                return parent.eval(list.get(0), env);
+            
+            //Look for a CEntry here
+            GenericTreeNode<Construct> node = list.get(0);
+            if(node.data instanceof CLabel){
+                GenericTreeNode<Construct> value = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", t));
+                for(int i = 1; i < list.size(); i++){
+                    value.addChild(list.get(i));
+                }
+                GenericTreeNode<Construct> ce = new GenericTreeNode<Construct>(new CFunction("centry", t));
+                ce.addChild(node);
+                ce.addChild(value);
+                return ce;
             }
-            StringHandling.sconcat sc = new StringHandling.sconcat();
-            return sc.execs(t, env, parent, list.toArray(new GenericTreeNode[]{}));
-        }
-
-        public String docs() {
-            return "string {var1, [var2...]} This function should only be used by the compiler, behavior"
-                    + " may be undefined if it is used in code.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_0_1;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        @Override
-        public boolean useSpecialExec() {
-            return true;
-        }
+            
+            //We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
+            //left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
+            //be handled in MethodScriptCompiler's optimize function.
+            if(list.size() == 1){
+                return list.get(0);
+            } else {                
+                GenericTreeNode<Construct> tree;
+                if(returnSConcat){
+                    tree = new GenericTreeNode<Construct>(new CFunction("sconcat", t));
+                } else {
+                    tree = new GenericTreeNode<Construct>(new CFunction("concat", t));
+                }
+                tree.setChildren(list);
+                return tree;
+            }
+        }                
+               
     }
 }

@@ -4,6 +4,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
@@ -779,6 +780,7 @@ public class BasicLogic {
         public boolean useSpecialExec() {
             return true;
         }
+               
     }
     
     @api public static class or extends AbstractFunction{
@@ -873,6 +875,16 @@ public class BasicLogic {
         public Boolean runAsync() {
             return null;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
     
     @api public static class xor extends AbstractFunction{
@@ -913,6 +925,16 @@ public class BasicLogic {
             boolean val1 = Static.getBoolean(args[0]);
             boolean val2 = Static.getBoolean(args[1]);
             return new CBoolean(val1 ^ val2, t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
         
     }
@@ -1059,6 +1081,16 @@ public class BasicLogic {
             return new CBoolean(!val, t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class bit_and extends AbstractFunction{
@@ -1104,6 +1136,16 @@ public class BasicLogic {
                 val = val & Static.getInt(args[i]);
             }
             return new CInt(val, t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
         
     }
@@ -1153,6 +1195,16 @@ public class BasicLogic {
             return new CInt(val, t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class bit_not extends AbstractFunction{
@@ -1191,6 +1243,16 @@ public class BasicLogic {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             return new CInt(~Static.getInt(args[0]), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
         
     }
@@ -1233,6 +1295,16 @@ public class BasicLogic {
             long value = Static.getInt(args[0]);
             long toShift = Static.getInt(args[1]);
             return new CInt(value << toShift, t);            
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
                 
     }
@@ -1277,6 +1349,16 @@ public class BasicLogic {
             return new CInt(value >> toShift, t);
         }
         
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+        
     }
     
     @api public static class urshift extends AbstractFunction{
@@ -1318,6 +1400,16 @@ public class BasicLogic {
             long value = Static.getInt(args[0]);
             long toShift = Static.getInt(args[1]);
             return new CInt(value >>> toShift, t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
         
     }

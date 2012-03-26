@@ -73,4 +73,9 @@ public class Variable extends Construct {
         return clone;
     }
 
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
+
 }

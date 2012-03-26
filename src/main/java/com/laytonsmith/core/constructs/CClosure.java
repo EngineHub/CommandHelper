@@ -109,17 +109,17 @@ public class CClosure extends Construct {
                     } catch(Exception e) {
                         value = defaults[i].clone();
                     }
-                    environment.GetVarList().set(new IVariable(name, value, target));
+                    environment.GetVarList().set(new IVariable(name, value, getTarget()));
                 }
             }
-            CArray arguments = new CArray(node.data.target);
+            CArray arguments = new CArray(node.data.getTarget());
             if(values != null){
                 for(Construct value : values){
                     arguments.push(value);
                 }
             }
-            environment.GetVarList().set(new IVariable("@arguments", arguments, node.data.target));
-            GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", target));
+            environment.GetVarList().set(new IVariable("@arguments", arguments, node.data.getTarget()));
+            GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", getTarget()));
             List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
             children.add(node);
             newNode.setChildren(children);
@@ -131,5 +131,10 @@ public class CClosure extends Construct {
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }
+
+    @Override
+    public boolean isDynamic() {
+        return false;
     }
 }

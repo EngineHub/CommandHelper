@@ -6,6 +6,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 
 /**
  *
@@ -39,5 +40,24 @@ public abstract class AbstractFunction implements Function{
     public boolean appearInDocumentation() {
         return true;
     }            
+    
+    /**
+     * Most functions can't optimize.
+     * @return 
+     */
+    public boolean canOptimize(){
+        return false;
+    }
+    
+    /**
+     * Just return null by default. Most functions won't get to this anyways, since
+     * canOptimize is returning false.
+     * @param t
+     * @param args
+     * @return 
+     */
+    public Construct optimize(Target t, Construct ... args) throws ConfigCompileException{
+        return null;
+    }
 
 }

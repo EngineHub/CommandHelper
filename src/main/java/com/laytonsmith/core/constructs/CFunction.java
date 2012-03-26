@@ -17,11 +17,17 @@ public class CFunction extends Construct {
     }
 
     public String toString() {
-        return this.value;
+        return getValue();
     }
     
     @Override
     public CFunction clone() throws CloneNotSupportedException{
         return (CFunction) super.clone();
     }
+
+    @Override
+    public boolean isDynamic() {
+        return true;
+    }
+    
 }

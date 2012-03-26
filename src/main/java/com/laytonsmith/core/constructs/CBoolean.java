@@ -66,4 +66,9 @@ public class CBoolean extends Construct implements Cloneable{
         return (CBoolean) super.clone();
     }
 
+    @Override
+    public boolean isDynamic() {
+        return false;
+    }
+
 }

@@ -66,6 +66,16 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) {
+            return exec(t, null, args);
+        }               
     }
 
     @api
@@ -167,6 +177,22 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            //We can't really optimize, but we can check that we are
+            //getting an ivariable.
+            if(!(args[0] instanceof IVariable)){
+                throw new ConfigCompileException("Expecting an ivar for argument 1 to assign", t);
+            }
+            return null;
+        }
+                
     }
 
     @api
@@ -505,6 +531,16 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(!(args[0] instanceof CArray), t);
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -544,6 +580,16 @@ public class DataHandling {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CArray, t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -586,6 +632,16 @@ public class DataHandling {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CDouble, t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -632,6 +688,16 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CInt, t);
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -676,6 +742,16 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CBoolean, t);
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -718,6 +794,16 @@ public class DataHandling {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CNull, t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -765,6 +851,16 @@ public class DataHandling {
 
         public CHVersion since() {
             return CHVersion.V3_3_0;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -816,6 +912,16 @@ public class DataHandling {
 
         public CHVersion since() {
             return CHVersion.V3_3_0;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -994,6 +1100,20 @@ public class DataHandling {
         public boolean useSpecialExec() {
             return true;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            //We can't optimize per se, but if the path is constant, and the code is uncompilable, we
+            //can give a warning, and go ahead and cache the tree.
+            String path = args[0].val();
+            IncludeCache.get(new File(path), t);
+            return null;
+        }
     }
 
     @api
@@ -1153,6 +1273,16 @@ public class DataHandling {
             } else {
                 throw new ConfigRuntimeException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, t);
             }
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -1478,6 +1608,16 @@ public class DataHandling {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -1523,6 +1663,16 @@ public class DataHandling {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
     }
 
     @api
@@ -1564,6 +1714,16 @@ public class DataHandling {
 
         public CHVersion since() {
             return CHVersion.V3_3_0;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 
@@ -1607,6 +1767,16 @@ public class DataHandling {
 
         public CHVersion since() {
             return CHVersion.V3_3_0;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
         }
     }
 }

@@ -30,4 +30,10 @@ public class CEntry extends Construct{
     public Construct construct(){
         return this.construct;
     }
+
+    @Override
+    public boolean isDynamic() {
+        return false;
+    }
+    
 }

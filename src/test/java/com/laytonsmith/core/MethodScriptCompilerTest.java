@@ -574,11 +574,6 @@ public class MethodScriptCompilerTest {
         assertEquals("true", SRun("2 == 2 && true", fakePlayer));
     }
     
-    @Test public void testBitwiseSymbols() throws ConfigCompileException{
-        assertEquals("0", SRun("1 & 2", fakePlayer));
-        assertEquals("3", SRun("1 | 2", fakePlayer));
-    }
-    
     @Test public void testSymbolCompileError(){
         try{
             SRun("(+ * 2)", fakePlayer);
@@ -620,6 +615,11 @@ public class MethodScriptCompilerTest {
     
     @Test public void testParenthesisAfterQuotedString() throws ConfigCompileException{
         assertEquals("2 + 2 is 4", SRun("'2 + 2 is' (2 + 2)", fakePlayer));
+    }
+    
+    @Test(expected=ConfigCompileException.class)
+    public void testCompileErrorOfStaticConstructOptimization() throws ConfigCompileException{
+        MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null));
     }
     
     

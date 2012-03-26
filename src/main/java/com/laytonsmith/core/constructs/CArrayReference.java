@@ -27,10 +27,10 @@ public class CArrayReference extends Construct{
                 if(ival instanceof CArray){
                     this.array = ival;
                 } else {
-                    this.array = new CArray(target);
+                    this.array = new CArray(getTarget());
                 }
             } else {
-                this.array = new CArray(target);
+                this.array = new CArray(getTarget());
             }
         }
         this.index = index;
@@ -58,5 +58,10 @@ public class CArrayReference extends Construct{
             temp = (CArrayReference)temp.array;
         }
         return temp.index;
+    }
+
+    @Override
+    public boolean isDynamic() {
+        return false;
     }
 }

@@ -19,4 +19,9 @@ public class Command extends Construct implements Cloneable {
         return (Command) super.clone();
     }
 
+    @Override
+    public boolean isDynamic() {
+        return false;
+    }
+
 }

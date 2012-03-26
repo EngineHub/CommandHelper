@@ -7,8 +7,8 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.functions.IncludeCache;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.*;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -263,30 +263,31 @@ public class MethodScriptCompiler {
                 token_list.add(new Token(TType.LOGICAL_NOT, "!", target));  
                 continue;
             }
-            if(c == '&' && !state_in_quote){
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuffer();
-                }
-                token_list.add(new Token(TType.BIT_AND, "&", target));  
-                continue;
-            }
-            if(c == '|' && !state_in_quote){
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuffer();
-                }
-                token_list.add(new Token(TType.BIT_OR, "|", target));  
-                continue;
-            }
-            if(c == '^' && !state_in_quote){
-                if (buf.length() > 0) {
-                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-                    buf = new StringBuffer();
-                }
-                token_list.add(new Token(TType.BIT_XOR, "^", target));  
-                continue;
-            }
+            //I don't want to use these symbols yet, especially since bitwise operations are rare.
+//            if(c == '&' && !state_in_quote){
+//                if (buf.length() > 0) {
+//                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+//                    buf = new StringBuffer();
+//                }
+//                token_list.add(new Token(TType.BIT_AND, "&", target));  
+//                continue;
+//            }
+//            if(c == '|' && !state_in_quote){
+//                if (buf.length() > 0) {
+//                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+//                    buf = new StringBuffer();
+//                }
+//                token_list.add(new Token(TType.BIT_OR, "|", target));  
+//                continue;
+//            }
+//            if(c == '^' && !state_in_quote){
+//                if (buf.length() > 0) {
+//                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+//                    buf = new StringBuffer();
+//                }
+//                token_list.add(new Token(TType.BIT_XOR, "^", target));  
+//                continue;
+//            }
             
             if (c == '.' && c2 == '.' && !state_in_quote) {
                 //This one has to come before plain .
@@ -374,11 +375,11 @@ public class MethodScriptCompiler {
                         if (token_list.get(token_list.size() - 1).type == TType.UNKNOWN) {
                             token_list.get(token_list.size() - 1).type = TType.FUNC_NAME;
                         } else {
-                            token_list.add(new Token(TType.FUNC_NAME, "p", target));
+                            token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
                         }
                     } catch (IndexOutOfBoundsException e) {
-                        //This is the first element on the list, so, it's another p.
-                        token_list.add(new Token(TType.FUNC_NAME, "p", target));
+                        //This is the first element on the list, so, it's another autoconcat.
+                        token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
                     }
                 }
                 token_list.add(new Token(TType.FUNC_START, "(", target));
@@ -660,7 +661,7 @@ public class MethodScriptCompiler {
     }
 
     public static GenericTreeNode<Construct> compile(List<Token> stream) throws ConfigCompileException {
-        stream.add(0, new Token(TType.FUNC_NAME, "p", Target.UNKNOWN));
+        stream.add(0, new Token(TType.FUNC_NAME, "__autoconcat__", Target.UNKNOWN));
         stream.add(1, new Token(TType.FUNC_START, "(", Target.UNKNOWN));
         stream.add(new Token(TType.FUNC_END, ")", Target.UNKNOWN));
         GenericTreeNode<Construct> tree = new GenericTreeNode<Construct>();
@@ -874,7 +875,102 @@ public class MethodScriptCompiler {
         if (parens != 0) {
             throw new ConfigCompileException("Mismatched parenthesis", t.target);
         }
+        
+        for(GenericTreeNode<Construct> node : tree.getChildren()){
+            //The topmost node is the root node
+            optimize(node);            
+        }
         return tree;
+    }
+    
+    /**
+     * Recurses down into the tree, attempting to optimize where possible.
+     * @param tree
+     * @return 
+     */
+    private static void optimize(GenericTreeNode<Construct> tree) throws ConfigCompileException{
+        if(!(tree.data instanceof CFunction)){
+            //There's no way to optimize something that's not a function
+            return;
+        }
+        //cc has to be inb4 other autoconcats, so sconcats on the lower level won't get run
+        if(tree.data.val().equals("cc")){
+            for(int i = 0; i < tree.getChildren().size(); i++){
+                GenericTreeNode<Construct> node = tree.getChildAt(i);
+                if(node.data.val().equals("__autoconcat__")){
+                    Sandbox.__autoconcat__ func = (Sandbox.__autoconcat__)FunctionList.getFunction(node.data);
+                    GenericTreeNode<Construct> tempNode = func.optimizeSpecial(node.data.getTarget(), node.children, false);
+                    tree.data = tempNode.data;
+                    tree.children = tempNode.children;
+                    optimize(tree);
+                    return;
+                }
+            }
+        }
+        List<GenericTreeNode<Construct>> children = tree.getChildren();
+        boolean fullyStatic = true;
+        boolean hasIVars = false;
+        for(int i = 0; i < children.size(); i++){
+            GenericTreeNode<Construct> node = children.get(i);            
+            if(node.data instanceof CFunction){
+                optimize(node);
+            }
+            
+            if(node.data.isDynamic() && !(node.data instanceof IVariable)){
+                fullyStatic = false;
+            }
+            if(node.data instanceof IVariable){
+                hasIVars = true;
+            }
+        }   
+        
+        CFunction cFunction = (CFunction)tree.data;
+        Function func;
+        try{
+            func = FunctionList.getFunction(cFunction);
+        } catch(ConfigCompileException e){
+            //It's a proc. We can't optimize those yet.
+            return;
+        }
+        //the compiler trick functions know how to deal with it specially, even if everything isn't
+        //static, so do this first.
+        if(func instanceof Sandbox.__autoconcat__){
+            Sandbox.__autoconcat__ autoconcat = (Sandbox.__autoconcat__)func;
+            GenericTreeNode<Construct> tempNode = autoconcat.optimizeSpecial(tree.data.getTarget(), tree.getChildren());
+            tree.data = tempNode.data;
+            tree.children = tempNode.children;
+            optimize(tree);
+            return;
+        }
+        if(!fullyStatic){
+            return;
+        }        
+        //Otherwise, everything is static, or an IVariable and we can proceed.
+        //Note since we could still have IVariables, we have to handle those
+        //specially from here forward
+        if(func.preResolveVariables() && hasIVars){
+            //Well, this function isn't equipped to deal with IVariables.
+            return;
+        }
+        if(func.canOptimize()){
+            Construct [] constructs = new Construct[tree.getChildren().size()];
+            for(int i = 0; i < tree.getChildren().size(); i++){
+                constructs[i] = tree.getChildAt(i).data;
+            }
+            try{
+                Construct result = func.optimize(tree.data.getTarget(), constructs);
+
+                //If the result is null, it was just a check, it can't optimize further.
+                if(result != null){
+                    tree.data = result;
+                    tree.children = new ArrayList<GenericTreeNode<Construct>>();
+                }
+            } catch(ConfigRuntimeException e){
+                //Turn this into a ConfigCompileException, then rethrow
+                throw new ConfigCompileException(e);
+            }
+        }
+        //It doesn't know how to optimize. Oh well.
     }
 
     /**

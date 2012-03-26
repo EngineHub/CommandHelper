@@ -19,11 +19,23 @@ public class ConfigCompileException extends Exception{
     final File file;
     final int col;
 
-    public ConfigCompileException(String message, Target t) {
+    public ConfigCompileException(String message, Target t){
+        this(message, t, null);
+    }
+    public ConfigCompileException(String message, Target t, Throwable cause) {
         this.message = message;
         this.line_num = t.line();
         this.file = t.file();
         this.col = t.col();
+    }
+
+    /**
+     * This turns a ConfigRuntimeException into a compile time exception. Typically only
+     * used during optimization.
+     * @param e 
+     */
+    public ConfigCompileException(ConfigRuntimeException e) {
+        this(e.getMessage(), e.getTarget(), e);
     }
     
     @Override
