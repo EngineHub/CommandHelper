@@ -708,16 +708,18 @@ public class Sandbox {
             }
             
             //Look for a CEntry here
-            GenericTreeNode<Construct> node = list.get(0);
-            if(node.data instanceof CLabel){
-                GenericTreeNode<Construct> value = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", t));
-                for(int i = 1; i < list.size(); i++){
-                    value.addChild(list.get(i));
+            if(list.size() >= 1){
+                GenericTreeNode<Construct> node = list.get(0);
+                if(node.data instanceof CLabel){
+                    GenericTreeNode<Construct> value = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", t));
+                    for(int i = 1; i < list.size(); i++){
+                        value.addChild(list.get(i));
+                    }
+                    GenericTreeNode<Construct> ce = new GenericTreeNode<Construct>(new CFunction("centry", t));
+                    ce.addChild(node);
+                    ce.addChild(value);
+                    return ce;
                 }
-                GenericTreeNode<Construct> ce = new GenericTreeNode<Construct>(new CFunction("centry", t));
-                ce.addChild(node);
-                ce.addChild(value);
-                return ce;
             }
             
             //We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
