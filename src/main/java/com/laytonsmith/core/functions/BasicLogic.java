@@ -124,7 +124,7 @@ public class BasicLogic {
 
         @Override
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            Construct value = env.GetScript().eval(nodes[0], env);
+            Construct value = parent.seval(nodes[0], env);
             equals equals = new equals();
             for(int i = 1; i <= nodes.length - 2; i+=2){
                 GenericTreeNode<Construct> statement = nodes[i];
@@ -134,17 +134,17 @@ public class BasicLogic {
                     for(String index : ((CArray)evalStatement).keySet()){
                         Construct inner = ((CArray)evalStatement).get(index);
                         if(((CBoolean)equals.exec(t, env, value, inner)).getBoolean()){
-                            return env.GetScript().eval(code, env);
+                            return parent.seval(code, env);
                         }
                     }
                 } else {
                     if(((CBoolean)equals.exec(t, env, value, evalStatement)).getBoolean()){
-                        return env.GetScript().eval(code, env);
+                        return parent.seval(code, env);
                     }
                 }
             }
             if(nodes.length % 2 == 0){
-                return env.GetScript().eval(nodes[nodes.length - 1], env);
+                return parent.seval(nodes[nodes.length - 1], env);
             }
             return new CVoid(t);
         }

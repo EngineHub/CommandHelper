@@ -350,6 +350,17 @@ public class BasicLogicTest {
         SRun("switch(2, 1, msg('nope'), 2, msg('yep'))", fakePlayer);
         verify(fakePlayer).sendMessage("yep");
     }
+    
+    @Test public void testSwitch3() throws ConfigCompileException{
+        SRun("assign(@args, 'test')" +
+                "switch(@args," +
+                    "'test'," + 
+                        "msg('test')," +
+                    "msg('default')" +
+                ")",
+                fakePlayer);
+        verify(fakePlayer).sendMessage("test");
+    }
 
     @Test(timeout = 10000)
     public void testSwitchWithArray() throws ConfigCompileException {
