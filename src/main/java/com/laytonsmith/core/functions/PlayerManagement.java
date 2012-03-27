@@ -1786,8 +1786,10 @@ public class PlayerManagement {
             if(p != null && !p.getName().equals(args[0].val())){
                 MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());                
                 return new CBoolean(player.isOnline(), t);
-            } else {
+            } else if(p != null){
                 return new CBoolean(p.isOnline(), t);
+            } else {
+                return new CBoolean(false, t);
             }
         }
     }
