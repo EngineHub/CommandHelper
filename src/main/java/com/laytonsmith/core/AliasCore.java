@@ -478,12 +478,19 @@ public class AliasCore {
         
         public void compileMS(MCPlayer player){
             for(FileInfo fi : ms){
+                boolean exception = false;
                 try{
                     Env env = new Env();
                     MethodScriptCompiler.registerAutoIncludes(env, null);
                     MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), env, null, null);
                 } catch(ConfigCompileException e){
+                    exception = true;
                     ConfigRuntimeException.DoReport(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
+                } catch(ConfigRuntimeException e){
+                    exception = true;
+                    ConfigRuntimeException.DoReport(e);
+                }
+                if(exception){
                     if(Prefs.HaltOnFailure()){
                         logger.log(Level.SEVERE, TermColors.RED + "[CommandHelper]: Compilation halted due to unrecoverable failure." + TermColors.reset());
                         return;

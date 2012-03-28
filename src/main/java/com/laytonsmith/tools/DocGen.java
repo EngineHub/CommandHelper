@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) {
-        functions("wiki");
+        events("wiki");
     }
 
     public static void functions(String type) {
@@ -359,8 +359,15 @@ public class DocGen {
             boolean first = true;
             for (String d : data) {
                 int split = d.indexOf(":");
-                String name = d.substring(0, split).trim();
-                String description = d.substring(split + 1).trim();
+                String name;
+                String description;
+                if(split == -1){                    
+                    name = d;
+                    description = "";
+                } else {
+                    name = d.substring(0, split).trim();
+                    description = d.substring(split + 1).trim();
+                }
                 if (type.equals("html")) {
                     b.append(first ? "" : "<br />").append("<strong>").append(name).append("</strong>: ").append(description);
                 } else if (type.equals("wiki")) {

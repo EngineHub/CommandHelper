@@ -10,12 +10,9 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
-import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
-import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
-import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.events.abstraction;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,6 +21,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -272,6 +270,35 @@ public class BukkitPlayerEvents {
 
         public boolean isCancelled() {
             return isCancelled;
+        }
+        
+    }
+    
+    @abstraction(type=Implementation.Type.BUKKIT)
+    public static class BukkitMCWorldChangedEvent implements MCWorldChangedEvent{
+        PlayerChangedWorldEvent pcwe;
+        public BukkitMCWorldChangedEvent(PlayerChangedWorldEvent e){
+            pcwe = e;
+        }
+
+        public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(pcwe.getPlayer());
+        }
+
+        public MCWorld getFrom() {
+            return new BukkitMCWorld(pcwe.getFrom());
+        }
+
+        public MCWorld getTo() {
+            return new BukkitMCWorld(pcwe.getPlayer().getWorld());
+        }
+
+        public Object _GetObject() {
+            return pcwe;
+        }
+        
+        public static BukkitMCWorldChangedEvent _instantiate(MCPlayer entity, MCWorld from){
+            return new BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(((BukkitMCPlayer)entity)._Player(), ((BukkitMCWorld)from).__World()));
         }
         
     }

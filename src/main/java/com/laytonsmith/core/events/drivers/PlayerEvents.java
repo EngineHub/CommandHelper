@@ -523,8 +523,8 @@ public class PlayerEvents {
         
         public String docs() {
             return "{command<string match>: The entire command the player ran "
-                    + "| prefix<string match>: Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'}"
-                    + "| player<macro>: The player using the command"
+                    + "| prefix<string match>: Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'"
+                    + "| player<macro>: The player using the command}"
                     + "This event is fired off when a player runs any command at all. This actually fires before normal "
                     + " CommandHelper aliases, allowing you to insert control before defined aliases, even."
                     + "{command: The entire command | prefix: Just the prefix of the command}"
@@ -600,6 +600,73 @@ public class PlayerEvents {
         public void cancel(BindableEvent o, boolean state) {
             ((MCPlayerCommandEvent)o).cancel();
         }                
+    }
+    
+    @api
+    public static class world_changed extends AbstractEvent {
+        
+        public String getName() {
+            return "world_changed";
+        }
+        
+        public String docs() {
+            return "{player<macro>: The player that switched worlds | from<string match>: The world the player is coming from | to<string match>: The world the player is now in}"
+                    + "This event is fired off when a player changes worlds"
+                    + "{player | from: The world the player is coming from | to: The world the player is now in}"
+                    + "{}"
+                    + "{player, from}";
+        }
+        
+        public Driver driver() {
+            return Driver.WORLD_CHANGED;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if (e instanceof MCWorldChangedEvent) {
+                MCWorldChangedEvent event = (MCWorldChangedEvent) e;
+                Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);   
+                Prefilters.match(prefilter, "from", event.getFrom().getName(), PrefilterType.STRING_MATCH);
+                Prefilters.match(prefilter, "to", event.getTo().getName(), PrefilterType.STRING_MATCH);
+                return true;
+            }
+            return false;
+        }
+        
+        public BindableEvent convert(CArray manualObject) {
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"));
+            MCWorld from = Static.getServer().getWorld(manualObject.get("from").val());
+            
+            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
+                player, from);
+            return e;
+        }
+        
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if (e instanceof MCWorldChangedEvent) {
+                MCWorldChangedEvent event = (MCWorldChangedEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                //Fill in the event parameters
+                map.put("from", new CString(event.getFrom().getName(), Target.UNKNOWN));
+                map.put("to", new CString(event.getTo().getName(), Target.UNKNOWN));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCWorldChangedEvent");
+            }
+        }
+        
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            if (event instanceof MCWorldChangedEvent) {
+                MCWorldChangedEvent e = (MCWorldChangedEvent) event;
+                
+                return true;
+            }
+            return false;
+        }
+                        
     }
     
     

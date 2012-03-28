@@ -7,9 +7,11 @@ package com.laytonsmith.abstraction.bukkit.events.drivers;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.player.PlayerChangedWorldEvent;
 import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
@@ -39,6 +41,11 @@ public class BukkitPlayerListener implements Listener{
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerChat(PlayerChatEvent event){
         EventUtils.TriggerListener(Driver.PLAYER_CHAT, "player_chat", new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event));
+    }
+    
+    @EventHandler(priority= EventPriority.LOWEST)
+    public void onPlayerChangedWorld(PlayerChangedWorldEvent event){
+        EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", new BukkitPlayerEvents.BukkitMCWorldChangedEvent(event));
     }
     
 
