@@ -16,6 +16,7 @@ import org.bukkit.event.player.PlayerChatEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.event.player.PlayerTeleportEvent;
 
 /**
  *
@@ -46,6 +47,13 @@ public class BukkitPlayerListener implements Listener{
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerChangedWorld(PlayerChangedWorldEvent event){
         EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", new BukkitPlayerEvents.BukkitMCWorldChangedEvent(event));
+    }
+    
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerTeleport(PlayerTeleportEvent event){
+        if(!event.getFrom().getWorld().equals(event.getTo().getWorld())){
+            EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", new BukkitPlayerEvents.BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(event.getPlayer(), event.getFrom().getWorld())));
+        }
     }
     
 

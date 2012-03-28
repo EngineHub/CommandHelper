@@ -322,7 +322,7 @@ public class PlayerEvents {
                     + "{player: The player that died | drops: An array of the dropped items"
                     + "| xp: The xp that will be dropped | cause: The cause of death | death_message: The"
                     + " death message}"
-                    + "{xp|drops An array of item objects, or null. The items to be dropped"
+                    + "{xp|drops: An array of item objects, or null. The items to be dropped"
                     + " are replaced with the given items, not added to|death_message the death message,"
                     + " or null to remove it entirely}"
                     + "{player | drops | death_message}";
@@ -522,9 +522,9 @@ public class PlayerEvents {
         }
         
         public String docs() {
-            return "{command<string match>: The entire command the player ran "
-                    + "| prefix<string match>: Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'"
-                    + "| player<macro>: The player using the command}"
+            return "{command: <string match> The entire command the player ran "
+                    + "| prefix: <string match> Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'"
+                    + "| player: <macro> The player using the command}"
                     + "This event is fired off when a player runs any command at all. This actually fires before normal "
                     + " CommandHelper aliases, allowing you to insert control before defined aliases, even."
                     + "{command: The entire command | prefix: Just the prefix of the command}"
@@ -610,7 +610,9 @@ public class PlayerEvents {
         }
         
         public String docs() {
-            return "{player<macro>: The player that switched worlds | from<string match>: The world the player is coming from | to<string match>: The world the player is now in}"
+            return "{player: <macro> The player that switched worlds "
+                    + "| from: <string match> The world the player is coming from "
+                    + "| to: <string match> The world the player is now in}"
                     + "This event is fired off when a player changes worlds"
                     + "{player | from: The world the player is coming from | to: The world the player is now in}"
                     + "{}"
