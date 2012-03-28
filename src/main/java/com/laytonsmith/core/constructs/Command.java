@@ -16,7 +16,7 @@ public class Command extends Construct implements Cloneable {
 
     @Override
     public Command clone() throws CloneNotSupportedException{
-        return (Command) super.clone();
+        return this;
     }
 
     @Override

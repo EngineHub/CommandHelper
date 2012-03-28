@@ -69,7 +69,9 @@ public class DataHandling {
 
         @Override
         public boolean canOptimize() {
-            return true;
+            //FALSE. Can't optimize, because this returns a reference. This is
+            //a much more complicated issue. TODO
+            return false;
         }
 
         @Override

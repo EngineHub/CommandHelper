@@ -37,7 +37,7 @@ public class CDouble extends Construct implements Cloneable{
     
     @Override
     public CDouble clone() throws CloneNotSupportedException{
-        return (CDouble) super.clone();
+        return this;
     }
 
     @Override

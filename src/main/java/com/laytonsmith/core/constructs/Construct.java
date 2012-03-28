@@ -27,10 +27,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
         DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
         SYMBOL
     }
-    private ConstructType ctype;
-    private String value;
+    private final ConstructType ctype;
+    private final String value;
 
-    private Target target;
+    private final Target target;
 
     public ConstructType getCType() {
         return ctype;

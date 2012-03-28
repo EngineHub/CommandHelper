@@ -355,5 +355,11 @@ public class ArrayTest {
         verify(fakePlayer).sendMessage("67890");
         verify(fakePlayer).sendMessage("there");
     }
+    
+    @Test public void testComplexGetter() throws ConfigCompileException{
+        SRun("assign(@array, array(blah: 'blarg'))"
+                + "msg(@array[to_lower('BLAH')])", fakePlayer);
+        verify(fakePlayer).sendMessage("blarg");
+    }
 
 }

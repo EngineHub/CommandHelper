@@ -16,7 +16,7 @@ public class CVoid extends Construct implements Cloneable{
     
     @Override
     public CVoid clone() throws CloneNotSupportedException{
-        return (CVoid) super.clone();
+        return this;
     }
 
     @Override

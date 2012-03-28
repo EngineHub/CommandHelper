@@ -6,11 +6,8 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.bukkit.events.MCPlayerChatEvent;
-import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
-import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
-import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
-import com.laytonsmith.abstraction.events.MCPlayerRespawnEvent;
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
+import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -21,6 +18,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.StringHandling;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -226,7 +224,11 @@ public class PlayerEvents {
         
         public String docs() {
             return "{x: <expression>| y: <expression>| z: <expression>| world: <string match>| player: <macro>}"
-                    + "Fires when a player respawns"
+                    + "Fires when a player respawns. Technically during this time, the player is not considered to be"
+                    + " 'online'. This can cause problems if you try to run an external command with run() or something."
+                    + " CommandHelper takes into account the fact that the player is offline, and works around this, so"
+                    + " all CH functions should respond correctly, as if the player was online, however other plugins or"
+                    + " plain text commands that are run may not."
                     + "{player: The player that is respawning | "
                     + "location: The location they are going to respawn at}"
                     + "{location}"
@@ -462,7 +464,7 @@ public class PlayerEvents {
             MCPlayer player = Static.GetPlayer(manualObject.get("player"));
             String message = manualObject.get("message").nval();
             
-            BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class, 
+            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
                 player, message);
             return e;
         }
@@ -510,6 +512,94 @@ public class PlayerEvents {
             }
             return false;
         }
+    }
+    
+    @api
+    public static class player_command extends AbstractEvent {
+        
+        public String getName() {
+            return "player_command";
+        }
+        
+        public String docs() {
+            return "{command<string match>: The entire command the player ran "
+                    + "| prefix<string match>: Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'}"
+                    + "| player<macro>: The player using the command"
+                    + "This event is fired off when a player runs any command at all. This actually fires before normal "
+                    + " CommandHelper aliases, allowing you to insert control before defined aliases, even."
+                    + "{command: The entire command | prefix: Just the prefix of the command}"
+                    + "{}"
+                    + "{command}";
+        }
+        
+        public Driver driver() {
+            return Driver.PLAYER_COMMAND;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if (e instanceof MCPlayerCommandEvent) {
+                MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
+                String command = event.getCommand();
+                Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);   
+                if(prefilter.containsKey("command") && !command.equals(event.getCommand())){
+                    return false;
+                }
+                if(prefilter.containsKey("prefix")){
+                    StringHandling.parse_args pa = new StringHandling.parse_args();
+                    CArray ca = (CArray)pa.exec(Target.UNKNOWN, null, new CString(command, Target.UNKNOWN));
+                    if(ca.size() > 0){
+                        if(!ca.get(0).val().equals(prefilter.get("prefix").val())){
+                            return false;
+                        }
+                    } else {
+                        return false;
+                    }
+                }
+                return true;
+            }
+            return false;
+        }
+        
+        public BindableEvent convert(CArray manualObject) {
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"));
+            String command = manualObject.get("command").nval();
+            
+            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
+                player, command);
+            return e;
+        }
+        
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if (e instanceof MCPlayerCommandEvent) {
+                MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                //Fill in the event parameters
+                map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerCommandEvent");
+            }
+        }
+        
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            if (event instanceof MCPlayerCommandEvent) {
+                MCPlayerCommandEvent e = (MCPlayerCommandEvent) event;
+                if("command".equals(key)){
+                    e.setCommand(value.val());
+                }
+                return true;
+            }
+            return false;
+        }
+
+        @Override
+        public void cancel(BindableEvent o, boolean state) {
+            ((MCPlayerCommandEvent)o).cancel();
+        }                
     }
     
     

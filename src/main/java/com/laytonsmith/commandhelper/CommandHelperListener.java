@@ -22,8 +22,12 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlayerListener;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -92,6 +96,11 @@ public class CommandHelperListener implements Listener {
 //        if(Prefs.DebugMode()){
 //            System.out.println("CommandHelper: (>'.')> Received event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
 //        }
+        MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
+        EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
+        if(mpce.isCancelled()){
+            return;
+        }
         
         if (Implementation.GetServerType() == Implementation.Type.BUKKIT) {
             WorldGuardPlugin wgp = Static.getWorldGuardPlugin(Target.UNKNOWN);

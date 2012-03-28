@@ -15,7 +15,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 public class CBoolean extends Construct implements Cloneable{
     
     public static final long serialVersionUID = 1L;
-    private boolean val;
+    private final boolean val;
     public CBoolean(boolean value, Target t){
         super(Boolean.toString(value), ConstructType.BOOLEAN, t);
         val = value;
@@ -23,29 +23,31 @@ public class CBoolean extends Construct implements Cloneable{
 
     public CBoolean(String value, Target t){
         super(value, ConstructType.BOOLEAN, t);
+        boolean tempVal;
         try{
             int i = Integer.parseInt(value);
             if(i == 0){
-                val = false;
+                tempVal = false;
             } else {
-                val = true;
+                tempVal = true;
             }
         } catch(NumberFormatException e){
             try{
                 double d = Double.parseDouble(value);
                 if(d == 0){
-                    val = false;
+                    tempVal = false;
                 } else {
-                    val = true;
+                    tempVal = true;
                 }
             } catch(NumberFormatException f){
                 try{
-                    val = Boolean.parseBoolean(value);
+                    tempVal = Boolean.parseBoolean(value);
                 } catch(NumberFormatException g){
                     throw new ConfigRuntimeException("Could not parse value " + value + " into a Boolean type", ExceptionType.FormatException, t);
                 }
             }
         }
+        val = tempVal;
     }
 
     public boolean getBoolean(){
@@ -63,7 +65,7 @@ public class CBoolean extends Construct implements Cloneable{
     
     @Override
     public CBoolean clone() throws CloneNotSupportedException{
-        return (CBoolean) super.clone();
+        return this;
     }
 
     @Override

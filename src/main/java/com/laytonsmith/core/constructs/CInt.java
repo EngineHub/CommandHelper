@@ -35,7 +35,7 @@ public class CInt extends Construct implements Cloneable{
     }
     
     public CInt clone() throws CloneNotSupportedException{
-        return (CInt) super.clone();
+        return this;
     }
 
     @Override

@@ -24,7 +24,7 @@ public class CNull extends Construct implements Cloneable{
     
     @Override
     public CNull clone() throws CloneNotSupportedException{
-        return (CNull) super.clone();
+        return this;
     }
     
     @Override

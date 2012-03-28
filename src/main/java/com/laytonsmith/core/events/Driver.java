@@ -14,5 +14,6 @@ public enum Driver {
     PLAYER_INTERACT, 
     PLAYER_SPAWN,     
     PLAYER_DEATH, 
-    PLAYER_CHAT,
+    PLAYER_CHAT, 
+    PLAYER_COMMAND,
 }

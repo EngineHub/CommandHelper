@@ -4,12 +4,14 @@
  */
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.events.MCPlayerChatEvent;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.events.MCPlayerCommandEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDeathEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEvent;
 import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
@@ -23,6 +25,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -233,6 +236,44 @@ public class BukkitPlayerEvents {
             ((PlayerDeathEvent)ede).setDeathMessage(nval);
         }
 
+    }
+    
+    @abstraction(type=Implementation.Type.BUKKIT)
+    public static class BukkitMCPlayerCommandEvent implements MCPlayerCommandEvent{
+        PlayerCommandPreprocessEvent pcpe;
+        boolean isCancelled = false;
+        public BukkitMCPlayerCommandEvent(PlayerCommandPreprocessEvent pcpe){
+            this.pcpe = pcpe;
+        }
+        public Object _GetObject() {            
+            return pcpe;
+        }
+        
+        public String getCommand(){
+            return pcpe.getMessage();
+        }
+
+        public void cancel() {
+            pcpe.setMessage("/commandhelper null");
+            isCancelled = true;
+        }
+
+        public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(pcpe.getPlayer());
+        }                
+        
+        public static BukkitMCPlayerCommandEvent _instantiate(MCPlayer entity, String command){
+            return new BukkitMCPlayerCommandEvent(new PlayerCommandPreprocessEvent(((BukkitMCPlayer)entity)._Player(), command));
+        }
+
+        public void setCommand(String val) {
+            pcpe.setMessage(val);
+        }
+
+        public boolean isCancelled() {
+            return isCancelled;
+        }
+        
     }
    
 }
