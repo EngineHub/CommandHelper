@@ -7,6 +7,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -30,7 +31,7 @@ public class IncludeCache {
     public static GenericTreeNode<Construct> get(File file, Target t){
         if(!cache.containsKey(file)){
             //We have to pull the file from the FS, and compile it.
-            if(Static.CheckSecurity(file.getAbsolutePath())){
+            if(Security.CheckSecurity(file.getAbsolutePath())){
                 try {
                     String s = new ZipReader(file).getFileContents();
                     GenericTreeNode<Construct> tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("g(\n" + s + "\n)", file));

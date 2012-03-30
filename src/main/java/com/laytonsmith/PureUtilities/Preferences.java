@@ -18,11 +18,13 @@ import java.util.logging.Logger;
  * @author Layton Smith
  */
 public class Preferences {
-    private final static Map<String, Preference> prefs = new HashMap<String, Preference>();
+    private final Map<String, Preference> prefs = new HashMap<String, Preference>();
     private final String appName;
     private final Logger logger;
     
     private File prefFile;
+    
+    private String header = "";
     
     /**
      * The type a particular preference can be. The value will be cast to the given type
@@ -73,14 +75,27 @@ public class Preferences {
     /**
      * Provide the name of the app, and logger, for recording errors, and a list
      * of defaults, in case the value is not provided by the user, or an invalid
-     * value is provided. 
+     * value is provided. It also writes a custom header at the top of the file.
+     * Newlines are supported, but only \n
      */
-    public Preferences(String appName, Logger logger, ArrayList<Preference> defaults){
+    public Preferences(String appName, Logger logger, List<Preference> defaults, String header){
         this.appName = appName;
         this.logger = logger;
         for(Preference p : defaults){
             prefs.put(p.name, p);
         }
+        if(!header.trim().equals("")){
+            this.header = "#  " + header.replaceAll("\n", "\n#  ");
+        }
+    }
+    
+    /**
+     * Provide the name of the app, and logger, for recording errors, and a list
+     * of defaults, in case the value is not provided by the user, or an invalid
+     * value is provided. 
+     */
+    public Preferences(String appName, Logger logger, List<Preference> defaults){
+        this(appName, logger, defaults, "");
     }
 
     /**
@@ -211,6 +226,9 @@ public class Preferences {
                     .append(nl)
                     .append("#will persist, but changes to comments will not.")
                     .append(nl).append(nl);
+            if(!header.trim().equals("")){
+                b.append(header).append(nl).append(nl);
+            }
             Iterator it = prefs.entrySet().iterator();
             while(it.hasNext()){
                 Map.Entry<String, Preference> e = (Map.Entry<String, Preference>) it.next();
@@ -232,6 +250,10 @@ public class Preferences {
                 b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
             }
             BufferedWriter out = null;
+            if(!prefFile.exists()){
+                prefFile.getParentFile().mkdirs();
+                prefFile.createNewFile();
+            }
             out = new BufferedWriter(new FileWriter(prefFile.getAbsolutePath()));
             out.write(b.toString());
             out.close();

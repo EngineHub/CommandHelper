@@ -4,10 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -67,7 +64,7 @@ public class Persistance {
             return CHVersion.V3_0_2;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
             String key = GetNamespace(args, args.length - 1, getName(), t);
             String value = null;
             try{
@@ -89,6 +86,7 @@ public class Persistance {
                             ExceptionType.FormatException, t);
                 }
             }
+            CHLog.Log(CHLog.Tags.PERSISTANCE, "Storing: " + key + " -> " + value, t);
             Static.getPersistance().setValue(new String[]{"storage", key}, value);
             try {
                 Static.getPersistance().save();
@@ -142,8 +140,10 @@ public class Persistance {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {            
             Object o;
+            String namespace = GetNamespace(args, null, getName(), t);
+            CHLog.Log(CHLog.Tags.PERSISTANCE, "Getting value: " + namespace, t);
             try {
-                Object obj = Static.getPersistance().getValue(new String[]{"storage", GetNamespace(args, null, getName(), t)});
+                Object obj = Static.getPersistance().getValue(new String[]{"storage", namespace});
                 if(obj == null){
                     return new CNull(t);
                 }
@@ -204,9 +204,12 @@ public class Persistance {
             com.laytonsmith.PureUtilities.Persistance p = Static.getPersistance();
             List<String> keyChain = new ArrayList<String>();
             keyChain.add("storage");
-            keyChain.addAll(Arrays.asList(GetNamespace(args, null, getName(), t).split("\\.")));
+            String namespace = GetNamespace(args, null, getName(), t);
+            CHLog.Log(CHLog.Tags.PERSISTANCE, "Getting all values from " + namespace, t);
+            keyChain.addAll(Arrays.asList(namespace.split("\\.")));
             List<Map.Entry<String, Object>> list = p.getNamespaceValues(keyChain.toArray(new String[]{}));
             CArray ca = new CArray(t);
+            CHLog.Log(CHLog.Tags.PERSISTANCE, CHLog.Level.DEBUG, list.size() + " value(s) are being returned", t);
             for(Map.Entry<String, Object> e : list){
                 try {
                     String key = ((String)e.getKey()).replaceFirst("storage\\.", ""); //Get that junk out of here
@@ -302,7 +305,9 @@ public class Persistance {
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            Static.getPersistance().setValue(new String[]{"storage", GetNamespace(args, null, getName(), t)}, null);
+            String namespace = GetNamespace(args, null, getName(), t);
+            CHLog.Log(CHLog.Tags.PERSISTANCE, "Clearing value: " + namespace, t);
+            Static.getPersistance().setValue(new String[]{"storage", namespace}, null);
             return new CVoid(t);
         }
         

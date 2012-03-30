@@ -55,7 +55,7 @@ public class AliasCore {
      * @param maxCommands How many commands an alias may contain. Since aliases can be used like a
      * macro, this can help prevent command spamming.
      */
-    public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, PermissionsResolverManager perms, CommandHelperPlugin parent) throws ConfigCompileException {
+    public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, PermissionsResolverManager perms, CommandHelperPlugin parent) {
         this.aliasConfig = aliasConfig;
         this.auxAliases = auxAliases;
         this.prefFile = prefFile;
@@ -139,17 +139,7 @@ public class AliasCore {
                             });
                         } catch(ConfigRuntimeException ex){
                             ex.setEnv(env);
-                            switch(ConfigRuntimeException.HandleUncaughtException(ex)){
-                                case REPORT:
-                                    ConfigRuntimeException.DoReport(ex);
-                                    break;
-                                case IGNORE:
-                                    break;
-                                case FATAL:
-                                    throw ex;
-                                default:
-                                    break;
-                            }
+                            ConfigRuntimeException.React(ex);
                         } catch (Throwable e) {
                             //This is not a simple user script error, this is a deeper problem, so we always handle this.
                             System.err.println("An unexpected exception occured: " + e.getClass().getSimpleName());
@@ -202,7 +192,7 @@ public class AliasCore {
                             }
                             e.getEnv().SetCommandSender(player);
                             Static.getAliasCore().removePlayerReference(player);
-                            ConfigRuntimeException.DoReport(e);
+                            ConfigRuntimeException.React(e);
                         } catch(ConfigCompileException e){
                             //Something strange happened, and a bad alias was added
                             //to the database. Our best course of action is to just
@@ -488,7 +478,7 @@ public class AliasCore {
                     ConfigRuntimeException.DoReport(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
                 } catch(ConfigRuntimeException e){
                     exception = true;
-                    ConfigRuntimeException.DoReport(e);
+                    ConfigRuntimeException.React(e);
                 }
                 if(exception){
                     if(Prefs.HaltOnFailure()){

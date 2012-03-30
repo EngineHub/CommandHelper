@@ -131,8 +131,6 @@ public class CommandHelperPlugin extends JavaPlugin {
             ac.reload(null);
         } catch (IOException ex) {
             logger.log(Level.SEVERE, null, ex);
-        } catch (ConfigCompileException ex) {
-            logger.log(Level.SEVERE, null, ex);
         }
         
         //Clear out our hostname cache

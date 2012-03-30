@@ -183,17 +183,7 @@ public class EventUtils {
                     throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
                 } catch(ConfigRuntimeException ex){
                     //An exception has bubbled all the way up
-                    switch(ConfigRuntimeException.HandleUncaughtException(ex)){
-                        case REPORT:
-                            ConfigRuntimeException.DoReport(ex);
-                            break;
-                        case IGNORE:
-                            break;
-                        case FATAL:
-                            throw ex;
-                        default:
-                            break;
-                    }
+                    ConfigRuntimeException.React(ex);
                 }
             }
         }

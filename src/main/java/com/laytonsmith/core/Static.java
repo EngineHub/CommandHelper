@@ -278,7 +278,7 @@ public class Static {
      * @return 
      */
     public static FileWriter debugLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String) getPreferences().getPreference("debug-log-file"));
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation((String) getPreferences().getPreference("debug-log-file"));
         if (!currentFileName.equals(debugLogFileCurrent)) {
             if (debugLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -294,7 +294,7 @@ public class Static {
     private static FileWriter standardLogFileHandle = null;
 
     public static FileWriter standardLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String) getPreferences().getPreference("standard-log-file"));
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation((String) getPreferences().getPreference("standard-log-file"));
         if (!currentFileName.equals(standardLogFileCurrent)) {
             if (standardLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -310,7 +310,7 @@ public class Static {
     private static FileWriter profilingLogFileHandle = null;
 
     public static FileWriter profilingLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + ParseCalendarNotation((String) getPreferences().getPreference("profiling-file"));
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation((String) getPreferences().getPreference("profiling-file"));
         if (!currentFileName.equals(profilingLogFileCurrent)) {
             if (profilingLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -323,43 +323,7 @@ public class Static {
         return profilingLogFileHandle;
     }
 
-    /**
-     * Convenience notation for ParseCalendarNotation(name, null)
-     */
-    public static String ParseCalendarNotation(String name) {
-        return ParseCalendarNotation(name, null);
-    }
-
-    /**
-     * Parses a calendar notation. The following patterns are replaced with the following:
-     * <table>
-     * <tr><td>%Y</td><td>Year</td></tr>
-     * <tr><td>%M</td><td>Month</td></tr>
-     * <tr><td>%D</td><td>Day</td></tr>
-     * <tr><td>%h</td><td>Hour</td></tr>
-     * <tr><td>%m</td><td>Minute</td></tr>
-     * <tr><td>%s</td><td>Second</td></tr>
-     * </table>
-     * 
-     * A generally standard format for human readable logs is: %Y-%M-%D %h:%m.%s
-     * @param name
-     * @param c
-     * @return 
-     */
-    public static String ParseCalendarNotation(String name, Calendar c) {
-        if (c == null) {
-            c = Calendar.getInstance();
-        }
-        String year = String.format("%04d", c.get(Calendar.YEAR));
-        String month = String.format("%02d", 1 + c.get(Calendar.MONTH)); //January is 0
-        String day = String.format("%02d", c.get(Calendar.DAY_OF_MONTH));
-        String hour = String.format("%02d", c.get(Calendar.HOUR));
-        String minute = String.format("%02d", c.get(Calendar.MINUTE));
-        String second = String.format("%02d", c.get(Calendar.SECOND));
-        return name.replaceAll("%Y", year).replaceAll("%M", month)
-                .replaceAll("%D", day).replaceAll("%h", hour)
-                .replaceAll("%m", minute).replaceAll("%s", second);
-    }
+    
 
     public static WorldEditPlugin getWorldEditPlugin(Target t) {
         if (Implementation.GetServerType() != Implementation.Type.BUKKIT) {
@@ -511,24 +475,7 @@ public class Static {
         }, msg);
     }
 
-    /**
-     * Returns true if this filepath is accessible to CH, false otherwise.
-     * @param location
-     * @return 
-     */
-    public static boolean CheckSecurity(String location) {
-        String pref = Prefs.BaseDir();
-        if (pref.trim().equals("")) {
-            pref = ".";
-        }
-        File base_dir = new File(pref);
-        String base_final = base_dir.getAbsolutePath();
-        if (base_final.endsWith(".")) {
-            base_final = base_final.substring(0, base_final.length() - 1);
-        }
-        File loc = new File(location);
-        return loc.getAbsolutePath().startsWith(base_final);
-    }
+    
 
     /**
      * Returns whether or not this location appears to be a url.
@@ -672,7 +619,7 @@ public class Static {
         if (Debug.LOG_TO_SCREEN) {
             Static.getLogger().log(Level.INFO, message);
         }
-        String timestamp = Static.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
+        String timestamp = DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
         QuickAppend(Static.debugLogFile(), timestamp + message + Static.LF());
     }
 

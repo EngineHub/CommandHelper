@@ -279,7 +279,7 @@ public class StringHandling {
             String location = args[0].val();
             location = new File(t.file().getParentFile(), location).getAbsolutePath();
             //Verify this file is not above the craftbukkit directory (or whatever directory the user specified
-            if (!Static.CheckSecurity(location)) {
+            if (!Security.CheckSecurity(location)) {
                 throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
                         ExceptionType.SecurityException, t);
             }

@@ -8,6 +8,7 @@ package com.laytonsmith.core.exceptions;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
@@ -112,15 +113,15 @@ public class ConfigRuntimeException extends RuntimeException {
         React(e, HandleUncaughtException(e), null);
     }
     
-    /**
-     * If there's nothing special you want to do with the exception, you can send it
-     * here, and it will take the default action for an uncaught exception.
-     * @param e
-     * @param r 
-     */
-    public static void React(ConfigRuntimeException e, Reaction r) {
-        React(e, r, null);
-    }
+//    /**
+//     * If there's nothing special you want to do with the exception, you can send it
+//     * here, and it will take the default action for an uncaught exception.
+//     * @param e
+//     * @param r 
+//     */
+//    public static void React(ConfigRuntimeException e, Reaction r) {
+//        React(e, r, null);
+//    }
     
     /**
      * If there's nothing special you want to do with the exception, you can send it
@@ -138,15 +139,17 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param e
      * @param r 
      */
-    public static void React(ConfigRuntimeException e, Reaction r, String optionalMessage){        
+    private static void React(ConfigRuntimeException e, Reaction r, String optionalMessage){        
         if(r == Reaction.IGNORE){
             //Welp, you heard the man.
+            CHLog.Log(CHLog.Tags.RUNTIME, CHLog.Level.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
         } else if(r == ConfigRuntimeException.Reaction.REPORT){
             ConfigRuntimeException.DoReport(e, optionalMessage);
         } else if(r == ConfigRuntimeException.Reaction.FATAL){
             ConfigRuntimeException.DoReport(e, optionalMessage);
             //Well, here goes nothing
-            throw new Error(optionalMessage, e);
+            ConfigRuntimeException.DoReport(e, optionalMessage);
+            throw e;
         }
     }
     
@@ -173,6 +176,9 @@ public class ConfigRuntimeException extends RuntimeException {
             type = "FATAL";
         }
         String formatted = optionalMessage==null?"":"; " + optionalMessage;
+        String plain = message + formatted + " :: " + type + ":" 
+                + file + ":" + line_num;
+        CHLog.Log(exceptionType.equals("COMPILE ERROR")?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, CHLog.Level.ERROR, plain, new Target(Integer.parseInt(line_num), new File(file), 0));
         System.out.println(TermColors.RED + message + formatted 
                 + TermColors.WHITE + " :: " + TermColors.GREEN 
                 + type + TermColors.WHITE + ":" 

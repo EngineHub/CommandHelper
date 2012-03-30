@@ -64,4 +64,8 @@ public class Target {
     public int col(){
         return col;
     }
+    
+    public String toString(){
+        return (file!=null?file.getAbsolutePath():"Unknown File") + ":" + line;
+    }
 }
