@@ -47,7 +47,7 @@ public class CHLog {
 //        EVENTS("events", "Logs bindings of an event.", Level.OFF),
 //        PROCEDURES("procedures", "Logs when a procedure is created", Level.OFF),
 //        INCLUDES("includes", "Logs what file is requested when include() is used", Level.OFF),
-//        GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", Level.ERROR)
+        GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", Level.ERROR)
         ;
         
         
@@ -80,7 +80,7 @@ public class CHLog {
         }
         CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), prefs, header);
         try{
-            File file = new File(new File(Prefs.DebugLogFile()).getParentFile(), "loggerPreferences.txt");
+            File file = new File(new File("plugins" + File.separator + "CommandHelper" + File.separator + Prefs.DebugLogFile()).getParentFile(), "loggerPreferences.txt");
             CHLog.prefs.init(file);
         } catch(IOException e){
             Static.getLogger().log(java.util.logging.Level.SEVERE, "Could not create logger preferences", e);

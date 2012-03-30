@@ -30,3 +30,6 @@ runtime=ERROR
 #Logs compiler errors (but not runtime errors)
 compiler=ERROR
 
+#Anything that doesn't fit in a more specific category is logged here.
+general=ERROR
+

@@ -221,6 +221,7 @@ public class AliasCore {
      */
     public final void reload(MCPlayer player) {
         try {
+            CHLog.Log(CHLog.Tags.GENERAL, CHLog.Level.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
             Globals.clear();
             Scheduling.ClearScheduledRunners();
             EventUtils.UnregisterAll();            
