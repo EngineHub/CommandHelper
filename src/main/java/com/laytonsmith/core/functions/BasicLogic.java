@@ -65,7 +65,7 @@ public class BasicLogic {
         public void varList(IVariableList varList) {}
 
         public boolean preResolveVariables() {
-            return true;
+            return false;
         }
         public CHVersion since() {
             return CHVersion.V3_0_1;
@@ -79,6 +79,29 @@ public class BasicLogic {
         public boolean useSpecialExec() {
             return true;
         }
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            if(args[0].isDynamic()){
+                return null; //Can't optimize.
+            } else {
+                if(Static.getBoolean(args[0])){
+                    return args[1];
+                } else {
+                    if(args.length == 3){
+                        return args[2];
+                    } else {
+                        return new CVoid(t);
+                    }
+                }
+            }
+        }          
+        
         
     }
     
