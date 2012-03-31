@@ -3,6 +3,7 @@ package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -37,6 +38,14 @@ public class GeneralTests {
     }
     
     @Test public void testCallProcInEventHandler() throws ConfigCompileException{
-        String script = "";
+//        String script = "proc(_testproc, @text, msg(@text))"
+//                + "bind(player_join, array(priority: highest), null, @eb, msg(@eb)"
+//                + "msg(call_proc(_testproc, @eb['player']))  msg(@eb))";
+//        SRun(script, null);
+//        MCPlayerJoinEvent mcpje = mock(MCPlayerJoinEvent.class);
+//        when(mcpje.getPlayer()).thenReturn(fakePlayer);
+//        when(mcpje.getJoinMessage()).thenReturn("player joined");
+//        EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", mcpje);
+//        verify(fakePlayer).sendMessage("");
     }
 }

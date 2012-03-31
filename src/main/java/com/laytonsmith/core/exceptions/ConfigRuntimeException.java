@@ -178,7 +178,16 @@ public class ConfigRuntimeException extends RuntimeException {
         String formatted = optionalMessage==null?"":"; " + optionalMessage;
         String plain = message + formatted + " :: " + type + ":" 
                 + file + ":" + line_num;
-        CHLog.Log(exceptionType.equals("COMPILE ERROR")?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, CHLog.Level.ERROR, plain, new Target(Integer.parseInt(line_num), file!=null?new File(file):null, 0));
+        Target t;
+        int ll = Integer.parseInt(line_num);
+        File ff = file!=null?new File(file):null;
+        int cc = 0;
+        if(ll == 0 && ff == null && cc == 0){
+            t = Target.UNKNOWN;
+        } else {
+            t = new Target(ll, ff, cc);
+        }        
+        CHLog.Log(exceptionType.equals("COMPILE ERROR")?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, CHLog.Level.ERROR, plain, t);
         System.out.println(TermColors.RED + message + formatted 
                 + TermColors.WHITE + " :: " + TermColors.GREEN 
                 + type + TermColors.WHITE + ":" 
