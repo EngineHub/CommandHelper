@@ -24,11 +24,13 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
 import org.bukkit.World;
+import org.bukkit.plugin.PluginDescriptionFile;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.spy;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -424,6 +426,15 @@ public class StaticTest {
         CommandHelperPlugin.myServer = fakeServer;  
         CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
         return fakeServer;
+    }
+
+    public static void StartServer() {
+        CommandHelperPlugin chp = spy(new CommandHelperPlugin());
+        PluginDescriptionFile pdf = mock(PluginDescriptionFile.class);
+        when(pdf.getVersion()).thenReturn("0.0.0");
+        when(chp.getDescription()).thenReturn(pdf);        
+        chp.onLoad();
+        chp.onEnable();
     }
     
 }
