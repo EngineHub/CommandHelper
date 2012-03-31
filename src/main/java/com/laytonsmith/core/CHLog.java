@@ -46,7 +46,7 @@ public class CHLog {
 //        ALIAS("alias", "Logs use of user aliases.", Level.OFF),
 //        EVENTS("events", "Logs bindings of an event.", Level.OFF),
 //        PROCEDURES("procedures", "Logs when a procedure is created", Level.OFF),
-//        INCLUDES("includes", "Logs what file is requested when include() is used", Level.OFF),
+        INCLUDES("includes", "Logs what file is requested when include() is used", Level.OFF),
         GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", Level.ERROR)
         ;
         
