@@ -305,7 +305,7 @@ public class MethodScriptCompiler {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.DEREFERENCE, ".", target));
+                token_list.add(new Token(TType.CONCAT, ".", target));
                 continue;
             }
             if (c == ':' && c2 == ':' && !state_in_quote) {

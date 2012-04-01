@@ -13,6 +13,9 @@ public class CSymbol extends Construct {
         super(symbol, ConstructType.SYMBOL, target);
         symbolType = type;
         switch (symbolType) {
+            case CONCAT:
+                conversion = "concat";
+                break;
             case ADDITION:
                 conversion = "add";
                 break;

@@ -13,7 +13,7 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
  * @author layton
  */
 public class StaticLayer {
-    
+    //Do not rename this field, it is used reflectively in testing
     private static Convertor convertor = null;
     static{
         InitConvertor();

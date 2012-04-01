@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URL;
 import java.security.CodeSource;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,9 +18,25 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class ClassDiscovery {
+    
+    /**
+     * Adds a jar or file path location to be scanned by the default call to GetClassesWithinPackageHierarchy.
+     * This is useful if an external library wishes to be considered by the scanner.
+     * @param url 
+     */
+    public static void InstallDiscoveryLocation(String url){
+        additionalURLs.add(url);
+    }
+    
+    private static List<String> additionalURLs = new ArrayList<String>();
 
     public static Class[] GetClassesWithinPackageHierarchy(){
-        return GetClassesWithinPackageHierarchy(null);
+        List<Class> classes = new ArrayList<Class>();
+        classes.addAll(Arrays.asList(GetClassesWithinPackageHierarchy(null)));
+        for(String url : additionalURLs){
+            classes.addAll(Arrays.asList(GetClassesWithinPackageHierarchy(url)));
+        }
+        return classes.toArray(new Class[classes.size()]);
     }
     /**
      * Gets all the classes in the specified location. The url can point to a jar, or a
@@ -39,7 +56,7 @@ public class ClassDiscovery {
             String fileName = Pattern.quote(ClassDiscovery.class.getCanonicalName().replace(".", File.separator));
             fileName = fileName.replaceAll("\\\\Q", "").replaceAll("\\\\E", "") + ".class";
             String root = url.replaceAll("file:", "").replaceAll(fileName, "");
-            System.out.println(root);
+            //System.out.println(root);
             //Ok, now we have the "root" of the known class structure. Let's recursively
             //go through everything and pull out the files
             List<File> fileList = new ArrayList<File>();
@@ -80,6 +97,7 @@ public class ClassDiscovery {
         //are inaccessible anyways
         List<Class> files = new ArrayList<Class>();
         for(String s : classNameList){
+            //Don't consider anonymous inner classes
             if(!s.matches(".*\\$(?:\\d)*\\.class") && s.endsWith(".class")){
                 //Now, replace any \ with / and replace / with ., and remove the .class,
                 //and forName it.

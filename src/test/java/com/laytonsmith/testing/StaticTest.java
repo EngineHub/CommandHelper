@@ -4,33 +4,34 @@
  */
 package com.laytonsmith.testing;
 
+import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
-import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.sk89q.wepif.PermissionsResolverManager;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
+import java.net.MalformedURLException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.World;
 import org.bukkit.plugin.PluginDescriptionFile;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.spy;
+import org.powermock.api.mockito.PowerMockito;
+import static org.powermock.api.mockito.PowerMockito.mock;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -39,10 +40,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  * @author Layton
  */
 @RunWith(PowerMockRunner.class)
-@PrepareForTest( { Static.class })
 
 public class StaticTest {
-
     /**
      * Tests the boilerplate functions in a Function. While all functions should conform to
      * at least this, it is useful to also use the more strict TestBoilerplate function.
@@ -340,7 +339,7 @@ public class StaticTest {
         return c;
     }
     
-    public static MCLocation GetFakeLocation(MCWorld w, int x, int y, int z){
+    public static MCLocation GetFakeLocation(MCWorld w, double x, double y, double z){
         MCLocation loc = mock(BukkitMCLocation.class);
         World bukkitWorld = mock(World.class);
         when(loc.getWorld()).thenReturn(w);
@@ -428,13 +427,151 @@ public class StaticTest {
         return fakeServer;
     }
 
-    public static void StartServer() {
-        CommandHelperPlugin chp = spy(new CommandHelperPlugin());
-        PluginDescriptionFile pdf = mock(PluginDescriptionFile.class);
-        when(pdf.getVersion()).thenReturn("0.0.0");
-        when(chp.getDescription()).thenReturn(pdf);        
-        chp.onLoad();
-        chp.onEnable();
+//    public static void StartServer() {
+//        Class[] classes = new Class[]{};
+//        MCServer fakeServer = GetFakeServer();
+//        try{
+//            Convertor c = mock(Convertor.class);
+//            when(c.GetServer()).thenReturn(fakeServer);
+//            Field f = StaticLayer.class.getDeclaredField("convertor");
+//            f.setAccessible(true);
+//            f.set(null, c);
+//        } catch(Exception e){
+//            fail("Could not set up reflective sections of the test code.");
+//        }
+//        PowerMockito.mockStatic(PermissionsResolverManager.class);
+//        PermissionsResolverManager prm = mock(PermissionsResolverManager.class);        
+//        when(PermissionsResolverManager.getInstance()).thenReturn(prm);
+//        CommandHelperPlugin chp = spy(new CommandHelperPlugin());
+//        PluginDescriptionFile pdf = PowerMockito.mock(PluginDescriptionFile.class);
+//        when(pdf.getVersion()).thenReturn("0.0.0");
+//        when(chp.getDescription()).thenReturn(pdf);       
+//        //when(chp.getServer()).thenReturn(fakeServer);
+//        chp.onLoad();
+//    }
+    
+    /**
+     * Installs the fake convertor into the server, so event based calls will
+     * work. Additionally, adds the fakePlayer to the server, if player based
+     * events are to be called, this is the player returned.
+     * @param fakePlayer 
+     */
+    public static void InstallFakeConvertor(MCPlayer fakePlayer){
+        try {
+            //We need to add the test directory to the ClassDiscovery path
+            //This should probably not be hard coded at some point.
+            ClassDiscovery.InstallDiscoveryLocation(new File("./src/test/java").toURI().toURL().toString());
+        }
+        catch (MalformedURLException ex) {
+            throw new RuntimeException(ex);
+        }
+        System.exit(1010101);
+        Implementation.setServerType(Implementation.Type.TEST);
+        MCServer fakeServer = GetFakeServer();
+        TestConvertor.fakeServer = fakeServer;
+        FakeServerMixin.fakePlayer = fakePlayer;
+        CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
+        EventList.Startup(chp);
+//        try{
+//            Convertor c = mock(Convertor.class);
+//            when(c.GetServer()).thenReturn(fakeServer);
+//            when(c.GetServerEventMixin()).thenReturn(FakeServerMixin.class);
+//            Field f = StaticLayer.class.getDeclaredField("convertor");
+//            f.setAccessible(true);
+//            f.set(null, c);
+//        } catch(Exception e){
+//            fail("Could not set up reflective sections of the test code.");
+//        }
+        
+    }
+    
+    @convert(type=Implementation.Type.TEST)
+    public static class TestConvertor implements Convertor{
+        
+        private static MCServer fakeServer;
+
+        public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
+            return StaticTest.GetFakeLocation(w, x, y, z);
+        }
+
+        public Class GetServerEventMixin() {
+            return FakeServerMixin.class;
+        }
+
+        public MCEnchantment[] GetEnchantmentValues() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public MCEnchantment GetEnchantmentByName(String name) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public MCServer GetServer() {
+            return fakeServer;
+        }
+
+        public MCItemStack GetItemStack(int type, int qty) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void Startup(CommandHelperPlugin chp) {
+            //Nothing.
+        }
+
+        public int LookupItemId(String materialName) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public String LookupMaterialName(int id) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public MCItemStack GetItemStack(int type, byte data, int qty) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public int SetFutureRunnable(long ms, Runnable r) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void ClearAllRunnables() {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public void ClearFutureRunnable(int id) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public int SetFutureRepeater(long ms, long initialDelay, Runnable r) {
+            throw new UnsupportedOperationException("Not supported yet.");
+        }
+        
+    }
+    
+    public static class FakeServerMixin implements EventMixinInterface{
+        
+        public static MCPlayer fakePlayer;
+
+        public void cancel(BindableEvent e, boolean state) {
+            
+        }
+
+        public boolean isCancellable(BindableEvent o) {
+            return true;
+        }
+
+        public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException {
+            Map<String, Construct> map = new HashMap<String, Construct>();
+            if(fakePlayer != null){
+                map.put("player", new CString(fakePlayer.getName(), Target.UNKNOWN));
+            }
+            return map;
+        }
+
+        public void manualTrigger(BindableEvent e) {
+            throw new RuntimeException("Manual triggering is not supported in tests yet");
+        }
+        
     }
     
 }

@@ -559,6 +559,10 @@ public class MethodScriptCompilerTest {
         assertEquals("1", SRun("2 + - 1", fakePlayer));
     }
     
+    @Test public void testSymbolicConcat() throws ConfigCompileException{
+        assertEquals("helloworld", SRun("g(assign(@hello, 'hello') assign(@world, 'world')) @hello.@world", fakePlayer));
+    }
+    
     @Test public void testSymbolicLogic1() throws ConfigCompileException{
         assertEquals("true", SRun("2 <= 5", fakePlayer));
         assertEquals("false", SRun("2 === '2'", fakePlayer));
