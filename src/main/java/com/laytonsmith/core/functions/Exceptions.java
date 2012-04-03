@@ -211,8 +211,10 @@ public class Exceptions {
                         ex.push(new CString(e.getMessage(), t));
                         ex.push(new CString((e.getFile()!=null?e.getFile().getAbsolutePath():"null"), t));
                         ex.push(new CInt(e.getLineNum(), t));
-                        ivar.setIval(ex);
-                        env.GetVarList().set(ivar);
+                        if(ivar != null){
+                            ivar.setIval(ex);
+                            env.GetVarList().set(ivar);
+                        }
                         that.eval(catchCode, env);
                     }
                 } else {

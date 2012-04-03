@@ -23,7 +23,10 @@ public class Regex {
     
     public static String docs(){
         return "This class provides regular expression functions. For more details, please see the page on "
-                + "[[CommandHelper/Regex|regular expressions]]";
+                + "[[CommandHelper/Regex|regular expressions]]. Note that all the functions are just passthroughs"
+                + " to the Java regex mechanism. If you need to set a flag on the regex, where the api calls"
+                + " for a pattern, instead send array('pattern', 'flags') where flags is any of i, m, or s."
+                + " Alternatively, using the embedded flag system that Java provides is also valid.";
     }
     
     @api public static class reg_match extends AbstractFunction{

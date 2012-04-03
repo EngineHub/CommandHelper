@@ -38,13 +38,10 @@ public class PlayerManagement {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
-            if(p == null){
-                return new CNull(t);
-            }
             
             if (args.length == 1) {
                 p = Static.GetPlayer(args[0]);
-            }
+            }            
             
             if (p != null && p.instanceofPlayer()) {
                 return new CString(((MCPlayer) p).getName(), t);
@@ -154,9 +151,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0]);
             }
-            if (m == null) {
-                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, t);
-            }
+            Static.AssertPlayerNonNull(m, t);
             MCLocation l = m.getLocation();
             MCWorld w = m.getWorld();
             return new CArray(t,
@@ -289,7 +284,7 @@ public class PlayerManagement {
             if (m == null && MCPlayer != null) {
                 m = Static.GetPlayer(MCPlayer, t);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             return new CBoolean(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), t);
         }
     }
@@ -340,19 +335,16 @@ public class PlayerManagement {
             } else {
                 m = Static.GetPlayer(args[0]);
             }
-            if (m != null) {
-                MCBlock b = m.getTargetBlock(null, 10000);
-                if (b == null) {
-                    throw new ConfigRuntimeException("No block in sight, or block too far",
-                            ExceptionType.RangeException, t);
-                }
-                return new CArray(t, new CInt(b.getX(), t),
-                        new CInt(b.getY(), t),
-                        new CInt(b.getZ(), t),
-                        new CString(b.getWorld().getName(), t));
-            } else {
-                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, t);
+            Static.AssertPlayerNonNull(m, t);
+            MCBlock b = m.getTargetBlock(null, 10000);
+            if (b == null) {
+                throw new ConfigRuntimeException("No block in sight, or block too far",
+                        ExceptionType.RangeException, t);
             }
+            return new CArray(t, new CInt(b.getX(), t),
+                    new CInt(b.getY(), t),
+                    new CInt(b.getZ(), t),
+                    new CString(b.getWorld().getName(), t));
         }
 
         public Boolean runAsync() {
@@ -381,6 +373,7 @@ public class PlayerManagement {
                     m = (MCPlayer) p;
                 }
             }
+            Static.AssertPlayerNonNull(m, t);
             m.setHealth(0);
             return new CVoid(t);
         }
@@ -435,9 +428,7 @@ public class PlayerManagement {
                 m = Static.GetPlayer(args[0]);
             }
 
-            if (m == null) {
-                throw new ConfigRuntimeException("player was not specified, or is offline", ExceptionType.PlayerOfflineException, t);
-            }
+            Static.AssertPlayerNonNull(m, t);
             
             String[] sa = Static.getPermissionsResolverManager().getGroups(m.getName());
             Construct[] ca = new Construct[sa.length];
@@ -539,11 +530,10 @@ public class PlayerManagement {
                 player = args[0].val();
                 index = (int) Static.getInt(args[1]);
             }
-            if (player == null) {
-                throw new ConfigRuntimeException("player was not specified", ExceptionType.PlayerOfflineException, t);
-            }
+            
             MCPlayer p = Static.GetPlayer(player, t);
 
+            Static.AssertPlayerNonNull(p, t);
             if (index < -1 || index > 11) {
                 throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 11",
                         ExceptionType.RangeException, t);
@@ -677,6 +667,7 @@ public class PlayerManagement {
             } else {
                 m = Static.GetPlayer(args[0]);
             }
+            Static.AssertPlayerNonNull(m, t);
             return new CString(m.getWorld().getName(), t);
         }
     }
@@ -736,6 +727,7 @@ public class PlayerManagement {
                 message = args[1].val();
             }
             MCPlayer ptok = m;
+            Static.AssertPlayerNonNull(ptok, t);
             ptok.kickPlayer(message);
             return new CVoid(t);
         }
@@ -794,7 +786,7 @@ public class PlayerManagement {
                 MCPlayer = Static.GetPlayer(args[0]);
                 name = args[1].val();
             }
-
+            Static.AssertPlayerNonNull(MCPlayer, t);
             MCPlayer.setDisplayName(name);
             return new CVoid(t);
         }
@@ -849,7 +841,7 @@ public class PlayerManagement {
             } else {
                 MCPlayer = Static.GetPlayer(args[0]);
             }
-
+            Static.AssertPlayerNonNull(MCPlayer, t);
             MCPlayer.setDisplayName(MCPlayer.getName());
             return new CVoid(t);
         }
@@ -1035,7 +1027,8 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0]);
             }
-
+            
+            Static.AssertPlayerNonNull(m, t);
             String mode = m.getGameMode().name();
             return new CString(mode, t);
         }
@@ -1100,6 +1093,7 @@ public class PlayerManagement {
             } catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("Mode must be either 'CREATIVE' or 'SURVIVAL'", ExceptionType.FormatException, t);
             }
+            Static.AssertPlayerNonNull(m, t);
             m.setGameMode(gm);
             return new CVoid(t);
         }
@@ -1153,7 +1147,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), t);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             return new CInt((int) (m.getExp() * 100), t);
         }
     }
@@ -1209,7 +1203,7 @@ public class PlayerManagement {
             } else {
                 xp = (int) Static.getInt(args[0]);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             m.setExp(((float) xp) / 100.0F);
             return new CVoid(t);
         }
@@ -1263,7 +1257,7 @@ public class PlayerManagement {
             } else {
                 xp = (int) Static.getInt(args[0]);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             m.giveExp(xp);
 
             return new CVoid(t);
@@ -1317,7 +1311,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), t);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             return new CInt(m.getLevel(), t);
         }
     }
@@ -1373,7 +1367,7 @@ public class PlayerManagement {
             } else {
                 level = (int) Static.getInt(args[0]);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             m.setLevel(level);
             return new CVoid(t);
         }
@@ -1426,7 +1420,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), t);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             return new CInt(m.getTotalExperience(), t);
         }
     }
@@ -1482,7 +1476,7 @@ public class PlayerManagement {
             } else {
                 xp = (int) Static.getInt(args[0]);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             m.setTotalExperience(xp);
 //            m.setLevel(0);
 //            m.setExp(0);
@@ -1539,7 +1533,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), t);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             return new CInt(m.getFoodLevel(), t);
         }
     }
@@ -1595,7 +1589,7 @@ public class PlayerManagement {
             } else {
                 level = (int) Static.getInt(args[0]);
             }
-
+            Static.AssertPlayerNonNull(m, t);
             m.setFoodLevel(level);
             return new CVoid(t);
         }
@@ -1661,12 +1655,13 @@ public class PlayerManagement {
             if (args.length == 4) {
                 seconds = (int) Static.getInt(args[3]);
             }
+            Static.AssertPlayerNonNull(m, t);
             if(seconds == 0 || strength == 0){
                 return new CBoolean(m.removeEffect(effect), t);
             } else {
                 m.addEffect(effect, strength, seconds);
+                return new CBoolean(true, t);
             }
-            return new CBoolean(true, t);
         }
     }
 
@@ -1724,6 +1719,7 @@ public class PlayerManagement {
             if (health < 0 || health > 20) {
                 throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, t);
             }
+            Static.AssertPlayerNonNull(m, t);
             m.setHealth(health);
             return new CVoid(t);
         }
@@ -2025,9 +2021,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), t);
             }
-            if (m == null) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, t);
-            }
+            Static.AssertPlayerNonNull(m, t);
             return new CBoolean(m.isOp(), t);
         }
     }
@@ -2078,6 +2072,7 @@ public class PlayerManagement {
             if (m == null) {
                 throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, t);
             }
+            Static.AssertPlayerNonNull(m, t);
             MCLocation old = m.getCompassTarget();
             m.setCompassTarget(l);
             return ObjectGenerator.GetGenerator().location(old);
@@ -2124,9 +2119,7 @@ public class PlayerManagement {
             if(args.length == 1){
                 m = Static.GetPlayer(args[0].val(), t);
             }
-            if (m == null) {
-                throw new ConfigRuntimeException("That player is not online", ExceptionType.PlayerOfflineException, t);
-            }
+            Static.AssertPlayerNonNull(m, t);
             return ObjectGenerator.GetGenerator().location(m.getCompassTarget());
         }
         
@@ -2173,6 +2166,7 @@ public class PlayerManagement {
             if(args.length == 1){
                 p = Static.GetPlayer(args[0]);
             }
+            Static.AssertPlayerNonNull(p, t);
             int left = p.getRemainingFireTicks();
             return new CInt(left, t);
         }
@@ -2232,6 +2226,7 @@ public class PlayerManagement {
             } else {
                 tick = (int) Static.getInt(ticks);
             }
+            Static.AssertPlayerNonNull(p, t);
             p.setRemainingFireTicks(tick);
             return new CVoid(t);
         }
@@ -2273,6 +2268,7 @@ public class PlayerManagement {
             if(args.length == 1){
                 p = Static.GetPlayer(args[0]);
             }
+            Static.AssertPlayerNonNull(p, t);
             return new CBoolean(p.getAllowFlight(), t);
         }
 
@@ -2321,6 +2317,7 @@ public class PlayerManagement {
                 p = Static.GetPlayer(args[0]);
                 flight = Static.getBoolean(args[1]);
             }
+            Static.AssertPlayerNonNull(p, t);
             p.setAllowFlight(flight);
             return new CVoid(t);
         }

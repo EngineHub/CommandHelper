@@ -153,6 +153,11 @@ public class PlayerManangementTest {
         Run("", fakePlayer);
         Run("", fakePlayer);
     }
+    
+    @Test
+    public void testPlayerNotProvided() throws ConfigCompileException{
+        assertEquals("success", SRun("try(kill(), assign(@success, 'success')) @success", null));        
+    }
 //    //@Test(timeout=10000)
 //    public void testPinfo(){
 //        

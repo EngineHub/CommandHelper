@@ -769,4 +769,10 @@ public class Static {
            } 
         });
     }
+    
+    public static void AssertPlayerNonNull(MCPlayer p, Target t){
+        if(p == null){
+            throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
+        }
+    }
 }

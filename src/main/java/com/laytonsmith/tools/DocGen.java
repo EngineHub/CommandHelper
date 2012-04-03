@@ -26,7 +26,7 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) {
-        events("wiki");
+        functions("wiki");
     }
 
     public static void functions(String type) {
