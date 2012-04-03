@@ -46,6 +46,9 @@ public interface MCPlayer extends MCCommandSender, MCOfflinePlayer{
     
     public void setItemInHand(MCItemStack is);
 
+    public void setPlayerTime(Long time);
+    public long getPlayerTime();
+    public void resetPlayerTime();
     
     public int getLevel();
     public void setLevel(int xp);

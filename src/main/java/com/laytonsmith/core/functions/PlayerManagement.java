@@ -12,7 +12,13 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.util.ArrayList;
+
+import java.io.IOException;
+import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 
 /**
@@ -2327,7 +2333,222 @@ public class PlayerManagement {
         }
         
     }
-    
+
+    private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
+    static{
+        Properties p = new Properties();
+        try {
+            p.load(Minecraft.class.getResourceAsStream("/time_names.txt"));
+            Enumeration e = p.propertyNames();
+            while(e.hasMoreElements()){
+                String name = e.nextElement().toString();
+                TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
+            }
+        } catch (IOException ex) {
+            Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+
+    @api public static class pset_time extends AbstractFunction{
+
+        public String getName() {
+            return "pset_time";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            StringBuilder doc = new StringBuilder();
+            doc.append("void {[player], time} Sets the time of a given player. Should be a number from 0 to"
+                    + " 24000, if not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am)"
+                    + " is acceptable, and convenient english mappings also exist:"
+            );
+            doc.append("<ul>");
+            for(String key : TimeLookup.keySet()){
+                doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>\n");
+            }
+            doc.append("</ul>");
+            return doc.toString();
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = null;
+            if(environment.GetPlayer() != null){
+                p = environment.GetPlayer();
+            }
+            if(args.length == 2){
+                p = Static.GetPlayer(args[0]);
+            }
+            if(p == null){
+                throw new ConfigRuntimeException("No player specified", ExceptionType.PlayerOfflineException, t);
+            }
+            long time = 0;
+            String stime = (args.length == 1?args[0]:args[1]).val().toLowerCase();
+            if(TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))){
+                stime = TimeLookup.get(stime.replaceAll("[^a-z]", "")).val();
+            }
+            if(stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")){
+                Pattern pa = Pattern.compile("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$");
+                Matcher m = pa.matcher(stime);
+                m.find();
+                int hour = Integer.parseInt(m.group(1));
+                int minute = Integer.parseInt(m.group(2));
+                String offset = "a";
+                if(m.group(3) != null){
+                    offset = m.group(3);
+                }
+                if(offset.equals("p")){
+                    hour += 12;
+                }
+                if(hour == 24) hour = 0;
+                if(hour > 24){
+                    throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+                }
+                if(minute > 59){
+                    throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+                }
+                hour -= 6;
+                hour = hour % 24;
+                long ttime = hour * 1000;
+                ttime += ((minute / 60.0) * 1000);
+                stime = Long.toString(ttime);
+            }
+            try{
+                Long.valueOf(stime);
+            } catch(NumberFormatException e){
+                throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
+            }
+            time = Long.parseLong(stime);
+            p.setPlayerTime(time);
+            return new CVoid(t);
+        }
+
+    }
+
+    @api public static class pget_time extends AbstractFunction{
+
+        public String getName() {
+            return "pget_time";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "int {[player]} Returns the time of the specified player, as an integer from"
+                    + " 0 to 24000-1";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = null;
+            if(environment.GetPlayer() != null){
+                p = environment.GetPlayer();
+            }
+            if(args.length == 1){
+                p = Static.GetPlayer(args[0]);
+            }
+            if(p == null){
+                throw new ConfigRuntimeException("No player specified", ExceptionType.PlayerOfflineException, t);
+            }
+            return new CInt(p.getPlayerTime(), t);
+        }
+
+    }
+
+    @api public static class preset_time extends AbstractFunction{
+
+        public String getName() {
+            return "preset_time";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public String docs() {
+            return "void {[player]} Resets the time of the player to the time of the world.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = null;
+            if(environment.GetPlayer() != null){
+                p = environment.GetPlayer();
+            }
+            if(args.length == 1){
+                p = Static.GetPlayer(args[0]);
+            }
+            if(p == null){
+                throw new ConfigRuntimeException("No player specified", ExceptionType.PlayerOfflineException, t);
+            }
+            p.resetPlayerTime();
+            return new CVoid(t);
+        }
+
+    }
+
     //Disabled until bukkit fixes their bug
 //    @api public static class pvelocity extends AbstractFunction{
 //
