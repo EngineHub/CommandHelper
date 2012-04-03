@@ -41,7 +41,7 @@ public class Persistance {
         }
 
         public String docs() {
-            return "void {key[, namespace, ...], value} Allows you to store a value, which can then be retrieved later. key must be a string containing"
+            return "void {[namespace, ...,] key, value} Allows you to store a value, which can then be retrieved later. key must be a string containing"
                     + " only letters, numbers, underscores. Periods may also be used, but they form a namespace, and have special meaning."
                     + " (See get_values())";
         }
@@ -115,7 +115,7 @@ public class Persistance {
         }
 
         public String docs() {
-            return "Mixed {key[, namespace, ...]} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
+            return "Mixed {[namespace, ...,] key} Returns a stored value stored with store_value. If the key doesn't exist in storage, null"
                     + " is returned. On a more detailed note: If the value stored in the persistance database is not actually a construct,"
                     + " then null is also returned.";
         }
@@ -239,7 +239,7 @@ public class Persistance {
         }
 
         public String docs() {
-            return "boolean {key[, namespace, ...]} Returns whether or not there is data stored at the specified key in the Persistance database.";
+            return "boolean {[namespace, ...,] key} Returns whether or not there is data stored at the specified key in the Persistance database.";
         }
 
         public ExceptionType[] thrown() {
@@ -281,7 +281,7 @@ public class Persistance {
         }
 
         public String docs() {
-            return "void {key[, namespace, ...]} Completely removes a value from storage. Calling has_value(key) after this call will return false.";
+            return "void {[namespace, ...,] key} Completely removes a value from storage. Calling has_value(key) after this call will return false.";
         }
 
         public ExceptionType[] thrown() {

@@ -526,7 +526,7 @@ public class StaticTest {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 
-        public MCItemStack GetItemStack(int type, byte data, int qty) {
+        public MCItemStack GetItemStack(int type, int data, int qty) {
             throw new UnsupportedOperationException("Not supported yet.");
         }
 

@@ -80,7 +80,6 @@ public class MetaTest {
 //        when(fakeServer.dispatchCommand(fakePlayer, "cmd yay")).thenAnswer(new Answer<Boolean>(){
 //
 //            public Boolean answer(InvocationOnMock invocation) throws Throwable {
-//                System.out.println("HERE");
 //                assertTrue(((Server)invocation.getMock()).getPlayer(fakePlayer.getName()).isOp());
 //                bool.set(true);
 //                return true;

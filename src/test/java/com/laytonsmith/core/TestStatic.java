@@ -36,7 +36,6 @@ public class TestStatic {
 
     @Test
     public void testGetNumber() {
-        System.out.println("getNumber");
         assertEquals(1.0, Static.getNumber(C.String("1.0")), 0.0);
         assertEquals(1.0, Static.getNumber(C.String("1")), 0.0);
         assertEquals(1.0, Static.getNumber(C.Int(1)), 0.0);
@@ -45,7 +44,6 @@ public class TestStatic {
 
     @Test
     public void testGetDouble() {
-        System.out.println("getDouble");
         assertEquals(1.0, Static.getDouble(C.String("1.0")), 0.0);
         assertEquals(1.0, Static.getDouble(C.String("1")), 0.0);
         assertEquals(1.0, Static.getDouble(C.Int(1)), 0.0);
@@ -54,7 +52,6 @@ public class TestStatic {
 
     @Test
     public void testGetInt() {
-        System.out.println("getInt");
         assertEquals(1, Static.getInt(C.Int(1)));
         assertEquals(1, Static.getInt(C.String("1")));
         try{
@@ -65,7 +62,6 @@ public class TestStatic {
 
     @Test
     public void testGetBoolean() {
-        System.out.println("getBoolean");
         assertEquals(true, Static.getBoolean(C.Boolean(true)));
         assertEquals(true, Static.getBoolean(C.String("non-empty string")));
         assertEquals(false, Static.getBoolean(C.String("")));
@@ -75,28 +71,24 @@ public class TestStatic {
 
     @Test
     public void testAnyDoubles() {
-        System.out.println("anyDoubles");
         assertTrue(Static.anyDoubles(C.Int(0), C.Int(1), C.Double(1)));
         assertFalse(Static.anyDoubles(C.Int(1)));
     }
 
     @Test
     public void testAnyStrings() {
-        System.out.println("anyStrings");
         assertTrue(Static.anyStrings(C.Int(0), C.Int(1), C.String("")));
         assertFalse(Static.anyStrings(C.Int(1)));
     }
 
     @Test
     public void testAnyBooleans() {
-        System.out.println("anyBooleans");
         assertTrue(Static.anyBooleans(C.Int(0), C.Int(1), C.Boolean(true)));
         assertFalse(Static.anyBooleans(C.Int(1)));
     }
 
     @Test
     public void testGetLogger() {
-        System.out.println("getLogger");
         assertNotNull(Static.getLogger());
     }
 
@@ -108,7 +100,6 @@ public class TestStatic {
 
     @Test(expected=NotInitializedYetException.class)
     public void testGetAliasCore() {
-        System.out.println("getAliasCore");
         Static.getAliasCore();
     }
 
@@ -126,19 +117,16 @@ public class TestStatic {
 
     @Test(expected=NotInitializedYetException.class)
     public void testGetVersion() {
-        System.out.println("getVersion");
         Static.getVersion();
     }
 
     @Test
     public void testGetPreferences() {
-        System.out.println("getPreferences");
         Static.getPreferences();
     }
 
     @Test
     public void testResolveConstruct() {
-        System.out.println("resolveConstruct");
         assertTrue(Static.resolveConstruct("1", Target.UNKNOWN) instanceof CInt);
         assertTrue(Static.resolveConstruct("true", Target.UNKNOWN) instanceof CBoolean);
         assertTrue(Static.resolveConstruct("false", Target.UNKNOWN) instanceof CBoolean);

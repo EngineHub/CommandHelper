@@ -26,4 +26,8 @@ public enum CHVersion {
     public String getVersionString(){
         return this.version.toString();
     }
+    
+    public String toString(){
+        return this.version.toString();
+    }
 }

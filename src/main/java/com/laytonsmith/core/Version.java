@@ -26,8 +26,8 @@ public class Version implements Comparable<Version>{
      * part is set to 0.
      * @param version 
      */
+    Pattern p = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\s+(.*))?");
     public Version(String version){
-        Pattern p = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)\\s+(.*)?");
         Matcher m = p.matcher(version);
         if(m.find()){
             major = Integer.parseInt(m.group(1)==null?"0":m.group(1));

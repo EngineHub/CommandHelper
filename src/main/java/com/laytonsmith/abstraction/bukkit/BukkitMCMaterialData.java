@@ -17,7 +17,7 @@ public class BukkitMCMaterialData implements MCMaterialData{
         this.md = md;
     }
 
-    public byte getData() {
+    public int getData() {
         return md.getData();
     }
     

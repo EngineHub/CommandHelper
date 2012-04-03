@@ -59,8 +59,8 @@ public class BukkitConvertor implements Convertor {
     public MCItemStack GetItemStack(int type, int qty) {
         return new BukkitMCItemStack(new ItemStack(type, qty));
     }
-    public MCItemStack GetItemStack(int type, byte data, int qty) {
-        return new BukkitMCItemStack(new ItemStack(type, qty, (short)0, data));
+    public MCItemStack GetItemStack(int type, int data, int qty) {
+        return new BukkitMCItemStack(new ItemStack(type, qty, (short)0, (byte)data));
     }
     
     public static final BukkitBlockListener BlockListener = new BukkitBlockListener();

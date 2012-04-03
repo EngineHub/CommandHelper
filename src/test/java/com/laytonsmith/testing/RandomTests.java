@@ -82,7 +82,7 @@ public class RandomTests {
                 b.append(key).append(" threw: ").append(uhohs.get(key)).append("\n");
             }
             String output = ("There was/were " + uhohs.size() + " boilerplate failure(s). Output:\n" + b.toString());
-            System.out.println(output);
+            System.err.println(output);
             fail(output); 
         }
     }

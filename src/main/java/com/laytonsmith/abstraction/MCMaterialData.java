@@ -9,5 +9,5 @@ package com.laytonsmith.abstraction;
  * @author layton
  */
 public interface MCMaterialData {
-    public byte getData();
+    public int getData();
 }

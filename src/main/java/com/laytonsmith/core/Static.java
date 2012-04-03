@@ -530,7 +530,7 @@ public class Static {
         }
         String append = null;
         if (is.getData() != null) {
-            append = Byte.toString(is.getData().getData());
+            append = Integer.toString(is.getData().getData());
         } else if (is.getDurability() != 0) {
             append = Short.toString(is.getDurability());
         }

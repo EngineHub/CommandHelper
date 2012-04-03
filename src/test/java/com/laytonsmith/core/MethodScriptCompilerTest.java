@@ -57,7 +57,6 @@ public class MethodScriptCompilerTest {
      */
     @Test
     public void testLex() throws Exception {
-        System.out.println("lex");
         String config = "/cmd = msg('string')";
         List e = null;
         e = new ArrayList();
@@ -95,7 +94,6 @@ public class MethodScriptCompilerTest {
     }
     @Test
     public void testCompile() throws ConfigCompileException {
-        System.out.println("compile");
         MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)", null), env).get(0).compileRight();
         try {
             //extra parameter

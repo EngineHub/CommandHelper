@@ -579,9 +579,15 @@ public class PlayerManagement {
             if (index == 6 || index == -1) {
                 //Item in hand
                 MCItemStack is = p.getItemInHand();
-                byte data = 0;
-                if (is.getData() != null) {
-                    data = is.getData().getData();
+                int data;
+                if(is.getTypeId() < 256){
+                    if (is.getData() != null) {
+                        data = is.getData().getData();
+                    } else {
+                        data = 0;
+                    }
+                } else {
+                    data = is.getDurability();
                 }
                 retVals.add(new CString(is.getTypeId() + ":" + data, t));
             }
@@ -2401,9 +2407,7 @@ public class PlayerManagement {
             if(args.length == 2){
                 p = Static.GetPlayer(args[0]);
             }
-            if(p == null){
-                throw new ConfigRuntimeException("No player specified", ExceptionType.PlayerOfflineException, t);
-            }
+            Static.AssertPlayerNonNull(p, t);
             long time = 0;
             String stime = (args.length == 1?args[0]:args[1]).val().toLowerCase();
             if(TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))){
@@ -2490,9 +2494,7 @@ public class PlayerManagement {
             if(args.length == 1){
                 p = Static.GetPlayer(args[0]);
             }
-            if(p == null){
-                throw new ConfigRuntimeException("No player specified", ExceptionType.PlayerOfflineException, t);
-            }
+            Static.AssertPlayerNonNull(p, t);
             return new CInt(p.getPlayerTime(), t);
         }
 
@@ -2513,7 +2515,7 @@ public class PlayerManagement {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PlayerOfflineException};
         }
 
         public boolean isRestricted() {
@@ -2540,9 +2542,7 @@ public class PlayerManagement {
             if(args.length == 1){
                 p = Static.GetPlayer(args[0]);
             }
-            if(p == null){
-                throw new ConfigRuntimeException("No player specified", ExceptionType.PlayerOfflineException, t);
-            }
+            Static.AssertPlayerNonNull(p, t);
             p.resetPlayerTime();
             return new CVoid(t);
         }

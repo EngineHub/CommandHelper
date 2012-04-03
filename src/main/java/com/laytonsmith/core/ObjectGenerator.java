@@ -148,7 +148,15 @@ public class ObjectGenerator {
             return new CNull(t);
         }
         int type = is.getTypeId();
-        int data = (is.getData() != null ? is.getData().getData() : 0);
+        
+        int data;
+        if(type < 256){
+            //Use the data
+            data = (is.getData() != null ? is.getData().getData() : 0);            
+        } else {
+            //Use the durability
+            data = is.getDurability();
+        }
         int qty = is.getAmount();
         CArray enchants = new CArray(t);
         for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {

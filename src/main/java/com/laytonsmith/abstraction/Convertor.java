@@ -33,7 +33,7 @@ public interface Convertor {
 
     public String LookupMaterialName(int id);
 
-    public MCItemStack GetItemStack(int type, byte data, int qty);
+    public MCItemStack GetItemStack(int type, int data, int qty);
     
     /**
      * A future runnable is run on a server accessible thread at roughly the time specified in the future.
