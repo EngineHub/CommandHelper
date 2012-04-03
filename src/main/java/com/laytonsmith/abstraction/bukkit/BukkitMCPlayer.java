@@ -110,6 +110,18 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer, M
         p.recalculatePermissions();
     }
 
+    public void setPlayerTime(Long time) {
+        p.setPlayerTime(time, false);
+    }
+
+    public long getPlayerTime() {
+        return p.getPlayerTime();
+    }
+
+    public void resetPlayerTime() {
+        p.resetPlayerTime();
+    }
+
     public MCLocation getLocation() {
         if(p.getLocation() == null){
             return null;
