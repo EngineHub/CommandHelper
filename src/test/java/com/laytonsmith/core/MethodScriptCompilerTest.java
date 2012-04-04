@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.util.ArrayList;
@@ -624,5 +625,44 @@ public class MethodScriptCompilerTest {
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("2 / 0", null));
     }
     
+    @Test public void testLineNumberCorrectInException1() throws ConfigCompileException{
+        String script = 
+                "try(\n" //Line 1
+                + "assign(@a, array(1, 2))\n" //Line 2
+                + "\n" //Line 3
+                + "assign(@d, @a[@b])\n" //Line 4
+                + "\n" //Line 5
+                + ", @e, msg(@e[3]))\n"; //Line 6
+        SRun(script, fakePlayer);
+        verify(fakePlayer).sendMessage("4");                
+    }
+    
+    @Test public void testLineNumberCorrectInException2() throws ConfigCompileException{
+        String script = 
+                "assign(@a, array(1, 2))\n" //Line 1
+                + "\n" //Line 2
+                + "assign(@d, @a[@b])\n"; //Line 3
+        try{
+            SRun(script, fakePlayer);
+        } catch(ConfigRuntimeException e){
+            assertEquals(3, e.getLineNum());
+        }
+        
+    }
+    
+    @Test public void testLineNumberCorrectInException3() throws ConfigCompileException{
+        String script = 
+                "\n"
+                + "assign(@a, array('aaa', 'bbb'))\n"
+                + "assign(@b, 'test')\n"
+                + "msg('test1')\n"
+                + "assign(@d, @a[@b])\n"
+                + "msg('test2')\n";
+        try{
+            SRun(script, fakePlayer);
+        } catch(ConfigRuntimeException e){
+            assertEquals(5, e.getLineNum());
+        }
+    }
     
 }

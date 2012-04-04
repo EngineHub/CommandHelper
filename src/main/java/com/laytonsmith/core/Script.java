@@ -277,7 +277,7 @@ public class Script {
                     }
                     if(f.preResolveVariables() && ca[i] instanceof IVariable){
                         IVariable cur = (IVariable)ca[i];
-                        ca[i] = env.GetVarList().get(cur.getName(), cur.getTarget()).ival();                        
+                        ca[i] = env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
                     }
                 }
 

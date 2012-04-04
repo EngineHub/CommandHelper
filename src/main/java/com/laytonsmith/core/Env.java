@@ -7,7 +7,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.events.BoundEvent;
-import com.laytonsmith.core.functions.IVariableList;
+import com.laytonsmith.core.constructs.IVariableList;
 import java.util.HashMap;
 import java.util.Map;
 

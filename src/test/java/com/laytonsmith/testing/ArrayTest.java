@@ -361,5 +361,10 @@ public class ArrayTest {
                 + "msg(@array[to_lower('BLAH')])", fakePlayer);
         verify(fakePlayer).sendMessage("blarg");
     }
+    
+    @Test public void testArrayUsageBeforeDefined() throws ConfigCompileException{
+        SRun("try(@a[1], msg('success'))", fakePlayer);
+        verify(fakePlayer).sendMessage("success");
+    }
 
 }

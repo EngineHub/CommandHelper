@@ -30,6 +30,7 @@ public class IVariable extends Construct implements Cloneable{
         return var_value.val();
     }
     public Construct ival(){
+        var_value.setTarget(getTarget());
         return var_value;
     }
     public String getName(){

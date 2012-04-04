@@ -2,7 +2,7 @@
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-package com.laytonsmith.core.functions;
+package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
@@ -25,6 +25,7 @@ public class IVariableList {
         if(!varList.containsKey(name)){
             this.set(new IVariable(name, t));
         }
+        varList.get(name).setTarget(t);
         return varList.get(name);
     }
 
@@ -53,8 +54,8 @@ public class IVariableList {
         return clone;
     }
 
-    //package private, only the reflection package should be accessing this anyways
-    Set<String> keySet() {
+    //only the reflection package should be accessing this
+    public Set<String> keySet() {
         return varList.keySet();
     }
     

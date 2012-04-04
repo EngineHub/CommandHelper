@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
@@ -176,7 +177,11 @@ public class ArrayHandling {
                         throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
                     }
                 } else {
-                    return new CString(args[0].val().charAt((int)Static.getInt(index)), t);
+                    try{
+                        return new CString(args[0].val().charAt((int)Static.getInt(index)), t);
+                    } catch(StringIndexOutOfBoundsException e){
+                        throw new ConfigRuntimeException("No index at " + args[0].val(), ExceptionType.RangeException, t);
+                    }
                 }
             } else{
                 throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);

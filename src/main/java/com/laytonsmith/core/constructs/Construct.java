@@ -21,6 +21,7 @@ import org.json.simple.JSONValue;
 public abstract class Construct implements Cloneable, Comparable<Construct> {
 
 
+
     public enum ConstructType {
 
         TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
@@ -30,12 +31,20 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
     private final ConstructType ctype;
     private final String value;
 
-    private final Target target;
+    private Target target;
 
     public ConstructType getCType() {
         return ctype;
     }
-
+    
+    /**
+     * This method should only be used by Script when setting the children's target, if it's an ivariable.
+     * @param target 
+     */
+    void setTarget(Target target) {
+        this.target = target;
+    }
+    
     public String getValue() {
         return value;
     }
