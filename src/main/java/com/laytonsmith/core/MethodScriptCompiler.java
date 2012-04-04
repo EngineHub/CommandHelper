@@ -668,19 +668,25 @@ public class MethodScriptCompiler {
         } catch(Exception e){
             unknown = Target.UNKNOWN;
         }
-        stream.add(0, new Token(TType.FUNC_NAME, "__autoconcat__", unknown));
-        stream.add(1, new Token(TType.FUNC_START, "(", unknown));
-        stream.add(new Token(TType.FUNC_END, ")", unknown));
+        
         GenericTreeNode<Construct> tree = new GenericTreeNode<Construct>();
         tree.setData(new CNull(unknown));
         Stack<GenericTreeNode> parents = new Stack<GenericTreeNode>();
         Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
         constructCount.push(new AtomicInteger(0));
+        parents.push(tree);
+        
+        tree.addChild(new GenericTreeNode<Construct>(new CFunction("__autoconcat__", unknown)));
+        parents.push(tree.getChildAt(0));
+        tree = tree.getChildAt(0);
+        constructCount.push(new AtomicInteger(0));
+        
         Stack<AtomicInteger> arrayStack = new Stack<AtomicInteger>();
         arrayStack.add(new AtomicInteger(-1));
-        parents.push(tree);
+        
         int parens = 0;
         Token t = null;
+        
         for (int i = 0; i < stream.size(); i++) {
             t = stream.get(i);
             //Token prev2 = i - 2 >= 0 ? stream.get(i - 2) : new Token(TType.UNKNOWN, "", t.target);
@@ -805,7 +811,7 @@ public class MethodScriptCompiler {
                 }
                 parens++;
             } else if (t.type.equals(TType.FUNC_END)) {
-                if (parens < 0) {
+                if (parens <= 0) {
                     throw new ConfigCompileException("Unexpected parenthesis", t.target);
                 }
                 parens--;
@@ -883,10 +889,9 @@ public class MethodScriptCompiler {
             throw new ConfigCompileException("Mismatched parenthesis", t.target);
         }
         
-        for(GenericTreeNode<Construct> node : tree.getChildren()){
-            //The topmost node is the root node
-            optimize(node);            
-        }
+        optimize(tree);
+        parents.pop();
+        tree = parents.pop();
         return tree;
     }
     

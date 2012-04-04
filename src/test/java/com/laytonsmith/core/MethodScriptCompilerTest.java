@@ -665,4 +665,14 @@ public class MethodScriptCompilerTest {
         }
     }
     
+    @Test public void testExtraParenthesis(){
+        try{
+            SRun("\n"
+                    + "\n"
+                    + "player())\n", fakePlayer);
+        } catch(ConfigCompileException e){
+            assertEquals("3", e.getLineNum());
+        }
+    }
+    
 }
