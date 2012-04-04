@@ -675,4 +675,9 @@ public class MethodScriptCompilerTest {
         }
     }
     
+    @Test(expected=ConfigCompileException.class) 
+    public void testSpuriousSymbols() throws ConfigCompileException{
+        SRun("2 +", fakePlayer);
+    }
+    
 }

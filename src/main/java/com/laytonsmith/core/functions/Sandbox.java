@@ -594,6 +594,7 @@ public class Sandbox {
                 }
             }
             if (inSymbolMode) {
+                try{
                 //look for unary operators
                 for (int i = 0; i < list.size() - 1; i++) {
                     GenericTreeNode<Construct> node = list.get(i);
@@ -705,6 +706,9 @@ public class Sandbox {
                         list.remove(i + 1);
                         i--;
                     }
+                }
+                } catch(IndexOutOfBoundsException e){
+                    throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).data.val() + "). Did you forget to quote your symbols?", t);
                 }
             }
             
