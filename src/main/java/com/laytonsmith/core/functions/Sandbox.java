@@ -175,7 +175,7 @@ public class Sandbox {
                     natural = true;
                 } else {
                     if (args[0] instanceof CArray) {
-                        l = ObjectGenerator.GetGenerator().location(args[0], (l != null ? l.getWorld() : null), t);
+                        l = ObjectGenerator.GetGenerator().location(args[0], ( l != null ? l.getWorld() : null ), t);
                         natural = false;
                     } else {
                         l = Static.GetPlayer(args[0].val(), t).getLocation();
@@ -187,7 +187,7 @@ public class Sandbox {
             } else if (args.length == 3) {
                 //We are specifying all 3
                 if (args[0] instanceof CArray) {
-                    l = ObjectGenerator.GetGenerator().location(args[0], (l != null ? l.getWorld() : null), t);
+                    l = ObjectGenerator.GetGenerator().location(args[0], ( l != null ? l.getWorld() : null ), t);
                     natural = false;
                 } else {
                     l = Static.GetPlayer(args[0].val(), t).getLocation();
@@ -302,7 +302,7 @@ public class Sandbox {
             }
             if (original.getUnderlyingEvent() != null && original.getUnderlyingEvent() instanceof Cancellable
                     && original.getUnderlyingEvent() instanceof org.bukkit.event.Event) {
-                ((Cancellable) original.getUnderlyingEvent()).setCancelled(true);
+                ( (Cancellable) original.getUnderlyingEvent() ).setCancelled(true);
                 BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
             }
             environment.GetEvent().setCancelled(true);
@@ -363,14 +363,14 @@ public class Sandbox {
                 is = m.getInventory().getItem(slot);
             }
             CArray enchantArray = new CArray(t);
-            if (!(args[2 - offset] instanceof CArray)) {
+            if (!( args[2 - offset] instanceof CArray )) {
                 enchantArray.push(args[2 - offset]);
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
 
             CArray levelArray = new CArray(t);
-            if (!(args[3 - offset] instanceof CArray)) {
+            if (!( args[3 - offset] instanceof CArray )) {
                 levelArray.push(args[3 - offset]);
             } else {
                 levelArray = (CArray) args[3 - offset];
@@ -511,7 +511,7 @@ public class Sandbox {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             throw new Error("Should not have gotten here");
-        }                
+        }
 
         public String docs() {
             return "string {var1, [var2...]} This function should only be used by the compiler, behavior"
@@ -545,7 +545,6 @@ public class Sandbox {
         public boolean canOptimize() {
             return true;
         }
-                
 
         @Override
         public Construct optimize(Target t, Construct... args) {
@@ -554,20 +553,23 @@ public class Sandbox {
             throw new Error("Should not have gotten here");
         }
 
-        public GenericTreeNode<Construct> optimizeSpecial(Target t, List<GenericTreeNode<Construct>> list) throws ConfigCompileException{
+        public GenericTreeNode<Construct> optimizeSpecial(Target t, List<GenericTreeNode<Construct>> list) throws ConfigCompileException {
             return optimizeSpecial(t, list, true);
         }
+
         /**
-         * __autoconcat__ has special optimization techniques needed, since it's really a part
-         * of the compiler itself, and not so much a function. It being a function is merely
-         * a convenience, so we can defer processing until after parsing. While it is
-         * tightly coupled with the compiler, this is ok, since it's really a compiler mechanism
-         * more than a function.
+         * __autoconcat__ has special optimization techniques needed, since it's
+         * really a part of the compiler itself, and not so much a function. It
+         * being a function is merely a convenience, so we can defer processing
+         * until after parsing. While it is tightly coupled with the compiler,
+         * this is ok, since it's really a compiler mechanism more than a
+         * function.
+         *
          * @param t
          * @param list
-         * @return 
+         * @return
          */
-        public GenericTreeNode<Construct> optimizeSpecial(Target t, List<GenericTreeNode<Construct>> list, boolean returnSConcat) throws ConfigCompileException{
+        public GenericTreeNode<Construct> optimizeSpecial(Target t, List<GenericTreeNode<Construct>> list, boolean returnSConcat) throws ConfigCompileException {
             //If any of our nodes are CSymbols, we have different behavior
             boolean inSymbolMode = false; //catching this can save Xn
 
@@ -577,14 +579,14 @@ public class Sandbox {
                 if (node.data instanceof CSymbol) {
                     inSymbolMode = true;
                 }
-                if (node.data instanceof CSymbol && ((CSymbol) node.data).isPostfix()) {
-                    if(i - 1 >=0 && list.get(i - 1).data instanceof IVariable){
-                        CSymbol sy = (CSymbol) node.data;                    
+                if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isPostfix()) {
+                    if (i - 1 >= 0 && list.get(i - 1).data instanceof IVariable) {
+                        CSymbol sy = (CSymbol) node.data;
                         GenericTreeNode<Construct> conversion;
-                        if(sy.val().equals("++")){
+                        if (sy.val().equals("++")) {
                             conversion = new GenericTreeNode<Construct>(new CFunction("postinc", t));
                         } else {
-                            conversion = new GenericTreeNode<Construct>(new CFunction("postdec", t));                        
+                            conversion = new GenericTreeNode<Construct>(new CFunction("postdec", t));
                         }
                         conversion.addChild(list.get(i - 1));
                         list.set(i - 1, conversion);
@@ -594,41 +596,111 @@ public class Sandbox {
                 }
             }
             if (inSymbolMode) {
-                try{
-                //look for unary operators
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> node = list.get(i);
-                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isUnary()) {
-                        GenericTreeNode<Construct> conversion;
-                        if (node.data.val().equals("-") || node.data.val().equals("+")) {
-                            //These are special, because if the values to the left isn't a symbol,
-                            //it's not unary
-                            if (i == 0 || list.get(i - 1).data instanceof CSymbol) {
-                                if (node.data.val().equals("-")) {
-                                    //We have to negate it
-                                    conversion = new GenericTreeNode<Construct>(new CFunction("neg", t));
+                try {
+                    //look for unary operators
+                    for (int i = 0; i < list.size() - 1; i++) {
+                        GenericTreeNode<Construct> node = list.get(i);
+                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isUnary()) {
+                            GenericTreeNode<Construct> conversion;
+                            if (node.data.val().equals("-") || node.data.val().equals("+")) {
+                                //These are special, because if the values to the left isn't a symbol,
+                                //it's not unary
+                                if (i == 0 || list.get(i - 1).data instanceof CSymbol) {
+                                    if (node.data.val().equals("-")) {
+                                        //We have to negate it
+                                        conversion = new GenericTreeNode<Construct>(new CFunction("neg", t));
+                                    } else {
+                                        conversion = new GenericTreeNode<Construct>(new CFunction("p", t));
+                                    }
                                 } else {
-                                    conversion = new GenericTreeNode<Construct>(new CFunction("p", t));
+                                    continue;
                                 }
                             } else {
-                                continue;
+                                conversion = new GenericTreeNode<Construct>(new CFunction(( (CSymbol) node.data ).convert(), t));
                             }
-                        } else {
-                            conversion = new GenericTreeNode<Construct>(new CFunction(((CSymbol) node.data).convert(), t));
+                            conversion.addChild(list.get(i + 1));
+                            list.set(i, conversion);
+                            list.remove(i + 1);
+                            i--;
                         }
-                        conversion.addChild(list.get(i + 1));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        i--;
                     }
-                }
 
-                //Multiplicative
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> next = list.get(i + 1);
-                    if (next.data instanceof CSymbol) {
-                        if (((CSymbol) next.data).isMultaplicative()) {
-                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(((CSymbol) next.data).convert(), t));
+                    //Multiplicative
+                    for (int i = 0; i < list.size() - 1; i++) {
+                        GenericTreeNode<Construct> next = list.get(i + 1);
+                        if (next.data instanceof CSymbol) {
+                            if (( (CSymbol) next.data ).isMultaplicative()) {
+                                GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(( (CSymbol) next.data ).convert(), t));
+                                conversion.addChild(list.get(i));
+                                conversion.addChild(list.get(i + 2));
+                                list.set(i, conversion);
+                                list.remove(i + 1);
+                                list.remove(i + 1);
+                                i--;
+                            }
+                        }
+                    }
+                    //Additive
+                    for (int i = 0; i < list.size() - 1; i++) {
+                        GenericTreeNode<Construct> next = list.get(i + 1);
+                        if (next.data instanceof CSymbol && ( (CSymbol) next.data ).isAdditive()) {
+                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(( (CSymbol) next.data ).convert(), t));
+                            conversion.addChild(list.get(i));
+                            conversion.addChild(list.get(i + 2));
+                            list.set(i, conversion);
+                            list.remove(i + 1);
+                            list.remove(i + 1);
+                            i--;
+                        }
+                    }
+                    //relational
+                    for (int i = 0; i < list.size() - 1; i++) {
+                        GenericTreeNode<Construct> node = list.get(i + 1);
+                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isRelational()) {
+                            CSymbol sy = (CSymbol) node.data;
+                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                            conversion.addChild(list.get(i));
+                            conversion.addChild(list.get(i + 2));
+                            list.set(i, conversion);
+                            list.remove(i + 1);
+                            list.remove(i + 1);
+                            i--;
+                        }
+                    }
+                    //equality
+                    for (int i = 0; i < list.size() - 1; i++) {
+                        GenericTreeNode<Construct> node = list.get(i + 1);
+                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isEquality()) {
+                            CSymbol sy = (CSymbol) node.data;
+                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                            conversion.addChild(list.get(i));
+                            conversion.addChild(list.get(i + 2));
+                            list.set(i, conversion);
+                            list.remove(i + 1);
+                            list.remove(i + 1);
+                            i--;
+                        }
+                    }
+                    //logical and
+                    for (int i = 0; i < list.size() - 1; i++) {
+                        GenericTreeNode<Construct> node = list.get(i + 1);
+                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isLogicalAnd()) {
+                            CSymbol sy = (CSymbol) node.data;
+                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                            conversion.addChild(list.get(i));
+                            conversion.addChild(list.get(i + 2));
+                            list.set(i, conversion);
+                            list.remove(i + 1);
+                            list.remove(i + 1);
+                            i--;
+                        }
+                    }
+                    //logical or
+                    for (int i = 0; i < list.size() - 1; i++) {
+                        GenericTreeNode<Construct> node = list.get(i + 1);
+                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isLogicalOr()) {
+                            CSymbol sy = (CSymbol) node.data;
+                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -638,86 +710,17 @@ public class Sandbox {
                         }
                     }
                 }
-                //Additive
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> next = list.get(i + 1);
-                    if (next.data instanceof CSymbol && ((CSymbol)next.data).isAdditive()) {
-                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(((CSymbol) next.data).convert(), t));
-                        conversion.addChild(list.get(i));
-                        conversion.addChild(list.get(i + 2));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        list.remove(i + 1);
-                        i--;
-                    }
-                }
-                //relational
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> node = list.get(i + 1);
-                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isRelational()) {
-                        CSymbol sy = (CSymbol) node.data;
-                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
-                        conversion.addChild(list.get(i));
-                        conversion.addChild(list.get(i + 2));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        list.remove(i + 1);
-                        i--;
-                    }
-                }
-                //equality
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> node = list.get(i + 1);
-                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isEquality()) {
-                        CSymbol sy = (CSymbol) node.data;
-                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
-                        conversion.addChild(list.get(i));
-                        conversion.addChild(list.get(i + 2));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        list.remove(i + 1);
-                        i--;
-                    }
-                }
-                //logical and
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> node = list.get(i + 1);
-                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isLogicalAnd()) {
-                        CSymbol sy = (CSymbol) node.data;
-                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
-                        conversion.addChild(list.get(i));
-                        conversion.addChild(list.get(i + 2));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        list.remove(i + 1);
-                        i--;
-                    }
-                }
-                //logical or
-                for (int i = 0; i < list.size() - 1; i++) {
-                    GenericTreeNode<Construct> node = list.get(i + 1);
-                    if (node.data instanceof CSymbol && ((CSymbol) node.data).isLogicalOr()) {
-                        CSymbol sy = (CSymbol) node.data;
-                        GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
-                        conversion.addChild(list.get(i));
-                        conversion.addChild(list.get(i + 2));
-                        list.set(i, conversion);
-                        list.remove(i + 1);
-                        list.remove(i + 1);
-                        i--;
-                    }
-                }
-                } catch(IndexOutOfBoundsException e){
+                catch (IndexOutOfBoundsException e) {
                     throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).data.val() + "). Did you forget to quote your symbols?", t);
                 }
             }
-            
+
             //Look for a CEntry here
-            if(list.size() >= 1){
+            if (list.size() >= 1) {
                 GenericTreeNode<Construct> node = list.get(0);
-                if(node.data instanceof CLabel){
+                if (node.data instanceof CLabel) {
                     GenericTreeNode<Construct> value = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", t));
-                    for(int i = 1; i < list.size(); i++){
+                    for (int i = 1; i < list.size(); i++) {
                         value.addChild(list.get(i));
                     }
                     GenericTreeNode<Construct> ce = new GenericTreeNode<Construct>(new CFunction("centry", t));
@@ -726,15 +729,15 @@ public class Sandbox {
                     return ce;
                 }
             }
-            
+
             //We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
             //left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
             //be handled in MethodScriptCompiler's optimize function.
-            if(list.size() == 1){
+            if (list.size() == 1) {
                 return list.get(0);
-            } else {                
+            } else {
                 GenericTreeNode<Construct> tree;
-                if(returnSConcat){
+                if (returnSConcat) {
                     tree = new GenericTreeNode<Construct>(new CFunction("sconcat", t));
                 } else {
                     tree = new GenericTreeNode<Construct>(new CFunction("concat", t));
@@ -742,7 +745,6 @@ public class Sandbox {
                 tree.setChildren(list);
                 return tree;
             }
-        }                
-               
+        }
     }
 }

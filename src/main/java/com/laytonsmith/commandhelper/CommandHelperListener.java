@@ -93,9 +93,11 @@ public class CommandHelperListener implements Listener {
      */
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {     
-//        if(Prefs.DebugMode()){
-//            System.out.println("CommandHelper: (>'.')> Received event-> " + event.getMessage() + " Is Cancelled? " + (event.isCancelled()?"Y":"N"));
-//        }
+        if(CommandHelperPlugin.self.interpreterListener
+                .isInInterpreterMode(new BukkitMCPlayer(event.getPlayer()))){
+            //They are in interpreter mode, so we want it to handle this, not everything else.
+            return;
+        }
         MCPlayerCommandEvent mpce = new BukkitPlayerEvents.BukkitMCPlayerCommandEvent(event);
         EventUtils.TriggerListener(Driver.PLAYER_COMMAND, "player_command", mpce);
         if(mpce.isCancelled()){
