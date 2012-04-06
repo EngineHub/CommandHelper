@@ -1493,7 +1493,7 @@ public class DataHandling {
             Construct[] defaults = new Construct[nodes.length - 1];
             for (int i = 0; i < nodes.length - 1; i++) {
                 GenericTreeNode<Construct> node = nodes[i];
-                GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", t));
+                GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("g", t));
                 List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
                 children.add(node);
                 newNode.setChildren(children);

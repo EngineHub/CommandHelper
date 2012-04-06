@@ -443,6 +443,36 @@ public class Script {
         boolean inside_opt_var = false;
         boolean after_no_def_opt_var = false;
         String lastVar = null;
+        //Go through our token list and readjust non-spaced symbols. Any time we combine a symbol,
+        //the token becomes a string
+        List<Token> tempLeft = new ArrayList<Token>();
+        for(int i = 0; i < left.size(); i++){
+            Token t = left.get(i);
+            if(t.type.isSymbol() && left.size() - 1 >= i && left.get(i + 1).type != TType.WHITESPACE){
+                StringBuilder b = new StringBuilder();
+                b.append(t.value);
+                i++;
+                Token m = left.get(i);
+                while(m.type.isSymbol() && m.type != TType.WHITESPACE){                    
+                    b.append(m.value);
+                    i++;
+                    m = left.get(i);
+                }
+                if(m.type != TType.WHITESPACE){
+                    b.append(m.value);
+                }
+                t = new Token(TType.STRING, b.toString(), t.target);                
+            }
+            //Go ahead and toString the other symbols too
+            if(t.type.isSymbol()){
+                t = new Token(TType.STRING, t.value, t.target);
+            }
+            if(t.type != TType.WHITESPACE){
+                tempLeft.add(t);
+            }
+            
+        }
+        left = tempLeft;
         for (int j = 0; j < left.size(); j++) {
             Token t = left.get(j);
             //Token prev_token = j - 2 >= 0?c.tokens.get(j - 2):new Token(TType.UNKNOWN, "", t.line_num);
@@ -478,7 +508,8 @@ public class Script {
                     v.setDefault("");
                 }
             }
-            if (j == 0 && !t.type.equals(TType.COMMAND)) {
+            //We're looking for a command up front
+            if (j == 0 && !t.value.startsWith("/")) {
                 if (!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)) {
                     throw new ConfigCompileException("Expected command (/command) at start of alias."
                             + " Instead, found " + t.type + " (" + t.val() + ")", t.target);
@@ -487,7 +518,8 @@ public class Script {
             if (last_token.type.equals(TType.LSQUARE_BRACKET)) {
                 inside_opt_var = true;
                 if (!(t.type.equals(TType.FINAL_VAR) || t.type.equals(TType.VARIABLE))) {
-                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + ")", t.target);
+                    throw new ConfigCompileException("Unexpected " + t.type.toString() + " (" + t.val() + "), was expecting"
+                            + " a $variable", t.target);
                 }
             }
             if (after_no_def_opt_var && !inside_opt_var) {
@@ -503,7 +535,7 @@ public class Script {
                     && !t.type.equals(TType.LIT)
                     && !t.type.equals(TType.COMMAND)
                     && !t.type.equals(TType.FINAL_VAR)) {
-                if (!(t.type.equals(TType.STRING) && j - 1 > 0 && left.get(j - 1).type.equals(TType.OPT_VAR_ASSIGN))) {
+                if (j - 1 > 0 && !(/*t.type.equals(TType.STRING) &&*/ left.get(j - 1).type.equals(TType.OPT_VAR_ASSIGN))) {
                     throw new ConfigCompileException("Unexpected " + t.type + " (" + t.val() + ")", t.target);
                 }
             }
@@ -540,7 +572,7 @@ public class Script {
         cleft = new ArrayList<Construct>();
         for (int i = 0; i < left.size(); i++) {
             Token t = left.get(i);
-            if (t.type == Token.TType.COMMAND) {
+            if (t.value.startsWith("/")) {
                 cleft.add(new Command(t.val(), t.target));
             } else if (t.type == Token.TType.VARIABLE) {
                 cleft.add(new Variable(t.val(), null, t.target));
@@ -583,6 +615,9 @@ public class Script {
                 right.add(temp);
                 temp = new ArrayList<Token>();
             } else {
+                if(t.type == TType.WHITESPACE){
+                    continue; //Whitespace is ignored on the right side
+                }
                 temp.add(t);
             }
         }

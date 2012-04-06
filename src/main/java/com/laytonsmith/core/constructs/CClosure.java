@@ -119,7 +119,7 @@ public class CClosure extends Construct {
                 }
             }
             environment.GetVarList().set(new IVariable("@arguments", arguments, node.data.getTarget()));
-            GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("p", getTarget()));
+            GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("g", getTarget()));
             List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
             children.add(node);
             newNode.setChildren(children);

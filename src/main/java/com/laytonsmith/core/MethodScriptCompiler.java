@@ -393,13 +393,20 @@ public class MethodScriptCompiler {
                 token_list.add(new Token(TType.FUNC_END, ")", target));
                 continue;
             }
-            if (Character.isWhitespace(c) && !state_in_quote && c != '\n') {
-                //ignore the whitespace, but end the previous token
+            if(Character.isWhitespace(c) && !state_in_quote && c != '\n') {
+                //keep the whitespace, but end the previous token, unless the last character
+                //was also whitespace. All whitespace is added as a single space.                
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
                     buf = new StringBuffer();
                 }
-            } else if (c == '\'') {
+                if(token_list.size() > 0 
+                        && token_list.get(token_list.size() - 1).type != TType.WHITESPACE){
+                    token_list.add(new Token(TType.WHITESPACE, " ", target));
+                }
+                continue;
+            }
+            if (c == '\'') {
                 if (state_in_quote && !in_smart_quote) {
                     token_list.add(new Token(TType.STRING, buf.toString(), target));
                     buf = new StringBuffer();
@@ -559,7 +566,9 @@ public class MethodScriptCompiler {
                     while (tokenStream.get(++i).type.equals(TType.NEWLINE)) {
                     }
                 }
-                temp.add(tokenStream.get(i));
+                if(tokenStream.get(i).type != TType.WHITESPACE){
+                    temp.add(tokenStream.get(i));
+                }
             } catch (IndexOutOfBoundsException e) {
             }
         }

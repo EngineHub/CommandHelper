@@ -6,6 +6,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
@@ -13,18 +14,25 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import static org.junit.Assert.*;
 import org.junit.*;
+import org.junit.runner.RunWith;
 import static org.mockito.Mockito.*;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  * @author Layton
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(CommandHelperPlugin.class)
 public class MethodScriptCompilerTest {
 
     MCServer fakeServer;
@@ -63,7 +71,9 @@ public class MethodScriptCompilerTest {
         e = new ArrayList();
         //This is the decomposed version of the above config
         e.add(new Token(Token.TType.COMMAND, "/cmd", Target.UNKNOWN));
+        e.add(new Token(Token.TType.WHITESPACE, " ", Target.UNKNOWN));
         e.add(new Token(Token.TType.ALIAS_END, "=", Target.UNKNOWN));
+        e.add(new Token(Token.TType.WHITESPACE, " ", Target.UNKNOWN));
         e.add(new Token(Token.TType.FUNC_NAME, "msg", Target.UNKNOWN));
         e.add(new Token(Token.TType.FUNC_START, "(", Target.UNKNOWN));
         e.add(new Token(Token.TType.STRING, "string", Target.UNKNOWN));
@@ -411,6 +421,21 @@ public class MethodScriptCompilerTest {
         } catch (ConfigCompileException ex) {
             //Passed
         }
+    }
+    
+    @Test
+    public void testCompileWithDoubleSlashCommand() throws ConfigCompileException{
+        AliasCore ac = mock(AliasCore.class);
+        ac.autoIncludes = new ArrayList<File>();
+        PowerMockito.mockStatic(CommandHelperPlugin.class);
+        when(CommandHelperPlugin.getCore()).thenReturn(ac);
+        assertEquals(ac, CommandHelperPlugin.getCore());
+        String config = "//cmd blah = msg('success')";
+        Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
+        s.compile();
+        env.SetPlayer(fakePlayer);
+        s.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+        verify(fakePlayer).sendMessage("success");
     }
 
     @Test

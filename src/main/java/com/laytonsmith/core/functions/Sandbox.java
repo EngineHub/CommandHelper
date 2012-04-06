@@ -605,7 +605,8 @@ public class Sandbox {
                             if (node.data.val().equals("-") || node.data.val().equals("+")) {
                                 //These are special, because if the values to the left isn't a symbol,
                                 //it's not unary
-                                if (i == 0 || list.get(i - 1).data instanceof CSymbol) {
+                                if ((i == 0 || list.get(i - 1).data instanceof CSymbol)
+                                        && !(list.get(i + 1).data instanceof CSymbol)) {
                                     if (node.data.val().equals("-")) {
                                         //We have to negate it
                                         conversion = new GenericTreeNode<Construct>(new CFunction("neg", t));
