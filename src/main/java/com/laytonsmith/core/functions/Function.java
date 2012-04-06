@@ -14,6 +14,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.List;
 
 /**
  * Note that to "activate" this class as a function, you must prefix the '@api' annotation
@@ -162,4 +163,27 @@ public interface Function extends Documentation {
      * @return 
      */
     public Construct optimize(Target t, Construct... args) throws ConfigRuntimeException, ConfigCompileException;
+    
+    /**
+     * If a function knows how to optimize, even if portions are dynamic, it can return true here.
+     * If this returns true, the value of canOptimize is ignored, and optimize will never get called.
+     * @return 
+     */
+    public boolean canOptimizeDynamic();
+    
+    /**
+     * If the function indicates it can optimize dynamic values, this method is called. It may
+     * also throw a compile exception should the parameters be unacceptable.
+     * @param t
+     * @param children
+     * @return 
+     */
+    public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException;
+
+    /**
+     * If a function's syntax allows { braces }, then this method should return true. Exceedingly few functions
+     * should allow this, as only language construct emulators should use braces.
+     * @return 
+     */
+    public boolean allowBraces();
 }

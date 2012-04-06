@@ -608,6 +608,8 @@ public class MethodScriptCompilerTest {
             fail("Did not expect test to pass");
         } catch(ConfigCompileException e){
             //pass
+        } catch(ConfigRuntimeException e){
+            //pass?
         }
     }        
     
@@ -703,6 +705,83 @@ public class MethodScriptCompilerTest {
     @Test(expected=ConfigCompileException.class) 
     public void testSpuriousSymbols() throws ConfigCompileException{
         SRun("2 +", fakePlayer);
+    }
+    
+    @Test
+    public void testBraceIf() throws ConfigCompileException{
+        SRun("if(true)\n\n"
+                + "{\n"
+                + "msg('success!')\n"
+                + "}", fakePlayer);
+        verify(fakePlayer).sendMessage("success!");
+    }
+    
+    @Test
+    public void testBraceElseIfElse() throws ConfigCompileException{
+        SRun("if(false){"
+                + "msg('fail')"
+                + "} else if(true == true){"
+                + "msg('success!')"
+                + "} else {\n"
+                + "msg('fail')"
+                + "}", fakePlayer);
+        verify(fakePlayer).sendMessage("success!");
+    }
+    
+    @Test
+    public void testBraceElseIfElseWithElseCondTrue() throws ConfigCompileException{
+        SRun("if(false){"
+                + "msg('fail')"
+                + "} else if(false){"
+                + "msg('fail')"
+                + "} else {"
+                + "msg('success!')"
+                + "}", fakePlayer);
+        verify(fakePlayer).sendMessage("success!");
+    }
+    
+    @Test(expected=ConfigCompileException.class)
+    public void testFailureOfBraces() throws ConfigCompileException{
+        SRun("and(1){ 1 }", fakePlayer);
+    }
+    
+    @Test(expected=ConfigCompileException.class)
+    public void testInnerElseInElseIf() throws ConfigCompileException{
+        SRun("if(true){"
+                + "msg('fail')"
+                + "} else {"
+                + "msg('fail')"
+                + "} else if(true){"
+                + "msg('fail')"
+                + "}", fakePlayer);
+    }
+    
+    @Test
+    public void testBracketsOnFor() throws ConfigCompileException{
+        SRun("for(assign(@i, 0), @i < 5, @i++){\n"
+                + "msg('worked')\n"
+                + "}", fakePlayer);
+        verify(fakePlayer, times(5)).sendMessage("worked");
+    }
+    
+    @Test
+    public void testBracketsOnForeach() throws ConfigCompileException{
+        SRun("foreach(range(2), @i){\n"
+                + "msg(@i)\n"
+                + "}", fakePlayer);
+        verify(fakePlayer).sendMessage("0");
+        verify(fakePlayer).sendMessage("1");
+    }
+    
+    @Test
+    public void testBracketsOnSwitch() throws ConfigCompileException{
+        SRun("switch('hi'){\n"
+                + "'nope',"
+                + "     msg('fail'),"
+                + "'hi',"
+                + "     msg('pass')"
+                + "}", fakePlayer);
+        verify(fakePlayer).sendMessage("pass");
     }
     
 }

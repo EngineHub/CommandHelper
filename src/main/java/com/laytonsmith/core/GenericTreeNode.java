@@ -17,6 +17,7 @@ public class GenericTreeNode<T> implements Cloneable{
 
     public T data;
     public List<GenericTreeNode<T>> children;
+    public boolean optimized = false;
     
     @Override
     public GenericTreeNode<T> clone() throws CloneNotSupportedException{
@@ -28,6 +29,7 @@ public class GenericTreeNode<T> implements Cloneable{
                 Object obj = m.invoke(data, new Object[]{});
                 clone.data = (T) obj;
                 clone.children = new ArrayList<GenericTreeNode<T>>(children);
+                clone.optimized = optimized;
             } catch (IllegalAccessException ex) {
                 throw new CloneNotSupportedException();
             } catch (IllegalArgumentException ex) {

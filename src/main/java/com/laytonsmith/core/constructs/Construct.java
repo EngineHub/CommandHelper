@@ -26,7 +26,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
 
         TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
         DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
-        SYMBOL
+        SYMBOL, IDENTIFIER
     }
     private final ConstructType ctype;
     private final String value;
@@ -259,6 +259,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
     
     /**
      * If this type of construct is dynamic, that is to say, if it isn't a constant.
+     * Things like 9, and 's' are constant. Things like {@code @value} are dynamic.
      * @return 
      */
     public abstract boolean isDynamic();

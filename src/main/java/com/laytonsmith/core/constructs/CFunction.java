@@ -10,7 +10,7 @@ package com.laytonsmith.core.constructs;
  */
 public class CFunction extends Construct {
     
-    public static final long serialVersionUID = 1L;
+    public static final long serialVersionUID = 1L;    
 
     public CFunction(String name, Target t) {
         super(name, ConstructType.FUNCTION, t);

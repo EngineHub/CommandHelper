@@ -481,7 +481,7 @@ public class Script {
             Token after_token = j + 2 < left.size() ? left.get(j + 2) : new Token(TType.UNKNOWN, "", t.getTarget());
 
             if (j == 0) {
-                if (next_token.type == TType.IDENT) {
+                if (next_token.type == TType.LABEL) {
                     this.label = t.val();
                     j--;
                     left.remove(0);
@@ -490,7 +490,7 @@ public class Script {
                 }
             }
 
-            if (t.type == TType.IDENT) {
+            if (t.type == TType.LABEL) {
                 continue;
             }
 
@@ -510,7 +510,7 @@ public class Script {
             }
             //We're looking for a command up front
             if (j == 0 && !t.value.startsWith("/")) {
-                if (!(next_token.type == TType.IDENT && after_token.type == TType.COMMAND)) {
+                if (!(next_token.type == TType.LABEL && after_token.type == TType.COMMAND)) {
                     throw new ConfigCompileException("Expected command (/command) at start of alias."
                             + " Instead, found " + t.type + " (" + t.val() + ")", t.target);
                 }

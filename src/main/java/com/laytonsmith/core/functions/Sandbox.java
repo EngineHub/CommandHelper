@@ -542,18 +542,12 @@ public class Sandbox {
         }
 
         @Override
-        public boolean canOptimize() {
+        public boolean canOptimizeDynamic() {
             return true;
         }
 
         @Override
-        public Construct optimize(Target t, Construct... args) {
-            //This function is tightly coupled with MethodScriptCompiler. It should call
-            //the special function during optimization.
-            throw new Error("Should not have gotten here");
-        }
-
-        public GenericTreeNode<Construct> optimizeSpecial(Target t, List<GenericTreeNode<Construct>> list) throws ConfigCompileException {
+        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> list) throws ConfigCompileException {
             return optimizeSpecial(t, list, true);
         }
 
@@ -733,10 +727,33 @@ public class Sandbox {
 
             //We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
             //left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
-            //be handled in MethodScriptCompiler's optimize function.
+            //be handled in MethodScriptCompiler's optimize function. Also, we must scan for CPreIdentifiers,
+            //which may be turned into a function
             if (list.size() == 1) {
                 return list.get(0);
             } else {
+                for(int i = 0; i < list.size(); i++){
+                    if(list.get(i).data.getCType() == Construct.ConstructType.IDENTIFIER){
+                        if(i == 0){
+                            //Yup, it's an identifier
+                            CFunction identifier = new CFunction(list.get(i).data.val(), t);
+                            list.remove(0);
+                            GenericTreeNode<Construct> child = list.get(0);
+                            try{
+                                Function f = FunctionList.getFunction(identifier);                                
+                                GenericTreeNode<Construct> node 
+                                        = new GenericTreeNode<Construct>(f.execs(t, null, null, child));                                
+                                return node;
+                            } catch(Exception e){
+                                throw new Error("Unknown function " + identifier.val() + "?");
+                            }                                                      
+                        } else {
+                            //Hmm, this is weird. I'm not sure what condition this can happen in
+                            throw new ConfigCompileException("Unexpected IDENTIFIER? O.o Please report a bug,"
+                                    + " and include the script you used to get this error.", t);
+                        }
+                    }
+                }
                 GenericTreeNode<Construct> tree;
                 if (returnSConcat) {
                     tree = new GenericTreeNode<Construct>(new CFunction("sconcat", t));

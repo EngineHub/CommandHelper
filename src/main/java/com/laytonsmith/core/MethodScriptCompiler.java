@@ -9,8 +9,11 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.*;
+import com.laytonsmith.core.functions.BasicLogic.ifelse;
+import com.sk89q.jchronic.handlers.SRPAHandler;
 import java.io.File;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -263,6 +266,22 @@ public class MethodScriptCompiler {
                 token_list.add(new Token(TType.LOGICAL_NOT, "!", target));  
                 continue;
             }
+            if(c == '{' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.LCURLY_BRACKET, "{", target));
+                continue;
+            }
+            if(c == '}' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.RCURLY_BRACKET, "}", target));
+                continue;
+            }
             //I don't want to use these symbols yet, especially since bitwise operations are rare.
 //            if(c == '&' && !state_in_quote){
 //                if (buf.length() > 0) {
@@ -353,7 +372,7 @@ public class MethodScriptCompiler {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
                     buf = new StringBuffer();
                 }
-                token_list.add(new Token(TType.IDENT, ":", target));
+                token_list.add(new Token(TType.LABEL, ":", target));
                 continue;
             }
             if (c == ',' && !state_in_quote) {
@@ -678,10 +697,110 @@ public class MethodScriptCompiler {
             unknown = Target.UNKNOWN;
         }
         
+        List<Token> tempStream = new ArrayList<Token>(stream.size());
+        List<Integer> irrelevantWhitespace = new ArrayList<Integer>();
+        int startingRelevant = -1;
+        int endingRelevant = -1;
+        int bracketBlocks = 0;
+        for(int i = 0; i < stream.size(); i++){
+            if(!irrelevantWhitespace.isEmpty()){
+                //We have to be careful about the whitespace we remove, just
+                //because we think it's irrelevant doesn't mean it is, for token
+                //patterns that are < lookahead's size.
+                for(int ii = irrelevantWhitespace.size() - 1; ii >= 0; ii--){
+                    int index = irrelevantWhitespace.get(ii);
+                    if(index >= startingRelevant && index <= endingRelevant){
+                        stream.remove(index);
+                    }
+                }
+                irrelevantWhitespace.clear();
+                startingRelevant = -1;
+                endingRelevant = -1;
+            }
+            //We need a 4 lookahead
+            int lookahead = 4;
+            Token [] t = new Token[lookahead + 1];
+            int [] pos = new int[t.length - 1];
+            //We could have removed all the indexes due to irrelevantNewlines being cleared, so if
+            //i is >= stream.size(), we're done!
+            if(i >= stream.size()){
+                break;
+            }
+            t[1] = stream.get(i);
+            pos[0] = i;
+            for(int ii = 2; ii < t.length; ii++){    
+                int offset = i + (ii - 1) + irrelevantWhitespace.size();
+                pos[ii - 1] = offset;
+                t[ii] = offset < stream.size() ? stream.get(offset) : new Token(TType.UNKNOWN, "", t[1].target);
+                if(t[ii].type == TType.NEWLINE || t[ii].type == TType.WHITESPACE){
+                    //Skip newlines for the purposes of comparisons. If a newline was t[1], it'll still
+                    //get added in the right spot, but we do want to make note of the irrelevant newlines
+                    //afterwards, so we can toss them from the stream. We also have to deal with whitespace at this point.
+                    irrelevantWhitespace.add(offset);
+                    ii--;        
+                }
+            }
+
+            //Look for the longest; the "} else if(" and replace with elseif
+            if(t[1].type == TType.RCURLY_BRACKET && 
+                    t[2].type == TType.LIT && t[2].value.equals("else") &&
+                    t[3].type == TType.FUNC_NAME && t[3].value.equals("if") &&
+                    t[4].type == TType.FUNC_START){
+                tempStream.add(new Token(TType.COMMA, ",", t[1].target));
+                tempStream.add(new Token(TType.IDENTIFIER, "elseif", t[1].target));
+                startingRelevant = pos[0];
+                endingRelevant = pos[3];
+                bracketBlocks--;
+                i += 3;
+                continue;
+            }
+            //Look for "} else {" and replace with else
+            if(t[1].type == TType.RCURLY_BRACKET &&
+                    t[2].type == TType.LIT && t[2].value.equals("else") &&
+                    t[3].type == TType.LCURLY_BRACKET){
+                tempStream.add(new Token(TType.COMMA, ",", t[1].target));
+                tempStream.add(new Token(TType.IDENTIFIER, "else", t[1].target));
+                startingRelevant = pos[0];
+                endingRelevant = pos[2];
+                i += 2;
+                continue;
+            }
+            //Look for "){" and replace with ,
+            if(t[1].type == TType.FUNC_END &&
+                    t[2].type == TType.LCURLY_BRACKET){
+                tempStream.add(new Token(TType.SCOMMA, ",", t[1].target));
+                startingRelevant = pos[0];
+                endingRelevant = pos[1];
+                i++;
+                bracketBlocks++;                
+                continue;
+            }
+            //Look for "}" and replace with )
+            if(t[1].type == TType.RCURLY_BRACKET){
+                tempStream.add(new Token(TType.FUNC_END, ")", t[1].target));
+                bracketBlocks--;
+                if(bracketBlocks < 0){
+                    throw new ConfigCompileException("Unexpected right curly brace", unknown);
+                }
+                startingRelevant = endingRelevant = pos[0];
+                continue;
+            }            
+            
+            //Nothing. Add it to the tempStream. Also, clear irrelevantNewlines,
+            //because they may not be irrelevant at this point.            
+            tempStream.add(t[1]);
+            irrelevantWhitespace.clear();
+        }
+        if(bracketBlocks > 0){
+            throw new ConfigCompileException("Unclosed code block, check for missing right curly brace", unknown);
+        }
+        stream = tempStream;
+        
         GenericTreeNode<Construct> tree = new GenericTreeNode<Construct>();
         tree.setData(new CNull(unknown));
         Stack<GenericTreeNode> parents = new Stack<GenericTreeNode>();
         Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
+        Stack<AtomicBoolean> usesBraces = new Stack<AtomicBoolean>();
         constructCount.push(new AtomicInteger(0));
         parents.push(tree);
         
@@ -705,7 +824,7 @@ public class MethodScriptCompiler {
             //Token next3 = i + 3 < stream.size() ? stream.get(i + 3) : new Token(TType.UNKNOWN, "", t.target);
 
             //Associative array handling
-            if (next1.type.equals(TType.IDENT)) {
+            if (next1.type.equals(TType.LABEL)) {
                 tree.addChild(new GenericTreeNode<Construct>(new CLabel(Static.resolveConstruct(t.val(), t.target))));
                 constructCount.peek().incrementAndGet();
                 i++;
@@ -790,6 +909,9 @@ public class MethodScriptCompiler {
             } else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
                 tree.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
+            } else if(t.type.equals(TType.IDENTIFIER)){
+                tree.addChild(new GenericTreeNode<Construct>(new CPreIdentifier(t.val(), t.target)));
+                constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.IVARIABLE)) {
                 tree.addChild(new GenericTreeNode<Construct>(new IVariable(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
@@ -819,13 +941,24 @@ public class MethodScriptCompiler {
                     throw new ConfigCompileException("Unexpected parenthesis", t.target);
                 }
                 parens++;
+                usesBraces.push(new AtomicBoolean(false));
             } else if (t.type.equals(TType.FUNC_END)) {
                 if (parens <= 0) {
                     throw new ConfigCompileException("Unexpected parenthesis", t.target);
                 }
                 parens--;
-                parents.pop();
-                if (constructCount.peek().get() > 1) {
+                GenericTreeNode<Construct> function = parents.pop();
+                if(usesBraces.peek().get()){
+                    try{
+                        Function f = FunctionList.getFunction(function.data);
+                        if(!f.allowBraces()){
+                            throw new ConfigCompileException("Improper use of braces with " + f.getName() + "()", t.target);
+                        }
+                    } catch(Exception e){
+                        throw new ConfigCompileException("Could not find function " + function.data.val(), t.target);
+                    }
+                }
+                if (constructCount.peek().get() > 1) {                    
                     //We need to autoconcat some stuff
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
@@ -855,6 +988,7 @@ public class MethodScriptCompiler {
                         }
                     }
                 }
+                usesBraces.pop();
                 constructCount.pop();
                 try {
                     constructCount.peek().incrementAndGet();
@@ -866,7 +1000,10 @@ public class MethodScriptCompiler {
                 } catch (EmptyStackException e) {
                     throw new ConfigCompileException("Unexpected end parenthesis", t.target);
                 }
-            } else if (t.type.equals(TType.COMMA)) {
+            } else if (t.type.equals(TType.COMMA) || t.type == TType.SCOMMA) {
+                if(t.type == TType.SCOMMA){
+                    usesBraces.peek().set(true);
+                }
                 if (constructCount.peek().get() > 1) {
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
@@ -910,6 +1047,13 @@ public class MethodScriptCompiler {
      * @return 
      */
     private static void optimize(GenericTreeNode<Construct> tree) throws ConfigCompileException{
+        if(tree.optimized){
+            return; //Don't need to re-run this
+        }
+        if(tree.data instanceof CIdentifier){
+            optimize(((CIdentifier)tree.data).contained());
+            return;
+        }
         if(!(tree.data instanceof CFunction)){
             //There's no way to optimize something that's not a function
             return;
@@ -953,14 +1097,19 @@ public class MethodScriptCompiler {
             //It's a proc. We can't optimize those yet.
             return;
         }
+        //In all cases, at this point, we are either unable to optimize, or we will
+        //optimize, so set our optimized variable at this point.
+        tree.optimized = true;
+        
         //the compiler trick functions know how to deal with it specially, even if everything isn't
         //static, so do this first.
-        if(func instanceof Sandbox.__autoconcat__){
-            Sandbox.__autoconcat__ autoconcat = (Sandbox.__autoconcat__)func;
-            GenericTreeNode<Construct> tempNode = autoconcat.optimizeSpecial(tree.data.getTarget(), tree.getChildren());
+        if(func.canOptimizeDynamic()){            
+            GenericTreeNode<Construct> tempNode = func.optimizeDynamic(tree.data.getTarget(), tree.getChildren());
             tree.data = tempNode.data;
             tree.children = tempNode.children;
+            tree.optimized = tempNode.optimized;
             optimize(tree);
+            tree.optimized = true;
             return;
         }
         if(!fullyStatic){
@@ -991,6 +1140,7 @@ public class MethodScriptCompiler {
                 throw new ConfigCompileException(e);
             }
         }
+        
         //It doesn't know how to optimize. Oh well.
     }
 

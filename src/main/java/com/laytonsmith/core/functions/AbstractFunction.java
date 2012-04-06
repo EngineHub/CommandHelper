@@ -3,10 +3,13 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import java.util.List;
 
 /**
  *
@@ -59,5 +62,33 @@ public abstract class AbstractFunction implements Function{
     public Construct optimize(Target t, Construct ... args) throws ConfigCompileException{
         return null;
     }
+
+    /**
+     * Most functions (even the ones that can optimize) cannot optimize dynamic things.
+     * @return 
+     */
+    public boolean canOptimizeDynamic() {
+        return false;
+    }
+
+    /**
+     * It may be that a function can simply check for compile errors, but not optimize. In this
+     * case, it is appropriate to use this definition of optimizeDynamic, to return a value
+     * that will essentially make no changes.
+     * @param t
+     * @param children
+     * @return 
+     */
+    public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException{
+        GenericTreeNode<Construct> node = new GenericTreeNode<Construct>();
+        node.data = new CFunction(this.getName(), t);
+        node.children = children;
+        node.optimized = true;
+        return node;
+    }
+
+    public boolean allowBraces() {
+        return false;
+    }        
 
 }

@@ -286,6 +286,11 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
+
+        @Override
+        public boolean allowBraces() {
+            return true;
+        }                
        
     }
 
@@ -392,6 +397,11 @@ public class DataHandling {
         public boolean useSpecialExec() {
             return true;
         }
+
+        @Override
+        public boolean allowBraces() {
+            return true;
+        }        
     }
 
     @api
