@@ -10,6 +10,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
@@ -100,6 +101,9 @@ public class SyntaxHighlighters {
             base.add("true");
         } else if(datalist.equalsIgnoreCase("functions")){
             for(Function f : GetFunctions()){
+                if(!f.appearInDocumentation()){
+                    continue;
+                }
                 if(params.contains("restricted") || params.contains("unrestricted")){
                     if(params.contains("restricted") && f.isRestricted()){
                         base.add(f.getName());
@@ -113,6 +117,10 @@ public class SyntaxHighlighters {
         } else if(datalist.equalsIgnoreCase("events")){
             for(Documentation d : GetEvents()){
                 base.add(d.getName());
+            }
+        } else if(datalist.equalsIgnoreCase("exceptions")){
+            for(Exceptions.ExceptionType e : Exceptions.ExceptionType.values()){
+                base.add(e.name());
             }
         }
         String header = "";

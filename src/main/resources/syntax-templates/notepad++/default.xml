@@ -9,21 +9,21 @@
             <Keywords name="Delimiters">&apos;&quot;0&apos;&quot;0</Keywords>
             <Keywords name="Folder+">&gt;&gt;&gt;</Keywords>
             <Keywords name="Folder-">&lt;&lt;&lt;</Keywords>
-            <Keywords name="Operators">( ) , : [ \ ] =</Keywords>
+            <Keywords name="Operators">- ! % &amp; ( ) * , . / : [ \ ] { | } + &lt; = &gt;</Keywords>
             <Keywords name="Comment">1/* 2*/ 0#</Keywords>
             <Keywords name="Words1">%%space:functions%%</Keywords>
-            <Keywords name="Words2">_</Keywords>
-            <Keywords name="Words3">@</Keywords>
-            <Keywords name="Words4">$</Keywords>
+            <Keywords name="Words2">%%space:exceptions%% %%space:events%%</Keywords>
+            <Keywords name="Words3">_</Keywords>
+            <Keywords name="Words4">$ @</Keywords>
         </KeywordLists>
         <Styles>
             <WordsStyle name="DEFAULT" styleID="11" fgColor="FF0000" bgColor="FFFFFF" fontName="" fontStyle="0" />
             <WordsStyle name="FOLDEROPEN" styleID="12" fgColor="000080" bgColor="FFFF80" fontName="" fontStyle="1" />
             <WordsStyle name="FOLDERCLOSE" styleID="13" fgColor="000080" bgColor="FFFF80" fontName="" fontStyle="1" />
             <WordsStyle name="KEYWORD1" styleID="5" fgColor="0080FF" bgColor="FFFFFF" fontName="" fontStyle="1" />
-            <WordsStyle name="KEYWORD2" styleID="6" fgColor="004080" bgColor="FFFFFF" fontName="" fontStyle="1" />
-            <WordsStyle name="KEYWORD3" styleID="7" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" />
-            <WordsStyle name="KEYWORD4" styleID="8" fgColor="8000FF" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="KEYWORD2" styleID="6" fgColor="800080" bgColor="FFFFFF" fontName="" fontStyle="1" />
+            <WordsStyle name="KEYWORD3" styleID="7" fgColor="004080" bgColor="FFFFFF" fontName="" fontStyle="0" />
+            <WordsStyle name="KEYWORD4" styleID="8" fgColor="FF8000" bgColor="FFFFFF" fontName="" fontStyle="0" />
             <WordsStyle name="COMMENT" styleID="1" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" />
             <WordsStyle name="COMMENT LINE" styleID="2" fgColor="008000" bgColor="FFFFFF" fontName="" fontStyle="0" />
             <WordsStyle name="NUMBER" styleID="4" fgColor="FF0000" bgColor="FFFFFF" fontName="" fontStyle="0" />
