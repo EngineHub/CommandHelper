@@ -359,10 +359,14 @@ public class Meta {
         }
 
         public String docs() {
-            return "void {cmd} Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
+            return "boolean {cmd} Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
                     + " a script that runs \"/jail = /jail\" for instance, would simply be calling whatever plugin that actually"
                     + " provides the jail functionality's /jail command. However, using this function makes the command loop back"
-                    + " to CommandHelper only.";
+                    + " to CommandHelper only. Returns true if the command was run, or false otherwise. Note however that if an alias"
+                    + " ends up throwing an exception to the top level, it will not bubble up to this script, it will be caught and dealt"
+                    + " with already; if this happens, this function will still return true, because essentially the return value"
+                    + " simply indicates if the command matches an alias. Also, it is worth noting that this will trigger a player's"
+                    + " personal alias possibly.";
         }
 
         public ExceptionType[] thrown() {
@@ -396,11 +400,11 @@ public class Meta {
             if(doRemoval){
                 Static.getAliasCore().removePlayerReference(env.GetCommandSender());
             }
-            Static.getAliasCore().alias(args[0].val(), env.GetCommandSender(), null);
+            boolean ret = Static.getAliasCore().alias(args[0].val(), env.GetCommandSender(), null);
             if(doRemoval){
                 Static.getAliasCore().addPlayerReference(env.GetCommandSender());
             }
-            return new CVoid(t);
+            return new CBoolean(ret, t);
         }
     }
     
