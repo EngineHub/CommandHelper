@@ -175,4 +175,8 @@ public class BukkitMCServer implements MCServer{
         return null;            
     }
 
+    public void runasConsole(String cmd) {
+        s.dispatchCommand(s.getConsoleSender(), cmd);
+    }
+
 }

@@ -44,10 +44,11 @@ public class CHLog {
         //TODO Add the rest of these hooks into the code
 //        IO("IO", "Logs when the filesystem is accessed.", Level.OFF),
 //        ALIAS("alias", "Logs use of user aliases.", Level.OFF),
-//        EVENTS("events", "Logs bindings of an event.", Level.OFF),
+//        EVENTS("events", "Logs bindings and use of an event.", Level.OFF),
 //        PROCEDURES("procedures", "Logs when a procedure is created", Level.OFF),
         INCLUDES("includes", "Logs what file is requested when include() is used", Level.OFF),
-        GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", Level.ERROR)
+        GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", Level.ERROR),
+        META("meta", "Functions in the meta class use this tag", Level.OFF)
         ;
         
         

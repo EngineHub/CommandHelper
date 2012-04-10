@@ -38,4 +38,6 @@ public interface MCServer {
     public List<MCOfflinePlayer> getOperators();
 
     public Economy getEconomy();
+
+    public void runasConsole(String cmd);
 }

@@ -57,12 +57,9 @@ public class Meta {
                 //Store their current op status
                 Boolean isOp = env.GetCommandSender().isOp();
 
+                CHLog.Log(CHLog.Tags.META, "Executing command on " + env.GetPlayer().getName() + " (as op): " + args[1].val().trim(), t);
                 if (Prefs.DebugMode()) {
-                    if (env.GetCommandSender() instanceof MCPlayer) {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[1].val().trim());
-                    } else {
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[1].val().trim());
-                    }
+                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + " (as op): " + args[1].val().trim());
                 }
 
                 //If they aren't op, op them now
@@ -80,10 +77,19 @@ public class Meta {
                         this.setOp(env.GetCommandSender(), isOp);
                     }
                 }
+            } else if(args[0].val().equals("~console")){
+                CHLog.Log(CHLog.Tags.META, "Executing command on " + env.GetPlayer().getName() + " (as console): " + args[1].val().trim(), t);
+                if (Prefs.DebugMode()) {
+                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + " (as : " + args[1].val().trim());
+                }
+                Static.getServer().runasConsole(cmd);
             } else {
                 MCPlayer m = Static.GetPlayer(args[0]);
                 if (m != null && m.isOnline()) {
-                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + " (running as " + args[0].val() + "): " + args[1].val().trim());
+                    CHLog.Log(CHLog.Tags.META, "Executing command on " + env.GetPlayer().getName() + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
+                    if(Prefs.DebugMode()){
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + " (running as " + args[0].val() + "): " + args[1].val().trim());
+                    }
                     //m.chat(cmd);
                     Static.getServer().dispatchCommand(m, cmd);
                 } else {
