@@ -93,4 +93,13 @@ public class EchoesTest {
 //        a.exec(Target.UNKNOWN, fakePlayer, C.onstruct("wraithguard02"), C.onstruct("Hello World!"));
 //        verify(wraithguard01).chat("Hello World!");        
     }
+    
+    @Test
+    public void testIndentation() throws ConfigCompileException{
+        SRun("msg('yay\n yay\n  yay\n   yay')", fakePlayer);
+        verify(fakePlayer).sendMessage("yay");
+        verify(fakePlayer).sendMessage(" yay");
+        verify(fakePlayer).sendMessage("  yay");
+        verify(fakePlayer).sendMessage("   yay");
+    }
 }

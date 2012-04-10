@@ -144,6 +144,13 @@ public class MethodScriptCompilerTest {
         }
 
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("if(1, msg('') msg(''))", null));
+        
+    }
+    
+    @Test public void testLabel() throws ConfigCompileException{
+        assertEquals("*", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("*:/cmd = die()", null), env).get(0).compile().getLabel());
+        assertEquals("*", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("* : /cmd = die()", null), env).get(0).compile().getLabel());
+        assertEquals("~lol/fun", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("~lol/fun: /cmd = die()", null), env).get(0).compile().getLabel());
     }
     
     @Test
@@ -782,6 +789,6 @@ public class MethodScriptCompilerTest {
                 + "     msg('pass')"
                 + "}", fakePlayer);
         verify(fakePlayer).sendMessage("pass");
-    }
+    }       
     
 }

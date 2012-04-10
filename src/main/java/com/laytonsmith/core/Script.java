@@ -426,7 +426,7 @@ public class Script {
         return vars;
     }
 
-    public void compile() throws ConfigCompileException {
+    public Script compile() throws ConfigCompileException {
         try {
             verifyLeft();
             compileLeft();
@@ -437,6 +437,7 @@ public class Script {
         }
         compilerError = false;
         hasBeenCompiled = true;
+        return this;
     }
 
     private boolean verifyLeft() throws ConfigCompileException {
@@ -458,10 +459,16 @@ public class Script {
                     i++;
                     m = left.get(i);
                 }
-                if(m.type != TType.WHITESPACE){
+                
+                if(m.type != TType.WHITESPACE && m.type != TType.LABEL){
                     b.append(m.value);
                 }
-                t = new Token(TType.STRING, b.toString(), t.target);                
+                t = new Token(TType.STRING, b.toString(), t.target);  
+                if(m.type == TType.LABEL){
+                    tempLeft.add(t);
+                    tempLeft.add(m);
+                    continue;
+                }
             }
             //Go ahead and toString the other symbols too
             if(t.type.isSymbol()){
