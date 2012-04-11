@@ -130,5 +130,14 @@ public interface Event extends Comparable<Event>, Documentation{
      * event was successfully updated.
      */
     public boolean modifyEvent(String key, Construct value, BindableEvent event);
+
+    /**
+     * Returns if this event is cancelled. If the event is not cancellable, false should
+     * be returned, though this case shouldn't normally occur, since isCancellable will
+     * be called prior to calling this function.
+     * @param underlyingEvent
+     * @return 
+     */
+    public boolean isCancelled(BindableEvent underlyingEvent);
     
 }

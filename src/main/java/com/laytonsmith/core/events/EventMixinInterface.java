@@ -37,4 +37,11 @@ public interface EventMixinInterface {
      * @param e 
      */
     public void manualTrigger(BindableEvent e);
+
+    /**
+     * Is this event cancelled?
+     * @param o
+     * @return 
+     */
+    public boolean isCancelled(BindableEvent o);
 }

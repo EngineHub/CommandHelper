@@ -310,7 +310,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         private final BindableEvent underlyingEvent;
         private Map<String, Construct> parsedEvent;
         private BoundEvent boundEvent;
-        private boolean cancelled;
+        private Boolean cancelled;
         private BoundEvent consumedAt;
         private final Map<String, BoundEvent> lockedAt;
         private final List<Pair<CClosure, Env>> whenCancelled;
@@ -320,7 +320,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         
         public ActiveEvent(BindableEvent underlyingEvent){
             this.underlyingEvent = underlyingEvent;
-            this.cancelled = false;
+            this.cancelled = null;
             whenCancelled = new ArrayList<Pair<CClosure, Env>>();
             whenTriggered = new ArrayList<Pair<CClosure, Env>>();
             lockedAt = new HashMap<String, BoundEvent>();
@@ -358,7 +358,19 @@ public class BoundEvent implements Comparable<BoundEvent> {
         }
 
         public boolean isCancelled() {
-            return cancelled;
+            //if cancelled is not null, return it. If it is null, check with the underlying event.
+            //If it isn't null, that means we have manually set it somewhere, so that takes precedence;
+            //indeed, it may not make sense to ask the event, as it may not be cancellable in the first
+            //place, but we can still return regardless.
+            if(cancelled != null){
+                return cancelled;
+            } else {
+                if(boundEvent.getEventDriver().isCancellable(underlyingEvent)){
+                    return boundEvent.getEventDriver().isCancelled(underlyingEvent);
+                } else {
+                    return false;
+                }
+            }
         }
 
         public void setCancelled(boolean cancelled) {
