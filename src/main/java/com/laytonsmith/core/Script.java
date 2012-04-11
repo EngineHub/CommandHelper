@@ -449,6 +449,9 @@ public class Script {
         List<Token> tempLeft = new ArrayList<Token>();
         for(int i = 0; i < left.size(); i++){
             Token t = left.get(i);
+            if(i == 0 && t.type == TType.NEWLINE){
+                continue;
+            }
             if(t.type.isSymbol() && left.size() - 1 >= i && left.get(i + 1).type != TType.WHITESPACE){
                 StringBuilder b = new StringBuilder();
                 b.append(t.value);

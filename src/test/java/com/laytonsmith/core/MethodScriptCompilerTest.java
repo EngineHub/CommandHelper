@@ -444,6 +444,26 @@ public class MethodScriptCompilerTest {
         s.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
         verify(fakePlayer).sendMessage("success");
     }
+    
+    @Test
+    public void testCompileTwoAliases() throws ConfigCompileException{
+        AliasCore ac = mock(AliasCore.class);
+        ac.autoIncludes = new ArrayList<File>();
+        PowerMockito.mockStatic(CommandHelperPlugin.class);
+        when(CommandHelperPlugin.getCore()).thenReturn(ac);
+        assertEquals(ac, CommandHelperPlugin.getCore());
+        String config = "/cmd1 = msg('success')\n"
+                + "                 \n" //Spaces and tabs are here
+                + "/cmd2 = msg('success')";
+        env.SetPlayer(fakePlayer);
+        Script s1 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
+        s1.compile();
+        s1.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+        Script s2 = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(1);
+        s2.compile();
+        s2.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
+        verify(fakePlayer, times(2)).sendMessage("success");
+    }
 
     @Test
     public void testCompile2() {
