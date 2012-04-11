@@ -77,9 +77,9 @@ public class Meta {
                     }
                 }
             } else if(args[0].val().equals("~console")){
-                CHLog.Log(CHLog.Tags.META, "Executing command on " + env.GetPlayer().getName() + " (as console): " + args[1].val().trim(), t);
+                CHLog.Log(CHLog.Tags.META, "Executing command on " + (env.GetPlayer()!=null?env.GetPlayer().getName():"~console") + " (as console): " + args[1].val().trim(), t);
                 if (Prefs.DebugMode()) {
-                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + " (as : " + args[1].val().trim());
+                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.GetPlayer()!=null?env.GetPlayer().getName():"~console") + " (as : " + args[1].val().trim());
                 }
                 Static.getServer().runasConsole(cmd);
             } else {
