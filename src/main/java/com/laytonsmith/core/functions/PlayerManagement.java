@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -13,7 +12,6 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;

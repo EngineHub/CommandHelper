@@ -72,6 +72,7 @@ public class DocGen {
                 return o1.getKey().getName().compareTo(o2.getKey().getName());
             }
         });
+        int total = 0;
 
         for (Map.Entry<Class, ArrayList<Function>> entry : entrySet) {
             Class apiClass = entry.getKey();
@@ -95,22 +96,23 @@ public class DocGen {
             } catch (InvocationTargetException ex) {
             } catch (NoSuchMethodException e) {
             }
+            StringBuilder intro = new StringBuilder();
             if (type.equals("html")) {
                 if (className != null) {
-                    System.out.println("<h1>" + className + "</h1>");
-                    System.out.println(classDocs == null ? "" : classDocs);
+                    intro.append("<h1>").append(className).append("</h1>" + "\n");
+                    intro.append(classDocs == null ? "" : classDocs).append("\n");
                 } else {
-                    System.out.println("<h1>Other Functions</h1>");
+                    intro.append("<h1>Other Functions</h1>" + "\n");
                 }
-                System.out.println("<table>");
+                intro.append("<table>" + "\n");
             } else if (type.equals("wiki")) {
                 if (className != null) {
-                    System.out.println("===" + className + "===");
-                    System.out.println(classDocs == null ? "" : classDocs);
+                    intro.append("===").append(className).append("===" + "\n");
+                    intro.append(classDocs == null ? "" : classDocs).append("\n");
                 } else {
-                    System.out.println("===Other Functions===");
+                    intro.append("===Other Functions===" + "\n");
                 }
-                System.out.println("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" align=\"left\" class=\"wikitable\"\n"
+                intro.append("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" align=\"left\" class=\"wikitable\"\n"
                         + "|-\n"
                         + "! scope=\"col\" width=\"6%\" | Function Name\n"
                         + "! scope=\"col\" width=\"5%\" | Returns\n"
@@ -118,15 +120,18 @@ public class DocGen {
                         + "! scope=\"col\" width=\"10%\" | Throws\n"
                         + "! scope=\"col\" width=\"61%\" | Description\n"
                         + "! scope=\"col\" width=\"3%\" | Since\n"
-                        + "! scope=\"col\" width=\"5%\" | Restricted");
+                        + "! scope=\"col\" width=\"5%\" | Restricted" + "\n");
             } else if (type.equals("text")) {
-                System.out.println("**********************************************************************************************");
+                intro.append("**********************************************************************************************" + "\n");
                 if (className != null) {
-                    System.out.println(classDocs == null ? "" : classDocs);
+                    intro.append(classDocs == null ? "" : classDocs).append("\n");
                 } else {
-                    System.out.println("Other Functions");
+                    intro.append("Other Functions" + "\n");
                 }
-                System.out.println("**********************************************************************************************");
+                intro.append("**********************************************************************************************" + "\n");
+            }
+            if(!entry.getValue().isEmpty()){
+                System.out.println(intro.toString());
             }
             List<Function> flist = entry.getValue();
             Collections.sort(flist, new Comparator<Function>() {
@@ -136,6 +141,11 @@ public class DocGen {
                 }
             });
             for (Function f : entry.getValue()) {
+                if(!f.appearInDocumentation()){
+                    //Some functions don't need to be included in the documentation; for instance __autoconcat__
+                    continue;
+                }
+                total++;
                 String doc = f.docs();
                 String ret = null;
                 String args = null;
@@ -191,12 +201,14 @@ public class DocGen {
                             : "\n\tThis function is not restricted"));
                 }
             }
-            if (type.equals("html")) {
-                System.out.println("</table>");
-            } else if (type.equals("wiki")) {
-                System.out.println("|}");
-            } else if (type.equals("text")) {
-                System.out.println();
+            if(!entry.getValue().isEmpty()){
+                if (type.equals("html")) {
+                    System.out.println("</table>");
+                } else if (type.equals("wiki")) {
+                    System.out.println("|}");
+                } else if (type.equals("text")) {
+                    System.out.println();
+                }
             }
         }
         if (type.equals("html")) {
@@ -204,13 +216,15 @@ public class DocGen {
                     + "<h2>Errors in documentation</h2>\n"
                     + "<em>Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
-                    + " plugin itself!</em>");
+                    + " plugin itself!</em>"
+                    + "<div style='text-size:small; text-decoration:italics; color:grey'>There are " + total + " functions in this API page</div>");
         } else if (type.equals("wiki")) {
             System.out.println(""
                     + "===Errors in documentation===\n"
                     + "''Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
-                    + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]");
+                    + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]"
+                    + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page</div>");
         }
     }
 

@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;

@@ -2,10 +2,6 @@ package com.laytonsmith.core;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.Test;
-import static org.junit.Assert.*;
-import static com.laytonsmith.core.TypeHinting.Type.*;
-import static com.laytonsmith.core.TypeHinting.Modifier.*;
 
 /**
  *

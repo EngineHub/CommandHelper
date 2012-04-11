@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;

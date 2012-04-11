@@ -3,10 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.Script;
-import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.List;
@@ -87,8 +84,28 @@ public abstract class AbstractFunction implements Function{
         return node;
     }
 
+    /**
+     * Only an extreme few functions should allow braces.
+     * @return 
+     */
     public boolean allowBraces() {
         return false;
-    }        
+    }     
+    
+    /**
+     * Most functions don't need the varlist.
+     * @param varList 
+     */
+    public void varList(IVariableList varList) {
+        return;
+    }
+
+    /**
+     * Most functions want the atomic values, not the variable itself.
+     * @return 
+     */
+    public boolean preResolveVariables() {
+        return true;
+    }
 
 }

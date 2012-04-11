@@ -4,8 +4,6 @@
  */
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.Target;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;

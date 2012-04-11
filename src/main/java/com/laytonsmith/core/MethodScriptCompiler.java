@@ -8,9 +8,10 @@ import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.*;
-import com.laytonsmith.core.functions.BasicLogic.ifelse;
-import com.sk89q.jchronic.handlers.SRPAHandler;
+import com.laytonsmith.core.functions.Compiler;
+import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.IncludeCache;
 import java.io.File;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -1063,7 +1064,7 @@ public class MethodScriptCompiler {
             for(int i = 0; i < tree.getChildren().size(); i++){
                 GenericTreeNode<Construct> node = tree.getChildAt(i);
                 if(node.data.val().equals("__autoconcat__")){
-                    Sandbox.__autoconcat__ func = (Sandbox.__autoconcat__)FunctionList.getFunction(node.data);
+                    Compiler.__autoconcat__ func = (Compiler.__autoconcat__)FunctionList.getFunction(node.data);
                     GenericTreeNode<Construct> tempNode = func.optimizeSpecial(node.data.getTarget(), node.children, false);
                     tree.data = tempNode.data;
                     tree.children = tempNode.children;
