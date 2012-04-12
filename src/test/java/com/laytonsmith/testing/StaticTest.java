@@ -296,7 +296,6 @@ public class StaticTest {
         when(p.isOnline()).thenReturn(true);
         when(p.getName()).thenReturn(name);        
         when(p.getServer()).thenReturn(s); 
-        when(p.instanceofPlayer()).thenReturn(true);
         when(p.isOp()).thenReturn(true);
         if(s != null && s.getOnlinePlayers() != null){
             List<MCPlayer> online = new ArrayList<MCPlayer>(Arrays.asList(s.getOnlinePlayers()));
@@ -331,13 +330,11 @@ public class StaticTest {
         MCConsoleCommandSender c = mock(MCConsoleCommandSender.class);
         MCServer s = GetFakeServer();
         when(c.getServer()).thenReturn(s);
-        when(c.instanceofMCConsoleCommandSender()).thenReturn(true);
         return c;
     }
     
     public static MCLocation GetFakeLocation(MCWorld w, double x, double y, double z){
         MCLocation loc = mock(BukkitMCLocation.class);
-        World bukkitWorld = mock(World.class);
         when(loc.getWorld()).thenReturn(w);
         return loc;
     }
@@ -540,6 +537,10 @@ public class StaticTest {
 
         public int SetFutureRepeater(long ms, long initialDelay, Runnable r) {
             throw new UnsupportedOperationException("Not supported yet.");
+        }
+
+        public MCEntity GetCorrectEntity(MCEntity e) {
+            return e;
         }
         
     }

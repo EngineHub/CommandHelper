@@ -122,5 +122,16 @@ public class StaticLayer {
     public static void ClearFutureRunnable(int id){
         convertor.ClearFutureRunnable(id);
     }
+
+    /**
+     * Given an entity, returns the more specific entity type, by creating a new more
+     * specific type based on the actual type of the underlying object contained by the 
+     * more generic type.
+     * @param e
+     * @return 
+     */
+    public static MCEntity GetCorrectEntity(MCEntity e) {
+        return convertor.GetCorrectEntity(e);
+    }
     
 }

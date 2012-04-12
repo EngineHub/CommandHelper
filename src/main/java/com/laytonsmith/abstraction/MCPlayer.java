@@ -12,7 +12,7 @@ import java.util.HashSet;
  *
  * @author layton
  */
-public interface MCPlayer extends MCCommandSender, MCOfflinePlayer{
+public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlayer{
     public String getDisplayName();
     public void chat(String chat);
     public MCItemStack getItemInHand();

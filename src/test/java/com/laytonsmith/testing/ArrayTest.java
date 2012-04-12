@@ -366,5 +366,10 @@ public class ArrayTest {
         SRun("try(@a[1], msg('success'))", fakePlayer);
         verify(fakePlayer).sendMessage("success");
     }
+    
+    @Test public void testDirectSquareBracketUsage() throws ConfigCompileException{
+        SRun("msg(array(0, 1, 2)[0])", fakePlayer);
+        verify(fakePlayer).sendMessage("0");
+    }
 
 }

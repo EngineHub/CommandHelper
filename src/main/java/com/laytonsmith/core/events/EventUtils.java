@@ -187,10 +187,13 @@ public class EventUtils {
                 }
             }
         }
-        if(activeEvent.isCancelled()){
-            activeEvent.executeCancelled();
-        } else {
-            activeEvent.executeTriggered();
+        for(BoundEvent b : toRun){
+            activeEvent.setBoundEvent(b);
+            if(activeEvent.isCancelled()){
+                activeEvent.executeCancelled();
+            } else {
+                activeEvent.executeTriggered();
+            }
         }
     }
 

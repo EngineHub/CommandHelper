@@ -583,8 +583,8 @@ public class Static {
     public static MCEntity getEntity(int id) {
         for (MCWorld w : Static.getServer().getWorlds()) {
             for (MCLivingEntity e : w.getLivingEntities()) {
-                if (e.getEntityId() == id) {
-                    return e;
+                if (e.getEntityId() == id) {                    
+                    return StaticLayer.GetCorrectEntity(e);
                 }
             }
         }

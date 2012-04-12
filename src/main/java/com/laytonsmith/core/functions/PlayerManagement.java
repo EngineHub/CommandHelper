@@ -48,9 +48,9 @@ public class PlayerManagement {
                 p = Static.GetPlayer(args[0]);
             }            
             
-            if (p != null && p.instanceofPlayer()) {
+            if (p != null && p instanceof MCPlayer) {
                 return new CString(((MCPlayer) p).getName(), t);
-            } else if (p != null && p.instanceofMCConsoleCommandSender()) {
+            } else if (p != null && p instanceof MCConsoleCommandSender) {
                 return new CString("~console", t);
             } else {
                 return new CNull(t);

@@ -5,7 +5,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
 import java.util.List;
 
@@ -40,7 +40,7 @@ public interface MCWorld {
     
     public long getTime();
     
-    public Construct spawnMob(String name, String subClass, int qty, MCLocation location, Target t);
+    public CArray spawnMob(String name, String subClass, int qty, MCLocation location, Target t);
 
     public MCBiomeType getBiome(int x, int z);
     

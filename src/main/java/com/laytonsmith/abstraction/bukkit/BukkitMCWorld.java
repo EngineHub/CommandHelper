@@ -122,7 +122,7 @@ public class BukkitMCWorld implements MCWorld {
         OCELOT, CAT, IRONGOLEM;
     }
 
-    public Construct spawnMob(String name, String subClass, int qty, MCLocation l, Target t) {
+    public CArray spawnMob(String name, String subClass, int qty, MCLocation l, Target t) {
         Class mobType = null;
         CArray ids = new CArray(Target.UNKNOWN);
         try {
@@ -202,7 +202,7 @@ public class BukkitMCWorld implements MCWorld {
                     net.minecraft.server.Entity giant = new net.minecraft.server.EntityGiantZombie(((CraftWorld) l.getWorld()).getHandle());
                     giant.setLocation(x, y, z, pitch, yaw);
                     ((CraftWorld) ((BukkitMCLocation)l)._Location().getWorld()).getHandle().addEntity(giant, SpawnReason.CUSTOM);
-                    return new CVoid(t);
+                    break;
                 case SNOWGOLEM:
                     mobType = Snowman.class;
                     break;

@@ -7,11 +7,12 @@ import org.bukkit.entity.HumanEntity;
  *
  * @author layton
  */
-class BukkitMCHumanEntity implements MCHumanEntity {
+class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
     
     HumanEntity he;
 
     public BukkitMCHumanEntity(HumanEntity humanEntity) {
+        super(humanEntity);
         he = humanEntity;
     }
 

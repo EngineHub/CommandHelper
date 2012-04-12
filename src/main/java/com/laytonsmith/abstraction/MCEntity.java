@@ -11,13 +11,6 @@ package com.laytonsmith.abstraction;
 public interface MCEntity {
     public int getEntityId();
 
-    public boolean isTameable();
-
-    public MCTameable getMCTameable();
-
     public MCDamageCause getLastDamageCause();
 
-    public MCLivingEntity getLivingEntity();
-
-    public boolean isLivingEntity();
 }

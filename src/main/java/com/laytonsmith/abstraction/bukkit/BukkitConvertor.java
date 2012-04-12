@@ -16,6 +16,7 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.enchantments.Enchantment;
+import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
@@ -123,6 +124,28 @@ public class BukkitConvertor implements Convertor {
             Bukkit.getServer().getScheduler().cancelTask(id);
             validIDs.remove(id);
         }
+    }
+
+    public MCEntity GetCorrectEntity(MCEntity e) {
+
+        Entity be = ((BukkitMCEntity)e)._Entity();
+        if(be instanceof Tameable){
+            return new BukkitMCTameable((Tameable)be);
+        }
+        
+        if(be instanceof LivingEntity){
+            return new BukkitMCLivingEntity(((LivingEntity)be));
+        }
+        
+        if(be instanceof HumanEntity){
+            return new BukkitMCHumanEntity((HumanEntity)be);
+        }
+        
+        if(be instanceof Player){
+            return new BukkitMCPlayer((Player)be);
+        }
+        
+        return e;
     }
 
 }

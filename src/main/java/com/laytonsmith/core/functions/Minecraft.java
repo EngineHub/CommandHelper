@@ -443,8 +443,8 @@ public class Minecraft {
             MCEntity e = Static.getEntity(id);
             if(e == null){
                 return new CVoid(t);
-            } else if(e.isTameable()){                
-                MCTameable mct = e.getMCTameable();
+            } else if(e instanceof MCTameable){                
+                MCTameable mct = ((MCTameable)e);
                 if(player != null){
                     mct.setOwner(Static.getServer().getOfflinePlayer(player));
                 } else {
@@ -498,12 +498,12 @@ public class Minecraft {
             MCEntity e = Static.getEntity(id);
             if(e == null){
                 return new CNull(t);
-            } else if(e.isTameable()){
-                MCAnimalTamer at = e.getMCTameable().getOwner();
-                if(at.isHumanEntity()){
-                    return new CString(at.getHumanEntity().getName(), t);
-                } else if(at.isOfflinePlayer()){
-                    return new CString(at.getOfflinePlayer().getName(), t);
+            } else if(e instanceof MCTameable){
+                MCAnimalTamer at = ((MCTameable)e).getOwner();                 
+                if(at instanceof MCHumanEntity){
+                    return new CString(((MCHumanEntity)at).getName(), t);
+                } else if(at instanceof MCOfflinePlayer){
+                    return new CString(((MCOfflinePlayer)at).getName(), t);
                 } else {
                     return new CNull(t);
                 }
@@ -554,7 +554,7 @@ public class Minecraft {
             boolean ret;
             if(e == null){
                 ret = false;
-            } else if(e.isTameable()){
+            } else if(e instanceof MCTameable){
                 ret = true;
             } else {
                 ret = false;
@@ -661,8 +661,8 @@ public class Minecraft {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCEntity e = Static.getEntity((int)Static.getInt(args[0]));
-            if(e.isLivingEntity()){
-                int health = (int)((double)Static.getInt(args[1])/100.0*(double)e.getLivingEntity().getMaxHealth());
+            if(e instanceof MCLivingEntity){
+                int health = (int)((double)Static.getInt(args[1])/100.0*(double)((MCLivingEntity)e).getMaxHealth());
                 if(health != 0){
                     ((MCLivingEntity)e).setHealth(health);
                 } else {

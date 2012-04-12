@@ -17,7 +17,4 @@ public interface MCCommandSender {
     
     public boolean isOp();
 
-    public boolean instanceofPlayer();
-
-    public boolean instanceofMCConsoleCommandSender();
 }

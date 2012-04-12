@@ -49,5 +49,7 @@ public interface Convertor {
     public void ClearFutureRunnable(int id);
 
     public int SetFutureRepeater(long ms, long initialDelay, Runnable r);
+
+    public MCEntity GetCorrectEntity(MCEntity e);
     
 }

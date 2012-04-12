@@ -20,6 +20,7 @@ import net.minecraft.server.MobEffect;
 import net.minecraft.server.ServerConfigurationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -30,7 +31,7 @@ import org.bukkit.util.BlockIterator;
  *
  * @author layton
  */
-public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer, MCEntity {
+public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer {
 
     Player p;
 
@@ -391,6 +392,18 @@ public class BukkitMCPlayer extends BukkitMCCommandSender implements MCPlayer, M
     public void setAllowFlight(boolean flight){
         p.setAllowFlight(flight);
     }
+
+    public void sendMessage(String string) {
+        p.sendMessage(string);
+    }
+
+    public MCServer getServer() {
+        return new BukkitMCServer();
+    }
+
+    public boolean isOp() {
+        return p.isOp();
+    }    
     
     
 }
