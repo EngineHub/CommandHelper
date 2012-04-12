@@ -425,7 +425,8 @@ public class Environment {
         }
 
         public String docs() {
-            return "void {x, z, [world] | locationObject} Mostly simulates a block break at a location. (Does not trigger an event)";
+            return "void {x, z, [world] | locationObject} Mostly simulates a block break at a location. Does not trigger an event. Only works with"
+                    + " craftbukkit.";
         }
 
         public ExceptionType[] thrown() {

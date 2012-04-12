@@ -547,9 +547,10 @@ public class StaticTest {
     public static class FakeServerMixin implements EventMixinInterface{
         
         public static MCPlayer fakePlayer;
+        public boolean cancelled = false;
 
         public void cancel(BindableEvent e, boolean state) {
-            
+            cancelled = state;
         }
 
         public boolean isCancellable(BindableEvent o) {
@@ -566,6 +567,10 @@ public class StaticTest {
 
         public void manualTrigger(BindableEvent e) {
             throw new RuntimeException("Manual triggering is not supported in tests yet");
+        }
+
+        public boolean isCancelled(BindableEvent o) {
+            return cancelled;
         }
         
     }

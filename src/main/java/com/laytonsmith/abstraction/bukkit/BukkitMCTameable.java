@@ -6,8 +6,10 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCDamageCause;
+import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCTameable;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
 
 /**
@@ -56,6 +58,17 @@ public class BukkitMCTameable implements MCTameable{
 
     public MCDamageCause getLastDamageCause() {
         return MCDamageCause.valueOf(((Entity)t).getLastDamageCause().getCause().name());
+    }
+
+    public MCLivingEntity getLivingEntity() {
+        if(t instanceof LivingEntity){
+            return new BukkitMCLivingEntity((LivingEntity)t);
+        }
+        return null;
+    }
+
+    public boolean isLivingEntity() {
+        return t instanceof LivingEntity;
     }
     
     

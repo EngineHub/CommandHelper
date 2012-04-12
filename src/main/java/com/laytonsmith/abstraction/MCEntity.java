@@ -16,4 +16,8 @@ public interface MCEntity {
     public MCTameable getMCTameable();
 
     public MCDamageCause getLastDamageCause();
+
+    public MCLivingEntity getLivingEntity();
+
+    public boolean isLivingEntity();
 }

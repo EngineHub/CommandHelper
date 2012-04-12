@@ -9,5 +9,13 @@ package com.laytonsmith.abstraction;
  * @author layton
  */
 public interface MCAnimalTamer {
+
+    public MCOfflinePlayer getOfflinePlayer();
+
+    public boolean isOfflinePlayer();
+
+    public boolean isHumanEntity();
+
+    public MCHumanEntity getHumanEntity();
     
 }

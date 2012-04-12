@@ -1444,7 +1444,11 @@ public class DataHandling {
                     throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
                 }
             } else {
-                Globals.SetGlobal(args[0].val(), args[1]);
+                Construct value = args[1];
+                while(value instanceof IVariable){
+                    value = ((IVariable)value).ival();
+                }
+                Globals.SetGlobal(args[0].val(), value);
             }
             return new CVoid(t);
         }

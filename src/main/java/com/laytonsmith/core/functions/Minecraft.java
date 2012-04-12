@@ -14,9 +14,6 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.bukkit.OfflinePlayer;
-import org.bukkit.entity.HumanEntity;
-import org.bukkit.entity.LivingEntity;
 
 /**
  *
@@ -501,12 +498,12 @@ public class Minecraft {
             MCEntity e = Static.getEntity(id);
             if(e == null){
                 return new CNull(t);
-            } else if(e instanceof MCTameable){
-                MCAnimalTamer at = ((MCTameable)e).getOwner();
-                if(at instanceof HumanEntity){
-                    return new CString(((HumanEntity)at).getName(), t);
-                } else if(at instanceof OfflinePlayer){
-                    return new CString(((OfflinePlayer)at).getName(), t);
+            } else if(e.isTameable()){
+                MCAnimalTamer at = e.getMCTameable().getOwner();
+                if(at.isHumanEntity()){
+                    return new CString(at.getHumanEntity().getName(), t);
+                } else if(at.isOfflinePlayer()){
+                    return new CString(at.getOfflinePlayer().getName(), t);
                 } else {
                     return new CNull(t);
                 }
@@ -554,10 +551,10 @@ public class Minecraft {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             int id = (int)Static.getInt(args[0]);
             MCEntity e = Static.getEntity(id);
-            boolean ret = false;
+            boolean ret;
             if(e == null){
                 ret = false;
-            } else if(e instanceof MCTameable){
+            } else if(e.isTameable()){
                 ret = true;
             } else {
                 ret = false;
@@ -664,8 +661,8 @@ public class Minecraft {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCEntity e = Static.getEntity((int)Static.getInt(args[0]));
-            if(e instanceof MCLivingEntity){
-                int health = (int)((double)Static.getInt(args[1])/100.0*(double)((LivingEntity)e).getMaxHealth());
+            if(e.isLivingEntity()){
+                int health = (int)((double)Static.getInt(args[1])/100.0*(double)e.getLivingEntity().getMaxHealth());
                 if(health != 0){
                     ((MCLivingEntity)e).setHealth(health);
                 } else {

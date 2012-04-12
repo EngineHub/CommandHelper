@@ -251,7 +251,7 @@ public class DataHandlingTest {
         SRun("export('hi', 20)", fakePlayer);
         SRun("msg(import('hi'))", fakePlayer);
         verify(fakePlayer).sendMessage("20");
-    }
+    }    
 
     @Test(timeout = 10000)
     public void testIsBoolean() throws ConfigCompileException {
