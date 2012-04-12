@@ -9,7 +9,7 @@ import java.util.logging.Logger;
 /**
  * This class allows an application to more easily manage user preferences. As
  * an application grows, more preferences will likely be added, but if the application
- * uses flat file storage, mananging these preferences while adding new preferences
+ * uses flat file storage, managing these preferences while adding new preferences
  * can be difficult. This class manages, documents, and provides default values, all the
  * while not interfering with changes the user has made, meaning that you are free
  * to add new preferences, or change default values, without fear of changing

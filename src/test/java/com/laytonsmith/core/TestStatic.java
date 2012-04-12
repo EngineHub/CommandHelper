@@ -121,11 +121,6 @@ public class TestStatic {
     }
 
     @Test
-    public void testGetPreferences() {
-        Static.getPreferences();
-    }
-
-    @Test
     public void testResolveConstruct() {
         assertTrue(Static.resolveConstruct("1", Target.UNKNOWN) instanceof CInt);
         assertTrue(Static.resolveConstruct("true", Target.UNKNOWN) instanceof CBoolean);

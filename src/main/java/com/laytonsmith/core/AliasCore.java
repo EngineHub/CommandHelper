@@ -252,8 +252,7 @@ public class AliasCore {
                 }
             }
 
-            Preferences prefs = Static.getPreferences();
-            prefs.init(prefFile);
+            Prefs.init(prefFile);
             scripts = new ArrayList<Script>();
             
             LocalPackage localPackages = new LocalPackage();

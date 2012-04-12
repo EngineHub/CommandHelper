@@ -20,7 +20,7 @@ import com.sk89q.wepif.PermissionsResolverManager;
  * @author Layton
  */
 public class Permissions {
-    public String docs(){
+    public static String docs(){
         return "Provides access to the server's underlying permissions system. Permissions functionality is only as good as the management"
                 + " system in place, however, and so not all functions may be supported on a given system.";
     }

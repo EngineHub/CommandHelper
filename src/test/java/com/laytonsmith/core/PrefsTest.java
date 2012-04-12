@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Type;
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
@@ -17,10 +18,12 @@ public class PrefsTest {
     
     @Test public void testPrefs() throws Exception{
         Map<String, Preferences.Preference> prefs;
-        Prefs.init();
+        Prefs.init(new File("plugins/CommandHelper/preferences.txt"));
         Field f = Preferences.class.getDeclaredField("prefs");
         f.setAccessible(true);
-        prefs = (Map<String, Preferences.Preference>)f.get(Static.getPreferences());
+        Field storedPrefs = Prefs.class.getDeclaredField("prefs");
+        storedPrefs.setAccessible(true);
+        prefs = (Map<String, Preferences.Preference>)f.get(storedPrefs.get(null));
         assertNotNull(prefs);
         for(String name : prefs.keySet()){
             String [] parts = name.split("-");

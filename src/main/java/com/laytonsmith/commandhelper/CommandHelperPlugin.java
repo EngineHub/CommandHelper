@@ -66,7 +66,6 @@ public class CommandHelperPlugin extends JavaPlugin {
     public static SerializedPersistance persist;
     public static PermissionsResolverManager perms;
     public static Version version;
-    public static Preferences prefs;
     public static CommandHelperPlugin self;
     public static WorldEditPlugin wep;
     public static ExecutorService hostnameLookupThreadPool;
@@ -112,8 +111,10 @@ public class CommandHelperPlugin extends JavaPlugin {
             wep = (WorldEditPlugin)pwep;
         }
         try {
+            //Though the core will reload the preferences for us, we need them now, so we can gather
+            //some information from them.
             File prefsFile = new File("plugins/CommandHelper/preferences.txt");
-            Static.getPreferences().init(prefsFile);
+            Prefs.init(prefsFile);
             if(Prefs.UseColors()){
                 TermColors.EnableColors();
             } else {

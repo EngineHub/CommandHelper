@@ -29,7 +29,7 @@ public class Main {
     public static void main(String[] args) throws Exception {
         System.err.println("Running with arguments: " + Arrays.asList(args));
         try {
-            Static.getPreferences().init(new File("CommandHelper/preferences.txt"));
+            Prefs.init(new File("CommandHelper/preferences.txt"));
             List<String> l = Arrays.asList(args);
             if (args.length == 0) {
                 l.add("-help");

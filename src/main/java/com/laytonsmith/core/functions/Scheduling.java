@@ -5,10 +5,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
-import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -152,22 +149,22 @@ public class Scheduling {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if (Thread.currentThread().getName().equals("Server thread")) {
-                throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", 
-                        null, t);
-            }
-            Construct x = args[0];
-            double time = Static.getNumber(x);
-            Integer i = (Integer) (Static.getPreferences().getPreference("max-sleep-time"));
-            if (i > time || i <= 0) {
-                try {
-                    Thread.sleep((int)(time * 1000));
-                } catch (InterruptedException ex) {
-                }
-            } else {
-                throw new ConfigRuntimeException("The value passed to sleep must be less than the server defined value of " + i + " seconds or less.", 
-                        ExceptionType.RangeException, t);
-            }
+//            if (Thread.currentThread().getName().equals("Server thread")) {
+//                throw new ConfigRuntimeException("sleep() cannot be run in the main server thread", 
+//                        null, t);
+//            }
+//            Construct x = args[0];
+//            double time = Static.getNumber(x);
+//            Integer i = (Integer) (Prefs.);
+//            if (i > time || i <= 0) {
+//                try {
+//                    Thread.sleep((int)(time * 1000));
+//                } catch (InterruptedException ex) {
+//                }
+//            } else {
+//                throw new ConfigRuntimeException("The value passed to sleep must be less than the server defined value of " + i + " seconds or less.", 
+//                        ExceptionType.RangeException, t);
+//            }
             return new CVoid(t);
         }
 

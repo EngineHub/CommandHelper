@@ -15,6 +15,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
@@ -143,7 +144,7 @@ public class BukkitConvertor implements Convertor {
         
         if(be instanceof Player){
             return new BukkitMCPlayer((Player)be);
-        }
+        }        
         
         return e;
     }

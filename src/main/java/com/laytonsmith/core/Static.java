@@ -260,18 +260,6 @@ public class Static {
         return v;
     }
 
-    /**
-     * Gets the preferences object for this plugin, as well as setting it up if
-     * it is not already activated.
-     * @return
-     * @throws NotInitializedYetException 
-     */
-    public static Preferences getPreferences() throws NotInitializedYetException {
-        if (com.laytonsmith.commandhelper.CommandHelperPlugin.prefs == null) {
-            Prefs.init();
-        }
-        return com.laytonsmith.commandhelper.CommandHelperPlugin.prefs;
-    }
     private static String debugLogFileCurrent = null;
     private static FileWriter debugLogFileHandle = null;
 
@@ -281,7 +269,7 @@ public class Static {
      * @return 
      */
     public static FileWriter debugLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation((String) getPreferences().getPreference("debug-log-file"));
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation(Prefs.DebugLogFile());
         if (!currentFileName.equals(debugLogFileCurrent)) {
             if (debugLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -297,7 +285,7 @@ public class Static {
     private static FileWriter standardLogFileHandle = null;
 
     public static FileWriter standardLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation((String) getPreferences().getPreference("standard-log-file"));
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation(Prefs.StandardLogFile());
         if (!currentFileName.equals(standardLogFileCurrent)) {
             if (standardLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -313,7 +301,7 @@ public class Static {
     private static FileWriter profilingLogFileHandle = null;
 
     public static FileWriter profilingLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation((String) getPreferences().getPreference("profiling-file"));
+        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation(Prefs.ProfilingFile());
         if (!currentFileName.equals(profilingLogFileCurrent)) {
             if (profilingLogFileHandle != null) {
                 //We're done with the old one, close it.

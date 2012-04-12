@@ -4,13 +4,28 @@ import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 
 public class Prefs {
     private static Object pref(PNames name){
-        return Static.getPreferences().getPreference(name.config());
+        if(prefs == null){
+            //Uh oh. Default!
+            try {
+                Prefs.init(new File("plugins/CommandHelper/preferences.txt"));
+            } catch (IOException ex) {
+                //Well. We tried.
+                Logger.getLogger(Prefs.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return prefs.getPreference(name.config());
     }
+    
+    private static Preferences prefs;
     
     private static enum PNames{
         DEBUG_MODE("debug-mode"),
@@ -39,7 +54,7 @@ public class Prefs {
         }
     }
 
-    static void init() {
+    public static void init(File f) throws IOException {
         ArrayList<Preferences.Preference> a = new ArrayList<Preferences.Preference>();
         //a.add(new Preference("check-for-updates", "false", Type.BOOLEAN, "Whether or not to check to see if there's an update for CommandHelper"));
         a.add(new Preference(PNames.DEBUG_MODE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to display debug information in the console"));
@@ -62,7 +77,8 @@ public class Prefs {
         a.add(new Preference(PNames.SHOW_SPLASH_SCREEN.config(), "true", Preferences.Type.BOOLEAN, "Whether or not to show the splash screen at server startup"));
         a.add(new Preference(PNames.USE_COLORS.config(), (TermColors.SYSTEM == TermColors.SYS.WINDOWS ? "false" : "true"), Preferences.Type.BOOLEAN, "Whether or not to use console colors. If this is a Windows machine, defaults to false, however, it can be toggled manually, and will then respect your setting."));
         a.add(new Preference(PNames.HALT_ON_FAILURE.config(), "false", Preferences.Type.BOOLEAN, "Whether or not to halt compilation of pure mscript files if a compilation failure occurs in any one of the files."));
-        CommandHelperPlugin.prefs = new Preferences("CommandHelper", Static.getLogger(), a);
+        prefs = new Preferences("CommandHelper", Static.getLogger(), a);
+        prefs.init(f);
     }
     
     public static Boolean DebugMode(){

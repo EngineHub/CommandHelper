@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import com.sk89q.wepif.PermissionsResolverManager;
+import java.io.File;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -39,6 +41,7 @@ public class PermissionsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+        Prefs.init(new File("plugins/CommandHelper/preferences.txt"));
     }
 
     @AfterClass
@@ -52,7 +55,7 @@ public class PermissionsTest {
         fakePerms = mock(PermissionsResolverManager.class);
         env.SetPlayer(fakePlayer);
         mockStatic(Static.class);
-        when(Static.getPermissionsResolverManager()).thenReturn(null);
+        when(Static.getPermissionsResolverManager()).thenReturn(fakePerms);
     }
 
     @After
