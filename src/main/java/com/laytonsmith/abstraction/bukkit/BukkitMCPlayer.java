@@ -31,7 +31,7 @@ import org.bukkit.util.BlockIterator;
  *
  * @author layton
  */
-public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer {
+public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCCommandSender {
 
     Player p;
 
