@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCServer;
 import org.bukkit.command.CommandSender;
@@ -20,6 +21,19 @@ public class BukkitMCCommandSender implements MCCommandSender{
     public BukkitMCCommandSender(CommandSender c){
         this.c = c;
     }
+    
+    public BukkitMCCommandSender(AbstractionObject a){
+        this((CommandSender)null);
+        if(a instanceof MCCommandSender){
+            this.c = ((CommandSender)a.getHandle());
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
+    public Object getHandle(){
+        return c;
+    }        
     
     public void sendMessage(String string) {
         c.sendMessage(string);

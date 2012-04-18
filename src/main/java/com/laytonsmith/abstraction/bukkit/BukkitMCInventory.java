@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import org.bukkit.inventory.PlayerInventory;
@@ -17,6 +18,19 @@ public class BukkitMCInventory implements MCInventory {
     PlayerInventory i;
     public BukkitMCInventory(PlayerInventory inventory) {
         this.i = inventory;
+    }
+    
+    public BukkitMCInventory(AbstractionObject a){
+        this((PlayerInventory)null);
+        if(a instanceof MCInventory){
+            this.i = ((PlayerInventory)a.getHandle());
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
+    public Object getHandle(){
+        return i;
     }
 
     public MCItemStack getItem(int slot) {

@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCMaterialData;
@@ -23,6 +24,19 @@ public class BukkitMCItemStack implements MCItemStack{
     ItemStack is;
     public BukkitMCItemStack(ItemStack is){
         this.is = is;
+    }
+    
+    public BukkitMCItemStack(AbstractionObject a){
+        this((ItemStack)null);
+        if(a instanceof MCItemStack){
+            this.is = ((ItemStack)a.getHandle());
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
+    public Object getHandle(){
+        return is;
     }
     
     public MCMaterialData getData(){

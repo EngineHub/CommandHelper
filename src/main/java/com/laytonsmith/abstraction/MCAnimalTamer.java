@@ -8,6 +8,6 @@ package com.laytonsmith.abstraction;
  *
  * @author layton
  */
-public interface MCAnimalTamer {
+public interface MCAnimalTamer extends AbstractionObject{
     
 }

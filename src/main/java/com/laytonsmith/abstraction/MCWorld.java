@@ -13,7 +13,7 @@ import java.util.List;
  *
  * @author layton
  */
-public interface MCWorld {
+public interface MCWorld extends AbstractionObject{
     public List<MCLivingEntity> getLivingEntities();
     public String getName();
     public MCBlock getBlockAt(int x, int y, int z);

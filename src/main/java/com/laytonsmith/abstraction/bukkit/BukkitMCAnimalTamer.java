@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
@@ -20,6 +21,19 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
     AnimalTamer at;
     public BukkitMCAnimalTamer(AnimalTamer at){
         this.at = at;
+    }
+    
+    public BukkitMCAnimalTamer(AbstractionObject a){
+        this((AnimalTamer)null);
+        if(a instanceof MCAnimalTamer){
+            this.at = ((AnimalTamer)a.getHandle());
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
+    public Object getHandle(){
+        return at;
     }
 
     public MCOfflinePlayer getOfflinePlayer() {

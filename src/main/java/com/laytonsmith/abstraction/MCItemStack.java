@@ -11,7 +11,7 @@ import java.util.Map;
  *
  * @author layton
  */
-public interface MCItemStack {
+public interface MCItemStack extends AbstractionObject{
     public MCMaterialData getData();
     public short getDurability();
     public int getTypeId();

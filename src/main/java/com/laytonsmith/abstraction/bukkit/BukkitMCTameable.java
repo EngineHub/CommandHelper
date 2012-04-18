@@ -4,10 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCAnimalTamer;
-import com.laytonsmith.abstraction.MCDamageCause;
-import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCTameable;
+import com.laytonsmith.abstraction.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
@@ -21,6 +18,19 @@ public class BukkitMCTameable implements MCTameable{
     Tameable t;
     public BukkitMCTameable(Tameable t){
         this.t = t;
+    }
+    
+    public BukkitMCTameable(AbstractionObject a){
+        this((Tameable)null);
+        if(a instanceof MCTameable){
+            this.t = ((Tameable)a.getHandle());
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
+    public Object getHandle(){
+        return t;
     }
     public boolean isTamed() {
         return t.isTamed();

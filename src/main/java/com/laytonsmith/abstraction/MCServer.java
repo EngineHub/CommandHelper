@@ -12,7 +12,7 @@ import net.milkbowl.vault.economy.Economy;
  *
  * @author layton
  */
-public interface MCServer {
+public interface MCServer extends AbstractionObject{
     public String getName();
     public MCPlayer[] getOnlinePlayers();
     public boolean dispatchCommand(MCCommandSender cs, String string) throws MCCommandException;

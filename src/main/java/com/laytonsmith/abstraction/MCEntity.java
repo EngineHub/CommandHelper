@@ -8,7 +8,7 @@ package com.laytonsmith.abstraction;
  *
  * @author layton
  */
-public interface MCEntity {
+public interface MCEntity extends AbstractionObject{
     public int getEntityId();
 
     public MCDamageCause getLastDamageCause();

@@ -151,16 +151,18 @@ public class World {
     
     private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
     static{
-        Properties p = new Properties();
-        try {
-            p.load(Minecraft.class.getResourceAsStream("/time_names.txt"));
-            Enumeration e = p.propertyNames();
-            while(e.hasMoreElements()){
-                String name = e.nextElement().toString();
-                TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
+        synchronized(World.class){
+            Properties p = new Properties();
+            try {
+                p.load(Minecraft.class.getResourceAsStream("/time_names.txt"));
+                Enumeration e = p.propertyNames();
+                while(e.hasMoreElements()){
+                    String name = e.nextElement().toString();
+                    TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
             }
-        } catch (IOException ex) {
-            Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
@@ -176,15 +178,17 @@ public class World {
 
         public String docs() {
             StringBuilder doc = new StringBuilder();
-            doc.append("void {[world], time} Sets the time of a given world. Should be a number from 0 to"
-                    + " 24000, if not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am)"
-                    + " is acceptable, and convenient english mappings also exist:"
-                    );
-            doc.append("<ul>");
-            for(String key : TimeLookup.keySet()){
-                doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>\n");
+            synchronized(World.class){
+                doc.append("void {[world], time} Sets the time of a given world. Should be a number from 0 to"
+                        + " 24000, if not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am)"
+                        + " is acceptable, and convenient english mappings also exist:"
+                        );
+                doc.append("<ul>");
+                for(String key : TimeLookup.keySet()){
+                    doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>\n");
+                }
+                doc.append("</ul>");
             }
-            doc.append("</ul>");
             return doc.toString();
         }
 

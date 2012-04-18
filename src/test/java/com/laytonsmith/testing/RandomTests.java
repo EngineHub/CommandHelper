@@ -4,12 +4,12 @@
  */
 package com.laytonsmith.testing;
 
-import com.laytonsmith.abstraction.MCLocation;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.ObjectGenerator;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.MarshalException;
@@ -24,6 +24,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.entity.Player;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -198,6 +199,12 @@ public class RandomTests {
         assertEquals("35:14", SRun("data_values(redwool)", fakePlayer));
         assertEquals("35:14", SRun("data_values('wool:red')", fakePlayer));
         assertEquals("35:14", SRun("data_values(REDWOOL)", fakePlayer));
+    }
+    
+    @Test 
+    public void testCastFromBukkitMCPlayerToBukkitMCCommandSender() throws ConfigCompileException{
+        Player p = mock(Player.class);
+        BukkitMCCommandSender c = new BukkitMCCommandSender(new BukkitMCPlayer(p));
     }
     
 }

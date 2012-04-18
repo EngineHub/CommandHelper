@@ -31,6 +31,19 @@ public class BukkitMCWorld implements MCWorld {
     public BukkitMCWorld(World w) {
         this.w = w;
     }
+    
+    public BukkitMCWorld(AbstractionObject a){
+        this((World)null);
+        if(a instanceof MCWorld){
+            this.w = ((World)a.getHandle());
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
+    public Object getHandle(){
+        return w;
+    }
 
     public World __World() {
         return w;

@@ -10,7 +10,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
  *
  * @author layton
  */
-public interface MCLocation {    
+public interface MCLocation extends AbstractionObject{    
     public double getX();
     public double getY();
     public double getZ();

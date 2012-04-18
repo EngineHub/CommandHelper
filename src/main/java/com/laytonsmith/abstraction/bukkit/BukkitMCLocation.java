@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -18,6 +19,19 @@ public class BukkitMCLocation implements MCLocation{
     Location l;
     public BukkitMCLocation(Location l){
         this.l = l;        
+    }
+    
+    public BukkitMCLocation(AbstractionObject a){
+        this((Location)null);
+        if(a instanceof MCLocation){
+            this.l = ((Location)a.getHandle());
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
+    public Object getHandle(){
+        return l;
     }
 
     public double getX() {

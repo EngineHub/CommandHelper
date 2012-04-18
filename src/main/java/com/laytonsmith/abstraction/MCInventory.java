@@ -8,7 +8,7 @@ package com.laytonsmith.abstraction;
  *
  * @author layton
  */
-public interface MCInventory {
+public interface MCInventory extends AbstractionObject{
     public MCItemStack getItem(int slot);
     public void setItem(int slot, MCItemStack stack);
     public void setHelmet(MCItemStack stack);

@@ -4,10 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCDamageCause;
-import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCLivingEntity;
-import com.laytonsmith.abstraction.MCTameable;
+import com.laytonsmith.abstraction.*;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
@@ -21,6 +18,19 @@ public class BukkitMCEntity implements MCEntity {
     Entity e;
     public BukkitMCEntity(Entity e) {
         this.e = e;
+    }
+    
+    public BukkitMCEntity(AbstractionObject a){
+        this((Entity)null);
+        if(a instanceof MCEntity){
+            this.e = ((Entity)a.getHandle());
+        } else {
+            throw new ClassCastException();
+        }
+    }
+    
+    public Object getHandle(){
+        return e;
     }
     
     public int getEntityId(){
