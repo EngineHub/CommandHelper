@@ -1446,7 +1446,7 @@ public class DataHandling {
             } else {
                 Construct value = args[1];
                 while(value instanceof IVariable){
-                    value = ((IVariable)value).ival();
+                    value = environment.GetVarList().get(((IVariable)value).getName(), t).ival();
                 }
                 Globals.SetGlobal(args[0].val(), value);
             }

@@ -10,7 +10,9 @@ import com.laytonsmith.testing.StaticTest;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
-import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.junit.Assert.*;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import com.sk89q.wepif.PermissionsResolverManager;
@@ -20,7 +22,6 @@ import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.powermock.api.mockito.PowerMockito.mockStatic;
 
 
 /**
@@ -53,8 +54,8 @@ public class PermissionsTest {
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
         fakePerms = mock(PermissionsResolverManager.class);
-        env.SetPlayer(fakePlayer);
-        mockStatic(Static.class);
+        env.SetPlayer(fakePlayer);        
+        spy(Static.class);        
         when(Static.getPermissionsResolverManager()).thenReturn(fakePerms);
     }
 
@@ -66,8 +67,9 @@ public class PermissionsTest {
     public void testHasPermission() throws ConfigCompileException{
         when(fakePerms.hasPermission(fakePlayer.getName(), "this.is.a.test")).thenReturn(true);
         when(fakePerms.hasPermission(fakePlayer.getName(), "does.not.have")).thenReturn(false);
-        SRun("if(has_permission('this.is.a.test'), msg('success'))\n"
-                + "if(!has_permission('does.not.have'), msg('success'))", fakePlayer);
-        verify(fakePlayer, times(2)).sendMessage("success");
+        SRun("if(has_permission('this.is.a.test'), msg('success1'))\n"
+                + "if(not(has_permission('does.not.have')), msg('success2'))", fakePlayer);
+        verify(fakePlayer).sendMessage("success1");
+        verify(fakePlayer).sendMessage("success2");
     }
 }

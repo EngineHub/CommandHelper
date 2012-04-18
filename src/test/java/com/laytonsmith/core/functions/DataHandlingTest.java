@@ -252,6 +252,21 @@ public class DataHandlingTest {
         SRun("msg(import('hi'))", fakePlayer);
         verify(fakePlayer).sendMessage("20");
     }    
+    
+    @Test
+    public void testExportImportWithProcs() throws ConfigCompileException{
+        SRun("proc(_derping," +
+                "   msg(import('borked'))"+
+                "   assign(@var, import('borked'))" +
+                "   assign(@var, array('Am', 'I', 'borked?'))" +
+                "   export('borked', @var)" +
+                "   msg(import('borked'))" +
+                ")" +
+                "_derping()"+
+                "_derping()", fakePlayer);
+        verify(fakePlayer).sendMessage("null");
+        verify(fakePlayer, times(3)).sendMessage("{Am, I, borked?}");
+    }
 
     @Test(timeout = 10000)
     public void testIsBoolean() throws ConfigCompileException {
