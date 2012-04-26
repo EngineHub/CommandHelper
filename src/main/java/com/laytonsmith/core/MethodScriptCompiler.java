@@ -390,10 +390,19 @@ public class MethodScriptCompiler {
                     buf = new StringBuffer();
                 } else {
                     //The previous token, if unknown, should be changed to a FUNC_NAME. If it's not
-                    //unknown, we may be doing standalone parenthesis, so auto tack on the p function
+                    //unknown, we may be doing standalone parenthesis, so auto tack on the __autoconcat__ function
                     try {
-                        if (token_list.get(token_list.size() - 1).type == TType.UNKNOWN) {
-                            token_list.get(token_list.size() - 1).type = TType.FUNC_NAME;
+                        int count = 1;
+                        while(token_list.get(token_list.size() - count).type == TType.WHITESPACE){
+                            count++;
+                        }
+                        if (token_list.get(token_list.size() - count).type == TType.UNKNOWN) {
+                            token_list.get(token_list.size() - count).type = TType.FUNC_NAME;
+                            //Go ahead and remove the whitespace here too, it breaks things
+                            count--;
+                            for(int a = 0; a < count; a++){
+                                token_list.remove(token_list.size() - 1);
+                            }
                         } else {
                             token_list.add(new Token(TType.FUNC_NAME, "__autoconcat__", target));
                         }

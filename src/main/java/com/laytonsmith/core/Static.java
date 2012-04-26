@@ -412,7 +412,14 @@ public class Static {
         for (String line : newlines) {
             String[] arr = rParser.wordWrap(line);
             for (String toMsg : arr) {                
-                c.run(toMsg.trim());
+                //Trim just the right
+                for(int i = toMsg.length() - 1; i >= 0; i--){
+                    if(!Character.isWhitespace(toMsg.charAt(i))){
+                        toMsg = toMsg.substring(0, i + 1);
+                        break;
+                    }
+                }
+                c.run(toMsg);
             }
         }
 
