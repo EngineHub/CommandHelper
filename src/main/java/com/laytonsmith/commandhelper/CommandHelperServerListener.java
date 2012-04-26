@@ -6,13 +6,16 @@ package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCConsoleCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
+import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.logging.Level;
+import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -27,6 +30,10 @@ public class CommandHelperServerListener implements Listener{
     @EventHandler(priority= EventPriority.LOWEST)
     public void onServerCommand(ServerCommandEvent event){
         MCCommandSender player = new BukkitMCCommandSender(event.getSender());
+        if(event.getSender() instanceof ConsoleCommandSender){
+            //Need the more specific subtype for player()
+            player = new BukkitMCConsoleCommandSender((ConsoleCommandSender)event.getSender());
+        }
         boolean match = false;
         try {
             match = Static.getAliasCore().alias("/" + event.getCommand(), player, new ArrayList<Script>());

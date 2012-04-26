@@ -158,6 +158,14 @@ public class PlayerManangementTest {
     public void testPlayerNotProvided() throws ConfigCompileException{
         assertEquals("success", SRun("try(kill(), assign(@success, 'success')) @success", null));        
     }
+    
+    @Test
+    public void testPlayerFromConsole() throws ConfigCompileException{
+        MCConsoleCommandSender fakeConsole = mock(MCConsoleCommandSender.class);
+        SRun("msg(player())", fakeConsole);
+        verify(fakeConsole).sendMessage("~console");
+    }
+    
 //    //@Test(timeout=10000)
 //    public void testPinfo(){
 //        
