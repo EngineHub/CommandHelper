@@ -28,6 +28,8 @@ import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 import static org.mockito.Mockito.when;
+import org.mockito.exceptions.misusing.MissingMethodInvocationException;
+import org.powermock.api.mockito.PowerMockito;
 import static org.powermock.api.mockito.PowerMockito.mock;
 import org.powermock.modules.junit4.PowerMockRunner;
 
@@ -362,6 +364,26 @@ public class StaticTest {
         Env env = new Env();
         env.SetCommandSender(player);
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, done, null);
+    }
+    
+    public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws ConfigCompileException{
+        Env env = new Env();
+        env.SetCommandSender(player);
+        AliasCore ac = mock(AliasCore.class);
+        ac.autoIncludes = new ArrayList<File>();
+        PowerMockito.mockStatic(CommandHelperPlugin.class);
+        try{
+            when(CommandHelperPlugin.getCore()).thenReturn(ac);        
+        } catch(MissingMethodInvocationException e){
+            throw new RuntimeException("Could not mock CommandHelperPlugin. Did you forget to put @PrepareForTest(CommandHelperPlugin.class) at the top of your file?");
+        }
+        List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null), env);
+        for(Script s : scripts){
+            s.compile();
+            if(s.match(command)){
+                s.run(s.getVariables(command), env, null);
+            }
+        }
     }
     
     public static String SRun(String script, MCCommandSender player) throws ConfigCompileException{

@@ -482,6 +482,26 @@ public class Script {
             }
             
         }
+        //Look through and concatenate all tokens before the label, if such exists.
+        boolean hasLabel = false;        
+        for(int i = 0; i < tempLeft.size(); i++){
+            if(tempLeft.get(i).type == TType.LABEL){
+                hasLabel = true;
+                break;
+            }
+        }
+        if(hasLabel){
+            StringBuilder b = new StringBuilder();
+            int count = 0;
+            while(tempLeft.get(count).type != TType.LABEL){
+                b.append(tempLeft.get(count).val());
+                count++;
+            }            
+            tempLeft.set(0, new Token(TType.STRING, b.toString(), Target.UNKNOWN));
+            for(int i = 0; i < count - 1; i++){
+                tempLeft.remove(1);
+            }            
+        }
         left = tempLeft;
         for (int j = 0; j < left.size(); j++) {
             Token t = left.get(j);

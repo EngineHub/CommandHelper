@@ -2,10 +2,13 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.runner.RunWith;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -13,6 +16,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import static org.powermock.api.mockito.PowerMockito.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.atLeastOnce;
 import static org.junit.Assert.*;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import com.sk89q.wepif.PermissionsResolverManager;
@@ -30,7 +35,7 @@ import org.junit.Test;
  */
 
 @RunWith(PowerMockRunner.class)
-@PrepareForTest(Static.class)
+@PrepareForTest({Static.class, CommandHelperPlugin.class})
 public class PermissionsTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;
@@ -71,5 +76,48 @@ public class PermissionsTest {
                 + "if(not(has_permission('does.not.have')), msg('success2'))", fakePlayer);
         verify(fakePlayer).sendMessage("success1");
         verify(fakePlayer).sendMessage("success2");
+    }
+    
+    @Test
+    public void testQuickPermissions() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(false);
+        when(fakePlayer.isOnline()).thenReturn(Boolean.TRUE);
+        Static.InjectPlayer(fakePlayer);
+        when(fakePerms.hasPermission(fakePlayer.getName(), "commandhelper.alias.simple")).thenReturn(Boolean.TRUE);
+        StaticTest.RunCommand("simple:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
+        verify(fakePerms).hasPermission(fakePlayer.getName(), "commandhelper.alias.simple");
+    }
+    
+    @Test
+    public void testLongPermissions() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(false);
+        when(fakePlayer.isOnline()).thenReturn(Boolean.TRUE);
+        Static.InjectPlayer(fakePlayer);
+        when(fakePerms.hasPermission(fakePlayer.getName(), "arbitrary.permission")).thenReturn(Boolean.TRUE);
+        StaticTest.RunCommand("arbitrary.permission:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
+        verify(fakePerms).hasPermission(fakePlayer.getName(), "arbitrary.permission");
+    }
+    
+    @Test
+    public void testGroupPermissions() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(false);
+        when(fakePlayer.isOnline()).thenReturn(Boolean.TRUE);
+        Static.InjectPlayer(fakePlayer);
+        when(fakePerms.inGroup(fakePlayer.getName(), "group1")).thenReturn(false);
+        when(fakePerms.inGroup(fakePlayer.getName(), "group2")).thenReturn(true);
+        StaticTest.RunCommand("~group1/group2:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
+        verify(fakePerms, atLeastOnce()).inGroup(fakePlayer.getName(), "group1");
+        verify(fakePerms, atLeastOnce()).inGroup(fakePlayer.getName(), "group2");
+    }
+    
+    @Test(expected=ConfigRuntimeException.class)
+    public void testNegativeGroupPermissions() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(false);
+        when(fakePlayer.isOnline()).thenReturn(Boolean.TRUE);
+        Static.InjectPlayer(fakePlayer);
+        when(fakePerms.inGroup(fakePlayer.getName(), "group1")).thenReturn(false);
+        when(fakePerms.inGroup(fakePlayer.getName(), "group2")).thenReturn(true);
+        StaticTest.RunCommand("~group1/-group2:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
+        //We expect this to fail; we don't have permission.
     }
 }
