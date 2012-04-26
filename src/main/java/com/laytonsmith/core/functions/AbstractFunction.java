@@ -77,11 +77,7 @@ public abstract class AbstractFunction implements Function{
      * @return 
      */
     public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException{
-        GenericTreeNode<Construct> node = new GenericTreeNode<Construct>();
-        node.data = new CFunction(this.getName(), t);
-        node.children = children;
-        node.optimized = true;
-        return node;
+        return null;
     }
 
     /**

@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
@@ -72,5 +73,17 @@ public class RegexTest {
     public void testRegCount() throws ConfigCompileException {
         assertEquals("3", SRun("reg_count('/', '///yay')", null));
         assertEquals("0", SRun("reg_count('poppycock', 'tiddly winks')", null));
+    }
+    
+    //Here, it's a compile error, since we're using it statically
+    @Test(expected=ConfigCompileException.class)
+    public void testRegFailureStatic() throws ConfigCompileException{
+        MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null));
+    }
+    
+    //Here, it's a runtime error, since we're using it dynamically
+    @Test(expected=ConfigRuntimeException.class)
+    public void testRegFailureDynamic() throws ConfigCompileException{
+        SRun("assign(@a, '(?i)asd(') reg_match(@a, 'irrelevant')", null);        
     }
 }

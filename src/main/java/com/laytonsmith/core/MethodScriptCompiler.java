@@ -1105,10 +1105,18 @@ public class MethodScriptCompiler {
         //the compiler trick functions know how to deal with it specially, even if everything isn't
         //static, so do this first.
         if(func.canOptimizeDynamic()){            
-            GenericTreeNode<Construct> tempNode = func.optimizeDynamic(tree.data.getTarget(), tree.getChildren());
-            tree.data = tempNode.data;
-            tree.children = tempNode.children;
-            tree.optimized = tempNode.optimized;
+            GenericTreeNode<Construct> tempNode;
+            try{
+                tempNode = func.optimizeDynamic(tree.data.getTarget(), tree.getChildren());
+            } catch(ConfigRuntimeException e){
+                //Turn it into a compile exception, then rethrow
+                throw new ConfigCompileException(e);
+            }
+            if(tempNode != null){
+                tree.data = tempNode.data;
+                tree.children = tempNode.children;
+                tree.optimized = tempNode.optimized;
+            } //else it wasn't an optimization, but a compile check
             optimize(tree);
             tree.optimized = true;
             return;

@@ -809,6 +809,11 @@ public class MethodScriptCompilerTest {
                 + "     msg('pass')"
                 + "}", fakePlayer);
         verify(fakePlayer).sendMessage("pass");
-    }       
+    }     
+    
+    @Test public void testWhitespaceInBetweenFunctionAndParen() throws ConfigCompileException{
+        SRun("msg ('hi')", fakePlayer);
+        verify(fakePlayer).sendMessage("hi");
+    }
     
 }

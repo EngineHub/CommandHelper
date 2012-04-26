@@ -4,16 +4,15 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.regex.PatternSyntaxException;
 
 /**
  *
@@ -97,6 +96,19 @@ public class Regex {
             return exec(t, null, args);
         }
         
+        @Override
+        public boolean canOptimizeDynamic() {
+            return true;
+        }                
+
+        @Override
+        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+            if(!children.get(0).getData().isDynamic()){
+                getPattern(children.get(0).getData(), t);
+            }
+            return null;
+        } 
+        
     }
     
     @api public static class reg_match_all extends AbstractFunction{
@@ -163,6 +175,19 @@ public class Regex {
             return exec(t, null, args);
         }
         
+        @Override
+        public boolean canOptimizeDynamic() {
+            return true;
+        }                
+
+        @Override
+        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+            if(!children.get(0).getData().isDynamic()){
+                getPattern(children.get(0).getData(), t);
+            }
+            return null;
+        } 
+        
     }
     
     @api public static class reg_replace extends AbstractFunction{
@@ -222,6 +247,19 @@ public class Regex {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+        
+        @Override
+        public boolean canOptimizeDynamic() {
+            return true;
+        }                
+
+        @Override
+        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+            if(!children.get(0).getData().isDynamic()){
+                getPattern(children.get(0).getData(), t);
+            }
+            return null;
+        } 
         
     }
     
@@ -283,6 +321,18 @@ public class Regex {
             return exec(t, null, args);
         }
         
+        @Override
+        public boolean canOptimizeDynamic() {
+            return true;
+        }                
+
+        @Override
+        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+            if(!children.get(0).getData().isDynamic()){
+                getPattern(children.get(0).getData(), t);
+            }
+            return null;
+        } 
         
     }  
     
@@ -336,16 +386,29 @@ public class Regex {
         @Override
         public boolean canOptimize() {
             return true;
-        }
+        }                
 
         @Override
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
         
+        @Override
+        public boolean canOptimizeDynamic() {
+            return true;
+        }                
+
+        @Override
+        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+            if(!children.get(0).getData().isDynamic()){
+                getPattern(children.get(0).getData(), t);
+            }
+            return null;
+        }                
+        
     }
     
-    private static Pattern getPattern(Construct c, Target t){
+    private static Pattern getPattern(Construct c, Target t) throws ConfigRuntimeException{
         String regex = "";
         int flags = 0;
         String sflags = "";
@@ -367,6 +430,10 @@ public class Regex {
         } else {
             regex = c.val();
         }
-        return Pattern.compile(regex, flags);
+        try{
+            return Pattern.compile(regex, flags);
+        } catch(PatternSyntaxException e){
+            throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
+        }
     }
 }
