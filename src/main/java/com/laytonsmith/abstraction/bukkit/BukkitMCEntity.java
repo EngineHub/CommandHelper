@@ -21,12 +21,7 @@ public class BukkitMCEntity implements MCEntity {
     }
     
     public BukkitMCEntity(AbstractionObject a){
-        this((Entity)null);
-        if(a instanceof MCEntity){
-            this.e = ((Entity)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
+        this.e = ((Entity)a.getHandle());
     }
     
     public Object getHandle(){

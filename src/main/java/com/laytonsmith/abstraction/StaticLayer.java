@@ -17,7 +17,7 @@ public class StaticLayer {
     private static Convertor convertor = null;
     static{
         InitConvertor();
-    }
+    }        
     
     private static void InitConvertor(){
         Class[] classes = ClassDiscovery.GetClassesWithAnnotation(convert.class);

@@ -8,9 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.security.CodeSource;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -27,6 +25,31 @@ public class ClassDiscovery {
     public static void InstallDiscoveryLocation(String url){
         additionalURLs.add(url);
     }
+    
+    /**
+     * Clears the class cache.
+     * Upon the first call to the rather expensive GetClassesWithinPackageHierarchy(String) method,
+     * the returned classes are cached instead of being regenerated. This method is automatically
+     * called if a new discovery location is installed, but if new classes are being generated
+     * dynamically, this cache will become stale, and you should clear the cache for a particular url.
+     */
+    public static void InvalidateCache(String url){
+        classCache.remove(url);
+    }
+    
+    /**
+     * Equivalent to InvalidateCache(null);
+     */
+    public static void InvalidateCache(){        
+        InvalidateCache(null);
+    }
+    
+    /**
+     * There's no need to rescan the project every time GetClassesWithinPackageHierarchy is called,
+     * unless we add a new discovery location, or code is being generated on the fly or something crazy
+     * like that, so let's cache unless told otherwise.
+     */
+    private static Map<String, Class[]> classCache = new HashMap<String, Class[]>();
     
     private static List<String> additionalURLs = new ArrayList<String>();
 
@@ -45,6 +68,10 @@ public class ClassDiscovery {
      * @return 
      */
     public static Class[] GetClassesWithinPackageHierarchy(String url){
+        if(classCache.containsKey(url)){
+            return classCache.get(url);
+        }
+        String originalURL = url;
         if(url == null){
             url = ClassDiscovery.class.getResource(ClassDiscovery.class.getSimpleName() + ".class").toString();
         }
@@ -113,7 +140,10 @@ public class ClassDiscovery {
                 }
             }
         }
-        return files.toArray(new Class[files.size()]);
+        //Put the results in the cache
+        Class[] ret = files.toArray(new Class[files.size()]);
+        classCache.put(originalURL, ret);
+        return ret;
     }
     
     public static Class[] GetClassesWithAnnotation(Class annotation){

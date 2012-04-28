@@ -39,8 +39,9 @@ public class Implementation {
      * @return 
      */
     public static Type GetServerType(){       
-        //meh, not working yet
-        //return serverType;
-        return Type.BUKKIT;
+        if(serverType == null){
+            throw new RuntimeException("Server type has not been set yet! Please call Implementation.setServerType with the appropriate implementation.");
+        }
+        return serverType;        
     }
 }

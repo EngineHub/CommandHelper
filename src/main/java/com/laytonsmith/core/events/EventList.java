@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.api;
+import com.laytonsmith.core.exceptions.EventException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.*;
@@ -90,12 +91,6 @@ public class EventList {
                 try {
                     registerEvent(c, apiClass);
                     total++;
-                } catch (NoSuchMethodException ex) {
-                    Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalArgumentException ex) {
-                    Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (InvocationTargetException ex) {
-                    Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (InstantiationException ex) {
                     Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (IllegalAccessException ex) {
@@ -112,21 +107,28 @@ public class EventList {
         }
     }
     
-    public static void registerEvent(Class<Event> c, String apiClass) throws InstantiationException, IllegalAccessException, NoSuchMethodException, IllegalArgumentException, InvocationTargetException {
+    public static void registerEvent(Class<Event> c, String apiClass) throws InstantiationException, IllegalAccessException {
         //First, we need to instantiate the class
         
         Event e = c.newInstance();
         
         //Then, we need to find the mixin for this class, and set it, if this
-        //is an AbstractEvent (if it doesn't extend AbstractEvent, it's completely on
+        //is an AbstractEvent (if it implements Event directly, it's completely on
         //it's own anyways)
         if(e instanceof AbstractEvent){
             AbstractEvent ae = (AbstractEvent) e;
             //Get the mixin for this server, and add it to e
             Class mixinClass = StaticLayer.GetServerEventMixin();
-            Constructor mixinConstructor = mixinClass.getConstructor(AbstractEvent.class);
-            EventMixinInterface mixin = (EventMixinInterface) mixinConstructor.newInstance(e);
-            ae.setAbstractEventMixin(mixin);
+            try{
+                Constructor mixinConstructor = mixinClass.getConstructor(AbstractEvent.class);
+                EventMixinInterface mixin = (EventMixinInterface) mixinConstructor.newInstance(e);
+                ae.setAbstractEventMixin(mixin);
+            } catch(Exception ex){
+                //This is a serious problem, and it should kill the plugin, for fast failure detection.
+                throw new Error("Could not properly instantiate the mixin class. "
+                        + "The constructor with the signature \"public " + mixinClass.getSimpleName() + "(AbstractEvent e)\" is missing"
+                        + " from " + mixinClass.getName());
+            }
         }
         
         //Finally, add it to the list, and hook it.

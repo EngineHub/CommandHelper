@@ -11,6 +11,7 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.events.EventMixinInterface;
@@ -367,16 +368,9 @@ public class StaticTest {
     }
     
     public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws ConfigCompileException{
+        InstallFakeServerFrontend();
         Env env = new Env();
         env.SetCommandSender(player);
-        AliasCore ac = mock(AliasCore.class);
-        ac.autoIncludes = new ArrayList<File>();
-        PowerMockito.mockStatic(CommandHelperPlugin.class);
-        try{
-            when(CommandHelperPlugin.getCore()).thenReturn(ac);        
-        } catch(MissingMethodInvocationException e){
-            throw new RuntimeException("Could not mock CommandHelperPlugin. Did you forget to put @PrepareForTest(CommandHelperPlugin.class) at the top of your file?");
-        }
         List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null), env);
         for(Script s : scripts){
             s.compile();
@@ -441,29 +435,27 @@ public class StaticTest {
         CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
         return fakeServer;
     }
-
-//    public static void StartServer() {
-//        Class[] classes = new Class[]{};
-//        MCServer fakeServer = GetFakeServer();
-//        try{
-//            Convertor c = mock(Convertor.class);
-//            when(c.GetServer()).thenReturn(fakeServer);
-//            Field f = StaticLayer.class.getDeclaredField("convertor");
-//            f.setAccessible(true);
-//            f.set(null, c);
-//        } catch(Exception e){
-//            fail("Could not set up reflective sections of the test code.");
-//        }
-//        PowerMockito.mockStatic(PermissionsResolverManager.class);
-//        PermissionsResolverManager prm = mock(PermissionsResolverManager.class);        
-//        when(PermissionsResolverManager.getInstance()).thenReturn(prm);
-//        CommandHelperPlugin chp = spy(new CommandHelperPlugin());
-//        PluginDescriptionFile pdf = PowerMockito.mock(PluginDescriptionFile.class);
-//        when(pdf.getVersion()).thenReturn("0.0.0");
-//        when(chp.getDescription()).thenReturn(pdf);       
-//        //when(chp.getServer()).thenReturn(fakeServer);
-//        chp.onLoad();
-//    }
+    
+    private static boolean frontendInstalled = false;
+    /**
+     * This installs a fake server frontend. You must have already included @PrepareForTest(Static.class)
+     * in the calling test code, which will allow the proper static methods to be mocked.
+     */
+    public static void InstallFakeServerFrontend(){
+        if(frontendInstalled){
+            return;
+        }        
+        PowerMockito.spy(Static.class);
+        AliasCore fakeCore = mock(AliasCore.class);
+        fakeCore.autoIncludes = new ArrayList<File>();
+        try{
+            PowerMockito.doReturn(fakeCore).when(Static.class);
+            Static.getAliasCore();        
+        } catch(MissingMethodInvocationException e){
+            throw new Error("Could not mock Static. Did you forget to put @PrepareForTest(Static.class) at the top of your file?");
+        }
+       frontendInstalled = true;
+    }
     
     /**
      * Installs the fake convertor into the server, so event based calls will
@@ -471,32 +463,21 @@ public class StaticTest {
      * events are to be called, this is the player returned.
      * @param fakePlayer 
      */
-    public static void InstallFakeConvertor(MCPlayer fakePlayer){
+    public static void InstallFakeConvertor(MCPlayer fakePlayer) throws Exception{
+        InstallFakeServerFrontend();               
         try {
             //We need to add the test directory to the ClassDiscovery path
             //This should probably not be hard coded at some point.
-            ClassDiscovery.InstallDiscoveryLocation(new File("./src/test/java").toURI().toURL().toString());
+            ClassDiscovery.InstallDiscoveryLocation(new File("./target/test-classes").toURI().toURL().toString());
         }
         catch (MalformedURLException ex) {
             throw new RuntimeException(ex);
         }
-        System.exit(1010101);
+        
         Implementation.setServerType(Implementation.Type.TEST);
         MCServer fakeServer = GetFakeServer();
         TestConvertor.fakeServer = fakeServer;
-        FakeServerMixin.fakePlayer = fakePlayer;
-        CommandHelperPlugin chp = mock(CommandHelperPlugin.class);
-        EventList.Startup(chp);
-//        try{
-//            Convertor c = mock(Convertor.class);
-//            when(c.GetServer()).thenReturn(fakeServer);
-//            when(c.GetServerEventMixin()).thenReturn(FakeServerMixin.class);
-//            Field f = StaticLayer.class.getDeclaredField("convertor");
-//            f.setAccessible(true);
-//            f.set(null, c);
-//        } catch(Exception e){
-//            fail("Could not set up reflective sections of the test code.");
-//        }
+        FakeServerMixin.fakePlayer = fakePlayer;       
         
     }
     
@@ -571,6 +552,10 @@ public class StaticTest {
         
         public static MCPlayer fakePlayer;
         public boolean cancelled = false;
+        
+        public FakeServerMixin(AbstractEvent e){
+            
+        }
 
         public void cancel(BindableEvent e, boolean state) {
             cancelled = state;

@@ -10,7 +10,9 @@ import java.util.Map;
 
 /**
  * The abstract event mixin contains functions that are common to all or most
- * event types in a particular implementation.
+ * event types in a particular implementation. Concrete classes are also required 
+ * to implement a constructor with the signature "public ClassName(AbstractEvent mySuper)",
+ * because the class is reflectively constructed.
  * @author layton
  */
 public interface EventMixinInterface {
