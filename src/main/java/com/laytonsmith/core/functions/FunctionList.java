@@ -7,13 +7,11 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.api;
+import com.laytonsmith.core.api.Platforms;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,8 +21,12 @@ import java.util.logging.Logger;
  */
 public class FunctionList {
 
-    private static Map<String, Function> functions = new HashMap<String, Function>();
+    private final static Map<api.Platforms, Map<String, FunctionBase>> functions = new HashMap<api.Platforms, Map<String, FunctionBase>>();
+    private final static Map<String, Set<api.Platforms>> supportedPlatforms = new HashMap<String, Set<api.Platforms>>();
     static {
+        for(api.Platforms p : api.Platforms.values()){
+            functions.put(p, new HashMap<String, FunctionBase>());
+        }
         //Initialize all our functions as soon as we start up
         initFunctions();
     }
@@ -36,10 +38,18 @@ public class FunctionList {
             String apiClass = (c.getEnclosingClass() != null
                     ? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
                     : "<global>");
-            if (Function.class.isAssignableFrom(c)) {
+            if (FunctionBase.class.isAssignableFrom(c)) {
                 try {
-                    Function f = (Function) c.newInstance();
-                    registerFunction(f, apiClass);
+                    FunctionBase f = (FunctionBase) c.newInstance();
+                    api api = f.getClass().getAnnotation(api.class);                    
+                    api.Platforms [] platforms = api.platform();
+                    if(supportedPlatforms.get(f.getName()) == null){
+                        supportedPlatforms.put(f.getName(), new HashSet<api.Platforms>());
+                    }
+                    supportedPlatforms.get(f.getName()).addAll(Arrays.asList(platforms));
+                    for(Platforms p : platforms){
+                        registerFunction(f, apiClass, p);
+                    }
                     //System.out.println("Loaded " + apiClass + "." + f.getName());
                 } catch (InstantiationException ex) {
                     Logger.getLogger(FunctionList.class.getName()).log(Level.SEVERE, null, ex);
@@ -96,14 +106,14 @@ public class FunctionList {
     }
 
     
-    public static void registerFunction(Function f, String apiClass) {
+    public static void registerFunction(FunctionBase f, String apiClass, api.Platforms platform) {
         if(!apiClass.equals("Sandbox")){
             if(Prefs.DebugMode()){
                 System.out.println("CommandHelper: Loaded function \"" + f.getName() + "\"");
             }
         }
         try{
-            functions.put(f.getName(), f);
+            functions.get(platform).put(f.getName(), f);
         } catch(UnsupportedOperationException e){
             //This function isn't done yet, and during production this is a serious problem,
             //but it will be caught when we test all the functions, so for now just ignore it,
@@ -111,22 +121,36 @@ public class FunctionList {
         }
     }
 
-    public static Function getFunction(Construct c) throws ConfigCompileException {
+    public static FunctionBase getFunction(Construct c) throws ConfigCompileException{
+        return getFunction(c, api.Platforms.INTERPRETER_JAVA);
+    }
+    
+    public static FunctionBase getFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
+        if(platform == null){
+            //Default to the Java interpreter
+            platform = api.Platforms.INTERPRETER_JAVA;
+        }
         if (c instanceof CFunction) {
-            if(!functions.containsKey(c.val())){
-                throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist",
+            if(!functions.get(platform).containsKey(c.val()) || !supportedPlatforms.get(c.val()).contains(platform)){
+                throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist in the " + platform.platformName(),
                         c.getTarget());
-            } else {
-                return functions.get(c.val());
-            }              
+            }
+            return functions.get(platform).get(c.val());                          
         }
         throw new ConfigCompileException("Expecting CFunction type", c.getTarget());
     }
 
-    public static List<Function> getFunctionList() {
-        List<Function> f = new ArrayList<Function>();
-        for(String name : functions.keySet()){
-            f.add(functions.get(name));
+    public static List<FunctionBase> getFunctionList(api.Platforms platform) {
+        if(platform == null){
+            List<FunctionBase> list = new ArrayList<FunctionBase>();
+            for(api.Platforms p : api.Platforms.values()){
+                list.addAll(getFunctionList(p));
+            }
+            return list;
+        }
+        List<FunctionBase> f = new ArrayList<FunctionBase>();
+        for(String name : functions.get(platform).keySet()){
+            f.add(functions.get(platform).get(name));
         }
         return f;
     }

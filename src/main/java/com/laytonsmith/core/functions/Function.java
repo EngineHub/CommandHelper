@@ -21,35 +21,7 @@ import java.util.List;
  * to it.
  * @author layton
  */
-public interface Function extends Documentation {
-
-    /**
-     * The name of this function, exactly as should be used in a script. Note that the name of
-     * the function must match the regex:
-     * <pre>
-     * [a-zA-Z_][a-zA-Z_0-9]*
-     * </pre>
-     * In other words, it must start with a letter or underscore, and may have any number of
-     * letters, numbers, or underscores after it.
-     * @return 
-     */
-    public String getName();
-
-    /**
-     * The number of arguments this function can accept. Some functions may be able to accept multiple numbers
-     * of arguments, so this function returns an array. If you return Integer.MAX_VALUE as one of the
-     * items in the array, then any number of arguments may be sent.
-     * @return 
-     */
-    public Integer[] numArgs();
-
-    /**
-     * If a user asks for information about a particular function, this method is called to obtain the functions
-     * usage. The returned string must follow the following format:
-     * @return A string with the documentation, or null, which will give a standard message to the user telling them there
-     * is no documentation for this function yet.
-     */
-    public String docs();
+public interface Function extends Documentation, FunctionBase {    
 
     /**
      * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
@@ -125,13 +97,7 @@ public interface Function extends Documentation {
      * @param nodes
      * @return 
      */
-    public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes);
-    
-    /**
-     * Some functions don't need to show up in documentation. Maybe they are experimental, or magic
-     * functions. If they shouldn't show up in the normal API documentation, return false.
-     */
-    public boolean appearInDocumentation();
+    public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes);    
     
     /**
      * If a function can possibly optimize during compilation, this should return true. This is only
@@ -187,4 +153,18 @@ public interface Function extends Documentation {
      * @return 
      */
     public boolean allowBraces();
+    
+    
+    
+    /**
+     * In addition to being a function, an object may also be a code branch, that is,
+     * it conditionally will execute some of its arguments. 
+     * For optimization and static code analysis purposes,
+     * it it important for these functions to be able to provide more information
+     * about their branches; if the branch conditions are static, they should be reduceable to a single
+     * branch anyways, but some optimizations require knowledge about code branches.
+     */
+    public interface CodeBranch{
+        public List<GenericTreeNode<Construct>> getBranches();
+    }
 }

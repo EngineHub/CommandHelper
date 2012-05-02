@@ -6,10 +6,9 @@ package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.exceptions.MarshalException;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -254,6 +253,99 @@ public abstract class Construct implements Cloneable, Comparable<Construct> {
             return d1.compareTo(d2);
         } catch (NumberFormatException e) {
             return this.value.compareTo(c.value);
+        }
+    }
+    
+    /**
+     * Converts a POJO to a Construct, if the type is convertable. This accepts many types of
+     * objects, and should be expanded if a type does fit into the overall type scheme.
+     * @param o
+     * @return
+     * @throws ClassCastException 
+     */
+    public static Construct GetConstruct(Object o) throws ClassCastException{
+        if(o == null){
+            return new CNull();
+        } else if(o instanceof CharSequence){
+            return new CString((CharSequence)o, Target.UNKNOWN);
+        } else if(o instanceof Number){
+            if(o instanceof Integer || o instanceof Long || o instanceof Byte || o instanceof BigInteger
+                    || o instanceof AtomicInteger || o instanceof Short){
+                //integral
+                return new CInt(((Number)o).longValue(), Target.UNKNOWN);
+            } else {
+                //floating point
+                return new CDouble(((Number)o).doubleValue(), Target.UNKNOWN);
+            }            
+        } else if(o instanceof Boolean){
+            return new CBoolean(((Boolean)o).booleanValue(), Target.UNKNOWN);
+        } else if(o instanceof Map){
+            //associative array
+            CArray a = new CArray(Target.UNKNOWN);
+            a.forceAssociativeMode();            
+            Map m = (Map)o;
+            for(Object key : m.entrySet()){
+                a.set(key.toString(), GetConstruct(m.get(key)));
+            }
+            return a;
+        } else if(o instanceof Collection){
+            //normal array
+            CArray a = new CArray(Target.UNKNOWN);
+            Collection l = (Collection)o;
+            for(Object obj : l){
+                a.push(GetConstruct(obj));
+            }
+            return a;
+        } else {
+            throw new ClassCastException(o.getClass().getName() + " cannot be cast to a Construct type");
+        }
+    }
+    
+    /**
+     * Converts a Construct to a POJO, if the type is convertable. The types returned from
+     * this method are set, unlike GetConstruct which is more flexible. The mapping is precisely
+     * as follows:
+     * boolean -> Boolean
+     * integer -> Long
+     * double -> Double
+     * string -> String
+     * normal array -> ArrayList<Object>
+     * associative array -> HashMap<String, Object>
+     * null -> null
+     * @param c
+     * @return
+     * @throws ClassCastException 
+     */
+    public static Object GetPOJO(Construct c) throws ClassCastException{
+        if(c instanceof CNull){
+            return null;
+        } else if(c instanceof CString){
+            return c.val();
+        } else if(c instanceof CBoolean){
+            return Boolean.valueOf(((CBoolean)c).getBoolean());
+        } else if(c instanceof CInt){
+            return Long.valueOf(((CInt)c).getInt());
+        } else if(c instanceof CDouble){
+            return Double.valueOf(((CDouble)c).getDouble());
+        } else if(c instanceof CArray){
+            CArray ca = (CArray)c;
+            if(ca.inAssociativeMode()){
+                //HashMap
+                HashMap<String, Object> map = new HashMap<String, Object>(ca.size());
+                for(String key : ca.keySet()){
+                    map.put(key, GetPOJO(ca.get(key)));
+                }
+                return map;
+            } else {
+                //ArrayList
+                ArrayList<Object> list = new ArrayList<Object>(ca.size());
+                for(int i = 0; i < ca.size(); i++){
+                    list.add(GetPOJO(ca.get(i)));
+                }
+                return list;
+            }            
+        } else {
+            throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
         }
     }
     

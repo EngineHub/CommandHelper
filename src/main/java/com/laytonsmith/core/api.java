@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.functions.bash.BashPlatformResolver;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -19,6 +20,33 @@ import java.util.List;
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
 public @interface api {
+    
+    public enum Platforms{
+        INTERPRETER_JAVA(null, "Java Interpreter"),
+        COMPILER_BASH(new BashPlatformResolver(), "Bash Compiler");
+        private PlatformResolver resolver;
+        private String platformName;
+        /**
+         * Returns the platform specific resolver, which is able to override base functionality,
+         * which will be adjusted as needed. If the resolver is null, one does not exist, implying
+         * that the default is fine.
+         * @return 
+         */
+        public PlatformResolver getResolver(){
+            return this.resolver;
+        }
+        public String platformName(){
+            return this.platformName;
+        }
+        private Platforms(PlatformResolver resolver, String platformName){
+            this.resolver = resolver;
+            this.platformName = platformName;
+        }
+    }
+    
+    Platforms [] platform() default {api.Platforms.INTERPRETER_JAVA};
+    
+    
     /**
      * This is a list of valid classes that are valid to be tagged with this annotation.
      */

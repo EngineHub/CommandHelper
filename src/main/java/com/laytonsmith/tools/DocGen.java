@@ -10,6 +10,7 @@ import com.laytonsmith.core.api;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -26,21 +27,21 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) {
-        functions("wiki");
+        functions("wiki", api.Platforms.INTERPRETER_JAVA);
     }
 
-    public static void functions(String type) {
-        List<Function> functions = FunctionList.getFunctionList();
-        HashMap<Class, ArrayList<Function>> functionlist = new HashMap<Class, ArrayList<Function>>();
+    public static void functions(String type, api.Platforms platform) {
+        List<FunctionBase> functions = FunctionList.getFunctionList(platform);
+        HashMap<Class, ArrayList<FunctionBase>> functionlist = new HashMap<Class, ArrayList<FunctionBase>>();
         for (int i = 0; i < functions.size(); i++) {
             //Sort the functions into classes
-            Function f = functions.get(i);
+            FunctionBase f = functions.get(i);
             Class apiClass = (f.getClass().getEnclosingClass() != null
                     ? f.getClass().getEnclosingClass()
                     : null);
-            ArrayList<Function> fl = functionlist.get(apiClass);
+            ArrayList<FunctionBase> fl = functionlist.get(apiClass);
             if (fl == null) {
-                fl = new ArrayList<Function>();
+                fl = new ArrayList<FunctionBase>();
                 functionlist.put(apiClass, fl);
             }
             fl.add(f);
@@ -65,16 +66,16 @@ public class DocGen {
                     + "Turing Complete language [http://en.wikipedia.org/wiki/Turing_Complete].\n"
                     + "There are several functions defined, and they are grouped into \"classes\".");
         }
-        List<Map.Entry<Class, ArrayList<Function>>> entrySet = new ArrayList<Map.Entry<Class, ArrayList<Function>>>(functionlist.entrySet());
-        Collections.sort(entrySet, new Comparator<Map.Entry<Class, ArrayList<Function>>>() {
+        List<Map.Entry<Class, ArrayList<FunctionBase>>> entrySet = new ArrayList<Map.Entry<Class, ArrayList<FunctionBase>>>(functionlist.entrySet());
+        Collections.sort(entrySet, new Comparator<Map.Entry<Class, ArrayList<FunctionBase>>>() {
 
-            public int compare(Map.Entry<Class, ArrayList<Function>> o1, Map.Entry<Class, ArrayList<Function>> o2) {
+            public int compare(Map.Entry<Class, ArrayList<FunctionBase>> o1, Map.Entry<Class, ArrayList<FunctionBase>> o2) {
                 return o1.getKey().getName().compareTo(o2.getKey().getName());
             }
         });
         int total = 0;
 
-        for (Map.Entry<Class, ArrayList<Function>> entry : entrySet) {
+        for (Map.Entry<Class, ArrayList<FunctionBase>> entry : entrySet) {
             Class apiClass = entry.getKey();
             String className = apiClass.getName().split("\\.")[apiClass.getName().split("\\.").length - 1];
             if (className.equals("Sandbox")) {
@@ -133,14 +134,14 @@ public class DocGen {
             if(!entry.getValue().isEmpty()){
                 System.out.println(intro.toString());
             }
-            List<Function> flist = entry.getValue();
-            Collections.sort(flist, new Comparator<Function>() {
+            List<FunctionBase> flist = entry.getValue();
+            Collections.sort(flist, new Comparator<FunctionBase>() {
 
-                public int compare(Function o1, Function o2) {
+                public int compare(FunctionBase o1, FunctionBase o2) {
                     return o1.getName().compareTo(o2.getName());
                 }
             });
-            for (Function f : entry.getValue()) {
+            for (FunctionBase f : entry.getValue()) {
                 if(!f.appearInDocumentation()){
                     //Some functions don't need to be included in the documentation; for instance __autoconcat__
                     continue;
@@ -150,11 +151,11 @@ public class DocGen {
                 String ret = null;
                 String args = null;
                 String desc = null;
-                String restricted = f.isRestricted() ? "<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>"
+                String restricted = (f instanceof Function && ((Function)f).isRestricted()) ? "<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>"
                         : "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
                 StringBuilder thrown = new StringBuilder();
-                if (f.thrown() != null) {
-                    List thrownList = Arrays.asList(f.thrown());
+                if (f instanceof Function && ((Function)f).thrown() != null) {
+                    List thrownList = Arrays.asList(((Function)f).thrown());
                     for (int i = 0; i < thrownList.size(); i++) {
                         ExceptionType t = (ExceptionType) thrownList.get(i);
                         if (type.equals("html") || type.equals("text")) {
@@ -171,7 +172,7 @@ public class DocGen {
                     }
                 }
 
-                String since = f.since().getVersionString();
+                String since = (f instanceof Documentation ?((Documentation)f).since().getVersionString():"0.0.0");
                 Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
                 Matcher m = p.matcher(doc);
                 if (m.find()) {
@@ -197,7 +198,7 @@ public class DocGen {
                             + "| " + restricted);
 
                 } else if (type.equals("text")) {
-                    System.out.println(ret + f.getName() + "(" + args + ")" + " {" + thrown.toString() + "}\n\t" + desc + "\n\t" + since + (f.isRestricted() ? "\n\tThis function is restricted"
+                    System.out.println(ret + f.getName() + "(" + args + ")" + " {" + thrown.toString() + "}\n\t" + desc + "\n\t" + since + ((f instanceof Function?((Function)f).isRestricted():false) ? "\n\tThis function is restricted"
                             : "\n\tThis function is not restricted"));
                 }
             }

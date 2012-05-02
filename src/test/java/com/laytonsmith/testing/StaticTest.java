@@ -18,6 +18,7 @@ import com.laytonsmith.core.events.EventMixinInterface;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionBase;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
 import java.lang.reflect.Field;
@@ -46,7 +47,11 @@ public class StaticTest {
      * at least this, it is useful to also use the more strict TestBoilerplate function.
      * @param f 
      */
-    public static void TestBoilerplate(Function f, String name) {
+    public static void TestBoilerplate(FunctionBase ff, String name) {
+        if(!(ff instanceof Function)){
+            return;
+        }
+        Function f = (Function)ff;
         //For the "quality test code coverage" number, set this to true
         boolean runQualityTestsOnly = false;
 

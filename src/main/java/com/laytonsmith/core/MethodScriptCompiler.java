@@ -960,7 +960,7 @@ public class MethodScriptCompiler {
                 GenericTreeNode<Construct> function = parents.pop();
                 if(usesBraces.peek().get()){
                     try{
-                        Function f = FunctionList.getFunction(function.data);
+                        Function f = (Function)FunctionList.getFunction(function.data);
                         if(!f.allowBraces()){
                             throw new ConfigCompileException("Improper use of braces with " + f.getName() + "()", t.target);
                         }
@@ -1052,7 +1052,9 @@ public class MethodScriptCompiler {
     }
     
     /**
-     * Recurses down into the tree, attempting to optimize where possible.
+     * Recurses down into the tree, attempting to optimize where possible. A few things
+     * have strong coupling, for information on these items, see the documentation included
+     * in the source.
      * @param tree
      * @return 
      */
@@ -1102,7 +1104,7 @@ public class MethodScriptCompiler {
         CFunction cFunction = (CFunction)tree.data;
         Function func;
         try{
-            func = FunctionList.getFunction(cFunction);
+            func = (Function)FunctionList.getFunction(cFunction);
         } catch(ConfigCompileException e){
             //It's a proc. We can't optimize those yet.
             return;

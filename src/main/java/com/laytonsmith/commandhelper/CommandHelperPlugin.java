@@ -22,10 +22,7 @@ package com.laytonsmith.commandhelper;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.MCChatColor;
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.events.EventList;
@@ -93,6 +90,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     
     @Override
     public void onLoad(){
+        Implementation.setServerType(Implementation.Type.BUKKIT);
         Installer.Install();
     }
     /**

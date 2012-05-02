@@ -225,7 +225,7 @@ public class Script {
                 }
                 final Function f;
                 try{
-                    f = FunctionList.getFunction(m);
+                    f = (Function)FunctionList.getFunction(m);
                 } catch(ConfigCompileException e){
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
                     throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getTarget());

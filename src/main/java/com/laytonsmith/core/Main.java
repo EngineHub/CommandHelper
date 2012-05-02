@@ -115,7 +115,7 @@ public class Main {
                         return;
                     }
                     System.out.println("Creating " + type + " documentation.");
-                    DocGen.functions(type);
+                    DocGen.functions(type, api.Platforms.INTERPRETER_JAVA);
                 } else if (s.matches("--test-compile")) {
                     System.out.println("This functionality is not currently implemented!");
 //                    File f = new File(".");

@@ -816,4 +816,14 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer).sendMessage("hi");
     }
     
+    @Test public void testMultipleFunctionsWithBraces() throws ConfigCompileException{
+        SRun("if(dyn(false)){\n"
+                + "msg('nope')\n"
+                + "} else {\n"
+                + " msg('hi')\n"
+                + " msg('hi')\n"
+                + "}", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("hi");
+    }
+    
 }

@@ -10,10 +10,12 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import com.sk89q.worldedit.expression.Expression;
@@ -47,7 +49,7 @@ public class RandomTests {
      */
     @Test public void testAllBoilerplate(){
         Map<String, Throwable> uhohs = new HashMap<String, Throwable>();
-        for(Function f : FunctionList.getFunctionList()){
+        for(FunctionBase f : FunctionList.getFunctionList(null)){
             try{
                 StaticTest.TestBoilerplate(f, f.getName());
                 Class upper = f.getClass().getEnclosingClass();

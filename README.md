@@ -1,7 +1,9 @@
 CommandHelper
 =============
 
-CommandHelper adds command aliases and repeat-last-command functions.
+CommandHelper adds simple command aliases, complex macros, 
+and the ability to script your own commands and events into Minecraft,
+using the MethodScript scripting language.
 
 Compiling
 ---------

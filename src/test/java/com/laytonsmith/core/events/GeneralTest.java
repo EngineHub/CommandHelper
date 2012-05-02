@@ -15,6 +15,7 @@ import org.junit.*;
 import org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.powermock.api.mockito.PowerMockito.when;
 import org.powermock.core.classloader.annotations.PrepareForTest;
@@ -67,17 +68,22 @@ public class GeneralTest {
         verify(fakePlayer).sendMessage("success");
     }
     
-//    @Test 
-//    public void testCallProcInEventHandler() throws ConfigCompileException{
-//        String script = "proc(_testproc, @text, msg(@text))"
-//                + "bind(player_join, array(priority: highest), null, @eb, msg(@eb)"
-//                + "msg(call_proc(_testproc, @eb['player']))  msg(@eb))";
-//        MCPlayerJoinEvent mcpje = mock(MCPlayerJoinEvent.class);
-//        when(mcpje.getPlayer()).thenReturn(fakePlayer);
-//        when(mcpje.getJoinMessage()).thenReturn("player joined");
-//        SRun(script, null);
-//        EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", mcpje);
-//        verify(fakePlayer).sendMessage("");
-//    }
+    @Test 
+    public void testCallProcInEventHandler() throws ConfigCompileException{
+        String script = ""
+                + "proc(_testproc, @text, msg(@text))"
+                + "bind(player_join, array(priority: highest), null, @eb, "
+                + " msg(@eb)"
+                + " msg(call_proc(_testproc, @eb['player']))  "
+                + " msg(@eb)"
+                + ")";
+        MCPlayerJoinEvent mcpje = mock(MCPlayerJoinEvent.class);
+        when(mcpje.getPlayer()).thenReturn(fakePlayer);
+        when(mcpje.getJoinMessage()).thenReturn("player joined");
+        SRun(script, null);
+        EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", mcpje);
+        verify(fakePlayer, times(2)).sendMessage("{join_message: player joined, player: " + fakePlayer.getName() + "}");
+        verify(fakePlayer).sendMessage(fakePlayer.getName());
+    }
     
 }

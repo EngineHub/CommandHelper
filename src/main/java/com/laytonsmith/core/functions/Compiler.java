@@ -5,6 +5,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.List;
 
 /**
@@ -378,7 +379,7 @@ public class Compiler {
                             list.remove(0);
                             GenericTreeNode<Construct> child = list.get(0);
                             try{
-                                Function f = FunctionList.getFunction(identifier);                                
+                                Function f = (Function)FunctionList.getFunction(identifier);                                
                                 GenericTreeNode<Construct> node 
                                         = new GenericTreeNode<Construct>(f.execs(t, null, null, child));                                
                                 return node;
@@ -459,5 +460,46 @@ public class Compiler {
             return false;
         }
                 
+    }
+    
+    @api public static class dyn extends AbstractFunction{
+
+        public String getName() {
+            return "dyn";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "exception {[argument]} Registers as a dynamic component, for optimization testing; that is"
+                    + " to say, this will not be optimizable ever."
+                    + " It simply returns the argument provided, or void if none.";
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(args.length == 0){
+                return new CVoid(t);
+            }
+            return args[0];
+        }
+
+        public CHVersion since() {
+            return CHVersion.V0_0_0;
+        }               
+        
     }
 }
