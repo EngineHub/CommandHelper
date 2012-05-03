@@ -121,6 +121,13 @@ public class DataHandlingTest {
         SRun(config, fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2}");
     }
+    
+    @Test(timeout = 10000)
+    public void testForeachWithArraySlice() throws ConfigCompileException{
+        SRun("foreach(1..2, @i, msg(@i))", fakePlayer);
+        verify(fakePlayer).sendMessage("1");
+        verify(fakePlayer).sendMessage("2");
+    }
 
     @Test(timeout = 10000)
     public void testCallProcIsProc() throws ConfigCompileException {
@@ -395,7 +402,7 @@ public class DataHandlingTest {
         verify(fakePlayer, times(2)).sendMessage("hi");
     }
     
-    @Test//(timeout=10000)
+    @Test(timeout=10000)
     public void testDoWhile() throws ConfigCompileException{
         SRun("assign(@i, 2) dowhile(@i-- msg('hi'), @i > 0)", fakePlayer);
         verify(fakePlayer, times(2)).sendMessage("hi");        

@@ -316,7 +316,14 @@ public class DataHandling {
 
             Construct arr = that.seval(array, env);
             Construct iv = that.eval(ivar, env);
-
+            if(arr instanceof CSlice){
+                long start = ((CSlice)arr).getStart();
+                long finish = ((CSlice)arr).getFinish();
+                if(finish < start){
+                    throw new ConfigRuntimeException("When using the .. notation, the left number may not be greater than the right number. Recieved " + start + " and " + finish, ExceptionType.RangeException, t);
+                }
+                arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
+            }
             if (arr instanceof CArray) {
                 if (iv instanceof IVariable) {
                     CArray one = (CArray) arr;
@@ -368,11 +375,13 @@ public class DataHandling {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
         }
 
         public String docs() {
-            return "void {array, ivar, code} Walks through array, setting ivar equal to each element in the array, then running code.";
+            return "void {array, ivar, code} Walks through array, setting ivar equal to each element in the array, then running code."
+                    + " In addition, foreach(1..4, @i, code()) is also valid, setting @i to 1, 2, 3, 4 each time. The same syntax is valid as"
+                    + " in an array slice, except negative indexes cannot be tolerated.";
         }
 
         public boolean isRestricted() {
@@ -401,6 +410,7 @@ public class DataHandling {
         public boolean allowBraces() {
             return true;
         }        
+                
     }
     
     @api
