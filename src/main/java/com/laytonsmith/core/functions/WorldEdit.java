@@ -396,7 +396,7 @@ public class WorldEdit {
         
         public String docs() {
             return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
-                    + " If region is found, an array of region names are returned, else null is returned";
+                    + " If region is found, an array of region names are returned, else an empty is returned";
         }
         
         public ExceptionType[] thrown() {
@@ -452,7 +452,7 @@ public class WorldEdit {
                 return regions;
             }
             
-            return new CNull(t);
+            return new CArray(t);
         }
     }
     
