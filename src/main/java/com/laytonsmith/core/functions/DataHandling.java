@@ -402,6 +402,132 @@ public class DataHandling {
             return true;
         }        
     }
+    
+    @api
+    public static class _while extends AbstractFunction{
+
+        public String getName() {
+            return "while";
+        }
+
+        public String docs() {
+            return "void {condition, code} While the condition is true, the code is executed. break and continue work"
+                    + " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
+                    + " keeping track of any counters anyways. Breaking multiple times still works however.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+        
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }        
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            try{
+                while(Static.getBoolean(parent.seval(nodes[0], env))){
+                    try{
+                        parent.seval(nodes[1], env);
+                    } catch(LoopContinueException e){
+                        //ok.
+                    }
+                }
+            } catch(LoopBreakException e){
+                if(e.getTimes() > 1){
+                    throw new LoopBreakException(e.getTimes() - 1);
+                }
+            }
+            return new CVoid(t);
+        }
+
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CNull();
+        }
+
+        
+    }
+    
+    @api
+    public static class _dowhile extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CNull();
+        }
+
+        public String getName() {
+            return "dowhile";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "void {code, condition} Like while, but always runs the code at least once. The condition is checked"
+                    + " after each run of the code, and if it is true, the code is run again. break and continue work"
+                    + " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
+                    + " keeping track of any counters anyways. Breaking multiple times still works however.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            try{
+                do{
+                    try{
+                        parent.seval(nodes[0], env);
+                    } catch(LoopContinueException e){
+                        //ok. No matter how many times it tells us to continue, we're only going to continue once.
+                    }
+                } while(Static.getBoolean(parent.seval(nodes[1], env)));
+            } catch(LoopBreakException e){
+                if(e.getTimes() > 1){
+                    throw new LoopBreakException(e.getTimes() - 1);
+                }
+            }
+            return new CVoid(t);
+        }        
+        
+    }
 
     @api
     public static class _break extends AbstractFunction {

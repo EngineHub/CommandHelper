@@ -388,4 +388,16 @@ public class DataHandlingTest {
                 + "msg(@value)", fakePlayer);
         verify(fakePlayer).sendMessage("{Hello World}");
     }
+    
+    @Test(timeout=10000)
+    public void testWhile() throws ConfigCompileException{
+        SRun("assign(@i, 2) while(@i > 0, @i-- msg('hi'))", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("hi");
+    }
+    
+    @Test//(timeout=10000)
+    public void testDoWhile() throws ConfigCompileException{
+        SRun("assign(@i, 2) dowhile(@i-- msg('hi'), @i > 0)", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage("hi");        
+    }
 }

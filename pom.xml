@@ -5,7 +5,7 @@
     <artifactId>commandhelper</artifactId>
     <version>3.3.1-SNAPSHOT</version>
     <name>CommandHelper</name>
-    <description>CommandHelper adds powerful command related utility functions</description>
+    <description>CommandHelper a full blown scripting language right into minecraft</description>
     <inceptionYear>2010</inceptionYear>
     <organization>
         <name>Mostly Layton Smith</name>
@@ -111,13 +111,13 @@
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
         
-        <repository>
+        <!--<repository>
             <id>bukkit-maven</id>
             <url>http://ci.bukkit.org/plugin/repository/project/dev-Bukkit/LastSuccessful/repository/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
-        </repository>
+        </repository>-->
         <repository>
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2/</url>
@@ -133,7 +133,7 @@
         <dependency>
             <groupId>com.sk89q</groupId>
             <artifactId>worldedit</artifactId>
-            <version>5.3-SNAPSHOT</version>
+            <version>5.4-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>org.spout</groupId>

@@ -4,7 +4,11 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.event.EventHandler;
@@ -40,7 +44,11 @@ public class BukkitPlayerListener implements Listener{
     
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerChangedWorld(PlayerChangedWorldEvent event){
-        EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", new BukkitPlayerEvents.BukkitMCWorldChangedEvent(event));
+        BukkitMCPlayer currentPlayer = (BukkitMCPlayer)Static.GetPlayer(event.getPlayer().getName(), Target.UNKNOWN);        
+        //Apparently this happens sometimes, so prevent it
+        if(!event.getFrom().equals(currentPlayer._Player().getWorld())){
+            EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", new BukkitPlayerEvents.BukkitMCWorldChangedEvent(event));            
+        }
     }
     
     @EventHandler(priority = EventPriority.LOWEST)

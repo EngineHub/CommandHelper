@@ -21,7 +21,7 @@ import java.util.List;
  * to it.
  * @author layton
  */
-public interface Function extends Documentation, FunctionBase {    
+public interface Function extends FunctionBase, Documentation {    
 
     /**
      * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)

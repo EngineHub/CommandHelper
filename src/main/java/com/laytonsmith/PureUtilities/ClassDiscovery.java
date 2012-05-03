@@ -80,9 +80,9 @@ public class ClassDiscovery {
             //We are running from the file system
             //First, get the "root" of the class structure. We assume it's
             //the root of this class
-            String fileName = Pattern.quote(ClassDiscovery.class.getCanonicalName().replace(".", File.separator));
-            fileName = fileName.replaceAll("\\\\Q", "").replaceAll("\\\\E", "") + ".class";
-            String root = url.replaceAll("file:", "").replaceAll(fileName, "");
+            String fileName = Pattern.quote(ClassDiscovery.class.getCanonicalName().replace(".", "/"));
+            fileName = fileName/*.replaceAll("\\\\Q", "").replaceAll("\\\\E", "")*/ + ".class";
+            String root = url.replaceAll("file:" + (TermColors.SYSTEM==TermColors.SYS.WINDOWS?"/":""), "").replaceAll(fileName, "");
             //System.out.println(root);
             //Ok, now we have the "root" of the known class structure. Let's recursively
             //go through everything and pull out the files
@@ -91,7 +91,7 @@ public class ClassDiscovery {
             //Now, we have all the class files in the package. But, it's the absolute path
             //to all of them. We have to first remove the "front" part
             for(File f : fileList){
-                classNameList.add(f.getAbsolutePath().replaceFirst(Pattern.quote(root), ""));
+                classNameList.add(f.getAbsolutePath().replaceFirst(Pattern.quote(new File(root).getAbsolutePath() + File.separator), ""));
             }
             
         } else if(url.startsWith("jar:")) {

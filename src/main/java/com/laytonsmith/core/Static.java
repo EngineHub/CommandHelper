@@ -392,10 +392,10 @@ public class Static {
         if (variable.getCType() == Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {
                 if (var.getName().equals(((Variable) variable).getName())) {
-                    return Static.resolveConstruct(var.val(), var.getTarget());
+                    return new CString(var.val(), var.getTarget());
                 }
             }
-            return Static.resolveConstruct(((Variable) variable).getDefault(), variable.getTarget());
+            return new CString(((Variable) variable).getDefault(), variable.getTarget());
         } else {
             return variable;
         }
