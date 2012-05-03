@@ -408,6 +408,55 @@ public class Regex {
         
     }
     
+    @api
+    public static class reg_escape extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CString(Pattern.quote(args[0].val()), t);
+        }
+
+        public String getName() {
+            return "reg_escape";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {arg} Escapes arg so that it may be used directly in a regular expression, without fear that"
+                    + " it will have special meaning; that is, it escapes all special characters. Use this if you need"
+                    + " to use user input or similar as a literal search index.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }                
+        
+    }
+    
     private static Pattern getPattern(Construct c, Target t) throws ConfigRuntimeException{
         String regex = "";
         int flags = 0;
