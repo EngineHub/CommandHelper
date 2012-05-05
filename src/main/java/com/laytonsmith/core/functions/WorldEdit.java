@@ -6,6 +6,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
@@ -452,6 +453,78 @@ public class WorldEdit {
                 return regions;
             }
             
+            return new CArray(t);
+        }
+    }
+
+    @api public static class sk_regions_at extends SKFunction {
+        public String getName() {
+            return "sk_regions_at";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "mixed {Locationarray} Returns the list regions at the location."
+                    + " If region is found, an array of region names are returned, else an empty is returned";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+            World world;
+            MCPlayer m = null;
+
+            if (!(env.GetCommandSender() instanceof CArray)) {
+                throw new ConfigRuntimeException(this.getName() + " needs a locationarray", ExceptionType.CastException, t);
+            }
+
+            if(env.GetCommandSender() instanceof MCPlayer){
+                m = env.GetPlayer();
+            }
+            if (!(env.GetCommandSender() instanceof CArray)) {
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
+            }
+            MCWorld w = m.getWorld();
+            MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+
+            world = Bukkit.getServer().getWorld(w.getName());
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+            Vector pt = new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
+            ApplicableRegionSet set = mgr.getApplicableRegions(pt);
+
+            CArray regions = new CArray(t);
+
+            List<ProtectedRegion> sortedRegions = new ArrayList<ProtectedRegion>();
+
+            for (ProtectedRegion r : set) {
+                boolean placed = false;
+                for (int i = 0; i < sortedRegions.size(); i++) {
+                    if (sortedRegions.get(i).volume() < r.volume()) {
+                        sortedRegions.add(i, r);
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    sortedRegions.add(r);
+                }
+            }
+
+            for (ProtectedRegion region : sortedRegions) {
+                regions.push(new CString(region.getId(), t));
+            }
+
+            if (regions.size() > 0) {
+                return regions;
+            }
+
             return new CArray(t);
         }
     }
