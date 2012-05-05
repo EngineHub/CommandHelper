@@ -678,4 +678,71 @@ public class Environment {
             return false;
         }
     }
+
+    @api
+    public static class explosion extends AbstractFunction {
+
+        public String getName() {
+            return "explosion";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{ 2};
+        }
+
+        public String docs() {
+            return "void {Locationarray, size} Creates an explosion with the given size at the given location.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            double x = 0;
+            double y = 0;
+            double z = 0;
+            float size = 0;
+            MCWorld w = null;
+
+            if(!(args[1] instanceof CInt)) {
+                throw new ConfigRuntimeException("Expecting an integer at parameter 2 of explosion",
+                        ExceptionType.CastException, t);
+            }
+            if(!(args[0] instanceof CArray)) {
+                throw new ConfigRuntimeException("Expecting an array at parameter 1 of explosion",
+                        ExceptionType.CastException, t);
+            }
+            
+                MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+                w = loc.getWorld();
+                x = loc.getX();
+                z = loc.getZ();
+                y = loc.getY();
+                CInt temp = (CInt) args[1];
+                size = temp.getInt();
+
+            w.explosion(x, y, z, size);
+            return new CVoid(t);
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+    }
 }
