@@ -1483,7 +1483,7 @@ public class DataHandling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
@@ -1540,7 +1540,7 @@ public class DataHandling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
