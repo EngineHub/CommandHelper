@@ -480,16 +480,15 @@ public class WorldEdit {
             World world;
             MCPlayer m = null;
 
-            if (!(env.GetCommandSender() instanceof CArray)) {
+            if (!(args[0] instanceof CArray)) {
                 throw new ConfigRuntimeException(this.getName() + " needs a locationarray", ExceptionType.CastException, t);
             }
 
-            if(env.GetCommandSender() instanceof MCPlayer){
-                m = env.GetPlayer();
-            }
-            if (!(env.GetCommandSender() instanceof CArray)) {
+            if (!(env.GetCommandSender() instanceof MCPlayer)) {
                 throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
             }
+
+            m = env.GetPlayer();
             MCWorld w = m.getWorld();
             MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 
