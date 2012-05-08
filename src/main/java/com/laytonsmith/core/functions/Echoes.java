@@ -30,20 +30,21 @@ public class Echoes {
     }
     @api public static class die extends AbstractFunction{
         public Integer []numArgs() {
-            return new Integer[] {0,1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException{
             if(args.length == 0){
                 throw new CancelCommandException("");
-            } else if(args.length == 1){
-                try{
-                    Static.SendMessage(env.GetCommandSender(), args[0].val(), t);
-                } finally{
-                    throw new CancelCommandException("");
-                }
-            } else{
-                return null;
+            }
+            StringBuilder b = new StringBuilder();
+            for(int i = 0; i < args.length; i++){
+                b.append(args[i].val());
+            }
+            try{
+                Static.SendMessage(env.GetCommandSender(), b.toString(), t);
+            } finally{
+                throw new CancelCommandException("");
             }
         }
         
@@ -53,7 +54,7 @@ public class Echoes {
 
         public String getName(){ return "die"; }
         public String docs(){
-            return "nothing {[var1]} Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
+            return "nothing {[var1, var2...]} Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
         }
 
         public boolean isRestricted() {
@@ -72,7 +73,7 @@ public class Echoes {
             return false;
         }
     }
-    
+
     @api public static class msg extends AbstractFunction{
 
         public String getName() {
@@ -84,6 +85,9 @@ public class Echoes {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args.length < 1){
+                throw new ConfigRuntimeException("You must send at least 1 arguments to msg", ExceptionType.InsufficientArgumentsException, t);
+            }
             StringBuilder b = new StringBuilder();
             for(int i = 0; i < args.length; i++){
                 b.append(args[i].val());
@@ -124,7 +128,7 @@ public class Echoes {
         }
     
     }
-    
+
     @api public static class tmsg extends AbstractFunction{
 
         public String getName() {
@@ -159,7 +163,7 @@ public class Echoes {
         }
 
         public String docs() {
-            return "void {player, msg, [...]} Displays a message on the specified players screen, similar to msg, but targets a specific user.";
+            return "void {player, msg[, ...]} Displays a message on the specified players screen, similar to msg, but targets a specific user.";
         }
         public ExceptionType[] thrown(){
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.InsufficientArgumentsException};
@@ -181,7 +185,7 @@ public class Echoes {
             return false;
         }
     }
-    
+
     @api public static class color extends AbstractFunction{
 
         public String getName() {
@@ -250,7 +254,7 @@ public class Echoes {
             return null;
         }
     }
-    
+
     @api public static class strip_colors extends AbstractFunction{
 
         public String getName() {
@@ -258,11 +262,11 @@ public class Echoes {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "string {toStrip} Strips all the color codes from a given string";
+            return "string {tostrip[, ...]} Strips all the color codes from a given string";
         }
 
         public ExceptionType[] thrown() {
@@ -286,11 +290,18 @@ public class Echoes {
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CString(MCChatColor.stripColor(args[0].val()), t);
+            if(args.length < 1){
+                throw new ConfigRuntimeException("You must send at least 1 arguments to strip_color", ExceptionType.InsufficientArgumentsException, t);
+            }
+            StringBuilder b = new StringBuilder();
+            for(int i = 0; i < args.length; i++){
+                b.append(args[i].val());
+            }
+            return new CString(MCChatColor.stripColor(b.toString()), t);
         }
         
     }
-    
+
     @api public static class chat extends AbstractFunction{
 
         public String getName() {
@@ -298,10 +309,18 @@ public class Echoes {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{1, Integer.MAX_VALUE};
         }
 
         public Construct exec(final Target t, final Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if(args.length < 1){
+                throw new ConfigRuntimeException("You must send at least 1 arguments to chat", ExceptionType.InsufficientArgumentsException, t);
+            }
+            StringBuilder b = new StringBuilder();
+            for(int i = 0; i < args.length; i++){
+                b.append(args[i].val());
+            }
+
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
@@ -310,13 +329,13 @@ public class Echoes {
                     }
                     (env.GetPlayer()).chat(line);
                 }
-            }, args[0].val());
+            }, b.toString());
 
             return new CVoid(t);
         }
 
         public String docs() {
-            return "void {string} Echoes string to the chat, as if the user simply typed something into the chat bar.";
+            return "void {message, [message2...]} Echoes string to the chat, as if the user simply typed something into the chat bar.";
         }
         
         public ExceptionType[] thrown(){
@@ -348,11 +367,11 @@ public class Echoes {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "void {player, msg} Sends a chat message to the server, as the given player. Otherwise the same as the chat"
+            return "void {player, var1[, var2...]} Sends a chat message to the server, as the given player. Otherwise the same as the chat"
                     + " function";
         }
         
@@ -376,6 +395,14 @@ public class Echoes {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             final MCPlayer player = Static.GetPlayer(args[0]);
+
+            if(args.length < 2){
+                throw new ConfigRuntimeException("You must send at least 2 arguments to chatas", ExceptionType.InsufficientArgumentsException, t);
+            }
+            StringBuilder b = new StringBuilder();
+            for(int i = 1; i < args.length; i++){
+                b.append(args[i].val());
+            }
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
@@ -383,7 +410,7 @@ public class Echoes {
                         player.chat(line);
                     }
                 }
-            }, args[1].val());
+            }, b.toString());
             
             return new CVoid(t);
         }
@@ -400,11 +427,11 @@ public class Echoes {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "void {message} Broadcasts a message to all players on the server";
+            return "void {message[, message2...]} Broadcasts a message to all players on the server";
         }
         
         public ExceptionType[] thrown(){
@@ -429,13 +456,22 @@ public class Echoes {
             if(args[0] instanceof CNull){
                 throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, t);
             }
+
+            if(args.length < 1){
+                throw new ConfigRuntimeException("You must send at least 1 arguments to broadcast", ExceptionType.InsufficientArgumentsException, t);
+            }
+            StringBuilder b = new StringBuilder();
+            for(int i = 0; i < args.length; i++){
+                b.append(args[i].val());
+            }
+            
             final MCServer server = Static.getServer();
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {
                     server.broadcastMessage(line);
                 }
-            }, args[0].val());
+            }, b.toString());
             return new CVoid(t);
         }
         public Boolean runAsync(){
@@ -451,11 +487,11 @@ public class Echoes {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "void {message, [prefix]} Logs a message to the console. If prefix is true, prepends \"CommandHelper:\""
+            return "void {message, [message2...], [prefix]} Logs a message to the console. If prefix is true, prepends \"CommandHelper:\""
                     + " to the message. Default is true.";
         }
         
@@ -478,12 +514,18 @@ public class Echoes {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            String mes = args[0].val();
+            if(args.length < 1){
+                throw new ConfigRuntimeException("You must send at least 1 arguments to console", ExceptionType.InsufficientArgumentsException, t);
+            }
+            StringBuilder b = new StringBuilder();
+            for(int i = 0; i < args.length - 1; i++){
+                b.append(args[i].val());
+            }
             boolean prefix = true;
             if(args.length > 1){
-                prefix = Static.getBoolean(args[1]);
+                prefix = Static.getBoolean(args[args.length]);
             }
-            mes = Static.MCToANSIColors(mes);
+            String mes = Static.MCToANSIColors(b.toString());
             com.laytonsmith.core.Static.getLogger().log(Level.INFO, (prefix?"CommandHelper: ":"") + mes);
             return new CVoid(t);
         }
