@@ -7,6 +7,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -25,6 +26,8 @@ import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.event.entity.EntityDamageEvent;
+import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.util.BlockIterator;
 
 /**
@@ -174,7 +177,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p.teleport(((BukkitMCLocation)l).l);
     }
 
-    public void setHealth(int i) {
+    public void setHealth(int i) {        
         p.setHealth(i);
     }
 
@@ -403,7 +406,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
     public boolean isOp() {
         return p.isOp();
-    }    
+    }
+
+    public void fireEntityDamageEvent(MCDamageCause dc) {
+        EntityDamageEvent ede = new EntityDamageEvent(p, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
+        CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
+    }
     
     
 }

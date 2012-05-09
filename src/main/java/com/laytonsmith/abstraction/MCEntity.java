@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.abstraction;
 
+import org.bukkit.event.entity.EntityDamageEvent;
+
 /**
  *
  * @author layton
@@ -12,5 +14,7 @@ public interface MCEntity extends AbstractionObject{
     public int getEntityId();
 
     public MCDamageCause getLastDamageCause();
+    
+    public void fireEntityDamageEvent(MCDamageCause dc);
 
 }
