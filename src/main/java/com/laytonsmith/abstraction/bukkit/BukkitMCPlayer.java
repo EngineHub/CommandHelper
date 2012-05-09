@@ -406,12 +406,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
     public boolean isOp() {
         return p.isOp();
-    }
-
-    public void fireEntityDamageEvent(MCDamageCause dc) {
-        EntityDamageEvent ede = new EntityDamageEvent(p, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
-        CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
-    }
+    }    
     
     
 }

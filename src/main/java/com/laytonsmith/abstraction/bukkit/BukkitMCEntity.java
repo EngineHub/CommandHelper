@@ -5,9 +5,11 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
+import org.bukkit.event.entity.EntityDamageEvent;
 
 /**
  *
@@ -57,6 +59,11 @@ public class BukkitMCEntity implements MCEntity {
 
     public boolean isLivingEntity() {
         return e instanceof LivingEntity;
+    }
+    
+    public void fireEntityDamageEvent(MCDamageCause dc) {
+        EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
+        CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
     }
     
 }
