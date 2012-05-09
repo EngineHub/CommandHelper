@@ -826,4 +826,24 @@ public class MethodScriptCompilerTest {
         verify(fakePlayer, times(2)).sendMessage("hi");
     }
     
+    @Test
+    public void testArrayGetCatchesInvalidParameter(){
+        try{
+            try {
+                SRun("1[4]", null);
+                fail("Did not expect test to pass");
+            } catch(ConfigCompileException e){
+                //Pass
+            }
+            try {
+                SRun("'string'['index']", null);
+                fail("Did not expect test to pass");
+            } catch(ConfigCompileException e){
+                //Pass
+            }
+        } catch(ConfigRuntimeException e){
+            fail("Expecting a compile error here, not a runtime exception");
+        }
+    }
+    
 }

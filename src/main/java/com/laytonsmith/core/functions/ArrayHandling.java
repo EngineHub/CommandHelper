@@ -10,10 +10,12 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 
 /**
  *
@@ -149,16 +151,17 @@ public class ArrayHandling {
                 }
             } else if(args[0] instanceof CString){
                 if(index instanceof CSlice){
+                    ArrayAccess aa = (ArrayAccess)args[0];
                     //It's a range
                     long start = ((CSlice)index).getStart();
                     long finish = ((CSlice)index).getFinish();
                     try{
                         //Convert negative indexes 
                         if(start < 0){
-                            start = args[0].val().length() + start;
+                            start = aa.val().length() + start;
                         }
                         if(finish < 0){
-                            finish = args[0].val().length() + finish;
+                            finish = aa.val().length() + finish;
                         }
                         CArray na = new CArray(t);
                         if(finish < start){
@@ -166,7 +169,7 @@ public class ArrayHandling {
                             return new CString("", t);
                         }
                         StringBuilder b = new StringBuilder();
-                        String val = args[0].val();
+                        String val = aa.val();
                         for(long i = start; i <= finish; i++){
                             b.append(val.charAt((int)i));
                         }
@@ -188,6 +191,8 @@ public class ArrayHandling {
                         throw new ConfigRuntimeException("No index at " + args[0].val(), ExceptionType.RangeException, t);
                     }
                 }
+            } else if(args[0] instanceof ArrayAccess){
+                throw new ConfigRuntimeException("Wat. How'd you get here? This isn't supposed to be implemented yet.", t);
             } else{
                 throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
             }
@@ -217,6 +222,27 @@ public class ArrayHandling {
         public Boolean runAsync() {
             return null;
         }
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            if(args[0] instanceof ArrayAccess){
+                ArrayAccess aa = (ArrayAccess)args[0];
+                if(!aa.canBeAssociative()){
+                    if(!(args[1] instanceof CInt)){
+                        throw new ConfigCompileException("Accessing an element as an associative array, when it can only accept integers.", t);
+                    }
+                }
+                return null;
+            } else {
+                throw new ConfigCompileException("Trying to access an element like an array, but it does not support array access.", t);
+            }
+            
+        }                
         
     }
     

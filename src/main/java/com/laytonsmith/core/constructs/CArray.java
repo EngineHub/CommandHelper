@@ -7,13 +7,14 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.*;
 
 /**
  *
  * @author layton
  */
-public class CArray extends Construct {
+public class CArray extends Construct implements ArrayAccess{
 
     private boolean associative_mode = false;
     private long next_index = 0;
@@ -407,5 +408,9 @@ public class CArray extends Construct {
         //is NOT static. So, if just the array function is run, it's static, if the static
         //array is put into a variable, the staticness is lost (as it is with a number or string)
         return false;
+    }
+
+    public boolean canBeAssociative() {
+        return true;
     }
 }

@@ -13,20 +13,17 @@ import org.bukkit.entity.Tameable;
  *
  * @author layton
  */
-public class BukkitMCTameable implements MCTameable{
+public class BukkitMCTameable extends BukkitMCEntity implements MCTameable{
 
     Tameable t;
-    public BukkitMCTameable(Tameable t){
-        this.t = t;
+    public BukkitMCTameable(Entity t){
+        super(t);
+        this.t = (Tameable)t;
     }
     
     public BukkitMCTameable(AbstractionObject a){
-        this((Tameable)null);
-        if(a instanceof MCTameable){
-            this.t = ((Tameable)a.getHandle());
-        } else {
-            throw new ClassCastException();
-        }
+        super((Entity)a.getHandle());
+        this.t = ((Tameable)a.getHandle());
     }
     
     public Object getHandle(){
@@ -51,37 +48,9 @@ public class BukkitMCTameable implements MCTameable{
         t.setOwner(((BukkitMCAnimalTamer)at).at);
     }
 
-    public int getEntityId() {
-        if(t instanceof Entity){
-            return ((Entity)t).getEntityId();
-        }
-        return 0;
-    }
-
+    @Override
     public boolean isTameable() {
         return true;
-    }
-
-    public MCTameable getMCTameable() {
-        return new BukkitMCTameable(t);
-    }
-
-    public MCDamageCause getLastDamageCause() {
-        return MCDamageCause.valueOf(((Entity)t).getLastDamageCause().getCause().name());
-    }
-
-    public MCLivingEntity getLivingEntity() {
-        if(t instanceof LivingEntity){
-            return new BukkitMCLivingEntity((LivingEntity)t);
-        }
-        return null;
-    }
-
-    public boolean isLivingEntity() {
-        return t instanceof LivingEntity;
-    }
-    
-    
-
+    }   
     
 }

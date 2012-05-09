@@ -37,10 +37,6 @@ public class BukkitMCEntity implements MCEntity {
     public boolean isTameable() {
         return e instanceof Tameable;
     }
-
-    public MCTameable getMCTameable() {
-        return new BukkitMCTameable((Tameable)e);
-    }
     
     public Entity _Entity(){
         return e;

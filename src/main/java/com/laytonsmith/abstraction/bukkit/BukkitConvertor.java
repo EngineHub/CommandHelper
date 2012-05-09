@@ -131,7 +131,7 @@ public class BukkitConvertor implements Convertor {
 
         Entity be = ((BukkitMCEntity)e)._Entity();
         if(be instanceof Tameable){
-            return new BukkitMCTameable((Tameable)be);
+            return new BukkitMCTameable(be);
         }
         
         if(be instanceof LivingEntity){

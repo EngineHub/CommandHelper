@@ -5,6 +5,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.math.BigInteger;
 import java.util.*;
@@ -17,7 +18,7 @@ import org.json.simple.JSONValue;
  *
  * @author layton
  */
-public abstract class Construct implements Cloneable, Comparable<Construct> {
+public abstract class Construct implements Cloneable, Comparable<Construct>, Mixed{
 
 
 
