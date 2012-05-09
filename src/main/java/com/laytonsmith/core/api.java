@@ -51,7 +51,7 @@ public @interface api {
      * This is a list of valid classes that are valid to be tagged with this annotation.
      */
     public static enum ValidClasses{
-        FUNCTION(com.laytonsmith.core.functions.Function.class),
+        FUNCTION(com.laytonsmith.core.functions.FunctionBase.class),
         EVENT(com.laytonsmith.core.events.Event.class);
         private static List<Class> classes = null;
         Class classType;

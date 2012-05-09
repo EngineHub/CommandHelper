@@ -10,6 +10,10 @@ import com.laytonsmith.core.constructs.Target;
  */
 public class Compiler {
     
+    public static String docs(){
+        return "Bash compiler internal functions";
+    }
+    
     @api(platform=api.Platforms.COMPILER_BASH)
     public static class dyn extends BashFunction{
 

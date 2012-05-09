@@ -578,7 +578,7 @@ public class MethodScriptCompiler {
     }
 
     /**
-     * This function breaks the token stream into parts, seperating the
+     * This function breaks the token stream into parts, separating the
      * aliases/MethodScript from the command triggers
      *
      * @param tokenStream

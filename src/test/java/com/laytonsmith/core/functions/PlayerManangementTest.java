@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
@@ -16,17 +17,20 @@ import java.util.HashSet;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertEquals;
 import org.junit.*;
+import org.junit.runner.RunWith;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.*;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 //import static org.powermock.api.mockito.PowerMockito.*;
 
 /**
  *
  * @author Layton
  */
-//@RunWith(PowerMockRunner.class)
-//@PrepareForTest( { StaticLayer.class })
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Static.class)
 public class PlayerManangementTest {
 
     MCServer fakeServer;
@@ -48,6 +52,7 @@ public class PlayerManangementTest {
     public void setUp() throws Exception {
         fakeServer = GetFakeServer();
         fakePlayer = GetOp("wraithguard01", fakeServer);
+        StaticTest.InstallFakeConvertor(fakePlayer); 
         when(fakePlayer.getServer()).thenReturn(fakeServer);
         CommandHelperPlugin.myServer = fakeServer;
         String name = fakePlayer.getName();
@@ -87,21 +92,15 @@ public class PlayerManangementTest {
         assertEquals("{wraithguard01, wraithguard02, wraithguard03}", done);
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void testPloc() throws ConfigCompileException, Exception {
-        String script = "ploc()";
+        String script = "msg(ploc())";
         BukkitMCWorld w = GetWorld("world");
         MCLocation loc = StaticLayer.GetLocation(w, 0, 1, 0);
         when(fakePlayer.getLocation()).thenReturn(loc);
         when(fakePlayer.getWorld()).thenReturn(w);
-        final StringBuilder done = new StringBuilder();
-        Run(script, fakePlayer, new MethodScriptComplete() {
-
-            public void done(String output) {
-                done.append(output);
-            }
-        });
-        assertEquals("{0.0, 0.0, 0.0, world}", done.toString());
+        SRun(script, fakePlayer);
+        verify(fakePlayer).sendMessage("{0.0, 0.0, 0.0, world}");
     }
 
     public void testSetPloc() throws ConfigCompileException, Exception {

@@ -30,18 +30,24 @@ import org.bukkit.entity.Player;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import static org.mockito.Mockito.*;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 /**
  *
  * @author Layton
  */
+@RunWith(PowerMockRunner.class)
+@PrepareForTest(Static.class)
 public class RandomTests {
     MCPlayer fakePlayer;
     
     @Before
-    public void setUp(){
+    public void setUp() throws Exception{
         fakePlayer = StaticTest.GetOnlinePlayer();
+        StaticTest.InstallFakeConvertor(fakePlayer);
     }
     /**
      * This function automatically tests all the boilerplate portions of all functions. Note that
@@ -192,15 +198,6 @@ public class RandomTests {
     @Test public void testProcScope() throws ConfigCompileException{
         SRun("proc(_b, assign(@a, 2)) assign(@a, 1) _b() msg(@a)", fakePlayer);
         verify(fakePlayer).sendMessage("1");
-    }
-    
-    @Test public void testDataLookup() throws ConfigCompileException{
-        assertEquals("1", SRun("data_values(stone)", fakePlayer));
-        assertEquals("4", SRun("data_values(cstone)", fakePlayer));
-        assertEquals("6:2", SRun("data_values(birchsapling)", fakePlayer));
-        assertEquals("35:14", SRun("data_values(redwool)", fakePlayer));
-        assertEquals("35:14", SRun("data_values('wool:red')", fakePlayer));
-        assertEquals("35:14", SRun("data_values(REDWOOL)", fakePlayer));
     }
     
     @Test 

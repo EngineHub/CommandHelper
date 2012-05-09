@@ -1828,16 +1828,16 @@ public class BasicLogic {
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
+        }          
+
+        @Override
+        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {            
+            return super.optimizeDynamic(t, children);
         }
 
         @Override
-        public boolean canOptimize() {
+        public boolean canOptimizeDynamic() {
             return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return args[0];
         }
 
         @Override

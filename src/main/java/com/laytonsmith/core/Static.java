@@ -657,8 +657,8 @@ public class Static {
         PermissionsResolverManager perms = Static.getPermissionsResolverManager();
         if (perms != null) {
             if (env.GetCommandSender() instanceof MCPlayer) {
-                perm = perms.hasPermission(env.GetPlayer().getName(), "ch.func.use." + functionName)
-                        || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.func.use." + functionName);
+                perm = perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), "ch.func.use." + functionName)
+                        || perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), "commandhelper.func.use." + functionName);
                 if (env.GetLabel() != null && env.GetLabel().startsWith("~")) {
                     String[] groups = env.GetLabel().substring(1).split("/");
                     for (String group : groups) {
@@ -672,11 +672,11 @@ public class Static {
                         if(env.GetLabel().contains(".")){
                             //We are using a non-standard permission. Don't automatically
                             //add CH's prefix
-                            if(perms.hasPermission(env.GetPlayer().getName(), env.GetLabel())){
+                            if(perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), env.GetLabel())){
                                 perm = true;
                             }
-                        } else if((perms.hasPermission(env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
-                            || perms.hasPermission(env.GetPlayer().getName(), "commandhelper.alias." + env.GetLabel())) {
+                        } else if((perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
+                            || perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), "commandhelper.alias." + env.GetLabel())) {
                             perm = true;
                         }
                     }

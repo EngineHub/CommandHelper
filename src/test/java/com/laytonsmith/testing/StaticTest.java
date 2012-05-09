@@ -118,7 +118,12 @@ public class StaticTest {
         //TODO
     }
 
+    private static ArrayList<String> tested = new ArrayList<String>();
     public static void TestExec(Function f, MCCommandSender p) {
+        if(tested.contains(f.getName() + String.valueOf(p))){
+            return;
+        }
+        tested.add(f.getName() + String.valueOf(p));
         Env env = new Env();
         env.SetCommandSender(p);
         //See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
@@ -126,15 +131,15 @@ public class StaticTest {
         //strings, numbers, arrays, and nulls
         for (Integer i : f.numArgs()) {
             if (i == Integer.MAX_VALUE) {
-                //er.. let's just try with 100...
-                i = 100;
+                //er.. let's just try with 10...
+                i = 10;
             }
             Construct[] con = new Construct[i];
             //Throw the book at it. Most functions will fail, and that is ok, what isn't
             //ok is if it throws an unexpected type of exception. It should only ever
             //throw a ConfigRuntimeException, or a CancelCommandException. Further,
             //if it throws a ConfigRuntimeException, the documentation should state so.
-            for (int z = 0; z < 11; z++) {
+            for (int z = 0; z < 10; z++) {
                 for (int a = 0; a < i; a++) {
                     switch (z) {
                         case 0:
@@ -154,16 +159,19 @@ public class StaticTest {
                             break;
                         case 5:
                             con[a] = C.onstruct(0);
+                            break;
                         case 6:
-                            con[a] = C.onstruct(90000);
+                            con[a] = C.onstruct(100);
+                            break;
                         case 7:
                             con[a] = C.onstruct(a);
+                            break;
                         case 8:
-                            con[a] = C.onstruct(new Random(System.currentTimeMillis()).nextDouble());
+                            con[a] = C.onstruct(true);
+                            break;
                         case 9:
-                            con[a] = C.onstruct(new Random(System.currentTimeMillis()).nextInt());
-                        case 10:
-                            con[a] = C.onstruct(new Random(System.currentTimeMillis()).nextBoolean());
+                            con[a] = C.onstruct(false);
+                            break;
                     }
                 }
                 try {
@@ -186,10 +194,17 @@ public class StaticTest {
                     if (e instanceof FunctionReturnException && !f.getName().equals("return")) {
                         fail("Only return() can throw FunctionReturnExceptions");
                     }
+                    if(e instanceof NullPointerException){
+                        if(!brokenJunk.contains(f.getName())){
+                            System.err.println("Oh dear god, " + f.getName() + " breaks if you send it stuff");
+                            brokenJunk.add(f.getName());
+                        }
+                    }
                 }
             }
         }
     }
+    private static ArrayList<String> brokenJunk = new ArrayList<String>();
 
     public static void TestClassDocs(String docs, Class container) {
         if (docs.length() <= 0) {
@@ -300,7 +315,14 @@ public class StaticTest {
     }
     
     public static MCPlayer GetOnlinePlayer(String name, MCServer s){
+        return GetOnlinePlayer(name, "world", s);
+    }
+    
+    public static MCPlayer GetOnlinePlayer(String name, String worldName, MCServer s){
         MCPlayer p = mock(MCPlayer.class);
+        MCWorld w = mock(MCWorld.class);
+        when(w.getName()).thenReturn(worldName);
+        when(p.getWorld()).thenReturn(w);
         when(p.isOnline()).thenReturn(true);
         when(p.getName()).thenReturn(name);        
         when(p.getServer()).thenReturn(s); 
@@ -344,6 +366,9 @@ public class StaticTest {
     public static MCLocation GetFakeLocation(MCWorld w, double x, double y, double z){
         MCLocation loc = mock(BukkitMCLocation.class);
         when(loc.getWorld()).thenReturn(w);
+        when(loc.getX()).thenReturn(x);
+        when(loc.getY()).thenReturn(y - 1);
+        when(loc.getZ()).thenReturn(z);
         return loc;
     }
     
@@ -449,10 +474,10 @@ public class StaticTest {
     public static void InstallFakeServerFrontend(){
         if(frontendInstalled){
             return;
-        }        
-        PowerMockito.spy(Static.class);
+        }                
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();
+        PowerMockito.spy(Static.class);
         try{
             PowerMockito.doReturn(fakeCore).when(Static.class);
             Static.getAliasCore();        
@@ -492,7 +517,7 @@ public class StaticTest {
         private static MCServer fakeServer;
 
         public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
-            return StaticTest.GetFakeLocation(w, x, y, z);
+             return StaticTest.GetFakeLocation(w, x, y + 1, z);
         }
 
         public Class GetServerEventMixin() {

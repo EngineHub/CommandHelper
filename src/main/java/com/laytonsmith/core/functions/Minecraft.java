@@ -747,7 +747,7 @@ public class Minecraft {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
         }
 
         public boolean isRestricted() {

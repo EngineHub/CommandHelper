@@ -378,6 +378,10 @@ public class Compiler {
                             CFunction identifier = new CFunction(list.get(i).data.val(), t);
                             list.remove(0);
                             GenericTreeNode<Construct> child = list.get(0);
+                            if(list.size() > 1){
+                                child = new GenericTreeNode<Construct>(new CFunction("sconcat", t));
+                                child.setChildren(list);
+                            }
                             try{
                                 Function f = (Function)FunctionList.getFunction(identifier);                                
                                 GenericTreeNode<Construct> node 

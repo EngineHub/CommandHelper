@@ -11,6 +11,9 @@ import com.laytonsmith.core.functions.FunctionBase;
  * @author layton
  */
 public class BasicLogic {
+    public static String docs(){
+        return "Contains basic logic functions for bash";
+    }
     @api(platform=api.Platforms.COMPILER_BASH)
     public static class _if extends BashFunction{
 

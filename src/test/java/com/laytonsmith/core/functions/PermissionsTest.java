@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -57,11 +58,17 @@ public class PermissionsTest {
     @Before
     public void setUp() {        
         fakePlayer = StaticTest.GetOnlinePlayer();
+        MCWorld fakeWorld = mock(MCWorld.class);
+        when(fakeWorld.getName()).thenReturn("world");
+        when(fakePlayer.getWorld()).thenReturn(fakeWorld);
         fakeServer = StaticTest.GetFakeServer();
         fakePerms = mock(PermissionsResolverManager.class);
+        com.laytonsmith.commandhelper.CommandHelperPlugin.perms = fakePerms;
         env.SetPlayer(fakePlayer);        
-        spy(Static.class);        
-        when(Static.getPermissionsResolverManager()).thenReturn(fakePerms);
+        spy(Static.class);      
+        doReturn(fakePerms).when(Static.class);
+        Static.getPermissionsResolverManager();
+        //when(Static.getPermissionsResolverManager()).thenReturn(fakePerms);
     }
 
     @After
@@ -83,19 +90,23 @@ public class PermissionsTest {
         when(fakePlayer.isOp()).thenReturn(false);
         when(fakePlayer.isOnline()).thenReturn(Boolean.TRUE);
         Static.InjectPlayer(fakePlayer);
-        when(fakePerms.hasPermission(fakePlayer.getName(), "commandhelper.alias.simple")).thenReturn(Boolean.TRUE);
+        String world = fakePlayer.getWorld().getName();
+        String name = fakePlayer.getName();
+        when(fakePerms.hasPermission(world, name, "commandhelper.alias.simple")).thenReturn(true);
         StaticTest.RunCommand("simple:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
-        verify(fakePerms).hasPermission(fakePlayer.getName(), "commandhelper.alias.simple");
+        verify(fakePerms, atLeastOnce()).hasPermission(world, name, "commandhelper.alias.simple");
     }
     
     @Test
     public void testLongPermissions() throws ConfigCompileException{
         when(fakePlayer.isOp()).thenReturn(false);
         when(fakePlayer.isOnline()).thenReturn(Boolean.TRUE);
+        String world = fakePlayer.getWorld().getName();
+        String name = fakePlayer.getName();
         Static.InjectPlayer(fakePlayer);
-        when(fakePerms.hasPermission(fakePlayer.getName(), "arbitrary.permission")).thenReturn(Boolean.TRUE);
+        when(fakePerms.hasPermission(world, name, "arbitrary.permission")).thenReturn(true);
         StaticTest.RunCommand("arbitrary.permission:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
-        verify(fakePerms).hasPermission(fakePlayer.getName(), "arbitrary.permission");
+        verify(fakePerms, atLeastOnce()).hasPermission(world, name, "arbitrary.permission");
     }
     
     @Test

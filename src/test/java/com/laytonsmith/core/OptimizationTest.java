@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
@@ -48,6 +49,8 @@ public class OptimizationTest {
         } else if(node.data instanceof CString){
             //strings
             return new StringBuilder().append("'").append(node.data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'").toString();
+        } else if(node.data instanceof IVariable){
+            return ((IVariable)node.data).getName();
         } else {
             //static
             return node.data.toString();
@@ -69,7 +72,7 @@ public class OptimizationTest {
     }
     
     @Test public void testMultipleLinesInBraces() throws ConfigCompileException{
-        assertEquals("if(dyn(false),msg('nope'),sconcat(msg('hi'),msg('hi')))", optimize("if(dyn(false)){\n"
+        assertEquals("ifelse(dyn(false),msg('nope'),sconcat(msg('hi'),msg('hi')))", optimize("if(dyn(false)){\n"
                 + "msg('nope')\n"
                 + "} else {\n"
                 + " msg('hi')\n"
