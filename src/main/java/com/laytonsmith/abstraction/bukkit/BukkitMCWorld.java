@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.CraftWorld;
@@ -126,6 +127,10 @@ public class BukkitMCWorld implements MCWorld {
     public MCBlock getHighestBlockAt(int x, int z) {
         return new BukkitMCBlock(w.getHighestBlockAt(x, z));
      }
+
+    public void explosion(double x, double y, double z, float size) {
+        w.createExplosion(new Location(w, x,y,z), size);
+    }
 
     private enum MOBS {
 

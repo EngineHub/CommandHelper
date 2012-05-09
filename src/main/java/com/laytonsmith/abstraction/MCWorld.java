@@ -47,4 +47,6 @@ public interface MCWorld extends AbstractionObject{
     public void setBiome(int x, int z, MCBiomeType type);
 
     public MCBlock getHighestBlockAt(int x, int z);
+
+    public void explosion(double x, double y, double z, float size);
 }

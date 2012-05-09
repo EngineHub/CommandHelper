@@ -11,6 +11,9 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -361,6 +364,5 @@ public class Scheduling {
             return CHVersion.V3_3_1;
         }
         
-    }    
-        
+    }
 }
