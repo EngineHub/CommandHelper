@@ -4,9 +4,13 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import org.bukkit.event.Cancellable;
+
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * @author Layton
@@ -445,5 +449,49 @@ public class Sandbox {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-    }    
+    }
+
+    @api public static class simple_date extends AbstractFunction{
+
+        public String getName() {
+            return "simple_date";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "mixed {format} Returns a date of the current time in the format you give."
+                    + "This will be implemented in a other way later, so for now it's just here.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public void varList(IVariableList varList) {}
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) {
+            Date now = new Date();
+            SimpleDateFormat dateFormat = new SimpleDateFormat(args[0].toString());
+            return new CString(dateFormat.format(now), t);
+        }
+    }
 }

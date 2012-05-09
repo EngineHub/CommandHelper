@@ -365,48 +365,4 @@ public class Scheduling {
         }
         
     }
-
-    @api public static class date extends AbstractFunction{
-
-        public String getName() {
-            return "date";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2};
-        }
-
-        public String docs() {
-            return "mixed {format} Returns a date of the current time in the format you give.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Date now = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat(args[0].toString());
-            return new CString(dateFormat.format(now), t);
-        }
-    }
-
 }
