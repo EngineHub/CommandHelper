@@ -54,7 +54,7 @@ public class Echoes {
 
         public String getName(){ return "die"; }
         public String docs(){
-            return "nothing {[var1, var2...]} Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
+            return "nothing {[var1, var2...,]} Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
         }
 
         public boolean isRestricted() {

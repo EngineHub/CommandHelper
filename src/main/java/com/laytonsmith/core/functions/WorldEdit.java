@@ -467,8 +467,8 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "mixed {Locationarray} Returns the list regions at the location."
-                    + " If region is found, an array of region names are returned, else an empty is returned";
+            return "mixed {Locationarray} Returns a list of regions at the specified location. "
+                    + "If regions are found, an array of region names are returned, otherwise, an empty array is returned.";
         }
 
         public ExceptionType[] thrown() {

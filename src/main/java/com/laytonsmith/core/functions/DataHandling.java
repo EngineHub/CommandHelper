@@ -1487,7 +1487,7 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "mixed {ivar | key[, namespace, ...]} This function imports a value from the global value"
+            return "mixed {ivar | key[, namespace, ...,]} This function imports a value from the global value"
                     + " register. In the first mode, it looks for an ivariable with the specified"
                     + " name, and stores the value in the variable, and returns void. In the"
                     + " second mode, it looks for a value stored with the specified key, and"
@@ -1544,7 +1544,7 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "void {ivar | key[, namespace, ...], value} Stores a value in the global storage register."
+            return "void {ivar | key[, namespace, ...,], value} Stores a value in the global storage register."
                     + " When using the first mode, the ivariable is stored so it can be imported"
                     + " later, and when using the second mode, an arbitrary value is stored with"
                     + " the give key, and can be retreived using the secode mode of import. If"
