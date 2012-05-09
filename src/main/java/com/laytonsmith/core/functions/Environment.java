@@ -687,11 +687,12 @@ public class Environment {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{ 2};
+            return new Integer[]{ 1,2};
         }
 
         public String docs() {
-            return "void {Locationarray, size} Creates an explosion with the given size at the given location.";
+            return "void {Locationarray[, size]} Creates an explosion with the given size at the given location."
+                    + "Size defaults to size of a creeper (3).";
         }
 
         public ExceptionType[] thrown() {
@@ -717,25 +718,39 @@ public class Environment {
             double x = 0;
             double y = 0;
             double z = 0;
-            float size = 0;
+            float size = 3;
             MCWorld w = null;
+            MCPlayer m = null;
 
-            if(!(args[1] instanceof CInt)) {
-                throw new ConfigRuntimeException("Expecting an integer at parameter 2 of explosion",
-                        ExceptionType.CastException, t);
+            if(args.length == 2 && args[1] instanceof CInt) {
+                CInt temp = (CInt) args[1];
+                size = temp.getInt();
             }
+
+            if (size > 100) {
+                throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
+                        ExceptionType.RangeException, t);
+            }
+
             if(!(args[0] instanceof CArray)) {
                 throw new ConfigRuntimeException("Expecting an array at parameter 1 of explosion",
                         ExceptionType.CastException, t);
             }
             
-                MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
-                w = loc.getWorld();
-                x = loc.getX();
-                z = loc.getZ();
-                y = loc.getY();
-                CInt temp = (CInt) args[1];
-                size = temp.getInt();
+            MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+            w = loc.getWorld();
+            x = loc.getX();
+            z = loc.getZ();
+            y = loc.getY();
+            
+            if(w == null) {
+                if (!(env.GetCommandSender() instanceof MCPlayer)) {
+                    throw new ConfigRuntimeException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", ExceptionType.PlayerOfflineException, t);
+                }
+
+                m = env.GetPlayer();
+                w = m.getWorld();
+            }
 
             w.explosion(x, y, z, size);
             return new CVoid(t);
