@@ -15,8 +15,10 @@ import com.laytonsmith.testing.C;
 import static com.laytonsmith.testing.StaticTest.*;
 import java.lang.reflect.InvocationTargetException;
 import org.junit.*;
+import org.mockito.Mockito;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.times;
 
 /**
  *
@@ -73,9 +75,15 @@ public class EchoesTest {
     }
 
     @Test(timeout = 10000)
-    public void testLongStringMsgd() throws ConfigCompileException {
+    public void testLongStringMsgd1() throws ConfigCompileException {
         SRun("msg('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')", fakePlayer);
         verify(fakePlayer).sendMessage("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
+    }
+    
+    @Test(timeout=10000)
+    public void testLongStringMsgd2() throws ConfigCompileException{
+        SRun("msg('.......................................................................................................................................................................')", fakePlayer);
+        verify(fakePlayer, times(2)).sendMessage(Mockito.anyString()); 
     }
 
     @Test(timeout = 10000)

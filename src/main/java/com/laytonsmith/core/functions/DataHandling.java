@@ -1322,7 +1322,11 @@ public class DataHandling {
             if (proc != null) {
                 List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
                 vars.remove(0);
-                return proc.execute(vars, env);
+                Env newEnv = null;
+                try {
+                    newEnv = env.clone();
+                } catch (CloneNotSupportedException ex) {}
+                return proc.execute(vars, newEnv);
             }
             throw new ConfigRuntimeException("Unknown procedure \"" + args[0].val() + "\"",
                     ExceptionType.InvalidProcedureException, t);
