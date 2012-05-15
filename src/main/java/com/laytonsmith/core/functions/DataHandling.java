@@ -77,7 +77,7 @@ public class DataHandling {
         @Override
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
-        }               
+        }
     }
 
     @api
@@ -194,7 +194,7 @@ public class DataHandling {
             }
             return null;
         }
-                
+
     }
 
     @api
@@ -289,8 +289,8 @@ public class DataHandling {
         @Override
         public boolean allowBraces() {
             return true;
-        }                
-       
+        }
+
     }
 
     @api
@@ -400,7 +400,7 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
-        
+
         @Override
         public boolean useSpecialExec() {
             return true;
@@ -409,10 +409,10 @@ public class DataHandling {
         @Override
         public boolean allowBraces() {
             return true;
-        }        
-                
+        }
+
     }
-    
+
     @api
     public static class _while extends AbstractFunction{
 
@@ -433,7 +433,7 @@ public class DataHandling {
         public Integer[] numArgs() {
             return new Integer[]{2};
         }
-        
+
         public ExceptionType[] thrown() {
             return null;
         }
@@ -444,7 +444,7 @@ public class DataHandling {
 
         public Boolean runAsync() {
             return null;
-        }        
+        }
 
         @Override
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
@@ -473,9 +473,9 @@ public class DataHandling {
             return new CNull();
         }
 
-        
+
     }
-    
+
     @api
     public static class _dowhile extends AbstractFunction{
 
@@ -535,8 +535,8 @@ public class DataHandling {
                 }
             }
             return new CVoid(t);
-        }        
-        
+        }
+
     }
 
     @api
@@ -679,7 +679,7 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(!(args[0] instanceof CArray), t);
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -729,7 +729,7 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CArray, t);
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -781,7 +781,7 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CDouble, t);
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -836,7 +836,7 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CInt, t);
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -890,7 +890,7 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CBoolean, t);
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -943,7 +943,7 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(args[0] instanceof CNull, t);
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1000,7 +1000,7 @@ public class DataHandling {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1061,7 +1061,7 @@ public class DataHandling {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1142,7 +1142,7 @@ public class DataHandling {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(t);
         }
-        
+
         @Override
         public boolean useSpecialExec() {
             return true;
@@ -1233,7 +1233,7 @@ public class DataHandling {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(t);
-        }                
+        }
 
         @Override
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
@@ -1248,7 +1248,7 @@ public class DataHandling {
         public boolean useSpecialExec() {
             return true;
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1306,18 +1306,18 @@ public class DataHandling {
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(t);
-        }        
+        }
 
         @Override
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
             if(nodes.length < 1){
                 throw new ConfigRuntimeException("Expecting at least one argument to call_proc", ExceptionType.InsufficientArgumentsException, t);
-            }            
+            }
             Construct[] args = new Construct[nodes.length];
             for (int i = 0; i < nodes.length; i++) {
                 args[i] = parent.seval(nodes[i], env);
             }
-            
+
             Procedure proc = env.GetProcs().get(args[0].val());
             if (proc != null) {
                 List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
@@ -1426,7 +1426,7 @@ public class DataHandling {
                 throw new ConfigRuntimeException(this.getName() + " expects argument 1 to be an array", ExceptionType.CastException, t);
             }
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1487,11 +1487,11 @@ public class DataHandling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "mixed {ivar | string} This function imports a value from the global value"
+            return "mixed {ivar | key[, namespace, ...,]} This function imports a value from the global value"
                     + " register. In the first mode, it looks for an ivariable with the specified"
                     + " name, and stores the value in the variable, and returns void. In the"
                     + " second mode, it looks for a value stored with the specified key, and"
@@ -1521,7 +1521,7 @@ public class DataHandling {
         public Boolean runAsync() {
             return null;
         }
-        
+
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             if (args[0] instanceof IVariable) {
                 //Mode 1     
@@ -1530,7 +1530,8 @@ public class DataHandling {
                 return new CVoid(t);
             } else {
                 //Mode 2
-                return Globals.GetGlobalConstruct(args[0].val());
+                String key = GetNamespace(args, null, getName(), t);
+                return Globals.GetGlobalConstruct(key);
             }
         }
     }
@@ -1543,11 +1544,11 @@ public class DataHandling {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public String docs() {
-            return "void {ivar | name, value} Stores a value in the global storage register."
+            return "void {ivar | key[, namespace, ...,], value} Stores a value in the global storage register."
                     + " When using the first mode, the ivariable is stored so it can be imported"
                     + " later, and when using the second mode, an arbitrary value is stored with"
                     + " the give key, and can be retreived using the secode mode of import. If"
@@ -1584,11 +1585,8 @@ public class DataHandling {
                     throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
                 }
             } else {
-                Construct value = args[1];
-                while(value instanceof IVariable){
-                    value = environment.GetVarList().get(((IVariable)value).getName(), t).ival();
-                }
-                Globals.SetGlobal(args[0].val(), value);
+                String key = GetNamespace(args, args.length - 1, getName(), t);
+                Globals.SetGlobal(key, args[args.length - 1]);
             }
             return new CVoid(t);
         }
@@ -1638,7 +1636,7 @@ public class DataHandling {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             return new CVoid(t);
-        }       
+        }
 
         @Override
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
@@ -1764,7 +1762,7 @@ public class DataHandling {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1819,7 +1817,7 @@ public class DataHandling {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1871,7 +1869,7 @@ public class DataHandling {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1924,7 +1922,7 @@ public class DataHandling {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         @Override
         public boolean canOptimize() {
             return true;
@@ -1934,5 +1932,32 @@ public class DataHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+    }
+
+    /**
+     * Generates the namespace for this value, given an array of constructs.
+     * If the entire list of arguments isn't supposed to be part of the namespace,
+     * the value to be excluded may be specified.
+     * @param args
+     * @param exclude
+     * @return
+     */
+    private static String GetNamespace(Construct [] args, Integer exclude, String name, Target t){
+        if(exclude != null && args.length < 2 || exclude == null && args.length < 1){
+            throw new ConfigRuntimeException(name + " was not provided with enough arguments. Check the documentation, and try again.", ExceptionType.InsufficientArgumentsException, t);
+        }
+        boolean first = true;
+        StringBuilder b = new StringBuilder();
+        for(int i = 0; i < args.length; i++){
+            if(exclude != null && exclude == i){
+                continue;
+            }
+            if(!first){
+                b.append(".");
+            }
+            first = false;
+            b.append(args[i].val());
+        }
+        return b.toString();
     }
 }

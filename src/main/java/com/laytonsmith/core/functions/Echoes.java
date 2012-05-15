@@ -30,30 +30,31 @@ public class Echoes {
     }
     @api public static class die extends AbstractFunction{
         public Integer []numArgs() {
-            return new Integer[] {0,1};
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException{
             if(args.length == 0){
                 throw new CancelCommandException("");
-            } else if(args.length == 1){
-                try{
-                    Static.SendMessage(env.GetCommandSender(), args[0].val(), t);
-                } finally{
-                    throw new CancelCommandException("");
-                }
-            } else{
-                return null;
+            }
+            StringBuilder b = new StringBuilder();
+            for(int i = 0; i < args.length; i++){
+                b.append(args[i].val());
+            }
+            try{
+                Static.SendMessage(env.GetCommandSender(), b.toString(), t);
+            } finally{
+                throw new CancelCommandException("");
             }
         }
-        
+
         public ExceptionType[] thrown(){
             return new ExceptionType[]{};
         }
 
         public String getName(){ return "die"; }
         public String docs(){
-            return "nothing {[var1]} Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
+            return "nothing {[var1, var2...,]} Kills the command immediately, without completing it. A message is optional, but if provided, displayed to the user.";
         }
 
         public boolean isRestricted() {
