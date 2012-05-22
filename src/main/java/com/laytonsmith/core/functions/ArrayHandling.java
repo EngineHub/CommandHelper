@@ -4,10 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -16,6 +13,7 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import java.util.List;
 
 /**
  *
@@ -1006,6 +1004,25 @@ public class ArrayHandling {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+
+        @Override
+        public boolean canOptimizeDynamic() {
+            return true;
+        }
+
+        @Override
+        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+            if(children.size() == 2){
+                if(!children.get(1).data.isDynamic()){
+                    try{
+                        CArray.SortType.valueOf(children.get(1).data.val().toUpperCase());
+                    } catch(IllegalArgumentException e){
+                        throw new ConfigCompileException("The sort type must be one of either: REGULAR, NUMERIC, STRING, or STRING_CI", t);
+                    }
+                }
+            }            
+            return null;
+        }                
         
     }
 }
