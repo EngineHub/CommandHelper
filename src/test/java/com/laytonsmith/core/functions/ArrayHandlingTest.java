@@ -239,4 +239,9 @@ public class ArrayHandlingTest {
         Run("msg(array_sort(array('002', '1', '03'), STRING))", fakePlayer);
         verify(fakePlayer).sendMessage("{002, 03, 1}");
     }
+    
+    @Test public void testArrayImplode1() throws ConfigCompileException{
+        Run("msg(array_implode(array(1,2,3,4,5,6,7,8,9,1,2,3,4,5)))", fakePlayer);
+        verify(fakePlayer).sendMessage("1 2 3 4 5 6 7 8 9 1 2 3 4 5");
+    }
 }

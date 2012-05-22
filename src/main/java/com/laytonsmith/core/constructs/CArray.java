@@ -164,12 +164,11 @@ public class CArray extends Construct implements ArrayAccess{
      * @return 
      */
     public Set<String> keySet(){
-        Set<String> set = new HashSet<String>(!associative_mode?array.size():associative_array.size());
-        if(!associative_mode){
+        Set<String> set = !associative_mode?new LinkedHashSet<String>(array.size()):new HashSet<String>(associative_array.size());
+        if(!associative_mode){            
             for(int i = 0; i < array.size(); i++){
                 set.add(Integer.toString(i));
             }
-            set = new TreeSet(set);
         } else {
             set = associative_array.keySet();
         }        
