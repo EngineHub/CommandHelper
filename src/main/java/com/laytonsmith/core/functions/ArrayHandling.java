@@ -233,9 +233,9 @@ public class ArrayHandling {
             if(args[0] instanceof ArrayAccess){
                 ArrayAccess aa = (ArrayAccess)args[0];
                 if(!aa.canBeAssociative()){
-                    if(!(args[1] instanceof CInt)){
+                    if(!(args[1] instanceof CInt) && !(args[1] instanceof CSlice)){
                         throw new ConfigCompileException("Accessing an element as an associative array, when it can only accept integers.", t);
-                    }
+                    }                    
                 }
                 return null;
             } else {
@@ -942,5 +942,70 @@ public class ArrayHandling {
             return CHVersion.V3_3_1;
         }
         
-    }        
+    }   
+    
+    @api public static class array_sort extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(!(args[0] instanceof CArray)){
+                throw new ConfigRuntimeException("The first parameter to array_sort must be an array", ExceptionType.CastException, t);
+            }
+            CArray ca = (CArray)args[0];
+            CArray.SortType sortType = CArray.SortType.REGULAR;
+            try{
+                if(args.length == 2){
+                    sortType = CArray.SortType.valueOf(args[1].val().toUpperCase());
+                }
+            } catch(IllegalArgumentException e){
+                throw new ConfigRuntimeException("The sort type must be one of either: REGULAR, NUMERIC, STRING, or STRING_CI",
+                        ExceptionType.FormatException, t);
+            }
+            ca.sort(sortType);
+            return ca;
+        }
+
+        public String getName() {
+            return "array_sort";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "array {array, [sortType]} Sorts an array in place, and also returns a reference to the array. The"
+                    + " complexity of this sort algorithm is guaranteed to be no worse than n log n, as it uses merge sort."
+                    + " The array is sorted in place, a new array is not explicitly created, so if you sort an array that"
+                    + " is passed in as a variable, the contents of that variable will be sorted, even if you don't re-assign"
+                    + " the returned array back to the variable. If you really need the old array, you should create a copy of"
+                    + " the array first, like so: assign(@sorted, array_sort(@array[])). The sort type may be one of the following:"
+                    + " REGULAR, NUMERIC, STRING, STRING_CI. A regular sort sorts the elements without changing types first. A"
+                    + " numeric sort always converts numeric values to numbers first (so 001 becomes 1). A string sort compares"
+                    + " values as strings, and a string_ci sort is the same as a string sort, but the comparision is case-insensitive."
+                    + " If the array contains array values, a CastException is thrown; inner arrays cannot be sorted against each"
+                    + " other. If the array is associative, a warning will be raised if the General logging channel is set to verbose,"
+                    + " because the array's keys will all be lost in the process. To avoid this warning, and to be more explicit,"
+                    + " you can use array_normalize() to normalize the array first. Note that the reason this function is an"
+                    + " in place sort instead of explicitely cloning the array is because in most cases, you may not need"
+                    + " to actually clone the array, an expensive operation. Due to this, it has slightly different behavior"
+                    + " than array_normalize, which could have also been implemented in place.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
 }

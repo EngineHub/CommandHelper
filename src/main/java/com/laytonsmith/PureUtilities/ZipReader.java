@@ -275,5 +275,9 @@ public class ZipReader {
         return file.hashCode();
     }
     
+    public File getFile(){
+        return file;
+    }
+    
     
 }

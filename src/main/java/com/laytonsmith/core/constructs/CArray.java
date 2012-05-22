@@ -4,10 +4,14 @@
  */
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.ArrayHandling;
+import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -412,5 +416,117 @@ public class CArray extends Construct implements ArrayAccess{
 
     public boolean canBeAssociative() {
         return true;
+    }
+
+    public Construct slice(int begin, int end, Target t) {
+        return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t));
+    }
+    
+    public enum SortType{
+        /**
+         * Sorts the elements without converting types first. If a non-numeric
+         * string is compared to a numeric string, it is compared as a string,
+         * otherwise, it's compared as a natural ordering.
+         */
+        REGULAR, 
+        /**
+         * All strings are considered numeric, that is, 001 comes before 2.
+         */
+        NUMERIC, 
+        /**
+         * All values are considered strings.
+         */
+        STRING, 
+        /**
+         * All values are considered strings, but the comparison is case-insensitive.
+         */
+        STRING_CI
+    }
+    public void sort(final SortType sort){
+        List<Construct> list = array;
+        if(this.associative_mode){
+            list = new ArrayList(associative_array.values());
+            this.associative_array.clear();
+            this.associative_array = null;
+            this.associative_mode = false;
+            CHLog.Log(CHLog.Tags.GENERAL, CHLog.Level.VERBOSE, "Attempting to sort an associative array; key values will be lost.", this.getTarget());
+        }
+        Collections.sort(array, new Comparator<Construct>() {
+            public int compare(Construct o1, Construct o2) {
+                //o1 < o2 -> -1
+                //o1 == o2 -> 0
+                //o1 > o2 -> 1
+                for(int i = 0; i < 2; i++){
+                    Construct c = null;
+                    if(i == 0){
+                        c = o1;
+                    } else {
+                        c = o2;
+                    }
+                    if(c instanceof CArray){
+                        throw new ConfigRuntimeException("Cannot sort an array of arrays.", ExceptionType.CastException, CArray.this.getTarget());
+                    }
+                    if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt || 
+                            c instanceof CDouble || c instanceof CNull)){
+                        throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getCType(), CArray.this.getTarget());
+                    }
+                }
+                if(o1 instanceof CNull || o2 instanceof CNull){
+                    if(o1 instanceof CNull && o2 instanceof CNull){
+                        return 0;
+                    } else if(o1 instanceof CNull){
+                        return "".compareTo(o2.getValue());
+                    } else {
+                        return o1.val().compareTo("");
+                    }
+                }
+                if(o1 instanceof CBoolean || o2 instanceof CBoolean){
+                    if(Static.getBoolean(o1) == Static.getBoolean(o2)){
+                        return 0;
+                    } else {
+                        int oo1 = Static.getBoolean(o1)==true?1:0;
+                        int oo2 = Static.getBoolean(o2)==true?1:0;
+                        return (oo1 < oo2) ? -1 : 1;
+                    }
+                }
+                //At this point, things will either be numbers or strings
+                switch(sort){
+                    case REGULAR:
+                        return compareRegular(o1, o2);
+                    case NUMERIC:
+                        return compareNumeric(o1, o2);                        
+                    case STRING:
+                        return compareString(o1.val(), o2.val());                        
+                    case STRING_CI:
+                        return compareString(o1.val().toLowerCase(), o2.val().toLowerCase());  
+                }
+                throw new ConfigRuntimeException("Missing implementation for " + sort.name(), Target.UNKNOWN);
+            }
+            public int compareRegular(Construct o1, Construct o2){
+                if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1))
+                        && Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2))){
+                    return compareNumeric(o1, o2);
+                } else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1))){
+                    //The first is a number, the second is a string
+                    return -1;
+                } else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2))){
+                    //The second is a number, the first is a string
+                    return 1;
+                } else {
+                    //They are both strings
+                    return compareString(o1.val(), o2.val());
+                }
+            }
+            public int compareNumeric(Construct o1, Construct o2){
+                double d1 = Static.getNumber(o1);
+                double d2 = Static.getNumber(o2);
+                return Double.compare(d1, d2);
+            }
+            public int compareString(String o1, String o2){
+                return o1.compareTo(o2);
+            }
+        });
+        this.array = list;  
+        this.regenValue();
     }
 }

@@ -53,4 +53,11 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
     public boolean canBeAssociative() {
         return false;
     }
+
+    public Construct slice(int begin, int end, Target t) {
+        if(begin >= end){
+            return new CString("", t);
+        }
+        return new CString(this.val().substring(begin, end), t);
+    }
 }

@@ -224,4 +224,19 @@ public class ArrayHandlingTest {
         SRun("msg('slice'[2..])", fakePlayer);
         verify(fakePlayer).sendMessage("ice");
     }
+    
+    @Test public void testArraySort1() throws ConfigCompileException{
+        Run("msg(array_sort(array(3, 1, 2)))", fakePlayer);
+        verify(fakePlayer).sendMessage("{1, 2, 3}");
+    }
+    
+    @Test public void testArraySort2() throws ConfigCompileException{
+        Run("msg(array_sort(array('002', '1', '03')))", fakePlayer);
+        verify(fakePlayer).sendMessage("{1, 002, 03}");
+    }
+    
+    @Test public void testArraySort3() throws ConfigCompileException{
+        Run("msg(array_sort(array('002', '1', '03'), STRING))", fakePlayer);
+        verify(fakePlayer).sendMessage("{002, 03, 1}");
+    }
 }

@@ -218,6 +218,14 @@
             <scope>compile</scope>
         </dependency>
         
+        <!-- Database -->
+        <dependency>
+            <groupId>org.xerial</groupId>
+            <artifactId>sqlite-jdbc</artifactId>
+            <version>3.7.2</version>
+            <scope>compile</scope>
+        </dependency>
+        
         <!-- Evil-y things (currently not used) -->
         <!--<dependency>
             <groupId>cglib</groupId>
