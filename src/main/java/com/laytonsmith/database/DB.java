@@ -19,27 +19,34 @@ import java.util.logging.Logger;
  * @author layton
  */
 public abstract class DB {
-    protected static class Statics{
-        private static Connection lastConnection = null;
-        protected static void SetLastConnection(Connection lastConnection){
+    private static class Statics{
+        private static CConnection lastConnection = null;
+        protected static void SetLastConnection(CConnection lastConnection){
             Statics.lastConnection = lastConnection;
         }
-        protected static Connection GetLastConnection(){
+        protected static CConnection GetLastConnection() throws SQLException{
+            if(lastConnection == null){
+                throw new SQLException("No connection specified!");
+            }
             return Statics.lastConnection;
         }
     }
     
-    public static class Connection{
-        private static Map<String, Connection> cache = new HashMap<String, Connection>();
-        public static Connection GetConnection(String connectionName) throws SQLException{
+    public enum SupportedDBConnectors{
+        SQLITE;
+    }
+    
+    final public static class CConnection{
+        private static Map<String, CConnection> cache = new HashMap<String, CConnection>();
+        public static CConnection GetConnection(String connectionName) throws SQLException{
             if(cache.containsKey(connectionName)){
                 return cache.get(connectionName);
             }
-            Connection c = ConnectionLookup(connectionName);
+            CConnection c = ConnectionLookup(connectionName);
             cache.put(connectionName, c);
             return c;
         }
-        private static Connection ConnectionLookup(String name) throws SQLException{
+        private static CConnection ConnectionLookup(String name) throws SQLException{
             ZipReader zr = new ZipReader(new File("plugins/CommandHelper/Connections/" + name));
             Properties p = new Properties();
             try {
@@ -50,25 +57,40 @@ public abstract class DB {
             }
             String filePath = zr.getFile().getAbsolutePath();
             String hostname = p.getProperty("hostname");
-            int port;
+            Integer port;
             try{
-                port = Integer.parseInt(p.getProperty("port"));
+                String sport = p.getProperty("port", "");
+                if(sport.equals("")){
+                    port = null;
+                } else {
+                    port = Integer.parseInt(sport);
+                    if(port < 1 || port > 65535){
+                        throw new NumberFormatException();
+                    }
+                }
             } catch(NumberFormatException e){
-                throw new SQLException("Could not convert port in " + filePath + " to a number");
+                throw new SQLException("Could not convert port in " + filePath + " to a number, or the number was less than 1 or greater than 65535");
             }
             String username = p.getProperty("username", "");
             String password = p.getProperty("password", "");
             if(hostname == null){
                 throw new SQLException("No hostname provided in " + filePath);
             }
-            return new Connection(hostname, port, username, password);
+            try{
+                SupportedDBConnectors type = SupportedDBConnectors.valueOf(p.getProperty("type").toUpperCase());
+                return new CConnection(type, hostname, port, username, password);
+            } catch(IllegalArgumentException e){
+                throw new SQLException("Unsupported type " + p.getProperty("type"));
+            }
         }
         
+        SupportedDBConnectors type;
         String hostname;
-        int port;
+        Integer port;
         String username;
         String password;
-        private Connection(String hostname, int port, String username, String password){
+        private CConnection(SupportedDBConnectors type, String hostname, int port, String username, String password){
+            this.type = type;
             this.hostname = hostname;
             this.port = port;
             this.username = username;
@@ -77,28 +99,79 @@ public abstract class DB {
     }
     
     /**
+     * Performs a raw query to the database. The parameters have already been inserted
+     * into the query at this point.
+     * @param c
+     * @param query
+     * @return 
+     */
+    protected abstract Set raw_query(CConnection c, String query);
+    
+    /**
+     * Note to subclasses: If prepared queries are more efficiently handled directly
+     * in the particular implementation, this method can be overridden, and raw_query and sanitize
+     * will not be used.
+     * @param c
+     * @param query
+     * @param params
+     * @return
+     * @throws SQLException 
+     */
+    protected Set do_query(CConnection c, String query, Object[] params) throws SQLException{
+        return this.raw_query(c, escape(c, query, params));        
+    }
+    
+    /**
+     * Performs a query to the database, using the specified connection.
+     * The query should be a prepared query, that is, parameters to be filled
+     * in should be question marks, and the objects in the params array will
+     * be filled in to the question marks.
+     * 
      * 
      * @param c
      * @param query
      * @param params
-     * @return 
+     * @return
+     * @throws SQLException 
      */
-    protected abstract Set raw_query(Connection c, String query);
-    
-    public Set query(Connection c, String query, Object ... params) throws SQLException{
-        Statics.SetLastConnection(c);        
-        return this.raw_query(c, escape(c, query, params));
+    final public Set query(CConnection c, String query, Object ... params) throws SQLException{
+        Statics.SetLastConnection(c); 
+        return this.do_query(c, query, params);
     }    
     
-    public Set query(String query, Object ... params) throws SQLException{
+    /**
+     * Performs a query to the database, using the last connection.
+     * @param query
+     * @param params
+     * @return
+     * @throws SQLException 
+     */
+    final public Set query(String query, Object ... params) throws SQLException{
         return query(Statics.GetLastConnection(), query, params);
     }
     
-    public Set query(String query) throws SQLException{
+    /**
+     * Performs a query to the database, using the last connection.
+     * @param query
+     * @return
+     * @throws SQLException 
+     */
+    final public Set query(String query) throws SQLException{
         return query(Statics.GetLastConnection(), query);
     }
     
-    protected String escape(Connection c, String query, Object[] params) throws SQLException{
+    /**
+     * Looks through the query and escapes the parameters. The sanitize function
+     * is used to actually create the sanitized parameter, but this function handles
+     * the replacement. The returned string is the fully prepared query, and is safe
+     * to run raw.
+     * @param c
+     * @param query
+     * @param params
+     * @return
+     * @throws SQLException 
+     */
+    final protected String escape(CConnection c, String query, Object[] params) throws SQLException{
         int prepared = 0;
         boolean failure = false;
         for(char ch : query.toCharArray()){
@@ -139,9 +212,17 @@ public abstract class DB {
      */
     protected abstract String testQuery();
     
-    protected abstract String sanitize(Connection c, Object o) throws SQLException;
+    /**
+     * Given an object, this function should sanitize the value, such that it can be inserted directly
+     * into a query.
+     * @param c
+     * @param o
+     * @return
+     * @throws SQLException 
+     */
+    protected abstract String sanitize(CConnection c, Object o) throws SQLException;
     
-    public void connect(Connection c) throws SQLException{
+    public void connect(CConnection c) throws SQLException{
         query(c, testQuery());
     }
 }

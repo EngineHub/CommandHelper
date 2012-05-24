@@ -1,10 +1,13 @@
 package com.laytonsmith.database;
 
-import java.util.Set;
+import com.mysql.jdbc.Statement;
 import java.sql.Connection;
-import java.sql.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
 
 /**
  *
@@ -13,7 +16,7 @@ import java.util.logging.Logger;
 public class SQLite extends DB{
 
     @Override
-    protected Set raw_query(com.laytonsmith.database.DB.Connection c, String query) {
+    protected Set raw_query(CConnection c, String query) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -21,9 +24,19 @@ public class SQLite extends DB{
     protected String testQuery() {
         return "SELECT 1";
     }
+    
+    private static PreparedStatement GetPreparedStatement(String query, CConnection cconn, Connection conn) throws SQLException{
+        PreparedStatement prep = conn.prepareStatement(query);
+        return prep;        
+    }
 
     @Override
-    protected String sanitize(com.laytonsmith.database.DB.Connection c, Object o) throws SQLException {
+    protected String sanitize(CConnection c, Object o) throws SQLException {       
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected Set do_query(CConnection c, String query, Object[] params) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
         }
@@ -31,8 +44,15 @@ public class SQLite extends DB{
             throw new SQLException("Cannot load SQLite. Check your installation and try again");
         }
         
-        java.sql.Connection conn = DriverManager.getConnection("jdbc:sqlite:test.db");       
+        Connection conn = DriverManager.getConnection("jdbc:sqlite:" + c.hostname);
+        PreparedStatement prep = SQLite.GetPreparedStatement(query, c, conn);
+        int i = 0;
+        for(Object o : params){
+            i++;
+            prep.setObject(i, o);
+        }
+        prep.addBatch();
         throw new UnsupportedOperationException("Not supported yet.");
-    }
+    }   
     
 }
