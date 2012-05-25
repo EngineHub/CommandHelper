@@ -18,4 +18,5 @@ public enum Driver {
     PLAYER_CHAT, 
     PLAYER_COMMAND, 
     WORLD_CHANGED,
+    SIGN_CHANGED,
 }
