@@ -28,4 +28,4 @@ By submitting code, you agree to dual license your code under the
 irrevocable GNU General Public License v3, and the MIT License.
 
 Portions of CommandHelper are copyright: wraithguard01, sk89q, Deaygo, 
-t3hk0d3, zml2008, and albatrossen
+t3hk0d3, zml2008, EntityReborn, and albatrossen

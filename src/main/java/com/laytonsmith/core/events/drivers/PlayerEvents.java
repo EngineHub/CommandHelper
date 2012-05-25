@@ -420,6 +420,79 @@ public class PlayerEvents {
     }
     
     @api
+    public static class player_quit extends AbstractEvent {
+        
+        public String getName() {
+            return "player_quit";
+        }
+        
+        public String docs() {
+            return "{player: <macro>}"
+                    + "Fired when any player quits."
+                    + "{message: The message to be sent | recipients}"
+                    + "{message|recipients: An array of"
+                    + " players that will recieve the chat message. If a player doesn't exist"
+                    + " or is offline, and is in the array, it is simply ignored, no"
+                    + " exceptions will be thrown.}"
+                    + "{player|message}";
+        }
+        
+        public Driver driver() {
+            return Driver.PLAYER_QUIT;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if (e instanceof MCPlayerQuitEvent) {
+                //As a very special case, if this player is currently in interpreter mode, we do not want to
+                //intercept their chat event
+                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerQuitEvent)e).getPlayer())){
+                    throw new PrefilterNonMatchException();
+                }
+                Prefilters.match(prefilter, "player", ((MCPlayerQuitEvent)e).getPlayer().getName(), PrefilterType.MACRO);
+                return true;
+            }
+            return false;
+        }
+        
+        public BindableEvent convert(CArray manualObject) {
+            //Get the parameters from the manualObject
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"));
+            String message = manualObject.get("message").nval();
+            
+            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
+                player, message);
+            return e;
+        }
+        
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if (e instanceof MCPlayerQuitEvent) {
+                MCPlayerQuitEvent event = (MCPlayerQuitEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                //Fill in the event parameters
+                map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerQuitEvent");
+            }
+        }
+        
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            if (event instanceof MCPlayerQuitEvent) {
+                MCPlayerQuitEvent e = (MCPlayerQuitEvent)event;
+                if("message".equals(key)){
+                    e.setMessage(value.nval());
+                }
+                return true;
+            }
+            return false;
+        }
+    }
+    
+    @api
     public static class player_chat extends AbstractEvent {
         
         public String getName() {
