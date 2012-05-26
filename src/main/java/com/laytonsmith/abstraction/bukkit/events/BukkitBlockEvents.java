@@ -59,12 +59,28 @@ public class BukkitBlockEvents {
         	return new CString(pie.getLine(index), Target.UNKNOWN);
         }
         
+        public CArray getLines() {
+        	CArray retn = new CArray(Target.UNKNOWN);
+        	
+        	for (int i=0; i<4; i++) {
+        		retn.push(new CString(pie.getLine(i), Target.UNKNOWN));
+        	}
+        	
+        	return retn;
+        }
+        
         public void setLine(int index, String text) {
         	pie.setLine(index, text);
         }
         
-        public MCBlock getBlock() {
-        	return (MCBlock)pie.getBlock();
+        public void setLines(String[] text) {
+        	for (int i=0; i<4; i++) {
+        		pie.setLine(i, text[i]);
+        	}
+        }
+        
+        public Block getBlock() {
+        	return pie.getBlock();
         }
 
         public Object _GetObject() {
