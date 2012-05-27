@@ -60,10 +60,10 @@ public class BlockEvents {
                     }
                 }
                 
-                //Prefilters.match(prefilter, "1", ple.getLine(0), Prefilters.PrefilterType.MACRO);
-                //Prefilters.match(prefilter, "2", ple.getLine(1), Prefilters.PrefilterType.MACRO);
-                //Prefilters.match(prefilter, "3", ple.getLine(2), Prefilters.PrefilterType.MACRO);
-                //Prefilters.match(prefilter, "4", ple.getLine(3), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "1", ple.getLine(0), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "2", ple.getLine(1), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "3", ple.getLine(2), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "4", ple.getLine(3), Prefilters.PrefilterType.MACRO);
                 
                 return true;
             }
@@ -142,7 +142,12 @@ public class BlockEvents {
         }
         
         public BindableEvent convert(CArray manual){
-            MCSignChangeEvent e = EventBuilder.instantiate(MCSignChangeEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN), manual.get("block").val());
+            MCSignChangeEvent e = EventBuilder.instantiate(
+        		MCSignChangeEvent.class, 
+        		Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN), 
+				manual.get("1").val(), manual.get("2").val(),
+				manual.get("3").val(), manual.get("4").val()
+			);
             return e;
         }   
     }

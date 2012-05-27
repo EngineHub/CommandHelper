@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -32,12 +33,11 @@ public class EntityEvents {
         }
 
         public String docs() {
-            return "{player: <string match> |"
-                    + "join_message: <regex>} This event is called when a living entity ("
-                    + "including mobs) is targeted by another entity."
-                    + "{player: The player's name | join_message: The default join message}"
-                    + "{}"
-                    + "{}";
+            return "{player: <string match>} "
+            		+ "This event is called when a player is targeted by another entity."
+                    + "{player: The player's name}"
+                    + "{player}"
+                    + "{player}";
         }
 
         public CHVersion since() {
@@ -53,6 +53,7 @@ public class EntityEvents {
         		MCEntityTargetEvent ple = (MCEntityTargetEvent) e;
         		 
 	        	if (ple.getTarget() instanceof Player) {
+	        		Prefilters.match(prefilter, "player", ((Player)ple.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
 	        		return true;
 	        	}
         	}
@@ -65,7 +66,7 @@ public class EntityEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 
                 String name = ((Player)ple.getTarget()).getName();
-                map.put("target", new CString(name, Target.UNKNOWN));
+                map.put("player", new CString(name, Target.UNKNOWN));
                 
                 return map;
             } else{
@@ -77,10 +78,18 @@ public class EntityEvents {
         	if(event instanceof MCEntityTargetEvent){
         		MCEntityTargetEvent pie = (MCEntityTargetEvent)event;
             
-        		if (key.equals("target")) {
-        			int id = Static.GetPlayer(value.val(), Target.UNKNOWN).getEntityId();
-        			pie.setTarget((Entity)Static.getEntity(id));
-        			return true;
+        		if (key.equals("player")) {
+        			if (value instanceof CNull) {
+        				pie.setTarget(null);
+        				return true;
+        			} else if (value instanceof CString) {
+        				MCPlayer p = Static.GetPlayer(value.val(), Target.UNKNOWN);
+        				
+        				if (p.isOnline()) {
+        					pie.setTarget((Entity)p);
+        					return true;
+        				}
+        			}
         		}
         	}
         	
@@ -88,7 +97,7 @@ public class EntityEvents {
         }
         
         public BindableEvent convert(CArray manual){
-            MCEntityTargetEvent e = EventBuilder.instantiate(MCEntityTargetEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN), manual.get("target").val());
+            MCEntityTargetEvent e = EventBuilder.instantiate(MCEntityTargetEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN));
             return e;
         }
         
