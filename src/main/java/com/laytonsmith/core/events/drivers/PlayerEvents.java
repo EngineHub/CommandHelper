@@ -429,11 +429,8 @@ public class PlayerEvents {
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when any player quits."
-                    + "{message: The message to be sent | recipients}"
-                    + "{message|recipients: An array of"
-                    + " players that will recieve the chat message. If a player doesn't exist"
-                    + " or is offline, and is in the array, it is simply ignored, no"
-                    + " exceptions will be thrown.}"
+                    + "{message: The message to be sent}"
+                    + "{message}"
                     + "{player|message}";
         }
         
@@ -452,6 +449,7 @@ public class PlayerEvents {
                 if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerQuitEvent)e).getPlayer())){
                     throw new PrefilterNonMatchException();
                 }
+                
                 Prefilters.match(prefilter, "player", ((MCPlayerQuitEvent)e).getPlayer().getName(), PrefilterType.MACRO);
                 return true;
             }

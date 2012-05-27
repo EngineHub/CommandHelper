@@ -52,18 +52,18 @@ public class BlockEvents {
 
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
         	if(e instanceof MCSignChangeEvent){
-                MCSignChangeEvent ple = (MCSignChangeEvent) e;
+                MCSignChangeEvent sce = (MCSignChangeEvent) e;
                 
                 if(prefilter.containsKey("player")){
-                    if(!ple.getPlayer().getName().equals(prefilter.get("player").val())){
+                    if(!sce.getPlayer().getName().equals(prefilter.get("player").val())){
                         return false;
                     }
                 }
                 
-                Prefilters.match(prefilter, "1", ple.getLine(0), Prefilters.PrefilterType.MACRO);
-                Prefilters.match(prefilter, "2", ple.getLine(1), Prefilters.PrefilterType.MACRO);
-                Prefilters.match(prefilter, "3", ple.getLine(2), Prefilters.PrefilterType.MACRO);
-                Prefilters.match(prefilter, "4", ple.getLine(3), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "1", sce.getLine(0), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "2", sce.getLine(1), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "3", sce.getLine(2), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "4", sce.getLine(3), Prefilters.PrefilterType.MACRO);
                 
                 return true;
             }
@@ -72,17 +72,18 @@ public class BlockEvents {
         
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if(e instanceof MCSignChangeEvent){
-                MCSignChangeEvent ple = (MCSignChangeEvent) e;
+                MCSignChangeEvent sce = (MCSignChangeEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                map.put("player", new CString(ple.getPlayer().getName(), Target.UNKNOWN));
+                
+                map.put("player", new CString(sce.getPlayer().getName(), Target.UNKNOWN));
 
-                map.put("text", ple.getLines());
+                map.put("text", sce.getLines());
                 
                 CArray blk = new CArray(Target.UNKNOWN);
-                blk.set("X", new CInt(ple.getBlock().getX(), Target.UNKNOWN));
-                blk.set("Y", new CInt(ple.getBlock().getX(), Target.UNKNOWN));
-                blk.set("Z", new CInt(ple.getBlock().getX(), Target.UNKNOWN));
-                blk.set("world", new CString(ple.getBlock().getWorld().getName(), Target.UNKNOWN));
+                blk.set("X", new CInt(sce.getBlock().getX(), Target.UNKNOWN));
+                blk.set("Y", new CInt(sce.getBlock().getX(), Target.UNKNOWN));
+                blk.set("Z", new CInt(sce.getBlock().getX(), Target.UNKNOWN));
+                blk.set("world", new CString(sce.getBlock().getWorld().getName(), Target.UNKNOWN));
                 map.put("location", blk);
                 
                 return map;
@@ -93,7 +94,7 @@ public class BlockEvents {
         
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if(event instanceof MCSignChangeEvent){
-                MCSignChangeEvent pje = (MCSignChangeEvent)event;
+                MCSignChangeEvent sce = (MCSignChangeEvent)event;
                 
                 if(key.equals("text")) {
                 	if (!(value instanceof CArray)){
@@ -111,7 +112,7 @@ public class BlockEvents {
                 		lines[i] = val.get(i).toString();
                 	}
                 	
-                	pje.setLines(lines);
+                	sce.setLines(lines);
                 	
                 	return true;
                 }
@@ -131,11 +132,11 @@ public class BlockEvents {
                 }
                 
                 if(value instanceof CNull){
-                    pje.setLine(index, "");
-                    return pje.getLine(index).toString() == "";
+                    sce.setLine(index, "");
+                    return sce.getLine(index).toString() == "";
                 } else {
-                	pje.setLine(index, value.val());
-                    return pje.getLine(index).toString() == value.val();
+                	sce.setLine(index, value.val());
+                    return sce.getLine(index).toString() == value.val();
                 }
             }
             return false;

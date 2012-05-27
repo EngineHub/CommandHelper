@@ -50,10 +50,10 @@ public class EntityEvents {
 
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
         	if(e instanceof MCEntityTargetEvent){
-        		MCEntityTargetEvent ple = (MCEntityTargetEvent) e;
+        		MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
         		 
-	        	if (ple.getTarget() instanceof Player) {
-	        		Prefilters.match(prefilter, "player", ((Player)ple.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
+	        	if (ete.getTarget() instanceof Player) {
+	        		Prefilters.match(prefilter, "player", ((Player)ete.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
 	        		return true;
 	        	}
         	}
@@ -62,10 +62,10 @@ public class EntityEvents {
         
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if(e instanceof MCEntityTargetEvent){
-                MCEntityTargetEvent ple = (MCEntityTargetEvent) e;
+                MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 
-                String name = ((Player)ple.getTarget()).getName();
+                String name = ((Player)ete.getTarget()).getName();
                 map.put("player", new CString(name, Target.UNKNOWN));
                 
                 return map;
@@ -76,17 +76,17 @@ public class EntityEvents {
         
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
         	if(event instanceof MCEntityTargetEvent){
-        		MCEntityTargetEvent pie = (MCEntityTargetEvent)event;
+        		MCEntityTargetEvent ete = (MCEntityTargetEvent)event;
             
         		if (key.equals("player")) {
         			if (value instanceof CNull) {
-        				pie.setTarget(null);
+        				ete.setTarget(null);
         				return true;
         			} else if (value instanceof CString) {
         				MCPlayer p = Static.GetPlayer(value.val(), Target.UNKNOWN);
         				
         				if (p.isOnline()) {
-        					pie.setTarget((Entity)p);
+        					ete.setTarget((Entity)p);
         					return true;
         				}
         			}
