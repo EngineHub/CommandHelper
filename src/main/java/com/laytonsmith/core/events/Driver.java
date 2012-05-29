@@ -14,7 +14,10 @@ public enum Driver {
     PLAYER_INTERACT, 
     PLAYER_SPAWN,     
     PLAYER_DEATH, 
+    PLAYER_QUIT,
     PLAYER_CHAT, 
     PLAYER_COMMAND, 
     WORLD_CHANGED,
+    SIGN_CHANGED,
+    TARGET_ENTITY,
 }

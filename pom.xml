@@ -46,6 +46,12 @@
             </roles>
         </contributor>
         <contributor>
+            <name>EntityReborn</name>
+            <roles>
+                <role>contributor</role>
+            </roles>
+        </contributor>
+        <contributor>
             <name>Deaygo</name>
             <roles>
                 <role>contributor</role>
@@ -187,13 +193,13 @@
             <version>1.1</version>
         </dependency>
         
-        <!-- Used for potion effects -->
+        <!-- Used for potion effects
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>minecraft-server</artifactId>
             <version>1.8.1</version>
             <type>jar</type>
-        </dependency>
+        </dependency> -->
         
         <!-- Used for IRC hooks -->
         <!--<dependency> NOT READY YET

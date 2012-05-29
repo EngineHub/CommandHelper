@@ -29,7 +29,7 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BukkitPlayerEvents {
 
-    @abstraction(type=Implementation.Type.BUKKIT)
+	@abstraction(type=Implementation.Type.BUKKIT)
     public static class BukkitMCPlayerChatEvent implements MCPlayerChatEvent{
         PlayerChatEvent pce;
         public BukkitMCPlayerChatEvent(PlayerChatEvent event) {
@@ -65,6 +65,35 @@ public class BukkitPlayerEvents {
             for(MCPlayer p  : list){
                 pce.getRecipients().add(((BukkitMCPlayer)p)._Player());
             }
+        }
+
+        public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(pce.getPlayer());
+        }
+        
+    }
+	
+	@abstraction(type=Implementation.Type.BUKKIT)
+    public static class BukkitMCPlayerQuitEvent implements MCPlayerQuitEvent{
+        PlayerQuitEvent pce;
+        public BukkitMCPlayerQuitEvent(PlayerQuitEvent event) {
+            pce = event;            
+        }
+
+        public Object _GetObject() {
+            return pce;
+        }
+        
+        public static BukkitMCPlayerQuitEvent _instantiate(MCPlayer player, String message){
+            return new BukkitMCPlayerQuitEvent(new PlayerQuitEvent(((BukkitMCPlayer)player)._Player(), message));
+        }
+
+        public String getMessage() {
+            return pce.getQuitMessage();
+        }
+
+        public void setMessage(String message) {
+            pce.setQuitMessage(message);
         }
 
         public MCPlayer getPlayer() {

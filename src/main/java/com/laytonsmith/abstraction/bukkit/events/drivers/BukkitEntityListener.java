@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
@@ -12,6 +13,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDeathEvent;
+import org.bukkit.event.entity.EntityTargetEvent;
 
 /**
  *
@@ -26,5 +28,8 @@ public class BukkitEntityListener implements Listener{
         }
     }
     
-    
+    @EventHandler(priority=EventPriority.LOWEST)
+    public void onTargetLiving(EntityTargetEvent event) {
+        EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", new BukkitEntityEvents.BukkitMCTargetEvent(event));
+    }
 }

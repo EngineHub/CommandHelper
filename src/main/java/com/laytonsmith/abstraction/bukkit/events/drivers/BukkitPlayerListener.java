@@ -43,6 +43,11 @@ public class BukkitPlayerListener implements Listener{
     }
     
     @EventHandler(priority= EventPriority.LOWEST)
+    public void onPlayerQuit(PlayerQuitEvent event){
+        EventUtils.TriggerListener(Driver.PLAYER_QUIT, "player_quit", new BukkitPlayerEvents.BukkitMCPlayerQuitEvent(event));
+    }
+    
+    @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerChangedWorld(PlayerChangedWorldEvent event){
         BukkitMCPlayer currentPlayer = (BukkitMCPlayer)Static.GetPlayer(event.getPlayer().getName(), Target.UNKNOWN);        
         //Apparently this happens sometimes, so prevent it
