@@ -69,7 +69,7 @@ public class EntityEvents {
                 map.put("player", new CString(name, Target.UNKNOWN));
                 
                 return map;
-            } else{
+            } else {
                 throw new EventException("Cannot convert e to EntityTargetLivingEntityEvent");
             }
         }

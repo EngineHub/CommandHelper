@@ -60,10 +60,10 @@ public class BlockEvents {
                     }
                 }
                 
-                Prefilters.match(prefilter, "1", sce.getLine(0), Prefilters.PrefilterType.MACRO);
-                Prefilters.match(prefilter, "2", sce.getLine(1), Prefilters.PrefilterType.MACRO);
-                Prefilters.match(prefilter, "3", sce.getLine(2), Prefilters.PrefilterType.MACRO);
-                Prefilters.match(prefilter, "4", sce.getLine(3), Prefilters.PrefilterType.MACRO);
+                Prefilters.match(prefilter, "1", sce.getLine(0), Prefilters.PrefilterType.REGEX);
+                Prefilters.match(prefilter, "2", sce.getLine(1), Prefilters.PrefilterType.REGEX);
+                Prefilters.match(prefilter, "3", sce.getLine(2), Prefilters.PrefilterType.REGEX);
+                Prefilters.match(prefilter, "4", sce.getLine(3), Prefilters.PrefilterType.REGEX);
                 
                 return true;
             }
@@ -96,6 +96,7 @@ public class BlockEvents {
             if(event instanceof MCSignChangeEvent){
                 MCSignChangeEvent sce = (MCSignChangeEvent)event;
                 
+                // Allow changing everything at once.
                 if(key.equals("text")) {
                 	if (!(value instanceof CArray)){
                 		return false;
@@ -118,7 +119,7 @@ public class BlockEvents {
                 }
                 
                 int index;
-                
+                // Allow changing just one line at a time.
                 if(key.equals("1")){
                 	index = 0;
                 } else if(key.equals("2")){
@@ -139,6 +140,7 @@ public class BlockEvents {
                     return sce.getLine(index).toString() == value.val();
                 }
             }
+            
             return false;
         }
         
