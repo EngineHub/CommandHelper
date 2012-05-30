@@ -6,11 +6,15 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.CHLog.Tags;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Map;
+
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockState;
 
 /**
  *
@@ -19,6 +23,245 @@ import java.util.Map;
 public class BlockEvents {
     public static String docs(){
         return "Contains events related to a block";
+    }
+    
+    @api
+    public static class block_break extends AbstractEvent {
+    	public String getName() {
+            return "block_break";
+        }
+
+        public String docs() {
+            return "{player: <string match> | type: <string match> | data: <string match>} "
+            		+ "This event is called when a block is broken. "
+                    + "Cancelling the event cancels the breakage."
+                    + "{player: The player's name | block: An array with "
+                    + "keys 'type', 'data', 'X', 'Y', 'Z' and 'world' "
+                    + "for the physical location of the block }"
+                    + "{}"
+                    + "{player|block}";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+        public Driver driver(){
+            return Driver.BLOCK_BREAK;
+        }
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if(e instanceof MCBlockBreakEvent){
+                MCBlockBreakEvent event = (MCBlockBreakEvent) e;
+			
+				if(prefilter.containsKey("player")){
+	                if(!event.getPlayer().getName().equals(prefilter.get("player").val())){
+	                    return false;
+	                }
+	            }
+	            
+	            if(prefilter.containsKey("type")){
+	            	Construct v = prefilter.get("type");
+	            	
+	            	if(v instanceof CInt) {
+	                	int val = Integer.parseInt(v.val());
+	                	
+	                    if(event.getBlock().getTypeId() != val){
+	                        return false;
+	                    }
+	            	} else {
+	            		return false;
+	            	}
+	            }
+	            
+	            if(prefilter.containsKey("data")){
+	            	Construct v = prefilter.get("data");
+	            	
+	            	if(v instanceof CInt) {
+	                	int val = Integer.parseInt(v.val());
+	                	
+	                    if((int)event.getBlock().getData() != val){
+	                        return false;
+	                    }
+	            	} else {
+	            		return false;
+	            	}
+	            }
+			}
+			
+			return true;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			
+			MCBlockBreakEvent event = (MCBlockBreakEvent) e;
+            Map<String, Construct> map = evaluate_helper(event);
+            
+            map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+            
+            CArray blk = new CArray(Target.UNKNOWN);
+            blk.set("type", new CInt(event.getBlock().getTypeId(), Target.UNKNOWN));
+            blk.set("data", new CInt(event.getBlock().getData(), Target.UNKNOWN));
+            blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN));
+            blk.set("Y", new CInt(event.getBlock().getX(), Target.UNKNOWN));
+            blk.set("Z", new CInt(event.getBlock().getX(), Target.UNKNOWN));
+            blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN));
+            map.put("block", blk);
+            
+			return map;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			return false;
+		}
+    }
+    
+    @api
+    public static class block_place extends AbstractEvent {
+    	public String getName() {
+            return "block_place";
+        }
+
+        public String docs() {
+            return "{player: <string match> | type: <string match> | data: <string match>} "
+            		+ "This event is called when a player places a block. "
+                    + "Cancelling the event cancels placing the block."
+                    + "{player: The player's name | type: numerical type id of the block being "
+                    + "placed | X: the X coordinate of the block | Y: the Y coordinate of the block | "
+                    + "Z: the Z coordinate of the block| world: the world of the block | "
+                    + "data: the data value for the block being placed | block: An array with keys "
+                    + "'type', 'data' for the info pertaining to the block being placed "
+                    + "| against: the block being placed against | oldblock: the block "
+                    + "being replaced} "
+                    + "{type|data} "
+                    + "{player|X|Y|Z|world|block|against|oldblock}";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+        public Driver driver(){
+            return Driver.BLOCK_PLACE;
+        }
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if(e instanceof MCBlockPlaceEvent){
+                MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
+                
+                if(prefilter.containsKey("player")){
+                    if(!event.getPlayer().getName().equals(prefilter.get("player").val())){
+                        return false;
+                    }
+                }
+                
+                if(prefilter.containsKey("type")){
+                	Construct v = prefilter.get("type");
+                	
+                	if(v instanceof CInt) {
+	                	int val = Integer.parseInt(v.val());
+	                	
+	                    if(event.getBlock().getTypeId() != val){
+	                        return false;
+	                    }
+                	} else {
+                		return false;
+                	}
+                }
+                
+                if(prefilter.containsKey("data")){
+                	Construct v = prefilter.get("data");
+                	
+                	if(v instanceof CInt) {
+	                	int val = Integer.parseInt(v.val());
+	                	
+	                    if((int)event.getBlock().getData() != val){
+	                        return false;
+	                    }
+                	} else {
+                		return false;
+                	}
+                }
+			}
+			
+			return true;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+		
+		private CArray blockArray(Block blk) {
+			CArray arr = new CArray(Target.UNKNOWN);
+            arr.set("type", new CInt(blk.getTypeId(), Target.UNKNOWN));
+            arr.set("data", new CInt(blk.getData(), Target.UNKNOWN));
+            return arr;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
+            Map<String, Construct> map = evaluate_helper(e);
+            
+            map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+            
+            Block blk = event.getBlock();
+            map.put("X", new CInt(blk.getX(), Target.UNKNOWN));
+            map.put("Y", new CInt(blk.getX(), Target.UNKNOWN));
+            map.put("Z", new CInt(blk.getX(), Target.UNKNOWN));
+            map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
+            
+            map.put("block", blockArray(event.getBlock()));
+            map.put("against", blockArray(event.getBlockAgainst()));
+            
+            BlockState old = event.getBlockReplacedState();
+            CArray oldarr = new CArray(Target.UNKNOWN);
+            oldarr.set("type", new CInt(old.getTypeId(), Target.UNKNOWN));
+            oldarr.set("data", new CInt(old.getData().getData(), Target.UNKNOWN));
+            map.put("oldblock", oldarr);
+            
+			return map;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent e) {
+			MCBlockPlaceEvent event = (MCBlockPlaceEvent)e;
+			
+			if (key.equals("type")) {
+				if (value instanceof CInt) {
+					int i = Integer.parseInt(value.val());
+					event.getBlock().setTypeId(i);
+					
+					return true;
+				}
+			} else if (key.equals("data")) {
+				if (value instanceof CInt) {
+					byte b;
+					
+					try {
+						b = Byte.parseByte(value.val());
+					} catch (NumberFormatException exc) {
+						if ((int)((CInt)value).getInt() < 0) {
+							b = 0;
+						} else {
+							b = (byte)255;
+						}
+					}
+					
+					event.getBlock().setData(b);
+					return true;
+				}
+			}
+			return false;
+		}
     }
     
     @api

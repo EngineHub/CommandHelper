@@ -7,32 +7,84 @@ package com.laytonsmith.abstraction.bukkit.events;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
-import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents.BukkitMCPlayerInteractEvent;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.abstraction;
-import java.util.ArrayList;
-import java.util.List;
 
 import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
+import org.bukkit.block.BlockState;
+import org.bukkit.event.block.BlockBreakEvent;
+import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
-import org.bukkit.event.player.*;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author EntityReborn
  */
 public class BukkitBlockEvents {
+	@abstraction(type=Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockBreakEvent implements MCBlockBreakEvent {
+		BlockBreakEvent event;
+		
+		public BukkitMCBlockBreakEvent(BlockBreakEvent e){
+            event = e;
+        }
+		
+		public Object _GetObject() {
+			return event;
+		}
+
+		public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(event.getPlayer());
+        }
+
+		public Block getBlock() {
+        	return event.getBlock();
+        }
+		
+	}
+	
+	@abstraction(type=Implementation.Type.BUKKIT)
+	public static class BukkitMCBlockPlaceEvent implements MCBlockPlaceEvent {
+		BlockPlaceEvent event;
+		
+		public BukkitMCBlockPlaceEvent(BlockPlaceEvent e){
+            event = e;
+        }
+		
+		public Object _GetObject() {
+			return event;
+		}
+
+		public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(event.getPlayer());
+        }
+
+		public Block getBlock() {
+        	return event.getBlock();
+        }
+
+		public Block getBlockAgainst() {
+			return event.getBlockAgainst();
+		}
+
+		public MCItemStack getItemInHand() {
+			return new BukkitMCItemStack(event.getItemInHand());
+		}
+
+		public boolean canBuild() {
+			return event.canBuild();
+		}
+
+		public BlockState getBlockReplacedState() {
+			return event.getBlockReplacedState();
+		}
+	}
+	
 	@abstraction(type=Implementation.Type.BUKKIT)
     public static class BukkitMCSignChangeEvent implements MCSignChangeEvent{
 
