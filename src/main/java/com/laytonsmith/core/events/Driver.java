@@ -10,11 +10,18 @@ package com.laytonsmith.core.events;
  * @author layton
  */
 public enum Driver {
+	PLAYER_PRELOGIN,
+	PLAYER_LOGIN,
     PLAYER_JOIN,    
     PLAYER_INTERACT, 
     PLAYER_SPAWN,     
     PLAYER_DEATH, 
+    PLAYER_QUIT,
     PLAYER_CHAT, 
     PLAYER_COMMAND, 
     WORLD_CHANGED,
+    SIGN_CHANGED,
+    BLOCK_BREAK,
+    BLOCK_PLACE,
+    TARGET_ENTITY,  
 }

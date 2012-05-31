@@ -19,8 +19,11 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.StringHandling;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+
+import org.bukkit.event.player.PlayerPreLoginEvent.Result;
 
 
 /**
@@ -30,6 +33,172 @@ import java.util.Map;
 public class PlayerEvents {
     public static String docs(){
         return "Contains events related to a player";
+    }
+    
+    @api
+    public static class player_prelogin extends AbstractEvent {
+
+		public String getName() {
+			return "player_prelogin";
+		}
+
+		public String docs() {
+			return "{player: <string match>} "
+					+ "This event is called when a player is about to be authed. "
+					+ "This event only fires if your server is in online mode. "
+                    + "This event cannot be cancelled. Instead, you can deny them by setting "
+					+ "'result' to KICK_BANNED, KICK_WHITELIST, KICK_OTHER, or KICK_FULL. "
+                    + "The default for 'result' is ALLOWED. When setting 'result', you "
+                    + "can specify the kick message by modifying 'kickmsg'. "
+                    + "{player: The player's name | kickmsg: The default kick message | "
+                    + "ip: the player's IP address | result: the default response to their logging in}"
+                    + "{kickmsg|result}"
+                    + "{player|kickmsg|ip|result}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerPreLoginEvent){
+                MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
+                if(prefilter.containsKey("player")){
+                    if(!event.getName().equals(prefilter.get("player").val())){
+                        return false;
+                    }
+                }      
+			}
+			
+			return true;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if(e instanceof MCPlayerPreLoginEvent){
+                MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                
+                map.put("player", new CString(event.getName(), Target.UNKNOWN));
+                map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
+                map.put("result", new CString(event.getResult(), Target.UNKNOWN));
+                map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
+                
+                return map;
+            } else{
+                throw new EventException("Cannot convert e to PlayerPreLoginEvent");
+            }
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_PRELOGIN;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent e) {
+			if(e instanceof MCPlayerPreLoginEvent){
+                MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
+                if (key.equals("result")) {
+                	String[] possible = new String[] {"ALLOWED", "KICK_WHITELIST",
+                			"KICK_BANNED", "KICK_FULL", "KICK_OTHER"};
+                	if(Arrays.asList(possible).contains(value.val().toUpperCase())) {
+                		event.setResult(value.val().toUpperCase());
+                	}
+                } else if (key.equals("kickmsg")) {
+                	event.setKickMessage(value.val());
+                }
+			}
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+    	
+    }
+    
+    @api
+    public static class player_login extends AbstractEvent {
+
+		public String getName() {
+			return "player_login";
+		}
+
+		public String docs() {
+			return "{player: <string match>} "
+					+ "This event is called when a player is about to log in. "
+                    + "This event cannot be cancelled. Instead, you can deny them by setting "
+					+ "'result' to KICK_BANNED, KICK_WHITELIST, KICK_OTHER, or KICK_FULL. "
+                    + "The default for 'result' is ALLOWED. When setting 'result', you "
+                    + "can specify the kick message by modifying 'kickmsg'. "
+                    + "{player: The player's name | kickmsg: The default kick message | "
+                    + "ip: the player's IP address | result: the default response to their logging in}"
+                    + "{kickmsg|result}"
+                    + "{player|kickmsg|ip|result}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerPreLoginEvent){
+                MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
+                if(prefilter.containsKey("player")){
+                    if(!event.getName().equals(prefilter.get("player").val())){
+                        return false;
+                    }
+                }      
+			}
+			
+			return true;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if(e instanceof MCPlayerLoginEvent){
+                MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                
+                map.put("player", new CString(event.getName(), Target.UNKNOWN));
+                map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
+                map.put("result", new CString(event.getResult(), Target.UNKNOWN));
+                map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
+                
+                return map;
+            } else{
+                throw new EventException("Cannot convert e to PlayerLoginEvent");
+            }
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_LOGIN;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent e) {
+			if(e instanceof MCPlayerLoginEvent){
+                MCPlayerLoginEvent event = (MCPlayerLoginEvent)e;
+                if (key.equals("result")) {
+                	String[] possible = new String[] {"ALLOWED", "KICK_WHITELIST",
+                			"KICK_BANNED", "KICK_FULL", "KICK_OTHER"};
+                	if(Arrays.asList(possible).contains(value.val().toUpperCase())) {
+                		event.setResult(value.val().toUpperCase());
+                	}
+                } else if (key.equals("kickmsg")) {
+                	event.setKickMessage(value.val());
+                }
+			}
+			
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+    	
     }
     
     @api
@@ -61,7 +230,7 @@ public class PlayerEvents {
             if(e instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
                 if(prefilter.containsKey("player")){
-                    if(!ple.getPlayer().getName().equals(prefilter.get("player_name").val())){
+                    if(!ple.getPlayer().getName().equals(prefilter.get("player").val())){
                         return false;
                     }
                 }                
@@ -414,6 +583,77 @@ public class PlayerEvents {
                     ((MCPlayerDeathEvent)event).setDeathMessage(value.nval());
                     return true;
                 }
+            }
+            return false;
+        }
+    }
+    
+    @api
+    public static class player_quit extends AbstractEvent {
+        
+        public String getName() {
+            return "player_quit";
+        }
+        
+        public String docs() {
+            return "{player: <macro>}"
+                    + "Fired when any player quits."
+                    + "{message: The message to be sent}"
+                    + "{message}"
+                    + "{player|message}";
+        }
+        
+        public Driver driver() {
+            return Driver.PLAYER_QUIT;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if (e instanceof MCPlayerQuitEvent) {
+                //As a very special case, if this player is currently in interpreter mode, we do not want to
+                //intercept their chat event
+                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerQuitEvent)e).getPlayer())){
+                    throw new PrefilterNonMatchException();
+                }
+                
+                Prefilters.match(prefilter, "player", ((MCPlayerQuitEvent)e).getPlayer().getName(), PrefilterType.MACRO);
+                return true;
+            }
+            return false;
+        }
+        
+        public BindableEvent convert(CArray manualObject) {
+            //Get the parameters from the manualObject
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"));
+            String message = manualObject.get("message").nval();
+            
+            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
+                player, message);
+            return e;
+        }
+        
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if (e instanceof MCPlayerQuitEvent) {
+                MCPlayerQuitEvent event = (MCPlayerQuitEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                //Fill in the event parameters
+                map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerQuitEvent");
+            }
+        }
+        
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            if (event instanceof MCPlayerQuitEvent) {
+                MCPlayerQuitEvent e = (MCPlayerQuitEvent)event;
+                if("message".equals(key)){
+                    e.setMessage(value.nval());
+                }
+                return true;
             }
             return false;
         }
