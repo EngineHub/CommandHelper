@@ -36,7 +36,7 @@ public class SQLite extends DB{
     }
 
     @Override
-    protected Set do_query(CConnection c, String query, Object[] params) throws SQLException {
+    protected Object do_query(CConnection c, String query, Object[] params) throws SQLException {
         try {
             Class.forName("org.sqlite.JDBC");
         }
@@ -52,7 +52,12 @@ public class SQLite extends DB{
             prep.setObject(i, o);
         }
         prep.addBatch();
-        throw new UnsupportedOperationException("Not supported yet.");
+        if(prep.execute()){
+            return prep.getResultSet();
+        } else {
+            return prep.getUpdateCount();
+        }
+        //throw new UnsupportedOperationException("Not supported yet.");
     }   
     
 }

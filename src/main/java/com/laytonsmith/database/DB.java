@@ -110,14 +110,17 @@ public abstract class DB {
     /**
      * Note to subclasses: If prepared queries are more efficiently handled directly
      * in the particular implementation, this method can be overridden, and raw_query and sanitize
-     * will not be used.
+     * will not be used. This method should return a java.util.Set if it is a select or
+     * other query that returns a result set, or an Integer if it was an update query, which
+     * specifies the number of results affected, or an int if it was an insert query with an
+     * auto-increment.
      * @param c
      * @param query
      * @param params
      * @return
      * @throws SQLException 
      */
-    protected Set do_query(CConnection c, String query, Object[] params) throws SQLException{
+    protected Object do_query(CConnection c, String query, Object[] params) throws SQLException{
         return this.raw_query(c, escape(c, query, params));        
     }
     
@@ -134,7 +137,7 @@ public abstract class DB {
      * @return
      * @throws SQLException 
      */
-    final public Set query(CConnection c, String query, Object ... params) throws SQLException{
+    final public Object query(CConnection c, String query, Object ... params) throws SQLException{
         Statics.SetLastConnection(c); 
         return this.do_query(c, query, params);
     }    
@@ -146,7 +149,7 @@ public abstract class DB {
      * @return
      * @throws SQLException 
      */
-    final public Set query(String query, Object ... params) throws SQLException{
+    final public Object query(String query, Object ... params) throws SQLException{
         return query(Statics.GetLastConnection(), query, params);
     }
     
@@ -156,7 +159,7 @@ public abstract class DB {
      * @return
      * @throws SQLException 
      */
-    final public Set query(String query) throws SQLException{
+    final public Object query(String query) throws SQLException{
         return query(Statics.GetLastConnection(), query);
     }
     

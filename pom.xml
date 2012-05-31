@@ -111,13 +111,13 @@
             <url>http://repo.bukkit.org/content/groups/public/</url>
         </repository>
         
-        <!--<repository>
+        <repository>
             <id>bukkit-maven</id>
-            <url>http://ci.bukkit.org/plugin/repository/project/dev-Bukkit/LastSuccessful/repository/</url>
+            <url>http://repo.bukkit.org/content/repositories/releases/</url>
             <snapshots>
-                <enabled>false</enabled>
+                <enabled>true</enabled>
             </snapshots>
-        </repository>-->
+        </repository>
         <repository>
             <id>maven-central</id>
             <url>http://repo1.maven.org/maven2/</url>
@@ -146,7 +146,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>bukkit</artifactId>
-            <version>1.2.3-R0.2-SNAPSHOT</version>
+            <version>1.2.5-R3.0</version>
         </dependency>
         
         <!-- CraftBukkit Dependency for experimental features -->
@@ -154,7 +154,7 @@
         <dependency>
             <groupId>org.bukkit</groupId>
             <artifactId>craftbukkit</artifactId>
-            <version>1.2.3-R0.2-SNAPSHOT</version>
+            <version>1.2.5-R3.0</version>
         </dependency>
         
         <!-- WorldGuard for some of the sk functions -->
