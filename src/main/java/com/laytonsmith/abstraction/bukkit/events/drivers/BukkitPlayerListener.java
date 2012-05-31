@@ -4,7 +4,6 @@
  */
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.core.Static;
@@ -21,7 +20,16 @@ import org.bukkit.event.player.*;
  * @author Layton
  */
 public class BukkitPlayerListener implements Listener{
-    
+	@EventHandler(priority=EventPriority.LOWEST)
+    public void onPlayerLogin(PlayerLoginEvent e){
+        EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", new BukkitPlayerEvents.BukkitMCPlayerLoginEvent(e));
+    }
+	
+	@EventHandler(priority=EventPriority.LOWEST)
+    public void onPlayerPreLogin(PlayerPreLoginEvent e){
+        EventUtils.TriggerListener(Driver.PLAYER_PRELOGIN, "player_prelogin", new BukkitPlayerEvents.BukkitMCPlayerPreLoginEvent(e));
+    }
+	
     @EventHandler(priority=EventPriority.LOWEST)
     public void onPlayerJoin(PlayerJoinEvent e){
         EventUtils.TriggerListener(Driver.PLAYER_JOIN, "player_join", new BukkitPlayerEvents.BukkitMCPlayerJoinEvent(e));
