@@ -10,6 +10,8 @@ package com.laytonsmith.core.events;
  * @author layton
  */
 public enum Driver {
+	PLAYER_PRELOGIN,
+	PLAYER_LOGIN,
     PLAYER_JOIN,    
     PLAYER_INTERACT, 
     PLAYER_SPAWN,     
@@ -21,5 +23,5 @@ public enum Driver {
     SIGN_CHANGED,
     BLOCK_BREAK,
     BLOCK_PLACE,
-    TARGET_ENTITY,
+    TARGET_ENTITY,  
 }

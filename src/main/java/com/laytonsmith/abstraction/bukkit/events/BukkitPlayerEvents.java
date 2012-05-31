@@ -13,6 +13,9 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.events.abstraction;
+
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.block.BlockFace;
@@ -21,6 +24,7 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
+import org.bukkit.event.player.PlayerPreLoginEvent.Result;
 import org.bukkit.inventory.ItemStack;
 
 /**
@@ -28,6 +32,86 @@ import org.bukkit.inventory.ItemStack;
  * @author layton
  */
 public class BukkitPlayerEvents {
+	
+	public static class BukkitMCPlayerLoginEvent implements MCPlayerLoginEvent {
+		PlayerLoginEvent event;
+		
+		public BukkitMCPlayerLoginEvent(PlayerLoginEvent e) {
+            event = e;            
+        }
+		
+		public Object _GetObject() {
+			return event;
+		}
+
+		public String getName() {
+			return event.getPlayer().getName();
+		}
+
+		public String getKickMessage() {
+			return event.getKickMessage();
+		}
+
+		public void setKickMessage(String msg) {
+			event.setKickMessage(msg);
+		}
+
+		public String getResult() {
+			return event.getResult().toString();
+		}
+
+		public void setResult(String rst) {
+			event.setResult(PlayerLoginEvent.Result.valueOf(rst.toUpperCase()));
+		}
+
+		public String getIP() {
+			InetSocketAddress add = event.getPlayer().getAddress();
+			try {
+				return add.toString();
+			} catch (NullPointerException exc) {
+				// Sometimes the address isn't known yet apparently.
+				return "";
+			}
+		}
+		
+	}
+	
+	public static class BukkitMCPlayerPreLoginEvent implements MCPlayerPreLoginEvent {
+		PlayerPreLoginEvent event;
+		
+		public BukkitMCPlayerPreLoginEvent(PlayerPreLoginEvent e) {
+            event = e;            
+        }
+		
+		public Object _GetObject() {
+			return event;
+		}
+
+		public String getName() {
+			return event.getName();
+		}
+
+		public String getKickMessage() {
+			return event.getKickMessage();
+		}
+
+		public void setKickMessage(String msg) {
+			event.setKickMessage(msg);
+		}
+
+		public String getResult() {
+			return event.getResult().toString();
+		}
+
+		public void setResult(String rst) {
+			event.setResult(Result.valueOf(rst.toUpperCase()));
+		}
+
+		public String getIP() {
+			return event.getAddress().toString();
+		}
+		
+	}
 
 	@abstraction(type=Implementation.Type.BUKKIT)
     public static class BukkitMCPlayerChatEvent implements MCPlayerChatEvent{
