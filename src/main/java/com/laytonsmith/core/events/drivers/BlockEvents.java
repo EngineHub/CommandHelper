@@ -109,8 +109,8 @@ public class BlockEvents {
             blk.set("type", new CInt(event.getBlock().getTypeId(), Target.UNKNOWN));
             blk.set("data", new CInt(event.getBlock().getData(), Target.UNKNOWN));
             blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN));
-            blk.set("Y", new CInt(event.getBlock().getX(), Target.UNKNOWN));
-            blk.set("Z", new CInt(event.getBlock().getX(), Target.UNKNOWN));
+            blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN));
+            blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN));
             blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN));
             map.put("block", blk);
             
@@ -215,8 +215,8 @@ public class BlockEvents {
             
             Block blk = event.getBlock();
             map.put("X", new CInt(blk.getX(), Target.UNKNOWN));
-            map.put("Y", new CInt(blk.getX(), Target.UNKNOWN));
-            map.put("Z", new CInt(blk.getX(), Target.UNKNOWN));
+            map.put("Y", new CInt(blk.getY(), Target.UNKNOWN));
+            map.put("Z", new CInt(blk.getZ(), Target.UNKNOWN));
             map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
             
             map.put("block", blockArray(event.getBlock()));
