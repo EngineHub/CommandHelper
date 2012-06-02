@@ -65,13 +65,11 @@ public class BukkitPlayerEvents {
 		}
 
 		public String getIP() {
-			InetSocketAddress add = event.getPlayer().getAddress();
-			try {
-				return add.toString();
-			} catch (NullPointerException exc) {
-				// Sometimes the address isn't known yet apparently.
-				return "";
-			}
+			return event.getAddress().getHostAddress();
+		}
+
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(event.getPlayer());
 		}
 		
 	}

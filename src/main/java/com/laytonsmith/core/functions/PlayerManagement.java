@@ -564,8 +564,15 @@ public class PlayerManagement {
                 }
             }
             if (index == 3 || index == -1) {
-                //MCPlayer IP                
-                retVals.add(new CString(p.getAddress().getAddress().getHostAddress(), t));
+                //MCPlayer IP       
+            	String add;
+            	try {
+            		add = p.getAddress().getAddress().getHostAddress();
+            	} catch (NullPointerException npe) {
+            		add = "";
+            	}
+            	
+                retVals.add(new CString(add, t));
             }
             if (index == 4 || index == -1) {
                 //Display name
@@ -609,10 +616,17 @@ public class PlayerManagement {
                 retVals.add(a);
             }
             if (index == 10 || index == -1) {
-                String hostname = p.getAddress().getAddress().getHostAddress();
+            	String hostname;
+            	try {
+                	hostname = p.getAddress().getAddress().getHostAddress();
+            	} catch (NullPointerException npe) {
+            		hostname = "";
+            	}
+            	
                 if(CommandHelperPlugin.hostnameLookupCache.containsKey(p.getName())){
                     hostname = CommandHelperPlugin.hostnameLookupCache.get(p.getName());
                 }
+                
                 retVals.add(new CString(hostname, t));
             }
             if(index == 11 || index == -1){
