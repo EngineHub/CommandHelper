@@ -1648,7 +1648,8 @@ public class DataHandling {
                 List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
                 children.add(node);
                 newNode.setChildren(children);
-                Construct ret = MethodScriptCompiler.execute(newNode, env, null, null);
+                Script fakeScript = Script.GenerateScript(newNode, env.GetLabel());
+                Construct ret = MethodScriptCompiler.execute(newNode, env, null, fakeScript);
                 if (!(ret instanceof IVariable)) {
                     throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, t);
                 }
