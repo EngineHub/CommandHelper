@@ -606,6 +606,10 @@ public class MethodScriptCompilerTest {
         assertEquals("14", SRun("2 + 4 * 3", fakePlayer));
     }
     
+    @Test public void testInfixMath3() throws ConfigCompileException{
+        assertEquals("8.0", SRun("2 ** 3", fakePlayer));
+    }
+    
     @Test public void testUnary() throws ConfigCompileException{
         assertEquals("1", SRun("2 + - 1", fakePlayer));
     }

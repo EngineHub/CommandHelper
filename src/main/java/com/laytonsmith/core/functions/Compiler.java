@@ -258,6 +258,21 @@ public class Compiler {
                             i--;
                         }
                     }
+                    
+                    for(int i = 0; i < list.size() - 1; i++){
+                        GenericTreeNode<Construct> next = list.get(i + 1);
+                        if(next.data instanceof CSymbol){
+                            if(((CSymbol)next.data).isExponential()){
+                                GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(((CSymbol)next.data).convert(), t));
+                                conversion.addChild(list.get(i));
+                                conversion.addChild(list.get(i + 2));
+                                list.set(i, conversion);
+                                list.remove(i + 1);
+                                list.remove(i + 1);
+                                i--;
+                            }
+                        }
+                    }
 
                     //Multiplicative
                     for (int i = 0; i < list.size() - 1; i++) {

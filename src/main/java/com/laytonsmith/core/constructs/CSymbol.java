@@ -79,6 +79,9 @@ public class CSymbol extends Construct {
             case DECREMENT:
                 conversion = "dec";
                 break;
+            case EXPONENTIAL:
+                conversion = "pow";
+                break;
             default:
                 conversion = "";
                 break;
@@ -138,5 +141,9 @@ public class CSymbol extends Construct {
         //It gets turned into a function, but only after the __autoconcat__ features take over,
         //which essentially removes all symbols.
         return false;
+    }
+
+    public boolean isExponential() {
+        return symbolType.isExponential();
     }
 }

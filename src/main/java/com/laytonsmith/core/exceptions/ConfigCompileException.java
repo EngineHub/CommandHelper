@@ -23,6 +23,7 @@ public class ConfigCompileException extends Exception{
         this(message, t, null);
     }
     public ConfigCompileException(String message, Target t, Throwable cause) {
+        super(cause);
         this.message = message;
         this.line_num = t.line();
         this.file = t.file();

@@ -26,7 +26,7 @@ public class Token {
         IVARIABLE, FINAL_VAR, LIT, ROOT, LABEL, DEREFERENCE, SMART_STRING, SLICE, 
         MULTIPLICATION, SUBTRACTION, DIVISION, ADDITION, NOT_EQUALS, EQUALS, STRICT_NOT_EQUALS, 
         STRICT_EQUALS, GT, LT, LTE, GTE, LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT,
-        INCREMENT, DECREMENT, MODULO, CONCAT, WHITESPACE, LCURLY_BRACKET, RCURLY_BRACKET, IDENTIFIER;
+        INCREMENT, DECREMENT, MODULO, CONCAT, WHITESPACE, LCURLY_BRACKET, RCURLY_BRACKET, IDENTIFIER, EXPONENTIAL;
 
         public boolean isSymbol() {
             if(this.equals(TType.ADDITION) || this.equals(TType.SUBTRACTION) || this.equals(TType.MULTIPLICATION) 
@@ -35,6 +35,7 @@ public class Token {
                     this.equals(TType.LT) || this.equals(TType.GTE) || this.equals(TType.LTE)
                     || this.equals(TType.LOGICAL_AND) || this.equals(TType.LOGICAL_OR) || this.equals(TType.LOGICAL_NOT)
                     //|| this.equals(TType.BIT_AND) || this.equals(TType.BIT_OR) || this == BIT_XOR
+                    || this == EXPONENTIAL
                     || this == INCREMENT || this == DECREMENT || this == MODULO || this == CONCAT){
                 return true;
             } else {
@@ -96,6 +97,10 @@ public class Token {
             return this == UNKNOWN || this == LIT || this == IVARIABLE 
                     || this == VARIABLE || this == FINAL_VAR || this == STRING
                     || this == SMART_STRING;
+        }
+
+        boolean isExponential() {
+            return this == EXPONENTIAL;
         }
         
     }

@@ -118,7 +118,17 @@ public class MethodScriptCompiler {
             }
             
             //Math symbols must come after comment parsing, due to /* and */ block comments
-            if(c == '*' && !state_in_quote){ //Block comments are caught above
+            //Block comments are caught above
+            if(c == '*' && c2 == '*' && !state_in_quote){
+                if (buf.length() > 0) {
+                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+                    buf = new StringBuffer();
+                }
+                token_list.add(new Token(TType.EXPONENTIAL, "**", target));
+                i++;
+                continue;
+            }
+            if(c == '*' && !state_in_quote){ 
                 if (buf.length() > 0) {
                     token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
                     buf = new StringBuffer();
