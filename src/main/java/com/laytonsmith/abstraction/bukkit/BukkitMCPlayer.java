@@ -177,7 +177,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p.teleport(((BukkitMCLocation)l).l);
     }
 
-    public void setHealth(int i) {        
+    public void setHealth(int i) { 
+        if(i == 0){
+            this.fireEntityDamageEvent(MCDamageCause.CUSTOM);
+        }
         p.setHealth(i);
     }
 

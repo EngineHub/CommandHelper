@@ -12,6 +12,7 @@ import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.math.BigDecimal;
+import java.net.InetAddress;
 import java.util.*;
 
 /**
@@ -362,8 +363,10 @@ public class CArray extends Construct implements ArrayAccess{
         if(!associative_mode){
             try{
                 ret = array.remove(Integer.parseInt(c));
-            } catch(NumberFormatException e){
-                throw new ConfigRuntimeException("Expecting an integer, but received " + c, construct.getTarget());
+            } catch(NumberFormatException e){ 
+                throw new ConfigRuntimeException("Expecting an integer, but received " + c + " (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, construct.getTarget());
+            } catch(IndexOutOfBoundsException e){
+                throw new ConfigRuntimeException("Cannot remove the value at '" + c + "', as no such index exists in the array", ExceptionType.RangeException, construct.getTarget());
             }
         } else {
             ret = associative_array.remove(c);

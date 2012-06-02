@@ -379,7 +379,7 @@ public class PlayerManagement {
                 }
             }
             Static.AssertPlayerNonNull(m, t);
-            m.setHealth(0);            
+            m.setHealth(0);
             return new CVoid(t);
         }
 
