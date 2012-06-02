@@ -67,9 +67,9 @@ public class World {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String world;
             if(args.length == 1){
-                world = environment.GetPlayer().getWorld().getName();
-            } else {
                 world = args[0].val();
+            } else {
+                world = environment.GetPlayer().getWorld().getName();
             }
             return ObjectGenerator.GetGenerator().location(Static.getServer().getWorld(world).getSpawnLocation());
         }
