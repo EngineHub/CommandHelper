@@ -51,7 +51,13 @@ public class BukkitConvertor implements Convertor {
     }
 
     public MCEnchantment GetEnchantmentByName(String name) {
-        return new BukkitMCEnchantment(Enchantment.getByName(name));
+        try{
+            //If they are looking it up by number, we can support that
+            int i = Integer.valueOf(name);
+            return new BukkitMCEnchantment(Enchantment.getById(i));
+        } catch(NumberFormatException e){
+            return new BukkitMCEnchantment(Enchantment.getByName(name));
+        }
     }
 
     public MCServer GetServer() {

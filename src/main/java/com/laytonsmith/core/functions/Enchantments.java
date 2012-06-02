@@ -215,7 +215,7 @@ public class Enchantments {
             }
             for (String key : enchantArray.keySet()) {
                 MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
-                if(e == null){
+                if(e.getHandle() == null){
                     throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
                 }
                 if (e.canEnchantItem(is)) {
