@@ -198,6 +198,23 @@ public class PlayerEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+		
+        public void preExecution(Env env, ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent){
+                //Static lookups of the player don't seem to work here, but
+                //the player is passed in with the event.
+                MCPlayer player = ((MCPlayerLoginEvent)activeEvent.getUnderlyingEvent()).getPlayer();
+                env.SetPlayer(player);
+                Static.InjectPlayer(player);
+            }
+        }
+
+        public void postExecution(Env env, ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent){
+                MCPlayer player = ((MCPlayerLoginEvent)activeEvent.getUnderlyingEvent()).getPlayer();
+                Static.UninjectPlayer(player);
+            }
+        }
     	
     }
     
