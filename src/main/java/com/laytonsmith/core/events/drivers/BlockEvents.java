@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
 
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
@@ -43,7 +44,9 @@ public class BlockEvents {
                     + "{player: The player's name | block: An array with "
                     + "keys 'type', 'data', 'X', 'Y', 'Z' and 'world' "
                     + "for the physical location of the block | "
-                    + "drops: an array of items the block will drop}"
+                    + "drops: an array of arrays (with keys 'type' (int), "
+                    + "'amount' (int), and 'durability' (int)) of items the "
+                    + "block will drop}"
                     + "{}"
                     + "{player|block|drops}";
         }
@@ -140,15 +143,11 @@ public class BlockEvents {
 			
 			MCBlockBreakEvent event = (MCBlockBreakEvent)e;
 			
-			/*
-			 * Commented out pending Bukkit supporting this easier.
-			 * Or a in-depth dissection of CH code.
-			 * 
-			 * if (key.equals("drops")) {
+			if (key.equals("drops")) {
+				event.getBlock().setType(Material.AIR);
+				
 				if (value instanceof CArray) {
 					CArray arr = (CArray)value;
-					event.getBlock().getDrops().clear();
-					System.out.println(event.getBlock().getDrops().size());
 					
 					for(int i=0; i < arr.size(); i++) {
 						CArray item = (CArray)arr.get(i);
@@ -169,17 +168,13 @@ public class BlockEvents {
 								stk.setDurability(data);
 							}
 							
-							boolean success = event.getBlock().getDrops().add(stk);
-							
-							if(!success) {
-								System.out.println("failed");
-							}
+							event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), stk);
 						}
 					}
 					
 					return true;
 				}
-			}*/
+			}
 			
 			return false;
 		}
