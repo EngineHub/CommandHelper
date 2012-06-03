@@ -4,6 +4,9 @@
  */
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.CHLog.Tags;
@@ -40,14 +43,13 @@ public class BlockEvents {
         public String docs() {
             return "{player: <string match> | type: <string match> | data: <string match>} "
             		+ "This event is called when a block is broken. "
-                    + "Cancelling the event cancels the breakage."
+                    + "Cancelling the event cancels the breakage. "
                     + "{player: The player's name | block: An array with "
-                    + "keys 'type', 'data', 'X', 'Y', 'Z' and 'world' "
+                    + "keys 'type' (string), 'X' (int), 'Y' (int), 'Z' (int) and 'world' (string) "
                     + "for the physical location of the block | "
-                    + "drops: an array of arrays (with keys 'type' (int), "
-                    + "'amount' (int), and 'durability' (int)) of items the "
-                    + "block will drop}"
-                    + "{}"
+                    + "drops: an array of arrays (with keys 'type' (string), "
+                    + "'amount' (int)) of items the block will drop} "
+                    + "{} "
                     + "{player|block|drops}";
         }
 
@@ -115,8 +117,8 @@ public class BlockEvents {
             map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
             
             CArray blk = new CArray(Target.UNKNOWN);
-            blk.set("type", new CInt(event.getBlock().getTypeId(), Target.UNKNOWN));
-            blk.set("data", new CInt(event.getBlock().getData(), Target.UNKNOWN));
+            String blktype = Static.ParseItemNotation(new BukkitMCBlock(event.getBlock()));
+            blk.set("type", new CString(blktype, Target.UNKNOWN));
             blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN));
             blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN));
             blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN));
@@ -128,9 +130,11 @@ public class BlockEvents {
             for(Iterator<ItemStack> iter = items.iterator(); iter.hasNext();) {
             	ItemStack stack = (ItemStack)iter.next();
             	CArray item = new CArray(Target.UNKNOWN);
+            	
             	item.set("amount", Integer.toString(stack.getAmount()));
-            	item.set("type", new CInt(stack.getTypeId(), Target.UNKNOWN));
-            	item.set("durability", new CInt(stack.getDurability(), Target.UNKNOWN));
+            	String type = Static.ParseItemNotation(new BukkitMCItemStack(stack));
+            	item.set("type", new CString(type, Target.UNKNOWN));
+            	
             	drops.push(item);
             }
             map.put("drops", drops);
@@ -142,33 +146,29 @@ public class BlockEvents {
 				BindableEvent e) {
 			
 			MCBlockBreakEvent event = (MCBlockBreakEvent)e;
+			Block blk = event.getBlock();
 			
 			if (key.equals("drops")) {
-				event.getBlock().setType(Material.AIR);
+				blk.setType(Material.AIR);
 				
 				if (value instanceof CArray) {
 					CArray arr = (CArray)value;
 					
 					for(int i=0; i < arr.size(); i++) {
 						CArray item = (CArray)arr.get(i);
+						
 						if(item.containsKey("type")){
-							ItemStack stk = new ItemStack(i, i);
-							stk.setTypeId((int)((CInt)item.get("type")).getInt());
+							String type = item.get("type").val();
 							
 							int amt;
 							if(item.containsKey("amount")) {
-								amt = (int)((CInt)item.get("amount")).getInt();
+								amt = Integer.parseInt(item.get("amount").val());
 							} else {
 								amt = 1;
 							}
-							stk.setAmount(amt);
-							
-							if(item.containsKey("durability")) {
-								short data = (short)((CInt)item.get("durability")).getInt();
-								stk.setDurability(data);
-							}
-							
-							event.getBlock().getWorld().dropItemNaturally(event.getBlock().getLocation(), stk);
+
+							MCItemStack stk = Static.ParseItemNotation("block_break", type, amt, Target.UNKNOWN);
+							blk.getWorld().dropItemNaturally(blk.getLocation(), (ItemStack)stk.getHandle());
 						}
 					}
 					
@@ -195,7 +195,7 @@ public class BlockEvents {
                     + "Z: the Z coordinate of the block| world: the world of the block | "
                     + "data: the data value for the block being placed | block: An array with keys "
                     + "'type', 'data' for the info pertaining to the block being placed "
-                    + "| against: the block being placed against | oldblock: the block "
+                    + "| against: the block being placed against | oldblock: the blocktype "
                     + "being replaced} "
                     + "{type|data} "
                     + "{player|X|Y|Z|world|block|against|oldblock}";
@@ -255,13 +255,6 @@ public class BlockEvents {
 		public BindableEvent convert(CArray manualObject) {
 			return null;
 		}
-		
-		private CArray blockArray(Block blk) {
-			CArray arr = new CArray(Target.UNKNOWN);
-            arr.set("type", new CInt(blk.getTypeId(), Target.UNKNOWN));
-            arr.set("data", new CInt(blk.getData(), Target.UNKNOWN));
-            return arr;
-		}
 
 		public Map<String, Construct> evaluate(BindableEvent e)
 				throws EventException {
@@ -276,8 +269,17 @@ public class BlockEvents {
             map.put("Z", new CInt(blk.getZ(), Target.UNKNOWN));
             map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
             
-            map.put("block", blockArray(event.getBlock()));
-            map.put("against", blockArray(event.getBlockAgainst()));
+            String blktype = Static.ParseItemNotation(new BukkitMCBlock(event.getBlock()));
+            map.put("type", new CString(blktype, Target.UNKNOWN));
+            
+            CArray agst = new CArray(Target.UNKNOWN);
+            Block agstblk = event.getBlockAgainst();
+            String againsttype = Static.ParseItemNotation(new BukkitMCBlock(agstblk));
+            agst.set("against", new CString(againsttype, Target.UNKNOWN));
+            agst.set("X", new CInt(agstblk.getX(), Target.UNKNOWN));
+            agst.set("Y", new CInt(agstblk.getY(), Target.UNKNOWN));
+            agst.set("Z", new CInt(agstblk.getZ(), Target.UNKNOWN));
+            map.put("against", agst);
             
             BlockState old = event.getBlockReplacedState();
             CArray oldarr = new CArray(Target.UNKNOWN);
