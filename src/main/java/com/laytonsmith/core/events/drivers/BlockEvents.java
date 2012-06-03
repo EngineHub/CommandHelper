@@ -11,10 +11,15 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+
+import java.util.Collection;
+import java.util.Iterator;
 import java.util.Map;
 
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -37,9 +42,10 @@ public class BlockEvents {
                     + "Cancelling the event cancels the breakage."
                     + "{player: The player's name | block: An array with "
                     + "keys 'type', 'data', 'X', 'Y', 'Z' and 'world' "
-                    + "for the physical location of the block }"
+                    + "for the physical location of the block | "
+                    + "drops: an array of items the block will drop}"
                     + "{}"
-                    + "{player|block}";
+                    + "{player|block|drops}";
         }
 
         public CHVersion since() {
@@ -113,12 +119,68 @@ public class BlockEvents {
             blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN));
             blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN));
             map.put("block", blk);
+
+            CArray drops = new CArray(Target.UNKNOWN);
+            Collection<ItemStack> items = event.getBlock().getDrops();
+            for(Iterator<ItemStack> iter = items.iterator(); iter.hasNext();) {
+            	ItemStack stack = (ItemStack)iter.next();
+            	CArray item = new CArray(Target.UNKNOWN);
+            	item.set("amount", Integer.toString(stack.getAmount()));
+            	item.set("type", new CInt(stack.getTypeId(), Target.UNKNOWN));
+            	item.set("durability", new CInt(stack.getDurability(), Target.UNKNOWN));
+            	drops.push(item);
+            }
+            map.put("drops", drops);
             
 			return map;
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+				BindableEvent e) {
+			
+			MCBlockBreakEvent event = (MCBlockBreakEvent)e;
+			
+			/*
+			 * Commented out pending Bukkit supporting this easier.
+			 * Or a in-depth dissection of CH code.
+			 * 
+			 * if (key.equals("drops")) {
+				if (value instanceof CArray) {
+					CArray arr = (CArray)value;
+					event.getBlock().getDrops().clear();
+					System.out.println(event.getBlock().getDrops().size());
+					
+					for(int i=0; i < arr.size(); i++) {
+						CArray item = (CArray)arr.get(i);
+						if(item.containsKey("type")){
+							ItemStack stk = new ItemStack(i, i);
+							stk.setTypeId((int)((CInt)item.get("type")).getInt());
+							
+							int amt;
+							if(item.containsKey("amount")) {
+								amt = (int)((CInt)item.get("amount")).getInt();
+							} else {
+								amt = 1;
+							}
+							stk.setAmount(amt);
+							
+							if(item.containsKey("durability")) {
+								short data = (short)((CInt)item.get("durability")).getInt();
+								stk.setDurability(data);
+							}
+							
+							boolean success = event.getBlock().getDrops().add(stk);
+							
+							if(!success) {
+								System.out.println("failed");
+							}
+						}
+					}
+					
+					return true;
+				}
+			}*/
+			
 			return false;
 		}
     }
