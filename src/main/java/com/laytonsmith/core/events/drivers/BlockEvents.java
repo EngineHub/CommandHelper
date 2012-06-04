@@ -45,11 +45,11 @@ public class BlockEvents {
             		+ "This event is called when a block is broken. "
                     + "Cancelling the event cancels the breakage. "
                     + "{player: The player's name | block: An array with "
-                    + "keys 'type' (string), 'X' (int), 'Y' (int), 'Z' (int) and 'world' (string) "
-                    + "for the physical location of the block | "
+                    + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) " +
+                    "and 'world' (string) for the physical location of the block | "
                     + "drops: an array of arrays (with keys 'type' (string), "
-                    + "'amount' (int)) of items the block will drop} "
-                    + "{} "
+                    + "'qty' (int), 'data' (int), 'enchants' (array)) of items the block will drop} "
+                    + "{drops} "
                     + "{player|block|drops}";
         }
 
@@ -117,24 +117,25 @@ public class BlockEvents {
             map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
             
             CArray blk = new CArray(Target.UNKNOWN);
-            String blktype = Static.ParseItemNotation(new BukkitMCBlock(event.getBlock()));
-            blk.set("type", new CString(blktype, Target.UNKNOWN));
+            
+            int blktype = event.getBlock().getTypeId();
+            blk.set("type", new CInt(blktype, Target.UNKNOWN));
+            
+            int blkdata = event.getBlock().getData();
+            blk.set("data", new CInt(blkdata, Target.UNKNOWN));
+            
             blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN));
             blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN));
             blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN));
             blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN));
+            
             map.put("block", blk);
 
             CArray drops = new CArray(Target.UNKNOWN);
             Collection<ItemStack> items = event.getBlock().getDrops();
             for(Iterator<ItemStack> iter = items.iterator(); iter.hasNext();) {
-            	ItemStack stack = (ItemStack)iter.next();
-            	CArray item = new CArray(Target.UNKNOWN);
-            	
-            	item.set("amount", Integer.toString(stack.getAmount()));
-            	String type = Static.ParseItemNotation(new BukkitMCItemStack(stack));
-            	item.set("type", new CString(type, Target.UNKNOWN));
-            	
+            	MCItemStack stack = new BukkitMCItemStack((ItemStack)iter.next());
+            	CArray item = (CArray)ObjectGenerator.GetGenerator().item(stack, Target.UNKNOWN);
             	drops.push(item);
             }
             map.put("drops", drops);
@@ -156,20 +157,8 @@ public class BlockEvents {
 					
 					for(int i=0; i < arr.size(); i++) {
 						CArray item = (CArray)arr.get(i);
-						
-						if(item.containsKey("type")){
-							String type = item.get("type").val();
-							
-							int amt;
-							if(item.containsKey("amount")) {
-								amt = Integer.parseInt(item.get("amount").val());
-							} else {
-								amt = 1;
-							}
-
-							MCItemStack stk = Static.ParseItemNotation("block_break", type, amt, Target.UNKNOWN);
-							blk.getWorld().dropItemNaturally(blk.getLocation(), (ItemStack)stk.getHandle());
-						}
+						MCItemStack stk = ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN);
+						blk.getWorld().dropItemNaturally(blk.getLocation(), (ItemStack)stk.getHandle());
 					}
 					
 					return true;
@@ -193,12 +182,10 @@ public class BlockEvents {
                     + "{player: The player's name | type: numerical type id of the block being "
                     + "placed | X: the X coordinate of the block | Y: the Y coordinate of the block | "
                     + "Z: the Z coordinate of the block| world: the world of the block | "
-                    + "data: the data value for the block being placed | block: An array with keys "
-                    + "'type', 'data' for the info pertaining to the block being placed "
-                    + "| against: the block being placed against | oldblock: the blocktype "
-                    + "being replaced} "
+                    + "data: the data value for the block being placed | against: the block "
+                    + "being placed against | oldblock: the blocktype and blockdata being replaced} "
                     + "{type|data} "
-                    + "{player|X|Y|Z|world|block|against|oldblock}";
+                    + "{player|X|Y|Z|world|type|data|against|oldblock}";
         }
 
         public CHVersion since() {
@@ -260,22 +247,27 @@ public class BlockEvents {
 				throws EventException {
 			MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
             Map<String, Construct> map = evaluate_helper(e);
+            Block blk = event.getBlock();
             
             map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
             
-            Block blk = event.getBlock();
             map.put("X", new CInt(blk.getX(), Target.UNKNOWN));
             map.put("Y", new CInt(blk.getY(), Target.UNKNOWN));
             map.put("Z", new CInt(blk.getZ(), Target.UNKNOWN));
             map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
             
-            String blktype = Static.ParseItemNotation(new BukkitMCBlock(event.getBlock()));
-            map.put("type", new CString(blktype, Target.UNKNOWN));
+            int blktype = event.getBlock().getTypeId();
+            map.put("type", new CInt(blktype, Target.UNKNOWN));
+            
+            int blkdata = event.getBlock().getData();
+            map.put("data", new CInt(blkdata, Target.UNKNOWN));
             
             CArray agst = new CArray(Target.UNKNOWN);
             Block agstblk = event.getBlockAgainst();
-            String againsttype = Static.ParseItemNotation(new BukkitMCBlock(agstblk));
-            agst.set("against", new CString(againsttype, Target.UNKNOWN));
+            int againsttype = agstblk.getTypeId();
+            agst.set("type", new CInt(againsttype, Target.UNKNOWN));
+            int againstdata = agstblk.getData();
+            agst.set("data", new CInt(againstdata, Target.UNKNOWN));
             agst.set("X", new CInt(agstblk.getX(), Target.UNKNOWN));
             agst.set("Y", new CInt(agstblk.getY(), Target.UNKNOWN));
             agst.set("Z", new CInt(agstblk.getZ(), Target.UNKNOWN));
