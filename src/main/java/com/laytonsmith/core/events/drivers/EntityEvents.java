@@ -14,7 +14,10 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Map;
 
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
+import org.bukkit.entity.Projectile;
+
 
 /**
  *
@@ -23,6 +26,94 @@ import org.bukkit.entity.Player;
 public class EntityEvents {
     public static String docs(){
         return "Contains events related to an entity";
+    }
+    
+    @api
+    public static class entity_damage_player extends AbstractEvent {
+
+		public String getName() {
+			return "entity_damage_player";
+		}
+
+		public String docs() {
+			return "{} "
+            		+ "This event is called when a player is damaged by another entity."
+                    + "{player: The player being damaged | damager: The type of entity causing damage | "
+            		+ "amount: amount of damage caused | cause: the cause of damage | "
+                    + "data: any data about the event} "
+                    + "{amount} "
+                    + "{player|amount|damager|cause|data}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if(e instanceof MCEntityDamageByEntityEvent){
+				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
+				return event.getDamagee() instanceof Player;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if(e instanceof MCEntityDamageByEntityEvent){
+                MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                
+                // Guaranteed to be a player via matches
+                String name = ((Player)event.getDamagee()).getName();
+                map.put("player", new CString(name, Target.UNKNOWN));
+                String dtype = event.getDamager().getType().name();
+                map.put("damager",  new CString(dtype, Target.UNKNOWN));
+                map.put("cause",  new CString(event.getCause().name(), Target.UNKNOWN));
+                map.put("amount",  new CInt(event.getDamage(), Target.UNKNOWN));
+                
+                String data = "";
+                if(event.getDamager().getType() == EntityType.PLAYER) {
+                	data = ((Player)event.getDamager()).getName();
+                } else if (event.getDamager() instanceof Projectile) {
+                	Entity shooter = ((Projectile)event.getDamager()).getShooter();
+                	
+                	if(shooter.getType() == EntityType.PLAYER) {
+                		data = ((Player)event.getDamager()).getName();
+                	} else {
+                		data = ((Projectile)event.getDamager()).getShooter().getType().name().toUpperCase();
+                	}
+                }
+                map.put("data",  new CString(data, Target.UNKNOWN));
+                
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to EntityDamageByEntityEvent");
+            }
+		}
+
+		public Driver driver() {
+			return Driver.ENTITY_DAMAGE_PLAYER;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent e) {
+			MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent)e;
+            
+    		if (key.equals("amount")) {
+    			if (value instanceof CInt) {
+    				event.setDamage(Integer.parseInt(value.val()));
+    				
+    				return true;
+    			}
+    		}
+    		return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+    	
     }
     
     @api
