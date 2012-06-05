@@ -14,8 +14,6 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.events.abstraction;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.block.BlockFace;

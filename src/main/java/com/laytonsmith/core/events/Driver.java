@@ -23,5 +23,6 @@ public enum Driver {
     SIGN_CHANGED,
     BLOCK_BREAK,
     BLOCK_PLACE,
-    TARGET_ENTITY,  
+    TARGET_ENTITY, 
+    ENTITY_DAMAGE_PLAYER,  
 }

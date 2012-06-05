@@ -6,10 +6,8 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.*;
-import com.laytonsmith.core.CHLog.Tags;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.exceptions.EventException;
@@ -23,7 +21,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -300,10 +297,10 @@ public class BlockEvents {
 					try {
 						b = Byte.parseByte(value.val());
 					} catch (NumberFormatException exc) {
-						if ((int)((CInt)value).getInt() < 0) {
+						if(Integer.parseInt(value.val()) < 0) {
 							b = 0;
 						} else {
-							b = (byte)255;
+							b = Byte.MAX_VALUE;
 						}
 					}
 					
@@ -329,11 +326,11 @@ public class BlockEvents {
                     + "Cancelling the event cancels any edits completely."
                     + "{player: The player's name | 1: The first line of the sign | 2: "
                     + "The second line of the sign | 3: The third line of the sign | 4: "
-                    + "The fourth line of the sign | block: An array with keys 'X', 'Y', 'Z' and 'world' "
+                    + "The fourth line of the sign | location: An array with keys 'X', 'Y', 'Z' and 'world' "
                     + "for the physical location of the sign | text: An array with keys 0 thru 3 defining "
                     + "every line on the sign}"
                     + "{1|2|3|4|text}"
-                    + "{player|1|2|3|4|block|text}";
+                    + "{player|1|2|3|4|location|text}";
         }
 
         public CHVersion since() {
