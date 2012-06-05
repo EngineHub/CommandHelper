@@ -6,10 +6,8 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.*;
-import com.laytonsmith.core.CHLog.Tags;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.exceptions.EventException;
@@ -23,7 +21,6 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.material.MaterialData;
 
 /**
  *
@@ -300,10 +297,10 @@ public class BlockEvents {
 					try {
 						b = Byte.parseByte(value.val());
 					} catch (NumberFormatException exc) {
-						if ((int)((CInt)value).getInt() < 0) {
+						if(Integer.parseInt(value.val()) < 0) {
 							b = 0;
 						} else {
-							b = (byte)255;
+							b = Byte.MAX_VALUE;
 						}
 					}
 					

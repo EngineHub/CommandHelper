@@ -379,7 +379,6 @@ public class PlayerEvents {
             }
         }
         
-        @Override
         public BindableEvent convert(CArray manual){
             MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
             MCAction a = MCAction.valueOf(manual.get("action").val().toUpperCase());
@@ -784,7 +783,7 @@ public class PlayerEvents {
                     + "This event is fired off when a player runs any command at all. This actually fires before normal "
                     + " CommandHelper aliases, allowing you to insert control before defined aliases, even."
                     + "{command: The entire command | prefix: Just the prefix of the command}"
-                    + "{}"
+                    + "{command}"
                     + "{command}";
         }
         
@@ -835,6 +834,11 @@ public class PlayerEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 //Fill in the event parameters
                 map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
+                
+                StringHandling.parse_args pa = new StringHandling.parse_args();
+                CArray ca = (CArray)pa.exec(Target.UNKNOWN, null, new CString(event.getCommand(), Target.UNKNOWN));
+                map.put("prefix", new CString(ca.get(0).val(), Target.UNKNOWN));
+                
                 return map;
             } else {
                 throw new EventException("Cannot convert e to MCPlayerCommandEvent");
@@ -844,9 +848,11 @@ public class PlayerEvents {
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if (event instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent e = (MCPlayerCommandEvent) event;
+                
                 if("command".equals(key)){
                     e.setCommand(value.val());
                 }
+                
                 return true;
             }
             return false;
