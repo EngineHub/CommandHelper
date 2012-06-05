@@ -329,11 +329,11 @@ public class BlockEvents {
                     + "Cancelling the event cancels any edits completely."
                     + "{player: The player's name | 1: The first line of the sign | 2: "
                     + "The second line of the sign | 3: The third line of the sign | 4: "
-                    + "The fourth line of the sign | block: An array with keys 'X', 'Y', 'Z' and 'world' "
+                    + "The fourth line of the sign | location: An array with keys 'X', 'Y', 'Z' and 'world' "
                     + "for the physical location of the sign | text: An array with keys 0 thru 3 defining "
                     + "every line on the sign}"
                     + "{1|2|3|4|text}"
-                    + "{player|1|2|3|4|block|text}";
+                    + "{player|1|2|3|4|location|text}";
         }
 
         public CHVersion since() {
