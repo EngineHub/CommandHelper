@@ -166,7 +166,7 @@ public class Prefilters {
     
     private static void RegexMatch(Construct expression, Construct value) throws PrefilterNonMatchException{
         if(expression.val().matches("/.*/")){
-            String exp = expression.val().substring(1, expression.val().length());
+            String exp = expression.val().substring(1, expression.val().length() - 1);
             if(!value.val().matches(exp)){
                 throw new PrefilterNonMatchException();
             }
