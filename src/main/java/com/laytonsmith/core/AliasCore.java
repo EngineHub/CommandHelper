@@ -40,7 +40,7 @@ public class AliasCore {
     private File prefFile;
     private File mainFile;
     //AliasConfig config;
-    List<Script> scripts;
+    private List<Script> scripts;
     static final Logger logger = Logger.getLogger("Minecraft");
     private Set<String> echoCommand = new HashSet<String>();
     private PermissionsResolverManager perms;
@@ -62,6 +62,10 @@ public class AliasCore {
         this.perms = perms;
         this.parent = parent;
         this.mainFile = mainFile;
+    }
+    
+    public List<Script> getScripts() {
+    	return new ArrayList<Script>(scripts);
     }
 
     /**
