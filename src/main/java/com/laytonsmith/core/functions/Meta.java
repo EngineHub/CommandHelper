@@ -345,6 +345,62 @@ public class Meta {
             return true;
         }
     }
+    
+    @api
+    public static class is_alias extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args)
+				throws ConfigRuntimeException {
+			AliasCore ac = Static.getAliasCore();
+			
+			for (Script s : ac.getScripts()) {
+				if (s.match(args[0].val())) {
+					return new CBoolean(true, t);
+				}
+			}
+			
+			MCPlayer p = environment.GetPlayer();
+			if (p instanceof MCPlayer) {
+				// p might be null
+				for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts()) {
+					if (s.match(args[0].val())) {
+						return new CBoolean(true, t);
+					}
+				}
+			}
+			
+			return new CBoolean(false, t);
+		}
+
+		public String getName() {
+			return "is_alias";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+            return "boolean {cmd} Returns true if using call_alias with this cmd would trigger an alias.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+    	
+    }
 
     @api
     public static class call_alias extends AbstractFunction {
