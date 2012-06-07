@@ -199,23 +199,35 @@ public class Echoes {
             try{
                 color = MCChatColor.valueOf(args[0].val().toUpperCase()).toString();
             } catch(IllegalArgumentException e){}
-            String a = args[0].val().toUpperCase();
-            if(a.equals("A")){
-                a = "10";
-            } else if(a.equals("B")){
-                a = "11";
-            } else if(a.equals("C")){
-                a = "12";
-            } else if(a.equals("D")){
-                a = "13";
-            } else if(a.equals("E")){
-                a = "14";
-            } else if(a.equals("F")){
-                a = "15";
+            String a = args[0].val().toLowerCase();
+            if(a.equals("10")){
+                a = "a";
+            } else if(a.equals("11")){
+                a = "b";
+            } else if(a.equals("12")){
+                a = "c";
+            } else if(a.equals("13")){
+                a = "d";
+            } else if(a.equals("14")){
+                a = "e";
+            } else if(a.equals("15")){
+                a = "f";
+            } else if(a.equals("random")){
+                a = "k";
+            } else if(a.equals("bold")){
+                a = "l";
+            } else if(a.equals("strike") || a.equals("strikethrough")){
+                a = "m";
+            } else if(a.equals("underline") || a.equals("underlined")){
+                a = "n";
+            } else if(a.equals("italic") || a.equals("italics")){
+                a = "o";
+            } else if(a.equals("plain white") || a.equals("plainwhite") || a.equals("plain_white")){
+                a = "r";
             }
             try{
-                Integer p = Integer.parseInt(a);
-                color = MCChatColor.getByCode(p).toString();
+                Character p = String.valueOf(a).charAt(0);
+                color = MCChatColor.getByChar(p).toString();
             } catch(NumberFormatException e){}
             
             return new CString(color, t);
@@ -228,7 +240,8 @@ public class Echoes {
             }
             return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
                     + " The list of valid color names can be found in the MCChatColor class, and case doesn't matter. For your reference,"
-                    + " here is the list of valid colors: " + StringUtil.joinString(b, ", ", 0) + ", in addition the integers 0-15 will work, or the hex numbers from 0-F.";
+                    + " here is the list of valid colors: " + StringUtil.joinString(b, ", ", 0) + ", in addition the integers 0-15 will work,"
+                    + " or the hex numbers from 0-F, and k, l, m, n, o, and r, which represent styles.";
         }
         
         public ExceptionType[] thrown(){

@@ -5,6 +5,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.SerializedPersistance;
+import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
@@ -32,8 +33,11 @@ public class Interpreter {
     public static void start(){
         try {
             MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
-        } catch (ConfigCompileException ex) {}
+        } catch (ConfigCompileException ex) {}        
         CommandHelperPlugin.persist = new SerializedPersistance(new File("CommandHelper/persistance.ser"));
+        if(TermColors.SYSTEM == TermColors.SYS.WINDOWS){
+            TermColors.DisableColors();
+        }
         pl(YELLOW + "You are now in cmdline interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
                 + " multiline mode.\nMost Minecraft features will not work, and your working directory is the"
                 + " CommandHelper.jar directory, not the Server directory. Have fun!");

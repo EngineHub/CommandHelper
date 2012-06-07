@@ -35,7 +35,7 @@ public class CSlice extends Construct {
             start = Long.parseLong(sstart.trim());
             finish = Long.parseLong(sfinish.trim());
         } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + split[0] + " and " + split[1], t);
+            throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + sstart + " and " + sfinish, t);
         }
     }
     
