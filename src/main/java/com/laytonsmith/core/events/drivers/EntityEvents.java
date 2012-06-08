@@ -124,11 +124,12 @@ public class EntityEvents {
         }
 
         public String docs() {
-            return "{player: <string match>} "
+            return "{player: <string match> | mobtype: <macro>} "
             		+ "This event is called when a player is targeted by another entity."
-                    + "{player: The player's name}"
+                    + "{player: The player's name | mobtype: The type of mob targeting "
+                    + "the player (this will be all capitals!)}"
                     + "{player}"
-                    + "{player}";
+                    + "{player|mobtype}";
         }
 
         public CHVersion since() {
@@ -142,7 +143,9 @@ public class EntityEvents {
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
         	if(e instanceof MCEntityTargetEvent){
         		MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
-        		 
+        		
+        		Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
+        		
 	        	if (ete.getTarget() instanceof Player) {
 	        		Prefilters.match(prefilter, "player", ((Player)ete.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
 	        		return true;
@@ -158,6 +161,9 @@ public class EntityEvents {
                 
                 String name = ((Player)ete.getTarget()).getName();
                 map.put("player", new CString(name, Target.UNKNOWN));
+                
+                String type = ete.getEntityType().name();
+                map.put("mobtype", new CString(type, Target.UNKNOWN));
                 
                 return map;
             } else {
