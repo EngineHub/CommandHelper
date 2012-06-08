@@ -126,7 +126,8 @@ public class EntityEvents {
         public String docs() {
             return "{player: <string match> | mobtype: <macro>} "
             		+ "This event is called when a player is targeted by another entity."
-                    + "{player: The player's name | mobtype: The type of mob targeting the player}"
+                    + "{player: The player's name | mobtype: The type of mob targeting "
+                    + "the player (this will be all capitals!)}"
                     + "{player}"
                     + "{player|mobtype}";
         }
