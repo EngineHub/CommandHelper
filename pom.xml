@@ -151,17 +151,12 @@
         <!-- Bukkit -->
         <dependency>
             <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.2.5-R3.0</version>
+            <artifactId>craftbukkit</artifactId>
+            <version>1.2.5-R4.0</version>
         </dependency>
         
         <!-- CraftBukkit Dependency for experimental features -->
         
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
-            <version>1.2.5-R3.0</version>
-        </dependency>
         
         <!-- WorldGuard for some of the sk functions -->
         <dependency>
@@ -170,13 +165,6 @@
             <version>5.5</version>
         </dependency>
     
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.7</version>
-            <type>jar</type>
-            <scope>compile</scope>
-        </dependency>
         
         
         <!-- Used for economy stuff -->
@@ -277,6 +265,11 @@
             <artifactId>powermock-api-mockito</artifactId>
             <version>1.4.10</version>
             <scope>test</scope>
+        </dependency>
+        <dependency>
+        	<groupId>org.bukkit</groupId>
+        	<artifactId>bukkit</artifactId>
+        	<version>1.2.5-R4.0</version>
         </dependency>
     </dependencies>
     <properties>
