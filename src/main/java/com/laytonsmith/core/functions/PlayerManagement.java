@@ -2520,7 +2520,7 @@ public class PlayerManagement {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{0};
+            return new Integer[]{0, 1};
         }
 
         public String docs() {

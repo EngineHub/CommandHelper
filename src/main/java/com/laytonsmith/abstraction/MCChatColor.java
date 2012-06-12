@@ -71,21 +71,61 @@ public enum MCChatColor {
     /**
      * Represents white
      */
-    WHITE(0xF);
+    WHITE(0xF),
+    
+    //Styles
+    /**
+     * Represents the random style
+     */
+    RANDOM('k'),
+    
+    /**
+     * Represents the bold style
+     */
+    BOLD('l'),
+    
+    /**
+     * Represents the strikethrough style
+     */
+    STRIKETHROUGH('m'),
+    
+    /**
+     * Represents the underline style
+     */
+    UNDERLINE('n'),
+    
+    /**
+     * Represents the italic style
+     */
+    ITALIC('o'),
+    
+    /**
+     * Represents the plain white style
+     */
+    PLAIN_WHITE('r');
 
-    private final int code;
+    private final char code;
     private final static Map<Integer, MCChatColor> colors = new HashMap<Integer, MCChatColor>();
+    private final static Map<Character, MCChatColor> charColors = new HashMap<Character, MCChatColor>();
 
-    private MCChatColor(final int code) {
+    private MCChatColor(char code){
         this.code = code;
+    }
+    private MCChatColor(int code) {
+        this.code = Integer.toHexString(code).toLowerCase().charAt(0);
     }
 
     /**
      * Gets the data value associated with this color
      *
      * @return An integer value of this color code
+     * @deprecated Use getChar in favor of this method
      */
     public int getCode() {
+        return code;
+    }
+    
+    public char getChar(){
         return code;
     }
 
@@ -99,10 +139,16 @@ public enum MCChatColor {
      *
      * @param code Code to check
      * @return Associative {@link com.laytonsmith.abstraction.MCChatColor} with the given code, or null if it doesn't exist
+     * @deprecated This should not be used, in favor of the char lookup
      */
     public static MCChatColor getByCode(final int code) {
         return colors.get(code);
     }
+    
+    public static MCChatColor getByChar(char code){
+        return charColors.get(Character.valueOf(code));
+    }
+    
 
     /**
      * Strips the given message of all color codes
@@ -121,6 +167,7 @@ public enum MCChatColor {
     static {
         for (MCChatColor color : MCChatColor.values()) {
             colors.put(color.getCode(), color);
+            charColors.put(color.getChar(), color);
         }
     }
 }
