@@ -253,12 +253,22 @@ public class DataHandlingTest {
     }
 
     @Test(timeout = 10000)
-    public void testExportImportStringValue() throws ConfigCompileException {
+    public void testExportImportStringValue1() throws ConfigCompileException {
         when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
         SRun("export('hi', 20)", fakePlayer);
         SRun("msg(import('hi'))", fakePlayer);
         verify(fakePlayer).sendMessage("20");
     }    
+    
+    @Test
+    public void testExportImportStringValue2() throws ConfigCompileException{
+        when(fakePlayer.isOp()).thenReturn(Boolean.TRUE);
+        SRun("assign(@test, array(1, 2, 3))"
+                + "export('myarray', @test)"             
+                + "msg(@newtest)", fakePlayer);
+        SRun("assign(@newtest, import('myarray')) msg(@newtest)", fakePlayer);
+        verify(fakePlayer).sendMessage("{1, 2, 3}");
+    }
     
     @Test
     public void testExportImportWithProcs() throws ConfigCompileException{

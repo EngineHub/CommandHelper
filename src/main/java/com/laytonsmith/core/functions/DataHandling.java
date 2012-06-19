@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.*;
@@ -1586,7 +1587,12 @@ public class DataHandling {
                 }
             } else {
                 String key = GetNamespace(args, args.length - 1, getName(), t);
-                Globals.SetGlobal(key, args[args.length - 1]);
+                Construct c = args[args.length - 1];
+                //We want to store the value contained, not the ivar itself
+                while(c instanceof IVariable){
+                    c = environment.GetVarList().get(((IVariable)c).getName(), t).ival();
+                }
+                Globals.SetGlobal(key, c);
             }
             return new CVoid(t);
         }
