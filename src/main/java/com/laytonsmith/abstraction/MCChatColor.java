@@ -131,7 +131,7 @@ public enum MCChatColor {
 
     @Override
     public String toString() {
-        return String.format("\u00A7%x", code);
+        return String.format("\u00A7%s", code);
     }
 
     /**

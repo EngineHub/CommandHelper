@@ -227,7 +227,11 @@ public class Echoes {
             }
             try{
                 Character p = String.valueOf(a).charAt(0);
-                color = MCChatColor.getByChar(p).toString();
+                MCChatColor cc = MCChatColor.getByChar(p);
+                if(cc == null){
+                    cc = MCChatColor.WHITE;
+                }
+                color = cc.toString();
             } catch(NumberFormatException e){}
             
             return new CString(color, t);
