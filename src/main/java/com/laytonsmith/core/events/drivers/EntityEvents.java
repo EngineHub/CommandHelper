@@ -4,19 +4,20 @@
  */
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCEntityType;
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.abstraction.events.*;
-import com.laytonsmith.core.*;
+import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
+import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import java.util.Map;
-
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
-import org.bukkit.entity.Player;
-import org.bukkit.entity.Projectile;
 
 
 /**
@@ -49,7 +50,7 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if(e instanceof MCEntityDamageByEntityEvent){
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
-				return event.getDamagee() instanceof Player;
+				return event.getDamagee() instanceof MCPlayer;
 			}
 			return false;
 		}
@@ -65,7 +66,7 @@ public class EntityEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 
                 // Guaranteed to be a player via matches
-                String name = ((Player)event.getDamagee()).getName();
+                String name = ((MCPlayer)event.getDamagee()).getName();
                 map.put("player", new CString(name, Target.UNKNOWN));
                 String dtype = event.getDamager().getType().name();
                 map.put("damager",  new CString(dtype, Target.UNKNOWN));
@@ -73,15 +74,15 @@ public class EntityEvents {
                 map.put("amount",  new CInt(event.getDamage(), Target.UNKNOWN));
                 
                 String data = "";
-                if(event.getDamager().getType() == EntityType.PLAYER) {
-                	data = ((Player)event.getDamager()).getName();
-                } else if (event.getDamager() instanceof Projectile) {
-                	Entity shooter = ((Projectile)event.getDamager()).getShooter();
+                if(event.getDamager().getType() == MCEntityType.PLAYER) {
+                	data = ((MCPlayer)event.getDamager()).getName();
+                } else if (event.getDamager() instanceof MCProjectile) {
+                	MCEntity shooter = ((MCProjectile)event.getDamager()).getShooter();
                 	
-                	if(shooter.getType() == EntityType.PLAYER) {
-                		data = ((Player)event.getDamager()).getName();
+                	if(shooter.getType() == MCEntityType.PLAYER) {
+                		data = ((MCPlayer)event.getDamager()).getName();
                 	} else {
-                		data = ((Projectile)event.getDamager()).getShooter().getType().name().toUpperCase();
+                		data = ((MCProjectile)event.getDamager()).getShooter().getType().name().toUpperCase();
                 	}
                 }
                 map.put("data",  new CString(data, Target.UNKNOWN));
@@ -146,8 +147,8 @@ public class EntityEvents {
         		
         		Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
         		
-	        	if (ete.getTarget() instanceof Player) {
-	        		Prefilters.match(prefilter, "player", ((Player)ete.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
+	        	if (ete.getTarget() instanceof MCPlayer) {
+	        		Prefilters.match(prefilter, "player", ((MCPlayer)ete.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
 	        		return true;
 	        	}
         	}
@@ -159,7 +160,7 @@ public class EntityEvents {
                 MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 
-                String name = ((Player)ete.getTarget()).getName();
+                String name = ((MCPlayer)ete.getTarget()).getName();
                 map.put("player", new CString(name, Target.UNKNOWN));
                 
                 String type = ete.getEntityType().name();
@@ -183,7 +184,7 @@ public class EntityEvents {
         				MCPlayer p = Static.GetPlayer(value.val(), Target.UNKNOWN);
         				
         				if (p.isOnline()) {
-        					ete.setTarget((Entity)p);
+        					ete.setTarget((MCEntity)p);
         					return true;
         				}
         			}

@@ -18,6 +18,7 @@ import org.bukkit.World;
 import org.bukkit.command.ConsoleCommandSender;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
+import org.bukkit.event.Listener;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
@@ -81,14 +82,14 @@ public class BukkitConvertor implements Convertor {
     public static final BukkitWorldListener WorldListener = new BukkitWorldListener();
 
     public void Startup(CommandHelperPlugin chp) {
-        chp.registerEvent(BlockListener);
-        chp.registerEvent(EntityListener);
-        chp.registerEvent(InventoryListener);
-        chp.registerEvent(PlayerListener);
-        chp.registerEvent(ServerListener);
-        chp.registerEvent(VehicleListener);
-        chp.registerEvent(WeatherListener);
-        chp.registerEvent(WorldListener);        
+        chp.registerEvent((Listener)BlockListener);
+        chp.registerEvent((Listener)EntityListener);
+        chp.registerEvent((Listener)InventoryListener);
+        chp.registerEvent((Listener)PlayerListener);
+        chp.registerEvent((Listener)ServerListener);
+        chp.registerEvent((Listener)VehicleListener);
+        chp.registerEvent((Listener)WeatherListener);
+        chp.registerEvent((Listener)WorldListener);        
     }
 
     public int LookupItemId(String materialName) {
@@ -132,10 +133,8 @@ public class BukkitConvertor implements Convertor {
             validIDs.remove(id);
         }
     }
-
-    public MCEntity GetCorrectEntity(MCEntity e) {
-
-        Entity be = ((BukkitMCEntity)e)._Entity();
+    
+    public static MCEntity BukkitGetCorrectEntity(Entity be){
         if(be instanceof Tameable){
             return new BukkitMCTameable(be);
         }
@@ -150,9 +149,16 @@ public class BukkitConvertor implements Convertor {
         
         if(be instanceof Player){
             return new BukkitMCPlayer((Player)be);
-        }        
+        }
         
-        return e;
+        throw new Error("While trying to find the correct entity type for " + be.getClass().getName() + ", was unable"
+                + " to find the appropriate implementation. Please alert the developers of this stack trace.");
+    }
+
+    public MCEntity GetCorrectEntity(MCEntity e) {
+
+        Entity be = ((BukkitMCEntity)e)._Entity();
+        return BukkitConvertor.BukkitGetCorrectEntity(be);
     }
 
 }

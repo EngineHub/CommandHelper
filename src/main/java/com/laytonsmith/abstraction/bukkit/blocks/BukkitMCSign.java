@@ -4,7 +4,9 @@
  */
 package com.laytonsmith.abstraction.bukkit.blocks;
 
+import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.bukkit.BukkitMCMaterialData;
 import org.bukkit.block.Sign;
 
 /**
@@ -26,6 +28,14 @@ class BukkitMCSign implements MCSign {
 
     public String getLine(int i) {
         return s.getLine(i);
+    }
+
+    public MCMaterialData getData() {
+        return new BukkitMCMaterialData(s.getData());
+    }
+
+    public int getTypeId() {
+        return s.getTypeId();
     }
     
 }

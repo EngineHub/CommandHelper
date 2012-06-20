@@ -271,7 +271,7 @@ public class DataHandlingTest {
     }
     
     @Test
-    public void testExportImportWithProcs() throws ConfigCompileException{
+    public void testExportImportWithProcs1() throws ConfigCompileException{
         SRun("proc(_derping," +
                 "   msg(import('borked'))"+
                 "   assign(@var, import('borked'))" +
@@ -283,6 +283,15 @@ public class DataHandlingTest {
                 "_derping()", fakePlayer);
         verify(fakePlayer).sendMessage("null");
         verify(fakePlayer, times(3)).sendMessage("{Am, I, borked?}");
+    }
+    
+    @Test
+    public void testExportImportWithProcs2() throws ConfigCompileException{
+        SRun("assign(@array, array(1, 2))"
+                + "export('myarray', @array)", fakePlayer);
+        SRun("proc(_get, return(import('myarray')))"
+                + "msg(_get())", fakePlayer);       
+        verify(fakePlayer).sendMessage("{1, 2}");
     }
 
     @Test(timeout = 10000)

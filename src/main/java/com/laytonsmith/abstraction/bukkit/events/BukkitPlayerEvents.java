@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;

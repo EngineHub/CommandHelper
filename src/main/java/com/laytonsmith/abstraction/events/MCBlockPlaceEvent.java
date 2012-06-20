@@ -1,10 +1,9 @@
 package com.laytonsmith.abstraction.events;
 
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockState;
-
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.core.events.BindableEvent;
 
 /**
@@ -13,9 +12,9 @@ import com.laytonsmith.core.events.BindableEvent;
  */
 public interface MCBlockPlaceEvent extends BindableEvent{
     public MCPlayer getPlayer();
-    public Block getBlock();
-    public Block getBlockAgainst();
-    public BlockState getBlockReplacedState();
+    public MCBlock getBlock();
+    public MCBlock getBlockAgainst();
+    public MCBlockState getBlockReplacedState();
     public MCItemStack getItemInHand();
     public boolean canBuild();
 }

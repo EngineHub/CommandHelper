@@ -1,10 +1,10 @@
 /* To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
- 
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
 import com.laytonsmith.abstraction.events.*;
@@ -23,78 +23,77 @@ import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
-	@abstraction(type=Implementation.Type.BUKKIT)
+
+    @abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCEntityDamageByEntityEvent implements MCEntityDamageByEntityEvent {
-		EntityDamageByEntityEvent event;
-		
-		public BukkitMCEntityDamageByEntityEvent(EntityDamageByEntityEvent e){
+
+        EntityDamageByEntityEvent event;
+
+        public BukkitMCEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
             event = e;
         }
-		
-		public Object _GetObject() {
-			return event;
-		}
 
-		public DamageCause getCause() {
-			return event.getCause();
-		}
+        public Object _GetObject() {
+            return event;
+        }
 
-		public Entity getDamagee() {
-			return event.getEntity();
-		}
+        public MCDamageCause getCause() {
+            return MCDamageCause.valueOf(event.getCause().name());
+        }
 
-		public Entity getDamager() {
-			return event.getDamager();
-		}
+        public MCEntity getDamagee() {
+            return BukkitConvertor.BukkitGetCorrectEntity(event.getEntity());
+        }
 
-		public int getDamage() {
-			return event.getDamage();
-		}
+        public MCEntity getDamager() {
+            return BukkitConvertor.BukkitGetCorrectEntity(event.getDamager());
+        }
 
-		public void setDamage(int damage) {
-			event.setDamage(damage);
-		}
-		
-	}
-	
-	@abstraction(type=Implementation.Type.BUKKIT)
-    public static class BukkitMCTargetEvent implements MCEntityTargetEvent{
+        public int getDamage() {
+            return event.getDamage();
+        }
+
+        public void setDamage(int damage) {
+            event.setDamage(damage);
+        }
+    }
+
+    @abstraction(type = Implementation.Type.BUKKIT)
+    public static class BukkitMCTargetEvent implements MCEntityTargetEvent {
 
         EntityTargetEvent pie;
-        
-        public BukkitMCTargetEvent(EntityTargetEvent e){
+
+        public BukkitMCTargetEvent(EntityTargetEvent e) {
             pie = e;
         }
-        
-        public static BukkitMCTargetEvent _instantiate(Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason){
-        	return new BukkitMCTargetEvent(new EntityTargetEvent(((BukkitMCEntity)entity)._Entity(), 
-        			(LivingEntity) ((BukkitMCLivingEntity)target).getLivingEntity(), reason));
+
+        public static BukkitMCTargetEvent _instantiate(Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason) {
+            return new BukkitMCTargetEvent(new EntityTargetEvent(( (BukkitMCEntity) entity )._Entity(),
+                    (LivingEntity) ( (BukkitMCLivingEntity) target ).getLivingEntity(), reason));
         }
-        
 
         public Object _GetObject() {
             return pie;
         }
 
-		public Entity getTarget() {
-			return pie.getTarget();
-		}
+        public MCEntity getTarget() {
+            return BukkitConvertor.BukkitGetCorrectEntity(pie.getTarget());
+        }
 
-		public void setTarget(Entity target) {
-			pie.setTarget(target);
-		}
+        public void setTarget(MCEntity target) {
+            pie.setTarget(((BukkitMCEntity)target)._Entity());
+        }
 
-		public Entity getEntity() {
-			return pie.getEntity();
-		}
+        public MCEntity getEntity() {
+            return BukkitConvertor.BukkitGetCorrectEntity(pie.getEntity());
+        }
 
-		public EntityType getEntityType() {
-			return pie.getEntityType();
-		}
+        public MCEntityType getEntityType() {
+            return BukkitConvertor.BukkitGetCorrectEntity(pie.getEntity()).getType();
+        }
 
-		public TargetReason getReason() {
-			return pie.getReason();
-		}
-        
+        public MCTargetReason getReason() {
+            return MCTargetReason.valueOf(pie.getReason().name());
+        }
     }
 }

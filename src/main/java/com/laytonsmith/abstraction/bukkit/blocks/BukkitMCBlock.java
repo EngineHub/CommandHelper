@@ -4,15 +4,20 @@
  */
 package com.laytonsmith.abstraction.bukkit.blocks;
 
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -87,6 +92,14 @@ public class BukkitMCBlock implements MCBlock{
 
     public boolean isNull() {
         return b == null;
+    }
+
+    public Collection<MCItemStack> getDrops() {
+        Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
+        for(ItemStack is : b.getDrops()){
+            collection.add(new BukkitMCItemStack(is));
+        }
+        return collection;
     }
     
     

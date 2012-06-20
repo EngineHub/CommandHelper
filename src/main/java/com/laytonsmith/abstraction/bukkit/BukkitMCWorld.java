@@ -73,7 +73,7 @@ public class BukkitMCWorld implements MCWorld {
     }
 
     public MCEntity spawn(MCLocation l, Class mobType) {
-        return new BukkitMCEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
+        return BukkitConvertor.BukkitGetCorrectEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
     }
 
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {

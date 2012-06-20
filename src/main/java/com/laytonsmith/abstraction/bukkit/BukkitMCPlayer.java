@@ -7,7 +7,6 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -21,13 +20,10 @@ import net.minecraft.server.MobEffect;
 import net.minecraft.server.ServerConfigurationManager;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
-import org.bukkit.event.entity.EntityDamageEvent;
-import org.bukkit.plugin.SimplePluginManager;
 import org.bukkit.util.BlockIterator;
 
 /**
@@ -409,7 +405,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
     public boolean isOp() {
         return p.isOp();
-    }    
+    }
+
+    public MCEntityType getType() {
+        return MCEntityType.PLAYER;
+    }
     
     
 }

@@ -15,7 +15,7 @@ import org.bukkit.event.entity.EntityDamageEvent;
  *
  * @author layton
  */
-public class BukkitMCEntity implements MCEntity {
+public abstract class BukkitMCEntity implements MCEntity {
 
     Entity e;
     public BukkitMCEntity(Entity e) {
@@ -61,5 +61,7 @@ public class BukkitMCEntity implements MCEntity {
         EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
         CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
     }
+
+    public abstract MCEntityType getType();
     
 }

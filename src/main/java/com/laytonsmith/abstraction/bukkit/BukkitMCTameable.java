@@ -51,6 +51,12 @@ public class BukkitMCTameable extends BukkitMCEntity implements MCTameable{
     @Override
     public boolean isTameable() {
         return true;
-    }   
+    }
+
+    @Override
+    public MCEntityType getType() {
+        //TODO: Once all the mob types get added, remove this, and make thi0s class abstract
+        return MCEntityType.UNKNOWN;
+    }
     
 }
