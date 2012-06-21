@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Compiler;
+import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
@@ -1055,7 +1056,9 @@ public class MethodScriptCompiler {
             throw new ConfigCompileException("Mismatched parenthesis", t.target);
         }
         
-        optimize(tree);
+        Stack<List<Procedure>> procs = new Stack<List<Procedure>>();
+        procs.add(new ArrayList<Procedure>());
+        optimize(tree, procs);
         parents.pop();
         tree = parents.pop();
         return tree;
@@ -1068,12 +1071,12 @@ public class MethodScriptCompiler {
      * @param tree
      * @return 
      */
-    private static void optimize(GenericTreeNode<Construct> tree) throws ConfigCompileException{
+    private static void optimize(GenericTreeNode<Construct> tree, Stack<List<Procedure>> procs) throws ConfigCompileException{
         if(tree.optimized){
             return; //Don't need to re-run this
         }
         if(tree.data instanceof CIdentifier){
-            optimize(((CIdentifier)tree.data).contained());
+            optimize(((CIdentifier)tree.data).contained(), procs);
             return;
         }
         if(!(tree.data instanceof CFunction)){
@@ -1089,10 +1092,14 @@ public class MethodScriptCompiler {
                     GenericTreeNode<Construct> tempNode = func.optimizeSpecial(node.data.getTarget(), node.children, false);
                     tree.data = tempNode.data;
                     tree.children = tempNode.children;
-                    optimize(tree);
+                    optimize(tree, procs);
                     return;
                 }
             }
+        }
+        //If it is a proc definition, we need to go ahead and see if we can add it to the const proc stack
+        if(tree.data.val().equals("proc")){
+            procs.push(new ArrayList<Procedure>());
         }
         List<GenericTreeNode<Construct>> children = tree.getChildren();
         boolean fullyStatic = true;
@@ -1100,8 +1107,8 @@ public class MethodScriptCompiler {
         for(int i = 0; i < children.size(); i++){
             GenericTreeNode<Construct> node = children.get(i);            
             if(node.data instanceof CFunction){
-                optimize(node);
-            }
+                optimize(node, procs);
+            }            
             
             if(node.data.isDynamic() && !(node.data instanceof IVariable)){
                 fullyStatic = false;
@@ -1110,18 +1117,63 @@ public class MethodScriptCompiler {
                 hasIVars = true;
             }
         }   
+        //In all cases, at this point, we are either unable to optimize, or we will
+        //optimize, so set our optimized variable at this point.
+        tree.optimized = true;
         
         CFunction cFunction = (CFunction)tree.data;
         Function func;
         try{
             func = (Function)FunctionList.getFunction(cFunction);
         } catch(ConfigCompileException e){
-            //It's a proc. We can't optimize those yet.
+            //It's a proc call. Let's see if we can optimize it
+            Procedure p = null;
+            //Did you know about this feature in java? I didn't until recently.
+            //I break to the loop label, which makes it jump to the bottom of
+            //that loop.
+            loop: for(int i = 0; i < procs.size(); i++){
+                for(Procedure pp : procs.get(i)){
+                    if(pp.getName().equals(cFunction.val())){
+                        p = pp;
+                        break loop;
+                    }
+                }
+            }
+            if(p != null){
+                try{
+                    Construct c = DataHandling.proc.optimizeProcedure(Target.UNKNOWN, p, children);
+                    if(c != null){
+                        tree.data = c;
+                        tree.children = new ArrayList<GenericTreeNode<Construct>>();
+                        return;
+                    }//else Nope, couldn't optimize.
+                } catch(ConfigRuntimeException ex){
+                    //Cool. Caught a runtime error at compile time :D
+                    throw new ConfigCompileException(ex);
+                }
+            } //else this procedure isn't listed yet. Maybe a compiler error, maybe not, depends,
+            //so we can't for sure say, but we do know we can't optimize this
             return;
         }
-        //In all cases, at this point, we are either unable to optimize, or we will
-        //optimize, so set our optimized variable at this point.
-        tree.optimized = true;
+        if(tree.data.val().equals("proc")){
+            //We just went out of scope, so we need to pop the layer of Procedures that
+            //are internal to us
+            procs.pop();
+            //However, as a special function, we *might* be able to get a const proc out of this
+            //Let's see.
+            try{
+                GenericTreeNode<Construct> root = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
+                Script fakeScript = Script.GenerateScript(root, "*");            
+                Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, new Env(), fakeScript, children.toArray(new GenericTreeNode[children.size()]));
+                procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
+            } catch(ConfigRuntimeException e){
+                //Well, they have an error in there somewhere
+                throw new ConfigCompileException(e);
+            } catch(NullPointerException e){
+                //Nope, can't optimize.
+                return;
+            }
+        }        
         
         //the compiler trick functions know how to deal with it specially, even if everything isn't
         //static, so do this first.
@@ -1138,7 +1190,7 @@ public class MethodScriptCompiler {
                 tree.children = tempNode.children;
                 tree.optimized = tempNode.optimized;
             } //else it wasn't an optimization, but a compile check
-            optimize(tree);
+            optimize(tree, procs);
             tree.optimized = true;
             return;
         }

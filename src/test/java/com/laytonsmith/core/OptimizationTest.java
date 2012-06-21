@@ -80,6 +80,29 @@ public class OptimizationTest {
                 + "}"));
     }
     
+    @Test public void testProcOptimization1() throws ConfigCompileException{
+        //The proc stays there, but the call to it should be consolidated
+        assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)", optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
+    }
+    
+    @Test(expected=ConfigCompileException.class) 
+    public void testProcOptimization2() throws ConfigCompileException{
+        optimize("proc(_divide, @a, return(@a / 0)) _divide(1)");
+    }
+    
+    @Test
+    public void testProcOptimization3() throws ConfigCompileException{
+        //Rather, lack of optimization
+        assertEquals("sconcat(proc('_nope',msg('Hi')),_nope())", optimize("proc(_nope, msg('Hi')) _nope()"));
+    }
+    
+    @Test
+    public void testProcOptimiztion4() throws ConfigCompileException{
+        //Test embedded procs
+        assertEquals("sconcat(proc('_outer',sconcat(proc('_inner',@a,return(@a)),'blah')),_inner('huh'))", 
+                optimize("proc(_outer, proc(_inner, @a, return(@a)) _inner('blah')) _inner('huh')"));
+    }
+    
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{
 //        //In this test, there's no way it won't ever be 'hi', so do a replacement (we still need to keep

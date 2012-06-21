@@ -228,7 +228,8 @@ public class Math {
         }
 
         public String docs() {
-            return "mixed {var1, [var2...]} Divides the arguments from left to right, and returns either a double or an integer";
+            return "mixed {var1, [var2...]} Divides the arguments from left to right, and returns either a double or an integer."
+                    + " If you divide by zero, a RangeException is thrown.";
         }
 
         public boolean isRestricted() {

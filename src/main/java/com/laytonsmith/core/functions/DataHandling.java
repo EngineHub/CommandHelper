@@ -12,6 +12,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1112,6 +1113,12 @@ public class DataHandling {
 
         @Override
         public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            Procedure myProc = getProcedure(t, env, parent, nodes);
+            env.GetProcs().put(myProc.getName(), myProc);
+            return new CVoid(t);
+        }
+        
+        public static Procedure getProcedure(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes){
             String name = "";
             List<IVariable> vars = new ArrayList<IVariable>();
             GenericTreeNode<Construct> tree = null;
@@ -1136,8 +1143,7 @@ public class DataHandling {
                 }
             }
             Procedure myProc = new Procedure(name, vars, tree, t);
-            env.GetProcs().put(name, myProc);
-            return new CVoid(t);
+            return myProc;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
@@ -1148,6 +1154,48 @@ public class DataHandling {
         public boolean useSpecialExec() {
             return true;
         }
+
+        /**
+         * Returns either null to indicate that the procedure is not const, or
+         * returns a single Construct, which should replace the call to the
+         * procedure.
+         * @param t
+         * @param myProc
+         * @param children
+         * @return
+         * @throws ConfigCompileException
+         * @throws ConfigRuntimeException 
+         */
+        public static Construct optimizeProcedure(Target t, Procedure myProc, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+            //First, we need to generate a fake script based on this one, so we can attempt to get the procedure.
+            //In the case where this fails, it's not optimizable, so we can just bail. If that works, it's on
+            //to step 2.
+            
+            if(myProc.isPossiblyConstant()){
+                //Oooh, it's possibly constant. So, let's run it with our children.
+                try{
+                    GenericTreeNode<Construct> root = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
+                    Script fakeScript = Script.GenerateScript(root, "*");
+                    Env env = new Env();
+                    env.SetScript(fakeScript);
+                    Construct c = myProc.cexecute(children, env);
+                    //Yup! It worked. It's a const proc.
+                    return c;
+                } catch(ConfigRuntimeException e){
+                    throw e; //Rethrow it. Since the functions are all static, and we actually are
+                    //running it with a mostly legit environment, this is a real runtime error,
+                    //and we can safely convert it to a compile error upstream
+                } catch(Exception e){
+                    //Nope. Something is preventing us from running it statically.
+                    //We don't really care. We just know it can't be optimized.
+                    return null;
+                }
+            } else {
+                //Oh. Well, we tried.
+                return null;
+            }
+        }
+                
     }
 
     @api
