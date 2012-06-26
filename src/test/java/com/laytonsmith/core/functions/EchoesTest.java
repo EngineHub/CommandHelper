@@ -118,5 +118,6 @@ public class EchoesTest {
         assertEquals(String.format("\u00A7%s", "6"), SRun("color(gold)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "k"), SRun("color(random)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "m"), SRun("color(strike)", fakePlayer));
+        assertEquals(String.format("\u00A7%s", "a"), SRun("color(a)", fakePlayer));
     }
 }
