@@ -194,7 +194,7 @@ public class Echoes {
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            String color = MCChatColor.WHITE.toString();
+            String color = null;
             
             try{
                 color = MCChatColor.valueOf(args[0].val().toUpperCase()).toString();
@@ -225,15 +225,20 @@ public class Echoes {
             } else if(a.equals("plain white") || a.equals("plainwhite") || a.equals("plain_white")){
                 a = "r";
             }
-            try{
-                Character p = String.valueOf(a).charAt(0);
-                MCChatColor cc = MCChatColor.getByChar(p);
-                if(cc == null){
-                    cc = MCChatColor.WHITE;
-                }
-                color = cc.toString();
-            } catch(NumberFormatException e){}
+            if(color == null){
+                try{
+                    Character p = String.valueOf(a).charAt(0);
+                    MCChatColor cc = MCChatColor.getByChar(p);
+                    if(cc == null){
+                        cc = MCChatColor.WHITE;
+                    }
+                    color = cc.toString();
+                } catch(NumberFormatException e){}
+            }            
             
+            if(color == null){
+                color = MCChatColor.WHITE.toString();
+            }
             return new CString(color, t);
         }
 

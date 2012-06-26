@@ -19,6 +19,7 @@ import org.mockito.Mockito;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.times;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -109,5 +110,13 @@ public class EchoesTest {
         verify(fakePlayer).sendMessage(" yay");
         verify(fakePlayer).sendMessage("  yay");
         verify(fakePlayer).sendMessage("   yay");
+    }
+    
+    @Test
+    public void testColor() throws ConfigCompileException{
+        assertEquals(String.format("\u00A7%s", "f"), SRun("color(white)", fakePlayer));
+        assertEquals(String.format("\u00A7%s", "6"), SRun("color(gold)", fakePlayer));
+        assertEquals(String.format("\u00A7%s", "k"), SRun("color(random)", fakePlayer));
+        assertEquals(String.format("\u00A7%s", "m"), SRun("color(strike)", fakePlayer));
     }
 }
