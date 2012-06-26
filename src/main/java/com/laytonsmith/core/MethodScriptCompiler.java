@@ -970,13 +970,14 @@ public class MethodScriptCompiler {
                 parens--;
                 GenericTreeNode<Construct> function = parents.pop();
                 if(usesBraces.peek().get()){
+                    Function f;
                     try{
-                        Function f = (Function)FunctionList.getFunction(function.data);
-                        if(!f.allowBraces()){
-                            throw new ConfigCompileException("Improper use of braces with " + f.getName() + "()", t.target);
-                        }
+                        f = (Function)FunctionList.getFunction(function.data);
                     } catch(Exception e){
                         throw new ConfigCompileException("Could not find function " + function.data.val(), t.target);
+                    }
+                    if(!f.allowBraces()){
+                        throw new ConfigCompileException("Improper use of braces with " + f.getName() + "()", t.target);
                     }
                 }
                 if (constructCount.peek().get() > 1) {                    

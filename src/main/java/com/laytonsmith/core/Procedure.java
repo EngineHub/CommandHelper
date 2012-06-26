@@ -62,8 +62,8 @@ public class Procedure implements Cloneable {
             //contract, but import() itself is dynamic, so this is not an issue.
             return true;
         } else if(tree.data instanceof CFunction){
-            try {
                 //If the function itself is not optimizable, we needn't recurse.
+            try{
                 FunctionBase fb = FunctionList.getFunction(tree.data);
                 if(fb instanceof Function){
                     Function f = (Function)fb;
@@ -72,26 +72,23 @@ public class Procedure implements Cloneable {
                     }
                     //If it's optimizable, it's possible. If it's restricted, it doesn't matter, because
                     //we can't optimize it out anyways, because we need to do the permission check
-                    if((f.canOptimizeDynamic() || f.canOptimize()) && !f.isRestricted()){
-                        //Ok, well, we have to check the children first.
-                        for(GenericTreeNode<Construct> child : tree.getChildren()){
-                            if(!checkPossiblyConstant(child)){
-                                return false; //Nope, since our child can't be constant, neither can we
-                            }
-                        }
-                        //They all check out, so, yep, we could possibly be constant
-                        return true;
-                    } else {
+                    if(!((f.canOptimizeDynamic() || f.canOptimize()) && !f.isRestricted())){
                         return false; //Nope. Doesn't matter if the children are or not
                     }
                 } else {
                     return false;
                 }
-            } catch (ConfigCompileException ex) {
-                //Uh. This should never happen.
-                Logger.getLogger(Procedure.class.getName()).log(Level.SEVERE, null, ex);
-                return false;
+            } catch(ConfigCompileException e){
+                //It's a proc. We will treat this just like any other function call, 
             }
+            //Ok, well, we have to check the children first.
+            for(GenericTreeNode<Construct> child : tree.getChildren()){
+                if(!checkPossiblyConstant(child)){
+                    return false; //Nope, since our child can't be constant, neither can we
+                }
+            }
+            //They all check out, so, yep, we could possibly be constant
+            return true;
         } else {
             //Uh. Ok, well, nope.
             return false;
