@@ -1,0 +1,9 @@
+#Make the textual files have the text setting, so things never have the wrong line endings.
+*.java text
+*.xml text
+*.txt text
+*.yml text
+
+*.png binary
+*.jpg binary
+*.jpeg binary
