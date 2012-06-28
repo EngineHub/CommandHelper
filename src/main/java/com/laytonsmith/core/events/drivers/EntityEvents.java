@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCEntityType;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.core.CHVersion;
@@ -147,11 +148,18 @@ public class EntityEvents {
         		
         		Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
         		
-	        	if (ete.getTarget() instanceof MCPlayer) {
-	        		Prefilters.match(prefilter, "player", ((MCPlayer)ete.getTarget()).getName(), Prefilters.PrefilterType.MACRO);
+        		MCEntity target = ete.getTarget();
+        		if (target == null) {
+        			return false;
+        		}
+        		
+        		if (target instanceof MCPlayer) {
+	        		Prefilters.match(prefilter, "player", ((MCPlayer)target).getName(), Prefilters.PrefilterType.MACRO);
+	        		
 	        		return true;
 	        	}
         	}
+        	
         	return false;
         }
         
@@ -160,7 +168,12 @@ public class EntityEvents {
                 MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 
-                String name = ((MCPlayer)ete.getTarget()).getName();
+                String name = "";
+                MCEntity target = ete.getTarget();
+                if (target instanceof MCPlayer) {
+                	name = ((MCPlayer)ete.getTarget()).getName();
+                } 
+                
                 map.put("player", new CString(name, Target.UNKNOWN));
                 
                 String type = ete.getEntityType().name();
