@@ -233,7 +233,12 @@ public class Regex {
             String subject = args[2].val();
             String ret = "";
             
-            ret = pattern.matcher(subject).replaceAll(replacement);
+            try {
+            	ret = pattern.matcher(subject).replaceAll(replacement);
+            } catch (IndexOutOfBoundsException e) {
+            	throw new ConfigRuntimeException("Expecting a regex group at parameter 1 of reg_replace",
+            			ExceptionType.FormatException, t);
+            }
             
             return new CString(ret, t);
         }

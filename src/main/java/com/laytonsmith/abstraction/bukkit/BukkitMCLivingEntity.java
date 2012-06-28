@@ -6,6 +6,8 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCEntityType;
 import com.laytonsmith.abstraction.MCLivingEntity;
+
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 
 /**
@@ -37,7 +39,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 
     @Override
     public MCEntityType getType() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    	EntityType type = le.getType();
+    	return MCEntityType.valueOf(type.name());
     }
     
 }

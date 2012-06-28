@@ -324,7 +324,7 @@ public class CArray extends Construct implements ArrayAccess{
     public CArray clone() throws CloneNotSupportedException {
         CArray clone = (CArray) super.clone();
         clone.associative_mode = associative_mode;
-        if(associative_mode){
+        if(!associative_mode){
             if (array != null) {
                 clone.array = new ArrayList<Construct>(this.array);
             }
