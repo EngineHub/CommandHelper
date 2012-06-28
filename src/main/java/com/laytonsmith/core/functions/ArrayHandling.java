@@ -808,7 +808,7 @@ public class ArrayHandling {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException, ExceptionType.PluginInternalException};
         }
 
         public boolean isRestricted() {

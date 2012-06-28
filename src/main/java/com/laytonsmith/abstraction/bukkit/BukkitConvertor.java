@@ -135,20 +135,24 @@ public class BukkitConvertor implements Convertor {
     }
     
     public static MCEntity BukkitGetCorrectEntity(Entity be){
+    	if (be == null) {
+    		return null;
+    	}
+    	
         if(be instanceof Tameable){
             return new BukkitMCTameable(be);
         }
         
-        if(be instanceof LivingEntity){
-            return new BukkitMCLivingEntity(((LivingEntity)be));
+        if(be instanceof Player){
+            return new BukkitMCPlayer((Player)be);
         }
         
         if(be instanceof HumanEntity){
             return new BukkitMCHumanEntity((HumanEntity)be);
         }
         
-        if(be instanceof Player){
-            return new BukkitMCPlayer((Player)be);
+        if(be instanceof LivingEntity){
+            return new BukkitMCLivingEntity(((LivingEntity)be));
         }
         
         throw new Error("While trying to find the correct entity type for " + be.getClass().getName() + ", was unable"

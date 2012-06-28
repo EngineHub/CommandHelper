@@ -43,7 +43,7 @@ public class Permissions {
         }
 
         public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{};
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.InsufficientPermissionException};
         }
 
         public boolean isRestricted() {
@@ -65,23 +65,32 @@ public class Permissions {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             String player = null;
             String permission = null;
-            if(environment.GetCommandSender() instanceof MCConsoleCommandSender){
-                //Console always has permission
-                return new CBoolean(true, t);
-            }
+            
             if(args.length == 1){
+                if(environment.GetCommandSender() instanceof MCConsoleCommandSender){
+                    //Console always has permission
+                    return new CBoolean(true, t);
+                }
+            	
                 player = environment.GetPlayer().getName();
                 permission = args[0].val();
             } else {
                 player = args[0].val();
                 permission = args[1].val();
             }
+            
             if(environment.GetPlayer() != null && !environment.GetPlayer().getName().equals(player)){
                 if(!Static.hasCHPermission(getName(), environment)){
                     throw new ConfigRuntimeException("You do not have permission to use the " + getName() + " function.",
-                                Exceptions.ExceptionType.InsufficientPermissionException, t);
+                    	Exceptions.ExceptionType.InsufficientPermissionException, t);
                 }
             }
+            
+            if(player.toLowerCase() == "~console") {
+            	//Console always has permission
+            	return new CBoolean(true, t);
+            }
+            
             PermissionsResolverManager perms = Static.getPermissionsResolverManager();
             return new CBoolean(perms.hasPermission(player, permission), t);
         }
