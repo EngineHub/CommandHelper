@@ -30,8 +30,11 @@ public class MethodScriptCompiler {
         List<Token> token_list = new ArrayList<Token>();
         //Set our state variables
         boolean state_in_quote = false;
+        int quoteLineNumberStart = 1;
         boolean in_smart_quote = false;
+        int smartQuoteLineNumberStart = 1;
         boolean in_comment = false;
+        int commentLineNumberStart = 1;
         boolean comment_is_block = false;
         boolean in_opt_var = false;
         StringBuffer buf = new StringBuffer();
@@ -64,6 +67,7 @@ public class MethodScriptCompiler {
                 in_comment = true;
                 if (c == '/' && c2 == '*') {
                     comment_is_block = true;
+                    commentLineNumberStart = line_num;
                     i++;
                 }
                 continue;
@@ -454,6 +458,7 @@ public class MethodScriptCompiler {
                     continue;
                 } else if (!state_in_quote) {
                     state_in_quote = true;
+                    quoteLineNumberStart = line_num;
                     in_smart_quote = false;
                     if (buf.length() > 0) {
                         token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
@@ -477,6 +482,7 @@ public class MethodScriptCompiler {
                 } else if (!state_in_quote) {
                     state_in_quote = true;
                     in_smart_quote = true;
+                    smartQuoteLineNumberStart = line_num;
                     if (buf.length() > 0) {
                         token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
                         buf = new StringBuffer();
@@ -540,10 +546,14 @@ public class MethodScriptCompiler {
             }
         } //end lexing
         if (state_in_quote) {
-            throw new ConfigCompileException("Unended string literal", target);
+            if(in_smart_quote){                
+                throw new ConfigCompileException("Unended string literal. You started the last double quote on line " + smartQuoteLineNumberStart, target);
+            } else {
+                throw new ConfigCompileException("Unended string literal. You started the last single quote on line " + quoteLineNumberStart, target);
+            }
         }
         if (in_comment || comment_is_block) {
-            throw new ConfigCompileException("Unended comment", target);
+            throw new ConfigCompileException("Unended block comment. You started the comment on line " + commentLineNumberStart, target);
         }
         //look at the tokens, and get meaning from them. Also, look for improper symbol locations,
         //and go ahead and absorb unary +- into the token
@@ -580,7 +590,7 @@ public class MethodScriptCompiler {
                 if(prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
                 || next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
                 || prev1.type.isSymbol() || next.type.isSymbol()){
-                    throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", target);                    
+                    throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());                    
                 }
             }                            
             

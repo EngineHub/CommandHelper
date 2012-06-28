@@ -8,6 +8,8 @@ import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -525,11 +527,15 @@ public class StaticTest {
         }
 
         public MCEnchantment[] GetEnchantmentValues() {
-            throw new UnsupportedOperationException("Not supported yet.");
+            System.out.println("Using bukkit convertor");
+            Convertor c = new BukkitConvertor();
+            return c.GetEnchantmentValues();
         }
 
         public MCEnchantment GetEnchantmentByName(String name) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            System.out.println("Using bukkit convertor");
+            Convertor c = new BukkitConvertor();
+            return c.GetEnchantmentByName(name);
         }
 
         public MCServer GetServer() {
@@ -537,7 +543,9 @@ public class StaticTest {
         }
 
         public MCItemStack GetItemStack(int type, int qty) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            System.out.println("Using bukkit convertor");
+            Convertor c = new BukkitConvertor();
+            return c.GetItemStack(type, qty);
         }
 
         public void Startup(CommandHelperPlugin chp) {
@@ -553,7 +561,9 @@ public class StaticTest {
         }
 
         public MCItemStack GetItemStack(int type, int data, int qty) {
-            throw new UnsupportedOperationException("Not supported yet.");
+            System.out.println("Using bukkit convertor");
+            Convertor c = new BukkitConvertor();
+            return c.GetItemStack(type, data, qty);
         }
 
         public int SetFutureRunnable(long ms, Runnable r) {

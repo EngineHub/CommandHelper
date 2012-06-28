@@ -193,13 +193,13 @@ public class Enchantments {
                 m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
-            MCItemStack is = null;
-            if (args[1 - offset] instanceof CNull) {
-                is = m.getItemInHand();
-            } else {
-                int slot = (int) Static.getInt(args[1 - offset]);
-                is = m.getInventory().getItem(slot);
-            }
+            MCItemStack is = m.getItemAt(args[1 - offset]);
+//            if (args[1 - offset] instanceof CNull) {
+//                is = m.getItemInHand();
+//            } else {
+//                int slot = (int) Static.getInt(args[1 - offset]);
+//                is = m.getInventory().getItem(slot);
+//            }
             CArray enchantArray = new CArray(t);
             if (!(args[2 - offset] instanceof CArray)) {
                 enchantArray.push(args[2 - offset]);
@@ -260,6 +260,7 @@ public class Enchantments {
             return true;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return true;
         }
@@ -279,13 +280,13 @@ public class Enchantments {
                 m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
-            MCItemStack is = null;
-            if (args[1 - offset] instanceof CNull) {
-                is = m.getItemInHand();
-            } else {
-                int slot = (int) Static.getInt(args[1 - offset]);
-                is = m.getInventory().getItem(slot);
-            }
+            MCItemStack is = m.getItemAt(args[1 - offset]);
+//            if (args[1 - offset] instanceof CNull) {
+//                is = m.getItemInHand();
+//            } else {
+//                int slot = (int) Static.getInt(args[1 - offset]);
+//                is = m.getInventory().getItem(slot);
+//            }
 
             CArray enchantArray = new CArray(t);
             if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
@@ -349,13 +350,13 @@ public class Enchantments {
             } else {
                 slot = args[0];
             }            
-            MCItemStack is;
-            if(slot instanceof CNull){
-                is = m.getItemInHand();
-            } else {
-                int slotID = (int) Static.getInt(slot);
-                is = m.getInventory().getItem(slotID);
-            }
+            MCItemStack is = m.getItemAt(slot);
+//            if(slot instanceof CNull){
+//                is = m.getItemInHand();
+//            } else {
+//                int slotID = (int) Static.getInt(slot);
+//                is = m.getInventory().getItem(slotID);
+//            }
             CArray enchants = new CArray(t);
             CArray levels = new CArray(t);
             for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()){

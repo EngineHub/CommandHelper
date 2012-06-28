@@ -7,6 +7,9 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.Construct;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -24,6 +27,7 @@ import org.bukkit.Server;
 import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.util.BlockIterator;
 
 /**
@@ -409,6 +413,32 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
     public MCEntityType getType() {
         return MCEntityType.PLAYER;
+    }
+
+    public MCItemStack getItemAt(Construct construct) {
+        if(construct == null || construct instanceof CNull){
+            return new BukkitMCItemStack(p.getItemInHand());
+        }
+        int slot = (int) Static.getInt(construct);
+        ItemStack is = null;
+        //Special slots
+        if(slot == 100){
+            is = p.getInventory().getBoots();
+        } else if(slot == 101){
+            is = p.getInventory().getLeggings();
+        } else if(slot == 102){
+            is = p.getInventory().getChestplate();
+        } else if(slot == 103){
+            is = p.getInventory().getHelmet();
+        }
+        if(slot >= 0 && slot <= 35){
+            is = p.getInventory().getItem(slot);
+        }
+        if(is == null){
+            return null;
+        } else {
+            return new BukkitMCItemStack(is);
+        }
     }
     
     

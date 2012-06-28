@@ -35,10 +35,14 @@ public class Procedure implements Cloneable {
 
     
     public Procedure(String name, List<IVariable> varList, GenericTreeNode<Construct> tree, Target t){
-        this.name = name;        
+        this.name = name;
         this.varList = new HashMap<String, IVariable>();
         for(IVariable var : varList){
-            this.varList.put(var.getName(), var);
+            try{
+                this.varList.put(var.getName(), var.clone());
+            } catch(CloneNotSupportedException e){
+                this.varList.put(var.getName(), var);
+            }
             this.varIndex.add(var);
             this.originals.put(var.getName(), var.ival());
         }        

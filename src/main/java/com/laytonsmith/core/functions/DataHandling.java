@@ -1166,11 +1166,7 @@ public class DataHandling {
          * @throws ConfigCompileException
          * @throws ConfigRuntimeException 
          */
-        public static Construct optimizeProcedure(Target t, Procedure myProc, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
-            //First, we need to generate a fake script based on this one, so we can attempt to get the procedure.
-            //In the case where this fails, it's not optimizable, so we can just bail. If that works, it's on
-            //to step 2.
-            
+        public static Construct optimizeProcedure(Target t, Procedure myProc, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {            
             if(myProc.isPossiblyConstant()){
                 //Oooh, it's possibly constant. So, let's run it with our children.
                 try{
@@ -1195,6 +1191,19 @@ public class DataHandling {
                 return null;
             }
         }
+
+//        @Override
+//        public boolean canOptimizeDynamic() {
+//            return true;
+//        }
+//
+//        @Override
+//        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+//            //We seriously lose out on the ability to optimize this procedure
+//            //if we are assigning a dynamic value as a default, but we have to check
+//            //that here. If we don't, we lose the information
+//            return ;
+//        }                
                 
     }
 

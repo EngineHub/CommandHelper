@@ -5,6 +5,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.core.constructs.Construct;
 import java.net.InetSocketAddress;
 import java.util.HashSet;
 
@@ -79,6 +80,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
     
     public boolean getAllowFlight();
     public void setAllowFlight(boolean flight);
+
+    public MCItemStack getItemAt(Construct construct);
     
     
     

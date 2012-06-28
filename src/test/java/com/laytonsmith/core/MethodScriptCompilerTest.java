@@ -161,6 +161,15 @@ public class MethodScriptCompilerTest {
     @Test public void testCompile14() throws ConfigCompileException{
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("msg(('hi'))", null));
     }
+    
+    @Test
+    public void testCompile15() throws ConfigCompileException{
+        try{
+            SRun("\n\nmsg(/, 'test')\n\n", fakePlayer);
+        } catch(ConfigCompileException e){
+            assertEquals("3", e.getLineNum());
+        }
+    }
 
     @Test
     public void testExecute1() throws ConfigCompileException {
