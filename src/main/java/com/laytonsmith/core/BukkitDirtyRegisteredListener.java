@@ -80,8 +80,8 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
         }
                 
     }
-    private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(queueCapacity);
     private static final int queueCapacity = 20;
+    private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(queueCapacity);
     public static BukkitDirtyRegisteredListener Generate(RegisteredListener real) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
         if (real instanceof BukkitDirtyRegisteredListener) {
             return (BukkitDirtyRegisteredListener) real;
