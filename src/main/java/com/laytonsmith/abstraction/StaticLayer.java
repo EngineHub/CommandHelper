@@ -19,6 +19,57 @@ public class StaticLayer {
         InitConvertor();
     }        
     
+    public static void ClearAllRunnables() {
+        convertor.ClearAllRunnables();
+    }
+
+    public static void ClearFutureRunnable(int id){
+        convertor.ClearFutureRunnable(id);
+    }
+    
+    /**
+     * Given an entity, returns the more specific entity type, by creating a new more
+     * specific type based on the actual type of the underlying object contained by the 
+     * more generic type.
+     * @param e
+     * @return 
+     */
+    public static MCEntity GetCorrectEntity(MCEntity e) {
+        return convertor.GetCorrectEntity(e);
+    }
+    
+    public static MCEnchantment GetEnchantmentByName(String name){
+        return convertor.GetEnchantmentByName(name);
+    }
+
+    public static MCEnchantment[] GetEnchantmentValues(){
+        return convertor.GetEnchantmentValues();
+    }
+    
+    public static MCItemStack GetItemStack(int type, int qty) {
+        return convertor.GetItemStack(type, qty);
+    }
+    
+    public static MCItemStack GetItemStack(int type, int data, int qty){
+        return convertor.GetItemStack(type, data, qty);
+    }
+    
+    public static MCLocation GetLocation(MCWorld w, double x, double y, double z){
+        return GetLocation(w, x, y, z, 0, 0);
+    }
+    
+    public static MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
+        return convertor.GetLocation(w, x, y, z, yaw, pitch);
+    }
+
+    public static MCServer GetServer(){
+        return convertor.GetServer();
+    }
+    
+    public static Class GetServerEventMixin() {
+        return convertor.GetServerEventMixin();
+    }
+    
     private static void InitConvertor(){
         Class[] classes = ClassDiscovery.GetClassesWithAnnotation(convert.class);
         for(Class c : classes){
@@ -52,42 +103,6 @@ public class StaticLayer {
             System.out.println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
         }
     }
-
-    public static MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
-        return convertor.GetLocation(w, x, y, z, yaw, pitch);
-    }
-    
-    public static Class GetServerEventMixin() {
-        return convertor.GetServerEventMixin();
-    }
-    
-    public static MCLocation GetLocation(MCWorld w, double x, double y, double z){
-        return GetLocation(w, x, y, z, 0, 0);
-    }
-
-    public static MCItemStack GetItemStack(int type, int qty) {
-        return convertor.GetItemStack(type, qty);
-    }
-    
-    public static MCItemStack GetItemStack(int type, int data, int qty){
-        return convertor.GetItemStack(type, data, qty);
-    }
-    
-    public static MCServer GetServer(){
-        return convertor.GetServer();
-    }
-    
-    public static MCEnchantment GetEnchantmentByName(String name){
-        return convertor.GetEnchantmentByName(name);
-    }
-    
-    public static MCEnchantment[] GetEnchantmentValues(){
-        return convertor.GetEnchantmentValues();
-    }
-
-    public static void Startup(CommandHelperPlugin chp) {
-        convertor.Startup(chp);
-    }
     
     /**
      * Returns the data value of the specified material name, or -1 if none was found.
@@ -106,32 +121,17 @@ public class StaticLayer {
     public static String LookupMaterialName(int id){
         return convertor.LookupMaterialName(id);
     }
+
+    public static int SetFutureRepeater(long ms, long initialDelay, Runnable r){
+        return convertor.SetFutureRepeater(ms, initialDelay, r);
+    }
     
     public static int SetFutureRunnable(long ms, Runnable r){
         return convertor.SetFutureRunnable(ms, r);
     }
-    
-    public static int SetFutureRepeater(long ms, long initialDelay, Runnable r){
-        return convertor.SetFutureRepeater(ms, initialDelay, r);
-    }
 
-    public static void ClearAllRunnables() {
-        convertor.ClearAllRunnables();
-    }
-    
-    public static void ClearFutureRunnable(int id){
-        convertor.ClearFutureRunnable(id);
-    }
-
-    /**
-     * Given an entity, returns the more specific entity type, by creating a new more
-     * specific type based on the actual type of the underlying object contained by the 
-     * more generic type.
-     * @param e
-     * @return 
-     */
-    public static MCEntity GetCorrectEntity(MCEntity e) {
-        return convertor.GetCorrectEntity(e);
+    public static void Startup(CommandHelperPlugin chp) {
+        convertor.Startup(chp);
     }
     
 }

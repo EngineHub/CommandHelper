@@ -22,11 +22,16 @@ import java.util.HashMap;
  * @author Layton
  */
 public class IncludeCache {
-    private static final CHLog.Tags TAG = CHLog.Tags.INCLUDES;
     private static HashMap<File, GenericTreeNode<Construct>> cache = new HashMap<File, GenericTreeNode<Construct>>();
+    private static final CHLog.Tags TAG = CHLog.Tags.INCLUDES;
     
     private static void add(File file, GenericTreeNode<Construct> tree){
         cache.put(file, tree);
+    }
+    
+    public static void clearCache(){
+        CHLog.Log(TAG, CHLog.Level.INFO, "Clearing include cache", Target.UNKNOWN);
+        cache.clear();
     }
     
     public static GenericTreeNode<Construct> get(File file, Target t){
@@ -56,10 +61,5 @@ public class IncludeCache {
         }
         CHLog.Log(TAG, CHLog.Level.INFO, "Returning " + file.getAbsolutePath() + " from cache", t);
         return cache.get(file);
-    }
-    
-    public static void clearCache(){
-        CHLog.Log(TAG, CHLog.Level.INFO, "Clearing include cache", Target.UNKNOWN);
-        cache.clear();
     }
 }

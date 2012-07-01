@@ -17,6 +17,11 @@ public class CDouble extends Construct implements Cloneable{
     public static final long serialVersionUID = 1L;
     final double val;
 
+    public CDouble(double value, Target t){
+        super(Double.toString(value), ConstructType.DOUBLE, t);
+        val = value;
+    }
+
     public CDouble(String value, Target t){
         super(value, ConstructType.INT, t);
         try{
@@ -26,18 +31,13 @@ public class CDouble extends Construct implements Cloneable{
         }
     }
 
-    public CDouble(double value, Target t){
-        super(Double.toString(value), ConstructType.DOUBLE, t);
-        val = value;
-    }
-
-    public double getDouble(){
-        return val;
-    }
-    
     @Override
     public CDouble clone() throws CloneNotSupportedException{
         return this;
+    }
+    
+    public double getDouble(){
+        return val;
     }
 
     @Override

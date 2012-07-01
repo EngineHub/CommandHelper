@@ -10,12 +10,12 @@ import com.laytonsmith.core.events.BindableEvent;
  */
 public interface MCEntityTargetEvent extends BindableEvent {
 
-    public MCEntity getTarget();
-
-    public void setTarget(MCEntity target);
-
     public MCEntity getEntity();
 
     public MCEntityType getEntityType();
+
+    public MCEntity getTarget();
+
+    public void setTarget(MCEntity target);
 
 }

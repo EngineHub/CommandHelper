@@ -16,104 +16,58 @@ import java.util.List;
  * @author Layton
  */
 public class Exceptions {
-    public static String docs(){
-        return "This class contains functions related to Exception handling in MethodScript";
-    }
-    public enum ExceptionType{
-        /**
-         * This exception is thrown if a value cannot be cast into an appropriate type. Functions that require
-         * a numeric value, for instance, would throw this if the string "hi" were passed in.
-         */
-        CastException,
-        /**
-         * This exception is thrown if a value is requested from an array that is above the highest index of the array,
-         * or a negative number.
-         */
-        IndexOverflowException,
-        /**
-         * This exception is thrown if a function expected a numeric value to be in a particular range, and it wasn't
-         */
-        RangeException,
-        /**
-         * This exception is thrown if a function expected the length of something to be a particular value, but it was not.
-         */
-        LengthException,
-        /**
-         * This exception is thrown if the user running the command does not have permission to run the function
-         */
-        InsufficientPermissionException,
-        /**
-         * This exception is thrown if a function expected an online player, but that player was offline, or the
-         * command is being run from somewhere not in game, and the function was trying to use the current player.
-         */
-        PlayerOfflineException, 
-        /**
-         * Some var arg functions may require at least a certain number of arguments to be passed to the function
-         */
-        InsufficientArgumentsException, 
-        /**
-         * This exception is thrown if a function expected a string to be formatted in a particular way, but it could not interpret the 
-         * given value.
-         */
-        FormatException,
-        /**
-         * This exception is thrown if a procedure is used without being defined, or if a procedure name does not follow proper naming
-         * conventions.
-         */
-        InvalidProcedureException, 
-        /**
-         * This exception is thrown if there is a problem with an include. This is thrown if there is
-         * a compile error in the included script.
-         */
-        IncludeException,
-        /**
-         * This exception is thrown if a script tries to read or write to a location of the filesystem that is not allowed.
-         */
-        SecurityException, 
-        /**
-         * This exception is thrown if a file cannot be read or written to.
-         */
-        IOException, 
-        /**
-         * This exception is thrown if a function uses an external plugin, and that plugin is not loaded, 
-         * or otherwise unusable.
-         */
-        InvalidPluginException,
-        /**
-         * This exception is thrown when a plugin is loaded, but a call to the plugin failed, usually
-         * for some reason specific to the plugin. Check the error message for more details about this
-         * error.
-         */
-        PluginInternalException,
-        /**
-         * If a function requests a world, and the world given doesn't exist, this is thrown
-         */
-        InvalidWorldException,
-        /**
-         * This exception is thrown if an error occurs when trying to bind() an event, or if a event framework
-         * related error occurs.
-         */
-        BindException,
-        /**
-         * If an enchantment is added to an item that isn't supported, this is thrown.
-         */
-        EnchantmentException,
-        /**
-         * If an untameable mob is attempted to be tamed, this exception is thrown
-         */
-        UntameableMobException,
-    }
-    @api public static class _try extends AbstractFunction{      
-        
+    @api public static class _throw extends AbstractFunction{
+
+        public String docs() {
+            return "nothing {exceptionType, msg} This function causes an exception to be thrown. If the exception type is null,"
+                    + " it will be uncatchable. Otherwise, exceptionType may be any valid exception type.";
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            try{
+                ExceptionType c = null;
+                if(!(args[0] instanceof CNull)){
+                    c = ExceptionType.valueOf(args[0].val());
+                }
+                throw new ConfigRuntimeException(args[1].val(), c, t);
+            } catch(IllegalArgumentException e){
+                throw new ConfigRuntimeException("Expected a valid exception type", ExceptionType.FormatException, t);
+            }
+        }
+
         public String getName() {
-            
-            return "try";
+            return "throw";
+        }
+        
+        public boolean isRestricted() {
+            return false;
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3, 4};
+            return new Integer[]{2};
         }
 
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
+        }
+
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.FormatException};
+        }
+
+        public void varList(IVariableList varList) {}
+        
+    }
+    @api public static class _try extends AbstractFunction{      
+        
         public String docs() {
             return "void {tryCode, [varName, catchCode, [exceptionTypes]] | tryCode, catchCode} This function works similar to a try-catch block in most languages. If the code in"
                     + " tryCode throws an exception, instead of killing the whole script, it stops running, and begins running the catchCode."
@@ -126,26 +80,10 @@ public class Exceptions {
                     + " Please see [[CommandHelper/Exceptions|the wiki page on exceptions]] for more information about what possible "
                     + " exceptions can be thrown and where, and examples.";
         }
-        
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
-        }
 
-        public boolean isRestricted() {
-            return false;
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CVoid(t);
         }
-
-        public boolean preResolveVariables() {
-            return false;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_1_2;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }        
 
         @Override
         public Construct execs(Target t, Env env, Script that, GenericTreeNode<Construct>... nodes) {
@@ -224,8 +162,33 @@ public class Exceptions {
             
             return new CVoid(t);
         }
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CVoid(t);
+        
+        public String getName() {
+            
+            return "try";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3, 4};
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }        
+
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
+        }
+        public ExceptionType[] thrown(){
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
         }
         
         @Override
@@ -234,55 +197,92 @@ public class Exceptions {
         }
         
     }
+    public enum ExceptionType{
+        /**
+         * This exception is thrown if an error occurs when trying to bind() an event, or if a event framework
+         * related error occurs.
+         */
+        BindException,
+        /**
+         * This exception is thrown if a value cannot be cast into an appropriate type. Functions that require
+         * a numeric value, for instance, would throw this if the string "hi" were passed in.
+         */
+        CastException,
+        /**
+         * If an enchantment is added to an item that isn't supported, this is thrown.
+         */
+        EnchantmentException,
+        /**
+         * This exception is thrown if a function expected a string to be formatted in a particular way, but it could not interpret the 
+         * given value.
+         */
+        FormatException,
+        /**
+         * This exception is thrown if there is a problem with an include. This is thrown if there is
+         * a compile error in the included script.
+         */
+        IncludeException,
+        /**
+         * This exception is thrown if a value is requested from an array that is above the highest index of the array,
+         * or a negative number.
+         */
+        IndexOverflowException, 
+        /**
+         * Some var arg functions may require at least a certain number of arguments to be passed to the function
+         */
+        InsufficientArgumentsException, 
+        /**
+         * This exception is thrown if the user running the command does not have permission to run the function
+         */
+        InsufficientPermissionException,
+        /**
+         * This exception is thrown if a function uses an external plugin, and that plugin is not loaded, 
+         * or otherwise unusable.
+         */
+        InvalidPluginException, 
+        /**
+         * This exception is thrown if a procedure is used without being defined, or if a procedure name does not follow proper naming
+         * conventions.
+         */
+        InvalidProcedureException,
+        /**
+         * If a function requests a world, and the world given doesn't exist, this is thrown
+         */
+        InvalidWorldException, 
+        /**
+         * This exception is thrown if a file cannot be read or written to.
+         */
+        IOException, 
+        /**
+         * This exception is thrown if a function expected the length of something to be a particular value, but it was not.
+         */
+        LengthException,
+        /**
+         * This exception is thrown if a function expected an online player, but that player was offline, or the
+         * command is being run from somewhere not in game, and the function was trying to use the current player.
+         */
+        PlayerOfflineException,
+        /**
+         * This exception is thrown when a plugin is loaded, but a call to the plugin failed, usually
+         * for some reason specific to the plugin. Check the error message for more details about this
+         * error.
+         */
+        PluginInternalException,
+        /**
+         * This exception is thrown if a function expected a numeric value to be in a particular range, and it wasn't
+         */
+        RangeException,
+        /**
+         * This exception is thrown if a script tries to read or write to a location of the filesystem that is not allowed.
+         */
+        SecurityException,
+        /**
+         * If an untameable mob is attempted to be tamed, this exception is thrown
+         */
+        UntameableMobException,
+    }
     
-    @api public static class _throw extends AbstractFunction{
-
-        public String getName() {
-            return "throw";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2};
-        }
-
-        public String docs() {
-            return "nothing {exceptionType, msg} This function causes an exception to be thrown. If the exception type is null,"
-                    + " it will be uncatchable. Otherwise, exceptionType may be any valid exception type.";
-        }
-        
-        public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.FormatException};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_1_2;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            try{
-                ExceptionType c = null;
-                if(!(args[0] instanceof CNull)){
-                    c = ExceptionType.valueOf(args[0].val());
-                }
-                throw new ConfigRuntimeException(args[1].val(), c, t);
-            } catch(IllegalArgumentException e){
-                throw new ConfigRuntimeException("Expected a valid exception type", ExceptionType.FormatException, t);
-            }
-        }
-        
+    public static String docs(){
+        return "This class contains functions related to Exception handling in MethodScript";
     }
 }

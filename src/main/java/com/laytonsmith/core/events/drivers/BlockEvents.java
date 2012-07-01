@@ -27,15 +27,11 @@ import java.util.Map;
  */
 public class BlockEvents {
 
-    public static String docs() {
-        return "Contains events related to a block";
-    }
-
     @api
     public static class block_break extends AbstractEvent {
 
-        public String getName() {
-            return "block_break";
+        public BindableEvent convert(CArray manualObject) {
+            return null;
         }
 
         public String docs() {
@@ -51,12 +47,47 @@ public class BlockEvents {
                     + "{player|block|drops}";
         }
 
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-
         public Driver driver() {
             return Driver.BLOCK_BREAK;
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e)
+                throws EventException {
+
+            MCBlockBreakEvent event = (MCBlockBreakEvent) e;
+            Map<String, Construct> map = evaluate_helper(event);
+
+            map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+
+            CArray blk = new CArray(Target.UNKNOWN);
+
+            int blktype = event.getBlock().getTypeId();
+            blk.set("type", new CInt(blktype, Target.UNKNOWN));
+
+            int blkdata = event.getBlock().getData();
+            blk.set("data", new CInt(blkdata, Target.UNKNOWN));
+
+            blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN));
+            blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN));
+            blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN));
+            blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN));
+
+            map.put("block", blk);
+
+            CArray drops = new CArray(Target.UNKNOWN);
+            Collection<MCItemStack> items = event.getBlock().getDrops();
+            for (Iterator<MCItemStack> iter = items.iterator(); iter.hasNext();) {
+                MCItemStack stack = new BukkitMCItemStack((MCItemStack) iter.next());
+                CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, Target.UNKNOWN);
+                drops.push(item);
+            }
+            map.put("drops", drops);
+
+            return map;
+        }
+
+        public String getName() {
+            return "block_break";
         }
 
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
@@ -102,45 +133,6 @@ public class BlockEvents {
             return true;
         }
 
-        public BindableEvent convert(CArray manualObject) {
-            return null;
-        }
-
-        public Map<String, Construct> evaluate(BindableEvent e)
-                throws EventException {
-
-            MCBlockBreakEvent event = (MCBlockBreakEvent) e;
-            Map<String, Construct> map = evaluate_helper(event);
-
-            map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-
-            CArray blk = new CArray(Target.UNKNOWN);
-
-            int blktype = event.getBlock().getTypeId();
-            blk.set("type", new CInt(blktype, Target.UNKNOWN));
-
-            int blkdata = event.getBlock().getData();
-            blk.set("data", new CInt(blkdata, Target.UNKNOWN));
-
-            blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN));
-            blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN));
-            blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN));
-            blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN));
-
-            map.put("block", blk);
-
-            CArray drops = new CArray(Target.UNKNOWN);
-            Collection<MCItemStack> items = event.getBlock().getDrops();
-            for (Iterator<MCItemStack> iter = items.iterator(); iter.hasNext();) {
-                MCItemStack stack = new BukkitMCItemStack((MCItemStack) iter.next());
-                CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, Target.UNKNOWN);
-                drops.push(item);
-            }
-            map.put("drops", drops);
-
-            return map;
-        }
-
         public boolean modifyEvent(String key, Construct value,
                 BindableEvent e) {
 
@@ -167,13 +159,17 @@ public class BlockEvents {
 
             return false;
         }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
     }
 
     @api
     public static class block_place extends AbstractEvent {
 
-        public String getName() {
-            return "block_place";
+        public BindableEvent convert(CArray manualObject) {
+            return null;
         }
 
         public String docs() {
@@ -189,12 +185,51 @@ public class BlockEvents {
                     + "{player|X|Y|Z|world|type|data|against|oldblock}";
         }
 
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-
         public Driver driver() {
             return Driver.BLOCK_PLACE;
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e)
+                throws EventException {
+            MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
+            Map<String, Construct> map = evaluate_helper(e);
+            MCBlock blk = event.getBlock();
+
+            map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+
+            map.put("X", new CInt(blk.getX(), Target.UNKNOWN));
+            map.put("Y", new CInt(blk.getY(), Target.UNKNOWN));
+            map.put("Z", new CInt(blk.getZ(), Target.UNKNOWN));
+            map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
+
+            int blktype = event.getBlock().getTypeId();
+            map.put("type", new CInt(blktype, Target.UNKNOWN));
+
+            int blkdata = event.getBlock().getData();
+            map.put("data", new CInt(blkdata, Target.UNKNOWN));
+
+            CArray agst = new CArray(Target.UNKNOWN);
+            MCBlock agstblk = event.getBlockAgainst();
+            int againsttype = agstblk.getTypeId();
+            agst.set("type", new CInt(againsttype, Target.UNKNOWN));
+            int againstdata = agstblk.getData();
+            agst.set("data", new CInt(againstdata, Target.UNKNOWN));
+            agst.set("X", new CInt(agstblk.getX(), Target.UNKNOWN));
+            agst.set("Y", new CInt(agstblk.getY(), Target.UNKNOWN));
+            agst.set("Z", new CInt(agstblk.getZ(), Target.UNKNOWN));
+            map.put("against", agst);
+
+            MCBlockState old = event.getBlockReplacedState();
+            CArray oldarr = new CArray(Target.UNKNOWN);
+            oldarr.set("type", new CInt(old.getTypeId(), Target.UNKNOWN));
+            oldarr.set("data", new CInt(old.getData().getData(), Target.UNKNOWN));
+            map.put("oldblock", oldarr);
+
+            return map;
+        }
+
+        public String getName() {
+            return "block_place";
         }
 
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
@@ -240,49 +275,6 @@ public class BlockEvents {
             return true;
         }
 
-        public BindableEvent convert(CArray manualObject) {
-            return null;
-        }
-
-        public Map<String, Construct> evaluate(BindableEvent e)
-                throws EventException {
-            MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
-            Map<String, Construct> map = evaluate_helper(e);
-            MCBlock blk = event.getBlock();
-
-            map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
-
-            map.put("X", new CInt(blk.getX(), Target.UNKNOWN));
-            map.put("Y", new CInt(blk.getY(), Target.UNKNOWN));
-            map.put("Z", new CInt(blk.getZ(), Target.UNKNOWN));
-            map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
-
-            int blktype = event.getBlock().getTypeId();
-            map.put("type", new CInt(blktype, Target.UNKNOWN));
-
-            int blkdata = event.getBlock().getData();
-            map.put("data", new CInt(blkdata, Target.UNKNOWN));
-
-            CArray agst = new CArray(Target.UNKNOWN);
-            MCBlock agstblk = event.getBlockAgainst();
-            int againsttype = agstblk.getTypeId();
-            agst.set("type", new CInt(againsttype, Target.UNKNOWN));
-            int againstdata = agstblk.getData();
-            agst.set("data", new CInt(againstdata, Target.UNKNOWN));
-            agst.set("X", new CInt(agstblk.getX(), Target.UNKNOWN));
-            agst.set("Y", new CInt(agstblk.getY(), Target.UNKNOWN));
-            agst.set("Z", new CInt(agstblk.getZ(), Target.UNKNOWN));
-            map.put("against", agst);
-
-            MCBlockState old = event.getBlockReplacedState();
-            CArray oldarr = new CArray(Target.UNKNOWN);
-            oldarr.set("type", new CInt(old.getTypeId(), Target.UNKNOWN));
-            oldarr.set("data", new CInt(old.getData().getData(), Target.UNKNOWN));
-            map.put("oldblock", oldarr);
-
-            return map;
-        }
-
         public boolean modifyEvent(String key, Construct value,
                 BindableEvent e) {
             MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
@@ -315,13 +307,22 @@ public class BlockEvents {
             }
             return false;
         }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
     }
 
     @api
     public static class sign_changed extends AbstractEvent {
 
-        public String getName() {
-            return "sign_changed";
+        public BindableEvent convert(CArray manual) {
+            MCSignChangeEvent e = EventBuilder.instantiate(
+                    MCSignChangeEvent.class,
+                    Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN),
+                    manual.get("1").val(), manual.get("2").val(),
+                    manual.get("3").val(), manual.get("4").val());
+            return e;
         }
 
         public String docs() {
@@ -336,32 +337,8 @@ public class BlockEvents {
                     + "{player|location|text}";
         }
 
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-
         public Driver driver() {
             return Driver.SIGN_CHANGED;
-        }
-
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-            if (e instanceof MCSignChangeEvent) {
-                MCSignChangeEvent sce = (MCSignChangeEvent) e;
-
-                if (prefilter.containsKey("player")) {
-                    if (!sce.getPlayer().getName().equals(prefilter.get("player").val())) {
-                        return false;
-                    }
-                }
-
-                Prefilters.match(prefilter, "1", sce.getLine(0), Prefilters.PrefilterType.REGEX);
-                Prefilters.match(prefilter, "2", sce.getLine(1), Prefilters.PrefilterType.REGEX);
-                Prefilters.match(prefilter, "3", sce.getLine(2), Prefilters.PrefilterType.REGEX);
-                Prefilters.match(prefilter, "4", sce.getLine(3), Prefilters.PrefilterType.REGEX);
-
-                return true;
-            }
-            return false;
         }
 
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
@@ -384,6 +361,30 @@ public class BlockEvents {
             } else {
                 throw new EventException("Cannot convert e to MCSignChangeEvent");
             }
+        }
+
+        public String getName() {
+            return "sign_changed";
+        }
+
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if (e instanceof MCSignChangeEvent) {
+                MCSignChangeEvent sce = (MCSignChangeEvent) e;
+
+                if (prefilter.containsKey("player")) {
+                    if (!sce.getPlayer().getName().equals(prefilter.get("player").val())) {
+                        return false;
+                    }
+                }
+
+                Prefilters.match(prefilter, "1", sce.getLine(0), Prefilters.PrefilterType.REGEX);
+                Prefilters.match(prefilter, "2", sce.getLine(1), Prefilters.PrefilterType.REGEX);
+                Prefilters.match(prefilter, "3", sce.getLine(2), Prefilters.PrefilterType.REGEX);
+                Prefilters.match(prefilter, "4", sce.getLine(3), Prefilters.PrefilterType.REGEX);
+
+                return true;
+            }
+            return false;
         }
 
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
@@ -438,13 +439,12 @@ public class BlockEvents {
             return false;
         }
 
-        public BindableEvent convert(CArray manual) {
-            MCSignChangeEvent e = EventBuilder.instantiate(
-                    MCSignChangeEvent.class,
-                    Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN),
-                    manual.get("1").val(), manual.get("2").val(),
-                    manual.get("3").val(), manual.get("4").val());
-            return e;
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
+    }
+
+    public static String docs() {
+        return "Contains events related to a block";
     }
 }

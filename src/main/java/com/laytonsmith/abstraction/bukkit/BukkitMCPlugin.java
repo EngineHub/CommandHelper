@@ -15,10 +15,6 @@ import org.bukkit.plugin.Plugin;
 public class BukkitMCPlugin implements MCPlugin {
 
     Plugin p;
-    public BukkitMCPlugin(Plugin plugin) {
-        this.p = plugin;
-    }
-    
     public BukkitMCPlugin(AbstractionObject a){
         this((Plugin)null);
         if(a instanceof MCPlugin){
@@ -28,10 +24,18 @@ public class BukkitMCPlugin implements MCPlugin {
         }
     }
     
+    public BukkitMCPlugin(Plugin plugin) {
+        this.p = plugin;
+    }
+    
     public Object getHandle(){
         return p;
     }
 
+    public Plugin getPlugin() {
+        return p;
+    }
+    
     public boolean isEnabled() {
         return p.isEnabled();
     }
@@ -42,10 +46,6 @@ public class BukkitMCPlugin implements MCPlugin {
         }
         
         return false;
-    }
-    
-    public Plugin getPlugin() {
-        return p;
     }
     
 }

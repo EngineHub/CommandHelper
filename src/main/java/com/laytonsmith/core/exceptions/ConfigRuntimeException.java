@@ -25,50 +25,13 @@ import java.util.logging.Level;
  */
 public class ConfigRuntimeException extends RuntimeException {
 
-    Stack<Target> stackTraceTrail = new Stack<Target>();
-
-    /**
-     * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
-     */
-    protected ConfigRuntimeException() {
-    }
-
-    public void setEnv(Env env) {
-        this.env = env;
-    }
-    
-    /**
-     * This returns the environment that was set when the exception was thrown.
-     * It may be null, though that's due to an incomplete swapover, and should be
-     * fixed.
-     */
-    public Env getEnv(){
-        return this.env;
-    }
-
-    public void setFile(File f) {
-        if(file == null){
-            file = f;
-        }
-    }
-
-    public void setLineNum(int line_num) {
-        if(this.line_num == -1){
-            this.line_num = line_num;
-        }
-    }
-    
-    public void setColumn(int column){
-        if(this.column == -1){
-            this.column = column;
-        }
-    }
-    
-    public void addStackTraceTrail(Target t){
-        //TODO: Add better stack traces to stuff that could bubble up
-    }
-    
     public static enum Reaction{
+        /**
+         * A handler knew how to deal with this exception, and furthermore, it escalated
+         * it to a more serious category. Though the behavior may be undefined, the
+         * plugin should pass the exception up further.
+         */
+        FATAL,
         /**
          * This exception should be ignored, because a handler dealt with it
          * as desired. The plugin is no longer responsible for dealing with this
@@ -80,77 +43,13 @@ public class ConfigRuntimeException extends RuntimeException {
          * to handle it. The plugin should handle it by using the default action
          * for an uncaught exception
          */
-        REPORT,
-        /**
-         * A handler knew how to deal with this exception, and furthermore, it escalated
-         * it to a more serious category. Though the behavior may be undefined, the
-         * plugin should pass the exception up further.
-         */
-        FATAL
+        REPORT
     }
-    
-    /**
-     * If a exception bubbles all the way up to the top, this should be called first,
-     * to see what reaction the plugin should take.
-     * @param e
-     * @return 
-     */
-    public static Reaction HandleUncaughtException(ConfigRuntimeException e){
-        //For now just return the default, but eventually, we will also see what the
-        //bound events do for it
-        return Reaction.REPORT;
+
+    public static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){
+        DoReport(e.getMessage(), "COMPILE ERROR", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), e.getLineNum(), optionalMessage, player);
     }
-    
-    /**
-     * If there's nothing special you want to do with the exception, you can send it
-     * here, and it will take the default action for an uncaught exception.
-     * @param e
-     * @param r 
-     */
-    public static void React(ConfigRuntimeException e){
-        React(e, HandleUncaughtException(e), null);
-    }
-    
-//    /**
-//     * If there's nothing special you want to do with the exception, you can send it
-//     * here, and it will take the default action for an uncaught exception.
-//     * @param e
-//     * @param r 
-//     */
-//    public static void React(ConfigRuntimeException e, Reaction r) {
-//        React(e, r, null);
-//    }
-    
-    /**
-     * If there's nothing special you want to do with the exception, you can send it
-     * here, and it will take the default action for an uncaught exception.
-     * @param e
-     * @param r 
-     */
-    public static void React(ConfigRuntimeException e, String optionalMessage){
-        React(e, HandleUncaughtException(e), optionalMessage);
-    }
-    
-    /**
-     * If there's nothing special you want to do with the exception, you can send it
-     * here, and it will take the default action for an uncaught exception.
-     * @param e
-     * @param r 
-     */
-    private static void React(ConfigRuntimeException e, Reaction r, String optionalMessage){        
-        if(r == Reaction.IGNORE){
-            //Welp, you heard the man.
-            CHLog.Log(CHLog.Tags.RUNTIME, CHLog.Level.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
-        } else if(r == ConfigRuntimeException.Reaction.REPORT){
-            ConfigRuntimeException.DoReport(e, optionalMessage);
-        } else if(r == ConfigRuntimeException.Reaction.FATAL){
-            ConfigRuntimeException.DoReport(e, optionalMessage);
-            //Well, here goes nothing
-            ConfigRuntimeException.DoReport(e, optionalMessage);
-            throw e;
-        }
-    }
-    
+
     /**
      * If the Reaction returned by HandleUncaughtException is to report the exception,
      * this function should be used to standardize the report format.
@@ -160,6 +59,14 @@ public class ConfigRuntimeException extends RuntimeException {
         DoReport(e, null);
     }
     
+    public static void DoReport(ConfigRuntimeException e, String optionalMessage){
+        MCPlayer p = null;
+        if(e.getEnv() != null && e.getEnv().GetPlayer() != null){
+            p = e.getEnv().GetPlayer();
+        }        
+        DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, p);
+    }
+
     /**
      * If the Reaction returned by HandleUncaughtException is to report the exception,
      * this function should be used to standardize the report format. If the error message
@@ -199,34 +106,13 @@ public class ConfigRuntimeException extends RuntimeException {
                     + MCChatColor.AQUA + line_num);
         }
     }
-    
-    public static void DoReport(ConfigRuntimeException e, String optionalMessage){
-        MCPlayer p = null;
-        if(e.getEnv() != null && e.getEnv().GetPlayer() != null){
-            p = e.getEnv().GetPlayer();
-        }        
-        DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, p);
-    }
-    
-    public static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){
-        DoReport(e.getMessage(), "COMPILE ERROR", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), e.getLineNum(), optionalMessage, player);
-    }
-        
-    
+
     /**
      * Shorthand for DoWarning(exception, null, true);
      * @param e 
      */
     public static void DoWarning(Exception e){
         DoWarning(e, null, true);
-    }
-    
-    /**
-     * Shorthand for DoWarning(null, message, true);
-     * @param optionalMessage 
-     */
-    public static void DoWarning(String optionalMessage){
-        DoWarning(null, optionalMessage, true);
     }
     
     /**
@@ -262,13 +148,98 @@ public class ConfigRuntimeException extends RuntimeException {
         }
     }
     
+    /**
+     * Shorthand for DoWarning(null, message, true);
+     * @param optionalMessage 
+     */
+    public static void DoWarning(String optionalMessage){
+        DoWarning(null, optionalMessage, true);
+    }
+    
+    /**
+     * If a exception bubbles all the way up to the top, this should be called first,
+     * to see what reaction the plugin should take.
+     * @param e
+     * @return 
+     */
+    public static Reaction HandleUncaughtException(ConfigRuntimeException e){
+        //For now just return the default, but eventually, we will also see what the
+        //bound events do for it
+        return Reaction.REPORT;
+    }
+    
+    /**
+     * If there's nothing special you want to do with the exception, you can send it
+     * here, and it will take the default action for an uncaught exception.
+     * @param e
+     * @param r 
+     */
+    public static void React(ConfigRuntimeException e){
+        React(e, HandleUncaughtException(e), null);
+    }
+    
+    /**
+     * If there's nothing special you want to do with the exception, you can send it
+     * here, and it will take the default action for an uncaught exception.
+     * @param e
+     * @param r 
+     */
+    private static void React(ConfigRuntimeException e, Reaction r, String optionalMessage){        
+        if(r == Reaction.IGNORE){
+            //Welp, you heard the man.
+            CHLog.Log(CHLog.Tags.RUNTIME, CHLog.Level.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
+        } else if(r == ConfigRuntimeException.Reaction.REPORT){
+            ConfigRuntimeException.DoReport(e, optionalMessage);
+        } else if(r == ConfigRuntimeException.Reaction.FATAL){
+            ConfigRuntimeException.DoReport(e, optionalMessage);
+            //Well, here goes nothing
+            ConfigRuntimeException.DoReport(e, optionalMessage);
+            throw e;
+        }
+    }
+    
+//    /**
+//     * If there's nothing special you want to do with the exception, you can send it
+//     * here, and it will take the default action for an uncaught exception.
+//     * @param e
+//     * @param r 
+//     */
+//    public static void React(ConfigRuntimeException e, Reaction r) {
+//        React(e, r, null);
+//    }
+    
+    /**
+     * If there's nothing special you want to do with the exception, you can send it
+     * here, and it will take the default action for an uncaught exception.
+     * @param e
+     * @param r 
+     */
+    public static void React(ConfigRuntimeException e, String optionalMessage){
+        React(e, HandleUncaughtException(e), optionalMessage);
+    }
+    
+    private int column = -1;
+    
+    private Env env;
     
     private ExceptionType ex;
-    private int line_num = -1;
+    
     private File file;
-    private int column = -1;
-    private Env env;
+    
+    private int line_num = -1;
+        
+    
+    Stack<Target> stackTraceTrail = new Stack<Target>();
+    
     private Target target;
+    
+    /**
+     * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
+     */
+    protected ConfigRuntimeException() {
+    }
+    
+    
     /**
      * Creates a new ConfigRuntimeException. If ex is not null, this exception can be caught
      * by user level code. Otherwise, it will be ignored by the try() function.
@@ -280,7 +251,6 @@ public class ConfigRuntimeException extends RuntimeException {
     public ConfigRuntimeException(String msg, ExceptionType ex, Target t){
         this(msg, ex, t, null);
     }
-    
     public ConfigRuntimeException(String msg, ExceptionType ex, Target t, Throwable cause){
         super(msg, cause);
         this.ex = ex;
@@ -289,14 +259,6 @@ public class ConfigRuntimeException extends RuntimeException {
         this.column = t.col();
         this.target = t;
     }
-    
-//    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
-//        this(msg, ex, line_num, null);
-//    }
-//    public ConfigRuntimeException(String msg, int line_num){
-//        this(msg, null, line_num, null);
-//    }
-    
     /**
      * Creates an uncatchable exception (by user level code)
      * @param msg
@@ -306,25 +268,37 @@ public class ConfigRuntimeException extends RuntimeException {
     public ConfigRuntimeException(String msg, Target t){
         this(msg, null, t);
     }
-    
+    public void addStackTraceTrail(Target t){
+        //TODO: Add better stack traces to stuff that could bubble up
+    }
+    public int getCol(){
+        return this.column;
+    }
+    /**
+     * This returns the environment that was set when the exception was thrown.
+     * It may be null, though that's due to an incomplete swapover, and should be
+     * fixed.
+     */
+    public Env getEnv(){
+        return this.env;
+    }
     public ExceptionType getExceptionType(){
         return this.ex;
-    }
-    
-    public int getLineNum(){
-        return this.line_num;
     }
     
     public File getFile(){
         return this.file;
     }
     
-    public int getCol(){
-        return this.column;
-    }
+//    public ConfigRuntimeException(String msg, ExceptionType ex, int line_num){
+//        this(msg, ex, line_num, null);
+//    }
+//    public ConfigRuntimeException(String msg, int line_num){
+//        this(msg, null, line_num, null);
+//    }
     
-    public Target getTarget(){
-        return this.target;
+    public int getLineNum(){
+        return this.line_num;
     }
     
     public String getSimpleFile(){
@@ -332,6 +306,32 @@ public class ConfigRuntimeException extends RuntimeException {
             return this.file.getName();
         } else {
             return null;
+        }
+    }
+    
+    public Target getTarget(){
+        return this.target;
+    }
+    
+    public void setColumn(int column){
+        if(this.column == -1){
+            this.column = column;
+        }
+    }
+    
+    public void setEnv(Env env) {
+        this.env = env;
+    }
+    
+    public void setFile(File f) {
+        if(file == null){
+            file = f;
+        }
+    }
+    
+    public void setLineNum(int line_num) {
+        if(this.line_num == -1){
+            this.line_num = line_num;
         }
     }
 }

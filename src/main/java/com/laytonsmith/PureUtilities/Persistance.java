@@ -14,36 +14,17 @@ import java.util.Map;
  */
 public interface Persistance {
     /**
-     * Loads the database from disk. This is automatically called when setValue or getValue is called.
-     * @throws Exception
+     * Clears out all of the data from this persistance object. For the love
+     * of God, don't call this from anywhere but the data manager!
      */
-    public void load() throws Exception;
+    public void clearAllData();
     
     /**
-     * Causes the database to be saved to disk
-     * @throws IOException
+     * Returns all the matched namespace entries.
+     * @param partialKey The partial name of the keys you wish to return
+     * @return An ArrayList of Map.Entries.
      */
-    public void save() throws Exception;
-    
-    /**
-     * Adds or modifies the value of the key. Typically, this convention should be followed:
-     * <pre>
-     * key1.key2.key3...
-     * </pre>
-     * To make this usage easier, the function automatically namespaces the values for you. A sample
-     * usage might be:
-     * <pre>
-     * setValue(new String[]{"playerName", "value"}, value);
-     * </pre>
-     *
-     * When using namespaces in this way, the isNamespaceSet function becomes available to you.
-     * Since plugin values are global, you can use this to interact with other plugins. Caution should
-     * be used when interacting with other plugin's values though.
-     * @param key The key for this particular value
-     * @param value The value to store. If value is null, the key is simply removed.
-     * @return The object that was in this key, or null if the value did not exist.
-     */
-    public Object setValue(String[] key, Object value);
+    public List<Map.Entry<String, Object>> getNamespaceValues(String[] partialKey);
     
     /**
      * Returns the value of a particular key
@@ -71,11 +52,10 @@ public interface Persistance {
     public boolean isNamespaceSet(String[] partialKey);
     
     /**
-     * Returns all the matched namespace entries.
-     * @param partialKey The partial name of the keys you wish to return
-     * @return An ArrayList of Map.Entries.
+     * Loads the database from disk. This is automatically called when setValue or getValue is called.
+     * @throws Exception
      */
-    public List<Map.Entry<String, Object>> getNamespaceValues(String[] partialKey);
+    public void load() throws Exception;
     
     /**
      * Prints all of the stored values to the specified stream.
@@ -83,8 +63,28 @@ public interface Persistance {
     public void printValues(PrintStream out);
     
     /**
-     * Clears out all of the data from this persistance object. For the love
-     * of God, don't call this from anywhere but the data manager!
+     * Causes the database to be saved to disk
+     * @throws IOException
      */
-    public void clearAllData();
+    public void save() throws Exception;
+    
+    /**
+     * Adds or modifies the value of the key. Typically, this convention should be followed:
+     * <pre>
+     * key1.key2.key3...
+     * </pre>
+     * To make this usage easier, the function automatically namespaces the values for you. A sample
+     * usage might be:
+     * <pre>
+     * setValue(new String[]{"playerName", "value"}, value);
+     * </pre>
+     *
+     * When using namespaces in this way, the isNamespaceSet function becomes available to you.
+     * Since plugin values are global, you can use this to interact with other plugins. Caution should
+     * be used when interacting with other plugin's values though.
+     * @param key The key for this particular value
+     * @param value The value to store. If value is null, the key is simply removed.
+     * @return The object that was in this key, or null if the value did not exist.
+     */
+    public Object setValue(String[] key, Object value);
 }

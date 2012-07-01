@@ -22,10 +22,14 @@ import java.util.List;
 public @interface api {
     
     public enum Platforms{
-        INTERPRETER_JAVA(null, "Java Interpreter"),
-        COMPILER_BASH(new BashPlatformResolver(), "Bash Compiler");
-        private PlatformResolver resolver;
+        COMPILER_BASH(new BashPlatformResolver(), "Bash Compiler"),
+        INTERPRETER_JAVA(null, "Java Interpreter");
         private String platformName;
+        private PlatformResolver resolver;
+        private Platforms(PlatformResolver resolver, String platformName){
+            this.resolver = resolver;
+            this.platformName = platformName;
+        }
         /**
          * Returns the platform specific resolver, which is able to override base functionality,
          * which will be adjusted as needed. If the resolver is null, one does not exist, implying
@@ -38,27 +42,15 @@ public @interface api {
         public String platformName(){
             return this.platformName;
         }
-        private Platforms(PlatformResolver resolver, String platformName){
-            this.resolver = resolver;
-            this.platformName = platformName;
-        }
     }
-    
-    Platforms [] platform() default {api.Platforms.INTERPRETER_JAVA};
-    
     
     /**
      * This is a list of valid classes that are valid to be tagged with this annotation.
      */
     public static enum ValidClasses{
-        FUNCTION(com.laytonsmith.core.functions.FunctionBase.class),
-        EVENT(com.laytonsmith.core.events.Event.class);
+        EVENT(com.laytonsmith.core.events.Event.class),
+        FUNCTION(com.laytonsmith.core.functions.FunctionBase.class);
         private static List<Class> classes = null;
-        Class classType;
-        private ValidClasses(Class c){
-            classType = c;
-        }
-        
         /**
          * Returns a copy of the list of valid classes that may be tagged with
          * the api annotation.
@@ -74,7 +66,6 @@ public @interface api {
             }
             return new ArrayList<Class>(classes);
         }
-        
         /**
          * Returns true if the specified class extends a valid class.
          * @param c
@@ -88,5 +79,14 @@ public @interface api {
             }
             return false;
         }
+        
+        Class classType;
+        
+        private ValidClasses(Class c){
+            classType = c;
+        }
     }
+    
+    
+    Platforms [] platform() default {api.Platforms.INTERPRETER_JAVA};
 }

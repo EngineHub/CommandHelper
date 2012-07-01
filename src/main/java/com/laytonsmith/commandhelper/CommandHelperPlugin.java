@@ -56,23 +56,51 @@ import org.bukkit.plugin.java.JavaPlugin;
  * @author sk89q
  */
 public class CommandHelperPlugin extends JavaPlugin {
-    public static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
     //Do not rename this field, it is changed reflectively in unit tests.
     private static AliasCore ac;
-    public static MCServer myServer;
-    public static SerializedPersistance persist;
-    public static PermissionsResolverManager perms;
-    public static Version version;
-    public static CommandHelperPlugin self;
-    public static WorldEditPlugin wep;
-    public static ExecutorService hostnameLookupThreadPool;
     public static ConcurrentHashMap<String, String> hostnameLookupCache;
+    public static ExecutorService hostnameLookupThreadPool;
     private static int hostnameThreadPoolID = 0;
+    public static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
+    public static MCServer myServer;
+    public static PermissionsResolverManager perms;
+    public static SerializedPersistance persist;
+    public static CommandHelperPlugin self;
+    public static Version version;
+    public static WorldEditPlugin wep;
     /**
-     * Listener for the plugin system.
+     * Execute a command.
+     * @param player 
+     *
+     * @param cmd
      */
-    final CommandHelperListener playerListener =
-            new CommandHelperListener(this);
+    public static void execCommand(MCPlayer player, String cmd) {
+        player.chat(cmd);
+    }
+    
+    public static AliasCore getCore(){
+        return ac;
+    }
+    /**
+     * Joins a string from an array of strings.
+     *
+     * @param str
+     * @param delimiter
+     * @return
+     */
+    public static String joinString(String[] str, String delimiter) {
+        if (str.length == 0) {
+            return "";
+        }
+        StringBuilder buffer = new StringBuilder(str[0]);
+        for (int i = 1; i < str.length; i++) {
+            buffer.append(delimiter).append(str[i]);
+        }
+        return buffer.toString();
+    }
+
+    final Set<MCPlayer> commandRunning = new HashSet<MCPlayer>();
+    
     
     /**
      * Interpreter listener
@@ -80,19 +108,75 @@ public class CommandHelperPlugin extends JavaPlugin {
     public final CommandHelperInterpreterListener interpreterListener = 
             new CommandHelperInterpreterListener();
     /**
+     * Listener for the plugin system.
+     */
+    final CommandHelperListener playerListener =
+            new CommandHelperListener(this);
+
+    /**
      * Server Command Listener, for console commands
      */
     final CommandHelperServerListener serverListener =
             new CommandHelperServerListener();
 
-    final Set<MCPlayer> commandRunning = new HashSet<MCPlayer>();
-    
-    
+    /**
+     * Called when a command registered by this plugin is received.
+     */
     @Override
-    public void onLoad(){
-        Implementation.setServerType(Implementation.Type.BUKKIT);
-        Installer.Install();
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+        if((sender.isOp() || (sender instanceof Player && (perms.hasPermission(((Player)sender).getName(), "commandhelper.reloadaliases") 
+                || perms.hasPermission(((Player)sender).getName(), "ch.reloadaliases"))))
+                && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
+            MCPlayer player = null;
+            if(sender instanceof Player){
+                player = new BukkitMCPlayer((Player)sender);
+            }
+            ac.reload(player);
+//            if(ac.reload(player)){
+//                if(sender instanceof Player){
+//                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");
+//                }
+//                System.out.println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
+//            } else{
+//                if(sender instanceof Player){
+//                    Static.SendMessage(player, MCChatColor.RED + "An error occured when trying to compile the script. Check the console for more information.");
+//                }
+//                System.out.println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
+//            }
+            return true;
+        } else if(cmd.getName().equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")){
+            return true;
+        } else if(cmd.getName().equals("runalias")){
+            //Hardcoded alias rebroadcast
+            if(sender instanceof Player){
+                PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player)sender, Static.strJoin(args, " "));
+                playerListener.onPlayerCommandPreprocess(pcpe);
+            } else if(sender instanceof ConsoleCommandSender){
+                String cmd2 = Static.strJoin(args, " ");
+                if(cmd2.startsWith("/")){
+                    cmd2 = cmd2.substring(1);
+                }
+                ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender)sender, cmd2);
+                serverListener.onServerCommand(sce);                
+            }
+            return true;
+        } else if (sender instanceof Player) {
+                return runCommand(new BukkitMCPlayer((Player)sender), cmd.getName(), args);
+        } else {
+            return false;
+        }
     }
+    
+    /**
+     * Disables the plugin.
+     */
+    @Override
+    public void onDisable() {
+        //free up some memory
+        ac = null;
+        wep = null;
+    }
+
     /**
      * Called on plugin enable.
      */
@@ -162,21 +246,13 @@ public class CommandHelperPlugin extends JavaPlugin {
         playerListener.loadGlobalAliases();
         interpreterListener.reload();
     }
-
-    public static AliasCore getCore(){
-        return ac;
-    }
-
-    /**
-     * Disables the plugin.
-     */
-    @Override
-    public void onDisable() {
-        //free up some memory
-        ac = null;
-        wep = null;
-    }
     
+    @Override
+    public void onLoad(){
+        Implementation.setServerType(Implementation.Type.BUKKIT);
+        Installer.Install();
+    }
+
     /**
      * Register an event.
      * 
@@ -186,54 +262,6 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     public void registerEvent(Listener listener) {
         getServer().getPluginManager().registerEvents(listener, this);
-    }
-
-    /**
-     * Called when a command registered by this plugin is received.
-     */
-    @Override
-    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if((sender.isOp() || (sender instanceof Player && (perms.hasPermission(((Player)sender).getName(), "commandhelper.reloadaliases") 
-                || perms.hasPermission(((Player)sender).getName(), "ch.reloadaliases"))))
-                && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
-            MCPlayer player = null;
-            if(sender instanceof Player){
-                player = new BukkitMCPlayer((Player)sender);
-            }
-            ac.reload(player);
-//            if(ac.reload(player)){
-//                if(sender instanceof Player){
-//                    Static.SendMessage(player, MCChatColor.GOLD + "Command Helper scripts sucessfully recompiled.");
-//                }
-//                System.out.println(TermColors.YELLOW + "Command Helper scripts sucessfully recompiled." + TermColors.reset());
-//            } else{
-//                if(sender instanceof Player){
-//                    Static.SendMessage(player, MCChatColor.RED + "An error occured when trying to compile the script. Check the console for more information.");
-//                }
-//                System.out.println(TermColors.RED + "An error occured when trying to compile the script. Check the console for more information." + TermColors.reset());
-//            }
-            return true;
-        } else if(cmd.getName().equals("commandhelper") && args.length >= 1 && args[0].equalsIgnoreCase("null")){
-            return true;
-        } else if(cmd.getName().equals("runalias")){
-            //Hardcoded alias rebroadcast
-            if(sender instanceof Player){
-                PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player)sender, Static.strJoin(args, " "));
-                playerListener.onPlayerCommandPreprocess(pcpe);
-            } else if(sender instanceof ConsoleCommandSender){
-                String cmd2 = Static.strJoin(args, " ");
-                if(cmd2.startsWith("/")){
-                    cmd2 = cmd2.substring(1);
-                }
-                ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender)sender, cmd2);
-                serverListener.onServerCommand(sce);                
-            }
-            return true;
-        } else if (sender instanceof Player) {
-                return runCommand(new BukkitMCPlayer((Player)sender), cmd.getName(), args);
-        } else {
-            return false;
-        }
     }
     
     /**
@@ -360,33 +388,5 @@ public class CommandHelperPlugin extends JavaPlugin {
         }
         commandRunning.remove(player);
         return false;
-    }
-
-    /**
-     * Joins a string from an array of strings.
-     *
-     * @param str
-     * @param delimiter
-     * @return
-     */
-    public static String joinString(String[] str, String delimiter) {
-        if (str.length == 0) {
-            return "";
-        }
-        StringBuilder buffer = new StringBuilder(str[0]);
-        for (int i = 1; i < str.length; i++) {
-            buffer.append(delimiter).append(str[i]);
-        }
-        return buffer.toString();
-    }
-    
-    /**
-     * Execute a command.
-     * @param player 
-     *
-     * @param cmd
-     */
-    public static void execCommand(MCPlayer player, String cmd) {
-        player.chat(cmd);
     }
 }

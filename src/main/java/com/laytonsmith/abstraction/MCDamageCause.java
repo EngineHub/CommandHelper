@@ -6,11 +6,29 @@ package com.laytonsmith.abstraction;
  */
 public enum MCDamageCause {
     /**
-         * Damage caused when an entity contacts a block such as a Cactus.
+	 * Damage caused by being in the area when a block explodes.
+	 * <p />
+	 * Damage: variable
+	 */
+	BLOCK_EXPLOSION,
+        /**
+		     * Damage caused when an entity contacts a block such as a Cactus.
+		     * <p />
+		     * Damage: 1 (Cactus)
+		     */
+		    CONTACT,
+        /**
+         * Custom damage.
          * <p />
-         * Damage: 1 (Cactus)
+         * Damage: variable
          */
-        CONTACT,
+        CUSTOM,
+        /**
+         * Damage caused by running out of air while in water
+         * <p />
+         * Damage: 2
+         */
+        DROWNING,
         /**
          * Damage caused when an entity attacks another entity.
          * <p />
@@ -18,17 +36,11 @@ public enum MCDamageCause {
          */
         ENTITY_ATTACK,
         /**
-         * Damage caused when attacked by a projectile.
+         * Damage caused by being in the area when an entity, such as a Creeper, explodes.
          * <p />
          * Damage: variable
          */
-        PROJECTILE,
-        /**
-         * Damage caused by being put in a block
-         * <p />
-         * Damage: 1
-         */
-        SUFFOCATION,
+        ENTITY_EXPLOSION,
         /**
          * Damage caused when an entity falls a distance greater than 3 blocks
          * <p />
@@ -54,53 +66,11 @@ public enum MCDamageCause {
          */
         LAVA,
         /**
-         * Damage caused by running out of air while in water
-         * <p />
-         * Damage: 2
-         */
-        DROWNING,
-        /**
-         * Damage caused by being in the area when a block explodes.
-         * <p />
-         * Damage: variable
-         */
-        BLOCK_EXPLOSION,
-        /**
-         * Damage caused by being in the area when an entity, such as a Creeper, explodes.
-         * <p />
-         * Damage: variable
-         */
-        ENTITY_EXPLOSION,
-        /**
-         * Damage caused by falling into the void
-         * <p />
-         * Damage: 4 for players
-         */
-        VOID,
-        /**
          * Damage caused by being struck by lightning
          * <p />
          * Damage: 5
          */
         LIGHTNING,
-        /**
-         * Damage caused by committing suicide using the command "/kill"
-         * <p />
-         * Damage: 1000
-         */
-        SUICIDE,
-        /**
-         * Damage caused by starving due to having an empty hunger bar
-         * <p />
-         * Damage: 1
-         */
-        STARVATION,
-        /**
-         * Damage caused due to an ongoing poison effect
-         *
-         * Damage: 1
-         */
-        POISON,
         /**
          * Damage caused by being hit by a damage potion or spell
          *
@@ -108,9 +78,39 @@ public enum MCDamageCause {
          */
         MAGIC,
         /**
-         * Custom damage.
+         * Damage caused due to an ongoing poison effect
+         *
+         * Damage: 1
+         */
+        POISON,
+        /**
+         * Damage caused when attacked by a projectile.
          * <p />
          * Damage: variable
          */
-        CUSTOM
+        PROJECTILE,
+        /**
+         * Damage caused by starving due to having an empty hunger bar
+         * <p />
+         * Damage: 1
+         */
+        STARVATION,
+        /**
+         * Damage caused by being put in a block
+         * <p />
+         * Damage: 1
+         */
+        SUFFOCATION,
+        /**
+         * Damage caused by committing suicide using the command "/kill"
+         * <p />
+         * Damage: 1000
+         */
+        SUICIDE,
+        /**
+         * Damage caused by falling into the void
+         * <p />
+         * Damage: 4 for players
+         */
+        VOID
 }

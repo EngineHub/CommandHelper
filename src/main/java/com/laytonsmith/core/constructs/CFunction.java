@@ -16,18 +16,18 @@ public class CFunction extends Construct {
         super(name, ConstructType.FUNCTION, t);
     }
 
-    public String toString() {
-        return getValue();
-    }
-    
     @Override
     public CFunction clone() throws CloneNotSupportedException{
         return (CFunction) super.clone();
     }
-
+    
     @Override
     public boolean isDynamic() {
         return true;
+    }
+
+    public String toString() {
+        return getValue();
     }
     
 }

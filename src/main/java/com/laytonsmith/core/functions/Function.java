@@ -24,45 +24,49 @@ import java.util.List;
 public interface Function extends FunctionBase, Documentation {    
 
     /**
-     * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
-     * @return An array of the exception enums, or null, if the function throws no catchable exceptions.
+     * In addition to being a function, an object may also be a code branch, that is,
+     * it conditionally will execute some of its arguments. 
+     * For optimization and static code analysis purposes,
+     * it it important for these functions to be able to provide more information
+     * about their branches; if the branch conditions are static, they should be reduceable to a single
+     * branch anyways, but some optimizations require knowledge about code branches.
      */
-    public ExceptionType[] thrown();
+    public interface CodeBranch{
+        public List<GenericTreeNode<Construct>> getBranches();
+    }
 
     /**
-     * Whether or not a function needs to be checked against the permissions file, if there are possible security concerns
-     * with a user compiling, or running this function. If this function returns true, the permissions file will be checked for
-     * commandhelper.func.compile.&lt;function name&gt; upon compilation, and commandhelper.func.use.&lt;function name&gt; upon
-     * usage in game. Note that the config script is never barred from compiling any function.
+     * If a function's syntax allows { braces }, then this method should return true. Exceedingly few functions
+     * should allow this, as only language construct emulators should use braces.
      * @return 
      */
-    public boolean isRestricted();
+    public boolean allowBraces();
 
     /**
-     * Most functions don't care that a construct is a variable, they simply care about the value stored in the variable.
-     * If the function is concerned with the variable listing however, then it has direct access to the variable list for
-     * this command.
-     * @param varList 
-     */
-    //public void varList(IVariableList varList);
-    /**
-     * If a function doesn't want to have to deal with a variable as a variable, but instead wants to recieve it as
-     * an atomic, resolved value, the function can return true from this function. This will signal the interpreter
-     * to go ahead and resolve the variable into one of the atomic Constructs. If it returns false, it is possible
-     * the exec function will receive an IVariable Construct.
+     * If a function can possibly optimize during compilation, this should return true. This is only
+     * relevant for functions that do NOT useSpecialExec, as if it takes a code tree, it is assumed that
+     * there is no way to optimize. If a function CAN optimize, and the arguments being sent to the
+     * function are constants, then the function will go ahead and run during compile time. Only functions
+     * that are true functions in the mathematical sense should return true, that is, if there is ANY
+     * case where the function might return differently, even given the same arguments, it CANNOT be
+     * optimized. A function that returns false for preResolveVariables will be sent the arguments even
+     * if they are variables, which may allow for errors to be caught at compile time if a function is
+     * expecting an ivariable to be passed in (such as assign). Functions that can't optimize, but
+     * can check argument types can also return true here.
+     * 
+     * If this returns true, optimize() will be called during compile time, which should return the construct
+     * to replace this function, if possible. It may also return {@code null}, in which case no changes will
+     * be made; this is useful for simple type checking however.
      * @return 
      */
-    public boolean preResolveVariables();
+    public boolean canOptimize();
 
     /**
-     * Whether or not to run this function asynchronously from the main server thread. If you 
-     * return true, you may NOT have any interaction with the bukkit api, other than
-     * bukkit thread safe methods. Returning true WILL run this function in the CH thread, returning
-     * false WILL run this function in the main server thread, and returning null will run this
-     * function in whatever context the script is currently running in.
+     * If a function knows how to optimize, even if portions are dynamic, it can return true here.
+     * If this returns true, the value of canOptimize is ignored, and optimize will never get called.
      * @return 
      */
-    public Boolean runAsync();
+    public boolean canOptimizeDynamic();
 
     /**
      * This function is invoked when the script is run. The line number is provided so that if there is an error,
@@ -83,13 +87,6 @@ public interface Function extends FunctionBase, Documentation {
     public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException;
     
     /**
-     * If a function needs a code tree instead of a resolved construct, it should return true here. Most
-     * functions will return false for this value.
-     * @return 
-     */
-    public boolean useSpecialExec();
-    
-    /**
      * If useSpecialExec indicates it needs the code tree instead of the resolved constructs,
      * this gets called instead of exec. If execs is needed, exec should return CVoid.
      * @param t
@@ -97,26 +94,16 @@ public interface Function extends FunctionBase, Documentation {
      * @param nodes
      * @return 
      */
-    public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes);    
+    public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes);
     
     /**
-     * If a function can possibly optimize during compilation, this should return true. This is only
-     * relevant for functions that do NOT useSpecialExec, as if it takes a code tree, it is assumed that
-     * there is no way to optimize. If a function CAN optimize, and the arguments being sent to the
-     * function are constants, then the function will go ahead and run during compile time. Only functions
-     * that are true functions in the mathematical sense should return true, that is, if there is ANY
-     * case where the function might return differently, even given the same arguments, it CANNOT be
-     * optimized. A function that returns false for preResolveVariables will be sent the arguments even
-     * if they are variables, which may allow for errors to be caught at compile time if a function is
-     * expecting an ivariable to be passed in (such as assign). Functions that can't optimize, but
-     * can check argument types can also return true here.
-     * 
-     * If this returns true, optimize() will be called during compile time, which should return the construct
-     * to replace this function, if possible. It may also return {@code null}, in which case no changes will
-     * be made; this is useful for simple type checking however.
+     * Whether or not a function needs to be checked against the permissions file, if there are possible security concerns
+     * with a user compiling, or running this function. If this function returns true, the permissions file will be checked for
+     * commandhelper.func.compile.&lt;function name&gt; upon compilation, and commandhelper.func.use.&lt;function name&gt; upon
+     * usage in game. Note that the config script is never barred from compiling any function.
      * @return 
      */
-    public boolean canOptimize();   
+    public boolean isRestricted();    
     
     /**
      * This is called during compile time, if canOptimize returns true. It should return the construct
@@ -128,14 +115,7 @@ public interface Function extends FunctionBase, Documentation {
      * @param args
      * @return 
      */
-    public Construct optimize(Target t, Construct... args) throws ConfigRuntimeException, ConfigCompileException;
-    
-    /**
-     * If a function knows how to optimize, even if portions are dynamic, it can return true here.
-     * If this returns true, the value of canOptimize is ignored, and optimize will never get called.
-     * @return 
-     */
-    public boolean canOptimizeDynamic();
+    public Construct optimize(Target t, Construct... args) throws ConfigRuntimeException, ConfigCompileException;   
     
     /**
      * If the function indicates it can optimize dynamic values, this method is called. It may
@@ -146,25 +126,45 @@ public interface Function extends FunctionBase, Documentation {
      * @return 
      */
     public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException;
-
+    
     /**
-     * If a function's syntax allows { braces }, then this method should return true. Exceedingly few functions
-     * should allow this, as only language construct emulators should use braces.
+     * Most functions don't care that a construct is a variable, they simply care about the value stored in the variable.
+     * If the function is concerned with the variable listing however, then it has direct access to the variable list for
+     * this command.
+     * @param varList 
+     */
+    //public void varList(IVariableList varList);
+    /**
+     * If a function doesn't want to have to deal with a variable as a variable, but instead wants to recieve it as
+     * an atomic, resolved value, the function can return true from this function. This will signal the interpreter
+     * to go ahead and resolve the variable into one of the atomic Constructs. If it returns false, it is possible
+     * the exec function will receive an IVariable Construct.
      * @return 
      */
-    public boolean allowBraces();
+    public boolean preResolveVariables();
+    
+    /**
+     * Whether or not to run this function asynchronously from the main server thread. If you 
+     * return true, you may NOT have any interaction with the bukkit api, other than
+     * bukkit thread safe methods. Returning true WILL run this function in the CH thread, returning
+     * false WILL run this function in the main server thread, and returning null will run this
+     * function in whatever context the script is currently running in.
+     * @return 
+     */
+    public Boolean runAsync();
+
+    /**
+     * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
+     * @return An array of the exception enums, or null, if the function throws no catchable exceptions.
+     */
+    public ExceptionType[] thrown();
     
     
     
     /**
-     * In addition to being a function, an object may also be a code branch, that is,
-     * it conditionally will execute some of its arguments. 
-     * For optimization and static code analysis purposes,
-     * it it important for these functions to be able to provide more information
-     * about their branches; if the branch conditions are static, they should be reduceable to a single
-     * branch anyways, but some optimizations require knowledge about code branches.
+     * If a function needs a code tree instead of a resolved construct, it should return true here. Most
+     * functions will return false for this value.
+     * @return 
      */
-    public interface CodeBranch{
-        public List<GenericTreeNode<Construct>> getBranches();
-    }
+    public boolean useSpecialExec();
 }

@@ -22,8 +22,8 @@ import com.laytonsmith.core.events.EventUtils;
  */
 public class BukkitBlockListener implements Listener{
 	@EventHandler(priority=EventPriority.LOWEST)
-    public void onSignChange(SignChangeEvent e){
-        EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", new BukkitBlockEvents.BukkitMCSignChangeEvent(e));
+    public void onBlockBreak(BlockBreakEvent e){
+        EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", new BukkitBlockEvents.BukkitMCBlockBreakEvent(e));
     }
 	
 	@EventHandler(priority=EventPriority.LOWEST)
@@ -32,7 +32,7 @@ public class BukkitBlockListener implements Listener{
     }
 	
 	@EventHandler(priority=EventPriority.LOWEST)
-    public void onBlockBreak(BlockBreakEvent e){
-        EventUtils.TriggerListener(Driver.BLOCK_BREAK, "block_break", new BukkitBlockEvents.BukkitMCBlockBreakEvent(e));
+    public void onSignChange(SignChangeEvent e){
+        EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", new BukkitBlockEvents.BukkitMCSignChangeEvent(e));
     }
 }

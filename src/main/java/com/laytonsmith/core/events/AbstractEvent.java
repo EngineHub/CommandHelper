@@ -21,16 +21,21 @@ import java.util.Map;
  */
 public abstract class AbstractEvent implements Event, Comparable<Event> {
     
-    private EventMixinInterface mixin;
-//    protected EventHandlerInterface handler;
-//    
-//    protected AbstractEvent(EventHandlerInterface handler){
-//        this.handler = handler;
-//    }
-//    
-    public final void setAbstractEventMixin(EventMixinInterface mixin){
-        this.mixin = mixin;
+    /**
+     * If it is ok to by default do a simple conversion from a CArray to a
+     * Map, this method can do it for you. Likely this is not acceptable,
+     * so hard-coding the conversion will be necessary.
+     * @param manualObject
+     * @return 
+     */
+    public static Object DoConvert(CArray manualObject){
+        Map<String, Construct> map = new HashMap<String, Construct>();
+        for(String key : manualObject.keySet()){
+            map.put(key, manualObject.get(key, Target.UNKNOWN));
+        }
+        return map;        
     }
+private EventMixinInterface mixin;
     
 
     /**
@@ -42,15 +47,24 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    /**
-     * If the event needs to run special code at server startup, it can be done
-     * here. By default, an UnsupportedOperationException is thrown, but is caught
-     * and ignored.
-     */
-    public void hook() {
-        throw new UnsupportedOperationException("Not supported yet.");
+    public void cancel(BindableEvent o, boolean state){
+        mixin.cancel(o, state);
     }
 
+    
+    /**
+     * For sorting and optimizing events, we need a comparison operation. By default
+     * it is compared by looking at the event name.
+     * @param o
+     * @return 
+     */
+    public int compareTo(Event o) {
+        return this.getName().compareTo(o.getName());
+    }
+    
+    public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException{
+        return mixin.evaluate_helper(e);
+    }
     
     /**
      * This function is run when the actual event occurs.
@@ -70,50 +84,22 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
             //Ignore.
         }
     }
-    
-    public void preExecution(Env env, BoundEvent.ActiveEvent activeEvent){
-        throw new UnsupportedOperationException();
-    }
-    
-    public void postExecution(Env env, BoundEvent.ActiveEvent activeEvent){
-        throw new UnsupportedOperationException();
-    }
 
     /**
-     * For sorting and optimizing events, we need a comparison operation. By default
-     * it is compared by looking at the event name.
-     * @param o
-     * @return 
+     * If the event needs to run special code at server startup, it can be done
+     * here. By default, an UnsupportedOperationException is thrown, but is caught
+     * and ignored.
      */
-    public int compareTo(Event o) {
-        return this.getName().compareTo(o.getName());
+    public void hook() {
+        throw new UnsupportedOperationException("Not supported yet.");
     }
     
-    /**
-     * Since most events are minecraft events, we return true by default.
-     * @return 
-     */
-    public boolean supportsExternal(){
-        return true;
+    public boolean isCancellable(BindableEvent o){
+        return mixin.isCancellable(o);
     }
     
-    /**
-     * If it is ok to by default do a simple conversion from a CArray to a
-     * Map, this method can do it for you. Likely this is not acceptable,
-     * so hard-coding the conversion will be necessary.
-     * @param manualObject
-     * @return 
-     */
-    public static Object DoConvert(CArray manualObject){
-        Map<String, Construct> map = new HashMap<String, Construct>();
-        for(String key : manualObject.keySet()){
-            map.put(key, manualObject.get(key, Target.UNKNOWN));
-        }
-        return map;        
-    }
-    
-    public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException{
-        return mixin.evaluate_helper(e);
+    public boolean isCancelled(BindableEvent o) {
+        return mixin.isCancelled(o);
     }
     
     /**
@@ -125,17 +111,31 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
     public void manualTrigger(BindableEvent o){
         mixin.manualTrigger(o);
     }
+    
+    public void postExecution(Env env, BoundEvent.ActiveEvent activeEvent){
+        throw new UnsupportedOperationException();
+    }
         
-    public void cancel(BindableEvent o, boolean state){
-        mixin.cancel(o, state);
+    public void preExecution(Env env, BoundEvent.ActiveEvent activeEvent){
+        throw new UnsupportedOperationException();
     }
     
-    public boolean isCancellable(BindableEvent o){
-        return mixin.isCancellable(o);
+    //    protected EventHandlerInterface handler;
+//    
+//    protected AbstractEvent(EventHandlerInterface handler){
+//        this.handler = handler;
+//    }
+//    
+    public final void setAbstractEventMixin(EventMixinInterface mixin){
+        this.mixin = mixin;
     }
 
-    public boolean isCancelled(BindableEvent o) {
-        return mixin.isCancelled(o);
+    /**
+     * Since most events are minecraft events, we return true by default.
+     * @return 
+     */
+    public boolean supportsExternal(){
+        return true;
     }
         
     

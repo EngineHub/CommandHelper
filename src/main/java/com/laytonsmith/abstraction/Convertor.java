@@ -16,25 +16,31 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
  */
 public interface Convertor {
 
-    public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch);
-    public Class GetServerEventMixin();
+    public void ClearAllRunnables();
+    public void ClearFutureRunnable(int id);
 
-    public MCEnchantment[] GetEnchantmentValues();
+    public MCEntity GetCorrectEntity(MCEntity e);
 
     public MCEnchantment GetEnchantmentByName(String name);
 
-    public MCServer GetServer();
+    public MCEnchantment[] GetEnchantmentValues();
 
     public MCItemStack GetItemStack(int type, int qty);
 
-    public void Startup(CommandHelperPlugin chp);
+    public MCItemStack GetItemStack(int type, int data, int qty);
+    
+    public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch);
+
+    public MCServer GetServer();
+
+    public Class GetServerEventMixin();
     
     public int LookupItemId(String materialName);
 
     public String LookupMaterialName(int id);
 
-    public MCItemStack GetItemStack(int type, int data, int qty);
-    
+    public int SetFutureRepeater(long ms, long initialDelay, Runnable r);
+
     /**
      * A future runnable is run on a server accessible thread at roughly the time specified in the future.
      * This is no guarantee however, as the particular server implementation may make this hard to do. The
@@ -44,12 +50,6 @@ public interface Convertor {
      */
     public int SetFutureRunnable(long ms, Runnable r);
 
-    public void ClearAllRunnables();
-
-    public void ClearFutureRunnable(int id);
-
-    public int SetFutureRepeater(long ms, long initialDelay, Runnable r);
-
-    public MCEntity GetCorrectEntity(MCEntity e);
+    public void Startup(CommandHelperPlugin chp);
     
 }

@@ -27,11 +27,11 @@ import java.util.logging.Logger;
  */
 public class Procedure implements Cloneable {
     private String name;
-    private Map<String, IVariable> varList;
     private Map<String, Construct> originals = new HashMap<String, Construct>();
-    private List<IVariable> varIndex = new ArrayList<IVariable>();
-    private GenericTreeNode<Construct> tree;
     private boolean possiblyConstant = false;
+    private GenericTreeNode<Construct> tree;
+    private List<IVariable> varIndex = new ArrayList<IVariable>();
+    private Map<String, IVariable> varList;
 
     
     public Procedure(String name, List<IVariable> varList, GenericTreeNode<Construct> tree, Target t){
@@ -54,6 +54,21 @@ public class Procedure implements Cloneable {
         //If it is, it may or may not help us during compilation, but if it's not,
         //we can be sure that we cannot inline this in any way.
         this.possiblyConstant = checkPossiblyConstant(tree);
+    }
+    
+    /**
+     * Convenience wrapper around executing a procedure if the parameters are in
+     * tree mode still.
+     * @param args
+     * @param env
+     * @return 
+     */
+    public Construct cexecute(List<GenericTreeNode<Construct>> args, Env env){
+        List<Construct> list = new ArrayList<Construct>();
+        for(GenericTreeNode<Construct> arg : args){
+            list.add(env.GetScript().seval(arg, env));
+        }
+        return execute(list, env);
     }
     
     private boolean checkPossiblyConstant(GenericTreeNode<Construct> tree){
@@ -99,32 +114,12 @@ public class Procedure implements Cloneable {
         }
     }
     
-    public boolean isPossiblyConstant(){
-        return this.possiblyConstant;
-    }
-    
-    public String getName(){
-        return name;
-    }
-    
     @Override
-    public String toString(){
-        return name + "(" + StringUtil.joinString(varList.keySet(), ", ", 0) + ")";
-    }
-    
-    /**
-     * Convenience wrapper around executing a procedure if the parameters are in
-     * tree mode still.
-     * @param args
-     * @param env
-     * @return 
-     */
-    public Construct cexecute(List<GenericTreeNode<Construct>> args, Env env){
-        List<Construct> list = new ArrayList<Construct>();
-        for(GenericTreeNode<Construct> arg : args){
-            list.add(env.GetScript().seval(arg, env));
-        }
-        return execute(list, env);
+    public Procedure clone() throws CloneNotSupportedException{
+        Procedure clone = (Procedure) super.clone();
+        if(this.varList != null) clone.varList = new HashMap<String, IVariable>(this.varList);
+        if(this.tree != null) clone.tree = this.tree.clone();
+        return clone;
     }
     
     /**
@@ -162,11 +157,16 @@ public class Procedure implements Cloneable {
         return new CVoid(Target.UNKNOWN);
     }
     
+    public String getName(){
+        return name;
+    }
+    
+    public boolean isPossiblyConstant(){
+        return this.possiblyConstant;
+    }
+    
     @Override
-    public Procedure clone() throws CloneNotSupportedException{
-        Procedure clone = (Procedure) super.clone();
-        if(this.varList != null) clone.varList = new HashMap<String, IVariable>(this.varList);
-        if(this.tree != null) clone.tree = this.tree.clone();
-        return clone;
+    public String toString(){
+        return name + "(" + StringUtil.joinString(varList.keySet(), ", ", 0) + ")";
     }
 }

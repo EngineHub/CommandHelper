@@ -11,10 +11,10 @@ import com.laytonsmith.core.events.BindableEvent;
  * @author EntityReborn
  */
 public interface MCBlockPlaceEvent extends BindableEvent{
-    public MCPlayer getPlayer();
+    public boolean canBuild();
     public MCBlock getBlock();
     public MCBlock getBlockAgainst();
     public MCBlockState getBlockReplacedState();
     public MCItemStack getItemInHand();
-    public boolean canBuild();
+    public MCPlayer getPlayer();
 }

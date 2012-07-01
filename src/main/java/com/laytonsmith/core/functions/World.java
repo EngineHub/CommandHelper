@@ -26,42 +26,10 @@ import java.util.regex.Pattern;
  * @author Layton
  */
 public class World {
-    public static String docs(){
-        return "Provides functions for manipulating a world";
-    }
-    
     @api public static class get_spawn extends AbstractFunction{
-
-        public String getName() {
-            return "get_spawn";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0, 1};
-        }
 
         public String docs() {
             return "array {[world]} Returns a location array for the specified world, or the current player's world, if not specified.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-
-        public Boolean runAsync() {
-            return false;
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
@@ -73,42 +41,93 @@ public class World {
             }
             return ObjectGenerator.GetGenerator().location(Static.getServer().getWorld(world).getSpawnLocation());
         }
-        
-    }
-    
-    @api public static class refresh_chunk extends AbstractFunction{
 
         public String getName() {
-            return "refresh_chunk";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3};
-        }
-
-        public String docs() {
-            return "void {[world], x, z | [world], locationArray} Resends the chunk to all clients, using the specified world, or the current"
-                    + " players world if not provided.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+            return "get_spawn";
         }
 
         public boolean isRestricted() {
             return true;
         }
 
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
         public boolean preResolveVariables() {
             return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
         }
 
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+        }
+        
+    }
+    
+    @api public static class get_world_time extends AbstractFunction{
+
+        public String docs() {
+            return "int {[world]} Returns the time of the specified world, as an integer from"
+                    + " 0 to 24000-1";
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCWorld w = null;
+            if(environment.GetPlayer() != null){
+                w = environment.GetPlayer().getWorld();
+            }
+            if(args.length == 1){
+                w = Static.getServer().getWorld(args[0].val());                
+            }
+            if(w == null){
+                throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+            }
+            return new CInt(w.getTime(), t);
+        }
+
+        public String getName() {
+            return "get_world_time";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
         public Boolean runAsync() {
             return false;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+        }
+        
+    }
+    
+    @api public static class refresh_chunk extends AbstractFunction{
+
+        public String docs() {
+            return "void {[world], x, z | [world], locationArray} Resends the chunk to all clients, using the specified world, or the current"
+                    + " players world if not provided.";
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
@@ -146,35 +165,38 @@ public class World {
             world.refreshChunk(x, z);
             return new CVoid(t);
         }
-        
-    }
-    
-    private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
-    static{
-        synchronized(World.class){
-            Properties p = new Properties();
-            try {
-                p.load(Minecraft.class.getResourceAsStream("/time_names.txt"));
-                Enumeration e = p.propertyNames();
-                while(e.hasMoreElements()){
-                    String name = e.nextElement().toString();
-                    TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
-                }
-            } catch (IOException ex) {
-                Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-    }
-    
-    @api public static class set_world_time extends AbstractFunction{
 
         public String getName() {
-            return "set_world_time";
+            return "refresh_chunk";
+        }
+
+        public boolean isRestricted() {
+            return true;
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2};
+            return new Integer[]{1, 2, 3};
         }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+        }
+        
+    }
+    
+    @api public static class set_world_time extends AbstractFunction{
 
         public String docs() {
             StringBuilder doc = new StringBuilder();
@@ -190,26 +212,6 @@ public class World {
                 doc.append("</ul>");
             }
             return doc.toString();
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-
-        public Boolean runAsync() {
-            return false;
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
@@ -263,57 +265,55 @@ public class World {
             w.setTime(time);
             return new CVoid(t);
         }
-        
-    }
-    
-    @api public static class get_world_time extends AbstractFunction{
 
         public String getName() {
-            return "get_world_time";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0, 1};
-        }
-
-        public String docs() {
-            return "int {[world]} Returns the time of the specified world, as an integer from"
-                    + " 0 to 24000-1";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+            return "set_world_time";
         }
 
         public boolean isRestricted() {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
         }
 
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
+        public boolean preResolveVariables() {
+            return true;
         }
 
         public Boolean runAsync() {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCWorld w = null;
-            if(environment.GetPlayer() != null){
-                w = environment.GetPlayer().getWorld();
-            }
-            if(args.length == 1){
-                w = Static.getServer().getWorld(args[0].val());                
-            }
-            if(w == null){
-                throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
-            }
-            return new CInt(w.getTime(), t);
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
         }
         
+    }
+    private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
+    
+    static{
+        synchronized(World.class){
+            Properties p = new Properties();
+            try {
+                p.load(Minecraft.class.getResourceAsStream("/time_names.txt"));
+                Enumeration e = p.propertyNames();
+                while(e.hasMoreElements()){
+                    String name = e.nextElement().toString();
+                    TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
+                }
+            } catch (IOException ex) {
+                Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+    }
+    
+    public static String docs(){
+        return "Provides functions for manipulating a world";
     }
 }

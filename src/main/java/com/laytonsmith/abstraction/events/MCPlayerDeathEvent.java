@@ -11,20 +11,20 @@ import java.util.List;
  */
 public interface MCPlayerDeathEvent extends BindableEvent{
 
-    public List<MCItemStack> getDrops();
+    public void addDrop(MCItemStack is);
     
-    public MCEntity getEntity();
-    
-    public int getDroppedExp();
-
-    public String getDeathMessage();
-
-    public void setDroppedExp(int i);
-
-    public void setDeathMessage(String nval);
-
     public void clearDrops();
     
-    public void addDrop(MCItemStack is);
+    public String getDeathMessage();
+
+    public int getDroppedExp();
+
+    public List<MCItemStack> getDrops();
+
+    public MCEntity getEntity();
+
+    public void setDeathMessage(String nval);
+    
+    public void setDroppedExp(int i);
     
 }

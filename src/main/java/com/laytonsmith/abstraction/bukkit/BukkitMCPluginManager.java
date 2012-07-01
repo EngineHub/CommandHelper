@@ -16,10 +16,6 @@ import org.bukkit.plugin.PluginManager;
 public class BukkitMCPluginManager implements MCPluginManager {
 
     PluginManager p;
-    public BukkitMCPluginManager(PluginManager pluginManager) {
-        this.p = pluginManager;
-    }
-    
     public BukkitMCPluginManager(AbstractionObject a){
         this((PluginManager)null);
         if(a instanceof MCPluginManager){
@@ -29,19 +25,23 @@ public class BukkitMCPluginManager implements MCPluginManager {
         }
     }
     
-    public Object getHandle(){
+    public BukkitMCPluginManager(PluginManager pluginManager) {
+        this.p = pluginManager;
+    }
+    
+    public PluginManager __PluginManager(){
         return p;
     }
 
+    public Object getHandle(){
+        return p;
+    }
+    
     public MCPlugin getPlugin(String name) {
         if(p.getPlugin(name) == null){
             return null;
         }
         return new BukkitMCPlugin(p.getPlugin(name));
-    }
-    
-    public PluginManager __PluginManager(){
-        return p;
     }
     
 }

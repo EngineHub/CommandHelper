@@ -18,37 +18,10 @@ import java.util.logging.Logger;
  * @author Layton Smith
  */
 public class Preferences {
-    private final Map<String, Preference> prefs = new HashMap<String, Preference>();
-    private final String appName;
-    private final Logger logger;
-    
-    private File prefFile;
-    
-    private String header = "";
-    
-    /**
-     * The type a particular preference can be. The value will be cast to the given type
-     * if possible. NUMBER and DOUBLE are guaranteed to be castable to a Double. NUMBER 
-     * can also sometimes be cast to an int. BOOLEAN is cast to a boolean, and may be stored
-     * in the preferences file as either true/false, yes/no, on/off, or a number, which
-     * get parsed accordingly. STRING can be any value.
-     */
-    public enum Type{
-        NUMBER, BOOLEAN, STRING, INT, DOUBLE
-    }
-    
     /**
      * An object corresponding to a single preference
      */
     public static class Preference{
-        /**
-         * The name of the preference
-         */
-        public String name;
-        /**
-         * The value of the preference, as a string
-         */
-        public String value;
         /**
          * The allowed type of this value
          */
@@ -57,12 +30,20 @@ public class Preferences {
          * The description of this preference. Used to write out to file.
          */
         public String description;
-
+        /**
+         * The name of the preference
+         */
+        public String name;
         /**
          * The object representation of this value. Should not be used
          * directly.
          */
         public Object objectValue;
+
+        /**
+         * The value of the preference, as a string
+         */
+        public String value;
         
         public Preference(String name, String def, Type allowed, String description) {
             this.name = name;
@@ -70,6 +51,34 @@ public class Preferences {
             this.allowed = allowed;
             this.description = description;
         }
+    }
+    /**
+     * The type a particular preference can be. The value will be cast to the given type
+     * if possible. NUMBER and DOUBLE are guaranteed to be castable to a Double. NUMBER 
+     * can also sometimes be cast to an int. BOOLEAN is cast to a boolean, and may be stored
+     * in the preferences file as either true/false, yes/no, on/off, or a number, which
+     * get parsed accordingly. STRING can be any value.
+     */
+    public enum Type{
+        BOOLEAN, DOUBLE, INT, NUMBER, STRING
+    }
+    private final String appName;
+    
+    private String header = "";
+    
+    private final Logger logger;
+    
+    private File prefFile;
+    
+    private final Map<String, Preference> prefs = new HashMap<String, Preference>();
+    
+    /**
+     * Provide the name of the app, and logger, for recording errors, and a list
+     * of defaults, in case the value is not provided by the user, or an invalid
+     * value is provided. 
+     */
+    public Preferences(String appName, Logger logger, List<Preference> defaults){
+        this(appName, logger, defaults, "");
     }
     
     /**
@@ -88,47 +97,28 @@ public class Preferences {
             this.header = "#  " + header.replaceAll("\n", "\n#  ");
         }
     }
-    
-    /**
-     * Provide the name of the app, and logger, for recording errors, and a list
-     * of defaults, in case the value is not provided by the user, or an invalid
-     * value is provided. 
-     */
-    public Preferences(String appName, Logger logger, List<Preference> defaults){
-        this(appName, logger, defaults, "");
-    }
 
-    /**
-     * Given a file that the preferences are supposedly stored in, this
-     * function will try to load the preferences. If the preferences don't exist,
-     * or they are incomplete, this will also fill in the missing values, and 
-     * store the now complete preferences in the file location specified.
-     * @param prefFile
-     * @throws Exception 
-     */
-    public void init(File prefFile) throws IOException {
-        this.prefFile = prefFile;
-        if(prefFile.exists()){
-            Properties userProperties = new Properties();
-            FileInputStream in = new FileInputStream(prefFile);
-            userProperties.load(in);
-            in.close();
-            for(String key : userProperties.stringPropertyNames()){
-                String val = userProperties.getProperty(key);
-                String value = getObject(val, ((Preference)prefs.get(key))).toString();
-                Object ovalue = getObject(val, ((Preference)prefs.get(key)));
-                Preference p1 = prefs.get(key);
-                Preference p2;
-                if(p1 != null){
-                    p2 = new Preference(p1.name, value, p1.allowed, p1.description);
-                } else {
-                    p2 = new Preference(key, val, Type.STRING, "");
-                }
-                p2.objectValue = ovalue;
-                prefs.put(key, p2);
+    private Boolean getBoolean(String value){
+        if(value.equalsIgnoreCase("true")){
+            return true;
+        } else if(value.equalsIgnoreCase("false")){
+            return false;
+        } else if(value.equalsIgnoreCase("yes")){
+            return true;
+        } else if(value.equalsIgnoreCase("no")){
+            return false;
+        } else if(value.equalsIgnoreCase("on")){
+            return true;
+        } else if(value.equalsIgnoreCase("off")){
+            return false;
+        } else {
+            double d = Double.parseDouble(value);
+            if(d == 0){
+                return false;
+            } else {
+                return true;
             }
         }
-        save();
     }
     
     private Object getObject(String value, Preference p){
@@ -182,29 +172,6 @@ public class Preferences {
         
     }
     
-    private Boolean getBoolean(String value){
-        if(value.equalsIgnoreCase("true")){
-            return true;
-        } else if(value.equalsIgnoreCase("false")){
-            return false;
-        } else if(value.equalsIgnoreCase("yes")){
-            return true;
-        } else if(value.equalsIgnoreCase("no")){
-            return false;
-        } else if(value.equalsIgnoreCase("on")){
-            return true;
-        } else if(value.equalsIgnoreCase("off")){
-            return false;
-        } else {
-            double d = Double.parseDouble(value);
-            if(d == 0){
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }
-    
     /**
      * Returns the value of a preference, cast to the appropriate type.
      * @param name
@@ -215,6 +182,39 @@ public class Preferences {
             prefs.get(name).objectValue = getObject(prefs.get(name).value, prefs.get(name));
         }
         return prefs.get(name).objectValue;
+    }
+    
+    /**
+     * Given a file that the preferences are supposedly stored in, this
+     * function will try to load the preferences. If the preferences don't exist,
+     * or they are incomplete, this will also fill in the missing values, and 
+     * store the now complete preferences in the file location specified.
+     * @param prefFile
+     * @throws Exception 
+     */
+    public void init(File prefFile) throws IOException {
+        this.prefFile = prefFile;
+        if(prefFile.exists()){
+            Properties userProperties = new Properties();
+            FileInputStream in = new FileInputStream(prefFile);
+            userProperties.load(in);
+            in.close();
+            for(String key : userProperties.stringPropertyNames()){
+                String val = userProperties.getProperty(key);
+                String value = getObject(val, ((Preference)prefs.get(key))).toString();
+                Object ovalue = getObject(val, ((Preference)prefs.get(key)));
+                Preference p1 = prefs.get(key);
+                Preference p2;
+                if(p1 != null){
+                    p2 = new Preference(p1.name, value, p1.allowed, p1.description);
+                } else {
+                    p2 = new Preference(key, val, Type.STRING, "");
+                }
+                p2.objectValue = ovalue;
+                prefs.put(key, p2);
+            }
+        }
+        save();
     }
     
     private void save(){

@@ -10,20 +10,182 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
  * @author layton
  */
 public class InventoryManagement {
-    public static String docs(){
-        return "Provides methods for managing inventory related tasks.";
-    }
-    
-    @api
-    public static class pinv extends AbstractFunction {
+    @api public static class pgive_item extends AbstractFunction{
+
+        public String docs() {
+            return "int {[player], itemID, qty} Gives a player the specified item * qty."
+                    + " Unlike set_pinv(), this does not specify a slot. The qty is distributed"
+                    + " in the player's inventory, first filling up slots that have the same item"
+                    + " type, up to the max stack size, then fills up empty slots, until either"
+                    + " the entire inventory is filled, or the entire amount has been given."
+                    + " The number of items actually given is returned, which will be less than"
+                    + " or equal to the quantity provided. This function will not touch the player's"
+                    + " armor slots however.";
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            MCItemStack is;
+            if(args.length == 2){
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
+            } else {
+                p = Static.GetPlayer(args[0]);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), t);
+            }
+            int total = is.getAmount();
+            int remaining = is.getAmount();
+            MCInventory inv = p.getInventory();
+            for(int i = 0; i < 36; i++){
+                MCItemStack iis = inv.getItem(i);
+                if(remaining <= 0){
+                    break;
+                }
+                if(match(is, iis) || iis.getTypeId() == 0){
+                    //It's either the same item stack, or air.
+                    int currentQty = 0;
+                    int max = is.maxStackSize();
+                    if(iis.getTypeId() != 0){
+                        currentQty = iis.getAmount();
+                    }
+                    if(currentQty < 0){
+                        //Infinite stack. Assume max stack size.
+                        currentQty = is.maxStackSize();
+                    }
+                    int left = max - currentQty;
+                    int toGive;
+                    if(left < remaining){
+                        //We'll have to split this across more than this stack.
+                        toGive = left;
+                    } else {
+                        //We can distribute the rest in this stack
+                        toGive = remaining;
+                    }
+                    remaining -= toGive;
+                    
+                    //The total we are going to set the stack size to is toGive + currentQty
+                    int replace = toGive + currentQty;
+                    
+                    inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+                }
+            }
+            return new CInt(total - remaining, t);
+        }
 
         public String getName() {
-            return "pinv";
+            return "pgive_item";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        private boolean match(MCItemStack is, MCItemStack iis){
+            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{0, 1, 2};
+            return new Integer[]{2, 3};
         }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+       
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+        
+        public Exceptions.ExceptionType[] thrown() {
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
+                Exceptions.ExceptionType.PlayerOfflineException};
+        }
+        
+    }
+    
+    @api public static class phas_item extends AbstractFunction{
+
+        public String docs() {
+            return "int {[player], itemId} Returns the quantity of the specified item"
+                    + " that the player is carrying (including armor slots)."
+                    + " This counts across all slots in"
+                    + " inventory. Recall that 0 is false, and anything else is true,"
+                    + " so this can be used to get the total, or just see if they have"
+                    + " the item. itemId can be either a plain number, or a 0:0 number,"
+                    + " indicating a data value.";
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            String item;
+            if(args.length == 1){
+                item = args[0].val();
+            } else {
+                p = Static.GetPlayer(args[0]);
+                item = args[1].val();
+            }
+            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
+            MCInventory inv = p.getInventory();
+            int total = 0;
+            for(int i = 0; i < 36; i++){
+                MCItemStack iis = inv.getItem(i);
+                total += total(is, iis);
+            }
+            total += total(is, inv.getBoots());
+            total += total(is, inv.getLeggings());
+            total += total(is, inv.getChestplate());
+            total += total(is, inv.getHelmet());
+            return new CInt(total, t);
+        }
+
+        public String getName() {
+            return "phas_item";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+        
+        public Exceptions.ExceptionType[] thrown() {
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.FormatException,
+                Exceptions.ExceptionType.CastException};
+        }
+
+        private int total(MCItemStack is, MCItemStack iis){
+            if(iis.getTypeId() == is.getTypeId() && iis.getData().getData() == is.getData().getData()){
+                int i = iis.getAmount();
+                if(i < 0){
+                    //Infinite stack
+                    i = iis.maxStackSize();
+                }
+                return i;
+            }         
+            return 0;
+        }
+        
+    }
+
+    @api
+    public static class pinv extends AbstractFunction {
 
         public String docs() {
             return "mixed {[player, [index]]} Gets the inventory information for the specified player, or the current player if none specified. If the index is specified, only the slot "
@@ -37,29 +199,6 @@ public class InventoryManagement {
                     + " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
                     + " of enchant objects, with 0 or more associative arrays which look like:"
                     + " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_1_3;
-        }
-
-        public Boolean runAsync() {
-            return false;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
@@ -133,18 +272,191 @@ public class InventoryManagement {
             }
             return ObjectGenerator.GetGenerator().item(is, t);
         }
-    }
-
-    @api
-    public static class set_pinv extends AbstractFunction {
 
         public String getName() {
-            return "set_pinv";
+            return "pinv";
+        }
+
+        public boolean isRestricted() {
+            return true;
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3, 4, 5, 7};
+            return new Integer[]{0, 1, 2};
         }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_1_3;
+        }
+
+        public Exceptions.ExceptionType[] thrown() {
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException};
+        }
+
+        public void varList(IVariableList varList) {
+        }
+    }
+    
+    @api public static class pitem_slot extends AbstractFunction{
+
+        public String docs() {
+            return "array {[player], itemID} Given an item id, returns the slot numbers"
+                    + " that the matching item has at least one item in.";
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            String item;
+            if(args.length == 1){
+                item = args[0].val();
+            } else {
+                p = Static.GetPlayer(args[0]);
+                item = args[1].val();
+            }
+            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
+            MCInventory inv = p.getInventory();
+            CArray ca = new CArray(t);
+            for(int i = 0; i < 36; i++){
+                if(match(is, inv.getItem(i))){
+                    ca.push(new CInt(i, t));
+                }
+            }
+            if(match(is, inv.getBoots())){
+                ca.push(new CInt(100, t));
+            }
+            if(match(is, inv.getLeggings())){
+                ca.push(new CInt(101, t));
+            }
+            if(match(is, inv.getChestplate())){
+                ca.push(new CInt(102, t));
+            }
+            if(match(is, inv.getHelmet())){
+                ca.push(new CInt(103, t));
+            }
+            return ca;
+        }
+
+        public String getName() {
+            return "pitem_slot";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        private boolean match(MCItemStack is, MCItemStack iis){
+            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public Exceptions.ExceptionType[] thrown() {
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
+                Exceptions.ExceptionType.PlayerOfflineException};
+        }
+        
+    }
+    
+    @api public static class ptake_item extends AbstractFunction{
+
+        public String docs() {
+            return "int {[player], itemID, qty} Works in reverse of pgive_item(), but"
+                    + " returns the number of items actually taken, which will be"
+                    + " from 0 to qty.";
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            MCItemStack is;
+            if(args.length == 2){
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
+            } else {
+                p = Static.GetPlayer(args[0]);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), t);
+            }
+            int total = is.getAmount();
+            int remaining = is.getAmount();
+            MCInventory inv = p.getInventory();
+            for(int i = 35; i >= 0; i--){
+                MCItemStack iis = inv.getItem(i);
+                if(remaining <= 0){
+                    break;
+                }
+                if(match(is, iis)){
+                    //Take the minimum of either: remaining, or iis.getAmount()
+                    int toTake = java.lang.Math.min(remaining, iis.getAmount());
+                    remaining -= toTake;
+                    int replace = iis.getAmount() - toTake;
+                    if(replace == 0){
+                        inv.setItem(i, StaticLayer.GetItemStack(0, 0));
+                    } else {
+                        inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+                    }
+                }
+            }
+            return new CInt(total - remaining, t);
+            
+        }
+
+        public String getName() {
+            return "ptake_item";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        private boolean match(MCItemStack is, MCItemStack iis){
+            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public Exceptions.ExceptionType[] thrown() {
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
+                Exceptions.ExceptionType.FormatException};
+        }
+        
+    }
+    
+    @api
+    public static class set_pinv extends AbstractFunction {
 
         public String docs() {
             return "void {[player], pinvArray} Sets a player's inventory to the specified inventory object."
@@ -162,29 +474,6 @@ public class InventoryManagement {
                     + " type uses the old format (for instance, \"35:11\"), then the second number is taken"
                     + " to be the data, making this backwards compatible (and sometimes more convenient).";
 
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_2_0;
-        }
-
-        public Boolean runAsync() {
-            return false;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
@@ -244,35 +533,17 @@ public class InventoryManagement {
             }
             return new CVoid(t);
         }
-    }
-    
-    @api public static class phas_item extends AbstractFunction{
 
         public String getName() {
-            return "phas_item";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2};
-        }
-
-        public String docs() {
-            return "int {[player], itemId} Returns the quantity of the specified item"
-                    + " that the player is carrying (including armor slots)."
-                    + " This counts across all slots in"
-                    + " inventory. Recall that 0 is false, and anything else is true,"
-                    + " so this can be used to get the total, or just see if they have"
-                    + " the item. itemId can be either a plain number, or a 0:0 number,"
-                    + " indicating a data value.";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.CastException};
+            return "set_pinv";
         }
 
         public boolean isRestricted() {
             return true;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3, 4, 5, 7};
         }
 
         public boolean preResolveVariables() {
@@ -283,291 +554,20 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.GetPlayer();
-            String item;
-            if(args.length == 1){
-                item = args[0].val();
-            } else {
-                p = Static.GetPlayer(args[0]);
-                item = args[1].val();
-            }
-            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
-            MCInventory inv = p.getInventory();
-            int total = 0;
-            for(int i = 0; i < 36; i++){
-                MCItemStack iis = inv.getItem(i);
-                total += total(is, iis);
-            }
-            total += total(is, inv.getBoots());
-            total += total(is, inv.getLeggings());
-            total += total(is, inv.getChestplate());
-            total += total(is, inv.getHelmet());
-            return new CInt(total, t);
-        }
-        
-        private int total(MCItemStack is, MCItemStack iis){
-            if(iis.getTypeId() == is.getTypeId() && iis.getData().getData() == is.getData().getData()){
-                int i = iis.getAmount();
-                if(i < 0){
-                    //Infinite stack
-                    i = iis.maxStackSize();
-                }
-                return i;
-            }         
-            return 0;
-        }
-
         public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-        
-    }
-    
-    @api public static class pitem_slot extends AbstractFunction{
-
-        public String getName() {
-            return "pitem_slot";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2};
-        }
-
-        public String docs() {
-            return "array {[player], itemID} Given an item id, returns the slot numbers"
-                    + " that the matching item has at least one item in.";
+            return CHVersion.V3_2_0;
         }
 
         public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.PlayerOfflineException};
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
         }
 
-        public boolean isRestricted() {
-            return true;
+        public void varList(IVariableList varList) {
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public Boolean runAsync() {
-            return false;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.GetPlayer();
-            String item;
-            if(args.length == 1){
-                item = args[0].val();
-            } else {
-                p = Static.GetPlayer(args[0]);
-                item = args[1].val();
-            }
-            MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
-            MCInventory inv = p.getInventory();
-            CArray ca = new CArray(t);
-            for(int i = 0; i < 36; i++){
-                if(match(is, inv.getItem(i))){
-                    ca.push(new CInt(i, t));
-                }
-            }
-            if(match(is, inv.getBoots())){
-                ca.push(new CInt(100, t));
-            }
-            if(match(is, inv.getLeggings())){
-                ca.push(new CInt(101, t));
-            }
-            if(match(is, inv.getChestplate())){
-                ca.push(new CInt(102, t));
-            }
-            if(match(is, inv.getHelmet())){
-                ca.push(new CInt(103, t));
-            }
-            return ca;
-        }
-        
-        private boolean match(MCItemStack is, MCItemStack iis){
-            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-        
     }
     
-    @api public static class pgive_item extends AbstractFunction{
-
-        public String getName() {
-            return "pgive_item";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2, 3};
-        }
-
-        public String docs() {
-            return "int {[player], itemID, qty} Gives a player the specified item * qty."
-                    + " Unlike set_pinv(), this does not specify a slot. The qty is distributed"
-                    + " in the player's inventory, first filling up slots that have the same item"
-                    + " type, up to the max stack size, then fills up empty slots, until either"
-                    + " the entire inventory is filled, or the entire amount has been given."
-                    + " The number of items actually given is returned, which will be less than"
-                    + " or equal to the quantity provided. This function will not touch the player's"
-                    + " armor slots however.";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
-                Exceptions.ExceptionType.PlayerOfflineException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public Boolean runAsync() {
-            return false;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.GetPlayer();
-            MCItemStack is;
-            if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
-            } else {
-                p = Static.GetPlayer(args[0]);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), t);
-            }
-            int total = is.getAmount();
-            int remaining = is.getAmount();
-            MCInventory inv = p.getInventory();
-            for(int i = 0; i < 36; i++){
-                MCItemStack iis = inv.getItem(i);
-                if(remaining <= 0){
-                    break;
-                }
-                if(match(is, iis) || iis.getTypeId() == 0){
-                    //It's either the same item stack, or air.
-                    int currentQty = 0;
-                    int max = is.maxStackSize();
-                    if(iis.getTypeId() != 0){
-                        currentQty = iis.getAmount();
-                    }
-                    if(currentQty < 0){
-                        //Infinite stack. Assume max stack size.
-                        currentQty = is.maxStackSize();
-                    }
-                    int left = max - currentQty;
-                    int toGive;
-                    if(left < remaining){
-                        //We'll have to split this across more than this stack.
-                        toGive = left;
-                    } else {
-                        //We can distribute the rest in this stack
-                        toGive = remaining;
-                    }
-                    remaining -= toGive;
-                    
-                    //The total we are going to set the stack size to is toGive + currentQty
-                    int replace = toGive + currentQty;
-                    
-                    inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
-                }
-            }
-            return new CInt(total - remaining, t);
-        }
-       
-        private boolean match(MCItemStack is, MCItemStack iis){
-            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
-        }
-        
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-        
-    }
-    
-    @api public static class ptake_item extends AbstractFunction{
-
-        public String getName() {
-            return "ptake_item";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2, 3};
-        }
-
-        public String docs() {
-            return "int {[player], itemID, qty} Works in reverse of pgive_item(), but"
-                    + " returns the number of items actually taken, which will be"
-                    + " from 0 to qty.";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
-                Exceptions.ExceptionType.FormatException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public Boolean runAsync() {
-            return false;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.GetPlayer();
-            MCItemStack is;
-            if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
-            } else {
-                p = Static.GetPlayer(args[0]);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), t);
-            }
-            int total = is.getAmount();
-            int remaining = is.getAmount();
-            MCInventory inv = p.getInventory();
-            for(int i = 35; i >= 0; i--){
-                MCItemStack iis = inv.getItem(i);
-                if(remaining <= 0){
-                    break;
-                }
-                if(match(is, iis)){
-                    //Take the minimum of either: remaining, or iis.getAmount()
-                    int toTake = java.lang.Math.min(remaining, iis.getAmount());
-                    remaining -= toTake;
-                    int replace = iis.getAmount() - toTake;
-                    if(replace == 0){
-                        inv.setItem(i, StaticLayer.GetItemStack(0, 0));
-                    } else {
-                        inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
-                    }
-                }
-            }
-            return new CInt(total - remaining, t);
-            
-        }
-        
-        private boolean match(MCItemStack is, MCItemStack iis){
-            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-        
+    public static String docs(){
+        return "Provides methods for managing inventory related tasks.";
     }
     
 //    @api

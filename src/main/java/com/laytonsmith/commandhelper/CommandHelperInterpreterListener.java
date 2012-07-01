@@ -29,6 +29,42 @@ public class CommandHelperInterpreterListener implements Listener {
     Set<String> interpreterMode = new HashSet<String>();
     Map<String, String> multilineMode = new HashMap<String, String>();
     
+    public void execute(String script, final MCPlayer p) throws ConfigCompileException {
+        List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
+        GenericTreeNode tree = MethodScriptCompiler.compile(stream);
+        interpreterMode.remove(p.getName());
+        Env env = new Env();
+        env.SetPlayer(p);
+        try {
+            MethodScriptCompiler.registerAutoIncludes(env, null);
+            MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
+
+                public void done(String output) {
+                    output = output.trim();
+                    if (output.equals("")) {
+                        Static.SendMessage(p, ":");
+                    } else {
+                        if (output.startsWith("/")) {
+                            //Run the command
+                            Static.SendMessage(p, ":" + MCChatColor.YELLOW + output);
+                            p.chat(output);
+                        } else {
+                            //output the results
+                            Static.SendMessage(p, ":" + MCChatColor.GREEN + output);
+                        }
+                    }
+                    interpreterMode.add(p.getName());
+                }
+            }, null);
+        } catch (CancelCommandException e) {
+            interpreterMode.add(p.getName());
+        } catch(Exception e){
+            Static.SendMessage(p, MCChatColor.RED + e.toString());
+            e.printStackTrace();
+            interpreterMode.add(p.getName());
+        }
+    }
+
     public boolean isInInterpreterMode(MCPlayer p){
         return (interpreterMode.contains(p.getName()));
     }
@@ -43,12 +79,6 @@ public class CommandHelperInterpreterListener implements Listener {
 
     }
 
-    @EventHandler(priority= EventPriority.NORMAL)
-    public void onPlayerQuit(PlayerQuitEvent event) {
-        interpreterMode.remove(event.getPlayer().getName());
-        multilineMode.remove(event.getPlayer().getName());
-    }
-
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
         if (interpreterMode.contains(event.getPlayer().getName())) {
@@ -56,6 +86,19 @@ public class CommandHelperInterpreterListener implements Listener {
             textLine(p, event.getMessage());
             event.setCancelled(true);
         }
+    }
+
+    @EventHandler(priority= EventPriority.NORMAL)
+    public void onPlayerQuit(PlayerQuitEvent event) {
+        interpreterMode.remove(event.getPlayer().getName());
+        multilineMode.remove(event.getPlayer().getName());
+    }
+
+    public void reload() {
+    }
+
+    public void startInterpret(String playername) {
+        interpreterMode.add(playername);
     }
 
     public void textLine(MCPlayer p, String line) {
@@ -96,48 +139,5 @@ public class CommandHelperInterpreterListener implements Listener {
                 }
             }
         }
-    }
-
-    public void reload() {
-    }
-
-    public void execute(String script, final MCPlayer p) throws ConfigCompileException {
-        List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
-        GenericTreeNode tree = MethodScriptCompiler.compile(stream);
-        interpreterMode.remove(p.getName());
-        Env env = new Env();
-        env.SetPlayer(p);
-        try {
-            MethodScriptCompiler.registerAutoIncludes(env, null);
-            MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
-
-                public void done(String output) {
-                    output = output.trim();
-                    if (output.equals("")) {
-                        Static.SendMessage(p, ":");
-                    } else {
-                        if (output.startsWith("/")) {
-                            //Run the command
-                            Static.SendMessage(p, ":" + MCChatColor.YELLOW + output);
-                            p.chat(output);
-                        } else {
-                            //output the results
-                            Static.SendMessage(p, ":" + MCChatColor.GREEN + output);
-                        }
-                    }
-                    interpreterMode.add(p.getName());
-                }
-            }, null);
-        } catch (CancelCommandException e) {
-            interpreterMode.add(p.getName());
-        } catch(Exception e){
-            Static.SendMessage(p, MCChatColor.RED + e.toString());
-            e.printStackTrace();
-            interpreterMode.add(p.getName());
-        }
-    }
-
-    public void startInterpret(String playername) {
-        interpreterMode.add(playername);
     }
 }

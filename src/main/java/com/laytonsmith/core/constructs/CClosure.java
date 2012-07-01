@@ -21,10 +21,10 @@ public class CClosure extends Construct {
     
     public static final long serialVersionUID = 1L;
 
-    GenericTreeNode<Construct> node;
+    Construct[] defaults;
     Env env;
     String[] names;
-    Construct[] defaults;
+    GenericTreeNode<Construct> node;
 
     public CClosure(GenericTreeNode<Construct> node, Env env, String[] names, Construct[] defaults, Target t) {
         super(node!=null?node.toString():"", ConstructType.CLOSURE, t);
@@ -39,10 +39,10 @@ public class CClosure extends Construct {
     }
     
     @Override
-    public String val(){
-        StringBuilder b = new StringBuilder();
-        condense(getNode(), b);
-        return b.toString();
+    public CClosure clone() throws CloneNotSupportedException{
+        CClosure clone = (CClosure) super.clone();
+        if(this.node != null) clone.node = this.node.clone();
+        return clone;
     }
     
     private void condense(GenericTreeNode<Construct> node, StringBuilder b){
@@ -64,29 +64,6 @@ public class CClosure extends Construct {
         }
     }
 
-    public GenericTreeNode<Construct> getNode() {
-        return node;
-    }        
-    
-    @Override
-    public CClosure clone() throws CloneNotSupportedException{
-        CClosure clone = (CClosure) super.clone();
-        if(this.node != null) clone.node = this.node.clone();
-        return clone;
-    }
-    
-    /**
-     * If meta code needs to affect this closure's environment, it can
-     * access it with this function. Note that changing this will only
-     * affect future runs of the closure, it will not affect the currently
-     * running closure, (if any) due to the environment being cloned right
-     * before running.
-     * @return 
-     */
-    public synchronized Env getEnv(){        
-        return env;
-    }
-    
     /**
      * Executes the closure, giving it the supplied arguments. {@code values} may be null, which means that
      * no arguments are being sent.
@@ -129,10 +106,33 @@ public class CClosure extends Construct {
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
         }
+    }        
+    
+    /**
+     * If meta code needs to affect this closure's environment, it can
+     * access it with this function. Note that changing this will only
+     * affect future runs of the closure, it will not affect the currently
+     * running closure, (if any) due to the environment being cloned right
+     * before running.
+     * @return 
+     */
+    public synchronized Env getEnv(){        
+        return env;
     }
-
+    
+    public GenericTreeNode<Construct> getNode() {
+        return node;
+    }
+    
     @Override
     public boolean isDynamic() {
         return false;
+    }
+
+    @Override
+    public String val(){
+        StringBuilder b = new StringBuilder();
+        condense(getNode(), b);
+        return b.toString();
     }
 }

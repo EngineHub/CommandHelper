@@ -22,12 +22,12 @@ public class BukkitMCMaterial implements MCMaterial {
         return this.m.getMaxDurability();
     }
 
-    public int getType() {
-        return m.getId();
-    }
-
     public int getMaxStackSize() {
         return m.getMaxStackSize();
+    }
+
+    public int getType() {
+        return m.getId();
     }
     
 }

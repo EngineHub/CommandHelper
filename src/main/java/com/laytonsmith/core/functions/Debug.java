@@ -18,11 +18,52 @@ import java.io.IOException;
  */
 public class Debug {
 
-//    public static boolean EVENT_LOGGING = false;
-//    public static int EVENT_LOGGING_LEVEL = 1;
-//    public static final Set<Event.Type> EVENT_LOGGING_FILTER = new HashSet<Event.Type>();
-//    public static final Set<String> EVENT_PLUGIN_FILTER = new HashSet<String>();
-    public static boolean LOG_TO_SCREEN = false;
+@api
+    public static class debug extends AbstractFunction {
+
+        public String docs() {
+            return "void {message} Manually logs a timestamped message to the debug log and the console, if debug-mode is set to true in the preferences";
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            if (Prefs.DebugMode()) {
+                try {
+                    Static.LogDebug(args[0].val());
+                } catch (IOException ex) {
+                    throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
+                }
+            }
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "debug";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return true;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.IOException};
+        }
+    }
 
 //    public static void DoLog(Event.Type filter, int verbosity, String message) {
 //        synchronized (EVENT_LOGGING_FILTER) {
@@ -44,12 +85,11 @@ public class Debug {
 //        }
 //    }
 
-    public static String docs() {
-        return "Provides methods for viewing data about both CommandHelper and the other plugins in your server. Though not meant to"
-                + " be called by normal scripts, these methods are available everywhere other methods are available. Note that for"
-                + " some of these functions to even work, play-dirty mode must set to on. These are most useful in conjuction with"
-                + " interpreter mode.";
-    }
+    //    public static boolean EVENT_LOGGING = false;
+//    public static int EVENT_LOGGING_LEVEL = 1;
+//    public static final Set<Event.Type> EVENT_LOGGING_FILTER = new HashSet<Event.Type>();
+//    public static final Set<String> EVENT_PLUGIN_FILTER = new HashSet<String>();
+    public static boolean LOG_TO_SCREEN = false;
 
 //    @api
 //    public static class dump_listeners extends AbstractFunction {
@@ -181,51 +221,11 @@ public class Debug {
 //        }
 //    }
 
-    @api
-    public static class debug extends AbstractFunction {
-
-        public String getName() {
-            return "debug";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "void {message} Manually logs a timestamped message to the debug log and the console, if debug-mode is set to true in the preferences";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.IOException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-
-        public Boolean runAsync() {
-            return true;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            if (Prefs.DebugMode()) {
-                try {
-                    Static.LogDebug(args[0].val());
-                } catch (IOException ex) {
-                    throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
-                }
-            }
-            return new CVoid(t);
-        }
+    public static String docs() {
+        return "Provides methods for viewing data about both CommandHelper and the other plugins in your server. Though not meant to"
+                + " be called by normal scripts, these methods are available everywhere other methods are available. Note that for"
+                + " some of these functions to even work, play-dirty mode must set to on. These are most useful in conjuction with"
+                + " interpreter mode.";
     }
 
 //    @api

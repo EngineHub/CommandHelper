@@ -22,10 +22,6 @@ import org.bukkit.material.MaterialData;
  */
 public class BukkitMCItemStack implements MCItemStack{
     ItemStack is;
-    public BukkitMCItemStack(ItemStack is){
-        this.is = is;
-    }
-    
     public BukkitMCItemStack(AbstractionObject a){
         this((ItemStack)null);
         if(a instanceof MCItemStack){
@@ -35,38 +31,14 @@ public class BukkitMCItemStack implements MCItemStack{
         }
     }
     
-    public Object getHandle(){
+    public BukkitMCItemStack(ItemStack is){
+        this.is = is;
+    }
+    
+    public ItemStack __ItemStack() {
         return is;
     }
     
-    public MCMaterialData getData(){
-        if(is == null || is.getData() == null){
-            return null;
-        }
-        return new BukkitMCMaterialData(is.getData());
-    }
-    
-    public short getDurability(){
-        if(is == null){
-            return 0;
-        }
-        return is.getDurability();
-    }
-    
-    public int getTypeId(){
-        if(is == null){
-            return 0;
-        }
-        return is.getTypeId();
-    }
-
-    public void setDurability(short data) {
-        if(is == null){
-            return;
-        }
-        is.setDurability(data);
-    }
-
     public void addEnchantment(MCEnchantment e, int level) {        
         if(is == null){
             return;
@@ -81,6 +53,27 @@ public class BukkitMCItemStack implements MCItemStack{
         is.addUnsafeEnchantment(((BukkitMCEnchantment)e).__Enchantment(), level);
     }
     
+    public int getAmount() {
+        if(is == null){
+            return 0;
+        }
+        return is.getAmount();
+    }
+
+    public MCMaterialData getData(){
+        if(is == null || is.getData() == null){
+            return null;
+        }
+        return new BukkitMCMaterialData(is.getData());
+    }
+
+    public short getDurability(){
+        if(is == null){
+            return 0;
+        }
+        return is.getDurability();
+    }
+    
     public Map<MCEnchantment, Integer> getEnchantments(){
         if(is == null || is.getEnchantments() == null){
             return null;
@@ -92,13 +85,10 @@ public class BukkitMCItemStack implements MCItemStack{
         return map;
     }
     
-    public void removeEnchantment(MCEnchantment e){
-        if(is == null){
-            return;
-        }
-        is.removeEnchantment(((BukkitMCEnchantment)e).__Enchantment());
+    public Object getHandle(){
+        return is;
     }
-
+    
     public MCMaterial getType() {
         if(is == null){
             return null;
@@ -106,22 +96,25 @@ public class BukkitMCItemStack implements MCItemStack{
         return new BukkitMCMaterial(is.getType());
     }
 
-    public void setTypeId(int type) {
-        if(is == null){
-            return;
-        }
-        is.setTypeId(type);
-    }
-
-    public int getAmount() {
+    public int getTypeId(){
         if(is == null){
             return 0;
         }
-        return is.getAmount();
+        return is.getTypeId();
     }
 
-    public ItemStack __ItemStack() {
-        return is;
+    public int maxStackSize() {
+        if(is == null){
+            return 0;
+        }
+        return is.getMaxStackSize();
+    }
+
+    public void removeEnchantment(MCEnchantment e){
+        if(is == null){
+            return;
+        }
+        is.removeEnchantment(((BukkitMCEnchantment)e).__Enchantment());
     }
 
     public void setData(int data) {
@@ -131,10 +124,17 @@ public class BukkitMCItemStack implements MCItemStack{
         is.setData(new MaterialData(is.getTypeId(), (byte)data));
     }
 
-    public int maxStackSize() {
+    public void setDurability(short data) {
         if(is == null){
-            return 0;
+            return;
         }
-        return is.getMaxStackSize();
+        is.setDurability(data);
+    }
+
+    public void setTypeId(int type) {
+        if(is == null){
+            return;
+        }
+        is.setTypeId(type);
     }
 }

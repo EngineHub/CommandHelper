@@ -13,143 +13,17 @@ import java.util.List;
  * @author layton
  */
 public class Compiler {
-    public static String docs(){
-        return "Compiler internal functions should be declared here. If you're reading this from anywhere"
-                + " but the source code, there's a bug, because these functions shouldn't be public or used"
-                + " in a script.";
-    }
-    
-    @api
-    public static class p extends AbstractFunction {
-
-        public String getName() {
-            return "p";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
-        public String docs() {
-            return "mixed {c...} Used internally by the compiler. You shouldn't use it.";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_1_2;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-       
-
-        @Override
-        public boolean useSpecialExec() {
-            return true;
-        }
-
-        @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            if(nodes.length == 1){
-                return parent.eval(nodes[0], env);
-            } else {
-                return new __autoconcat__().execs(t, env, parent, nodes);
-            }
-        }
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
-            return new CVoid(t);
-        }
-
-        @Override
-        public boolean appearInDocumentation() {
-            return false;
-        }                
-    }
-    
-    @api public static class centry extends AbstractFunction{
-
-        public String getName() {
-            return "centry";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2};
-        }
-
-        public String docs() {
-            return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
-                    + "compiler.";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            return new CEntry(args[0], args[1], t);
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-
-        @Override
-        public boolean appearInDocumentation() {
-            return false;
-        }
-
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }                
-    }
-    
-    
     @api
     public static class __autoconcat__ extends AbstractFunction {
 
-        public String getName() {
-            return "__autoconcat__";
+        @Override
+        public boolean appearInDocumentation() {
+            return false;
         }
 
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new Error("Should not have gotten here");
+        @Override
+        public boolean canOptimizeDynamic() {
+            return true;
         }
 
         public String docs() {
@@ -157,32 +31,20 @@ public class Compiler {
                     + " may be undefined if it is used in code.";
         }
 
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{};
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            throw new Error("Should not have gotten here");
+        }
+
+        public String getName() {
+            return "__autoconcat__";
         }
 
         public boolean isRestricted() {
             return false;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V0_0_0;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        @Override
-        public boolean canOptimizeDynamic() {
-            return true;
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         @Override
@@ -423,90 +285,88 @@ public class Compiler {
             }
         }
 
-        @Override
-        public boolean appearInDocumentation() {
-            return false;
-        }
-                
-    }
-    
-    @api
-    public static class npe extends AbstractFunction {
-
-        public String getName() {
-            return "npe";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0};
-        }
-
-        public String docs() {
-            return "void {}";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
         public boolean preResolveVariables() {
             return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
         }
 
         public CHVersion since() {
             return CHVersion.V0_0_0;
         }
 
-        public Boolean runAsync() {
-            return null;
+        public Exceptions.ExceptionType[] thrown() {
+            return new Exceptions.ExceptionType[]{};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
-            Object o = null;
-            o.toString();
-            return new CVoid(t);
+        public void varList(IVariableList varList) {
         }
+                
+    }
+    
+    @api public static class centry extends AbstractFunction{
 
         @Override
         public boolean appearInDocumentation() {
             return false;
         }
-                
-    }
-    
-    @api public static class dyn extends AbstractFunction{
 
-        public String getName() {
-            return "dyn";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0, 1};
+        @Override
+        public boolean canOptimize() {
+            return true;
         }
 
         public String docs() {
-            return "exception {[argument]} Registers as a dynamic component, for optimization testing; that is"
-                    + " to say, this will not be optimizable ever."
-                    + " It simply returns the argument provided, or void if none.";
+            return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
+                    + "compiler.";
         }
 
-        public ExceptionType[] thrown() {
-            return null;
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            return new CEntry(args[0], args[1], t);
+        }
+
+        public String getName() {
+            return "centry";
         }
 
         public boolean isRestricted() {
             return false;
         }
 
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
         public Boolean runAsync() {
             return null;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Exceptions.ExceptionType[] thrown() {
+            return null;
+        }                
+    }
+    
+    @api public static class dyn extends AbstractFunction{
+
+        public String docs() {
+            return "exception {[argument]} Registers as a dynamic component, for optimization testing; that is"
+                    + " to say, this will not be optimizable ever."
+                    + " It simply returns the argument provided, or void if none.";
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
@@ -516,9 +376,149 @@ public class Compiler {
             return args[0];
         }
 
+        public String getName() {
+            return "dyn";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
         public CHVersion since() {
             return CHVersion.V0_0_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return null;
         }               
         
+    }
+    
+    
+    @api
+    public static class npe extends AbstractFunction {
+
+        @Override
+        public boolean appearInDocumentation() {
+            return false;
+        }
+
+        public String docs() {
+            return "void {}";
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            Object o = null;
+            o.toString();
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "npe";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V0_0_0;
+        }
+
+        public Exceptions.ExceptionType[] thrown() {
+            return null;
+        }
+
+        public void varList(IVariableList varList) {
+        }
+                
+    }
+    
+    @api
+    public static class p extends AbstractFunction {
+
+        @Override
+        public boolean appearInDocumentation() {
+            return false;
+        }
+
+        public String docs() {
+            return "mixed {c...} Used internally by the compiler. You shouldn't use it.";
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            return new CVoid(t);
+        }
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            if(nodes.length == 1){
+                return parent.eval(nodes[0], env);
+            } else {
+                return new __autoconcat__().execs(t, env, parent, nodes);
+            }
+        }
+
+        public String getName() {
+            return "p";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+       
+
+        public CHVersion since() {
+            return CHVersion.V3_1_2;
+        }
+
+        public Exceptions.ExceptionType[] thrown() {
+            return null;
+        }
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
+
+        public void varList(IVariableList varList) {
+        }                
+    }
+    
+    public static String docs(){
+        return "Compiler internal functions should be declared here. If you're reading this from anywhere"
+                + " but the source code, there's a bug, because these functions shouldn't be public or used"
+                + " in a script.";
     }
 }

@@ -4,12 +4,13 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
+import org.bukkit.Location;
+
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import org.bukkit.Location;
 
 /**
  *
@@ -17,10 +18,6 @@ import org.bukkit.Location;
  */
 public class BukkitMCLocation implements MCLocation{
     Location l;
-    public BukkitMCLocation(Location l){
-        this.l = l;        
-    }
-    
     public BukkitMCLocation(AbstractionObject a){
         this((Location)null);
         if(a instanceof MCLocation){
@@ -30,35 +27,24 @@ public class BukkitMCLocation implements MCLocation{
         }
     }
     
-    public Object getHandle(){
+    public BukkitMCLocation(Location l){
+        this.l = l;        
+    }
+    
+    public Location _Location(){
         return l;
     }
 
-    public double getX() {
-        return l.getX();
+    @Override
+    public MCLocation clone() {
+        return new BukkitMCLocation(l.clone());
     }
 
-    public double getY() {
-        return l.getY();
-    }
-
-    public double getZ() {
-        return l.getZ();
-    }
-
-    public MCWorld getWorld() {
-        if(l.getWorld() == null){
+    public MCBlock getBlock() {
+        if(l.getBlock() == null){
             return null;
         }
-        return new BukkitMCWorld(l.getWorld());
-    }
-
-    public float getYaw() {
-        return l.getYaw();
-    }
-
-    public float getPitch() {
-        return l.getPitch();
+        return new BukkitMCBlock(l.getBlock());
     }
 
     public int getBlockX() {
@@ -73,15 +59,35 @@ public class BukkitMCLocation implements MCLocation{
         return l.getBlockZ();
     }
 
-    public MCBlock getBlock() {
-        if(l.getBlock() == null){
+    public Object getHandle(){
+        return l;
+    }
+
+    public float getPitch() {
+        return l.getPitch();
+    }
+
+    public MCWorld getWorld() {
+        if(l.getWorld() == null){
             return null;
         }
-        return new BukkitMCBlock(l.getBlock());
+        return new BukkitMCWorld(l.getWorld());
+    }
+
+    public double getX() {
+        return l.getX();
+    }
+
+    public double getY() {
+        return l.getY();
     }
     
-    public Location _Location(){
-        return l;
+    public float getYaw() {
+        return l.getYaw();
+    }
+
+    public double getZ() {
+        return l.getZ();
     }
 
     public void setPitch(float p) {
@@ -90,10 +96,5 @@ public class BukkitMCLocation implements MCLocation{
 
     public void setYaw(float y) {
         l.setYaw(y);
-    }
-
-    @Override
-    public MCLocation clone() {
-        return new BukkitMCLocation(l.clone());
     }
 }

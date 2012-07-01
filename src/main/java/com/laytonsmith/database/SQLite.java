@@ -15,24 +15,9 @@ import java.util.TreeMap;
  */
 public class SQLite extends DB{
 
-    @Override
-    protected Set raw_query(CConnection c, String query) {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    @Override
-    protected String testQuery() {
-        return "SELECT 1";
-    }
-    
     private static PreparedStatement GetPreparedStatement(String query, CConnection cconn, Connection conn) throws SQLException{
         PreparedStatement prep = conn.prepareStatement(query);
         return prep;        
-    }
-
-    @Override
-    protected String sanitize(CConnection c, Object o) throws SQLException {       
-        throw new UnsupportedOperationException("Not supported yet.");
     }
 
     @Override
@@ -58,6 +43,21 @@ public class SQLite extends DB{
             return prep.getUpdateCount();
         }
         //throw new UnsupportedOperationException("Not supported yet.");
+    }
+    
+    @Override
+    protected Set raw_query(CConnection c, String query) {
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected String sanitize(CConnection c, Object o) throws SQLException {       
+        throw new UnsupportedOperationException("Not supported yet.");
+    }
+
+    @Override
+    protected String testQuery() {
+        return "SELECT 1";
     }   
     
 }

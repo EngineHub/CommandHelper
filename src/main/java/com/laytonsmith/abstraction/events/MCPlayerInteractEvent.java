@@ -15,12 +15,12 @@ public interface MCPlayerInteractEvent extends BindableEvent{
 
     public MCAction getAction();
 
-    public MCPlayer getPlayer();
+    public MCBlockFace getBlockFace();
 
     public MCBlock getClickedBlock();
 
-    public MCBlockFace getBlockFace();
-    
     public MCItemStack getItem();
+    
+    public MCPlayer getPlayer();
     
 }

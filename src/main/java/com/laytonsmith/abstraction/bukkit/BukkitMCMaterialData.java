@@ -14,10 +14,6 @@ import org.bukkit.material.MaterialData;
  */
 public class BukkitMCMaterialData implements MCMaterialData{
     MaterialData md;
-    public BukkitMCMaterialData(MaterialData md){
-        this.md = md;
-    }
-    
     public BukkitMCMaterialData(AbstractionObject a){
         this((MaterialData)null);
         if(a instanceof MCMaterialData){
@@ -27,12 +23,16 @@ public class BukkitMCMaterialData implements MCMaterialData{
         }
     }
     
-    public Object getHandle(){
-        return md;
+    public BukkitMCMaterialData(MaterialData md){
+        this.md = md;
     }
-
+    
     public int getData() {
         return md.getData();
+    }
+
+    public Object getHandle(){
+        return md;
     }
     
     

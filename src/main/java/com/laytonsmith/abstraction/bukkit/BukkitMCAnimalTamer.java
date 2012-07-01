@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
-import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.entity.AnimalTamer;
 import org.bukkit.entity.HumanEntity;
@@ -19,10 +18,6 @@ import org.bukkit.entity.HumanEntity;
  */
 public class BukkitMCAnimalTamer implements MCAnimalTamer{
     AnimalTamer at;
-    public BukkitMCAnimalTamer(AnimalTamer at){
-        this.at = at;
-    }
-    
     public BukkitMCAnimalTamer(AbstractionObject a){
         this((AnimalTamer)null);
         if(a instanceof MCAnimalTamer){
@@ -32,8 +27,19 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
         }
     }
     
+    public BukkitMCAnimalTamer(AnimalTamer at){
+        this.at = at;
+    }
+    
     public Object getHandle(){
         return at;
+    }
+
+    public MCHumanEntity getHumanEntity() {
+        if(at instanceof HumanEntity){
+            return new BukkitMCHumanEntity((HumanEntity)at);
+        }
+        return null;
     }
 
     public MCOfflinePlayer getOfflinePlayer() {
@@ -43,18 +49,11 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
         return null;
     }
 
-    public boolean isOfflinePlayer() {
-        return at instanceof OfflinePlayer;
-    }
-
     public boolean isHumanEntity() {
         return at instanceof HumanEntity;
     }
 
-    public MCHumanEntity getHumanEntity() {
-        if(at instanceof HumanEntity){
-            return new BukkitMCHumanEntity((HumanEntity)at);
-        }
-        return null;
+    public boolean isOfflinePlayer() {
+        return at instanceof OfflinePlayer;
     }
 }

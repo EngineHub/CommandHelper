@@ -38,23 +38,116 @@ import org.bukkit.World;
  */
 public class WorldEdit {
 
-    public static String docs() {
-        return "Provides various methods for programmatically hooking into WorldEdit";
-    }
+    @api public static class sk_all_regions extends SKFunction {
 
-    @api public static class sk_pos1 extends SKFunction {
+        public String docs() {
+            return "array {[world]} Returns all the regions in all worlds, or just the one world, if specified.";
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+            List<World> checkWorlds = null;
+            CArray arr = new CArray(t);
+            if (args.length == 1) {
+                World world = Bukkit.getServer().getWorld(args[0].val());
+                if (world != null) checkWorlds = Arrays.asList(world);
+            }
+            if (checkWorlds == null) {
+                checkWorlds = Bukkit.getServer().getWorlds();
+            }
+            GlobalRegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager();
+            for (World world : checkWorlds) {
+                for (String region : mgr.get(world).getRegions().keySet()) arr.push(new CString(region, t));
+            }
+            return arr;
+            
+        }
 
         public String getName() {
-            return "sk_pos1";
+            return "sk_all_regions";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{0, 1, 2};
+            return new Integer[]{0, 1};
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+            return new ExceptionType[]{};
         }
+    }
+
+    @api public static class sk_current_regions extends SKFunction {
+        public String docs() {
+            return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
+                    + " If region is found, an array of region names are returned, else an empty is returned";
+        }
+        
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+            World world;
+            
+            MCPlayer m = null;
+            
+            if(env.GetCommandSender() instanceof MCPlayer){
+                m = env.GetPlayer();
+            }
+            if (args.length == 1) {
+                m = Static.GetPlayer(args[0].val(), t);
+            }
+            
+            if (m == null) {
+                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
+            }
+            
+            world = Bukkit.getServer().getWorld(m.getWorld().getName());
+            
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+            Vector pt = new Vector(m.getLocation().getBlockX(), m.getLocation().getBlockY(), m.getLocation().getBlockZ());
+            ApplicableRegionSet set = mgr.getApplicableRegions(pt);
+            
+            CArray regions = new CArray(t);
+            
+            List<ProtectedRegion> sortedRegions = new ArrayList<ProtectedRegion>();
+            
+            for (ProtectedRegion r : set) {
+                boolean placed = false;
+                for (int i = 0; i < sortedRegions.size(); i++) {
+                    if (sortedRegions.get(i).volume() < r.volume()) {
+                        sortedRegions.add(i, r);
+                        placed = true;
+                        break;
+                    }
+                }
+                if (!placed) {
+                    sortedRegions.add(r);
+                }
+            }
+            
+            for (ProtectedRegion region : sortedRegions) {
+                regions.push(new CString(region.getId(), t));
+            }
+            
+            if (regions.size() > 0) {
+                return regions;
+            }
+            
+            return new CArray(t);
+        }
+        
+        public String getName() {
+            return "sk_current_regions";
+        }
+        
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.PluginInternalException};
+        }
+    }
+
+    @api public static class sk_pos1 extends SKFunction {
 
         public String docs() {
             return "mixed {[player], locationArray | [player]} Sets the player's point 1, or returns it if the array to set isn't specified. If"
@@ -104,24 +197,49 @@ public class WorldEdit {
                         new CString(m.getWorld().getName(), t));
             }
         }
-    }
-
-    @api public static class sk_pos2 extends SKFunction {
 
         public String getName() {
-            return "sk_pos2";
+            return "sk_pos1";
         }
 
         public Integer[] numArgs() {
             return new Integer[]{0, 1, 2};
         }
 
-        public String docs() {
-            return "mixed {[player], array | [player]} Sets the player's point 2, or returns it if the array to set isn't specified";
-        }
-
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+    }
+
+//    public static class sk_points extends SKFunction {
+//
+//        public String getName() {
+//            return "sk_points";
+//        }
+//
+//        public Integer[] numArgs() {
+//            return new Integer[]{0, 1, 2};
+//        }
+//
+//        public String docs() {
+//            return "mixed {[player], arrayOfArrays | [player]} Sets a series of points, or returns the poly selection for this player, if one is specified."
+//                    + " The array should be an array of arrays, and the arrays should be array(x, y, z)";
+//        }
+//
+//        public ExceptionType[] thrown() {
+//            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+//        }
+//
+//        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+//            Static.checkPlugin("WorldEdit", t);
+//            return new CVoid(t);
+//        }
+//    }
+
+    @api public static class sk_pos2 extends SKFunction {
+
+        public String docs() {
+            return "mixed {[player], array | [player]} Sets the player's point 2, or returns it if the array to set isn't specified";
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -168,42 +286,21 @@ public class WorldEdit {
                         new CString(m.getWorld().getName(), t));
             }
         }
-    }
-
-//    public static class sk_points extends SKFunction {
-//
-//        public String getName() {
-//            return "sk_points";
-//        }
-//
-//        public Integer[] numArgs() {
-//            return new Integer[]{0, 1, 2};
-//        }
-//
-//        public String docs() {
-//            return "mixed {[player], arrayOfArrays | [player]} Sets a series of points, or returns the poly selection for this player, if one is specified."
-//                    + " The array should be an array of arrays, and the arrays should be array(x, y, z)";
-//        }
-//
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
-//        }
-//
-//        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-//            Static.checkPlugin("WorldEdit", t);
-//            return new CVoid(t);
-//        }
-//    }
-
-    @api public static class sk_region_info extends SKFunction {
 
         public String getName() {
-            return "sk_region_info";
+            return "sk_pos2";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2};
+            return new Integer[]{0, 1, 2};
         }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
+        }
+    }
+
+    @api public static class sk_region_info extends SKFunction {
 
         public String docs() {
             return "array {region, world} Given a region name, returns an array of information about that region, as follows:<ul>"
@@ -215,10 +312,6 @@ public class WorldEdit {
                     + " <li>5 - The volume of this region (in meters cubed)</li>"
                     + "</ul>"
                     + "If the region cannot be found, a PluginInternalException is thrown.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -297,24 +390,24 @@ public class WorldEdit {
                 throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, t, e);
             }
         }
-    }
-
-    @api public static class sk_region_overlaps extends SKFunction {
 
         public String getName() {
-            return "sk_region_overlaps";
+            return "sk_region_info";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
-        public String docs() {
-            return "boolean {world, region1, array(region2, [regionN...])} Returns true or false whether or not the specified regions overlap.";
+            return new Integer[]{2};
         }
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
+        }
+    }
+
+    @api public static class sk_region_overlaps extends SKFunction {
+
+        public String docs() {
+            return "boolean {world, region1, array(region2, [regionN...])} Returns true or false whether or not the specified regions overlap.";
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -345,134 +438,60 @@ public class WorldEdit {
             } catch (Exception e) {}
             return new CBoolean(false, t);
         }
-    }
-
-    @api public static class sk_all_regions extends SKFunction {
 
         public String getName() {
-            return "sk_all_regions";
+            return "sk_region_overlaps";
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{0, 1};
-        }
-
-        public String docs() {
-            return "array {[world]} Returns all the regions in all worlds, or just the one world, if specified.";
+            return new Integer[]{Integer.MAX_VALUE};
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Static.checkPlugin("WorldGuard", t);
-            List<World> checkWorlds = null;
-            CArray arr = new CArray(t);
-            if (args.length == 1) {
-                World world = Bukkit.getServer().getWorld(args[0].val());
-                if (world != null) checkWorlds = Arrays.asList(world);
-            }
-            if (checkWorlds == null) {
-                checkWorlds = Bukkit.getServer().getWorlds();
-            }
-            GlobalRegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager();
-            for (World world : checkWorlds) {
-                for (String region : mgr.get(world).getRegions().keySet()) arr.push(new CString(region, t));
-            }
-            return arr;
-            
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
     }
     
         
-    @api public static class sk_current_regions extends SKFunction {
-        public String getName() {
-            return "sk_current_regions";
-        }
-        
-        public Integer[] numArgs() {
-            return new Integer[]{0, 1};
-        }
-        
+    @api public static class sk_region_volume extends SKFunction {
         public String docs() {
-            return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
-                    + " If region is found, an array of region names are returned, else an empty is returned";
-        }
-        
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.PluginInternalException};
+            return "int {region, world} Returns the volume of the given region in the given world.";
         }
         
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
             
-            MCPlayer m = null;
-            
-            if(env.GetCommandSender() instanceof MCPlayer){
-                m = env.GetPlayer();
-            }
-            if (args.length == 1) {
-                m = Static.GetPlayer(args[0].val(), t);
-            }
-            
-            if (m == null) {
-                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
-            }
-            
-            world = Bukkit.getServer().getWorld(m.getWorld().getName());
+            world = Bukkit.getServer().getWorld(args[1].val());
             
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
-            Vector pt = new Vector(m.getLocation().getBlockX(), m.getLocation().getBlockY(), m.getLocation().getBlockZ());
-            ApplicableRegionSet set = mgr.getApplicableRegions(pt);
             
-            CArray regions = new CArray(t);
+            ProtectedRegion region = mgr.getRegion(args[0].val());
             
-            List<ProtectedRegion> sortedRegions = new ArrayList<ProtectedRegion>();
-            
-            for (ProtectedRegion r : set) {
-                boolean placed = false;
-                for (int i = 0; i < sortedRegions.size(); i++) {
-                    if (sortedRegions.get(i).volume() < r.volume()) {
-                        sortedRegions.add(i, r);
-                        placed = true;
-                        break;
-                    }
-                }
-                if (!placed) {
-                    sortedRegions.add(r);
-                }
+            if (region == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", args[0].val(), args[1].val()), ExceptionType.PluginInternalException, t);
             }
             
-            for (ProtectedRegion region : sortedRegions) {
-                regions.push(new CString(region.getId(), t));
-            }
-            
-            if (regions.size() > 0) {
-                return regions;
-            }
-            
-            return new CArray(t);
+            return new CInt(region.volume(), t);
+        }
+        
+        public String getName() {
+            return "sk_region_volume";
+        }
+        
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+        
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
     }
 
     @api public static class sk_regions_at extends SKFunction {
-        public String getName() {
-            return "sk_regions_at";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
         public String docs() {
             return "mixed {Locationarray} Returns a list of regions at the specified location. "
                     + "If regions are found, an array of region names are returned, otherwise, an empty array is returned.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException};
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -526,62 +545,43 @@ public class WorldEdit {
 
             return new CArray(t);
         }
+
+        public String getName() {
+            return "sk_regions_at";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException};
+        }
     }
     
-    @api public static class sk_region_volume extends SKFunction {
-        public String getName() {
-            return "sk_region_volume";
-        }
-        
-        public Integer[] numArgs() {
-            return new Integer[]{2};
-        }
-        
-        public String docs() {
-            return "int {region, world} Returns the volume of the given region in the given world.";
-        }
-        
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PluginInternalException};
-        }
-        
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Static.checkPlugin("WorldGuard", t);
-            World world;
-            
-            world = Bukkit.getServer().getWorld(args[1].val());
-            
-            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
-            
-            ProtectedRegion region = mgr.getRegion(args[0].val());
-            
-            if (region == null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) does not exist in world (%s).", args[0].val(), args[1].val()), ExceptionType.PluginInternalException, t);
-            }
-            
-            return new CInt(region.volume(), t);
-        }
-    }
-
     public static abstract class SKFunction extends AbstractFunction {
 
         public boolean isRestricted() {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
         public boolean preResolveVariables() {
             return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
         }
 
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
 
-        public Boolean runAsync() {
-            return false;
+        public void varList(IVariableList varList) {
         }
+    }
+
+    public static String docs() {
+        return "Provides various methods for programmatically hooking into WorldEdit";
     }
 }

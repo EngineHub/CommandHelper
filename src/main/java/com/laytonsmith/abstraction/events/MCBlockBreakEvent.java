@@ -10,7 +10,7 @@ import com.laytonsmith.core.events.BindableEvent;
  */
 public interface MCBlockBreakEvent extends BindableEvent {
 
-    public MCPlayer getPlayer();
-
     public MCBlock getBlock();
+
+    public MCPlayer getPlayer();
 }

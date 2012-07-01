@@ -22,28 +22,28 @@ public interface EventMixinInterface {
      */
     public void cancel(BindableEvent e, boolean state);
     /**
-     * Return if this event is cancellable
-     * @param o
-     * @return 
-     */
-    public boolean isCancellable(BindableEvent o);    
-    /**
      * This constructs the common elements in an event.
      * @param e
      * @return
      * @throws EventException 
      */
-    public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException;
+    public Map<String, Construct> evaluate_helper(BindableEvent e) throws EventException;    
     /**
-     * Manually trigger this implementation specific event
-     * @param e 
+     * Return if this event is cancellable
+     * @param o
+     * @return 
      */
-    public void manualTrigger(BindableEvent e);
-
+    public boolean isCancellable(BindableEvent o);
     /**
      * Is this event cancelled?
      * @param o
      * @return 
      */
     public boolean isCancelled(BindableEvent o);
+
+    /**
+     * Manually trigger this implementation specific event
+     * @param e 
+     */
+    public void manualTrigger(BindableEvent e);
 }

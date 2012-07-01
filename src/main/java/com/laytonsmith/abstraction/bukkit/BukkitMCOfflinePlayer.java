@@ -21,28 +21,8 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
         this.op = offlinePlayer;
     }
 
-    public boolean isOnline() {
-        return op.isOnline();
-    }
-
     public String getName() {
         return op.getName();
-    }
-
-    public boolean isBanned() {
-        return op.isBanned();
-    }
-
-    public void setBanned(boolean banned) {
-        op.setBanned(banned);
-    }
-
-    public boolean isWhitelisted() {
-        return op.isWhitelisted();
-    }
-
-    public void setWhitelisted(boolean value) {
-        op.setWhitelisted(value);
     }
 
     public MCPlayer getPlayer() {
@@ -50,6 +30,26 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
             return new BukkitMCPlayer(((Player)op));
         }
         return null;
+    }
+
+    public boolean isBanned() {
+        return op.isBanned();
+    }
+
+    public boolean isOnline() {
+        return op.isOnline();
+    }
+
+    public boolean isWhitelisted() {
+        return op.isWhitelisted();
+    }
+
+    public void setBanned(boolean banned) {
+        op.setBanned(banned);
+    }
+
+    public void setWhitelisted(boolean value) {
+        op.setWhitelisted(value);
     }
     
 }

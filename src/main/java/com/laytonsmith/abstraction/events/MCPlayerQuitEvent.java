@@ -10,6 +10,6 @@ import java.util.List;
  */
 public interface MCPlayerQuitEvent extends BindableEvent{
     public String getMessage();
-    public void setMessage(String message);
     public MCPlayer getPlayer();
+    public void setMessage(String message);
 }

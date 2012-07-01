@@ -19,13 +19,6 @@ public class MainSandbox {
     
     
     
-    public void print(){
-        for(int i = 0; i < 500; i++){
-            System.out.println(i);
-        }
-    }
-
-    
     public static void printPackets(){
 //        Class [] classes = ClassDiscovery.DiscoverClasses(net.minecraft.server.Packet.class, null, null);
 //        for(Class c : classes){
@@ -45,5 +38,12 @@ public class MainSandbox {
 //                }
 //            }
 //        }
+    }
+
+    
+    public void print(){
+        for(int i = 0; i < 500; i++){
+            System.out.println(i);
+        }
     }
 }

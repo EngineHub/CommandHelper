@@ -31,6 +31,41 @@ public class FunctionList {
         initFunctions();
     }
 
+    public static FunctionBase getFunction(Construct c) throws ConfigCompileException{
+        return getFunction(c, api.Platforms.INTERPRETER_JAVA);
+    }
+
+    
+    public static FunctionBase getFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
+        if(platform == null){
+            //Default to the Java interpreter
+            platform = api.Platforms.INTERPRETER_JAVA;
+        }
+        if (c instanceof CFunction) {
+            if(!functions.get(platform).containsKey(c.val()) || !supportedPlatforms.get(c.val()).contains(platform)){
+                throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist in the " + platform.platformName(),
+                        c.getTarget());
+            }
+            return functions.get(platform).get(c.val());                          
+        }
+        throw new ConfigCompileException("Expecting CFunction type", c.getTarget());
+    }
+
+    public static List<FunctionBase> getFunctionList(api.Platforms platform) {
+        if(platform == null){
+            List<FunctionBase> list = new ArrayList<FunctionBase>();
+            for(api.Platforms p : api.Platforms.values()){
+                list.addAll(getFunctionList(p));
+            }
+            return list;
+        }
+        List<FunctionBase> f = new ArrayList<FunctionBase>();
+        for(String name : functions.get(platform).keySet()){
+            f.add(functions.get(platform).get(name));
+        }
+        return f;
+    }
+    
     private static void initFunctions() {
         //Register internal classes first, so they can't be overridden
         Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
@@ -105,7 +140,6 @@ public class FunctionList {
 
     }
 
-    
     public static void registerFunction(FunctionBase f, String apiClass, api.Platforms platform) {
         if(!apiClass.equals("Sandbox")){
             if(Prefs.DebugMode()){
@@ -119,40 +153,6 @@ public class FunctionList {
             //but it will be caught when we test all the functions, so for now just ignore it,
             //since this function is called during initial initialization
         }
-    }
-
-    public static FunctionBase getFunction(Construct c) throws ConfigCompileException{
-        return getFunction(c, api.Platforms.INTERPRETER_JAVA);
-    }
-    
-    public static FunctionBase getFunction(Construct c, api.Platforms platform) throws ConfigCompileException {
-        if(platform == null){
-            //Default to the Java interpreter
-            platform = api.Platforms.INTERPRETER_JAVA;
-        }
-        if (c instanceof CFunction) {
-            if(!functions.get(platform).containsKey(c.val()) || !supportedPlatforms.get(c.val()).contains(platform)){
-                throw new ConfigCompileException("The function \"" + c.val() + "\" does not exist in the " + platform.platformName(),
-                        c.getTarget());
-            }
-            return functions.get(platform).get(c.val());                          
-        }
-        throw new ConfigCompileException("Expecting CFunction type", c.getTarget());
-    }
-
-    public static List<FunctionBase> getFunctionList(api.Platforms platform) {
-        if(platform == null){
-            List<FunctionBase> list = new ArrayList<FunctionBase>();
-            for(api.Platforms p : api.Platforms.values()){
-                list.addAll(getFunctionList(p));
-            }
-            return list;
-        }
-        List<FunctionBase> f = new ArrayList<FunctionBase>();
-        for(String name : functions.get(platform).keySet()){
-            f.add(functions.get(platform).get(name));
-        }
-        return f;
     }
     
 }

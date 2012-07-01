@@ -50,8 +50,18 @@ public class CBoolean extends Construct implements Cloneable{
         val = tempVal;
     }
 
+    @Override
+    public CBoolean clone() throws CloneNotSupportedException{
+        return this;
+    }
+
     public boolean getBoolean(){
         return val;
+    }
+    
+    @Override
+    public boolean isDynamic() {
+        return false;
     }
 
     @Override
@@ -61,16 +71,6 @@ public class CBoolean extends Construct implements Cloneable{
         } else{
             return "false";
         }
-    }
-    
-    @Override
-    public CBoolean clone() throws CloneNotSupportedException{
-        return this;
-    }
-
-    @Override
-    public boolean isDynamic() {
-        return false;
     }
 
 }

@@ -24,19 +24,354 @@ import java.util.logging.Level;
  */
 public class Meta {
 
-    public static String docs() {
-        return "These functions provide a way to run other commands";
+    @api
+    public static class call_alias extends AbstractFunction {
+
+        public String docs() {
+            return "boolean {cmd} Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
+                    + " a script that runs \"/jail = /jail\" for instance, would simply be calling whatever plugin that actually"
+                    + " provides the jail functionality's /jail command. However, using this function makes the command loop back"
+                    + " to CommandHelper only. Returns true if the command was run, or false otherwise. Note however that if an alias"
+                    + " ends up throwing an exception to the top level, it will not bubble up to this script, it will be caught and dealt"
+                    + " with already; if this happens, this function will still return true, because essentially the return value"
+                    + " simply indicates if the command matches an alias. Also, it is worth noting that this will trigger a player's"
+                    + " personal alias possibly.";
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+            boolean doRemoval = true;
+            if(!Static.getAliasCore().hasPlayerReference(env.GetCommandSender())){
+                doRemoval = false;
+            }
+            if(doRemoval){
+                Static.getAliasCore().removePlayerReference(env.GetCommandSender());
+            }
+            boolean ret = Static.getAliasCore().alias(args[0].val(), env.GetCommandSender(), null);
+            if(doRemoval){
+                Static.getAliasCore().addPlayerReference(env.GetCommandSender());
+            }
+            return new CBoolean(ret, t);
+        }
+
+        public String getName() {
+            return "call_alias";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_2_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public void varList(IVariableList varList) {
+        }
+    }
+
+    @api
+    public static class eval extends AbstractFunction {
+
+        public String docs() {
+            return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
+                    + "removal.";
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CVoid(t);
+        }
+        //Doesn't matter, run out of state anyways
+
+        @Override
+        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+            GenericTreeNode<Construct> node = nodes[0];
+            try{
+                Construct script = parent.seval(node, env);
+                GenericTreeNode<Construct> root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file()));
+                StringBuilder b = new StringBuilder();
+                int count = 0;
+                for (GenericTreeNode<Construct> child : root.getChildren()) {
+                    Construct s = parent.seval(child, env);
+                    if (!s.val().trim().equals("")) {
+                        if(count > 0){
+                            b.append(" ");
+                        }
+                        b.append(s.val());
+                    }
+                    count++;
+                }
+                return new CString(b.toString(), t);
+            } catch(ConfigCompileException e){
+                throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
+            }
+        }
+
+        public String getName() {
+            return "eval";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }      
+
+        public CHVersion since() {
+            return CHVersion.V3_1_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        @Override
+        public boolean useSpecialExec() {
+            return true;
+        }
+        
+        public void varList(IVariableList varList) {
+        }
+    }
+
+    @api
+    public static class g extends AbstractFunction {
+
+        public String docs() {
+            return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            for (int i = 0; i < args.length; i++) {
+                args[i].val();
+            }
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "g";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public void varList(IVariableList varList) {
+        }
+    }
+
+    @api public static class get_cmd extends AbstractFunction{
+
+        public String docs() {
+            return "mixed {} Gets the command (as a string) that ended up triggering this script, exactly"
+                    + " how it was entered by the player. This could be null, if for instance"
+                    + " it is called from within an event.";
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            if(environment.GetCommand() == null){
+                return new CNull(t);
+            } else {
+                return new CString(environment.GetCommand(), t);
+            }
+        }
+
+        public String getName() {
+            return "get_cmd";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+        
+    }
+
+    @api
+    public static class is_alias extends AbstractFunction {
+
+		public String docs() {
+            return "boolean {cmd} Returns true if using call_alias with this cmd would trigger an alias.";
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args)
+				throws ConfigRuntimeException {
+			AliasCore ac = Static.getAliasCore();
+			
+			for (Script s : ac.getScripts()) {
+				if (s.match(args[0].val())) {
+					return new CBoolean(true, t);
+				}
+			}
+			
+			MCPlayer p = environment.GetPlayer();
+			if (p instanceof MCPlayer) {
+				// p might be null
+				for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts()) {
+					if (s.match(args[0].val())) {
+						return new CBoolean(true, t);
+					}
+				}
+			}
+			
+			return new CBoolean(false, t);
+		}
+
+		public String getName() {
+			return "is_alias";
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+    	
+    }
+    
+    @api
+    public static class run extends AbstractFunction {
+
+        public String docs() {
+            return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
+                    + "chat; with a forward slash in front.";
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
+                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
+                        ExceptionType.FormatException, t);
+            }
+            String cmd = args[0].val().substring(1);
+            if (Prefs.DebugMode()) {
+                if (env.GetCommandSender() instanceof MCPlayer) {
+                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[0].val().trim());
+                } else {
+                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
+                }
+            }
+            //p.chat(cmd);
+            Static.getServer().dispatchCommand(env.GetCommandSender(), cmd);
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "run";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.FormatException};
+        }
+
+        public void varList(IVariableList varList) {
+        }
     }
 
     @api
     public static class runas extends AbstractFunction {
 
-        public String getName() {
-            return "runas";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2};
+        public String docs() {
+            return "void {player, command} Runs a command as a particular user. The special user '~op' is a user that runs as op. Be careful with this very powerful function."
+                    + " Commands cannot be run as an offline player. Returns void. If the first argument is an array of usernames, the command"
+                    + " will be run in the context of each user in the array.";
         }
 
         public Construct exec(Target t, final Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -99,29 +434,39 @@ public class Meta {
             return new CVoid(t);
         }
 
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
+        public String getName() {
+            return "runas";
         }
 
-        public String docs() {
-            return "void {player, command} Runs a command as a particular user. The special user '~op' is a user that runs as op. Be careful with this very powerful function."
-                    + " Commands cannot be run as an offline player. Returns void. If the first argument is an array of usernames, the command"
-                    + " will be run in the context of each user in the array.";
+        protected MCCommandSender getOPCommandSender(final MCCommandSender sender) {
+            if (sender.isOp()) {
+                return sender;
+            }
+
+            return (MCCommandSender) Proxy.newProxyInstance(sender.getClass().getClassLoader(),
+                    new Class[] { (sender instanceof MCPlayer) ? MCPlayer.class : MCCommandSender.class },
+                    new InvocationHandler() {
+                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
+                            String methodName = method.getName();
+                            if ("isOp".equals(methodName) || "hasPermission".equals(methodName) || "isPermissionSet".equals(methodName)) {
+                                return true;
+                            } else {
+                                return method.invoke(sender, args);
+                            }
+                        }
+                    });            
         }
 
         public boolean isRestricted() {
             return true;
         }
 
-        public void varList(IVariableList varList) {
+        public Integer[] numArgs() {
+            return new Integer[]{2};
         }
 
         public boolean preResolveVariables() {
             return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_0_1;
         }
 
         public Boolean runAsync() {
@@ -148,330 +493,19 @@ public class Meta {
             }
         }
 
-        protected MCCommandSender getOPCommandSender(final MCCommandSender sender) {
-            if (sender.isOp()) {
-                return sender;
-            }
-
-            return (MCCommandSender) Proxy.newProxyInstance(sender.getClass().getClassLoader(),
-                    new Class[] { (sender instanceof MCPlayer) ? MCPlayer.class : MCCommandSender.class },
-                    new InvocationHandler() {
-                        public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
-                            String methodName = method.getName();
-                            if ("isOp".equals(methodName) || "hasPermission".equals(methodName) || "isPermissionSet".equals(methodName)) {
-                                return true;
-                            } else {
-                                return method.invoke(sender, args);
-                            }
-                        }
-                    });            
-        }
-    }
-
-    @api
-    public static class run extends AbstractFunction {
-
-        public String getName() {
-            return "run";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if (args[0].nval() == null || args[0].val().length() <= 0 || args[0].val().charAt(0) != '/') {
-                throw new ConfigRuntimeException("The first character of the command must be a forward slash (i.e. '/give')",
-                        ExceptionType.FormatException, t);
-            }
-            String cmd = args[0].val().substring(1);
-            if (Prefs.DebugMode()) {
-                if (env.GetCommandSender() instanceof MCPlayer) {
-                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + ": " + args[0].val().trim());
-                } else {
-                    Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command from console equivalent: " + args[0].val().trim());
-                }
-            }
-            //p.chat(cmd);
-            Static.getServer().dispatchCommand(env.GetCommandSender(), cmd);
-            return new CVoid(t);
-        }
-
-        public String docs() {
-            return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
-                    + "chat; with a forward slash in front.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
 
-        public Boolean runAsync() {
-            return false;
-        }
-    }
-
-    @api
-    public static class g extends AbstractFunction {
-
-        public String getName() {
-            return "g";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            for (int i = 0; i < args.length; i++) {
-                args[i].val();
-            }
-            return new CVoid(t);
-        }
-
-        public String docs() {
-            return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
-        }
-
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return false;
+            return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
         }
 
         public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_0_1;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-    }
-
-    @api
-    public static class eval extends AbstractFunction {
-
-        public String getName() {
-            return "eval";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
-                    + "removal.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_1_0;
-        }      
-
-        @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            GenericTreeNode<Construct> node = nodes[0];
-            try{
-                Construct script = parent.seval(node, env);
-                GenericTreeNode<Construct> root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file()));
-                StringBuilder b = new StringBuilder();
-                int count = 0;
-                for (GenericTreeNode<Construct> child : root.getChildren()) {
-                    Construct s = parent.seval(child, env);
-                    if (!s.val().trim().equals("")) {
-                        if(count > 0){
-                            b.append(" ");
-                        }
-                        b.append(s.val());
-                    }
-                    count++;
-                }
-                return new CString(b.toString(), t);
-            } catch(ConfigCompileException e){
-                throw new ConfigRuntimeException("Could not compile eval'd code: " + e.getMessage(), ExceptionType.FormatException, t);
-            }
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            return new CVoid(t);
-        }
-        //Doesn't matter, run out of state anyways
-
-        public Boolean runAsync() {
-            return null;
-        }
-        
-        @Override
-        public boolean useSpecialExec() {
-            return true;
-        }
-    }
-    
-    @api
-    public static class is_alias extends AbstractFunction {
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public Boolean runAsync() {
-			return null;
-		}
-
-		public Construct exec(Target t, Env environment, Construct... args)
-				throws ConfigRuntimeException {
-			AliasCore ac = Static.getAliasCore();
-			
-			for (Script s : ac.getScripts()) {
-				if (s.match(args[0].val())) {
-					return new CBoolean(true, t);
-				}
-			}
-			
-			MCPlayer p = environment.GetPlayer();
-			if (p instanceof MCPlayer) {
-				// p might be null
-				for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts()) {
-					if (s.match(args[0].val())) {
-						return new CBoolean(true, t);
-					}
-				}
-			}
-			
-			return new CBoolean(false, t);
-		}
-
-		public String getName() {
-			return "is_alias";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{1};
-		}
-
-		public String docs() {
-            return "boolean {cmd} Returns true if using call_alias with this cmd would trigger an alias.";
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-    	
-    }
-
-    @api
-    public static class call_alias extends AbstractFunction {
-
-        public String getName() {
-            return "call_alias";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "boolean {cmd} Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
-                    + " a script that runs \"/jail = /jail\" for instance, would simply be calling whatever plugin that actually"
-                    + " provides the jail functionality's /jail command. However, using this function makes the command loop back"
-                    + " to CommandHelper only. Returns true if the command was run, or false otherwise. Note however that if an alias"
-                    + " ends up throwing an exception to the top level, it will not bubble up to this script, it will be caught and dealt"
-                    + " with already; if this happens, this function will still return true, because essentially the return value"
-                    + " simply indicates if the command matches an alias. Also, it is worth noting that this will trigger a player's"
-                    + " personal alias possibly.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_2_0;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
-            boolean doRemoval = true;
-            if(!Static.getAliasCore().hasPlayerReference(env.GetCommandSender())){
-                doRemoval = false;
-            }
-            if(doRemoval){
-                Static.getAliasCore().removePlayerReference(env.GetCommandSender());
-            }
-            boolean ret = Static.getAliasCore().alias(args[0].val(), env.GetCommandSender(), null);
-            if(doRemoval){
-                Static.getAliasCore().addPlayerReference(env.GetCommandSender());
-            }
-            return new CBoolean(ret, t);
         }
     }
     
     @api public static class scriptas extends AbstractFunction{
-
-        public String getName() {
-            return "scriptas";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2, 3};
-        }
 
         public String docs() {
             return "void {player, [label], script} Runs the specified script in the context of a given player."
@@ -480,26 +514,6 @@ public class Meta {
                     + " this script is run under as well (in regards to permission checking)";
         }
 
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
-            return false;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-        
         public Construct exec(Target t, Env environment, Construct... args){
             return null;
         }
@@ -522,6 +536,34 @@ public class Meta {
             environment.SetLabel(originalLabel);
             return new CVoid(t);
         }
+
+        public String getName() {
+            return "scriptas";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public boolean preResolveVariables() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
         
         @Override
         public boolean useSpecialExec() {
@@ -530,50 +572,8 @@ public class Meta {
         
     }        
     
-    @api public static class get_cmd extends AbstractFunction{
-
-        public String getName() {
-            return "get_cmd";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0};
-        }
-
-        public String docs() {
-            return "mixed {} Gets the command (as a string) that ended up triggering this script, exactly"
-                    + " how it was entered by the player. This could be null, if for instance"
-                    + " it is called from within an event.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            if(environment.GetCommand() == null){
-                return new CNull(t);
-            } else {
-                return new CString(environment.GetCommand(), t);
-            }
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-        
+    public static String docs() {
+        return "These functions provide a way to run other commands";
     }
         
 }

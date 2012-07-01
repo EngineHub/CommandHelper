@@ -36,11 +36,6 @@ public class CArrayReference extends Construct{
         this.index = index;
     }
     
-    @Override
-    public String toString(){
-        return "(" + array + ") -> " + index;
-    }
-    
     public Construct getInternalArray(){
         Construct temp = array;
         while(temp instanceof CArrayReference){
@@ -59,9 +54,14 @@ public class CArrayReference extends Construct{
         }
         return temp.index;
     }
-
+    
     @Override
     public boolean isDynamic() {
         return false;
+    }
+
+    @Override
+    public String toString(){
+        return "(" + array + ") -> " + index;
     }
 }

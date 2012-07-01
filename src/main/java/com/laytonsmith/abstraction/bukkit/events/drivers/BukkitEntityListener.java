@@ -23,6 +23,11 @@ import org.bukkit.event.entity.EntityTargetEvent;
 public class BukkitEntityListener implements Listener{
 
     @EventHandler(priority=EventPriority.LOWEST)
+    public void onEntityDamagePlayer(EntityDamageByEntityEvent event) {
+        EventUtils.TriggerListener(Driver.ENTITY_DAMAGE_PLAYER, "entity_damage_player", new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent(event));
+    }
+    
+    @EventHandler(priority=EventPriority.LOWEST)
     public void onEntityDeath(EntityDeathEvent event) {
         if(event.getEntity() instanceof Player){
             EventUtils.TriggerListener(Driver.PLAYER_DEATH, "player_death", new BukkitPlayerEvents.BukkitMCPlayerDeathEvent(event));
@@ -32,10 +37,5 @@ public class BukkitEntityListener implements Listener{
     @EventHandler(priority=EventPriority.LOWEST)
     public void onTargetLiving(EntityTargetEvent event) {
         EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", new BukkitEntityEvents.BukkitMCTargetEvent(event));
-    }
-    
-    @EventHandler(priority=EventPriority.LOWEST)
-    public void onEntityDamagePlayer(EntityDamageByEntityEvent event) {
-        EventUtils.TriggerListener(Driver.ENTITY_DAMAGE_PLAYER, "entity_damage_player", new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent(event));
     }
 }

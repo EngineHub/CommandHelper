@@ -16,6 +16,11 @@ public class CInt extends Construct implements Cloneable{
     
     public static final long serialVersionUID = 1L;
     final long val;
+    public CInt(long value, Target t){
+        super(Long.toString(value), ConstructType.INT, t);
+        val = value;
+    }
+    
     public CInt(String value, Target t){
         super(value, ConstructType.INT, t);
         try{
@@ -24,18 +29,13 @@ public class CInt extends Construct implements Cloneable{
             throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, t);
         }
     }
-    
-    public CInt(long value, Target t){
-        super(Long.toString(value), ConstructType.INT, t);
-        val = value;
-    }
 
-    public long getInt(){
-        return val;
-    }
-    
     public CInt clone() throws CloneNotSupportedException{
         return this;
+    }
+    
+    public long getInt(){
+        return val;
     }
 
     @Override

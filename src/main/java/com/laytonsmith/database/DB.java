@@ -19,33 +19,8 @@ import java.util.logging.Logger;
  * @author layton
  */
 public abstract class DB {
-    private static class Statics{
-        private static CConnection lastConnection = null;
-        protected static void SetLastConnection(CConnection lastConnection){
-            Statics.lastConnection = lastConnection;
-        }
-        protected static CConnection GetLastConnection() throws SQLException{
-            if(lastConnection == null){
-                throw new SQLException("No connection specified!");
-            }
-            return Statics.lastConnection;
-        }
-    }
-    
-    public enum SupportedDBConnectors{
-        SQLITE;
-    }
-    
     final public static class CConnection{
         private static Map<String, CConnection> cache = new HashMap<String, CConnection>();
-        public static CConnection GetConnection(String connectionName) throws SQLException{
-            if(cache.containsKey(connectionName)){
-                return cache.get(connectionName);
-            }
-            CConnection c = ConnectionLookup(connectionName);
-            cache.put(connectionName, c);
-            return c;
-        }
         private static CConnection ConnectionLookup(String name) throws SQLException{
             ZipReader zr = new ZipReader(new File("plugins/CommandHelper/Connections/" + name));
             Properties p = new Properties();
@@ -83,12 +58,20 @@ public abstract class DB {
                 throw new SQLException("Unsupported type " + p.getProperty("type"));
             }
         }
+        public static CConnection GetConnection(String connectionName) throws SQLException{
+            if(cache.containsKey(connectionName)){
+                return cache.get(connectionName);
+            }
+            CConnection c = ConnectionLookup(connectionName);
+            cache.put(connectionName, c);
+            return c;
+        }
         
-        SupportedDBConnectors type;
         String hostname;
-        Integer port;
-        String username;
         String password;
+        Integer port;
+        SupportedDBConnectors type;
+        String username;
         private CConnection(SupportedDBConnectors type, String hostname, int port, String username, String password){
             this.type = type;
             this.hostname = hostname;
@@ -98,14 +81,26 @@ public abstract class DB {
         }
     }
     
-    /**
-     * Performs a raw query to the database. The parameters have already been inserted
-     * into the query at this point.
-     * @param c
-     * @param query
-     * @return 
-     */
-    protected abstract Set raw_query(CConnection c, String query);
+    private static class Statics{
+        private static CConnection lastConnection = null;
+        protected static CConnection GetLastConnection() throws SQLException{
+            if(lastConnection == null){
+                throw new SQLException("No connection specified!");
+            }
+            return Statics.lastConnection;
+        }
+        protected static void SetLastConnection(CConnection lastConnection){
+            Statics.lastConnection = lastConnection;
+        }
+    }
+    
+    public enum SupportedDBConnectors{
+        SQLITE;
+    }
+    
+    public void connect(CConnection c) throws SQLException{
+        query(c, testQuery());
+    }
     
     /**
      * Note to subclasses: If prepared queries are more efficiently handled directly
@@ -122,45 +117,6 @@ public abstract class DB {
      */
     protected Object do_query(CConnection c, String query, Object[] params) throws SQLException{
         return this.raw_query(c, escape(c, query, params));        
-    }
-    
-    /**
-     * Performs a query to the database, using the specified connection.
-     * The query should be a prepared query, that is, parameters to be filled
-     * in should be question marks, and the objects in the params array will
-     * be filled in to the question marks.
-     * 
-     * 
-     * @param c
-     * @param query
-     * @param params
-     * @return
-     * @throws SQLException 
-     */
-    final public Object query(CConnection c, String query, Object ... params) throws SQLException{
-        Statics.SetLastConnection(c); 
-        return this.do_query(c, query, params);
-    }    
-    
-    /**
-     * Performs a query to the database, using the last connection.
-     * @param query
-     * @param params
-     * @return
-     * @throws SQLException 
-     */
-    final public Object query(String query, Object ... params) throws SQLException{
-        return query(Statics.GetLastConnection(), query, params);
-    }
-    
-    /**
-     * Performs a query to the database, using the last connection.
-     * @param query
-     * @return
-     * @throws SQLException 
-     */
-    final public Object query(String query) throws SQLException{
-        return query(Statics.GetLastConnection(), query);
     }
     
     /**
@@ -205,15 +161,55 @@ public abstract class DB {
                         + (prepared!=1?"s":"") + " but recieved " + params.length);
         }
         return b.toString();
+    }    
+    
+    /**
+     * Performs a query to the database, using the specified connection.
+     * The query should be a prepared query, that is, parameters to be filled
+     * in should be question marks, and the objects in the params array will
+     * be filled in to the question marks.
+     * 
+     * 
+     * @param c
+     * @param query
+     * @param params
+     * @return
+     * @throws SQLException 
+     */
+    final public Object query(CConnection c, String query, Object ... params) throws SQLException{
+        Statics.SetLastConnection(c); 
+        return this.do_query(c, query, params);
     }
     
     /**
-     * Provides a short, efficient query that allows for a connection test to happen,
-     * without changing the database at all. 
-     * <a href='http://stackoverflow.com/questions/3668506/efficient-sql-test-query-that-will-work-across-all-or-most-databases'>See here.</a>
+     * Performs a query to the database, using the last connection.
+     * @param query
+     * @return
+     * @throws SQLException 
+     */
+    final public Object query(String query) throws SQLException{
+        return query(Statics.GetLastConnection(), query);
+    }
+    
+    /**
+     * Performs a query to the database, using the last connection.
+     * @param query
+     * @param params
+     * @return
+     * @throws SQLException 
+     */
+    final public Object query(String query, Object ... params) throws SQLException{
+        return query(Statics.GetLastConnection(), query, params);
+    }
+    
+    /**
+     * Performs a raw query to the database. The parameters have already been inserted
+     * into the query at this point.
+     * @param c
+     * @param query
      * @return 
      */
-    protected abstract String testQuery();
+    protected abstract Set raw_query(CConnection c, String query);
     
     /**
      * Given an object, this function should sanitize the value, such that it can be inserted directly
@@ -225,7 +221,11 @@ public abstract class DB {
      */
     protected abstract String sanitize(CConnection c, Object o) throws SQLException;
     
-    public void connect(CConnection c) throws SQLException{
-        query(c, testQuery());
-    }
+    /**
+     * Provides a short, efficient query that allows for a connection test to happen,
+     * without changing the database at all. 
+     * <a href='http://stackoverflow.com/questions/3668506/efficient-sql-test-query-that-will-work-across-all-or-most-databases'>See here.</a>
+     * @return 
+     */
+    protected abstract String testQuery();
 }

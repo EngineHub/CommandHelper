@@ -28,8 +28,8 @@ public class CNull extends Construct implements Cloneable{
     }
     
     @Override
-    public String val(){
-        return "null";
+    public boolean isDynamic() {
+        return false;
     }
     
     @Override
@@ -38,8 +38,8 @@ public class CNull extends Construct implements Cloneable{
     }
 
     @Override
-    public boolean isDynamic() {
-        return false;
+    public String val(){
+        return "null";
     }
     
 }
