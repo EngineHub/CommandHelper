@@ -36,11 +36,5 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
     public void damage(int i) {
         le.damage(i);
     }
-
-    @Override
-    public MCEntityType getType() {
-    	EntityType type = le.getType();
-    	return MCEntityType.valueOf(type.name());
-    }
     
 }

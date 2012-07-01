@@ -544,7 +544,7 @@ public class PlayerEvents {
                     map.put("death_message", new CString(((MCPlayerDeathEvent)event).getDeathMessage(), Target.UNKNOWN));
                 }
                 try{
-                    map.put("cause", new CString(event.getEntity().getLastDamageCause().name(), Target.UNKNOWN));
+                    map.put("cause", new CString(event.getEntity().getLastDamageCause().getCause().name(), Target.UNKNOWN));
                 } catch(NullPointerException ex){
                     map.put("cause", new CString(MCDamageCause.CUSTOM.name(), Target.UNKNOWN));
                 }

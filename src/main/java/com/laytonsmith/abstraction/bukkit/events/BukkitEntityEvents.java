@@ -11,25 +11,23 @@ import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.events.abstraction;
 
 import org.bukkit.entity.Entity;
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
-import org.bukkit.event.entity.EntityDamageEvent.DamageCause;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
-import org.bukkit.event.entity.EntityTargetEvent.TargetReason;
 
 /**
  *
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+    public static class BukkitMCEntityDamageEvent implements MCEntityDamageEvent {
 
-    @abstraction(type = Implementation.Type.BUKKIT)
-    public static class BukkitMCEntityDamageByEntityEvent implements MCEntityDamageByEntityEvent {
+        EntityDamageEvent event;
 
-        EntityDamageByEntityEvent event;
-
-        public BukkitMCEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
+        public BukkitMCEntityDamageEvent(EntityDamageEvent e) {
             event = e;
         }
 
@@ -41,12 +39,8 @@ public class BukkitEntityEvents {
             return MCDamageCause.valueOf(event.getCause().name());
         }
 
-        public MCEntity getDamagee() {
+        public MCEntity getEntity() {
             return BukkitConvertor.BukkitGetCorrectEntity(event.getEntity());
-        }
-
-        public MCEntity getDamager() {
-            return BukkitConvertor.BukkitGetCorrectEntity(event.getDamager());
         }
 
         public int getDamage() {
@@ -55,6 +49,21 @@ public class BukkitEntityEvents {
 
         public void setDamage(int damage) {
             event.setDamage(damage);
+        }
+    }
+
+	@abstraction(type = Implementation.Type.BUKKIT)
+    public static class BukkitMCEntityDamageByEntityEvent extends BukkitMCEntityDamageEvent implements MCEntityDamageByEntityEvent {
+
+        EntityDamageByEntityEvent event;
+
+        public BukkitMCEntityDamageByEntityEvent(EntityDamageByEntityEvent e) {
+        	super(e);
+            event = e;
+        }
+
+        public MCEntity getDamager() {
+            return BukkitConvertor.BukkitGetCorrectEntity(event.getDamager());
         }
     }
 

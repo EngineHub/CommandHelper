@@ -139,7 +139,11 @@ public class BukkitConvertor implements Convertor {
     		return null;
     	}
     	
-        if(be instanceof Tameable){
+    	if(be instanceof Projectile){
+            return new BukkitMCProjectile(be);
+        }
+    	
+    	if(be instanceof Tameable){
             return new BukkitMCTameable(be);
         }
         

@@ -51,7 +51,7 @@ public class EntityEvents {
 				throws PrefilterNonMatchException {
 			if(e instanceof MCEntityDamageByEntityEvent){
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
-				return event.getDamagee() instanceof MCPlayer;
+				return event.getEntity() instanceof MCPlayer;
 			}
 			return false;
 		}
@@ -67,7 +67,7 @@ public class EntityEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 
                 // Guaranteed to be a player via matches
-                String name = ((MCPlayer)event.getDamagee()).getName();
+                String name = ((MCPlayer)event.getEntity()).getName();
                 map.put("player", new CString(name, Target.UNKNOWN));
                 String dtype = event.getDamager().getType().name();
                 map.put("damager",  new CString(dtype, Target.UNKNOWN));
