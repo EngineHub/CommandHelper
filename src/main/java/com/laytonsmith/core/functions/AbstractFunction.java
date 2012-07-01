@@ -15,6 +15,38 @@ import java.util.List;
 public abstract class AbstractFunction implements Function{
 
     /**
+     * Only an extreme few functions should allow braces.
+     * @return 
+     */
+    public boolean allowBraces() {
+        return false;
+    }
+
+    /**
+     * Most functions should show up in the normal documentation.
+     * @return 
+     */
+    public boolean appearInDocumentation() {
+        return true;
+    }
+
+    /**
+     * Most functions can't optimize.
+     * @return 
+     */
+    public boolean canOptimize(){
+        return false;
+    }            
+    
+    /**
+     * Most functions (even the ones that can optimize) cannot optimize dynamic things.
+     * @return 
+     */
+    public boolean canOptimizeDynamic() {
+        return false;
+    }
+    
+    /**
      * By default, we return CVoid.
      * @param t
      * @param env
@@ -26,30 +58,6 @@ public abstract class AbstractFunction implements Function{
     }
 
     /**
-     * By default, we return false, because most functions do not need this
-     * @return 
-     */
-    public boolean useSpecialExec() {
-        return false;
-    }
-
-    /**
-     * Most functions should show up in the normal documentation.
-     * @return 
-     */
-    public boolean appearInDocumentation() {
-        return true;
-    }            
-    
-    /**
-     * Most functions can't optimize.
-     * @return 
-     */
-    public boolean canOptimize(){
-        return false;
-    }
-    
-    /**
      * Just return null by default. Most functions won't get to this anyways, since
      * canOptimize is returning false.
      * @param t
@@ -58,14 +66,6 @@ public abstract class AbstractFunction implements Function{
      */
     public Construct optimize(Target t, Construct ... args) throws ConfigCompileException{
         return null;
-    }
-
-    /**
-     * Most functions (even the ones that can optimize) cannot optimize dynamic things.
-     * @return 
-     */
-    public boolean canOptimizeDynamic() {
-        return false;
     }
 
     /**
@@ -81,27 +81,27 @@ public abstract class AbstractFunction implements Function{
     }
 
     /**
-     * Only an extreme few functions should allow braces.
+     * Most functions want the atomic values, not the variable itself.
      * @return 
      */
-    public boolean allowBraces() {
-        return false;
+    public boolean preResolveVariables() {
+        return true;
     }     
     
+    /**
+     * By default, we return false, because most functions do not need this
+     * @return 
+     */
+    public boolean useSpecialExec() {
+        return false;
+    }
+
     /**
      * Most functions don't need the varlist.
      * @param varList 
      */
     public void varList(IVariableList varList) {
         return;
-    }
-
-    /**
-     * Most functions want the atomic values, not the variable itself.
-     * @return 
-     */
-    public boolean preResolveVariables() {
-        return true;
     }
 
 }

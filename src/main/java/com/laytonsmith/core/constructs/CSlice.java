@@ -8,8 +8,14 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
  * @author layton
  */
 public class CSlice extends Construct {
-    private long start;
     private long finish;
+    private long start;
+    public CSlice(long from, long to, Target t){
+        super(from + ".." + to, ConstructType.SLICE, t);
+        this.start = from;
+        this.finish = to;
+    }
+    
     public CSlice(String slice, Target t) throws ConfigCompileException{
         super(slice, ConstructType.SLICE, t);
         String [] split = slice.split("\\.\\.");
@@ -39,18 +45,12 @@ public class CSlice extends Construct {
         }
     }
     
-    public CSlice(long from, long to, Target t){
-        super(from + ".." + to, ConstructType.SLICE, t);
-        this.start = from;
-        this.finish = to;
+    public long getFinish(){
+        return finish;
     }
     
     public long getStart(){
         return start;
-    }
-    
-    public long getFinish(){
-        return finish;
     }
 
     @Override

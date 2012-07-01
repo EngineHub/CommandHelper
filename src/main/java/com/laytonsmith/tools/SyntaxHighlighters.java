@@ -67,19 +67,56 @@ public class SyntaxHighlighters {
                 + "can work to get it included in CommandHelper!";
     }
 
-    /**
-     * Available macros are listed in the code below.
-     * @param location
-     * @return 
-     */
-    private static String template(String location) {        
-        String template = Static.GetStringResource(location);
-        Pattern p = Pattern.compile("%%(.*?)%%");
-        Matcher m = p.matcher(template);
-        while(m.find()){
-            template = template.replaceAll("%%" + m.group(1) + "%%", macro(m.group(1)));
+    private static List<Documentation> GetEvents(){
+        List<Documentation> l = new ArrayList<Documentation>();
+        Class[] classes = ClassDiscovery.GetClassesWithinPackageHierarchy();
+        for(Class c : classes){
+            if (Event.class.isAssignableFrom(c) && Documentation.class.isAssignableFrom(c)) {
+                try {
+                    Constructor m = c.getConstructor();
+                    Documentation e = (Documentation)m.newInstance();
+                    l.add(e);
+                } catch (Exception ex) {
+                    System.err.println(ex.getMessage());
+                }
+            }           
         }
-        return template;
+        return l;
+    }
+    
+    private static List<Function> GetFunctions(){
+        List<Function> fl = new ArrayList<Function>();
+        Class[] functions = ClassDiscovery.GetClassesWithAnnotation(api.class);
+        for(Class c : functions){
+            if(Function.class.isAssignableFrom(c)){
+                try {
+                    fl.add((Function)c.newInstance());
+                } catch (InstantiationException ex) {
+                    Logger.getLogger(SyntaxHighlighters.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IllegalAccessException ex) {
+                    Logger.getLogger(SyntaxHighlighters.class.getName()).log(Level.SEVERE, null, ex);
+                } catch(NoClassDefFoundError e){
+                    //Hmm. No real good way to handle this... echo out to stderr, I guess.
+                    System.err.println(e.getMessage());
+                }
+                
+            }
+        }
+        return fl;
+    }
+
+    
+    
+    private static String Join(List l, String joiner){
+        StringBuilder b = new StringBuilder();
+        for(int i = 0; i < l.size(); i++){
+            if(i == 0){
+                b.append(l.get(i).toString());
+            } else {
+                b.append(joiner).append(l.get(i).toString());
+            }
+        }
+        return b.toString();
     }
     
     private static String macro(String macroName){
@@ -172,58 +209,21 @@ public class SyntaxHighlighters {
         return header + Join(base, spliter) + footer;
         
     }
-
     
     
-    private static List<Documentation> GetEvents(){
-        List<Documentation> l = new ArrayList<Documentation>();
-        Class[] classes = ClassDiscovery.GetClassesWithinPackageHierarchy();
-        for(Class c : classes){
-            if (Event.class.isAssignableFrom(c) && Documentation.class.isAssignableFrom(c)) {
-                try {
-                    Constructor m = c.getConstructor();
-                    Documentation e = (Documentation)m.newInstance();
-                    l.add(e);
-                } catch (Exception ex) {
-                    System.err.println(ex.getMessage());
-                }
-            }           
+    /**
+     * Available macros are listed in the code below.
+     * @param location
+     * @return 
+     */
+    private static String template(String location) {        
+        String template = Static.GetStringResource(location);
+        Pattern p = Pattern.compile("%%(.*?)%%");
+        Matcher m = p.matcher(template);
+        while(m.find()){
+            template = template.replaceAll("%%" + m.group(1) + "%%", macro(m.group(1)));
         }
-        return l;
-    }
-    
-    private static List<Function> GetFunctions(){
-        List<Function> fl = new ArrayList<Function>();
-        Class[] functions = ClassDiscovery.GetClassesWithAnnotation(api.class);
-        for(Class c : functions){
-            if(Function.class.isAssignableFrom(c)){
-                try {
-                    fl.add((Function)c.newInstance());
-                } catch (InstantiationException ex) {
-                    Logger.getLogger(SyntaxHighlighters.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IllegalAccessException ex) {
-                    Logger.getLogger(SyntaxHighlighters.class.getName()).log(Level.SEVERE, null, ex);
-                } catch(NoClassDefFoundError e){
-                    //Hmm. No real good way to handle this... echo out to stderr, I guess.
-                    System.err.println(e.getMessage());
-                }
-                
-            }
-        }
-        return fl;
-    }
-    
-    
-    private static String Join(List l, String joiner){
-        StringBuilder b = new StringBuilder();
-        for(int i = 0; i < l.size(); i++){
-            if(i == 0){
-                b.append(l.get(i).toString());
-            } else {
-                b.append(joiner).append(l.get(i).toString());
-            }
-        }
-        return b.toString();
+        return template;
     }
     
 }

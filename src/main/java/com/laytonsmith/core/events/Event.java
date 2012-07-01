@@ -22,10 +22,28 @@ import java.util.Map;
  */
 public interface Event extends Comparable<Event>, Documentation{
     /**
-     * This should return the name of the event.
+     * This function is called once a script binds to this event, which gives 
+     * this event type a chance to "activate" if needed. It may throw an 
+     * UnsupportedOperationException if it is not needed. The listener
+     * is automatically registered, based on the driver returned.
+     */
+    public void bind();
+    /**
+     * This is called if the script attempts to cancel the event, so the underlying
+     * event can also be cancelled. If the underlying event is not cancellable, this
+     * should throw an EventException, which is caught in the triggering code, and
+     * at this time ignored.
+     */
+    public void cancel(BindableEvent e, boolean state) throws EventException;
+
+    /**
+     * If an event is manually triggered, then it may be required for an event
+     * object to be faked, so the rest of the event will work properly.
+     * @param manualObject
      * @return 
      */
-    public String getName();
+    public BindableEvent convert(CArray manualObject);
+    
     /**
      * This should return the docs that are used in the wiki. The format should
      * be as follows: {prefilter: explanation | ...} Documentation {event_obj: explanation | ...}
@@ -37,20 +55,15 @@ public interface Event extends Comparable<Event>, Documentation{
      * @return 
      */
     public String docs();
-
-    /**
-     * This function should return true if the event code should be run, based
-     * on this prefilter and triggering event's parameters.
-     */
-    public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException;
     
     /**
-     * If an event is manually triggered, then it may be required for an event
-     * object to be faked, so the rest of the event will work properly.
-     * @param manualObject
-     * @return 
+     * This function returns the "driver" class of the event needed to trigger it.
+     * Though not strictly needed, this method helps optimize code. All events may
+     * more strictly filter events based on other conditions, but all events must
+     * have a single Type of event that drives the CH event. This is also the type of
+     * the event that will be sent to the matches function.
      */
-    public BindableEvent convert(CArray manualObject);
+    public Driver driver();
     
     /**
      * This function is called when an event is triggered. It passes the event, and expects
@@ -63,35 +76,19 @@ public interface Event extends Comparable<Event>, Documentation{
     public Map<String, Construct> evaluate(BindableEvent e) throws EventException;
     
     /**
-     * This is called to determine if an event is cancellable in the first place
+     * Because an event type knows best how to actually trigger an event, the prebuild,
+     * preconfigured script, and the BoundEvent generating the action are passed to
+     * the Event itself. AbstractEvent's default implementation is to simply run the
+     * script, but an event can choose to override this functionality if needed.
      */
-    public boolean isCancellable(BindableEvent e);
-    
-    /**
-     * This is called if the script attempts to cancel the event, so the underlying
-     * event can also be cancelled. If the underlying event is not cancellable, this
-     * should throw an EventException, which is caught in the triggering code, and
-     * at this time ignored.
-     */
-    public void cancel(BindableEvent e, boolean state) throws EventException;
+    public void execute(Script s, BoundEvent b, Env env, ActiveEvent activeEvent) throws EventException;
     
     
     /**
-     * This function returns the "driver" class of the event needed to trigger it.
-     * Though not strictly needed, this method helps optimize code. All events may
-     * more strictly filter events based on other conditions, but all events must
-     * have a single Type of event that drives the CH event. This is also the type of
-     * the event that will be sent to the matches function.
+     * This should return the name of the event.
+     * @return 
      */
-    public Driver driver();
-    
-    /**
-     * This function is called once a script binds to this event, which gives 
-     * this event type a chance to "activate" if needed. It may throw an 
-     * UnsupportedOperationException if it is not needed. The listener
-     * is automatically registered, based on the driver returned.
-     */
-    public void bind();
+    public String getName();
     
     /**
      * This function is called once when the plugin starts up, to give this
@@ -101,12 +98,18 @@ public interface Event extends Comparable<Event>, Documentation{
     public void hook();
     
     /**
-     * Because an event type knows best how to actually trigger an event, the prebuild,
-     * preconfigured script, and the BoundEvent generating the action are passed to
-     * the Event itself. AbstractEvent's default implementation is to simply run the
-     * script, but an event can choose to override this functionality if needed.
+     * This is called to determine if an event is cancellable in the first place
      */
-    public void execute(Script s, BoundEvent b, Env env, ActiveEvent activeEvent) throws EventException;
+    public boolean isCancellable(BindableEvent e);
+    
+    /**
+     * Returns if this event is cancelled. If the event is not cancellable, false should
+     * be returned, though this case shouldn't normally occur, since isCancellable will
+     * be called prior to calling this function.
+     * @param underlyingEvent
+     * @return 
+     */
+    public boolean isCancelled(BindableEvent underlyingEvent);
     
     /**
      * If it is required to do something extra for server wide events, this can be
@@ -117,12 +120,10 @@ public interface Event extends Comparable<Event>, Documentation{
     public void manualTrigger(BindableEvent e);
     
     /**
-     * If the event is an external event, and there is no reason to attempt a serverwide manual
-     * triggering, this function should return false, in which case the serverWide variable
-     * is ignored, and it is only piped through CH specific handlers.
-     * @return 
+     * This function should return true if the event code should be run, based
+     * on this prefilter and triggering event's parameters.
      */
-    public boolean supportsExternal();
+    public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException;
     
     /**
      * Called when a script wishes to modify an event specific parameter, this function
@@ -132,12 +133,11 @@ public interface Event extends Comparable<Event>, Documentation{
     public boolean modifyEvent(String key, Construct value, BindableEvent event);
 
     /**
-     * Returns if this event is cancelled. If the event is not cancellable, false should
-     * be returned, though this case shouldn't normally occur, since isCancellable will
-     * be called prior to calling this function.
-     * @param underlyingEvent
+     * If the event is an external event, and there is no reason to attempt a serverwide manual
+     * triggering, this function should return false, in which case the serverWide variable
+     * is ignored, and it is only piped through CH specific handlers.
      * @return 
      */
-    public boolean isCancelled(BindableEvent underlyingEvent);
+    public boolean supportsExternal();
     
 }

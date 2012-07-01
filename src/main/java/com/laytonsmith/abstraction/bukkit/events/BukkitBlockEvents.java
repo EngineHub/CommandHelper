@@ -41,12 +41,12 @@ public class BukkitBlockEvents {
             return event;
         }
 
-        public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(event.getPlayer());
-        }
-
         public MCBlock getBlock() {
             return new BukkitMCBlock(event.getBlock());
+        }
+
+        public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(event.getPlayer());
         }
     }
 
@@ -63,8 +63,8 @@ public class BukkitBlockEvents {
             return event;
         }
 
-        public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(event.getPlayer());
+        public boolean canBuild() {
+            return event.canBuild();
         }
 
         public MCBlock getBlock() {
@@ -75,27 +75,21 @@ public class BukkitBlockEvents {
             return new BukkitMCBlock(event.getBlockAgainst());
         }
 
+        public MCBlockState getBlockReplacedState() {            
+            return new BukkitMCBlockState(event.getBlockReplacedState());
+        }
+
         public MCItemStack getItemInHand() {
             return new BukkitMCItemStack(event.getItemInHand());
         }
 
-        public boolean canBuild() {
-            return event.canBuild();
-        }
-
-        public MCBlockState getBlockReplacedState() {            
-            return new BukkitMCBlockState(event.getBlockReplacedState());
+        public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(event.getPlayer());
         }
     }
 
     @abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCSignChangeEvent implements MCSignChangeEvent {
-
-        SignChangeEvent pie;
-
-        public BukkitMCSignChangeEvent(SignChangeEvent e) {
-            pie = e;
-        }
 
         public static BukkitMCSignChangeEvent _instantiate(MCBlock sign, MCPlayer player, CArray signtext) {
             String[] text = new String[4];
@@ -106,8 +100,18 @@ public class BukkitBlockEvents {
                     text));
         }
 
-        public MCPlayer getPlayer() {
-            return new BukkitMCPlayer(pie.getPlayer());
+        SignChangeEvent pie;
+
+        public BukkitMCSignChangeEvent(SignChangeEvent e) {
+            pie = e;
+        }
+
+        public Object _GetObject() {
+            return pie;
+        }
+
+        public MCBlock getBlock() {
+            return new BukkitMCBlock(pie.getBlock());
         }
 
         public CString getLine(int index) {
@@ -124,6 +128,10 @@ public class BukkitBlockEvents {
             return retn;
         }
 
+        public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(pie.getPlayer());
+        }
+
         public void setLine(int index, String text) {
             pie.setLine(index, text);
         }
@@ -132,14 +140,6 @@ public class BukkitBlockEvents {
             for (int i = 0; i < 4; i++) {
                 pie.setLine(i, text[i]);
             }
-        }
-
-        public MCBlock getBlock() {
-            return new BukkitMCBlock(pie.getBlock());
-        }
-
-        public Object _GetObject() {
-            return pie;
         }
     }
 }

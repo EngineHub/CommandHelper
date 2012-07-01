@@ -8,7 +8,7 @@ import com.laytonsmith.core.events.BindableEvent;
  * @author layton
  */
 public interface MCPlayerJoinEvent extends BindableEvent{
-    public MCPlayer getPlayer();
     public String getJoinMessage();
+    public MCPlayer getPlayer();
     public void setJoinMessage(String message);
 }

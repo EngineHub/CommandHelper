@@ -11,28 +11,17 @@ package com.laytonsmith.abstraction;
  */
 public class Implementation {
     
-    private static Implementation.Type serverType = null;
-    
-    public static void setServerType(Implementation.Type type){
-        if(serverType == null){
-            serverType = type;
-        } else {
-            if(type != Type.TEST){ //This could potentially happen, but we don't care in the case that we
-                //are testing, so don't error out here. (Failures may occur elsewhere though... :()
-                throw new RuntimeException("Server type is already set! Cannot re-set!");
-            }
-        }
-    }
-    
     /**
      * These are all the supported server types
      */
     public static enum Type{
-        TEST,
         BUKKIT,
+        TEST,
         //GLOWSTONE,
         //SINGLE_PLAYER
     }
+    
+    private static Implementation.Type serverType = null;
     
     /**
      * Returns the server type currently running
@@ -43,5 +32,16 @@ public class Implementation {
             throw new RuntimeException("Server type has not been set yet! Please call Implementation.setServerType with the appropriate implementation.");
         }
         return serverType;        
+    }
+    
+    public static void setServerType(Implementation.Type type){
+        if(serverType == null){
+            serverType = type;
+        } else {
+            if(type != Type.TEST){ //This could potentially happen, but we don't care in the case that we
+                //are testing, so don't error out here. (Failures may occur elsewhere though... :()
+                throw new RuntimeException("Server type is already set! Cannot re-set!");
+            }
+        }
     }
 }

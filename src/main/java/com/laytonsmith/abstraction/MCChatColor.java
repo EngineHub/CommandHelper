@@ -9,29 +9,45 @@ import java.util.Map;
 public enum MCChatColor {
 
     /**
+     * Represents aqua
+     */
+    AQUA(0xB),
+    /**
      * Represents black
      */
     BLACK(0x0),
     /**
-     * Represents dark blue
+     * Represents blue
      */
-    DARK_BLUE(0x1),
+    BLUE(0x9),
     /**
-     * Represents dark green
+     * Represents the bold style
      */
-    DARK_GREEN(0x2),
+    BOLD('l'),
     /**
      * Represents dark blue (aqua)
      */
     DARK_AQUA(0x3),
     /**
-     * Represents dark red
+     * Represents dark blue
      */
-    DARK_RED(0x4),
+    DARK_BLUE(0x1),
+    /**
+     * Represents dark gray
+     */
+    DARK_GRAY(0x8),
+    /**
+     * Represents dark green
+     */
+    DARK_GREEN(0x2),
     /**
      * Represents dark purple
      */
     DARK_PURPLE(0x5),
+    /**
+     * Represents dark red
+     */
+    DARK_RED(0x4),
     /**
      * Represents gold
      */
@@ -41,37 +57,21 @@ public enum MCChatColor {
      */
     GRAY(0x7),
     /**
-     * Represents dark gray
-     */
-    DARK_GRAY(0x8),
-    /**
-     * Represents blue
-     */
-    BLUE(0x9),
-    /**
      * Represents green
      */
     GREEN(0xA),
     /**
-     * Represents aqua
+     * Represents the italic style
      */
-    AQUA(0xB),
-    /**
-     * Represents red
-     */
-    RED(0xC),
+    ITALIC('o'),
     /**
      * Represents light purple
      */
     LIGHT_PURPLE(0xD),
     /**
-     * Represents yellow
+     * Represents the plain white style
      */
-    YELLOW(0xE),
-    /**
-     * Represents white
-     */
-    WHITE(0xF),
+    PLAIN_WHITE('r'),
     
     //Styles
     /**
@@ -80,9 +80,9 @@ public enum MCChatColor {
     RANDOM('k'),
     
     /**
-     * Represents the bold style
+     * Represents red
      */
-    BOLD('l'),
+    RED(0xC),
     
     /**
      * Represents the strikethrough style
@@ -95,45 +95,27 @@ public enum MCChatColor {
     UNDERLINE('n'),
     
     /**
-     * Represents the italic style
+     * Represents white
      */
-    ITALIC('o'),
+    WHITE(0xF),
     
     /**
-     * Represents the plain white style
+     * Represents yellow
      */
-    PLAIN_WHITE('r');
+    YELLOW(0xE);
 
-    private final char code;
-    private final static Map<Integer, MCChatColor> colors = new HashMap<Integer, MCChatColor>();
     private final static Map<Character, MCChatColor> charColors = new HashMap<Character, MCChatColor>();
-
-    private MCChatColor(char code){
-        this.code = code;
-    }
-    private MCChatColor(int code) {
-        this.code = Integer.toHexString(code).toLowerCase().charAt(0);
-    }
-
-    /**
-     * Gets the data value associated with this color
-     *
-     * @return An integer value of this color code
-     * @deprecated Use getChar in favor of this method
-     */
-    public int getCode() {
-        return code;
-    }
-    
-    public char getChar(){
-        return code;
+    private final static Map<Integer, MCChatColor> colors = new HashMap<Integer, MCChatColor>();
+    static {
+        for (MCChatColor color : MCChatColor.values()) {
+            colors.put(color.getCode(), color);
+            charColors.put(color.getChar(), color);
+        }
     }
 
-    @Override
-    public String toString() {
-        return String.format("\u00A7%s", code);
+    public static MCChatColor getByChar(char code){
+        return charColors.get(Character.valueOf(code));
     }
-
     /**
      * Gets the color represented by the specified color code
      *
@@ -144,11 +126,6 @@ public enum MCChatColor {
     public static MCChatColor getByCode(final int code) {
         return colors.get(code);
     }
-    
-    public static MCChatColor getByChar(char code){
-        return charColors.get(Character.valueOf(code));
-    }
-    
 
     /**
      * Strips the given message of all color codes
@@ -163,11 +140,34 @@ public enum MCChatColor {
 
         return input.replaceAll("(?i)\u00A7[0-9A-F]", "");
     }
+    
+    private final char code;
 
-    static {
-        for (MCChatColor color : MCChatColor.values()) {
-            colors.put(color.getCode(), color);
-            charColors.put(color.getChar(), color);
-        }
+    private MCChatColor(char code){
+        this.code = code;
+    }
+
+    private MCChatColor(int code) {
+        this.code = Integer.toHexString(code).toLowerCase().charAt(0);
+    }
+    
+    public char getChar(){
+        return code;
+    }
+    
+
+    /**
+     * Gets the data value associated with this color
+     *
+     * @return An integer value of this color code
+     * @deprecated Use getChar in favor of this method
+     */
+    public int getCode() {
+        return code;
+    }
+
+    @Override
+    public String toString() {
+        return String.format("\u00A7%s", code);
     }
 }

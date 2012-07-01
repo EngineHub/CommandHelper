@@ -5,25 +5,25 @@ package com.laytonsmith.abstraction.blocks;
  * @author layton
  */
 public enum MCBlockFace {
-    NORTH(-1, 0, 0),
-    EAST(0, 0, -1),
-    SOUTH(1, 0, 0),
-    WEST(0, 0, 1),
     UP(0, 1, 0),
+    WEST(0, 0, 1),
     DOWN(0, -1, 0),
+    EAST(0, 0, -1),
+    NORTH(-1, 0, 0),
+    SELF(0, 0, 0),
+    SOUTH(1, 0, 0),
     NORTH_EAST(NORTH, EAST),
     NORTH_WEST(NORTH, WEST),
     SOUTH_EAST(SOUTH, EAST),
     SOUTH_WEST(SOUTH, WEST),
-    WEST_NORTH_WEST(WEST, NORTH_WEST),
-    NORTH_NORTH_WEST(NORTH, NORTH_WEST),
-    NORTH_NORTH_EAST(NORTH, NORTH_EAST),
     EAST_NORTH_EAST(EAST, NORTH_EAST),
     EAST_SOUTH_EAST(EAST, SOUTH_EAST),
+    NORTH_NORTH_EAST(NORTH, NORTH_EAST),
+    NORTH_NORTH_WEST(NORTH, NORTH_WEST),
     SOUTH_SOUTH_EAST(SOUTH, SOUTH_EAST),
     SOUTH_SOUTH_WEST(SOUTH, SOUTH_WEST),
-    WEST_SOUTH_WEST(WEST, SOUTH_WEST),
-    SELF(0, 0, 0);
+    WEST_NORTH_WEST(WEST, NORTH_WEST),
+    WEST_SOUTH_WEST(WEST, SOUTH_WEST);
 
     private final int modX;
     private final int modY;

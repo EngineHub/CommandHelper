@@ -30,6 +30,38 @@ public class Interpreter {
     static boolean multilineMode = false;
     static String script;
 
+    public static void execute(String script) throws ConfigCompileException {
+        List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
+        GenericTreeNode tree = MethodScriptCompiler.compile(stream);
+        Env env = new Env();
+        env.SetPlayer(null);
+        env.SetLabel("*");
+        try {
+            MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
+
+                public void done(String output) {
+                    output = output.trim();
+                    if (output.equals("")) {
+                        pl(":");
+                    } else {
+                        if (output.startsWith("/")) {
+                            //Run the command
+                            pl(":" + YELLOW + output);
+                        } else {
+                            //output the results
+                            pl(":" + GREEN + output);
+                        }
+                    }
+                }
+            }, null);
+        } catch (CancelCommandException e) {
+            pl(":");
+        } catch(Exception e){
+            pl(RED + e.toString());
+            e.printStackTrace();
+        }
+    }
+
     public static void start(){
         try {
             MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
@@ -87,37 +119,5 @@ public class Interpreter {
             }
         }
         return true;
-    }
-
-    public static void execute(String script) throws ConfigCompileException {
-        List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
-        GenericTreeNode tree = MethodScriptCompiler.compile(stream);
-        Env env = new Env();
-        env.SetPlayer(null);
-        env.SetLabel("*");
-        try {
-            MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
-
-                public void done(String output) {
-                    output = output.trim();
-                    if (output.equals("")) {
-                        pl(":");
-                    } else {
-                        if (output.startsWith("/")) {
-                            //Run the command
-                            pl(":" + YELLOW + output);
-                        } else {
-                            //output the results
-                            pl(":" + GREEN + output);
-                        }
-                    }
-                }
-            }, null);
-        } catch (CancelCommandException e) {
-            pl(":");
-        } catch(Exception e){
-            pl(RED + e.toString());
-            e.printStackTrace();
-        }
     }
 }

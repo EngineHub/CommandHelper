@@ -14,25 +14,25 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
  */
 public interface ArrayAccess extends Mixed {
     /**
-     * Return the mixed at this location. This should throw an exception if
-     * the index does not exist.
-     * @param index
-     * @return 
-     */
-    public Construct get(String index, Target t) throws ConfigRuntimeException;
-    /**
-     * Return the size of the array
-     * @return 
-     */
-    public int size();
-    
-    /**
      * Just because it is accessible as an array doesn't mean it will be associative. For optimiziation purposes, it
      * may be possible to check at compile time if the code is attempting to send a non-integral index,
      * in which case we can throw a compile error.
      * @return 
      */
     public boolean canBeAssociative();
+    /**
+     * Return the mixed at this location. This should throw an exception if
+     * the index does not exist.
+     * @param index
+     * @return 
+     */
+    public Construct get(String index, Target t) throws ConfigRuntimeException;
+    
+    /**
+     * Return the size of the array
+     * @return 
+     */
+    public int size();
     
     /**
      * Returns a slice at the specified location. Should throw an exception if an element in

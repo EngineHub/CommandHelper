@@ -21,21 +21,21 @@ class BukkitMCSign implements MCSign {
         this.s = sign;
     }
 
-    public void setLine(int i, String line1) {
-        s.setLine(i, line1);
-        s.update();
+    public MCMaterialData getData() {
+        return new BukkitMCMaterialData(s.getData());
     }
 
     public String getLine(int i) {
         return s.getLine(i);
     }
 
-    public MCMaterialData getData() {
-        return new BukkitMCMaterialData(s.getData());
-    }
-
     public int getTypeId() {
         return s.getTypeId();
+    }
+
+    public void setLine(int i, String line1) {
+        s.setLine(i, line1);
+        s.update();
     }
     
 }

@@ -11,11 +11,11 @@ import java.util.List;
 public interface MCPlayerChatEvent extends BindableEvent{
     public String getMessage();
     
-    public void setMessage(String message);
+    public MCPlayer getPlayer();
     
     public List<MCPlayer> getRecipients();
     
-    public void setRecipients(List<MCPlayer> list);
+    public void setMessage(String message);
     
-    public MCPlayer getPlayer();
+    public void setRecipients(List<MCPlayer> list);
 }

@@ -30,16 +30,6 @@ public class EventList {
     }
     
     /**
-     * Gets all the events of the specified type.
-     * @param type
-     * @return 
-     */
-    public static SortedSet<Event> GetEvents(Driver type){
-        SortedSet<Event> set = event_list.get(type);
-        return set;
-    }
-    
-    /**
      * A more efficient lookup, this method will return a value in near constant time,
      * as opposed to the other getEvent, which will return in O(n) time. This could
      * return null if there is no event named name.
@@ -60,6 +50,7 @@ public class EventList {
         }
         return null;
     }
+    
     /**
      * This could return null if there is no event named name.
      * @param name
@@ -77,6 +68,15 @@ public class EventList {
             }
         }
         return null;
+    }
+    /**
+     * Gets all the events of the specified type.
+     * @param type
+     * @return 
+     */
+    public static SortedSet<Event> GetEvents(Driver type){
+        SortedSet<Event> set = event_list.get(type);
+        return set;
     }
     
     private static void initEvents() {

@@ -4,11 +4,9 @@
  */
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.MCEntityType;
-import com.laytonsmith.abstraction.MCLivingEntity;
-
-import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+
+import com.laytonsmith.abstraction.MCLivingEntity;
 
 /**
  *
@@ -21,26 +19,19 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
         super(le);
         this.le = le;
     }
-    public int getHealth() {
-        return le.getHealth();
+    public void damage(int i) {
+        le.damage(i);
     }
 
-    public void setHealth(int i) {
-        le.setHealth(i);
+    public int getHealth() {
+        return le.getHealth();
     }
 
     public int getMaxHealth() {
         return le.getMaxHealth();
     }
 
-    public void damage(int i) {
-        le.damage(i);
+    public void setHealth(int i) {
+        le.setHealth(i);
     }
-
-    @Override
-    public MCEntityType getType() {
-    	EntityType type = le.getType();
-    	return MCEntityType.valueOf(type.name());
-    }
-    
 }

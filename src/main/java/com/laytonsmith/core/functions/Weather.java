@@ -19,22 +19,11 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
  * @author Layton
  */
 public class Weather {
-    public static String docs(){
-        return "Provides functions to control the weather";
-    }
-    
     @api public static class lightning extends AbstractFunction{
 
-        public String getName() {
-            return "lightning";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3, 4};
-        }
-        
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+        public String docs() {
+            return "void {strikeLocArray, [safe] | x, y, z, [safe]} Makes lightning strike at the x y z coordinates specified in the array(x, y, z). safe"
+                    + " defaults to false, but if true, lightning striking a player will not hurt them.";
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -72,37 +61,40 @@ public class Weather {
             
             return new CVoid(t);
         }
-
-        public String docs() {
-            return "void {strikeLocArray, [safe] | x, y, z, [safe]} Makes lightning strike at the x y z coordinates specified in the array(x, y, z). safe"
-                    + " defaults to false, but if true, lightning striking a player will not hurt them.";
+        
+        public String getName() {
+            return "lightning";
         }
 
         public boolean isRestricted() {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3, 4};
+        }
 
         public boolean preResolveVariables() {
             return true;
         }
-        public CHVersion since() {
-            return CHVersion.V3_0_1;
-        }
+
         public Boolean runAsync(){
             return false;
         }
+
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
+        }
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+        }
+        public void varList(IVariableList varList) {}
     }
     
     @api public static class storm extends AbstractFunction{
 
-        public String getName() {
-            return "storm";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2};
+        public String docs() {
+            return "void {isStorming, [world]} Creates a storm if isStorming is true, stops a storm if isStorming is false";
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -122,30 +114,38 @@ public class Weather {
             return new CVoid(t);
         }
 
-        public String docs() {
-            return "void {isStorming, [world]} Creates a storm if isStorming is true, stops a storm if isStorming is false";
-        }
-        
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException};
+        public String getName() {
+            return "storm";
         }
 
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {}
+        
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
 
         public boolean preResolveVariables() {
             return true;
         }
-        public CHVersion since() {
-            return CHVersion.V3_0_1;
-        }
+
         public Boolean runAsync(){
             return false;
         }
+
+        public CHVersion since() {
+            return CHVersion.V3_0_1;
+        }
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.InvalidWorldException};
+        }
+        public void varList(IVariableList varList) {}
         
+    }
+    
+    public static String docs(){
+        return "Provides functions to control the weather";
     }
     
 }

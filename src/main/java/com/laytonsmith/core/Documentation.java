@@ -15,14 +15,14 @@ package com.laytonsmith.core;
  */
 public interface Documentation {
     /**
-     * The name of this code element
-     */
-    public String getName();
-    /**
      * Returns documentation in a format that is specified by the code type
      * @return 
      */
     public String docs();
+    /**
+     * The name of this code element
+     */
+    public String getName();
     /**
      * Returns the version number of when this functionality was added. It should
      * follow the format 0.0.0

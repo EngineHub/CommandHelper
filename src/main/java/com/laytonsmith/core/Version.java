@@ -17,9 +17,6 @@ public class Version implements Comparable<Version>{
     
     private int major;
     private int minor;
-    private int supplemental;
-    private String tag;
-    
     /**
      * Creates a new Version object from a string version number. The tag is
      * optional, but all other parameters are required. If left off, each version
@@ -27,6 +24,20 @@ public class Version implements Comparable<Version>{
      * @param version 
      */
     Pattern p = Pattern.compile("(\\d+)\\.(\\d+)\\.(\\d+)(?:\\s+(.*))?");
+    private int supplemental;
+    
+    private String tag;
+    public Version(int major, int minor, int supplemental){
+        this(major, minor, supplemental, "");
+    }
+    
+    public Version(int major, int minor, int supplemental, String tag){
+        this.major = major;
+        this.minor = minor;
+        this.supplemental = supplemental;
+        this.tag = tag;
+    }
+    
     public Version(String version){
         Matcher m = p.matcher(version);
         if(m.find()){
@@ -40,22 +51,6 @@ public class Version implements Comparable<Version>{
         }
     }
     
-    public Version(int major, int minor, int supplemental, String tag){
-        this.major = major;
-        this.minor = minor;
-        this.supplemental = supplemental;
-        this.tag = tag;
-    }
-    
-    public Version(int major, int minor, int supplemental){
-        this(major, minor, supplemental, "");
-    }
-    
-    @Override
-    public String toString(){
-        return (major + "." + minor + "." + supplemental + " " + tag).trim();
-    }
-
     public int compareTo(Version o) {
         if(major < o.major){
             return -1;
@@ -99,6 +94,11 @@ public class Version implements Comparable<Version>{
         hash = 97 * hash + this.minor;
         hash = 97 * hash + this.supplemental;
         return hash;
+    }
+
+    @Override
+    public String toString(){
+        return (major + "." + minor + "." + supplemental + " " + tag).trim();
     }
     
     

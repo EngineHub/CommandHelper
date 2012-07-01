@@ -19,16 +19,6 @@ import java.util.zip.ZipOutputStream;
  */
 public class ZipMaker {
 
-    public static void MakeZip(File startingDir, String filename) {
-        if(startingDir.isDirectory()){
-            List<File> files = new ArrayList<File>();
-            GetFiles(files, startingDir, startingDir);
-            MakeZip(files, new File(startingDir.getParentFile(), filename), startingDir);
-        } else {
-            MakeZip(Arrays.asList(startingDir), new File(startingDir.getParentFile(), filename), startingDir);
-        }
-    }
-    
     private static void GetFiles(List<File> ongoing, File directory, File base){
         if(directory.isDirectory()){
             for(File f : directory.listFiles()){
@@ -37,6 +27,16 @@ public class ZipMaker {
         } else {
             File file = new File(directory.getAbsolutePath().replaceFirst(Pattern.quote(base.getAbsolutePath() + "/"), ""));
             ongoing.add(file);
+        }
+    }
+    
+    public static void MakeZip(File startingDir, String filename) {
+        if(startingDir.isDirectory()){
+            List<File> files = new ArrayList<File>();
+            GetFiles(files, startingDir, startingDir);
+            MakeZip(files, new File(startingDir.getParentFile(), filename), startingDir);
+        } else {
+            MakeZip(Arrays.asList(startingDir), new File(startingDir.getParentFile(), filename), startingDir);
         }
     }
 

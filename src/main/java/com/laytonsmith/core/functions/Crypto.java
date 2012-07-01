@@ -22,43 +22,75 @@ import java.security.NoSuchAlgorithmException;
  */
 public class Crypto {
 
-    public static String docs() {
-        return "Provides common cryptographic functions";
-    }
-
     @api
-    public static class rot13 extends AbstractFunction {
+    public static class md5 extends AbstractFunction {
 
-        public String getName() {
-            return "rot13";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
+        @Override
+        public boolean canOptimize() {
+            return true;
         }
 
         public String docs() {
-            return "string {val} Returns the rot13 version of val. Note that rot13(rot13(val)) returns val";
+            return "string {val} Returns the md5 hash of the specified string. The md5 hash is no longer considered secure, so you should"
+                    + " not use it for storage of sensitive data, however for general hashing, it is a quick and easy solution. md5 is"
+                    + " a one way hashing algorithm.";
         }
 
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            try {
+                MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+                digest.update(args[0].val().getBytes());
+                String hash = toHex(digest.digest()).toLowerCase();
+                return new CString(hash, t);
+            } catch (NoSuchAlgorithmException ex) {
+                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+            }
+        }
+
+        public String getName() {
+            return "md5";
         }
 
         public boolean isRestricted() {
             return false;
         }
 
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+
         public boolean preResolveVariables() {
             return true;
         }
 
+        public Boolean runAsync() {
+            return null;
+        }
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
 
-        public Boolean runAsync() {
-            return null;
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        }
+    }
+
+    @api
+    public static class rot13 extends AbstractFunction {
+
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        public String docs() {
+            return "string {val} Returns the rot13 version of val. Note that rot13(rot13(val)) returns val";
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
@@ -79,111 +111,52 @@ public class Crypto {
             }
             return new CString(b.toString(), t);
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
-    }
-
-    @api
-    public static class md5 extends AbstractFunction {
 
         public String getName() {
-            return "md5";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "string {val} Returns the md5 hash of the specified string. The md5 hash is no longer considered secure, so you should"
-                    + " not use it for storage of sensitive data, however for general hashing, it is a quick and easy solution. md5 is"
-                    + " a one way hashing algorithm.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PluginInternalException};
+            return "rot13";
         }
 
         public boolean isRestricted() {
             return false;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            try {
-                MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
-                digest.update(args[0].val().getBytes());
-                String hash = toHex(digest.digest()).toLowerCase();
-                return new CString(hash, t);
-            } catch (NoSuchAlgorithmException ex) {
-                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
-            }
-        }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
+        public Integer[] numArgs() {
+            return new Integer[]{1};
         }
 
         @Override
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
         }
     }
 
     @api
     public static class sha1 extends AbstractFunction {
 
-        public String getName() {
-            return "sha1";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
+        @Override
+        public boolean canOptimize() {
+            return true;
         }
 
         public String docs() {
             return "string {val} Returns the sha1 hash of the specified string. Note that sha1 is considered more secure than md5, and is"
                     + " typically used when storing sensitive data. It is a one way hashing algorithm.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.PluginInternalException};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-
-        public Boolean runAsync() {
-            return null;
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
@@ -196,16 +169,43 @@ public class Crypto {
                 throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
             }
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
+
+        public String getName() {
+            return "sha1";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
         }
 
         @Override
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        }
+    }
+
+    public static String docs() {
+        return "Provides common cryptographic functions";
     }
 
     public static String toHex(byte[] bytes) {

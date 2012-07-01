@@ -14,39 +14,39 @@ import java.util.List;
  * @author layton
  */
 public interface MCWorld extends AbstractionObject{
-    public List<MCLivingEntity> getLivingEntities();
-    public String getName();
+    public void dropItem(MCLocation l, MCItemStack is);
+    public void dropItemNaturally(MCLocation l, MCItemStack is);
+    public void explosion(double x, double y, double z, float size);
+
+    public MCBiomeType getBiome(int x, int z);
+
     public MCBlock getBlockAt(int x, int y, int z);
 
-    public MCEntity spawn(MCLocation l, Class mobType);
+    public MCBlock getHighestBlockAt(int x, int z);
+
+    public List<MCLivingEntity> getLivingEntities();
+
+    public String getName();
+
+    public MCLocation getSpawnLocation();
+
+    public long getTime();
 
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data);
 
-    public void dropItemNaturally(MCLocation l, MCItemStack is);
+    public void refreshChunk(int x, int z);
 
-    public void dropItem(MCLocation l, MCItemStack is);
+    public void setBiome(int x, int z, MCBiomeType type);
+    
+    public void setStorm(boolean b);
+    
+    public void setTime(long time);
+
+    public MCEntity spawn(MCLocation l, Class mobType);
+    
+    public CArray spawnMob(String name, String subClass, int qty, MCLocation location, Target t);
 
     public void strikeLightning(MCLocation GetLocation);
 
     public void strikeLightningEffect(MCLocation GetLocation);
-
-    public void setStorm(boolean b);
-
-    public MCLocation getSpawnLocation();
-
-    public void refreshChunk(int x, int z);
-
-    public void setTime(long time);
-    
-    public long getTime();
-    
-    public CArray spawnMob(String name, String subClass, int qty, MCLocation location, Target t);
-
-    public MCBiomeType getBiome(int x, int z);
-    
-    public void setBiome(int x, int z, MCBiomeType type);
-
-    public MCBlock getHighestBlockAt(int x, int z);
-
-    public void explosion(double x, double y, double z, float size);
 }

@@ -14,13 +14,13 @@ public class CIdentifier extends Construct{
         contained = c;
     }
     
+    public GenericTreeNode<Construct> contained(){
+        return contained;
+    }
+    
     @Override
     public boolean isDynamic() {
         return contained.data.isDynamic();
-    }
-    
-    public GenericTreeNode<Construct> contained(){
-        return contained;
     }
     
 }

@@ -18,10 +18,6 @@ import org.bukkit.entity.Player;
 public class BukkitMCCommandSender implements MCCommandSender{
 
     CommandSender c;
-    public BukkitMCCommandSender(CommandSender c){
-        this.c = c;
-    }
-    
     public BukkitMCCommandSender(AbstractionObject a){
         this((CommandSender)null);
         if(a instanceof MCCommandSender){
@@ -31,17 +27,16 @@ public class BukkitMCCommandSender implements MCCommandSender{
         }
     }
     
-    public Object getHandle(){
+    public BukkitMCCommandSender(CommandSender c){
+        this.c = c;
+    }
+    
+    public CommandSender _CommandSender() {
         return c;
     }        
     
-    public void sendMessage(String string) {
-        c.sendMessage(string);
-    }
-
-    
-    public MCServer getServer() {
-        return new BukkitMCServer();
+    public Object getHandle(){
+        return c;
     }
 
     
@@ -49,20 +44,25 @@ public class BukkitMCCommandSender implements MCCommandSender{
         return c.getName();
     }
 
-    public boolean isOp() {
-        return c.isOp();
+    
+    public MCServer getServer() {
+        return new BukkitMCServer();
     }
 
-    public CommandSender _CommandSender() {
-        return c;
+    public boolean instanceofMCConsoleCommandSender() {
+        return c instanceof ConsoleCommandSender;
     }
 
     public boolean instanceofPlayer() {
         return c instanceof Player;
     }
 
-    public boolean instanceofMCConsoleCommandSender() {
-        return c instanceof ConsoleCommandSender;
+    public boolean isOp() {
+        return c.isOp();
+    }
+
+    public void sendMessage(String string) {
+        c.sendMessage(string);
     }
     
 }

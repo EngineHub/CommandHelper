@@ -15,10 +15,28 @@ import java.util.regex.Pattern;
 
 public class GenericTreeNode<T> implements Cloneable{
 
-    public T data;
     public List<GenericTreeNode<T>> children;
+    public T data;
     public boolean optimized = false;
     
+    public GenericTreeNode() {
+        super();
+        children = new ArrayList<GenericTreeNode<T>>();
+    }
+
+    public GenericTreeNode(T data) {
+        this();
+        setData(data);
+    }
+
+    public void addChild(GenericTreeNode<T> child) {
+        children.add(child);
+    }
+
+    public void addChildAt(int index, GenericTreeNode<T> child) throws IndexOutOfBoundsException {
+        children.add(index, child);
+    }
+
     @Override
     public GenericTreeNode<T> clone() throws CloneNotSupportedException{
         GenericTreeNode<T> clone = (GenericTreeNode<T>) super.clone();
@@ -43,65 +61,7 @@ public class GenericTreeNode<T> implements Cloneable{
         return clone;
     }
 
-    public GenericTreeNode() {
-        super();
-        children = new ArrayList<GenericTreeNode<T>>();
-    }
-
-    public GenericTreeNode(T data) {
-        this();
-        setData(data);
-    }
-
-    public synchronized List<GenericTreeNode<T>> getChildren() {
-        return this.children;
-    }
-
-    public int getNumberOfChildren() {
-        return getChildren().size();
-    }
-
-    public boolean hasChildren() {
-        return (getNumberOfChildren() > 0);
-    }
-
-    public void setChildren(List<GenericTreeNode<T>> children) {
-        this.children = children;
-    }
-
-    public void addChild(GenericTreeNode<T> child) {
-        children.add(child);
-    }
-
-    public void addChildAt(int index, GenericTreeNode<T> child) throws IndexOutOfBoundsException {
-        children.add(index, child);
-    }
-
-    public void removeChildren() {
-        this.children = new ArrayList<GenericTreeNode<T>>();
-    }
-
-    public void removeChildAt(int index) throws IndexOutOfBoundsException {
-        children.remove(index);
-    }
-
-    public GenericTreeNode<T> getChildAt(int index) throws IndexOutOfBoundsException {
-        return children.get(index);
-    }
-
-    public T getData() {
-        return this.data;
-    }
-
-    public void setData(T data) {
-        this.data = data;
-    }
-
-    public String toString() {
-        return getData().toString();
-    }
-
-	@Override
+    @Override
 	public boolean equals(Object obj) {
 		if (this == obj) {
 			return true;
@@ -123,7 +83,27 @@ public class GenericTreeNode<T> implements Cloneable{
 		return true;
 	}
 
-	/* (non-Javadoc)
+    public GenericTreeNode<T> getChildAt(int index) throws IndexOutOfBoundsException {
+        return children.get(index);
+    }
+
+    public synchronized List<GenericTreeNode<T>> getChildren() {
+        return this.children;
+    }
+
+    public T getData() {
+        return this.data;
+    }
+
+    public int getNumberOfChildren() {
+        return getChildren().size();
+    }
+
+    public boolean hasChildren() {
+        return (getNumberOfChildren() > 0);
+    }
+
+    /* (non-Javadoc)
 	 * @see java.lang.Object#hashCode()
 	 */
 	@Override
@@ -133,6 +113,26 @@ public class GenericTreeNode<T> implements Cloneable{
 		result = prime * result + ((data == null) ? 0 : data.hashCode());
 		return result;
 	}
+
+    public void removeChildAt(int index) throws IndexOutOfBoundsException {
+        children.remove(index);
+    }
+
+    public void removeChildren() {
+        this.children = new ArrayList<GenericTreeNode<T>>();
+    }
+
+    public void setChildren(List<GenericTreeNode<T>> children) {
+        this.children = children;
+    }
+
+	public void setData(T data) {
+        this.data = data;
+    }
+
+	public String toString() {
+        return getData().toString();
+    }
 
     public String toStringVerbose() {
         String stringRepresentation = getData().toString() + ":[";

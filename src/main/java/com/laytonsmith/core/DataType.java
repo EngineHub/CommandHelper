@@ -24,18 +24,15 @@ import java.util.TreeSet;
  */
 public class DataType {
     private static enum DataTypes{
+        ARRAY,
         DOUBLE,
         INT,
-        STRING,
         MAP,
-        OBJECT,
+        MIXED,
         NUMBER,
+        OBJECT,
         PRIMITIVE,
-        ARRAY,
-        MIXED;
-        EnumSet<DataTypes> parents;
-        EnumSet<DataTypes> children;
-        
+        STRING;
         static{
             DOUBLE.setup(EnumSet.of(NUMBER), null);
             INT.setup(EnumSet.of(INT), null);
@@ -47,6 +44,9 @@ public class DataType {
             ARRAY.setup(EnumSet.of(MIXED), EnumSet.of(MAP, OBJECT));
             MIXED.setup(null, EnumSet.of(PRIMITIVE, ARRAY));
         }
+        EnumSet<DataTypes> children;
+        
+        EnumSet<DataTypes> parents;
         private void setup(EnumSet<DataTypes> parents, EnumSet<DataTypes> children){
             if(parents == null){
                 this.parents = EnumSet.noneOf(DataTypes.class);
@@ -60,8 +60,20 @@ public class DataType {
             }
         }
     }
+    private static DataType MIXED = new DataType(DataTypes.MIXED, null);
+    private static DataType PRIMITIVE = new DataType(DataTypes.PRIMITIVE, null);
+    public static DataType MIXED(){
+        return MIXED;
+    }
+    
+    public static DataType PRIMITIVE(){
+        return PRIMITIVE;
+    }
+    Map<DataTypes, Boolean> cachedCastableTo = new HashMap<DataTypes, Boolean>();
+    private DataTypes subType;        
+    
     private DataTypes type;
-    private DataTypes subType;
+    
     private DataType(DataTypes myType, DataTypes subType){
         if(myType != DataTypes.ARRAY && subType != null){
             throw new Error("subType cannot be set except for arrays");
@@ -69,11 +81,10 @@ public class DataType {
         this.type = myType;
         this.subType = subType;
     }
-    
-    Map<DataTypes, Boolean> cachedCastableTo = new HashMap<DataTypes, Boolean>();
     public boolean castableTo(DataType type){
         return castableTo(type.type, null);
-    }
+    }        
+    
     private boolean castableTo(DataTypes type, Boolean upward){
         if(cachedCastableTo.containsKey(type)){
             return cachedCastableTo.get(type);
@@ -105,20 +116,9 @@ public class DataType {
             cachedCastableTo.put(type, answer);
             return answer;
         }        
-    }        
-    
+    }
     public boolean isSameType(DataType type){
         return this.type == type.type;
-    }
-    
-    private static DataType MIXED = new DataType(DataTypes.MIXED, null);
-    public static DataType MIXED(){
-        return MIXED;
-    }        
-    
-    private static DataType PRIMITIVE = new DataType(DataTypes.PRIMITIVE, null);
-    public static DataType PRIMITIVE(){
-        return PRIMITIVE;
     }
     
 }

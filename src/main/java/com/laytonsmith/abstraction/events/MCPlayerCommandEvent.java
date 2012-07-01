@@ -8,12 +8,12 @@ import com.laytonsmith.core.events.BindableEvent;
  * @author layton
  */
 public interface MCPlayerCommandEvent extends BindableEvent {
+    public void cancel();
     public String getCommand();
+
     public MCPlayer getPlayer();
 
-    public void cancel();
+    public boolean isCancelled();
 
     public void setCommand(String val);
-
-    public boolean isCancelled();
 }

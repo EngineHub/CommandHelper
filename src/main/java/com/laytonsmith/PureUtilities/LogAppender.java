@@ -13,12 +13,20 @@ import java.util.logging.Logger;
 public class LogAppender {
     
     
+    private static FileWriter GetLog(String filename) throws IOException{
+        return new FileWriter(filename, true);        
+    }
+    
     /**
      * Get the system's line endings
      * @return 
      */
     public static String LF() {
         return System.getProperty("line.separator");
+    }
+    
+    public static void Log(String filename, String message) throws IOException {
+        QuickAppend(GetLog(filename), message + LF());
     }
     
     /**
@@ -31,7 +39,7 @@ public class LogAppender {
         String timestamp = DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
         QuickAppend(GetLog(filename), timestamp + message + LF());
     }
-    
+
     /**
      * Logs a message to the given file, and prints out to the given logger as well.
      * @param filename
@@ -59,17 +67,9 @@ public class LogAppender {
         }
         LoggerMessage(filename, message);
     }
-
+    
     public static void QuickAppend(FileWriter f, String message) throws IOException {
         f.append(message);
         f.flush();
-    }
-    
-    private static FileWriter GetLog(String filename) throws IOException{
-        return new FileWriter(filename, true);        
-    }
-    
-    public static void Log(String filename, String message) throws IOException {
-        QuickAppend(GetLog(filename), message + LF());
     }
 }

@@ -14,21 +14,10 @@ import java.io.File;
  */
 public class ConfigCompileException extends Exception{
 
-    final String message;
-    final int line_num;
-    final File file;
     final int col;
-
-    public ConfigCompileException(String message, Target t){
-        this(message, t, null);
-    }
-    public ConfigCompileException(String message, Target t, Throwable cause) {
-        super(cause);
-        this.message = message;
-        this.line_num = t.line();
-        this.file = t.file();
-        this.col = t.col();
-    }
+    final File file;
+    final int line_num;
+    final String message;
 
     /**
      * This turns a ConfigRuntimeException into a compile time exception. Typically only
@@ -38,16 +27,39 @@ public class ConfigCompileException extends Exception{
     public ConfigCompileException(ConfigRuntimeException e) {
         this(e.getMessage(), e.getTarget(), e);
     }
+    public ConfigCompileException(String message, Target t){
+        this(message, t, null);
+    }
+
+    public ConfigCompileException(String message, Target t, Throwable cause) {
+        super(cause);
+        this.message = message;
+        this.line_num = t.line();
+        this.file = t.file();
+        this.col = t.col();
+    }
     
-    @Override
-    public String getMessage() {
-        return message;
+    public File getFile() {
+        return this.file;
     }
 
     public String getLineNum(){
         return Integer.toString(line_num);
     }
 
+
+    @Override
+    public String getMessage() {
+        return message;
+    }
+
+    public String getSimpleFile(){
+        if(this.file != null){
+            return this.file.getName();
+        } else {
+            return null;
+        }
+    }
 
     @Override
     public String toString(){
@@ -57,18 +69,6 @@ public class ConfigCompileException extends Exception{
         } else{
             return "Configuration Compile Exception: " + message + ". Please check your config file and try again. " 
                     + (file!=null?"(" + file.getAbsolutePath() + ")":"");
-        }
-    }
-
-    public File getFile() {
-        return this.file;
-    }
-
-    public String getSimpleFile(){
-        if(this.file != null){
-            return this.file.getName();
-        } else {
-            return null;
         }
     }
 }

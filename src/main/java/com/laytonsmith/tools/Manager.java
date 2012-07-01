@@ -31,49 +31,120 @@ public class Manager {
 
     private static Scanner scanner;
 
-    public static void start() {
-        cls();
-        pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
-
-        
-        pl("Starting the Data Manager...");
-        try {
-            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
-        } catch (ConfigCompileException ex) {}
-        pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
-        pl(BLINKON + RED + "Warning!" + BLINKOFF + YELLOW + " Be sure your server is not running before using this tool to make changes to your database!");
-        pl("------------------------");
-        boolean finished = false;
-        do {
-            pl(YELLOW + "What function would you like to run? Type \"help\" for a full list of options.");
-            String input = prompt();
-            pl();
-            if (input.toLowerCase().startsWith("help")) {
-                help(input.replaceFirst("help ?", "").toLowerCase().split(" "));
-            } else if (input.equalsIgnoreCase("refactor")) {
-                pl("refactor - That feature isn't implemented yet :(");
-            } else if (input.toLowerCase().startsWith("print")) {                
-                print(input.replaceFirst("print ?", "").toLowerCase().split(" "));
-            } else if (input.equalsIgnoreCase("cleardb")) {
-                cleardb();
-            } else if(input.equalsIgnoreCase("import")){                
-                pl("import - That feature isn't implemented yet :(");
-            } else if (input.equalsIgnoreCase("export")) {
-                export();
-            } else if(input.equalsIgnoreCase("edit")){
-                edit();
-            } else if (input.equalsIgnoreCase("upgrade")) {
-                upgrade();
-            } else if(input.equalsIgnoreCase("interpreter")){
-                Interpreter.start();
-            } else if (input.equalsIgnoreCase("exit")) {
-                pl("Thanks for using the " + CYAN + "Data Manager!");
-                finished = true;
-            } else {
-                pl("I'm sorry, that's not a valid command. Here's the help:");
-                help(new String[]{});
+    public static void cleardb(){
+        pl(RED + "Are you absolutely sure you want to clear out your database? " + BLINKON + "No backup is going to be made." + BLINKOFF);
+        pl(WHITE + "This will completely wipe your persistance information out. (No other data will be changed)");
+        pl("[YES/No]");
+        String choice = prompt();
+        if(choice.equals("YES")){
+            pl("Positive? [YES/No]");
+            if(prompt().equals("YES")){
+                p("Ok, here we go... ");
+                Persistance db = GetDB();
+                try {
+                    db.load();
+                    db.clearAllData();
+                    db.save();
+                } catch (Exception ex) {
+                    pl(RED + ex.getMessage());
+                }
+                pl("Done!");
             }
-        } while (finished == false);
+        } else if(choice.equalsIgnoreCase("yes")){
+            pl("No, you have to type YES exactly.");
+        }
+    }
+    
+    public static boolean doAddEdit(String key, String valueScript){
+        try {
+            Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null)), new Env(), null, null);
+            String value = Construct.json_encode(c, Target.UNKNOWN);
+            pl(CYAN + "Adding: " + WHITE + value);
+            Persistance db = GetDB();
+            db.setValue(new String[]{key}, value);
+            db.save();
+            return true;
+        } catch (Exception ex) {
+            pl(RED + ex.getMessage());
+            return false;
+        }        
+    }
+    
+    public static void doExport(String type, File file){
+        pl(RED + "Actually, this feature isn't implemented yet :(");
+    }
+    
+    public static boolean doRemove(String key){
+        Persistance db = GetDB();
+        try {
+            db.load();
+        } catch (Exception ex) {
+            pl(RED + ex.getMessage());
+            return false;
+        }
+        if(db.isKeySet(new String[]{key})){
+            db.setValue(new String[]{key}, null);
+            return true;
+        } else {
+            return false;
+        }
+    }
+    
+    public static boolean doView(String key){
+        Persistance db = GetDB();
+        try {
+            db.load();
+        } catch (Exception ex) {
+            pl(RED + ex.getMessage());
+        }
+        if(!db.isKeySet(new String[]{key})){
+            pl(RED + "That value is not set!");
+            return true;
+        }
+        pl(CYAN + key + ":" + WHITE + db.getValue(new String[]{key}));
+        return true;
+    }
+
+    public static void edit(){
+        cls();
+        while(true){
+            pl("Would you like to " + GREEN + "(a)dd/edit" + WHITE 
+                    + " a value, " + RED + "(r)emove" + WHITE + " a value, " + CYAN 
+                    + "(v)iew" + WHITE + " a single value, or " 
+                    + MAGENTA + "(s)top" + WHITE + " editting? [" + GREEN + "A" + WHITE + "/" 
+                    + RED + "R" + WHITE + "/" + CYAN + "V" + WHITE + "/" + MAGENTA + "S" + WHITE + "]");
+            String choice = prompt();
+            if(choice.equalsIgnoreCase("s") || choice.equalsIgnoreCase("exit")){
+                break;
+            } else if(choice.equalsIgnoreCase("a")){
+                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
+                        + " persistance format,\nnot the format you use when using store_value().");
+                String key = prompt();
+                pl("Provide a value for " + CYAN + key + WHITE + ". This value you provide will"
+                        + " be interpreted as pure MethodScript. (So things like array() will work)");
+                String value = prompt();
+                if(doAddEdit(key, value)){
+                    pl("Value changed!");
+                }
+            } else if(choice.equalsIgnoreCase("r")){
+                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
+                        + " persistance format,\nnot the format you use when using store_value().");
+                String key = prompt();
+                if(doRemove(key)){
+                    pl("Value removed!");
+                } else {
+                    pl("That value wasn't in the database to start with");
+                }
+            } else if(choice.equalsIgnoreCase("v")){
+                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
+                        + " persistance format,\nnot the format you use when using store_value().");
+                String key = prompt();
+                doView(key);
+            } else {
+                pl("I'm sorry, that's not a valid choice.");
+            }
+        }
+        
     }
     
     public static void export(){
@@ -118,32 +189,10 @@ public class Manager {
         }
     }
     
-    public static void doExport(String type, File file){
-        pl(RED + "Actually, this feature isn't implemented yet :(");
-    }
-    
-    public static void cleardb(){
-        pl(RED + "Are you absolutely sure you want to clear out your database? " + BLINKON + "No backup is going to be made." + BLINKOFF);
-        pl(WHITE + "This will completely wipe your persistance information out. (No other data will be changed)");
-        pl("[YES/No]");
-        String choice = prompt();
-        if(choice.equals("YES")){
-            pl("Positive? [YES/No]");
-            if(prompt().equals("YES")){
-                p("Ok, here we go... ");
-                Persistance db = GetDB();
-                try {
-                    db.load();
-                    db.clearAllData();
-                    db.save();
-                } catch (Exception ex) {
-                    pl(RED + ex.getMessage());
-                }
-                pl("Done!");
-            }
-        } else if(choice.equalsIgnoreCase("yes")){
-            pl("No, you have to type YES exactly.");
-        }
+    public static Persistance GetDB(){
+        //Figure out what engine they're using
+        //For now, it's obviously SerializedPersistance
+        return new SerializedPersistance(new File("CommandHelper/persistance.ser"), null);
     }
     
     public static void help(String [] args){
@@ -201,94 +250,6 @@ public class Manager {
             }
         }
     }
-
-    public static void edit(){
-        cls();
-        while(true){
-            pl("Would you like to " + GREEN + "(a)dd/edit" + WHITE 
-                    + " a value, " + RED + "(r)emove" + WHITE + " a value, " + CYAN 
-                    + "(v)iew" + WHITE + " a single value, or " 
-                    + MAGENTA + "(s)top" + WHITE + " editting? [" + GREEN + "A" + WHITE + "/" 
-                    + RED + "R" + WHITE + "/" + CYAN + "V" + WHITE + "/" + MAGENTA + "S" + WHITE + "]");
-            String choice = prompt();
-            if(choice.equalsIgnoreCase("s") || choice.equalsIgnoreCase("exit")){
-                break;
-            } else if(choice.equalsIgnoreCase("a")){
-                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
-                        + " persistance format,\nnot the format you use when using store_value().");
-                String key = prompt();
-                pl("Provide a value for " + CYAN + key + WHITE + ". This value you provide will"
-                        + " be interpreted as pure MethodScript. (So things like array() will work)");
-                String value = prompt();
-                if(doAddEdit(key, value)){
-                    pl("Value changed!");
-                }
-            } else if(choice.equalsIgnoreCase("r")){
-                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
-                        + " persistance format,\nnot the format you use when using store_value().");
-                String key = prompt();
-                if(doRemove(key)){
-                    pl("Value removed!");
-                } else {
-                    pl("That value wasn't in the database to start with");
-                }
-            } else if(choice.equalsIgnoreCase("v")){
-                pl("Type the name of the key " + YELLOW + "EXACTLY" + WHITE + " as shown in the"
-                        + " persistance format,\nnot the format you use when using store_value().");
-                String key = prompt();
-                doView(key);
-            } else {
-                pl("I'm sorry, that's not a valid choice.");
-            }
-        }
-        
-    }
-    
-    public static boolean doView(String key){
-        Persistance db = GetDB();
-        try {
-            db.load();
-        } catch (Exception ex) {
-            pl(RED + ex.getMessage());
-        }
-        if(!db.isKeySet(new String[]{key})){
-            pl(RED + "That value is not set!");
-            return true;
-        }
-        pl(CYAN + key + ":" + WHITE + db.getValue(new String[]{key}));
-        return true;
-    }
-    
-    public static boolean doAddEdit(String key, String valueScript){
-        try {
-            Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null)), new Env(), null, null);
-            String value = Construct.json_encode(c, Target.UNKNOWN);
-            pl(CYAN + "Adding: " + WHITE + value);
-            Persistance db = GetDB();
-            db.setValue(new String[]{key}, value);
-            db.save();
-            return true;
-        } catch (Exception ex) {
-            pl(RED + ex.getMessage());
-            return false;
-        }        
-    }
-    
-    public static boolean doRemove(String key){
-        Persistance db = GetDB();
-        try {
-            db.load();
-        } catch (Exception ex) {
-            pl(RED + ex.getMessage());
-            return false;
-        }
-        if(db.isKeySet(new String[]{key})){
-            db.setValue(new String[]{key}, null);
-            return true;
-        } else {
-            return false;
-        }
-    }
     
     public static void print(String [] args) {
         Map data = null;
@@ -323,6 +284,51 @@ public class Manager {
         }
     }
 
+    public static void start() {
+        cls();
+        pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
+
+        
+        pl("Starting the Data Manager...");
+        try {
+            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
+        } catch (ConfigCompileException ex) {}
+        pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
+        pl(BLINKON + RED + "Warning!" + BLINKOFF + YELLOW + " Be sure your server is not running before using this tool to make changes to your database!");
+        pl("------------------------");
+        boolean finished = false;
+        do {
+            pl(YELLOW + "What function would you like to run? Type \"help\" for a full list of options.");
+            String input = prompt();
+            pl();
+            if (input.toLowerCase().startsWith("help")) {
+                help(input.replaceFirst("help ?", "").toLowerCase().split(" "));
+            } else if (input.equalsIgnoreCase("refactor")) {
+                pl("refactor - That feature isn't implemented yet :(");
+            } else if (input.toLowerCase().startsWith("print")) {                
+                print(input.replaceFirst("print ?", "").toLowerCase().split(" "));
+            } else if (input.equalsIgnoreCase("cleardb")) {
+                cleardb();
+            } else if(input.equalsIgnoreCase("import")){                
+                pl("import - That feature isn't implemented yet :(");
+            } else if (input.equalsIgnoreCase("export")) {
+                export();
+            } else if(input.equalsIgnoreCase("edit")){
+                edit();
+            } else if (input.equalsIgnoreCase("upgrade")) {
+                upgrade();
+            } else if(input.equalsIgnoreCase("interpreter")){
+                Interpreter.start();
+            } else if (input.equalsIgnoreCase("exit")) {
+                pl("Thanks for using the " + CYAN + "Data Manager!");
+                finished = true;
+            } else {
+                pl("I'm sorry, that's not a valid command. Here's the help:");
+                help(new String[]{});
+            }
+        } while (finished == false);
+    }
+    
     public static void upgrade() {
         pl("\nThis will automatically detect and upgrade your persisted data. Though this will"
                 + " create a backup for you, you should manually back up your data before running"
@@ -410,12 +416,6 @@ public class Manager {
         } else {
             pl(RED + "Upgrade Cancelled");
         }
-    }
-    
-    public static Persistance GetDB(){
-        //Figure out what engine they're using
-        //For now, it's obviously SerializedPersistance
-        return new SerializedPersistance(new File("CommandHelper/persistance.ser"), null);
     }
 
     

@@ -12,26 +12,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
  * @author layton
  */
 public class Reflection {
-    public static String docs() {
-        return "This class of functions allows scripts to hook deep into the interpreter itself,"
-                + " and get meta information about the operations of a script. This is useful for"
-                + " debugging, testing, and ultra dynamic scripting. See the"
-                + " [[CommandHelper/Reflection|guide to reflection]] on the wiki for more"
-                + " details. In order to make the most of these functions, you should familiarize"
-                + " yourself with the general workings of the language. These functions explore"
-                + " extremely advanced concepts, and should normally not be used; especially"
-                + " if you are not familiar with the language.";
-    }
-    
     @api public static class reflect_pull extends AbstractFunction{
-
-        public String getName() {
-            return "reflect_pull";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
 
         public String docs() {
             return "mixed {param, [args, ...]} Returns information about the runtime in a usable"
@@ -48,22 +29,6 @@ public class Reflection {
                     
                     + "</tbody></table>";
                     //+ "<tr><td></td><td></td><td></td></tr>"
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.FormatException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public Boolean runAsync() {
-            return null;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
@@ -105,9 +70,44 @@ public class Reflection {
                     ExceptionType.FormatException, t);
         }
 
+        public String getName() {
+            return "reflect_pull";
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.FormatException};
+        }
         
+    }
+    
+    public static String docs() {
+        return "This class of functions allows scripts to hook deep into the interpreter itself,"
+                + " and get meta information about the operations of a script. This is useful for"
+                + " debugging, testing, and ultra dynamic scripting. See the"
+                + " [[CommandHelper/Reflection|guide to reflection]] on the wiki for more"
+                + " details. In order to make the most of these functions, you should familiarize"
+                + " yourself with the general workings of the language. These functions explore"
+                + " extremely advanced concepts, and should normally not be used; especially"
+                + " if you are not familiar with the language.";
     }
 }

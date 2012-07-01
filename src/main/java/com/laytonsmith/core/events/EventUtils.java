@@ -24,68 +24,47 @@ public class EventUtils {
     private static final Map<Driver, SortedSet<BoundEvent>> event_handles =
             new EnumMap<Driver, SortedSet<BoundEvent>>(Driver.class);
 
-    /**
-     * Registers a BoundEvent.
-     * @param b
-     * @throws EventException 
-     */
-    public static void RegisterEvent(BoundEvent b) throws EventException {
-        Event event = EventList.getEvent(b.getEventName());
-        if (event == null) {
-            throw new EventException("The event type \"" + b.getEventName() + "\" could not be found.");
-        }
-        if (!event_handles.containsKey(event.driver())) {
-            event_handles.put(event.driver(), new TreeSet<BoundEvent>());
-        }
-        SortedSet<BoundEvent> set = event_handles.get(event.driver());
-        set.add(b);
-        try {
-            event.bind();
-        } catch (UnsupportedOperationException e) {
-        }
-    }
-
-    /**
-     * Looks through all the events for an event with id <code>id</code>. Once found, removes it.
-     * If no event with that id is registered, nothing happens.
-     * @param id 
-     */
-    public static void UnregisterEvent(String id) {
+    public static Construct DumpEvents() {
+        CArray ca = new CArray(Target.UNKNOWN);
         for (Driver type : event_handles.keySet()) {
             SortedSet<BoundEvent> set = event_handles.get(type);
             Iterator<BoundEvent> i = set.iterator();
             while (i.hasNext()) {
                 BoundEvent b = i.next();
-                if (b.getId().equals(id)) {
-                    i.remove();
-                    return;
+                ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN));
+            }
+        }
+        return ca;
+    }
+
+    private static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, BindableEvent e) {
+        //Sort our event handlers by priorities
+        BoundEvent.ActiveEvent activeEvent = new BoundEvent.ActiveEvent(e);
+        for (BoundEvent b : toRun) {
+            if(activeEvent.canReceive() || b.getPriority().equals(Priority.MONITOR)){
+                try {
+                    //We must re-set the active event's bound event and parsed event
+                    activeEvent.setBoundEvent(b);
+                    activeEvent.setParsedEvent(driver.evaluate(e));                    
+                    b.trigger(activeEvent);
+                } catch (FunctionReturnException ex){
+                    //We also know how to deal with this
+                } catch (EventException ex) {
+                    throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
+                } catch(ConfigRuntimeException ex){
+                    //An exception has bubbled all the way up
+                    ConfigRuntimeException.React(ex);
                 }
             }
         }
-    }
-
-    /**
-     * Unregisters all event handlers. Runs in O(n)
-     */
-    public static void UnregisterAll(String name) {
-        for (Driver type : event_handles.keySet()) {
-            SortedSet<BoundEvent> set = event_handles.get(type);
-            Iterator<BoundEvent> i = set.iterator();
-            while (i.hasNext()) {
-                BoundEvent b = i.next();
-                if (b.getEventObjName().equals(name)) {
-                    i.remove();
-                    return;
-                }
+        for(BoundEvent b : toRun){
+            activeEvent.setBoundEvent(b);
+            if(activeEvent.isCancelled()){
+                activeEvent.executeCancelled();
+            } else {
+                activeEvent.executeTriggered();
             }
         }
-    }
-
-    /**
-     * This should be used in the case the plugin is disabled, or /reloadalises is run.
-     */
-    public static void UnregisterAll() {
-        event_handles.clear();
     }
 
     /**
@@ -138,6 +117,27 @@ public class EventUtils {
     }
 
     /**
+     * Registers a BoundEvent.
+     * @param b
+     * @throws EventException 
+     */
+    public static void RegisterEvent(BoundEvent b) throws EventException {
+        Event event = EventList.getEvent(b.getEventName());
+        if (event == null) {
+            throw new EventException("The event type \"" + b.getEventName() + "\" could not be found.");
+        }
+        if (!event_handles.containsKey(event.driver())) {
+            event_handles.put(event.driver(), new TreeSet<BoundEvent>());
+        }
+        SortedSet<BoundEvent> set = event_handles.get(event.driver());
+        set.add(b);
+        try {
+            event.bind();
+        } catch (UnsupportedOperationException e) {
+        }
+    }
+
+    /**
      * Triggers an event by name. The event name is the primary filter for this event, but
      * to increase event lookup efficiency, the driver is required. This will run in O(n),
      * where n is the number of bound events driven by type <code>type</code>.
@@ -167,46 +167,46 @@ public class EventUtils {
         FireListeners(toRun, driver, e);
     }
 
-    private static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, BindableEvent e) {
-        //Sort our event handlers by priorities
-        BoundEvent.ActiveEvent activeEvent = new BoundEvent.ActiveEvent(e);
-        for (BoundEvent b : toRun) {
-            if(activeEvent.canReceive() || b.getPriority().equals(Priority.MONITOR)){
-                try {
-                    //We must re-set the active event's bound event and parsed event
-                    activeEvent.setBoundEvent(b);
-                    activeEvent.setParsedEvent(driver.evaluate(e));                    
-                    b.trigger(activeEvent);
-                } catch (FunctionReturnException ex){
-                    //We also know how to deal with this
-                } catch (EventException ex) {
-                    throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
-                } catch(ConfigRuntimeException ex){
-                    //An exception has bubbled all the way up
-                    ConfigRuntimeException.React(ex);
-                }
-            }
-        }
-        for(BoundEvent b : toRun){
-            activeEvent.setBoundEvent(b);
-            if(activeEvent.isCancelled()){
-                activeEvent.executeCancelled();
-            } else {
-                activeEvent.executeTriggered();
-            }
-        }
+    /**
+     * This should be used in the case the plugin is disabled, or /reloadalises is run.
+     */
+    public static void UnregisterAll() {
+        event_handles.clear();
     }
 
-    public static Construct DumpEvents() {
-        CArray ca = new CArray(Target.UNKNOWN);
+    /**
+     * Unregisters all event handlers. Runs in O(n)
+     */
+    public static void UnregisterAll(String name) {
         for (Driver type : event_handles.keySet()) {
             SortedSet<BoundEvent> set = event_handles.get(type);
             Iterator<BoundEvent> i = set.iterator();
             while (i.hasNext()) {
                 BoundEvent b = i.next();
-                ca.push(new CString(b.toString() + ":" + b.getFile() + ":" + b.getLineNum(), Target.UNKNOWN));
+                if (b.getEventObjName().equals(name)) {
+                    i.remove();
+                    return;
+                }
             }
         }
-        return ca;
+    }
+
+    /**
+     * Looks through all the events for an event with id <code>id</code>. Once found, removes it.
+     * If no event with that id is registered, nothing happens.
+     * @param id 
+     */
+    public static void UnregisterEvent(String id) {
+        for (Driver type : event_handles.keySet()) {
+            SortedSet<BoundEvent> set = event_handles.get(type);
+            Iterator<BoundEvent> i = set.iterator();
+            while (i.hasNext()) {
+                BoundEvent b = i.next();
+                if (b.getId().equals(id)) {
+                    i.remove();
+                    return;
+                }
+            }
+        }
     }
 }

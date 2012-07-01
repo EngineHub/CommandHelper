@@ -27,38 +27,211 @@ import java.util.logging.Logger;
  */
 public class BoundEvent implements Comparable<BoundEvent> {
 
-    private final String eventName;
-    private final String id;
-    private final Priority priority;
-    private final Map<String, Construct> prefilter;
-    private final String eventObjName;
-    private Env originalEnv;
-    private final GenericTreeNode<Construct> tree; //The code closure for this event
-    private final Driver driver; //For efficiency sake, cache it here
-    private static int EventID = 0;
-    private final Target target;
-
     /**
-     * Returns a unique ID that can be used to identify an event.
-     * @return 
+     * The bound event is essentially an ActiveEvent generator. Because bound events don't change from run to run, it doesn't
+     * make sense to store triggered event specific information with the bound event itself. Instead, when the event is triggered,
+     * an ActiveEvent is generated, stored in the environment, and then the script is triggered. This ActiveEvent contains both
+     * the underlying event (if needed for things like cancellation or other event manipulation) and the BoundEvent object itself
+     * (which can be used to get the event id and other information as needed). For convenience, the parsed event information
+     * is also cached here.
      */
-    private static int GetUniqueID() {
-        synchronized (BoundEvent.class) {
-            return ++EventID;
+    public static class ActiveEvent{
+        private BoundEvent boundEvent;
+        private Boolean cancelled;
+        private BoundEvent consumedAt;
+        private final List<String> history;
+        private final Map<String, BoundEvent> lockedAt;
+        private Map<String, Construct> parsedEvent;
+        private final BindableEvent underlyingEvent;
+        private final List<Pair<CClosure, Env>> whenCancelled;
+        
+        private final List<Pair<CClosure, Env>> whenTriggered;
+        
+        public ActiveEvent(BindableEvent underlyingEvent){
+            this.underlyingEvent = underlyingEvent;
+            this.cancelled = null;
+            whenCancelled = new ArrayList<Pair<CClosure, Env>>();
+            whenTriggered = new ArrayList<Pair<CClosure, Env>>();
+            lockedAt = new HashMap<String, BoundEvent>();
+            history = new ArrayList<String>();
+        }
+        
+        public void addHistory(String history){
+            if(Prefs.DebugMode()){
+                this.history.add(DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ") + history);
+            }
+        }
+        
+        public void addWhenCancelled(CClosure tree){
+            this.addHistory("Adding a whenCancelled callback. " + boundEvent);
+            try {
+                whenCancelled.add(new Pair<CClosure, Env>(tree, boundEvent.originalEnv.clone()));
+            } catch (CloneNotSupportedException ex) {
+                Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        public void addWhenTriggered(CClosure tree){
+            this.addHistory("Adding a whenTriggered callback. " + boundEvent);
+            try {
+                whenTriggered.add(new Pair<CClosure, Env>(tree, boundEvent.originalEnv.clone()));
+            } catch (CloneNotSupportedException ex) {
+                Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+
+        public boolean canReceive(){
+            if(consumedAt == null){
+                return true;
+            }
+            return consumedAt.getPriority().isLowerPriority(boundEvent.getPriority());
+        }
+
+        public void consume(){
+            this.addHistory("Consuming event" + boundEvent);
+            if(consumedAt == null){
+                consumedAt = boundEvent;
+            }
+        }
+        
+        public Priority consumedAt(){
+            return consumedAt.getPriority();
+        }
+        
+        public void executeCancelled(){
+//            for(Pair<CClosure, Env> pair : whenCancelled){
+//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
+//            }            
+        }
+
+        public void executeTriggered(){
+//            for(Pair<CClosure, Env> pair : whenTriggered){
+//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
+//            }            
+        }
+
+        public BoundEvent getBoundEvent() {
+            return boundEvent;
+        }         
+        
+        public Event getEventDriver(){
+            return this.boundEvent.getEventDriver();
+        }
+
+        public List<String> getHistory(){
+            return history;
+        }
+        
+        public Map<String, Construct> getParsedEvent() {
+            return parsedEvent;
+        }
+        
+        public BindableEvent getUnderlyingEvent() {
+            return underlyingEvent;
+        }
+        
+        public boolean isCancellable() {
+            return boundEvent.getEventDriver().isCancellable(this.underlyingEvent);
+        }
+        
+        public boolean isCancelled() {
+            //if cancelled is not null, return it. If it is null, check with the underlying event.
+            //If it isn't null, that means we have manually set it somewhere, so that takes precedence;
+            //indeed, it may not make sense to ask the event, as it may not be cancellable in the first
+            //place, but we can still return regardless.
+            if(cancelled != null){
+                return cancelled;
+            } else {
+                if(boundEvent.getEventDriver().isCancellable(underlyingEvent)){
+                    return boundEvent.getEventDriver().isCancelled(underlyingEvent);
+                } else {
+                    return false;
+                }
+            }
+        }
+        
+        public boolean isConsumed(){
+            return consumedAt != null;
+        }
+        
+        public boolean isLocked(String parameter){           
+            Priority param = lockedAt.get(parameter)==null?null:lockedAt.get(parameter).getPriority();
+            Priority global = lockedAt.get(parameter)==null?null:lockedAt.get(null).getPriority();
+            if(param == null && global == null){
+                return false;
+            } else if(param == null){
+                return global.isHigherPriority(boundEvent.getPriority());
+            } else if(global == null){
+                return param.isHigherPriority(boundEvent.getPriority());
+            } else {
+                if(param.isHigherPriority(global)){
+                    return param.isHigherPriority(boundEvent.getPriority());
+                } else {
+                    return global.isHigherPriority(boundEvent.getPriority());
+                }
+            }
+        }
+        
+        public void lock(String parameter){
+            this.addHistory("Locking " + (parameter==null?"the whole event":parameter) + " " + boundEvent);
+            if(lockedAt.containsKey(null)){
+                return; //Everything is already locked
+            }
+            if(parameter == null && !lockedAt.containsKey(null)){
+                lockedAt.put(null, boundEvent); //Everything is locked now
+            } else if(!lockedAt.containsKey(parameter)) {
+                lockedAt.put(parameter, boundEvent);
+            }
+        }
+        
+        public Priority lockedAt(String parameter){            
+            Priority param = lockedAt.get(parameter)==null?null:lockedAt.get(parameter).getPriority();
+            Priority global = lockedAt.get(parameter)==null?null:lockedAt.get(null).getPriority();
+            if(param == null && global == null){
+                return null; //It's not locked
+            } else if(param == null){
+                return global; //It's not parameter locked, but it is globally locked
+            } else if(global == null){
+                return param; //It's not globally locked, but it is parameter locked
+            } else {
+                //It's both. The higher priority one wins.
+                if(param.isHigherPriority(global)){
+                    return param;
+                } else {
+                    return global;
+                }
+            }
+        }
+        
+        public void setBoundEvent(BoundEvent boundEvent){
+            this.boundEvent = boundEvent;
+        }
+        
+        public void setCancelled(boolean cancelled) {
+            this.addHistory("Setting cancelled flag to " + cancelled + " " + boundEvent);
+            this.cancelled = cancelled;
+            try {
+                boundEvent.getEventDriver().cancel(underlyingEvent, cancelled);
+            } catch (EventException ex) {
+                //Ignore this exception. This is thrown if the event isn't cancellable.
+                //Who cares.
+            }
+        }
+        
+        public void setParsedEvent(Map<String, Construct> parsedEvent){
+            this.parsedEvent = parsedEvent;
         }
     }
-    
-
     /**
      * Event priorities. This is sorted and events are run in a particular order.
      */
     public enum Priority {
-        LOWEST(5),
-        LOW(4),
-        NORMAL(3),
         HIGH(2),
         HIGHEST(1),
-        MONITOR(1000);
+        LOW(4),
+        LOWEST(5),
+        MONITOR(1000),
+        NORMAL(3);
         private final int id;
 
         private Priority(int i) {
@@ -77,32 +250,29 @@ public class BoundEvent implements Comparable<BoundEvent> {
             return other.getId() < this.getId();
         }
     }
-
+    private static int EventID = 0;
     /**
-     * Compares two event's IDs, and if they are the same, they should
-     * be the actual same event. Since only one event of a given ID exists,
-     * technically == should work on these events.
-     * @param obj
+     * Returns a unique ID that can be used to identify an event.
      * @return 
      */
-    @Override
-    public boolean equals(Object obj) {
-        if (obj instanceof BoundEvent) {
-            return this.id.equals(((BoundEvent) obj).id);
-        } else {
-            return false;
+    private static int GetUniqueID() {
+        synchronized (BoundEvent.class) {
+            return ++EventID;
         }
     }
+    private final Driver driver; //For efficiency sake, cache it here
+    private final String eventName;
+    private final String eventObjName;
+    private final String id;
+    private Env originalEnv;
+    private final Map<String, Construct> prefilter;
 
-    @Override
-    public int hashCode() {
-        return id.hashCode();
-    }
+    private final Priority priority;
+    
 
-    @Override
-    public String toString() {
-        return "(" + eventName + ") " + id;
-    }
+    private final Target target;
+
+    private final GenericTreeNode<Construct> tree; //The code closure for this event
 
     /**
      * Constructs a new BoundEvent.
@@ -157,47 +327,6 @@ public class BoundEvent implements Comparable<BoundEvent> {
 
     }
 
-    public int getLineNum(){
-        return target.line();
-    }
-    
-    public File getFile(){
-        return target.file();
-    }
-    
-    public int getCol(){
-        return target.col();
-    }
-    
-    public Target getTarget(){
-        return target;
-    }
-    
-    public String getEventName() {
-        return eventName;
-    }
-
-    public String getEventObjName() {
-        return eventObjName;
-    }
-
-    public Driver getDriver() {
-        return driver;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public Map<String, Construct> getPrefilter() {
-        return prefilter;
-    }
-
-    public Priority getPriority() {
-        return priority;
-    }
-
-
     /**
      * Events are sorted by priority
      * @param o
@@ -213,6 +342,112 @@ public class BoundEvent implements Comparable<BoundEvent> {
         }
     }
 
+    /**
+     * Compares two event's IDs, and if they are the same, they should
+     * be the actual same event. Since only one event of a given ID exists,
+     * technically == should work on these events.
+     * @param obj
+     * @return 
+     */
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof BoundEvent) {
+            return this.id.equals(((BoundEvent) obj).id);
+        } else {
+            return false;
+        }
+    }
+
+    private void execute(Env env, ActiveEvent activeEvent) throws EventException{
+        GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
+        superRoot.addChild(tree);
+        Script s = Script.GenerateScript(superRoot, "*");        
+        Event myDriver = this.getEventDriver();
+        myDriver.execute(s, this, env, activeEvent);
+    }
+    
+    public int getCol(){
+        return target.col();
+    }
+    
+    public Driver getDriver() {
+        return driver;
+    }
+    
+    /**
+     * Returns the Event driver that knows how to handle this event.
+     * @return 
+     */
+    public Event getEventDriver(){
+        return EventList.getEvent(this.getDriver(), this.getEventName());
+    }
+    
+    public String getEventName() {
+        return eventName;
+    }
+
+    public String getEventObjName() {
+        return eventObjName;
+    }
+
+    public File getFile(){
+        return target.file();
+    }
+
+    public String getId() {
+        return id;
+    }
+
+    public int getLineNum(){
+        return target.line();
+    }
+
+    public Map<String, Construct> getPrefilter() {
+        return prefilter;
+    }
+
+
+    public Priority getPriority() {
+        return priority;
+    }
+
+    public Target getTarget(){
+        return target;
+    }
+    
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
+    
+    /**
+     * Used to manually trigger an event, the underlying event is set to null.
+     * @param event
+     * @throws EventException 
+     */
+    public void manual_trigger(CArray event) throws EventException{
+        try {
+            Env env = originalEnv.clone();
+            env.GetVarList().set(new IVariable(eventObjName, event, Target.UNKNOWN));
+            Map<String, Construct> map = new HashMap<String, Construct>();
+            for(String key : event.keySet()){
+                map.put(key, event.get(key, Target.UNKNOWN));
+            }
+            ActiveEvent activeEvent = new ActiveEvent(null);
+            activeEvent.setParsedEvent(map);
+            activeEvent.setBoundEvent(this);
+            env.SetEvent(activeEvent);
+            this.execute(env, activeEvent);
+        } catch (CloneNotSupportedException ex) {
+            Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
+    @Override
+    public String toString() {
+        return "(" + eventName + ") " + id;
+    }
+    
     /**
      * When the event actually occurs, this should be run, after translating the
      * original event object (of whatever type it may be) into a standard map, which
@@ -256,241 +491,6 @@ public class BoundEvent implements Comparable<BoundEvent> {
             }
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    /**
-     * Used to manually trigger an event, the underlying event is set to null.
-     * @param event
-     * @throws EventException 
-     */
-    public void manual_trigger(CArray event) throws EventException{
-        try {
-            Env env = originalEnv.clone();
-            env.GetVarList().set(new IVariable(eventObjName, event, Target.UNKNOWN));
-            Map<String, Construct> map = new HashMap<String, Construct>();
-            for(String key : event.keySet()){
-                map.put(key, event.get(key, Target.UNKNOWN));
-            }
-            ActiveEvent activeEvent = new ActiveEvent(null);
-            activeEvent.setParsedEvent(map);
-            activeEvent.setBoundEvent(this);
-            env.SetEvent(activeEvent);
-            this.execute(env, activeEvent);
-        } catch (CloneNotSupportedException ex) {
-            Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
-        }
-    }
-    
-    private void execute(Env env, ActiveEvent activeEvent) throws EventException{
-        GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
-        superRoot.addChild(tree);
-        Script s = Script.GenerateScript(superRoot, "*");        
-        Event myDriver = this.getEventDriver();
-        myDriver.execute(s, this, env, activeEvent);
-    }
-    
-    /**
-     * Returns the Event driver that knows how to handle this event.
-     * @return 
-     */
-    public Event getEventDriver(){
-        return EventList.getEvent(this.getDriver(), this.getEventName());
-    }
-    
-    /**
-     * The bound event is essentially an ActiveEvent generator. Because bound events don't change from run to run, it doesn't
-     * make sense to store triggered event specific information with the bound event itself. Instead, when the event is triggered,
-     * an ActiveEvent is generated, stored in the environment, and then the script is triggered. This ActiveEvent contains both
-     * the underlying event (if needed for things like cancellation or other event manipulation) and the BoundEvent object itself
-     * (which can be used to get the event id and other information as needed). For convenience, the parsed event information
-     * is also cached here.
-     */
-    public static class ActiveEvent{
-        private final BindableEvent underlyingEvent;
-        private Map<String, Construct> parsedEvent;
-        private BoundEvent boundEvent;
-        private Boolean cancelled;
-        private BoundEvent consumedAt;
-        private final Map<String, BoundEvent> lockedAt;
-        private final List<Pair<CClosure, Env>> whenCancelled;
-        private final List<Pair<CClosure, Env>> whenTriggered;
-        
-        private final List<String> history;
-        
-        public ActiveEvent(BindableEvent underlyingEvent){
-            this.underlyingEvent = underlyingEvent;
-            this.cancelled = null;
-            whenCancelled = new ArrayList<Pair<CClosure, Env>>();
-            whenTriggered = new ArrayList<Pair<CClosure, Env>>();
-            lockedAt = new HashMap<String, BoundEvent>();
-            history = new ArrayList<String>();
-        }
-        
-        public void addHistory(String history){
-            if(Prefs.DebugMode()){
-                this.history.add(DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ") + history);
-            }
-        }
-        
-        public List<String> getHistory(){
-            return history;
-        }
-
-        public Map<String, Construct> getParsedEvent() {
-            return parsedEvent;
-        }
-
-        public BindableEvent getUnderlyingEvent() {
-            return underlyingEvent;
-        }
-
-        public BoundEvent getBoundEvent() {
-            return boundEvent;
-        }
-        
-        public void setBoundEvent(BoundEvent boundEvent){
-            this.boundEvent = boundEvent;
-        }
-        
-        public void setParsedEvent(Map<String, Construct> parsedEvent){
-            this.parsedEvent = parsedEvent;
-        }
-
-        public boolean isCancelled() {
-            //if cancelled is not null, return it. If it is null, check with the underlying event.
-            //If it isn't null, that means we have manually set it somewhere, so that takes precedence;
-            //indeed, it may not make sense to ask the event, as it may not be cancellable in the first
-            //place, but we can still return regardless.
-            if(cancelled != null){
-                return cancelled;
-            } else {
-                if(boundEvent.getEventDriver().isCancellable(underlyingEvent)){
-                    return boundEvent.getEventDriver().isCancelled(underlyingEvent);
-                } else {
-                    return false;
-                }
-            }
-        }
-
-        public void setCancelled(boolean cancelled) {
-            this.addHistory("Setting cancelled flag to " + cancelled + " " + boundEvent);
-            this.cancelled = cancelled;
-            try {
-                boundEvent.getEventDriver().cancel(underlyingEvent, cancelled);
-            } catch (EventException ex) {
-                //Ignore this exception. This is thrown if the event isn't cancellable.
-                //Who cares.
-            }
-        }         
-        
-        public Event getEventDriver(){
-            return this.boundEvent.getEventDriver();
-        }
-
-        public boolean isCancellable() {
-            return boundEvent.getEventDriver().isCancellable(this.underlyingEvent);
-        }
-        
-        public void consume(){
-            this.addHistory("Consuming event" + boundEvent);
-            if(consumedAt == null){
-                consumedAt = boundEvent;
-            }
-        }
-        
-        public boolean canReceive(){
-            if(consumedAt == null){
-                return true;
-            }
-            return consumedAt.getPriority().isLowerPriority(boundEvent.getPriority());
-        }
-        
-        public boolean isConsumed(){
-            return consumedAt != null;
-        }
-        
-        public Priority consumedAt(){
-            return consumedAt.getPriority();
-        }
-        
-        public void lock(String parameter){
-            this.addHistory("Locking " + (parameter==null?"the whole event":parameter) + " " + boundEvent);
-            if(lockedAt.containsKey(null)){
-                return; //Everything is already locked
-            }
-            if(parameter == null && !lockedAt.containsKey(null)){
-                lockedAt.put(null, boundEvent); //Everything is locked now
-            } else if(!lockedAt.containsKey(parameter)) {
-                lockedAt.put(parameter, boundEvent);
-            }
-        }
-        
-        public boolean isLocked(String parameter){           
-            Priority param = lockedAt.get(parameter)==null?null:lockedAt.get(parameter).getPriority();
-            Priority global = lockedAt.get(parameter)==null?null:lockedAt.get(null).getPriority();
-            if(param == null && global == null){
-                return false;
-            } else if(param == null){
-                return global.isHigherPriority(boundEvent.getPriority());
-            } else if(global == null){
-                return param.isHigherPriority(boundEvent.getPriority());
-            } else {
-                if(param.isHigherPriority(global)){
-                    return param.isHigherPriority(boundEvent.getPriority());
-                } else {
-                    return global.isHigherPriority(boundEvent.getPriority());
-                }
-            }
-        }
-        
-        public Priority lockedAt(String parameter){            
-            Priority param = lockedAt.get(parameter)==null?null:lockedAt.get(parameter).getPriority();
-            Priority global = lockedAt.get(parameter)==null?null:lockedAt.get(null).getPriority();
-            if(param == null && global == null){
-                return null; //It's not locked
-            } else if(param == null){
-                return global; //It's not parameter locked, but it is globally locked
-            } else if(global == null){
-                return param; //It's not globally locked, but it is parameter locked
-            } else {
-                //It's both. The higher priority one wins.
-                if(param.isHigherPriority(global)){
-                    return param;
-                } else {
-                    return global;
-                }
-            }
-        }
-        
-        public void addWhenTriggered(CClosure tree){
-            this.addHistory("Adding a whenTriggered callback. " + boundEvent);
-            try {
-                whenTriggered.add(new Pair<CClosure, Env>(tree, boundEvent.originalEnv.clone()));
-            } catch (CloneNotSupportedException ex) {
-                Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        
-        public void addWhenCancelled(CClosure tree){
-            this.addHistory("Adding a whenCancelled callback. " + boundEvent);
-            try {
-                whenCancelled.add(new Pair<CClosure, Env>(tree, boundEvent.originalEnv.clone()));
-            } catch (CloneNotSupportedException ex) {
-                Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        
-        public void executeTriggered(){
-//            for(Pair<CClosure, Env> pair : whenTriggered){
-//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
-//            }            
-        }
-        
-        public void executeCancelled(){
-//            for(Pair<CClosure, Env> pair : whenCancelled){
-//                MethodScriptCompiler.execute(pair.fst, pair.snd, null, null);
-//            }            
         }
     }
 }

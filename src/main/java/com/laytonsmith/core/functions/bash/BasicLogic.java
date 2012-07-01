@@ -11,23 +11,11 @@ import com.laytonsmith.core.functions.FunctionBase;
  * @author layton
  */
 public class BasicLogic {
-    public static String docs(){
-        return "Contains basic logic functions for bash";
-    }
     @api(platform=api.Platforms.COMPILER_BASH)
     public static class _if extends BashFunction{
 
-        public String getName() {
-            return "if";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2, 3};
-        }
-
-        public String docs() {
-            return "void {condition, ifcode, elsecode} Runs the ifcode if condition is true, otherwise, "
-                    + "runs the false code. Note that nothing is ever returned.";
+        public boolean appearInDocumentation() {
+            return true;
         }
 
         public String compile(Target t, String ... args) {
@@ -44,8 +32,17 @@ public class BasicLogic {
             return s;
         }
 
-        public boolean appearInDocumentation() {
-            return true;
+        public String docs() {
+            return "void {condition, ifcode, elsecode} Runs the ifcode if condition is true, otherwise, "
+                    + "runs the false code. Note that nothing is ever returned.";
+        }
+
+        public String getName() {
+            return "if";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
         }
 
         public CHVersion since() {
@@ -53,9 +50,16 @@ public class BasicLogic {
         }
         
     }
-    
     @api(platform=api.Platforms.COMPILER_BASH)
     public static class equals extends BashFunction{
+
+        public String compile(Target t, String... args) {
+            return args[0] + " == " + args[1];
+        }
+
+        public String docs() {
+            return "boolean {arg1, arg2} Compares two arguments for equality";
+        }
 
         public String getName() {
             return "equals";
@@ -65,17 +69,13 @@ public class BasicLogic {
             return new Integer[]{2};
         }
 
-        public String docs() {
-            return "boolean {arg1, arg2} Compares two arguments for equality";
-        }
-
-        public String compile(Target t, String... args) {
-            return args[0] + " == " + args[1];
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
         
+    }
+    
+    public static String docs(){
+        return "Contains basic logic functions for bash";
     }
 }

@@ -35,17 +35,257 @@ import java.util.zip.ZipFile;
  */
 public class AliasCore {
 
+    public static class LocalPackage {
+
+        public static class FileInfo{
+            String contents;
+            File file;
+            private FileInfo(String contents, File file){
+                this.contents = contents;
+                this.file = file;
+            }
+            
+            public String contents(){
+                return contents;
+            }
+            public File file(){
+                return file;
+            }
+        }
+        private List<File> autoIncludes = new ArrayList<File>();
+        private List<FileInfo> ms = new ArrayList<FileInfo>();
+        private List<FileInfo> msa = new ArrayList<FileInfo>();
+        
+        private void addAutoInclude(File f){
+            autoIncludes.add(f);
+        }
+        
+        public void appendMS(String s, File path){
+            ms.add(new FileInfo(s, path));
+        }
+        
+        public void appendMSA(String s, File path){
+            msa.add(new FileInfo(s, path));
+        }
+        
+        public void compileMS(MCPlayer player){
+            for(FileInfo fi : ms){
+                boolean exception = false;
+                try{
+                    Env env = new Env();
+                    MethodScriptCompiler.registerAutoIncludes(env, null);
+                    MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), env, null, null);
+                } catch(ConfigCompileException e){
+                    exception = true;
+                    ConfigRuntimeException.DoReport(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
+                } catch(ConfigRuntimeException e){
+                    exception = true;
+                    ConfigRuntimeException.React(e);
+                }
+                if(exception){
+                    if(Prefs.HaltOnFailure()){
+                        logger.log(Level.SEVERE, TermColors.RED + "[CommandHelper]: Compilation halted due to unrecoverable failure." + TermColors.reset());
+                        return;
+                    }
+                }
+            }
+            logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: MethodScript files processed" + TermColors.reset());
+        }
+        
+        public void compileMSA(List<Script> scripts, MCPlayer player) {
+            
+            for(FileInfo fi : msa){
+                List<Script> tempScripts;
+                try{
+                    tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file), new Env());
+                    for (Script s : tempScripts) {
+                        try {
+                            s.compile();
+                            s.checkAmbiguous((ArrayList<Script>) scripts);
+                            scripts.add(s);
+                        } catch (ConfigCompileException e) {
+                            ConfigRuntimeException.DoReport(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+                        }
+                    }
+                } catch(ConfigCompileException e){
+                    ConfigRuntimeException.DoReport(e, "Could not compile file " + fi.file + " compilation will halt.", player);
+                    return;
+                }
+            }
+            int errors = 0;
+            for (Script s : scripts) {
+                if (s.compilerError) {
+                    errors++;
+                }
+            }
+            if (errors > 0) {
+                System.out.println(TermColors.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
+            } else {
+                System.out.println(TermColors.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined." + TermColors.reset());
+            }
+        }
+        
+        private List<File> getAutoIncludes() {
+            return autoIncludes;
+        }
+        
+        public List<FileInfo> getMSAFiles(){
+            return new ArrayList<FileInfo>(msa);
+        }
+        
+        public List<FileInfo> getMSFiles(){
+            return new ArrayList<FileInfo>(ms);
+        }
+    }
+    static final Logger logger = Logger.getLogger("Minecraft");
+    public static CommandHelperPlugin parent;
+    /**
+     * Returns the contents of a file as a string. Accepts the file location
+     * as a string.
+     * @param file_location
+     * @return the contents of the file as a string
+     * @throws Exception if the file cannot be found
+     */
+    public static String file_get_contents(String file_location) throws IOException {
+        BufferedReader in = new BufferedReader(new FileReader(file_location));
+        String ret = "";
+        String str;
+        while ((str = in.readLine()) != null) {
+            ret += str + "\n";
+        }
+        in.close();
+        return ret;
+    }
+    /**
+     * This function writes the contents of a string to a file.
+     * @param file_location the location of the file on the disk
+     * @param contents the string to be written to the file
+     * @param mode the mode in which to write the file: <br />
+     * <ul>
+     * <li>"o" - overwrite the file if it exists, without asking</li>
+     * <li>"a" - append to the file if it exists, without asking</li>
+     * <li>"c" - cancel the operation if the file exists, without asking</li>
+     * </ul>
+     * @return true if the file was written, false if it wasn't. Throws an exception
+     * if the file could not be created, or if the mode is not valid.
+     * @throws Exception if the file could not be created
+     */
+    public static boolean file_put_contents(File file_location, String contents, String mode)
+            throws Exception {
+        BufferedWriter out = null;
+        File f = file_location;
+        if (f.exists()) {
+            //do different things depending on our mode
+            if (mode.equalsIgnoreCase("o")) {
+                out = new BufferedWriter(new FileWriter(file_location));
+            } else if (mode.equalsIgnoreCase("a")) {
+                out = new BufferedWriter(new FileWriter(file_location, true));
+            } else if (mode.equalsIgnoreCase("c")) {
+                return false;
+            } else {
+                throw new RuntimeException("Undefined mode in file_put_contents: " + mode);
+            }
+        } else {
+            out = new BufferedWriter(new FileWriter(file_location));
+        }
+        //At this point, we are assured that the file is open, and ready to be written in
+        //from this point in the file.
+        if (out != null) {
+            out.write(contents);
+            out.close();
+            return true;
+        } else {
+            return false;
+        }
+    }
+    public static void GetAuxAliases(File start, LocalPackage pack){
+        if(start.isDirectory() && !start.getName().endsWith(".disabled") && !start.getName().endsWith(".library")){
+            for(File f : start.listFiles()){
+                GetAuxAliases(f, pack);
+            }
+        } else if(start.isFile()){
+            if(start.getName().endsWith(".msa")){
+                try {
+                    pack.appendMSA(file_get_contents(start.getAbsolutePath()), start);
+                } catch (IOException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            } else if(start.getName().endsWith(".ms")){
+                if(start.getName().equals("auto_include.ms")){
+                    pack.addAutoInclude(start);
+                } else {
+                    try {
+                        pack.appendMS(file_get_contents(start.getAbsolutePath()), start);
+                    } catch (IOException ex) {
+                        Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            } else if(start.getName().endsWith(".mslp")){
+                try {
+                    GetAuxZipAliases(new ZipFile(start), pack);
+                } catch (ZipException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                } catch (IOException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+    private static void GetAuxZipAliases(ZipFile file, LocalPackage pack){
+        ZipEntry ze;
+        Enumeration<? extends ZipEntry> entries = file.entries();
+        while(entries.hasMoreElements()){
+            ze = entries.nextElement();
+            if(ze.getName().endsWith(".ms")){
+                if(ze.getName().equals("auto_include.ms")){
+                    pack.addAutoInclude(new File(file.getName() + File.separator + ze.getName()));
+                } else {
+                    try {
+                        pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
+                    } catch (IOException ex) {
+                        Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                }
+            } else if(ze.getName().endsWith(".msa")){
+                try {
+                    pack.appendMSA(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
+                } catch (IOException ex) {
+                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+    public static String getStringResource(InputStream is) throws IOException {
+        Writer writer = new StringWriter();
+        char[] buffer = new char[1024];
+        try {
+            Reader reader = new BufferedReader(new InputStreamReader(is));
+            int n;
+            while ((n = reader.read(buffer)) != -1) {
+                writer.write(buffer, 0, n);
+            }
+        } finally {
+            if (is != null) {
+                is.close();
+            }
+        }
+        return writer.toString();
+    }
     private File aliasConfig;
+    public List<File> autoIncludes;
+
     private File auxAliases;
-    private File prefFile;
+    
+    private Set<String> echoCommand = new HashSet<String>();
+
     private File mainFile;
+
+    private PermissionsResolverManager perms;
+
+    private File prefFile;
+
     //AliasConfig config;
     private List<Script> scripts;
-    static final Logger logger = Logger.getLogger("Minecraft");
-    private Set<String> echoCommand = new HashSet<String>();
-    private PermissionsResolverManager perms;
-    public List<File> autoIncludes;
-    public static CommandHelperPlugin parent;
 
     /**
      * This constructor accepts the configuration settings for the plugin, and ensures
@@ -63,9 +303,11 @@ public class AliasCore {
         this.parent = parent;
         this.mainFile = mainFile;
     }
-    
-    public List<Script> getScripts() {
-    	return new ArrayList<Script>(scripts);
+
+    public void addPlayerReference(MCCommandSender p) {
+        if (p instanceof MCPlayer) {
+            echoCommand.add(((MCPlayer) p).getName());
+        }
     }
 
     /**
@@ -217,7 +459,19 @@ public class AliasCore {
         }
         return match;
     }
-
+    
+    public List<Script> getScripts() {
+    	return new ArrayList<Script>(scripts);
+    }
+    
+    public boolean hasPlayerReference(MCCommandSender p){
+        if(p instanceof MCPlayer){
+            return echoCommand.contains(((MCPlayer)p).getName());
+        } else {
+            return false;
+        }
+    }
+    
     /**
      * Loads the global alias file in from the file system. If a player is
      * running the command, send a reference to them, and they will see
@@ -292,265 +546,11 @@ public class AliasCore {
             }
         }
     }
-
-    /**
-     * Returns the contents of a file as a string. Accepts the file location
-     * as a string.
-     * @param file_location
-     * @return the contents of the file as a string
-     * @throws Exception if the file cannot be found
-     */
-    public static String file_get_contents(String file_location) throws IOException {
-        BufferedReader in = new BufferedReader(new FileReader(file_location));
-        String ret = "";
-        String str;
-        while ((str = in.readLine()) != null) {
-            ret += str + "\n";
-        }
-        in.close();
-        return ret;
-    }
-
-    /**
-     * This function writes the contents of a string to a file.
-     * @param file_location the location of the file on the disk
-     * @param contents the string to be written to the file
-     * @param mode the mode in which to write the file: <br />
-     * <ul>
-     * <li>"o" - overwrite the file if it exists, without asking</li>
-     * <li>"a" - append to the file if it exists, without asking</li>
-     * <li>"c" - cancel the operation if the file exists, without asking</li>
-     * </ul>
-     * @return true if the file was written, false if it wasn't. Throws an exception
-     * if the file could not be created, or if the mode is not valid.
-     * @throws Exception if the file could not be created
-     */
-    public static boolean file_put_contents(File file_location, String contents, String mode)
-            throws Exception {
-        BufferedWriter out = null;
-        File f = file_location;
-        if (f.exists()) {
-            //do different things depending on our mode
-            if (mode.equalsIgnoreCase("o")) {
-                out = new BufferedWriter(new FileWriter(file_location));
-            } else if (mode.equalsIgnoreCase("a")) {
-                out = new BufferedWriter(new FileWriter(file_location, true));
-            } else if (mode.equalsIgnoreCase("c")) {
-                return false;
-            } else {
-                throw new RuntimeException("Undefined mode in file_put_contents: " + mode);
-            }
-        } else {
-            out = new BufferedWriter(new FileWriter(file_location));
-        }
-        //At this point, we are assured that the file is open, and ready to be written in
-        //from this point in the file.
-        if (out != null) {
-            out.write(contents);
-            out.close();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    public static String getStringResource(InputStream is) throws IOException {
-        Writer writer = new StringWriter();
-        char[] buffer = new char[1024];
-        try {
-            Reader reader = new BufferedReader(new InputStreamReader(is));
-            int n;
-            while ((n = reader.read(buffer)) != -1) {
-                writer.write(buffer, 0, n);
-            }
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-        }
-        return writer.toString();
-    }
-
+    
     public void removePlayerReference(MCCommandSender p) {
         //If they're not a player, oh well.
         if (p instanceof MCPlayer) {
             echoCommand.remove(((MCPlayer) p).getName());
-        }
-    }
-
-    public void addPlayerReference(MCCommandSender p) {
-        if (p instanceof MCPlayer) {
-            echoCommand.add(((MCPlayer) p).getName());
-        }
-    }
-    
-    public boolean hasPlayerReference(MCCommandSender p){
-        if(p instanceof MCPlayer){
-            return echoCommand.contains(((MCPlayer)p).getName());
-        } else {
-            return false;
-        }
-    }
-    
-    public static class LocalPackage {
-
-        public static class FileInfo{
-            String contents;
-            File file;
-            private FileInfo(String contents, File file){
-                this.contents = contents;
-                this.file = file;
-            }
-            
-            public String contents(){
-                return contents;
-            }
-            public File file(){
-                return file;
-            }
-        }
-        private List<File> autoIncludes = new ArrayList<File>();
-        private List<FileInfo> ms = new ArrayList<FileInfo>();
-        private List<FileInfo> msa = new ArrayList<FileInfo>();
-        
-        public List<FileInfo> getMSFiles(){
-            return new ArrayList<FileInfo>(ms);
-        }
-        
-        public List<FileInfo> getMSAFiles(){
-            return new ArrayList<FileInfo>(msa);
-        }
-        
-        private List<File> getAutoIncludes() {
-            return autoIncludes;
-        }
-        
-        private void addAutoInclude(File f){
-            autoIncludes.add(f);
-        }
-        
-        public void appendMSA(String s, File path){
-            msa.add(new FileInfo(s, path));
-        }
-        
-        public void appendMS(String s, File path){
-            ms.add(new FileInfo(s, path));
-        }
-        
-        public void compileMSA(List<Script> scripts, MCPlayer player) {
-            
-            for(FileInfo fi : msa){
-                List<Script> tempScripts;
-                try{
-                    tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file), new Env());
-                    for (Script s : tempScripts) {
-                        try {
-                            s.compile();
-                            s.checkAmbiguous((ArrayList<Script>) scripts);
-                            scripts.add(s);
-                        } catch (ConfigCompileException e) {
-                            ConfigRuntimeException.DoReport(e, "Compile error in script. Compilation will attempt to continue, however.", player);
-                        }
-                    }
-                } catch(ConfigCompileException e){
-                    ConfigRuntimeException.DoReport(e, "Could not compile file " + fi.file + " compilation will halt.", player);
-                    return;
-                }
-            }
-            int errors = 0;
-            for (Script s : scripts) {
-                if (s.compilerError) {
-                    errors++;
-                }
-            }
-            if (errors > 0) {
-                System.out.println(TermColors.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
-            } else {
-                System.out.println(TermColors.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined." + TermColors.reset());
-            }
-        }
-        
-        public void compileMS(MCPlayer player){
-            for(FileInfo fi : ms){
-                boolean exception = false;
-                try{
-                    Env env = new Env();
-                    MethodScriptCompiler.registerAutoIncludes(env, null);
-                    MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), env, null, null);
-                } catch(ConfigCompileException e){
-                    exception = true;
-                    ConfigRuntimeException.DoReport(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
-                } catch(ConfigRuntimeException e){
-                    exception = true;
-                    ConfigRuntimeException.React(e);
-                }
-                if(exception){
-                    if(Prefs.HaltOnFailure()){
-                        logger.log(Level.SEVERE, TermColors.RED + "[CommandHelper]: Compilation halted due to unrecoverable failure." + TermColors.reset());
-                        return;
-                    }
-                }
-            }
-            logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: MethodScript files processed" + TermColors.reset());
-        }
-    }
-    
-    public static void GetAuxAliases(File start, LocalPackage pack){
-        if(start.isDirectory() && !start.getName().endsWith(".disabled") && !start.getName().endsWith(".library")){
-            for(File f : start.listFiles()){
-                GetAuxAliases(f, pack);
-            }
-        } else if(start.isFile()){
-            if(start.getName().endsWith(".msa")){
-                try {
-                    pack.appendMSA(file_get_contents(start.getAbsolutePath()), start);
-                } catch (IOException ex) {
-                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            } else if(start.getName().endsWith(".ms")){
-                if(start.getName().equals("auto_include.ms")){
-                    pack.addAutoInclude(start);
-                } else {
-                    try {
-                        pack.appendMS(file_get_contents(start.getAbsolutePath()), start);
-                    } catch (IOException ex) {
-                        Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            } else if(start.getName().endsWith(".mslp")){
-                try {
-                    GetAuxZipAliases(new ZipFile(start), pack);
-                } catch (ZipException ex) {
-                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-                } catch (IOException ex) {
-                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
-        }
-    }
-    
-    private static void GetAuxZipAliases(ZipFile file, LocalPackage pack){
-        ZipEntry ze;
-        Enumeration<? extends ZipEntry> entries = file.entries();
-        while(entries.hasMoreElements()){
-            ze = entries.nextElement();
-            if(ze.getName().endsWith(".ms")){
-                if(ze.getName().equals("auto_include.ms")){
-                    pack.addAutoInclude(new File(file.getName() + File.separator + ze.getName()));
-                } else {
-                    try {
-                        pack.appendMS(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
-                    } catch (IOException ex) {
-                        Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                }
-            } else if(ze.getName().endsWith(".msa")){
-                try {
-                    pack.appendMSA(Installer.parseISToString(file.getInputStream(ze)), new File(file.getName() + File.separator + ze.getName()));
-                } catch (IOException ex) {
-                    Logger.getLogger(AliasCore.class.getName()).log(Level.SEVERE, null, ex);
-                }
-            }
         }
     }
 }

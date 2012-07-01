@@ -12,8 +12,8 @@ public interface MCPlayerRespawnEvent extends BindableEvent{
 
     public MCPlayer getPlayer();
 
-    public void setRespawnLocation(MCLocation location);
-
     public MCLocation getRespawnLocation();
+
+    public void setRespawnLocation(MCLocation location);
     
 }

@@ -9,11 +9,11 @@ package com.laytonsmith.abstraction;
  * @author layton
  */
 public interface MCLivingEntity extends MCEntity {
-    public int getHealth();
+    public void damage(int i);
 
-    public void setHealth(int i);
+    public int getHealth();
 
     public int getMaxHealth();
 
-    public void damage(int i);
+    public void setHealth(int i);
 }

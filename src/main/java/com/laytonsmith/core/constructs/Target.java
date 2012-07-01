@@ -16,15 +16,10 @@ public class Target {
      * elsewhere, an exception is thrown.
      */
     public static final Target UNKNOWN = new Target(0, null, 0, null);
-    private final int line;
-    private final File file;
     private final int col;
+    private final File file;
+    private final int line;
     
-    private Target(int line, File file, int col, String Null){
-        this.line = line;
-        this.file = file;
-        this.col = col;
-    }
     /**
      * Creates a new target that represents a location in a source file.
      * @param line
@@ -40,13 +35,18 @@ public class Target {
         this.file = file;
         this.col = col;
     }
+    private Target(int line, File file, int col, String Null){
+        this.line = line;
+        this.file = file;
+        this.col = col;
+    }
     
     /**
-     * Returns the line number
+     * Return the column.
      * @return 
      */
-    public int line(){
-        return line;
+    public int col(){
+        return col;
     }
     
     /**
@@ -58,11 +58,11 @@ public class Target {
     }
     
     /**
-     * Return the column.
+     * Returns the line number
      * @return 
      */
-    public int col(){
-        return col;
+    public int line(){
+        return line;
     }
     
     public String toString(){

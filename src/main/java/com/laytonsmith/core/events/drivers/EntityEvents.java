@@ -26,15 +26,11 @@ import java.util.Map;
  * @author EntityReborn
  */
 public class EntityEvents {
-    public static String docs(){
-        return "Contains events related to an entity";
-    }
-    
     @api
     public static class entity_damage_player extends AbstractEvent {
 
-		public String getName() {
-			return "entity_damage_player";
+		public BindableEvent convert(CArray manualObject) {
+			return null;
 		}
 
 		public String docs() {
@@ -47,17 +43,8 @@ public class EntityEvents {
                     + "{player|amount|damager|cause|data}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
-				throws PrefilterNonMatchException {
-			if(e instanceof MCEntityDamageByEntityEvent){
-				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
-				return event.getDamagee() instanceof MCPlayer;
-			}
-			return false;
-		}
-
-		public BindableEvent convert(CArray manualObject) {
-			return null;
+		public Driver driver() {
+			return Driver.ENTITY_DAMAGE_PLAYER;
 		}
 
 		public Map<String, Construct> evaluate(BindableEvent e)
@@ -94,8 +81,17 @@ public class EntityEvents {
             }
 		}
 
-		public Driver driver() {
-			return Driver.ENTITY_DAMAGE_PLAYER;
+		public String getName() {
+			return "entity_damage_player";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if(e instanceof MCEntityDamageByEntityEvent){
+				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
+				return event.getDamagee() instanceof MCPlayer;
+			}
+			return false;
 		}
 
 		public boolean modifyEvent(String key, Construct value,
@@ -121,8 +117,9 @@ public class EntityEvents {
     @api
     public static class target_player extends AbstractEvent{
 
-        public String getName() {
-            return "target_player";
+        public BindableEvent convert(CArray manual){
+            MCEntityTargetEvent e = EventBuilder.instantiate(MCEntityTargetEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN));
+            return e;
         }
 
         public String docs() {
@@ -134,33 +131,8 @@ public class EntityEvents {
                     + "{player|mobtype}";
         }
 
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-        
         public Driver driver(){
             return Driver.TARGET_ENTITY;
-        }
-
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-        	if(e instanceof MCEntityTargetEvent){
-        		MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
-        		
-        		Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
-        		
-        		MCEntity target = ete.getTarget();
-        		if (target == null) {
-        			return false;
-        		}
-        		
-        		if (target instanceof MCPlayer) {
-	        		Prefilters.match(prefilter, "player", ((MCPlayer)target).getName(), Prefilters.PrefilterType.MACRO);
-	        		
-	        		return true;
-	        	}
-        	}
-        	
-        	return false;
         }
         
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
@@ -183,6 +155,31 @@ public class EntityEvents {
             } else {
                 throw new EventException("Cannot convert e to EntityTargetLivingEntityEvent");
             }
+        }
+
+        public String getName() {
+            return "target_player";
+        }
+        
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        	if(e instanceof MCEntityTargetEvent){
+        		MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
+        		
+        		Prefilters.match(prefilter, "mobtype", ete.getEntityType().name(), Prefilters.PrefilterType.MACRO);
+        		
+        		MCEntity target = ete.getTarget();
+        		if (target == null) {
+        			return false;
+        		}
+        		
+        		if (target instanceof MCPlayer) {
+	        		Prefilters.match(prefilter, "player", ((MCPlayer)target).getName(), Prefilters.PrefilterType.MACRO);
+	        		
+	        		return true;
+	        	}
+        	}
+        	
+        	return false;
         }
         
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
@@ -207,10 +204,13 @@ public class EntityEvents {
         	return false;
         }
         
-        public BindableEvent convert(CArray manual){
-            MCEntityTargetEvent e = EventBuilder.instantiate(MCEntityTargetEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN));
-            return e;
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
         
+    }
+    
+    public static String docs(){
+        return "Contains events related to an entity";
     }
 }

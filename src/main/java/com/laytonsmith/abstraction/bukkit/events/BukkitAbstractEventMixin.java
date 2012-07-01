@@ -82,13 +82,6 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
     }
     
     @Override
-    public void manualTrigger(BindableEvent e){
-        if(e._GetObject() instanceof org.bukkit.event.Event){
-            ((BukkitMCServer)Static.getServer()).__Server().getPluginManager().callEvent((org.bukkit.event.Event)e);
-        }
-    }
-
-    @Override
     public boolean isCancellable(BindableEvent o) {
         return (o._GetObject() instanceof Cancellable);
     }
@@ -98,6 +91,13 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
             return ((Cancellable)o._GetObject()).isCancelled();
         } else {
             return false;
+        }
+    }
+
+    @Override
+    public void manualTrigger(BindableEvent e){
+        if(e._GetObject() instanceof org.bukkit.event.Event){
+            ((BukkitMCServer)Static.getServer()).__Server().getPluginManager().callEvent((org.bukkit.event.Event)e);
         }
     }
     

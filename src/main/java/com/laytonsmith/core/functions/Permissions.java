@@ -20,19 +20,7 @@ import com.sk89q.wepif.PermissionsResolverManager;
  * @author Layton
  */
 public class Permissions {
-    public static String docs(){
-        return "Provides access to the server's underlying permissions system. Permissions functionality is only as good as the management"
-                + " system in place, however, and so not all functions may be supported on a given system.";
-    }
     @api public static class has_permission extends AbstractFunction{
-
-        public String getName() {
-            return "has_permission";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1, 2};
-        }
 
         public String docs() {
             return "boolean {[player], permissionName} Using the built in permissions system, checks to see if the player has a particular permission."
@@ -40,26 +28,6 @@ public class Permissions {
                     + " it works with offline players, but that means that names must be an exact match. If you notice, this function isn't"
                     + " restricted. However, it IS restricted if the player attempts to check another player's permissions. If run from"
                     + " the console, will always return true.";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.InsufficientPermissionException};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_0;
-        }
-
-        public Boolean runAsync() {
-            return false;
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
@@ -94,6 +62,38 @@ public class Permissions {
             PermissionsResolverManager perms = Static.getPermissionsResolverManager();
             return new CBoolean(perms.hasPermission(player, permission), t);
         }
+
+        public String getName() {
+            return "has_permission";
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public boolean preResolveVariables() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+        public Exceptions.ExceptionType[] thrown() {
+            return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.InsufficientPermissionException};
+        }
         
+    }
+    public static String docs(){
+        return "Provides access to the server's underlying permissions system. Permissions functionality is only as good as the management"
+                + " system in place, however, and so not all functions may be supported on a given system.";
     }
 }

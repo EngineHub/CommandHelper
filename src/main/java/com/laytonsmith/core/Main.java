@@ -26,6 +26,34 @@ public class Main {
 
     static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
 
+    private static PluginDescriptionFile loadSelf() throws Exception{
+        PluginDescriptionFile description = null;
+        System.out.println(new File(".").getAbsolutePath());
+        File file = new File("./target/commandhelper-3.1.2-ShadedBundle.jar");
+        if (!file.exists()) {
+            throw new InvalidPluginException(new FileNotFoundException(String.format("%s does not exist", file.getPath())));
+        }
+        try {
+            JarFile jar = new JarFile(file);
+            JarEntry entry = jar.getJarEntry("plugin.yml");
+
+            if (entry == null) {
+                throw new InvalidPluginException(new FileNotFoundException("Jar does not contain plugin.yml"));
+            }
+
+            InputStream stream = jar.getInputStream(entry);
+            description = new PluginDescriptionFile(stream);
+
+            stream.close();
+            jar.close();
+        } catch (IOException ex) {
+            throw new InvalidPluginException(ex);
+        } catch (Exception ex) {
+            throw new InvalidPluginException(ex);
+        }
+        return description;
+    }
+    
     public static void main(String[] args) throws Exception {
         System.err.println("Running with arguments: " + Arrays.asList(args));
         try {
@@ -148,33 +176,5 @@ public class Main {
                     + " and put it in the CommandHelper directory. If you're dying for more details, here:");
             error.printStackTrace();
         }
-    }
-    
-    private static PluginDescriptionFile loadSelf() throws Exception{
-        PluginDescriptionFile description = null;
-        System.out.println(new File(".").getAbsolutePath());
-        File file = new File("./target/commandhelper-3.1.2-ShadedBundle.jar");
-        if (!file.exists()) {
-            throw new InvalidPluginException(new FileNotFoundException(String.format("%s does not exist", file.getPath())));
-        }
-        try {
-            JarFile jar = new JarFile(file);
-            JarEntry entry = jar.getJarEntry("plugin.yml");
-
-            if (entry == null) {
-                throw new InvalidPluginException(new FileNotFoundException("Jar does not contain plugin.yml"));
-            }
-
-            InputStream stream = jar.getInputStream(entry);
-            description = new PluginDescriptionFile(stream);
-
-            stream.close();
-            jar.close();
-        } catch (IOException ex) {
-            throw new InvalidPluginException(ex);
-        } catch (Exception ex) {
-            throw new InvalidPluginException(ex);
-        }
-        return description;
     }
 }

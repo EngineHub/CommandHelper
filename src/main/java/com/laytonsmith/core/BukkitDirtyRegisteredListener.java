@@ -23,22 +23,6 @@ import org.bukkit.plugin.RegisteredListener;
  */
 public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
-    private final Listener listener;
-    private final EventPriority priority;
-    private final Plugin plugin;
-    private final EventExecutor executor;
-    private static final int queueCapacity = 20;
-    private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(queueCapacity);
-
-    public BukkitDirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor, final EventPriority eventPriority, final Plugin registeredPlugin,
-            boolean ignoreCancelled) {
-        super(pluginListener, eventExecutor, eventPriority, registeredPlugin, ignoreCancelled);
-        listener = pluginListener;
-        priority = eventPriority;
-        plugin = registeredPlugin;
-        executor = eventExecutor;
-    }
-
     public static class DirtyEnumMap<K extends Enum<K>, V> extends EnumMap<K, V> {
 
         public DirtyEnumMap(Class<K> keyType) {
@@ -63,7 +47,6 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
             //return null;
         }
     }
-
     public static class DirtyTreeSet<E> extends TreeSet {
 
         public static DirtyTreeSet GenerateDirtyTreeSet(TreeSet ts) {
@@ -97,7 +80,34 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
         }
                 
     }
+    private static final int queueCapacity = 20;
+    private static Queue<Event> cancelledEvents = new LinkedBlockingQueue<Event>(queueCapacity);
+    public static BukkitDirtyRegisteredListener Generate(RegisteredListener real) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
+        if (real instanceof BukkitDirtyRegisteredListener) {
+            return (BukkitDirtyRegisteredListener) real;
+        }
+        Field rListener = real.getClass().getDeclaredField("listener");
+        rListener.setAccessible(true);
+        Listener nListener = (Listener) rListener.get(real);
 
+        Field rPriority = real.getClass().getDeclaredField("priority");
+        rPriority.setAccessible(true);
+        EventPriority nPriority = (EventPriority) rPriority.get(real);
+
+        Field rPlugin = real.getClass().getDeclaredField("plugin");
+        rPlugin.setAccessible(true);
+        Plugin nPlugin = (Plugin) rPlugin.get(real);
+
+        Field rExecutor = real.getClass().getDeclaredField("executor");
+        rExecutor.setAccessible(true);
+        EventExecutor nExecutor = (EventExecutor) rExecutor.get(real);
+        
+        Field rIgnoreCancelled = real.getClass().getDeclaredField("ignoreCancelled");
+        rIgnoreCancelled.setAccessible(true);
+        boolean nIgnoreCancelled = rIgnoreCancelled.getBoolean(real);
+
+        return new BukkitDirtyRegisteredListener(nListener, nExecutor, nPriority, nPlugin, nIgnoreCancelled);
+    }
     public static void Repopulate() throws NoSuchFieldException, ClassCastException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException {
         ConfigRuntimeException.DoWarning(null, "Play-dirty mode is currently disabled until further notice. Disable play-dirty in your preferences file"
                 + " to get rid of this message.", false);
@@ -156,12 +166,6 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
 
     }
 
-//    public static class MyEntry {
-//
-//        public Type key;
-//        public DirtyRegisteredListener value;
-//    }
-
     public static void setCancelled(Event superCancelledEvent) {
         if (cancelledEvents.size() >= queueCapacity) {
             cancelledEvents.poll();
@@ -169,31 +173,27 @@ public class BukkitDirtyRegisteredListener extends RegisteredListener {
         cancelledEvents.offer(superCancelledEvent);
     }
 
-    public static BukkitDirtyRegisteredListener Generate(RegisteredListener real) throws NoSuchFieldException, IllegalArgumentException, IllegalAccessException {
-        if (real instanceof BukkitDirtyRegisteredListener) {
-            return (BukkitDirtyRegisteredListener) real;
-        }
-        Field rListener = real.getClass().getDeclaredField("listener");
-        rListener.setAccessible(true);
-        Listener nListener = (Listener) rListener.get(real);
+    private final EventExecutor executor;
 
-        Field rPriority = real.getClass().getDeclaredField("priority");
-        rPriority.setAccessible(true);
-        EventPriority nPriority = (EventPriority) rPriority.get(real);
+    private final Listener listener;
 
-        Field rPlugin = real.getClass().getDeclaredField("plugin");
-        rPlugin.setAccessible(true);
-        Plugin nPlugin = (Plugin) rPlugin.get(real);
+    private final Plugin plugin;
 
-        Field rExecutor = real.getClass().getDeclaredField("executor");
-        rExecutor.setAccessible(true);
-        EventExecutor nExecutor = (EventExecutor) rExecutor.get(real);
-        
-        Field rIgnoreCancelled = real.getClass().getDeclaredField("ignoreCancelled");
-        rIgnoreCancelled.setAccessible(true);
-        boolean nIgnoreCancelled = rIgnoreCancelled.getBoolean(real);
+//    public static class MyEntry {
+//
+//        public Type key;
+//        public DirtyRegisteredListener value;
+//    }
 
-        return new BukkitDirtyRegisteredListener(nListener, nExecutor, nPriority, nPlugin, nIgnoreCancelled);
+    private final EventPriority priority;
+
+    public BukkitDirtyRegisteredListener(final Listener pluginListener, final EventExecutor eventExecutor, final EventPriority eventPriority, final Plugin registeredPlugin,
+            boolean ignoreCancelled) {
+        super(pluginListener, eventExecutor, eventPriority, registeredPlugin, ignoreCancelled);
+        listener = pluginListener;
+        priority = eventPriority;
+        plugin = registeredPlugin;
+        executor = eventExecutor;
     }
 
     /**

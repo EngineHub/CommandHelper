@@ -11,39 +11,14 @@ import java.util.List;
  */
 public class TypeHinting {
     
-    List<TypeHintingEntry> types = new ArrayList<TypeHintingEntry>();
-    public String toString(){
-        StringBuilder b = new StringBuilder();
-        for(TypeHintingEntry the : types){
-            b.append(the.toString()).append(" ");
-        }
-        return b.toString().trim();
-    }
-    
-    private class TypeHintingEntry{
-        List<HintEntry> types = new ArrayList<HintEntry>();
-        public TypeHintingEntry(List<HintEntry> types){
-            this.types = types;
-        }
-        
-        public String toString(){
-            StringBuilder b = new StringBuilder();
-            for(HintEntry h : types){
-                b.append(h.toString()).append(" ");
-            }
-            return b.toString().trim();
-        }
-    }
-    
     //Marker class
     public static class Hint{}
-    
     /**
      * Combines the modifiers and type into one class
      */
     private static class HintEntry{
-        private Type type;
         private List<Modifier> modifiers;
+        private Type type;
         private HintEntry(Type type, Modifier ... modifiers){
             this.type = type;
             this.modifiers = Arrays.asList(modifiers);
@@ -80,57 +55,6 @@ public class TypeHinting {
             b.append(type.toString());
             return b.toString().trim();
         }
-    } 
-    /**
-     * The type is the actual data type required.
-     */
-    public static class Type extends Hint{
-        public final static Type MIXED = new Type(1, "MIXED");
-        public final static Type ARRAY = new Type(2, "ARRAY");
-        public static Type ARRAY(String ... keys){
-            Type m = new Type(2, "ARRAY");
-            m.keys = keys;
-            return m;
-        }
-        public static Type ARRAY(int minLength, int maxLength){
-            Type m = new Type(2, "ARRAY");
-            m.keys = null;
-            m.minArrayLength = minLength;
-            m.maxArrayLength = maxLength;
-            return m;
-        }
-        public static Type ARRAY(int length){
-            return ARRAY(length, length);
-        }
-        public final static Type INT = new Type(4, "INT");
-        public final static Type FLOAT = new Type(8, "FLOAT");
-        public final static Type NUMBER = new Type(16, "NUMBER");
-        public final static Type STRING = new Type(32, "STRING");
-        public final static Type VOID = new Type(64, "VOID");
-        public final static Type BOOLEAN = new Type(128, "BOOLEAN");
-        public final static Type NULL = new Type(256, "NULL");
-        public final static Type IVARIABLE = new Type(512, "IVARIABLE");
-        public static Type OBJECT(String name){
-            Type m = new Type(1024, "OBJECT");
-            m.object = name;
-            return m;
-        }
-        
-        private String object;
-        private String toString;
-        private String [] keys;
-        private int minArrayLength;
-        private int maxArrayLength;
-        private int i;
-        
-        private Type(int i, String name){
-            this.i = i;
-            this.toString = name;
-        }
-        
-        public String toString(){
-            return toString;
-        }
     }
     
     /**
@@ -142,9 +66,9 @@ public class TypeHinting {
     public static class Modifier extends Hint{
         public final static Modifier OPTIONAL = new Modifier(1, "OPTIONAL");
         public final static Modifier VARARGS = new Modifier(2, "VARARGS");
+        int i = 0;
         String object = null;
         String toString = null;
-        int i = 0;
         private Modifier(int i, String name){
             this. i = i;
             this.toString = name;
@@ -155,6 +79,72 @@ public class TypeHinting {
         }
     }
     
+    /**
+     * The type is the actual data type required.
+     */
+    public static class Type extends Hint{
+        public final static Type ARRAY = new Type(2, "ARRAY");
+        public final static Type BOOLEAN = new Type(128, "BOOLEAN");
+        public final static Type FLOAT = new Type(8, "FLOAT");
+        public final static Type INT = new Type(4, "INT");
+        public final static Type IVARIABLE = new Type(512, "IVARIABLE");
+        public final static Type MIXED = new Type(1, "MIXED");
+        public final static Type NULL = new Type(256, "NULL");
+        public final static Type NUMBER = new Type(16, "NUMBER");
+        public final static Type STRING = new Type(32, "STRING");
+        public final static Type VOID = new Type(64, "VOID");
+        public static Type ARRAY(int length){
+            return ARRAY(length, length);
+        }
+        public static Type ARRAY(int minLength, int maxLength){
+            Type m = new Type(2, "ARRAY");
+            m.keys = null;
+            m.minArrayLength = minLength;
+            m.maxArrayLength = maxLength;
+            return m;
+        }
+        public static Type ARRAY(String ... keys){
+            Type m = new Type(2, "ARRAY");
+            m.keys = keys;
+            return m;
+        }
+        public static Type OBJECT(String name){
+            Type m = new Type(1024, "OBJECT");
+            m.object = name;
+            return m;
+        }
+        
+        private int i;
+        private String [] keys;
+        private int maxArrayLength;
+        private int minArrayLength;
+        private String object;
+        private String toString;
+        
+        private Type(int i, String name){
+            this.i = i;
+            this.toString = name;
+        }
+        
+        public String toString(){
+            return toString;
+        }
+    }
+    
+    private class TypeHintingEntry{
+        List<HintEntry> types = new ArrayList<HintEntry>();
+        public TypeHintingEntry(List<HintEntry> types){
+            this.types = types;
+        }
+        
+        public String toString(){
+            StringBuilder b = new StringBuilder();
+            for(HintEntry h : types){
+                b.append(h.toString()).append(" ");
+            }
+            return b.toString().trim();
+        }
+    } 
     /**
      * Generates a new TypeHinting object, and fills it in with one sequence.
      * You may append other sequences by calling append as many times as needed.
@@ -170,6 +160,11 @@ public class TypeHinting {
     public static TypeHinting Generate(Hint ... types){
         return new TypeHinting().append(types);
     }
+    
+    List<TypeHintingEntry> types = new ArrayList<TypeHintingEntry>();
+    
+    //Don't allow direct instantiation
+    private TypeHinting(){}
     
     /**
      * Appends a sequence to this TypeHinting object. It returns itself, so you
@@ -288,6 +283,11 @@ public class TypeHinting {
         return false;
     }
     
-    //Don't allow direct instantiation
-    private TypeHinting(){}
+    public String toString(){
+        StringBuilder b = new StringBuilder();
+        for(TypeHintingEntry the : types){
+            b.append(the.toString()).append(" ");
+        }
+        return b.toString().trim();
+    }
 }

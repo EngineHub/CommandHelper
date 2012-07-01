@@ -72,21 +72,6 @@ public class CommandHelperListener implements Listener {
     }
 
     /**
-     * Find and run aliases for a player for a given command.
-     *
-     * @param command
-     * @return
-     */
-    public boolean runAlias(String command, MCPlayer player) {
-        UserManager um = UserManager.GetUserManager(player.getName());
-        List<Script> scripts = um.getAllScripts();
-
-        return CommandHelperPlugin.getCore().alias(command, player, scripts);
-    }
-
-        
-
-    /**
      * Called when a player attempts to use a command
      *
      * @param event Relevant event details
@@ -150,6 +135,13 @@ public class CommandHelperListener implements Listener {
         }
     }
 
+        
+
+    @EventHandler(priority= EventPriority.NORMAL)
+    public void onPlayerJoin(PlayerJoinEvent event) {
+        Static.HostnameCache(new BukkitMCPlayer(event.getPlayer()));
+    }
+
     /**
      * Called when a player leaves a server
      *
@@ -161,9 +153,17 @@ public class CommandHelperListener implements Listener {
         UserManager.ClearUser(player.getName());
     }
 
-    @EventHandler(priority= EventPriority.NORMAL)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Static.HostnameCache(new BukkitMCPlayer(event.getPlayer()));
+    /**
+     * Find and run aliases for a player for a given command.
+     *
+     * @param command
+     * @return
+     */
+    public boolean runAlias(String command, MCPlayer player) {
+        UserManager um = UserManager.GetUserManager(player.getName());
+        List<Script> scripts = um.getAllScripts();
+
+        return CommandHelperPlugin.getCore().alias(command, player, scripts);
     }
     
 

@@ -14,17 +14,17 @@ import java.util.Collection;
  */
 public interface MCBlock {
 
-    public int getTypeId();
-
     public byte getData();
 
-    public void setTypeId(int idata);
+    public Collection<MCItemStack> getDrops();
 
-    public void setData(byte imeta);
+    public MCSign getSign();
 
     public MCBlockState getState();
 
     public MCMaterial getType();
+
+    public int getTypeId();
 
     public MCWorld getWorld();
 
@@ -34,11 +34,11 @@ public interface MCBlock {
 
     public int getZ();
 
-    public MCSign getSign();
+    public boolean isNull();
 
     public boolean isSign();
 
-    public boolean isNull();
+    public void setData(byte imeta);
 
-    public Collection<MCItemStack> getDrops();
+    public void setTypeId(int idata);
 }

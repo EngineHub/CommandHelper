@@ -8,6 +8,20 @@ package com.laytonsmith.core.functions;
  */
 public interface FunctionBase {
     /**
+     * Some functions don't need to show up in documentation. Maybe they are experimental, or magic
+     * functions. If they shouldn't show up in the normal API documentation, return false.
+     */
+    public boolean appearInDocumentation();
+
+    /**
+     * If a user asks for information about a particular function, this method is called to obtain the functions
+     * usage. The returned string must follow the following format:
+     * @return A string with the documentation, or null, which will give a standard message to the user telling them there
+     * is no documentation for this function yet.
+     */
+    public String docs();
+
+    /**
      * The name of this function, exactly as should be used in a script. Note that the name of
      * the function must match the regex:
      * <pre>
@@ -18,7 +32,7 @@ public interface FunctionBase {
      * @return 
      */
     public String getName();
-
+    
     /**
      * The number of arguments this function can accept. Some functions may be able to accept multiple numbers
      * of arguments, so this function returns an array. If you return Integer.MAX_VALUE as one of the
@@ -26,18 +40,4 @@ public interface FunctionBase {
      * @return 
      */
     public Integer[] numArgs();
-
-    /**
-     * If a user asks for information about a particular function, this method is called to obtain the functions
-     * usage. The returned string must follow the following format:
-     * @return A string with the documentation, or null, which will give a standard message to the user telling them there
-     * is no documentation for this function yet.
-     */
-    public String docs();
-    
-    /**
-     * Some functions don't need to show up in documentation. Maybe they are experimental, or magic
-     * functions. If they shouldn't show up in the normal API documentation, return false.
-     */
-    public boolean appearInDocumentation();
 }

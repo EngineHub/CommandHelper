@@ -26,9 +26,209 @@ import java.util.regex.Pattern;
  */
 public class DocGen {
 
-    public static void main(String[] args) {
-        //functions("wiki", api.Platforms.INTERPRETER_JAVA);
-        events("wiki");
+    private static class EventData {
+
+        public static String Get(String[] data, String type) {
+            StringBuilder b = new StringBuilder();
+            boolean first = true;
+            for (String d : data) {
+                int split = d.indexOf(":");
+                String name;
+                String description;
+                if(split == -1){                    
+                    name = d;
+                    description = "";
+                } else {
+                    name = d.substring(0, split).trim();
+                    description = d.substring(split + 1).trim();
+                }
+                if (type.equals("html")) {
+                    b.append(first ? "" : "<br />").append("<strong>").append(name).append("</strong>: ").append(description);
+                } else if (type.equals("wiki")) {
+                    b.append(first ? "" : "<br />").append("'''").append(name).append("''': ").append(description);
+                } else if (type.equals("text")) {
+                    b.append(first ? "" : "\n").append("\t").append(name).append(": ").append(description);
+                }
+                first = false;
+            }
+            return b.toString();
+        }
+    }
+
+    private static class ManualTriggerData{
+        public static String Get(String[] data, String type){
+            throw new UnsupportedOperationException("FIXME");
+        }
+    }
+
+    private static class MutabilityData {
+
+        public static String Get(String[] data, String type) {
+            StringBuilder b = new StringBuilder();
+            boolean first = true;
+            for (String d : data) {
+                int split = d.indexOf(":");
+                if (split == -1) {
+                    if (type.equals("html")) {
+                        b.append(first ? "" : "<br />").append("<strong>").append(d.trim()).append("</strong>");
+                    } else if (type.equals("wiki")) {
+                        b.append(first ? "" : "<br />").append("'''").append(d.trim()).append("'''");
+                    } else if (type.equals("text")) {
+                        b.append(first ? "" : "\n").append("\t").append(d.trim());
+                    }
+                } else {
+                    String name = d.substring(0, split).trim();
+                    String description = d.substring(split).trim();
+                    if (type.equals("html")) {
+                        b.append(first ? "" : "<br />").append("<strong>").append(name).append("</strong>: ").append(description);
+                    } else if (type.equals("wiki")) {
+                        b.append(first ? "" : "<br />").append("'''").append(name).append("''': ").append(description);
+                    } else if (type.equals("text")) {
+                        b.append(first ? "" : "\n").append("\t").append(name).append(": ").append(description);
+                    }
+                }
+                first = false;
+            }
+            return b.toString();
+        }
+    }
+
+    private static class PrefilterData {
+
+        private static String ExpandMacro(String macro, String type) {
+            if (type.equals("html")) {
+                return "<em>" + macro
+                    .replaceAll("<string match>", "&lt;String Match&gt;")
+                    .replaceAll("<regex>", "&lt;Regex&gt;")
+                    .replaceAll("<item match>", "&lt;Item Match&gt;")
+                    .replaceAll("<math match>", "&lt;Math Match&gt;")
+                    .replaceAll("<macro>", "&lt;Macro&gt;")
+                    .replaceAll("<expression>", "&lt;Expression&gt;") + "</em>";
+            } else if (type.equals("wiki")) {
+                return macro
+                    .replaceAll("<string match>", "[[CommandHelper/Events/Prefilters#String Match|String Match]]")
+                    .replaceAll("<regex>", "[[CommandHelper/Events/Prefilters#Regex|Regex]]")
+                    .replaceAll("<item match>", "[[CommandHelper/Events/Prefilters#Item Match|Item Match]]")
+                    .replaceAll("<math match>", "[[CommandHelper/Events/Prefilters#Math Match|Math Match]]")
+                    .replaceAll("<macro>", "[[CommandHelper/Events/Prefilters#Macro|Macro]]")
+                    .replaceAll("<expression>", "[[CommandHelper/Events/Prefilters#Expression|Expression]]");                
+            } else if (type.equals("text")) {
+                return macro
+                    .replaceAll("<string match>", "<String Match>")
+                    .replaceAll("<regex>", "<Regex>")
+                    .replaceAll("<item match>", "<Item Match>")
+                    .replaceAll("<math match>", "<Math Match>")
+                    .replaceAll("<macro>", "<Macro>")
+                    .replaceAll("<expression>", "<Expression>");
+            }
+            return macro;
+        }
+
+        public static String Get(String[] data, String type) {
+            StringBuilder b = new StringBuilder();
+            boolean first = true;
+            for (String d : data) {
+                int split = d.indexOf(":");
+                String name = d.substring(0, split).trim();
+                String description = ExpandMacro(d.substring(split + 1).trim(), type);
+                if (type.equals("html")) {
+                    b.append(first ? "" : "<br />").append("<strong>").append(name).append("</strong>: ").append(description);
+                } else if (type.equals("wiki")) {
+                    b.append(first ? "" : "<br />").append("'''").append(name).append("''': ").append(description);
+                } else if (type.equals("text")) {
+                    b.append(first ? "" : "\n").append("\t").append(name).append(": ").append(description);
+                }
+                first = false;
+            }
+            return b.toString();
+        }
+    }
+
+    public static void events(String type) {
+        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
+        Set<Documentation> list = new TreeSet<Documentation>();
+        for (Class c : classes) {
+            if (Event.class.isAssignableFrom(c)
+                    && Documentation.class.isAssignableFrom(c)) {
+                try {
+                    //First, we have to instatiate the event.
+                    Constructor<Event> cons = c.getConstructor();
+                    Documentation docs = (Documentation) cons.newInstance();
+                    list.add(docs);
+                } catch (Exception ex) {
+                    System.err.println("Could not get documentation for " + c.getSimpleName());
+                }
+            }
+        }
+
+        StringBuilder doc = new StringBuilder();
+        if (type.equals("html")) {
+            doc.append("Events allow you to trigger scripts not just on commands, but also on other actions, such as"
+                    + " a player logging in, or a player breaking a block. See the documentation on events for"
+                    + " more information"
+                    + "<table><thead><tr><th>Name</th><th>Description</th><th>Prefilters</th>"
+                    + "<th>Event Data</th><th>Mutable Fields</th><th>Since</th></thead><tbody>");
+        } else if (type.equals("wiki")) {
+            doc.append("Events allow you to trigger scripts not just on commands, but also on other actions, such as"
+                    + " a player logging in, or a player breaking a block. See the [[CommandHelper/Events|documentation on events]] for"
+                    + " more information<br />\n\n");
+            
+            doc.append("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" align=\"left\" class=\"wikitable\"\n"
+                        + "|-\n"
+                        + "! scope=\"col\" width=\"7%\" | Event Name\n"
+                        + "! scope=\"col\" width=\"36%\" | Description\n"
+                        + "! scope=\"col\" width=\"18%\" | Prefilters\n"
+                        + "! scope=\"col\" width=\"18%\" | Event Data\n"
+                        + "! scope=\"col\" width=\"18%\" | Mutable Fields\n"
+                        + "! scope=\"col\" width=\"3%\" | Since\n");
+        } else if (type.equals("text")) {
+            doc.append("Events allow you to trigger scripts not just on commands, but also on other actions, such as"
+                    + " a player logging in, or a player breaking a block. See the documentation on events for"
+                    + " more information\n\n\n");
+        }
+        Pattern p = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
+        for (Documentation d : list) {
+            Matcher m = p.matcher(d.docs());
+            if (m.find()) {
+                String name = d.getName();
+                String description = m.group(2).trim();
+                String prefilter = PrefilterData.Get(m.group(1).split("\\|"), type);
+                String eventData = EventData.Get(m.group(3).split("\\|"), type);
+                String mutability = MutabilityData.Get(m.group(4).split("\\|"), type);
+                //String manualTrigger = ManualTriggerData.Get(m.group(5).split("\\|"), type);
+                String since = d.since().getVersionString();
+
+                if (type.equals("html")) {
+                    doc.append("<tr><td style=\"vertical-align:top\">").append(name).append("</td><td style=\"vertical-align:top\">").append(description).append("</td><td style=\"vertical-align:top\">").append(prefilter).append("</td><td style=\"vertical-align:top\">").append(eventData).append("</td><td style=\"vertical-align:top\">").append(mutability).append("</td><td style=\"vertical-align:top\">").append(since).append("</td></tr>");
+                } else if (type.equals("wiki")) {
+                    doc.append("|-\n" + "! scope=\"row\" | [[CommandHelper/Event API/").append(name).append("|").append(name).append("]]\n" + "| ").append(description).append("\n" + "| ").append(prefilter).append("\n" + "| ").append(eventData).append("\n" + "| ").append(mutability).append("\n" + "| ").append(since).append("\n");
+                } else if (type.equals("text")) {
+                    doc.append("Name: ").append(name).append("\nDescription: ").append(description).append("\nPrefilters:\n").append(prefilter).append("\nEvent Data:\n").append(eventData).append("\nMutable Fields:\n").append(mutability).append("\nSince: ").append(since).append("\n\n");
+                }
+            }
+        }
+
+        if (type.equals("html")) {
+            doc.append("</tbody></table>");
+        } else if (type.equals("wiki")) {
+            doc.append("|}");
+        }
+
+        System.out.println(doc.toString());
+
+        if (type.equals("html")) {
+            System.out.println(""
+                    + "<h2>Errors in documentation</h2>\n"
+                    + "<em>Please note that this documentation is generated automatically,"
+                    + " if you notice an error in the documentation, please file a bug report for the"
+                    + " plugin itself!</em>");
+        } else if (type.equals("wiki")) {
+            System.out.println(""
+                    + "===Errors in documentation===\n"
+                    + "''Please note that this documentation is generated automatically,"
+                    + " if you notice an error in the documentation, please file a bug report for the"
+                    + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]\n\n{{LearningTrail}}");
+        }
     }
 
     public static void functions(String type, api.Platforms platform) {
@@ -229,209 +429,9 @@ public class DocGen {
                     + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page</div>");
         }
     }
-
-    public static void events(String type) {
-        Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
-        Set<Documentation> list = new TreeSet<Documentation>();
-        for (Class c : classes) {
-            if (Event.class.isAssignableFrom(c)
-                    && Documentation.class.isAssignableFrom(c)) {
-                try {
-                    //First, we have to instatiate the event.
-                    Constructor<Event> cons = c.getConstructor();
-                    Documentation docs = (Documentation) cons.newInstance();
-                    list.add(docs);
-                } catch (Exception ex) {
-                    System.err.println("Could not get documentation for " + c.getSimpleName());
-                }
-            }
-        }
-
-        StringBuilder doc = new StringBuilder();
-        if (type.equals("html")) {
-            doc.append("Events allow you to trigger scripts not just on commands, but also on other actions, such as"
-                    + " a player logging in, or a player breaking a block. See the documentation on events for"
-                    + " more information"
-                    + "<table><thead><tr><th>Name</th><th>Description</th><th>Prefilters</th>"
-                    + "<th>Event Data</th><th>Mutable Fields</th><th>Since</th></thead><tbody>");
-        } else if (type.equals("wiki")) {
-            doc.append("Events allow you to trigger scripts not just on commands, but also on other actions, such as"
-                    + " a player logging in, or a player breaking a block. See the [[CommandHelper/Events|documentation on events]] for"
-                    + " more information<br />\n\n");
-            
-            doc.append("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" align=\"left\" class=\"wikitable\"\n"
-                        + "|-\n"
-                        + "! scope=\"col\" width=\"7%\" | Event Name\n"
-                        + "! scope=\"col\" width=\"36%\" | Description\n"
-                        + "! scope=\"col\" width=\"18%\" | Prefilters\n"
-                        + "! scope=\"col\" width=\"18%\" | Event Data\n"
-                        + "! scope=\"col\" width=\"18%\" | Mutable Fields\n"
-                        + "! scope=\"col\" width=\"3%\" | Since\n");
-        } else if (type.equals("text")) {
-            doc.append("Events allow you to trigger scripts not just on commands, but also on other actions, such as"
-                    + " a player logging in, or a player breaking a block. See the documentation on events for"
-                    + " more information\n\n\n");
-        }
-        Pattern p = Pattern.compile("\\{(.*?)\\} *?(.*?) *?\\{(.*?)\\} *?\\{(.*?)\\}");
-        for (Documentation d : list) {
-            Matcher m = p.matcher(d.docs());
-            if (m.find()) {
-                String name = d.getName();
-                String description = m.group(2).trim();
-                String prefilter = PrefilterData.Get(m.group(1).split("\\|"), type);
-                String eventData = EventData.Get(m.group(3).split("\\|"), type);
-                String mutability = MutabilityData.Get(m.group(4).split("\\|"), type);
-                //String manualTrigger = ManualTriggerData.Get(m.group(5).split("\\|"), type);
-                String since = d.since().getVersionString();
-
-                if (type.equals("html")) {
-                    doc.append("<tr><td style=\"vertical-align:top\">").append(name).append("</td><td style=\"vertical-align:top\">").append(description).append("</td><td style=\"vertical-align:top\">").append(prefilter).append("</td><td style=\"vertical-align:top\">").append(eventData).append("</td><td style=\"vertical-align:top\">").append(mutability).append("</td><td style=\"vertical-align:top\">").append(since).append("</td></tr>");
-                } else if (type.equals("wiki")) {
-                    doc.append("|-\n" + "! scope=\"row\" | [[CommandHelper/Event API/").append(name).append("|").append(name).append("]]\n" + "| ").append(description).append("\n" + "| ").append(prefilter).append("\n" + "| ").append(eventData).append("\n" + "| ").append(mutability).append("\n" + "| ").append(since).append("\n");
-                } else if (type.equals("text")) {
-                    doc.append("Name: ").append(name).append("\nDescription: ").append(description).append("\nPrefilters:\n").append(prefilter).append("\nEvent Data:\n").append(eventData).append("\nMutable Fields:\n").append(mutability).append("\nSince: ").append(since).append("\n\n");
-                }
-            }
-        }
-
-        if (type.equals("html")) {
-            doc.append("</tbody></table>");
-        } else if (type.equals("wiki")) {
-            doc.append("|}");
-        }
-
-        System.out.println(doc.toString());
-
-        if (type.equals("html")) {
-            System.out.println(""
-                    + "<h2>Errors in documentation</h2>\n"
-                    + "<em>Please note that this documentation is generated automatically,"
-                    + " if you notice an error in the documentation, please file a bug report for the"
-                    + " plugin itself!</em>");
-        } else if (type.equals("wiki")) {
-            System.out.println(""
-                    + "===Errors in documentation===\n"
-                    + "''Please note that this documentation is generated automatically,"
-                    + " if you notice an error in the documentation, please file a bug report for the"
-                    + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]\n\n{{LearningTrail}}");
-        }
-    }
-
-    private static class PrefilterData {
-
-        public static String Get(String[] data, String type) {
-            StringBuilder b = new StringBuilder();
-            boolean first = true;
-            for (String d : data) {
-                int split = d.indexOf(":");
-                String name = d.substring(0, split).trim();
-                String description = ExpandMacro(d.substring(split + 1).trim(), type);
-                if (type.equals("html")) {
-                    b.append(first ? "" : "<br />").append("<strong>").append(name).append("</strong>: ").append(description);
-                } else if (type.equals("wiki")) {
-                    b.append(first ? "" : "<br />").append("'''").append(name).append("''': ").append(description);
-                } else if (type.equals("text")) {
-                    b.append(first ? "" : "\n").append("\t").append(name).append(": ").append(description);
-                }
-                first = false;
-            }
-            return b.toString();
-        }
-
-        private static String ExpandMacro(String macro, String type) {
-            if (type.equals("html")) {
-                return "<em>" + macro
-                    .replaceAll("<string match>", "&lt;String Match&gt;")
-                    .replaceAll("<regex>", "&lt;Regex&gt;")
-                    .replaceAll("<item match>", "&lt;Item Match&gt;")
-                    .replaceAll("<math match>", "&lt;Math Match&gt;")
-                    .replaceAll("<macro>", "&lt;Macro&gt;")
-                    .replaceAll("<expression>", "&lt;Expression&gt;") + "</em>";
-            } else if (type.equals("wiki")) {
-                return macro
-                    .replaceAll("<string match>", "[[CommandHelper/Events/Prefilters#String Match|String Match]]")
-                    .replaceAll("<regex>", "[[CommandHelper/Events/Prefilters#Regex|Regex]]")
-                    .replaceAll("<item match>", "[[CommandHelper/Events/Prefilters#Item Match|Item Match]]")
-                    .replaceAll("<math match>", "[[CommandHelper/Events/Prefilters#Math Match|Math Match]]")
-                    .replaceAll("<macro>", "[[CommandHelper/Events/Prefilters#Macro|Macro]]")
-                    .replaceAll("<expression>", "[[CommandHelper/Events/Prefilters#Expression|Expression]]");                
-            } else if (type.equals("text")) {
-                return macro
-                    .replaceAll("<string match>", "<String Match>")
-                    .replaceAll("<regex>", "<Regex>")
-                    .replaceAll("<item match>", "<Item Match>")
-                    .replaceAll("<math match>", "<Math Match>")
-                    .replaceAll("<macro>", "<Macro>")
-                    .replaceAll("<expression>", "<Expression>");
-            }
-            return macro;
-        }
-    }
-
-    private static class EventData {
-
-        public static String Get(String[] data, String type) {
-            StringBuilder b = new StringBuilder();
-            boolean first = true;
-            for (String d : data) {
-                int split = d.indexOf(":");
-                String name;
-                String description;
-                if(split == -1){                    
-                    name = d;
-                    description = "";
-                } else {
-                    name = d.substring(0, split).trim();
-                    description = d.substring(split + 1).trim();
-                }
-                if (type.equals("html")) {
-                    b.append(first ? "" : "<br />").append("<strong>").append(name).append("</strong>: ").append(description);
-                } else if (type.equals("wiki")) {
-                    b.append(first ? "" : "<br />").append("'''").append(name).append("''': ").append(description);
-                } else if (type.equals("text")) {
-                    b.append(first ? "" : "\n").append("\t").append(name).append(": ").append(description);
-                }
-                first = false;
-            }
-            return b.toString();
-        }
-    }
-
-    private static class MutabilityData {
-
-        public static String Get(String[] data, String type) {
-            StringBuilder b = new StringBuilder();
-            boolean first = true;
-            for (String d : data) {
-                int split = d.indexOf(":");
-                if (split == -1) {
-                    if (type.equals("html")) {
-                        b.append(first ? "" : "<br />").append("<strong>").append(d.trim()).append("</strong>");
-                    } else if (type.equals("wiki")) {
-                        b.append(first ? "" : "<br />").append("'''").append(d.trim()).append("'''");
-                    } else if (type.equals("text")) {
-                        b.append(first ? "" : "\n").append("\t").append(d.trim());
-                    }
-                } else {
-                    String name = d.substring(0, split).trim();
-                    String description = d.substring(split).trim();
-                    if (type.equals("html")) {
-                        b.append(first ? "" : "<br />").append("<strong>").append(name).append("</strong>: ").append(description);
-                    } else if (type.equals("wiki")) {
-                        b.append(first ? "" : "<br />").append("'''").append(name).append("''': ").append(description);
-                    } else if (type.equals("text")) {
-                        b.append(first ? "" : "\n").append("\t").append(name).append(": ").append(description);
-                    }
-                }
-                first = false;
-            }
-            return b.toString();
-        }
-    }
     
-    private static class ManualTriggerData{
-        public static String Get(String[] data, String type){
-            throw new UnsupportedOperationException("FIXME");
-        }
+    public static void main(String[] args) {
+        //functions("wiki", api.Platforms.INTERPRETER_JAVA);
+        events("wiki");
     }
 }

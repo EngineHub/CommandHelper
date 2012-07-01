@@ -33,49 +33,6 @@ import java.util.*;
  */
 public class Script {
 
-    private List<Token> left;
-    private List<List<Token>> right;
-    private List<Token> fullRight;
-    private List<Construct> cleft;
-    private List<GenericTreeNode<Construct>> cright;
-    //This should be null if we are running in non-alias mode
-    private Map<String, Variable> left_vars;
-    boolean hasBeenCompiled = false;
-    boolean compilerError = false;
-    private String label;
-    private Env CurrentEnv;
-
-    @Override
-    public String toString() {
-        StringBuilder b = new StringBuilder();
-        for (Token t : left) {
-            b.append(t.val()).append(" ");
-        }
-        b.append("compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
-        return b.toString();
-    }
-
-    private Procedure getProc(String name) {
-        return CurrentEnv.GetProcs().get(name);
-    }
-    
-    public Env getCurrentEnv(){
-        return CurrentEnv;
-    }
-    
-    public String getLabel(){
-        return label;
-    }
-    
-    public Script(List<Token> left, List<Token> right) {
-        this.left = left;
-        this.fullRight = right;
-        this.left_vars = new HashMap<String, Variable>();        
-        //this.OriginalEnv = env;
-    }
-    
-    private Script(){}
-    
     public static Script GenerateScript(GenericTreeNode<Construct> tree, String label){
         Script s = new Script();
         
@@ -95,114 +52,198 @@ public class Script {
         
         return s;
     }
+    private List<Construct> cleft;
+    boolean compilerError = false;
+    private List<GenericTreeNode<Construct>> cright;
+    private Env CurrentEnv;
+    private List<Token> fullRight;
+    boolean hasBeenCompiled = false;
+    private String label;
+    private List<Token> left;
+    //This should be null if we are running in non-alias mode
+    private Map<String, Variable> left_vars;
 
-    public boolean uncompilable() {
-        return compilerError;
-    }
+    private List<List<Token>> right;
 
-    public void run(final List<Variable> vars, Env myEnv, final MethodScriptComplete done) {
-        //Some things, such as the label are determined at compile time
-        this.CurrentEnv = myEnv;
-        this.CurrentEnv.SetLabel(this.label);
-        MCCommandSender p = myEnv.GetCommandSender();
-        if (!hasBeenCompiled || compilerError) {
-            Target target = Target.UNKNOWN;
-            if (left.size() >= 1) {
-                try{
-                    target = new Target(left.get(0).line_num, left.get(0).file, left.get(0).column);
-                } catch(NullPointerException e){
-                    //Oh well, we tried to get more information
-                }
-            }
-            throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command."
-                    + " To see the compile error, run /reloadaliases",
-                    null, target);
-        }
-        if (p instanceof MCPlayer) {
-            if (CurrentEnv.GetLabel() != null) {
-                PermissionsResolverManager perms = Static.getPermissionsResolverManager();
-                String[] groups = CurrentEnv.GetLabel().substring(1).split("/");
-                for (String group : groups) {
-                    if (group.startsWith("-") && perms.inGroup(((MCPlayer)p).getName(), group.substring(1))) {
-                        //negative permission
-                        throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
-                                Target.UNKNOWN);
-                    } else if (perms.inGroup(((MCPlayer)p).getName(), group)) {
-                        //They do have permission.
-                        break;
-                    }
-                }
-            }
-        }
-
-        try {
-            for (GenericTreeNode<Construct> rootNode : cright) {
-                GenericTree<Construct> tree = new GenericTree<Construct>();
-                tree.setRoot(rootNode);
-                for (GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)) {
-                    if (tempNode.data instanceof Variable) {
-                        if(left_vars == null){
-                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.data.getTarget());
-                        }
-                        ((Variable) tempNode.data).setVal(
-                                Static.resolveConstruct(
-                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getTarget()));
-                    }
-                }
-                
-                MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
-                MethodScriptCompiler.execute(tree.getRoot(), CurrentEnv, done, this);
-            }
-        } catch (ConfigRuntimeException ex) {
-            //We don't know how to handle this really, so let's pass it up the chain.
-            throw ex;
-        } catch (CancelCommandException e) {
-            //p.sendMessage(e.getMessage());
-            //The message in the exception is actually empty
-        } catch (LoopBreakException e) {            
-            if(p != null){
-                p.sendMessage("The break() function must be used inside a for() or foreach() loop");
-            }
-            System.out.println("The break() function must be used inside a for() or foreach() loop");
-        } catch (LoopContinueException e) {
-            if(p != null){
-                p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
-            }
-            System.out.println("The continue() function must be used inside a for() or foreach() loop");
-        } catch (FunctionReturnException e) {
-            if(myEnv.GetEvent() != null){
-                //Oh, we're running in an event handler. Those know how to catch it too.
-                throw e;
-            }
-            if(p != null){
-                p.sendMessage("The return() function must be used inside a procedure.");
-            }
-            System.out.println("The return() function must be used inside a procedure.");
-        } catch (Throwable t) {
-            System.out.println("An unexpected exception occured during the execution of a script.");
-            t.printStackTrace();
-            if(p != null){
-                p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
-            }
-        }
-        if (done != null) {
-            done.done(null);
-        }
+    private Script(){}
+    
+    public Script(List<Token> left, List<Token> right) {
+        this.left = left;
+        this.fullRight = right;
+        this.left_vars = new HashMap<String, Variable>();        
+        //this.OriginalEnv = env;
     }
     
-    /**
-     * Runs eval on the code tree, and if it returns an ival, resolves it.
-     * @param c
-     * @param env
-     * @return 
-     */
-    public Construct seval(GenericTreeNode<Construct> c, final Env env){
-        Construct ret = eval(c, env);
-        if(ret instanceof IVariable){
-            IVariable cur = (IVariable)ret;
-            return env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
+    public void checkAmbiguous(List<Script> scripts) throws ConfigCompileException {
+        //for (int i = 0; i < scripts.size(); i++) {
+        List<Construct> thisCommand = this.cleft;
+        for (int j = 0; j < scripts.size(); j++) {
+            List<Construct> thatCommand = scripts.get(j).cleft;
+            if (thatCommand == null) {
+                //it hasn't been compiled yet.
+                return;
+            }
+            if (this.cleft == scripts.get(j).cleft) {
+                //Of course this command is going to match it's own signature
+                continue;
+            }
+            boolean soFarAMatch = true;
+            for (int k = 0; k < thisCommand.size(); k++) {
+                try {
+                    Construct c1 = thisCommand.get(k);
+                    Construct c2 = thatCommand.get(k);
+                    if (c1.getCType() != c2.getCType() || ((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
+                        soFarAMatch = false;
+                    } else {
+                        //It's a literal, check to see if it's the same literal
+                        if (c1.nval() == null || !c1.val().equals(c2.val())) {
+                            soFarAMatch = false;
+                        }
+                    }
+                } catch (IndexOutOfBoundsException e) {
+                    /**
+                     * The two commands:
+                     * /cmd $var1 [$var2]
+                     * /cmd $var1
+                     * would cause this exception to be thrown, but the signatures
+                     * are the same, so the fact that they've matched this far means
+                     * they are ambiguous. However,
+                     * /cmd $var1 $var2
+                     * /cmd $var1
+                     * is not ambiguous
+                     */
+                    //thatCommand is the short one
+                    if (!(thisCommand.get(k) instanceof Variable)
+                            || (thisCommand.get(k) instanceof Variable
+                            && !((Variable) thisCommand.get(k)).isOptional())) {
+                        soFarAMatch = false;
+                    }
+                }
+            }
+            if (thatCommand.size() > thisCommand.size()) {
+                int k = thisCommand.size();
+                //thisCommand is the short one
+                if (!(thatCommand.get(k) instanceof Variable)
+                        || (thatCommand.get(k) instanceof Variable
+                        && !((Variable) thatCommand.get(k)).isOptional())) {
+                    soFarAMatch = false;
+                }
+            }
+
+            if (soFarAMatch) {
+                String commandThis = "";
+                for (Construct c : thisCommand) {
+                    commandThis += c.val() + " ";
+                }
+                String commandThat = "";
+                for (Construct c : thatCommand) {
+                    commandThat += c.val() + " ";
+                }
+                scripts.get(j).compilerError = true;
+                this.compilerError = true;
+                throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
+                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getTarget());
+            }
         }
-        return ret;
+
+        //Also, check for undefined variables on the right, and unused variables on the left
+        ArrayList<String> left_copy = new ArrayList<String>();
+        for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
+            left_copy.add(v.getValue().getName());
+        }
+        Arrays.asList(new String[]{}).toArray(new String[]{});
+        for (GenericTreeNode<Construct> gtn : cright) {
+            GenericTree<Construct> tree = new GenericTree<Construct>();
+            tree.setRoot(gtn);
+            List<GenericTreeNode<Construct>> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
+            for (GenericTreeNode<Construct> c : builtTree) {
+                if (c.getData() instanceof Variable) {
+                    for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
+                        if (v.getValue().getName().equals(((Variable) c.getData()).getName())) {
+                            //Found it, remove this from the left_copy, and break
+                            left_copy.remove(v.getValue().getName());
+                            break;
+                            //TODO: Layton!
+                        }
+                    }
+                }
+            }
+        }
+        //}
+    }
+    
+    public Script compile() throws ConfigCompileException {
+        try {
+            verifyLeft();
+            compileLeft();
+            compileRight();
+        } catch (ConfigCompileException e) {
+            compilerError = true;
+            throw e;
+        }
+        compilerError = false;
+        hasBeenCompiled = true;
+        return this;
+    }
+    
+    private boolean compileLeft() {
+        cleft = new ArrayList<Construct>();
+        for (int i = 0; i < left.size(); i++) {
+            Token t = left.get(i);
+            if (t.value.startsWith("/")) {
+                cleft.add(new Command(t.val(), t.target));
+            } else if (t.type == Token.TType.VARIABLE) {
+                cleft.add(new Variable(t.val(), null, t.target));
+            } else if (t.type.equals(TType.FINAL_VAR)) {
+                Variable v = new Variable(t.val(), null, t.target);
+                v.setFinal(true);
+                cleft.add(v);
+            } else if (t.type.equals(TType.LSQUARE_BRACKET)) {
+                if (i + 2 < left.size() && left.get(i + 2).type.equals(TType.OPT_VAR_ASSIGN)) {
+                    Variable v = new Variable(left.get(i + 1).val(),
+                            left.get(i + 3).val(), t.target);
+                    v.setOptional(true);
+                    if (left.get(i + 1).type.equals(TType.FINAL_VAR)) {
+                        v.setFinal(true);
+                    }
+                    cleft.add(v);
+                    i += 4;
+                } else {
+                    t = left.get(i + 1);
+                    Variable v = new Variable(t.val(), null, t.target);
+                    v.setOptional(true);
+                    if (t.val().equals("$")) {
+                        v.setFinal(true);
+                    }
+                    cleft.add(v);
+                    i += 2;
+                }
+            } else {
+                cleft.add(new CString(t.val(), t.getTarget()));
+            }
+        }
+        return true;
+    }
+    
+    public void compileRight() throws ConfigCompileException {
+        List<Token> temp = new ArrayList<Token>();
+        right = new ArrayList<List<Token>>();
+        for (Token t : fullRight) {
+            if (t.type == TType.SEPERATOR) {
+                right.add(temp);
+                temp = new ArrayList<Token>();
+            } else {
+                if(t.type == TType.WHITESPACE){
+                    continue; //Whitespace is ignored on the right side
+                }
+                temp.add(t);
+            }
+        }
+        right.add(temp);
+        cright = new ArrayList<GenericTreeNode<Construct>>();
+        for (List<Token> l : right) {
+            cright.add(MethodScriptCompiler.compile(l));
+        }
     }
 
     public Construct eval(GenericTreeNode<Construct> c, final Env env) throws CancelCommandException {
@@ -289,6 +330,51 @@ public class Script {
         } else {
             return m;
         }
+    }
+
+    public Env getCurrentEnv(){
+        return CurrentEnv;
+    }
+    
+    public String getLabel(){
+        return label;
+    }
+
+    private Procedure getProc(String name) {
+        return CurrentEnv.GetProcs().get(name);
+    }
+
+    public List<Variable> getVariables(String command) {
+        String[] cmds = command.split(" ");
+        List<String> args = new ArrayList(Arrays.asList(cmds));
+
+        StringBuilder lastVar = new StringBuilder();
+
+        ArrayList<Variable> vars = new ArrayList<Variable>();
+        Variable v = null;
+        for (int j = 0; j < cleft.size(); j++) {
+            try {
+                if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
+                    if (((Variable) cleft.get(j)).getName().equals("$")) {
+                        for (int k = j; k < args.size(); k++) {
+                            lastVar.append(args.get(k).trim()).append(" ");
+                        }
+                        v = new Variable(((Variable) cleft.get(j)).getName(),
+                                lastVar.toString().trim(), Target.UNKNOWN);
+                    } else {
+                        v = new Variable(((Variable) cleft.get(j)).getName(),
+                                args.get(j), Target.UNKNOWN);
+                    }
+                }
+            } catch (IndexOutOfBoundsException e) {
+                v = new Variable(((Variable) cleft.get(j)).getName(),
+                        ((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
+            }
+            if (v != null) {
+                vars.add(v);
+            }
+        }
+        return vars;
     }
 
     public boolean match(String command) {
@@ -393,51 +479,123 @@ public class Script {
         return isAMatch;
     }
 
-    public List<Variable> getVariables(String command) {
-        String[] cmds = command.split(" ");
-        List<String> args = new ArrayList(Arrays.asList(cmds));
-
-        StringBuilder lastVar = new StringBuilder();
-
-        ArrayList<Variable> vars = new ArrayList<Variable>();
-        Variable v = null;
-        for (int j = 0; j < cleft.size(); j++) {
-            try {
-                if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
-                    if (((Variable) cleft.get(j)).getName().equals("$")) {
-                        for (int k = j; k < args.size(); k++) {
-                            lastVar.append(args.get(k).trim()).append(" ");
-                        }
-                        v = new Variable(((Variable) cleft.get(j)).getName(),
-                                lastVar.toString().trim(), Target.UNKNOWN);
-                    } else {
-                        v = new Variable(((Variable) cleft.get(j)).getName(),
-                                args.get(j), Target.UNKNOWN);
+    public void run(final List<Variable> vars, Env myEnv, final MethodScriptComplete done) {
+        //Some things, such as the label are determined at compile time
+        this.CurrentEnv = myEnv;
+        this.CurrentEnv.SetLabel(this.label);
+        MCCommandSender p = myEnv.GetCommandSender();
+        if (!hasBeenCompiled || compilerError) {
+            Target target = Target.UNKNOWN;
+            if (left.size() >= 1) {
+                try{
+                    target = new Target(left.get(0).line_num, left.get(0).file, left.get(0).column);
+                } catch(NullPointerException e){
+                    //Oh well, we tried to get more information
+                }
+            }
+            throw new ConfigRuntimeException("Unable to run command, script not yet compiled, or a compiler error occured for that command."
+                    + " To see the compile error, run /reloadaliases",
+                    null, target);
+        }
+        if (p instanceof MCPlayer) {
+            if (CurrentEnv.GetLabel() != null) {
+                PermissionsResolverManager perms = Static.getPermissionsResolverManager();
+                String[] groups = CurrentEnv.GetLabel().substring(1).split("/");
+                for (String group : groups) {
+                    if (group.startsWith("-") && perms.inGroup(((MCPlayer)p).getName(), group.substring(1))) {
+                        //negative permission
+                        throw new ConfigRuntimeException("You do not have permission to use that command", ExceptionType.InsufficientPermissionException,
+                                Target.UNKNOWN);
+                    } else if (perms.inGroup(((MCPlayer)p).getName(), group)) {
+                        //They do have permission.
+                        break;
                     }
                 }
-            } catch (IndexOutOfBoundsException e) {
-                v = new Variable(((Variable) cleft.get(j)).getName(),
-                        ((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
-            }
-            if (v != null) {
-                vars.add(v);
             }
         }
-        return vars;
+
+        try {
+            for (GenericTreeNode<Construct> rootNode : cright) {
+                GenericTree<Construct> tree = new GenericTree<Construct>();
+                tree.setRoot(rootNode);
+                for (GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)) {
+                    if (tempNode.data instanceof Variable) {
+                        if(left_vars == null){
+                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.data.getTarget());
+                        }
+                        ((Variable) tempNode.data).setVal(
+                                Static.resolveConstruct(
+                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getTarget()));
+                    }
+                }
+                
+                MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
+                MethodScriptCompiler.execute(tree.getRoot(), CurrentEnv, done, this);
+            }
+        } catch (ConfigRuntimeException ex) {
+            //We don't know how to handle this really, so let's pass it up the chain.
+            throw ex;
+        } catch (CancelCommandException e) {
+            //p.sendMessage(e.getMessage());
+            //The message in the exception is actually empty
+        } catch (LoopBreakException e) {            
+            if(p != null){
+                p.sendMessage("The break() function must be used inside a for() or foreach() loop");
+            }
+            System.out.println("The break() function must be used inside a for() or foreach() loop");
+        } catch (LoopContinueException e) {
+            if(p != null){
+                p.sendMessage("The continue() function must be used inside a for() or foreach() loop");
+            }
+            System.out.println("The continue() function must be used inside a for() or foreach() loop");
+        } catch (FunctionReturnException e) {
+            if(myEnv.GetEvent() != null){
+                //Oh, we're running in an event handler. Those know how to catch it too.
+                throw e;
+            }
+            if(p != null){
+                p.sendMessage("The return() function must be used inside a procedure.");
+            }
+            System.out.println("The return() function must be used inside a procedure.");
+        } catch (Throwable t) {
+            System.out.println("An unexpected exception occured during the execution of a script.");
+            t.printStackTrace();
+            if(p != null){
+                p.sendMessage("An unexpected exception occured during the execution of your script. Please check the console for more information.");
+            }
+        }
+        if (done != null) {
+            done.done(null);
+        }
     }
 
-    public Script compile() throws ConfigCompileException {
-        try {
-            verifyLeft();
-            compileLeft();
-            compileRight();
-        } catch (ConfigCompileException e) {
-            compilerError = true;
-            throw e;
+    /**
+     * Runs eval on the code tree, and if it returns an ival, resolves it.
+     * @param c
+     * @param env
+     * @return 
+     */
+    public Construct seval(GenericTreeNode<Construct> c, final Env env){
+        Construct ret = eval(c, env);
+        if(ret instanceof IVariable){
+            IVariable cur = (IVariable)ret;
+            return env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
         }
-        compilerError = false;
-        hasBeenCompiled = true;
-        return this;
+        return ret;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder b = new StringBuilder();
+        for (Token t : left) {
+            b.append(t.val()).append(" ");
+        }
+        b.append("compiled: ").append(hasBeenCompiled).append("; errors? ").append(compilerError);
+        return b.toString();
+    }
+
+    public boolean uncompilable() {
+        return compilerError;
     }
 
     private boolean verifyLeft() throws ConfigCompileException {
@@ -596,163 +754,5 @@ public class Script {
         }
 
         return true;
-    }
-
-    private boolean compileLeft() {
-        cleft = new ArrayList<Construct>();
-        for (int i = 0; i < left.size(); i++) {
-            Token t = left.get(i);
-            if (t.value.startsWith("/")) {
-                cleft.add(new Command(t.val(), t.target));
-            } else if (t.type == Token.TType.VARIABLE) {
-                cleft.add(new Variable(t.val(), null, t.target));
-            } else if (t.type.equals(TType.FINAL_VAR)) {
-                Variable v = new Variable(t.val(), null, t.target);
-                v.setFinal(true);
-                cleft.add(v);
-            } else if (t.type.equals(TType.LSQUARE_BRACKET)) {
-                if (i + 2 < left.size() && left.get(i + 2).type.equals(TType.OPT_VAR_ASSIGN)) {
-                    Variable v = new Variable(left.get(i + 1).val(),
-                            left.get(i + 3).val(), t.target);
-                    v.setOptional(true);
-                    if (left.get(i + 1).type.equals(TType.FINAL_VAR)) {
-                        v.setFinal(true);
-                    }
-                    cleft.add(v);
-                    i += 4;
-                } else {
-                    t = left.get(i + 1);
-                    Variable v = new Variable(t.val(), null, t.target);
-                    v.setOptional(true);
-                    if (t.val().equals("$")) {
-                        v.setFinal(true);
-                    }
-                    cleft.add(v);
-                    i += 2;
-                }
-            } else {
-                cleft.add(new CString(t.val(), t.getTarget()));
-            }
-        }
-        return true;
-    }
-
-    public void compileRight() throws ConfigCompileException {
-        List<Token> temp = new ArrayList<Token>();
-        right = new ArrayList<List<Token>>();
-        for (Token t : fullRight) {
-            if (t.type == TType.SEPERATOR) {
-                right.add(temp);
-                temp = new ArrayList<Token>();
-            } else {
-                if(t.type == TType.WHITESPACE){
-                    continue; //Whitespace is ignored on the right side
-                }
-                temp.add(t);
-            }
-        }
-        right.add(temp);
-        cright = new ArrayList<GenericTreeNode<Construct>>();
-        for (List<Token> l : right) {
-            cright.add(MethodScriptCompiler.compile(l));
-        }
-    }
-
-    public void checkAmbiguous(List<Script> scripts) throws ConfigCompileException {
-        //for (int i = 0; i < scripts.size(); i++) {
-        List<Construct> thisCommand = this.cleft;
-        for (int j = 0; j < scripts.size(); j++) {
-            List<Construct> thatCommand = scripts.get(j).cleft;
-            if (thatCommand == null) {
-                //it hasn't been compiled yet.
-                return;
-            }
-            if (this.cleft == scripts.get(j).cleft) {
-                //Of course this command is going to match it's own signature
-                continue;
-            }
-            boolean soFarAMatch = true;
-            for (int k = 0; k < thisCommand.size(); k++) {
-                try {
-                    Construct c1 = thisCommand.get(k);
-                    Construct c2 = thatCommand.get(k);
-                    if (c1.getCType() != c2.getCType() || ((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
-                        soFarAMatch = false;
-                    } else {
-                        //It's a literal, check to see if it's the same literal
-                        if (c1.nval() == null || !c1.val().equals(c2.val())) {
-                            soFarAMatch = false;
-                        }
-                    }
-                } catch (IndexOutOfBoundsException e) {
-                    /**
-                     * The two commands:
-                     * /cmd $var1 [$var2]
-                     * /cmd $var1
-                     * would cause this exception to be thrown, but the signatures
-                     * are the same, so the fact that they've matched this far means
-                     * they are ambiguous. However,
-                     * /cmd $var1 $var2
-                     * /cmd $var1
-                     * is not ambiguous
-                     */
-                    //thatCommand is the short one
-                    if (!(thisCommand.get(k) instanceof Variable)
-                            || (thisCommand.get(k) instanceof Variable
-                            && !((Variable) thisCommand.get(k)).isOptional())) {
-                        soFarAMatch = false;
-                    }
-                }
-            }
-            if (thatCommand.size() > thisCommand.size()) {
-                int k = thisCommand.size();
-                //thisCommand is the short one
-                if (!(thatCommand.get(k) instanceof Variable)
-                        || (thatCommand.get(k) instanceof Variable
-                        && !((Variable) thatCommand.get(k)).isOptional())) {
-                    soFarAMatch = false;
-                }
-            }
-
-            if (soFarAMatch) {
-                String commandThis = "";
-                for (Construct c : thisCommand) {
-                    commandThis += c.val() + " ";
-                }
-                String commandThat = "";
-                for (Construct c : thatCommand) {
-                    commandThat += c.val() + " ";
-                }
-                scripts.get(j).compilerError = true;
-                this.compilerError = true;
-                throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
-                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getTarget());
-            }
-        }
-
-        //Also, check for undefined variables on the right, and unused variables on the left
-        ArrayList<String> left_copy = new ArrayList<String>();
-        for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
-            left_copy.add(v.getValue().getName());
-        }
-        Arrays.asList(new String[]{}).toArray(new String[]{});
-        for (GenericTreeNode<Construct> gtn : cright) {
-            GenericTree<Construct> tree = new GenericTree<Construct>();
-            tree.setRoot(gtn);
-            List<GenericTreeNode<Construct>> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
-            for (GenericTreeNode<Construct> c : builtTree) {
-                if (c.getData() instanceof Variable) {
-                    for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
-                        if (v.getValue().getName().equals(((Variable) c.getData()).getName())) {
-                            //Found it, remove this from the left_copy, and break
-                            left_copy.remove(v.getValue().getName());
-                            break;
-                            //TODO: Layton!
-                        }
-                    }
-                }
-            }
-        }
-        //}
     }
 }

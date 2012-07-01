@@ -92,28 +92,31 @@ public class CSymbol extends Construct {
         return conversion;
     }
 
-    public boolean isPostfix() {
-        return symbolType.isPostfix();
-    }
-
-    public boolean isUnary() {
-        return symbolType.isUnary();
-    }
-
-    public boolean isMultaplicative() {
-        return symbolType.isMultaplicative();
-    }
-
     public boolean isAdditive() {
         return symbolType.isAdditive();
     }
 
-    public boolean isRelational() {
-        return symbolType.isRelational();
+    @Override
+    public boolean isDynamic() {
+        //It gets turned into a function, but only after the __autoconcat__ features take over,
+        //which essentially removes all symbols.
+        return false;
     }
 
     public boolean isEquality() {
         return symbolType.isEquality();
+    }
+
+    public boolean isExponential() {
+        return symbolType.isExponential();
+    }
+
+    public boolean isLogicalAnd() {
+        return symbolType.isLogicalAnd();
+    }
+
+    public boolean isLogicalOr() {
+        return symbolType.isLogicalOr();
     }
 
 //    public boolean isBitwiseAnd() {
@@ -128,22 +131,19 @@ public class CSymbol extends Construct {
 //        return symbolType.isBitwiseOr();
 //    }
 
-    public boolean isLogicalAnd() {
-        return symbolType.isLogicalAnd();
+    public boolean isMultaplicative() {
+        return symbolType.isMultaplicative();
     }
 
-    public boolean isLogicalOr() {
-        return symbolType.isLogicalOr();
+    public boolean isPostfix() {
+        return symbolType.isPostfix();
     }
 
-    @Override
-    public boolean isDynamic() {
-        //It gets turned into a function, but only after the __autoconcat__ features take over,
-        //which essentially removes all symbols.
-        return false;
+    public boolean isRelational() {
+        return symbolType.isRelational();
     }
 
-    public boolean isExponential() {
-        return symbolType.isExponential();
+    public boolean isUnary() {
+        return symbolType.isUnary();
     }
 }

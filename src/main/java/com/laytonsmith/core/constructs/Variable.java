@@ -14,10 +14,10 @@ public class Variable extends Construct {
     
     public static final long serialVersionUID = 1L;
 
-    final private String name;
     private String def;
-    private boolean optional;
     private boolean final_var;
+    final private String name;
+    private boolean optional;
     private Construct var_value;
     
 
@@ -35,47 +35,47 @@ public class Variable extends Construct {
     }
 
     @Override
-    public String toString() {
-        return "var:" + name;
-    }
-    public String getName(){
-        return name;
-    }
-    public void setFinal(boolean final_var){
-        this.final_var = final_var;
-    }
-    public boolean isFinal(){
-        return final_var;
-    }
-    public void setOptional(boolean optional){
-        this.optional = optional;
-    }
-    public boolean isOptional(){
-        return optional;
-    }
-    public String getDefault(){
-        return def;
-    }
-    public void setDefault(String def){
-        this.def = def;
-    }
-    @Override
-    public String val(){
-        return var_value.toString();
-    }
-    public void setVal(Construct val){
-        this.var_value = val;
-    }
-    @Override
     public Variable clone() throws CloneNotSupportedException{
         Variable clone = (Variable) super.clone();
         if(this.var_value != null) clone.var_value = var_value;
         return clone;
     }
-
+    public String getDefault(){
+        return def;
+    }
+    public String getName(){
+        return name;
+    }
     @Override
     public boolean isDynamic() {
         return true;
+    }
+    public boolean isFinal(){
+        return final_var;
+    }
+    public boolean isOptional(){
+        return optional;
+    }
+    public void setDefault(String def){
+        this.def = def;
+    }
+    public void setFinal(boolean final_var){
+        this.final_var = final_var;
+    }
+    public void setOptional(boolean optional){
+        this.optional = optional;
+    }
+    public void setVal(Construct val){
+        this.var_value = val;
+    }
+    @Override
+    public String toString() {
+        return "var:" + name;
+    }
+
+    @Override
+    public String val(){
+        return var_value.toString();
     }
 
 }

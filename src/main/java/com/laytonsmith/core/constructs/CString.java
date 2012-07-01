@@ -15,10 +15,6 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
  */
 public class CString extends Construct implements Cloneable, ArrayAccess{
     
-    public CString(String value, Target t){
-        super(value, ConstructType.STRING, t);
-    }
-    
     public CString(char value, Target t){
         this(Character.toString(value), t);
     }
@@ -27,14 +23,17 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         this(value.toString(), t);
     }
     
-    @Override
-    public CString clone() throws CloneNotSupportedException{
-        return this;
+    public CString(String value, Target t){
+        super(value, ConstructType.STRING, t);
+    }
+    
+    public boolean canBeAssociative() {
+        return false;
     }
 
     @Override
-    public boolean isDynamic() {
-        return false;
+    public CString clone() throws CloneNotSupportedException{
+        return this;
     }
 
     public Construct get(String index, Target t) {
@@ -46,12 +45,13 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         }
     }
 
-    public int size() {
-        return val().length();
+    @Override
+    public boolean isDynamic() {
+        return false;
     }
 
-    public boolean canBeAssociative() {
-        return false;
+    public int size() {
+        return val().length();
     }
 
     public Construct slice(int begin, int end, Target t) {

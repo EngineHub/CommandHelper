@@ -12,39 +12,24 @@ import java.util.logging.Logger;
 
 
 public class Prefs {
-    private static Object pref(PNames name){
-        if(prefs == null){
-            //Uh oh. Default!
-            try {
-                Prefs.init(new File("plugins/CommandHelper/preferences.txt"));
-            } catch (IOException ex) {
-                //Well. We tried.
-                Logger.getLogger(Prefs.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        return prefs.getPreference(name.config());
-    }
-    
-    private static Preferences prefs;
-    
     private static enum PNames{
-        DEBUG_MODE("debug-mode"),
-        SHOW_WARNINGS("show-warnings"),
-        CONSOLE_LOG_COMMANDS("console-log-commands"),
-        SCRIPT_NAME("script-name"),
-        ENABLE_INTERPRETER("enable-interpreter"),
-        BASE_DIR("base-dir"),
-        PLAY_DIRTY("play-dirty"),
-        CASE_SENSITIVE("case-sensitive"),
-        MAIN_FILE("main-file"),
         ALLOW_DEBUG_LOGGING("allow-debug-logging"),
-        DEBUG_LOG_FILE("debug-log-file"),
-        STANDARD_LOG_FILE("standard-log-file"),
         ALLOW_PROFILING("allow-profiling"),
+        BASE_DIR("base-dir"),
+        CASE_SENSITIVE("case-sensitive"),
+        CONSOLE_LOG_COMMANDS("console-log-commands"),
+        DEBUG_LOG_FILE("debug-log-file"),
+        DEBUG_MODE("debug-mode"),
+        ENABLE_INTERPRETER("enable-interpreter"),
+        HALT_ON_FAILURE("halt-on-failure"),
+        MAIN_FILE("main-file"),
+        PLAY_DIRTY("play-dirty"),
         PROFILING_FILE("profiling-file"),
+        SCRIPT_NAME("script-name"),
         SHOW_SPLASH_SCREEN("show-splash-screen"),
-        USE_COLORS("use-colors"),
-        HALT_ON_FAILURE("halt-on-failure");
+        SHOW_WARNINGS("show-warnings"),
+        STANDARD_LOG_FILE("standard-log-file"),
+        USE_COLORS("use-colors");
         String name;
         private PNames(String name){
             this.name = name;
@@ -53,7 +38,45 @@ public class Prefs {
             return name;
         }
     }
+    
+    private static Preferences prefs;
+    
+    public static Boolean AllowDebugLogging(){
+        return (Boolean)pref(PNames.ALLOW_DEBUG_LOGGING);
+    }
 
+    public static Boolean AllowProfiling(){
+        return (Boolean)pref(PNames.ALLOW_PROFILING);
+    }
+    
+    public static String BaseDir(){
+        return (String)pref(PNames.BASE_DIR);
+    }
+    
+    public static Boolean CaseSensitive(){
+        return (Boolean)pref(PNames.CASE_SENSITIVE);
+    }
+    
+    public static Boolean ConsoleLogCommands(){
+        return (Boolean)pref(PNames.CONSOLE_LOG_COMMANDS);
+    }
+    
+    public static String DebugLogFile(){
+        return (String)pref(PNames.DEBUG_LOG_FILE);
+    }
+    
+    public static Boolean DebugMode(){
+        return (Boolean)pref(PNames.DEBUG_MODE);
+    }
+    
+    public static Boolean EnableInterpreter(){
+        return (Boolean)pref(PNames.ENABLE_INTERPRETER);
+    }
+    
+    public static Boolean HaltOnFailure() {
+        return (Boolean)pref(PNames.HALT_ON_FAILURE);
+    }
+    
     public static void init(File f) throws IOException {
         ArrayList<Preferences.Preference> a = new ArrayList<Preferences.Preference>();
         //a.add(new Preference("check-for-updates", "false", Type.BOOLEAN, "Whether or not to check to see if there's an update for CommandHelper"));
@@ -81,71 +104,48 @@ public class Prefs {
         prefs.init(f);
     }
     
-    public static Boolean DebugMode(){
-        return (Boolean)pref(PNames.DEBUG_MODE);
-    }
-    
-    public static Boolean ShowWarnings(){
-        return (Boolean)pref(PNames.SHOW_WARNINGS);
-    }
-    
-    public static Boolean ConsoleLogCommands(){
-        return (Boolean)pref(PNames.CONSOLE_LOG_COMMANDS);
-    }
-    
-    public static String ScriptName(){
-        return (String)pref(PNames.SCRIPT_NAME);
-    }
-    
-    public static Boolean EnableInterpreter(){
-        return (Boolean)pref(PNames.ENABLE_INTERPRETER);
-    }
-    
-    public static String BaseDir(){
-        return (String)pref(PNames.BASE_DIR);
+    public static String MainFile(){
+        return (String)pref(PNames.MAIN_FILE);
     }
     
     public static Boolean PlayDirty(){
         return (Boolean)pref(PNames.PLAY_DIRTY);
     }
     
-    public static Boolean CaseSensitive(){
-        return (Boolean)pref(PNames.CASE_SENSITIVE);
-    }
-    
-    public static String MainFile(){
-        return (String)pref(PNames.MAIN_FILE);
-    }
-    
-    public static Boolean AllowDebugLogging(){
-        return (Boolean)pref(PNames.ALLOW_DEBUG_LOGGING);
-    }
-    
-    public static String DebugLogFile(){
-        return (String)pref(PNames.DEBUG_LOG_FILE);
-    }
-    
-    public static String StandardLogFile(){
-        return (String)pref(PNames.STANDARD_LOG_FILE);
-    }
-    
-    public static Boolean AllowProfiling(){
-        return (Boolean)pref(PNames.ALLOW_PROFILING);
+    private static Object pref(PNames name){
+        if(prefs == null){
+            //Uh oh. Default!
+            try {
+                Prefs.init(new File("plugins/CommandHelper/preferences.txt"));
+            } catch (IOException ex) {
+                //Well. We tried.
+                Logger.getLogger(Prefs.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        return prefs.getPreference(name.config());
     }
     
     public static String ProfilingFile(){
         return (String)pref(PNames.PROFILING_FILE);
     }
     
+    public static String ScriptName(){
+        return (String)pref(PNames.SCRIPT_NAME);
+    }
+    
     public static Boolean ShowSplashScreen(){
         return (Boolean)pref(PNames.SHOW_SPLASH_SCREEN);
     }
     
-    public static Boolean UseColors(){
-        return (Boolean)pref(PNames.USE_COLORS);
+    public static Boolean ShowWarnings(){
+        return (Boolean)pref(PNames.SHOW_WARNINGS);
     }
     
-    public static Boolean HaltOnFailure() {
-        return (Boolean)pref(PNames.HALT_ON_FAILURE);
+    public static String StandardLogFile(){
+        return (String)pref(PNames.STANDARD_LOG_FILE);
+    }
+    
+    public static Boolean UseColors(){
+        return (Boolean)pref(PNames.USE_COLORS);
     }
 }

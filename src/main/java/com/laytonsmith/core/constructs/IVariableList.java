@@ -15,8 +15,11 @@ import java.util.Set;
 public class IVariableList {
     Map<String, IVariable> varList = new HashMap<String, IVariable>();
     
-    public void set(IVariable v){
-        varList.put(v.getName(), v);
+    @Override
+    public IVariableList clone(){
+        IVariableList clone = new IVariableList();
+        clone.varList = new HashMap<String, IVariable>(varList);
+        return clone;
     }
     
     public IVariable get(String name, Target t){
@@ -25,6 +28,15 @@ public class IVariableList {
         }
         varList.get(name).setTarget(t);
         return varList.get(name);
+    }
+
+    //only the reflection package should be accessing this
+    public Set<String> keySet() {
+        return varList.keySet();
+    }
+    
+    public void set(IVariable v){
+        varList.put(v.getName(), v);
     }
 
     @Override
@@ -43,18 +55,6 @@ public class IVariableList {
         }
         b.append("]");
         return b.toString();
-    }
-    
-    @Override
-    public IVariableList clone(){
-        IVariableList clone = new IVariableList();
-        clone.varList = new HashMap<String, IVariable>(varList);
-        return clone;
-    }
-
-    //only the reflection package should be accessing this
-    public Set<String> keySet() {
-        return varList.keySet();
     }
     
     

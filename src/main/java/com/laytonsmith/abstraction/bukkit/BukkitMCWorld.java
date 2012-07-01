@@ -27,11 +27,15 @@ import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
  */
 public class BukkitMCWorld implements MCWorld {
 
-    World w;
+    private enum MOBS {
 
-    public BukkitMCWorld(World w) {
-        this.w = w;
+        BLAZE, CAT, CAVESPIDER, CHICKEN, COW, CREEPER, ENDERDRAGON, ENDERMAN, GHAST,
+        GIANT, IRONGOLEM, MAGMACUBE, MOOSHROOM, OCELOT, PIG, PIGZOMBIE, SHEEP,
+        SILVERFISH, SKELETON, SLIME, SNOWGOLEM, SPIDER, SPIDERJOCKEY, SQUID,
+        VILLAGER, WOLF, ZOMBIE;
     }
+
+    World w;
     
     public BukkitMCWorld(AbstractionObject a){
         this((World)null);
@@ -42,13 +46,44 @@ public class BukkitMCWorld implements MCWorld {
         }
     }
     
-    public Object getHandle(){
-        return w;
+    public BukkitMCWorld(World w) {
+        this.w = w;
     }
 
     public World __World() {
         return w;
     }
+
+    public void dropItem(MCLocation l, MCItemStack is) {
+        w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is);
+    }
+
+    public void dropItemNaturally(MCLocation l, MCItemStack is) {
+        w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is);
+    }
+
+    public void explosion(double x, double y, double z, float size) {
+        w.createExplosion(new Location(w, x,y,z), size);
+    }
+
+    public MCBiomeType getBiome(int x, int z) {
+        return MCBiomeType.valueOf(w.getBiome(x, z).name());
+    }
+
+    public MCBlock getBlockAt(int x, int y, int z) {
+        if (w.getBlockAt(x, y, z) == null) {
+            return null;
+        }
+        return new BukkitMCBlock(w.getBlockAt(x, y, z));
+    }
+
+    public Object getHandle(){
+        return w;
+    }
+
+    public MCBlock getHighestBlockAt(int x, int z) {
+        return new BukkitMCBlock(w.getHighestBlockAt(x, z));
+     }
 
     public List<MCLivingEntity> getLivingEntities() {
         if (w.getLivingEntities() == null) {
@@ -65,79 +100,36 @@ public class BukkitMCWorld implements MCWorld {
         return w.getName();
     }
 
-    public MCBlock getBlockAt(int x, int y, int z) {
-        if (w.getBlockAt(x, y, z) == null) {
-            return null;
-        }
-        return new BukkitMCBlock(w.getBlockAt(x, y, z));
-    }
-
-    public MCEntity spawn(MCLocation l, Class mobType) {
-        return BukkitConvertor.BukkitGetCorrectEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
-    }
-
-    public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {
-        w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), e, data);
-    }
-
-    public void dropItemNaturally(MCLocation l, MCItemStack is) {
-        w.dropItemNaturally(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is);
-    }
-
-    public void dropItem(MCLocation l, MCItemStack is) {
-        w.dropItem(((BukkitMCLocation) l).l, ((BukkitMCItemStack) is).is);
-    }
-
-    public void strikeLightning(MCLocation GetLocation) {
-        w.strikeLightning(((BukkitMCLocation) GetLocation).l);
-    }
-
-    public void strikeLightningEffect(MCLocation GetLocation) {
-        w.strikeLightningEffect(((BukkitMCLocation) GetLocation).l);
-    }
-
-    public void setStorm(boolean b) {
-        w.setStorm(b);
-    }
-
     public MCLocation getSpawnLocation() {
         return new BukkitMCLocation(w.getSpawnLocation());
-    }
-
-    public void refreshChunk(int x, int z) {
-        w.refreshChunk(x, z);
-    }
-
-    public void setTime(long time) {
-        w.setTime(time);
     }
 
     public long getTime() {
         return w.getTime();
     }
 
-    public MCBiomeType getBiome(int x, int z) {
-        return MCBiomeType.valueOf(w.getBiome(x, z).name());
+    public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data) {
+        w.playEffect(((BukkitMCLocation) l).l, Effect.valueOf(mCEffect.name()), e, data);
+    }
+
+    public void refreshChunk(int x, int z) {
+        w.refreshChunk(x, z);
     }
 
     public void setBiome(int x, int z, MCBiomeType type) {
         w.setBiome(x, z, Biome.valueOf(type.name()));
     }
 
-    public MCBlock getHighestBlockAt(int x, int z) {
-        return new BukkitMCBlock(w.getHighestBlockAt(x, z));
-     }
-
-    public void explosion(double x, double y, double z, float size) {
-        w.createExplosion(new Location(w, x,y,z), size);
+    public void setStorm(boolean b) {
+        w.setStorm(b);
     }
 
-    private enum MOBS {
+    public void setTime(long time) {
+        w.setTime(time);
+    }
 
-        CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME,
-        SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH, VILLAGER,
-        BLAZE, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY, GIANT, SNOWGOLEM,
-        OCELOT, CAT, IRONGOLEM;
+    public MCEntity spawn(MCLocation l, Class mobType) {
+        return BukkitConvertor.BukkitGetCorrectEntity(w.spawn(((BukkitMCLocation) l).l, mobType));
     }
 
     public CArray spawnMob(String name, String subClass, int qty, MCLocation l, Target t) {
@@ -269,5 +261,13 @@ public class BukkitMCWorld implements MCWorld {
             ids.push(new CInt(e.getEntityId(), t));
         }
         return ids;
+    }
+
+    public void strikeLightning(MCLocation GetLocation) {
+        w.strikeLightning(((BukkitMCLocation) GetLocation).l);
+    }
+
+    public void strikeLightningEffect(MCLocation GetLocation) {
+        w.strikeLightningEffect(((BukkitMCLocation) GetLocation).l);
     }
 }

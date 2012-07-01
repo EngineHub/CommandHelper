@@ -24,189 +24,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
     public enum ConstructType {
 
-        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
-        DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
-        SYMBOL, IDENTIFIER
+        ARRAY, BOOLEAN, CLOSURE, COMMAND, DOUBLE, ENTRY, FUNCTION, IDENTIFIER, INT, 
+        IVARIABLE, LABEL, LITERAL, MAP, NULL, SLICE, STRING, SYMBOL, TOKEN,
+        VARIABLE, VOID
     }
-    private final ConstructType ctype;
-    private final String value;
-
-    private Target target;
-
-    public ConstructType getCType() {
-        return ctype;
-    }
-    
-    /**
-     * This method should only be used by Script when setting the children's target, if it's an ivariable.
-     * @param target 
-     */
-    void setTarget(Target target) {
-        this.target = target;
-    }
-    
-    public String getValue() {
-        return value;
-    }
-
-    public int getLineNum() {
-        return target.line();
-    }
-
-    public File getFile() {
-        return target.file();
-    }
-    
-    public int getColumn(){
-        return target.col();
-    }
-    
-    public Target getTarget(){
-        return target;
-    }
-
-    public Construct(String value, ConstructType ctype, int line_num, File file, int column) {
-        this.value = value;
-        this.ctype = ctype;
-        this.target = new Target(line_num, file, column);
-    }
-    
-    public Construct(String value, ConstructType ctype, Target t){
-        this.value = value;
-        this.ctype = ctype;
-        this.target = t;
-    }
-
-    /**
-     * Returns the standard string representation of this Construct.
-     * @return 
-     */
-    public String val() {
-        return value;
-    }
-    
-    /**
-     * Returns the standard string representation of this Construct, except
-     * in the case that the construct is a CNull, in which case it returns
-     * java null.
-     * @return 
-     */
-    public String nval(){
-        return val();
-    }
-    
-
-    @Override
-    public String toString() {
-        return value;
-    }
-
-    @Override
-    public Construct clone() throws CloneNotSupportedException {
-        return (Construct) super.clone();
-    }
-
-    /**
-     * This function takes a Construct, and turns it into a JSON value. If the construct is
-     * not one of the following, a MarshalException is thrown: CArray, CBoolean, CDouble, CInt, CNull, 
-     * CString, CVoid, Command. Currently unsupported, but will be in the future are: CClosure/CFunction
-     * The following map is applied when encoding and decoding:
-     * <table border='1'>
-     * <tr><th>JSON</th><th>MethodScript</th></tr>
-     * <tr><td>string</td><td>CString, CVoid, Command, but all are decoded into CString</td></tr>
-     * <tr><td>number</td><td>CInt, CDouble, and it is decoded intelligently</td></tr>
-     * <tr><td>boolean</td><td>CBoolean</td></tr>
-     * <tr><td>null</td><td>CNull</td></tr>
-     * <tr><td>array/object</td><td>CArray</td></tr>
-     * </table>
-     * @param c
-     * @return 
-     */
-    public static String json_encode(Construct c, Target t) throws MarshalException{
-        return json_encode(c, false, t);
-    }
-
-    /**
-     * Use the other one.
-     * @deprecated 
-     * @param c
-     * @param raw
-     * @param line_num
-     * @param f
-     * @return
-     * @throws MarshalException
-     * @deprecated
-     */
-    @Deprecated
-    public static String json_encode(Construct c, boolean raw, Target t) throws MarshalException {
-        return JSONValue.toJSONString(json_encode0(c, t));
-    }
-    
-    private static Object json_encode0(Construct c, Target t) throws MarshalException{
-        if (c instanceof CString || c instanceof Command) {
-            return c.val();
-        } else if (c instanceof CVoid) {
-            return "";
-        } else if (c instanceof CInt) {
-            return ((CInt) c).getInt();
-        } else if (c instanceof CDouble) {
-            return ((CDouble) c).getDouble();
-        } else if (c instanceof CBoolean) {
-            return ((CBoolean) c).getBoolean();
-        } else if (c instanceof CNull) {
-            return null;
-        } else if (c instanceof CArray) {
-            CArray ca = (CArray) c;
-            if (!ca.inAssociativeMode()) {
-                List<Object> list = new ArrayList<Object>();
-                for(int i = 0; i < ca.size(); i++){
-                    list.add(json_encode0(ca.get(i, t), t));
-                }
-                return list;
-            } else {
-                Map<String, Object> map = new HashMap<String, Object>();
-                for(String key : ca.keySet()){
-                    map.put(key, json_encode0(ca.get(key, t), t));
-                }
-                return map;
-            }
-        } else {
-            throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
-        }
-    }
-    /**
-     * Takes a string and converts it into a Construct
-     * @param s
-     * @return 
-     */
-    public static Construct json_decode(String s, Target t) throws MarshalException {
-        if (s.startsWith("{")) {
-            //Object
-            JSONObject obj = (JSONObject) JSONValue.parse(s);
-            CArray ca = new CArray(t);
-            ca.forceAssociativeMode();
-            for(Object key : obj.keySet()){
-                ca.set(convertJSON(key, t), 
-                        convertJSON(obj.get(key), t));
-            }
-            return ca;
-        } else if (s.startsWith("[")) {
-            //It's an array
-            JSONArray array = (JSONArray) JSONValue.parse(s);
-            CArray carray = new CArray(t);
-            for (int i = 0; i < array.size(); i++) {
-                carray.push(convertJSON(array.get(i), t));
-            }
-            return carray;
-        } else {
-            //It's a single value, but we're gonna wrap it in an array, then deconstruct it
-            s = "[" + s + "]";
-            JSONArray array = (JSONArray) JSONValue.parse(s);
-            Object o = array.get(0);
-            return convertJSON(o, t);
-        }
-    }
-
     private static Construct convertJSON(Object o, Target t) throws MarshalException {
         if (o instanceof String) {
             return new CString((String) o, Target.UNKNOWN);
@@ -242,21 +63,6 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             throw new MarshalException(o.getClass().getSimpleName() + " are not currently supported");
         }
     }
-
-    public int compareTo(Construct c) {
-        if(this.value.contains(" ") || this.value.contains("\t") 
-                || c.value.contains(" ") || c.value.contains("\t")){
-            return this.value.compareTo(c.value);
-        }
-        try {
-            Double d1 = Double.valueOf(this.value);
-            Double d2 = Double.valueOf(c.value);
-            return d1.compareTo(d2);
-        } catch (NumberFormatException e) {
-            return this.value.compareTo(c.value);
-        }
-    }
-    
     /**
      * Converts a POJO to a Construct, if the type is convertable. This accepts many types of
      * objects, and should be expanded if a type does fit into the overall type scheme.
@@ -301,7 +107,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             throw new ClassCastException(o.getClass().getName() + " cannot be cast to a Construct type");
         }
     }
-    
+
     /**
      * Converts a Construct to a POJO, if the type is convertable. The types returned from
      * this method are set, unlike GetConstruct which is more flexible. The mapping is precisely
@@ -349,11 +155,205 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
         }
     }
+
+    /**
+     * Takes a string and converts it into a Construct
+     * @param s
+     * @return 
+     */
+    public static Construct json_decode(String s, Target t) throws MarshalException {
+        if (s.startsWith("{")) {
+            //Object
+            JSONObject obj = (JSONObject) JSONValue.parse(s);
+            CArray ca = new CArray(t);
+            ca.forceAssociativeMode();
+            for(Object key : obj.keySet()){
+                ca.set(convertJSON(key, t), 
+                        convertJSON(obj.get(key), t));
+            }
+            return ca;
+        } else if (s.startsWith("[")) {
+            //It's an array
+            JSONArray array = (JSONArray) JSONValue.parse(s);
+            CArray carray = new CArray(t);
+            for (int i = 0; i < array.size(); i++) {
+                carray.push(convertJSON(array.get(i), t));
+            }
+            return carray;
+        } else {
+            //It's a single value, but we're gonna wrap it in an array, then deconstruct it
+            s = "[" + s + "]";
+            JSONArray array = (JSONArray) JSONValue.parse(s);
+            Object o = array.get(0);
+            return convertJSON(o, t);
+        }
+    }
     
+    /**
+     * Use the other one.
+     * @deprecated 
+     * @param c
+     * @param raw
+     * @param line_num
+     * @param f
+     * @return
+     * @throws MarshalException
+     * @deprecated
+     */
+    @Deprecated
+    public static String json_encode(Construct c, boolean raw, Target t) throws MarshalException {
+        return JSONValue.toJSONString(json_encode0(c, t));
+    }
+    
+    /**
+     * This function takes a Construct, and turns it into a JSON value. If the construct is
+     * not one of the following, a MarshalException is thrown: CArray, CBoolean, CDouble, CInt, CNull, 
+     * CString, CVoid, Command. Currently unsupported, but will be in the future are: CClosure/CFunction
+     * The following map is applied when encoding and decoding:
+     * <table border='1'>
+     * <tr><th>JSON</th><th>MethodScript</th></tr>
+     * <tr><td>string</td><td>CString, CVoid, Command, but all are decoded into CString</td></tr>
+     * <tr><td>number</td><td>CInt, CDouble, and it is decoded intelligently</td></tr>
+     * <tr><td>boolean</td><td>CBoolean</td></tr>
+     * <tr><td>null</td><td>CNull</td></tr>
+     * <tr><td>array/object</td><td>CArray</td></tr>
+     * </table>
+     * @param c
+     * @return 
+     */
+    public static String json_encode(Construct c, Target t) throws MarshalException{
+        return json_encode(c, false, t);
+    }
+
+    private static Object json_encode0(Construct c, Target t) throws MarshalException{
+        if (c instanceof CString || c instanceof Command) {
+            return c.val();
+        } else if (c instanceof CVoid) {
+            return "";
+        } else if (c instanceof CInt) {
+            return ((CInt) c).getInt();
+        } else if (c instanceof CDouble) {
+            return ((CDouble) c).getDouble();
+        } else if (c instanceof CBoolean) {
+            return ((CBoolean) c).getBoolean();
+        } else if (c instanceof CNull) {
+            return null;
+        } else if (c instanceof CArray) {
+            CArray ca = (CArray) c;
+            if (!ca.inAssociativeMode()) {
+                List<Object> list = new ArrayList<Object>();
+                for(int i = 0; i < ca.size(); i++){
+                    list.add(json_encode0(ca.get(i, t), t));
+                }
+                return list;
+            } else {
+                Map<String, Object> map = new HashMap<String, Object>();
+                for(String key : ca.keySet()){
+                    map.put(key, json_encode0(ca.get(key, t), t));
+                }
+                return map;
+            }
+        } else {
+            throw new MarshalException("The type of " + c.getClass().getSimpleName() + " is not currently supported", c);
+        }
+    }
+
+    private final ConstructType ctype;
+    
+    private Target target;
+    
+    private final String value;
+
+    public Construct(String value, ConstructType ctype, int line_num, File file, int column) {
+        this.value = value;
+        this.ctype = ctype;
+        this.target = new Target(line_num, file, column);
+    }
+    
+    public Construct(String value, ConstructType ctype, Target t){
+        this.value = value;
+        this.ctype = ctype;
+        this.target = t;
+    }
+
+    @Override
+    public Construct clone() throws CloneNotSupportedException {
+        return (Construct) super.clone();
+    }
+    
+    public int compareTo(Construct c) {
+        if(this.value.contains(" ") || this.value.contains("\t") 
+                || c.value.contains(" ") || c.value.contains("\t")){
+            return this.value.compareTo(c.value);
+        }
+        try {
+            Double d1 = Double.valueOf(this.value);
+            Double d2 = Double.valueOf(c.value);
+            return d1.compareTo(d2);
+        } catch (NumberFormatException e) {
+            return this.value.compareTo(c.value);
+        }
+    }
+    
+
+    public int getColumn(){
+        return target.col();
+    }
+
+    public ConstructType getCType() {
+        return ctype;
+    }
+
+    public File getFile() {
+        return target.file();
+    }
+
+    public int getLineNum() {
+        return target.line();
+    }
+    
+    public Target getTarget(){
+        return target;
+    }
+    public String getValue() {
+        return value;
+    }
+
     /**
      * If this type of construct is dynamic, that is to say, if it isn't a constant.
      * Things like 9, and 's' are constant. Things like {@code @value} are dynamic.
      * @return 
      */
     public abstract boolean isDynamic();
+
+    /**
+     * Returns the standard string representation of this Construct, except
+     * in the case that the construct is a CNull, in which case it returns
+     * java null.
+     * @return 
+     */
+    public String nval(){
+        return val();
+    }
+    
+    /**
+     * This method should only be used by Script when setting the children's target, if it's an ivariable.
+     * @param target 
+     */
+    void setTarget(Target target) {
+        this.target = target;
+    }
+    
+    @Override
+    public String toString() {
+        return value;
+    }
+    
+    /**
+     * Returns the standard string representation of this Construct.
+     * @return 
+     */
+    public String val() {
+        return value;
+    }
 }

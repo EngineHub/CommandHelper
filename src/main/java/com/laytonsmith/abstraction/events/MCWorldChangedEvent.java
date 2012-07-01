@@ -9,7 +9,7 @@ import com.laytonsmith.core.events.BindableEvent;
  * @author layton
  */
 public interface MCWorldChangedEvent extends BindableEvent {
-    public MCPlayer getPlayer();
     public MCWorld getFrom();
+    public MCPlayer getPlayer();
     public MCWorld getTo();
 }

@@ -29,23 +29,24 @@ public class BukkitMCBlock implements MCBlock{
         this.b = b;
     }
     
-    public int getTypeId(){
-        if(b == null){
-            return 0;
-        }
-        return b.getTypeId();
+    public Block __Block() {
+        return b;
     }
     
     public byte getData(){
         return b.getData();
     }
 
-    public void setTypeId(int idata) {
-        b.setTypeId(idata);
+    public Collection<MCItemStack> getDrops() {
+        Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
+        for(ItemStack is : b.getDrops()){
+            collection.add(new BukkitMCItemStack(is));
+        }
+        return collection;
     }
 
-    public void setData(byte imeta) {
-        b.setData(imeta);
+    public MCSign getSign() {
+        return new BukkitMCSign((Sign)b.getState());
     }
 
     public MCBlockState getState() {
@@ -60,6 +61,13 @@ public class BukkitMCBlock implements MCBlock{
             return null;
         }
         return new BukkitMCMaterial(b.getType());
+    }
+
+    public int getTypeId(){
+        if(b == null){
+            return 0;
+        }
+        return b.getTypeId();
     }
 
     public MCWorld getWorld() {
@@ -78,28 +86,20 @@ public class BukkitMCBlock implements MCBlock{
         return b.getZ();
     }
 
-    public Block __Block() {
-        return b;
-    }
-
-    public MCSign getSign() {
-        return new BukkitMCSign((Sign)b.getState());
+    public boolean isNull() {
+        return b == null;
     }
 
     public boolean isSign() {
         return (b.getType() == Material.SIGN || b.getType() == Material.SIGN_POST || b.getType() == Material.WALL_SIGN);
     }
 
-    public boolean isNull() {
-        return b == null;
+    public void setData(byte imeta) {
+        b.setData(imeta);
     }
 
-    public Collection<MCItemStack> getDrops() {
-        Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
-        for(ItemStack is : b.getDrops()){
-            collection.add(new BukkitMCItemStack(is));
-        }
-        return collection;
+    public void setTypeId(int idata) {
+        b.setTypeId(idata);
     }
     
     

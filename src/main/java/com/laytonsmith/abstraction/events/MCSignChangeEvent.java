@@ -12,15 +12,15 @@ import com.laytonsmith.core.events.BindableEvent;
  */
 public interface MCSignChangeEvent extends BindableEvent {
 
-    public MCPlayer getPlayer();
-
     public MCBlock getBlock();
 
     public CString getLine(int index);
 
+    public CArray getLines();
+
+    public MCPlayer getPlayer();
+
     public void setLine(int index, String text);
 
     public void setLines(String[] lines);
-
-    public CArray getLines();
 }

@@ -12,11 +12,11 @@ public interface MCEntityDamageByEntityEvent extends BindableEvent {
 
     public MCDamageCause getCause();
 
+    public int getDamage();
+
     public MCEntity getDamagee();
 
     public MCEntity getDamager();
-
-    public int getDamage();
 
     public void setDamage(int damage);
 }

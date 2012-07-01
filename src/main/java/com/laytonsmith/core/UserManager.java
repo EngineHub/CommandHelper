@@ -24,6 +24,12 @@ public class UserManager {
     private static Map<String, UserManager> map = new HashMap<String, UserManager>();
     private static Map<String, List<Token>> script_cache = new HashMap<String, List<Token>>();
     
+    public static void ClearUser(String name){
+        if(map.containsKey(name)){
+            map.remove(name);
+        }
+    }
+    
     public static UserManager GetUserManager(String name){
         if(!map.containsKey(name)){
             map.put(name, new UserManager(name));
@@ -31,25 +37,11 @@ public class UserManager {
         return map.get(name);
     }
     
-    public static void ClearUser(String name){
-        if(map.containsKey(name)){
-            map.remove(name);
-        }
-    }
-    
-    String name;
     String lastCommand;
+    String name;
     
     private UserManager(String name){
         this.name = name;
-    }
-    
-    public void setLastCommand(String lastCommand){
-        this.lastCommand = lastCommand;
-    }
-    
-    public String getLastCommand(){
-        return lastCommand;
     }
     
     public int addAlias(String alias) throws ConfigCompileException {
@@ -70,6 +62,10 @@ public class UserManager {
         return nextValue;
     }
     
+    public void delAlias(int id){
+        Static.getPersistance().setValue(new String[]{"user", name, "aliases", Integer.toString(id)}, null);
+    }
+    
     public Script getAlias(int id) throws ConfigCompileException{
         String alias = (String)Static.getPersistance().getValue(new String[]{"user", name, "aliases", Integer.toString(id)});
         if(alias == null){
@@ -88,10 +84,6 @@ public class UserManager {
             tokens = MethodScriptCompiler.lex(alias, new File("User Alias"));            
         }
         return MethodScriptCompiler.preprocess(tokens, env).get(0);
-    }
-    
-    public void delAlias(int id){
-        Static.getPersistance().setValue(new String[]{"user", name, "aliases", Integer.toString(id)}, null);
     }
     
     public String getAllAliases(int page){
@@ -127,6 +119,14 @@ public class UserManager {
             }
         }
         return list;
+    }
+    
+    public String getLastCommand(){
+        return lastCommand;
+    }
+    
+    public void setLastCommand(String lastCommand){
+        this.lastCommand = lastCommand;
     }
     
     
