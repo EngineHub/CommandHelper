@@ -5,10 +5,6 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
-import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
@@ -24,32 +20,30 @@ import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MobEffect;
 import net.minecraft.server.ServerConfigurationManager;
 import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
-import org.bukkit.block.Block;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.util.BlockIterator;
 
 /**
  *
  * @author layton
  */
-public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCCommandSender {
+public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCCommandSender, MCOfflinePlayer {
 
     Player p;
 
-    public BukkitMCPlayer(Player p) {
-        super(p);
-        this.p = p;
+	public BukkitMCPlayer(Player player) {
+        super(player);
+        this.p = player;
     }
 
-    public Player _Player(){
+	public Player _Player(){
         return p;
     }
 
-    public void addEffect(int potionID, int strength, int seconds) {        
+	public void addEffect(int potionID, int strength, int seconds) {        
         EntityPlayer ep = ((CraftPlayer) p).getHandle();        
         MobEffect me = new MobEffect(potionID, seconds * 20, strength);
         //ep.addEffect(me);
@@ -97,40 +91,25 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p.getDisplayName();
     }
 
-    public int getEntityId() {
-        return p.getEntityId();
-    }
-
     public float getExp() {
         return p.getExp();
     }
+
+    public long getFirstPlayed() {
+		return p.getFirstPlayed();
+	}
 
     public int getFoodLevel() {
         return p.getFoodLevel();
     }
 
-    public MCGameMode getGameMode() {
-        switch(p.getGameMode()){
-            case SURVIVAL:
-                return MCGameMode.SURVIVAL;
-            case CREATIVE:
-                return MCGameMode.CREATIVE;
-        }
-        return null;
-    }
-    
-    public int getHealth() {
-        return p.getHealth();
-    }
-    
-    
     public MCInventory getInventory() {
         if (p == null || p.getInventory() == null) {
             return null;
         }
         return new BukkitMCInventory(p.getInventory());
     }
-    
+
     public MCItemStack getItemAt(Construct construct) {
         if(construct == null || construct instanceof CNull){
             return new BukkitMCItemStack(p.getItemInHand());
@@ -157,62 +136,24 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         }
     }
     
-    public MCItemStack getItemInHand() {
-        if (p == null || p.getItemInHand() == null) {
-            return null;
-        }
-        return new BukkitMCItemStack(p.getItemInHand());
-    }
-
+    public long getLastPlayed() {
+		return p.getLastPlayed();
+	}
+    
     public int getLevel() {
         return p.getLevel();
     }
 
-    private List<Block> getLineOfSight(HashSet<Byte> transparent, int maxDistance, int maxLength) {
-        if (maxDistance > 512) {
-            maxDistance = 512;
-        }
-        ArrayList<Block> blocks = new ArrayList<Block>();
-        Iterator<Block> itr = new BlockIterator(p, maxDistance);
-        while (itr.hasNext()) {
-            Block block = itr.next();
-            blocks.add(block);
-            if (maxLength != 0 && blocks.size() > maxLength) {
-                blocks.remove(0);
-            }
-            int id = block.getTypeId();
-            if (transparent == null) {
-                if (id != 0) {
-                    break;
-                }
-            } else {
-                if (!transparent.contains((byte) id)) {
-                    break;
-                }
-            }
-        }
-        return blocks;
-    }
-    
     public MCPlayer getPlayer() {
         return new BukkitMCPlayer(p);
     }
-
+    
     public long getPlayerTime() {
         return p.getPlayerTime();
     }
 
     public int getRemainingFireTicks() {
         return p.getFireTicks();
-    }
-
-    public MCBlock getTargetBlock(HashSet<Byte> b, int i){
-        return new BukkitMCBlock(getFirstTargetBlock(b, i));
-    }
-
-    private Block getFirstTargetBlock(HashSet<Byte> transparent, int maxDistance) {
-        List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);
-        return blocks.get(0);
     }
 
     public int getTotalExperience() {
@@ -222,6 +163,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void giveExp(int xp) {
         p.giveExp(xp);
     }
+
+    public boolean hasPlayedBefore() {
+		return p.hasPlayedBefore();
+	}
 
     public boolean isBanned() {
         return p.isBanned();
@@ -311,28 +256,13 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setFoodLevel(int f) {
         p.setFoodLevel(f);
     }
-
-    public void setGameMode(MCGameMode mode) {
-        switch(mode){
-            case SURVIVAL:
-                p.setGameMode(GameMode.SURVIVAL);
-                break;
-            case CREATIVE:
-                p.setGameMode(GameMode.CREATIVE);
-                break;
-        }
-    }
     
-    public void setHealth(int i) { 
+    /*public void setHealth(int i) { 
         if(i == 0){
             this.fireEntityDamageEvent(MCDamageCause.CUSTOM);
         }
         p.setHealth(i);
-    }
-
-    public void setItemInHand(MCItemStack is) {
-        p.setItemInHand(((BukkitMCItemStack)is).is);
-    }
+    }*/
     
     public void setLevel(int xp) {
         p.setLevel(xp);

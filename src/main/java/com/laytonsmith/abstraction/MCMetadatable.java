@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction;
 
 import java.util.List;
 
-public interface MCMetadatable {
+public interface MCMetadatable extends AbstractionObject {
 	public List<MCMetadataValue> getMetadata(String metadataKey);
 
 	public boolean hasMetadata(String metadataKey);

@@ -13,7 +13,7 @@ import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
  * 
  * @author layton
  */
-public interface MCEntity extends AbstractionObject {
+public interface MCEntity extends MCMetadatable {
 	public static class Velocity {
 		public double magnitude;
 		public double x;

@@ -47,4 +47,8 @@ public class BukkitMCMetadatable implements MCMetadatable {
 		meta.setMetadata(metadataKey, (MetadataValue)newMetadataValue.getHandle());
 	}
 
+	public Object getHandle() {
+		return meta;
+	}
+
 }

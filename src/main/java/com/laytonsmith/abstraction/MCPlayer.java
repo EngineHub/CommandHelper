@@ -33,21 +33,15 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 
 	public int getFoodLevel();
 
-	public MCGameMode getGameMode();
-
 	public MCInventory getInventory();
 
 	public MCItemStack getItemAt(Construct construct);
-
-	public MCItemStack getItemInHand();
 
 	public int getLevel();
 
 	public long getPlayerTime();
 
 	public int getRemainingFireTicks();
-
-	public MCBlock getTargetBlock(HashSet<Byte> b, int i);
 
 	public int getTotalExperience();
 
@@ -70,10 +64,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public void setExp(float i);
 
 	public void setFoodLevel(int f);
-
-	public void setGameMode(MCGameMode mode);
-
-	public void setItemInHand(MCItemStack is);
 
 	public void setLevel(int xp);
 
