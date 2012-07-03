@@ -514,12 +514,14 @@ public class Meta {
                 offset++;
                 String label = environment.GetScript().seval(nodes[1], environment).val();
                 environment.SetLabel(label);
+                environment.GetScript().setLabel(label);
             }
             environment.SetPlayer(p);
             GenericTreeNode<Construct> tree = nodes[1 + offset];
             environment.GetScript().eval(tree, environment);
             environment.SetCommandSender(originalPlayer);
             environment.SetLabel(originalLabel);
+            environment.GetScript().setLabel(originalLabel);
             return new CVoid(t);
         }
         

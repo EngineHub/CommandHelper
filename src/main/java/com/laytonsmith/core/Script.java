@@ -755,4 +755,12 @@ public class Script {
         }
         //}
     }
+
+    /**
+     * This is only used by scriptas to hack the label in and out.
+     * @param label 
+     */
+    public void setLabel(String label) {
+        this.label = label;
+    }
 }
