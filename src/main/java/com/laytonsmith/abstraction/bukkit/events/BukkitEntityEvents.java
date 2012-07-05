@@ -77,7 +77,7 @@ public class BukkitEntityEvents {
         }
 
         public static BukkitMCTargetEvent _instantiate(Entity entity, LivingEntity target, EntityTargetEvent.TargetReason reason) {
-            return new BukkitMCTargetEvent(new EntityTargetEvent(( (BukkitMCEntity) entity )._Entity(),
+            return new BukkitMCTargetEvent(new EntityTargetEvent(( (BukkitMCEntity) entity ).asEntity(),
                     (LivingEntity) ( (BukkitMCLivingEntity) target ).getLivingEntity(), reason));
         }
 
@@ -90,7 +90,7 @@ public class BukkitEntityEvents {
         }
 
         public void setTarget(MCEntity target) {
-            pie.setTarget(((BukkitMCEntity)target)._Entity());
+            pie.setTarget(((BukkitMCEntity)target).asEntity());
         }
 
         public MCEntity getEntity() {

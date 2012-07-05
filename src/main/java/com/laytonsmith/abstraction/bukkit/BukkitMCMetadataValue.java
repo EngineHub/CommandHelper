@@ -58,5 +58,8 @@ public class BukkitMCMetadataValue implements MCMetadataValue {
 	public MetadataValue getHandle() {
 		return val;
 	}
+    public MetadataValue asMetadataValue() {
+        return val;
+    }
 
 }

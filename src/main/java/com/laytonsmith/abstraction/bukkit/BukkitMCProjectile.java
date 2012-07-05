@@ -35,6 +35,10 @@ public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	}
 
 	public void setShooter(MCLivingEntity shooter) {
-		proj.setShooter((LivingEntity)shooter.getHandle());
+		proj.setShooter(((BukkitMCLivingEntity)shooter).asLivingEntity());
 	}
+
+    public Projectile asProjectile() {
+        return proj;
+    }
 }

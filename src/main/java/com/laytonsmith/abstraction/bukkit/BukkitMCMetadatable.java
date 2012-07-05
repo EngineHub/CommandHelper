@@ -40,11 +40,11 @@ public class BukkitMCMetadatable implements MCMetadatable {
 	}
 
 	public void removeMetadata(String metadataKey, MCPlugin owningPlugin) {
-		meta.removeMetadata(metadataKey, (Plugin)owningPlugin.getHandle());
+		meta.removeMetadata(metadataKey, ((BukkitMCPlugin)owningPlugin).getPlugin());
 	}
 
 	public void setMetadata(String metadataKey, MCMetadataValue newMetadataValue) {
-		meta.setMetadata(metadataKey, (MetadataValue)newMetadataValue.getHandle());
+		meta.setMetadata(metadataKey, ((BukkitMCMetadataValue)newMetadataValue).asMetadataValue());
 	}
 
 	public Object getHandle() {

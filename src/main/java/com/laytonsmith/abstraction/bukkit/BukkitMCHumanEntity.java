@@ -61,10 +61,10 @@ class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity 
 	}
 
 	public void setItemInHand(MCItemStack item) {
-		he.setItemInHand((ItemStack)item.getHandle());
+		he.setItemInHand(((BukkitMCItemStack)item).asItemStack());
 	}
 
 	public void setItemOnCursor(MCItemStack item) {
-		he.setItemOnCursor((ItemStack)item.getHandle());
+		he.setItemOnCursor(((BukkitMCItemStack)item).asItemStack());
 	}
 }

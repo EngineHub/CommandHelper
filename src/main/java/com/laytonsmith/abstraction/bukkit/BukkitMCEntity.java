@@ -36,7 +36,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         this.e = e;
     }
     
-    public Entity _Entity(){
+    public Entity asEntity(){
         return e;
     }
     
@@ -193,19 +193,20 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	public boolean teleport(MCEntity destination) {
-		return e.teleport((Entity)destination.getHandle());
+	    Entity ent = ((BukkitMCEntity)destination).asEntity();
+		return e.teleport(ent.getLocation());
 	}
 
 	public boolean teleport(MCEntity destination, MCTeleportCause cause) {
-		return e.teleport((Entity)destination.getHandle(), TeleportCause.valueOf(cause.name()));
+		return e.teleport(((BukkitMCEntity)destination).asEntity(), TeleportCause.valueOf(cause.name()));
 	}
 
 	public boolean teleport(MCLocation location) {
-		return e.teleport((Location)location.getHandle());
+		return e.teleport(((BukkitMCLocation)location).asLocation());
 	}
 
 	public boolean teleport(MCLocation location, MCTeleportCause cause) {
-		return e.teleport((Location)location.getHandle(), TeleportCause.valueOf(cause.name()));
+		return e.teleport(((BukkitMCLocation)location).asLocation(), TeleportCause.valueOf(cause.name()));
 	}
     
 }

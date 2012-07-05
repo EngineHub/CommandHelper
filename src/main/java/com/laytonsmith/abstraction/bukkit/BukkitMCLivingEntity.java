@@ -54,7 +54,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements
 	}
 
 	public void damage(int amount, MCEntity source) {
-		le.damage(amount, (Entity) source.getHandle());
+		le.damage(amount, ((BukkitMCEntity)source).asEntity());
 	}
 
 	public double getEyeHeight() {
@@ -154,7 +154,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements
     }
 
 	public MCProjectile launchProjectile(MCProjectile projectile) {
-		Projectile p = (Projectile) projectile.getHandle();
+		Projectile p = ((BukkitMCProjectile)projectile).asProjectile();
 		Projectile proj = le.launchProjectile(p.getClass());
 
 		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj);
@@ -185,4 +185,8 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements
 	public void setRemainingAir(int ticks) {
 		le.setRemainingAir(ticks);
 	}
+
+    public LivingEntity asLivingEntity() {
+        return le;
+    }
 }
