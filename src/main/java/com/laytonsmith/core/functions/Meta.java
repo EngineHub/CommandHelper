@@ -85,9 +85,18 @@ public class Meta {
             } else {
                 MCPlayer m = Static.GetPlayer(args[0]);
                 if (m != null && m.isOnline()) {
-                    CHLog.Log(CHLog.Tags.META, "Executing command on " + env.GetPlayer().getName() + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
+                	MCPlayer p = env.GetPlayer();
+                	String name;
+                	
+                	if (p != null){
+                		name = p.getName();
+                	} else {
+                		name = "Unknown player";
+                	}
+                	
+                    CHLog.Log(CHLog.Tags.META, "Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim(), t);
                     if(Prefs.DebugMode()){
-                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + env.GetPlayer().getName() + " (running as " + args[0].val() + "): " + args[1].val().trim());
+                        Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + name + " (running as " + args[0].val() + "): " + args[1].val().trim());
                     }
                     //m.chat(cmd);
                     Static.getServer().dispatchCommand(m, cmd);

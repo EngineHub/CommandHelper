@@ -51,5 +51,17 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
         }
         return null;
     }
+
+	public long getFirstPlayed() {
+		return op.getFirstPlayed();
+	}
+
+	public long getLastPlayed() {
+		return op.getLastPlayed();
+	}
+
+	public boolean hasPlayedBefore() {
+		return op.hasPlayedBefore();
+	}
     
 }

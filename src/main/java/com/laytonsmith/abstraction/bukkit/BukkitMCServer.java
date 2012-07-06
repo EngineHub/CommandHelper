@@ -26,7 +26,11 @@ public class BukkitMCServer implements MCServer{
         this.s = Bukkit.getServer();
     }
     
-    public Object getHandle(){
+    public BukkitMCServer(Server server) {
+		this.s = server;
+	}
+
+	public Object getHandle(){
         return s;
     }
     
@@ -34,12 +38,10 @@ public class BukkitMCServer implements MCServer{
         return s;
     }
 
-    @Override
     public String getName() {
         return s.getName();
     }
 
-    @Override
     public MCPlayer[] getOnlinePlayers() {
         if(s.getOnlinePlayers() == null){
             return null;
@@ -168,7 +170,8 @@ public class BukkitMCServer implements MCServer{
 
     public Economy getEconomy() {
         try{
-            RegisteredServiceProvider<Economy> economyProvider = (RegisteredServiceProvider<Economy>)
+            @SuppressWarnings("unchecked")
+			RegisteredServiceProvider<Economy> economyProvider = (RegisteredServiceProvider<Economy>)
                     s.getServicesManager().getRegistration(Class.forName("net.milkbowl.vault.economy.Economy"));
             if (economyProvider != null) {
                 return economyProvider.getProvider();

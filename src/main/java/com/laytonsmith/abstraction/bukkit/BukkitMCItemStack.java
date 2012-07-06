@@ -137,4 +137,8 @@ public class BukkitMCItemStack implements MCItemStack{
         }
         return is.getMaxStackSize();
     }
+
+    public ItemStack asItemStack() {
+        return is;
+    }
 }
