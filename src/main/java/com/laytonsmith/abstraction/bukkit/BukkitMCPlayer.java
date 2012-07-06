@@ -322,4 +322,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setWhitelisted(boolean value) {
         p.setWhitelisted(value);
     }
+
+    public void setPlayerListName(String listName) {
+        p.setPlayerListName(listName);
+    }
+
+    public String getPlayerListName() {
+        return p.getPlayerListName();
+    }
 }
