@@ -83,6 +83,8 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlaye
 
     public MCItemStack getItemAt(Construct construct);
     
+    public void setPlayerListName(String listName);
+    public String getPlayerListName();
     
     
     public static class Velocity{

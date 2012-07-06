@@ -440,6 +440,14 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
             return new BukkitMCItemStack(is);
         }
     }
+
+    public void setPlayerListName(String listName) {
+        p.setPlayerListName(listName);
+    }
+
+    public String getPlayerListName() {
+        return p.getPlayerListName();
+    }
     
     
 }

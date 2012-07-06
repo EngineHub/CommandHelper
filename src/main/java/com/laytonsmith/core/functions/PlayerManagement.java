@@ -2561,6 +2561,96 @@ public class PlayerManagement {
         }
 
     }
+    
+    @api public static class set_list_name extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.LengthException, ExceptionType.FormatException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer m = environment.GetPlayer();
+            String listName;
+            if(args.length == 2){
+                m = Static.GetPlayer(args[0]);
+                listName = args[1].nval();
+            } else {
+                listName = args[0].nval();
+            }
+            Static.AssertPlayerNonNull(m, t);
+            m.setPlayerListName(listName);
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "set_list_name";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "void {[player], [listName]} Sets the player's list name."
+                    + " The name cannot be longer than 16 characters, but colors are supported."
+                    + " Setting the name to null resets it. If the name specified is already taken,"
+                    + " a FormatException is thrown, and if the length of the name is greater than 16"
+                    + " characters, a LengthException is thrown.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
+    
+    @api public static class get_list_name extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer m = environment.GetPlayer();
+            if(args.length == 1){
+                m = Static.GetPlayer(args[0]);
+            }
+            return new CString(m.getPlayerListName(), t);
+        }
+
+        public String getName() {
+            return "get_list_name";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "string {[player]} Returns the list name of the specified player, or the current player if none specified.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
 
     //Disabled until bukkit fixes their bug
 //    @api public static class pvelocity extends AbstractFunction{
