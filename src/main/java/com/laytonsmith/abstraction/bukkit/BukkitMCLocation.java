@@ -96,4 +96,8 @@ public class BukkitMCLocation implements MCLocation{
     public MCLocation clone() {
         return new BukkitMCLocation(l.clone());
     }
+
+    public Location asLocation() {
+        return l;
+    }
 }

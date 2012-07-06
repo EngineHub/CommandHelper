@@ -139,7 +139,11 @@ public class BukkitConvertor implements Convertor {
     		return null;
     	}
     	
-        if(be instanceof Tameable){
+    	if(be instanceof Projectile){
+            return new BukkitMCProjectile(be);
+        }
+    	
+    	if(be instanceof Tameable){
             return new BukkitMCTameable(be);
         }
         
@@ -161,7 +165,7 @@ public class BukkitConvertor implements Convertor {
 
     public MCEntity GetCorrectEntity(MCEntity e) {
 
-        Entity be = ((BukkitMCEntity)e)._Entity();
+        Entity be = ((BukkitMCEntity)e).asEntity();
         return BukkitConvertor.BukkitGetCorrectEntity(be);
     }
 
