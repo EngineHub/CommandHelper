@@ -25,7 +25,8 @@ We'll look at it, make comments, and merge it into CommandHelper if
 everything works out.
 
 By submitting code, you agree to dual license your code under the 
-irrevocable GNU General Public License v3, and the MIT License.
+the MIT License, barring the special restriction regarding code submissions,
+explained in the SPECIAL_LICENSE.txt file, which is attached.
 
 Portions of CommandHelper are copyright: wraithguard01, sk89q, Deaygo, 
 t3hk0d3, zml2008, EntityReborn, and albatrossen
