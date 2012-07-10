@@ -10,93 +10,74 @@ import java.net.InetSocketAddress;
 import java.util.HashSet;
 
 /**
- *
+ * 
  * @author layton
  */
-public interface MCPlayer extends MCCommandSender, MCHumanEntity, MCOfflinePlayer{
-    public String getDisplayName();
-    public void chat(String chat);
-    public MCItemStack getItemInHand();
-    public MCInventory getInventory();
-    public MCWorld getWorld();
-
-    public void setTempOp(Boolean value) throws Exception;
-
-    public MCLocation getLocation();
+public interface MCPlayer extends MCCommandSender, MCHumanEntity,
+        MCOfflinePlayer {
+    public void addEffect(int potionID, int strength, int seconds);
     
-    public MCBlock getTargetBlock(HashSet<Byte> b, int i);
-    public boolean teleport(MCLocation l);
-
-    public void setHealth(int i);
-
-    public void setDisplayName(String name);
-
-    public void kickPlayer(String message);
+    public boolean canSee(MCPlayer p);
+    
+    public void chat(String chat);
+    
     public InetSocketAddress getAddress();
     
-    public boolean isSneaking();
+    public boolean getAllowFlight();
     
-    public int getHealth();
+    public MCLocation getCompassTarget();
     
-    public void setExp(float i);
+    public String getDisplayName();
     
     public float getExp();
     
-    public MCGameMode getGameMode();
-    public void setGameMode(MCGameMode mode);
-    
-    public void setItemInHand(MCItemStack is);
-
-    public void setPlayerTime(Long time);
-    public long getPlayerTime();
-    public void resetPlayerTime();
-    
-    public int getLevel();
-    public void setLevel(int xp);
-    public void giveExp(int xp);
-    
-    public int getTotalExperience();
-    public void setTotalExperience(int total);
-    
-    
     public int getFoodLevel();
-    public void setFoodLevel(int f);
-
-    public MCLocation getCompassTarget();
-
-    public void setCompassTarget(MCLocation l);
-
-    public int getRemainingFireTicks();
-    public void setRemainingFireTicks(int i);  
     
-    public void addEffect(int potionID, int strength, int seconds);
-
-    public boolean removeEffect(int effect);
+    public MCInventory getInventory();
     
-    public boolean canSee(MCPlayer p);
-    public void setVanished(boolean set, MCPlayer to);
-    
-    public Velocity getVelocity();
-    
-    public boolean getAllowFlight();
-    public void setAllowFlight(boolean flight);
-
     public MCItemStack getItemAt(Construct construct);
     
-    public void setPlayerListName(String listName);
+    public int getLevel();
+    
     public String getPlayerListName();
     
+    public long getPlayerTime();
     
-    public static class Velocity{
-        public double magnitute;
-        public double x;
-        public double y;
-        public double z;
-        public Velocity(double magnitute, double x, double y, double z){
-            this.magnitute = magnitute;
-            this.x = x;
-            this.y = y;
-            this.z = z;
-        }
-    }
+    public int getRemainingFireTicks();
+    
+    public int getTotalExperience();
+    
+    public void giveExp(int xp);
+    
+    public boolean isSneaking();
+    
+    public void kickPlayer(String message);
+    
+    public boolean removeEffect(int effect);
+    
+    public void resetPlayerTime();
+    
+    public void setAllowFlight(boolean flight);
+    
+    public void setCompassTarget(MCLocation l);
+    
+    public void setDisplayName(String name);
+    
+    public void setExp(float i);
+    
+    public void setFoodLevel(int f);
+    
+    public void setLevel(int xp);
+    
+    public void setPlayerListName(String listName);
+    
+    public void setPlayerTime(Long time);
+    
+    public void setRemainingFireTicks(int i);
+    
+    public void setTempOp(Boolean value) throws Exception;
+    
+    public void setTotalExperience(int total);
+    
+    public void setVanished(boolean set, MCPlayer to);
 }

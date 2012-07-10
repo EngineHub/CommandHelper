@@ -25,10 +25,7 @@ public class BukkitMCTameable extends BukkitMCEntity implements MCTameable{
         super((Entity)a.getHandle());
         this.t = ((Tameable)a.getHandle());
     }
-    
-    public Object getHandle(){
-        return t;
-    }
+
     public boolean isTamed() {
         return t.isTamed();
     }
@@ -47,16 +44,4 @@ public class BukkitMCTameable extends BukkitMCEntity implements MCTameable{
     public void setOwner(MCAnimalTamer at) {
         t.setOwner(((BukkitMCAnimalTamer)at).at);
     }
-
-    @Override
-    public boolean isTameable() {
-        return true;
-    }
-
-    @Override
-    public MCEntityType getType() {
-        //TODO: Once all the mob types get added, remove this, and make thi0s class abstract
-        return MCEntityType.UNKNOWN;
-    }
-    
 }

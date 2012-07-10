@@ -246,8 +246,8 @@ public class BukkitMCWorld implements MCWorld {
                 Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
                 s.setPassenger(sk);
             }
-            if (((BukkitMCEntity)e)._Entity() instanceof Sheep) {
-                Sheep s = (Sheep) ((BukkitMCEntity)e)._Entity();
+            if (((BukkitMCEntity)e).asEntity() instanceof Sheep) {
+                Sheep s = (Sheep) ((BukkitMCEntity)e).asEntity();
                 if("".equals(subClass)){
                     subClass = DyeColor.WHITE.name();
                 }
@@ -258,8 +258,8 @@ public class BukkitMCWorld implements MCWorld {
                             ExceptionType.FormatException, t);
                 }
             }
-            if(((BukkitMCEntity)e)._Entity() instanceof Ocelot){
-                Ocelot o = (Ocelot)((BukkitMCEntity)e)._Entity();
+            if(((BukkitMCEntity)e).asEntity() instanceof Ocelot){
+                Ocelot o = (Ocelot)((BukkitMCEntity)e).asEntity();
                 if("".equals(subClass)){
                     subClass = Ocelot.Type.WILD_OCELOT.name();
                 }

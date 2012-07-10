@@ -401,7 +401,7 @@ public class BlockEvents {
                         return false;
                     }
 
-                    String[] lines = {};
+                    String[] lines = {"","","",""};
 
                     for (int i = 0; i < 4; i++) {
                         lines[i] = val.get(i).toString();
