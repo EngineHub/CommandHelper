@@ -55,7 +55,7 @@ public class ClassReader {
 		private int constant_pool_count;
 		private List<Object> constant_pool = new ArrayList<Object>();
 		private int access_flags;
-		private int this_class;
+		private String this_class;
 		private int super_class;
 		private int interfaces_count;
 		private int[] interfaces;
@@ -65,6 +65,10 @@ public class ClassReader {
 		//private method_info[] methods;
 		private int attributes_count;
 		//private attribute_info[] attributes;
+                
+                public String className(){
+                    return this_class;
+                }
 		
 		//Class access and property modifiers
 		/**
@@ -121,7 +125,8 @@ public class ClassReader {
 			minor_version = toInt(consume(2));
 			major_version = toInt(consume(2));
 			constant_pool_count = toInt(consume(2));
-			for(int i = 0; i < constant_pool_count; i++){
+                        constant_pool.add(null);
+			for(int i = 0; i < constant_pool_count - 1; i++){
 				int tag = toInt(consume(1));
 				switch(tag){
 					case 1:
@@ -142,25 +147,32 @@ public class ClassReader {
 					case 5:
 					case 6:
 						consume(8);
+                                                constant_pool.add(null);
 						break;
 					case 7:
+                                                int index = toInt(consume(2));
+                                                constant_pool.add(index);
+                                                break;
 					case 8:
 						consume(2);
+                                                constant_pool.add(null);
 						break;
 					case 9:
 					case 10:
 					case 11:
 					case 12:
 						consume(4);
-						break;
-					case 0:
+                                                constant_pool.add(null);
 						break;
 					default:
 						throw new ClassCastException("Invalid tag supplied in constant pool: " + tag);						
 				}
 			}
 			access_flags = toInt(consume(2));
-                        System.out.println(constant_pool.toString());
+                        this_class = (String)constant_pool.get((Integer)constant_pool.get(toInt(consume(2))));
+                        this_class = this_class.replace("/", ".");
+                        System.out.println(this_class);
+                        //TODO: Finish this as needed
 		}
 		
 		ByteArrayInputStream stream;
@@ -179,13 +191,15 @@ public class ClassReader {
 			}
 			return temp;
 		}
-		
+		                
 		private int toInt(byte[] b){
 			int num = 0;
-			for(int i = 0; i < b.length; i++){
-				int temp = (b[i] & 0x00FF) << ((b.length - i - 1) * 8);
-				num |= temp;
-			}
+                        int start = 0;
+                        int stop = b.length;
+                        for(int i = start; i < stop; i++){
+                                int temp = (b[i] & 0x00FF) << ((b.length - i - 1) * 8);
+                                num |= temp;
+                        }
 			return num;
 		}
 		
