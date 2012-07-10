@@ -85,6 +85,9 @@ public class RandomTests {
                 uhohs.put(f.getClass().getName(), t);
             }
         }
+        if(!StaticTest.brokenJunk.isEmpty()){
+            System.err.println("There is/are " + StaticTest.brokenJunk.size() + " test(s) that has a failure in extreme circumstances.");
+        }
         if(!uhohs.isEmpty()){
             StringBuilder b = new StringBuilder();
             for(String key : uhohs.keySet()){

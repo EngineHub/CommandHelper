@@ -57,11 +57,9 @@ public class StaticTest {
         //For the "quality test code coverage" number, set this to true
         boolean runQualityTestsOnly = false;
 
-        MCPlayer fakePlayer = Mockito.mock(MCPlayer.class);
-        MCServer fakeServer = Mockito.mock(MCServer.class);
-        MCWorld fakeWorld = Mockito.mock(MCWorld.class);
-        Mockito.when(fakePlayer.getServer()).thenReturn(fakeServer);
-        Mockito.when(fakePlayer.getWorld()).thenReturn(fakeWorld);
+        MCServer fakeServer = StaticTest.GetFakeServer();
+        MCPlayer fakePlayer = StaticTest.GetOnlinePlayer("wraithguard01", fakeServer);
+
         //make sure that these functions don't throw an exception. Any other results
         //are fine
         f.isRestricted();
@@ -95,20 +93,32 @@ public class StaticTest {
         //If we want a "quality test coverage" number, we can't run this section, because it bombards the code
         //with random data to see if it fails in expected ways (to simulate how a user could run the scripts)
         //If we are interested in tests that are specific to the functions however, we shouldn't run this.
-        if (!runQualityTestsOnly) {
-            TestExec(f, fakePlayer);
-            TestExec(f, null);
-            TestExec(f, StaticTest.GetFakeConsoleCommandSender());
+        if (!runQualityTestsOnly && f.getClass().getAnnotation(noboilerplate.class) == null) {
+            TestExec(f, fakePlayer, "fake player");
+            TestExec(f, null, "null command sender");
+            TestExec(f, StaticTest.GetFakeConsoleCommandSender(), "fake console command sender");
         }
         
         //Let's make sure that if execs is defined in the class, useSpecialExec returns true.
+        //Same thing for optimize/canOptimize and optimizeDynamic/canOptimizeDynamic
         for(Method method : f.getClass().getDeclaredMethods()){
             if(method.getName().equals("execs")){
                 if(!f.useSpecialExec()){
                     fail(f.getName() + " declares execs, but returns false for useSpecialExec.");
                 }
             }
+            if(method.getName().equals("optimize")){
+                if(!f.canOptimize()){
+                    fail(f.getName() + " declares optimize, but returns false for canOptimize");
+                }
+            }
+            if(method.getName().equals("optimizeDynamic")){
+                if(!f.canOptimizeDynamic()){
+                    fail(f.getName() + " declares optimizeDynamic, but returns false for canOptimizeDynamic");
+                }
+            }
         }
+        
 
         //now the only function left to test is exec. This cannot be abstracted, unfortunately.
     }
@@ -121,7 +131,7 @@ public class StaticTest {
     }
 
     private static ArrayList<String> tested = new ArrayList<String>();
-    public static void TestExec(Function f, MCCommandSender p) {
+    public static void TestExec(Function f, MCCommandSender p, String commandType) {
         if(tested.contains(f.getName() + String.valueOf(p))){
             return;
         }
@@ -197,16 +207,20 @@ public class StaticTest {
                         fail("Only return() can throw FunctionReturnExceptions");
                     }
                     if(e instanceof NullPointerException){
-                        if(!brokenJunk.contains(f.getName())){
-                            System.err.println("Oh dear god, " + f.getName() + " breaks if you send it stuff");
-                            brokenJunk.add(f.getName());
+                        if(!brokenJunk.contains(f.getName() + commandType)){
+                            System.err.println(f.getName() + " breaks if you send it the following while using a " + commandType + ": " + Arrays.deepToString(con));
+                            System.err.println("Here is the first few stack trace lines:");
+                            System.err.println("\t" + e.getStackTrace()[0].toString());
+                            System.err.println("\t" + e.getStackTrace()[1].toString());
+                            System.err.println("\t" + e.getStackTrace()[2].toString());
+                            brokenJunk.add(f.getName() + commandType);
                         }
                     }
                 }
             }
         }
     }
-    private static ArrayList<String> brokenJunk = new ArrayList<String>();
+    static ArrayList<String> brokenJunk = new ArrayList<String>();
 
     public static void TestClassDocs(String docs, Class container) {
         if (docs.length() <= 0) {
@@ -323,6 +337,9 @@ public class StaticTest {
     public static MCPlayer GetOnlinePlayer(String name, String worldName, MCServer s){
         MCPlayer p = mock(MCPlayer.class);
         MCWorld w = mock(MCWorld.class);
+        MCLocation fakeLocation = StaticTest.GetFakeLocation(w, 0, 0, 0);
+        MCItemStack fakeItemStack = mock(MCItemStack.class);
+        
         when(w.getName()).thenReturn(worldName);
         when(p.getWorld()).thenReturn(w);
         when(p.isOnline()).thenReturn(true);
@@ -343,6 +360,11 @@ public class StaticTest {
                 when(s.getOnlinePlayers()).thenReturn(online.toArray(new MCPlayer[]{}));
             }            
         }
+        
+        
+        //Plethora of fake data
+        when(p.getCompassTarget()).thenReturn(fakeLocation);
+        when(p.getItemAt((Construct)Mockito.any())).thenReturn(fakeItemStack);
         return p;
     }
     
@@ -527,13 +549,11 @@ public class StaticTest {
         }
 
         public MCEnchantment[] GetEnchantmentValues() {
-            System.out.println("Using bukkit convertor");
             Convertor c = new BukkitConvertor();
             return c.GetEnchantmentValues();
         }
 
         public MCEnchantment GetEnchantmentByName(String name) {
-            System.out.println("Using bukkit convertor");
             Convertor c = new BukkitConvertor();
             return c.GetEnchantmentByName(name);
         }
@@ -543,7 +563,6 @@ public class StaticTest {
         }
 
         public MCItemStack GetItemStack(int type, int qty) {
-            System.out.println("Using bukkit convertor");
             Convertor c = new BukkitConvertor();
             return c.GetItemStack(type, qty);
         }
@@ -561,7 +580,6 @@ public class StaticTest {
         }
 
         public MCItemStack GetItemStack(int type, int data, int qty) {
-            System.out.println("Using bukkit convertor");
             Convertor c = new BukkitConvertor();
             return c.GetItemStack(type, data, qty);
         }

@@ -19,9 +19,14 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 public class Economy {
     
     private static void CheckInstallation() throws ConfigRuntimeException{
+        boolean failure = true;
         try{
             economy.getName();
-        } catch(NoClassDefFoundError e){
+            failure = false;
+        } catch(NoClassDefFoundError e){            
+        } catch(NullPointerException e){            
+        }
+        if(failure){
             throw new ConfigRuntimeException("You are attempting to use"
                     + " an economy function, and your economy setup is not valid."
                     + " Please install Vault and an Economy plugin before attempting"

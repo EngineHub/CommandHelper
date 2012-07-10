@@ -79,7 +79,8 @@ public class World {
     @api public static class set_spawn extends AbstractFunction{
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, 
+                ExceptionType.CastException, ExceptionType.FormatException};
         }
 
         public boolean isRestricted() {

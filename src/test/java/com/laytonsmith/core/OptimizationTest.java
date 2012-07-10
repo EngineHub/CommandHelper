@@ -103,6 +103,11 @@ public class OptimizationTest {
                 optimize("proc(_outer, proc(_inner, @a, return(@a)) _inner('blah')) _inner('huh')"));
     }
     
+    @Test public void testProcReturn() throws ConfigCompileException{
+        assertEquals("sconcat(proc('_proc',return(array(1))),array_get(_proc(),0))", 
+                optimize("proc(_proc, return(array(1))) _proc()[0]"));
+    }
+    
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{
 //        //In this test, there's no way it won't ever be 'hi', so do a replacement (we still need to keep

@@ -280,6 +280,7 @@ public class Enchantments {
                 m = Static.GetPlayer(args[0].val(), t);
                 offset = 0;
             }
+            Static.AssertPlayerNonNull(m, t);
             MCItemStack is = m.getItemAt(args[1 - offset]);
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
