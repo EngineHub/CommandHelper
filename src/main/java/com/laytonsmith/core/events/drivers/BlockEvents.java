@@ -156,9 +156,14 @@ public class BlockEvents {
                     for (int i = 0; i < arr.size(); i++) {
                         CArray item = (CArray) arr.get(i);
                         MCItemStack stk = ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN);
-                        blk.getWorld().dropItemNaturally(StaticLayer.GetLocation(
-                                blk.getWorld(), blk.getX(), blk.getY(), blk.getZ()), 
-                                (MCItemStack) stk.getHandle());
+                        
+                        blk.getWorld().dropItemNaturally(
+                            StaticLayer.GetLocation(
+                                    blk.getWorld(), 
+                                    blk.getX(), 
+                                    blk.getY(), 
+                                    blk.getZ()), 
+                            stk);
                     }
 
                     return true;
