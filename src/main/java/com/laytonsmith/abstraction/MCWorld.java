@@ -33,6 +33,7 @@ public interface MCWorld extends AbstractionObject{
     public void setStorm(boolean b);
 
     public MCLocation getSpawnLocation();
+    public void setSpawnLocation(int x, int y, int z);
 
     public void refreshChunk(int x, int z);
 

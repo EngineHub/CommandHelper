@@ -76,6 +76,68 @@ public class World {
         
     }
     
+    @api public static class set_spawn extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCWorld w = (environment.GetPlayer()!=null?environment.GetPlayer().getWorld():null);
+            int x = 0;
+            int y = 0;
+            int z = 0;
+            if(args.length == 1){
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
+                w = l.getWorld();
+                x = l.getBlockX();
+                y = l.getBlockY();
+                z = l.getBlockZ();
+            } else if(args.length == 3){                
+                x = (int)Static.getInt(args[0]);
+                y = (int)Static.getInt(args[1]);
+                z = (int)Static.getInt(args[2]);
+            } else if(args.length == 4){
+                w = Static.getServer().getWorld(args[0].val());
+                x = (int)Static.getInt(args[1]);
+                y = (int)Static.getInt(args[2]);
+                z = (int)Static.getInt(args[3]);
+            }
+            if(w == null){
+                throw new ConfigRuntimeException("Invalid world given.", ExceptionType.InvalidWorldException, t);
+            }
+            w.setSpawnLocation(x, y, z);
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "set_spawn";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 3, 4};
+        }
+
+        public String docs() {
+            return "void {locationArray | [world], x, y, z} Sets the spawn of the world. Note that in some cases, a plugin"
+                    + " may set the spawn differently, and this method will do nothing. In that case, you should use"
+                    + " the plugin's commands to set the spawn.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
+    
     @api public static class refresh_chunk extends AbstractFunction{
 
         public String getName() {

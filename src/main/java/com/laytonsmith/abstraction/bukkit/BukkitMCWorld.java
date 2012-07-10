@@ -132,6 +132,10 @@ public class BukkitMCWorld implements MCWorld {
         w.createExplosion(new Location(w, x,y,z), size);
     }
 
+    public void setSpawnLocation(int x, int y, int z) {
+        w.setSpawnLocation(x, y, z);
+    }
+
     private enum MOBS {
 
         CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME,
