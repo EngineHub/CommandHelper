@@ -69,17 +69,17 @@ public class DataHandling {
             return null;
         }
 
-        @Override
-        public boolean canOptimize() {
-            //FALSE. Can't optimize, because this returns a reference. This is
-            //a much more complicated issue. TODO
-            return false;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) {
-            return exec(t, null, args);
-        }
+//        @Override
+//        public boolean canOptimize() {
+//            //FALSE. Can't optimize, because this returns a reference. This is
+//            //a much more complicated issue. TODO
+//            return false;
+//        }
+//
+//        @Override
+//        public Construct optimize(Target t, Construct... args) {
+//            return exec(t, null, args);
+//        }
     }
 
     @api

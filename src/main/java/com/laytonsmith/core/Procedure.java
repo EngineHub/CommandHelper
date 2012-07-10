@@ -72,7 +72,13 @@ public class Procedure implements Cloneable {
                 if(fb instanceof Function){
                     Function f = (Function)fb;
                     if(f instanceof DataHandling._return){
-                        return true; //This is a special exception
+                        //This is a special exception. Return itself is not optimizable,
+                        //but if the contents are optimizable, it is still considered constant.
+                        if(tree.children.isEmpty()){
+                            return true;
+                        } else {
+                            return checkPossiblyConstant(tree.children.get(0)); 
+                        }
                     }
                     //If it's optimizable, it's possible. If it's restricted, it doesn't matter, because
                     //we can't optimize it out anyways, because we need to do the permission check
