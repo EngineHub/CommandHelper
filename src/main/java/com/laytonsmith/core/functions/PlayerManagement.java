@@ -2585,6 +2585,11 @@ public class PlayerManagement {
             } else {
                 listName = args[0].nval();
             }
+
+            if (listName.length() > 16) {
+                throw new ConfigRuntimeException("set_list_name([player,] name) expects name to be 16 characters or less", t);
+            }
+            
             Static.AssertPlayerNonNull(m, t);
             m.setPlayerListName(listName);
             return new CVoid(t);
