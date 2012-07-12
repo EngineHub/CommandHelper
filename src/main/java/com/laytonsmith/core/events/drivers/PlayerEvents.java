@@ -717,7 +717,7 @@ public class PlayerEvents {
             MCPlayer player = Static.GetPlayer(manualObject.get("player"));
             String message = manualObject.get("message").nval();
             
-            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
+            BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class, 
                 player, message);
             return e;
         }

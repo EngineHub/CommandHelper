@@ -116,6 +116,10 @@ public class BukkitPlayerEvents {
         public BukkitMCPlayerChatEvent(PlayerChatEvent event) {
             pce = event;            
         }
+        
+        public BukkitMCPlayerChatEvent(BukkitMCPlayerChatEvent event) {
+            pce = event.pce;            
+        }
 
         public Object _GetObject() {
             return pce;
