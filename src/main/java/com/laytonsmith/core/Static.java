@@ -748,7 +748,14 @@ public class Static {
                 .replaceAll("§c", TermColors.BRIGHT_RED)
                 .replaceAll("§d", TermColors.BRIGHT_MAGENTA)
                 .replaceAll("§e", TermColors.BRIGHT_YELLOW)
-                .replaceAll("§f", TermColors.BRIGHT_WHITE) + TermColors.reset();
+                .replaceAll("§f", TermColors.BRIGHT_WHITE)
+                .replaceAll("§k", "") //Uh, no equivalent for "random"
+                .replaceAll("§l", TermColors.BOLD)
+                .replaceAll("§m", TermColors.STRIKE)
+                .replaceAll("§n", TermColors.UNDERLINE)
+                .replaceAll("§o", TermColors.ITALIC)
+                .replaceAll("§r", TermColors.reset());
+                
                 
     }
 

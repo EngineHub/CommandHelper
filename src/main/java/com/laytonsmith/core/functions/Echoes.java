@@ -6,6 +6,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.LineCallback;
+import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
@@ -239,6 +240,9 @@ public class Echoes {
             if(color == null){
                 color = MCChatColor.WHITE.toString();
             }
+            if(env.GetCustom("cmdline") instanceof Boolean && (Boolean)env.GetCustom("cmdline") == true){
+                color = Static.MCToANSIColors(color);
+            }
             return new CString(color, t);
         }
 
@@ -250,7 +254,9 @@ public class Echoes {
             return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
                     + " The list of valid color names can be found in the MCChatColor class, and case doesn't matter. For your reference,"
                     + " here is the list of valid colors: " + StringUtil.joinString(b, ", ", 0) + ", in addition the integers 0-15 will work,"
-                    + " or the hex numbers from 0-F, and k, l, m, n, o, and r, which represent styles.";
+                    + " or the hex numbers from 0-F, and k, l, m, n, o, and r, which represent styles. Unlike manually putting in the color symbol,"
+                    + " using this function will return the platform's color code, so if you are wanting to keep your scripts platform independant,"
+                    + " it is a much better idea to use this function as opposed to hard coding your own color codes.";
         }
         
         public ExceptionType[] thrown(){
@@ -531,7 +537,12 @@ public class Echoes {
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            System.out.println(args[0].val());
+            System.out.print(args[0].val());
+            if(args[0].val().matches("(?m).*\033.*")){
+                //We have color codes in it, we need to reset them
+                System.out.print(TermColors.reset());
+            }
+            System.out.println();
             return new CVoid(t);
         }
 
@@ -545,7 +556,9 @@ public class Echoes {
 
         public String docs() {
             return "void {text} Writes the text to the system's std out. Unlike console(), this does not use anything else to format the output, though in many"
-                    + " cases they will behave the same.";
+                    + " cases they will behave the same. However, colors and other formatting characters will not \"bleed\" through, so"
+                    + " sys_out(color(RED) . 'This is red') will not cause the next line to also be red, so if you need to print multiple lines out, you should"
+                    + " manually add \\n to create your linebreaks, and only make one call to sys_out.";
         }
 
         public CHVersion since() {
@@ -569,7 +582,12 @@ public class Echoes {
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            System.err.println(args[0].val());
+            System.err.print(args[0].val());
+            if(args[0].val().matches("(?m).*\033.*")){
+                //We have color codes in it, we need to reset them
+                System.err.print(TermColors.reset());
+            }
+            System.err.println();
             return new CVoid(t);
         }
 
@@ -583,7 +601,9 @@ public class Echoes {
 
         public String docs() {
             return "void {text} Writes the text to the system's std err. Unlike console(), this does not use anything else to format the output, though in many"
-                    + " cases they will behave nearly the same.";
+                    + " cases they will behave nearly the same. However, colors and other formatting characters will not \"bleed\" through, so"
+                    + " sys_err(color(RED) . 'This is red') will not cause the next line to also be red, so if you need to print multiple lines out, you should"
+                    + " manually add \\n to create your linebreaks, and only make one call to sys_err.";
         }
 
         public CHVersion since() {

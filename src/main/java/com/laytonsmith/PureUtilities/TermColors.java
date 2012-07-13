@@ -99,6 +99,11 @@ public class TermColors {
     @color public static String BLINKON = special("blinkon");
     @color public static String BLINKOFF = special("blinkoff");
     
+    @color public static String BOLD = special("bold");
+    @color public static String STRIKE = special("strike");
+    @color public static String UNDERLINE = special("underline");
+    @color public static String ITALIC = special("italic");
+    
     private static Map<String, String> defaults = new HashMap<String, String>();
     private static List<Field> fields = null;
     
@@ -152,6 +157,18 @@ public class TermColors {
             }
             if(type.equals("blinkoff")){
                 return "\033[25m";
+            }
+            if(type.equals("bold")){
+                return "\033[1m";
+            }
+            if(type.equals("strike")){
+                return "\033[9m";
+            }
+            if(type.equals("underline")){
+                return "\033[4m";
+            }
+            if(type.equals("italic")){
+                return "\033[3m";
             }
         }
         return "";
