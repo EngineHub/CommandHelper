@@ -2587,7 +2587,7 @@ public class PlayerManagement {
             }
 
             if (listName.length() > 16) {
-                throw new ConfigRuntimeException("set_list_name([player,] name) expects name to be 16 characters or less", t);
+                throw new ConfigRuntimeException("set_list_name([player,] name) expects name to be 16 characters or less", Exceptions.ExceptionType.LengthException, t);
             }
             
             Static.AssertPlayerNonNull(m, t);
