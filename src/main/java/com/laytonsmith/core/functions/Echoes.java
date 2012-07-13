@@ -515,4 +515,80 @@ public class Echoes {
         }
         
     }
+    
+    @api public static class sys_out extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            System.out.println(args[0].val());
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "sys_out";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "void {text} Writes the text to the system's std out. Unlike console(), this does not use anything else to format the output, though in many"
+                    + " cases they will behave the same.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
+    
+    @api public static class sys_err extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            System.err.println(args[0].val());
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "sys_err";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "void {text} Writes the text to the system's std err. Unlike console(), this does not use anything else to format the output, though in many"
+                    + " cases they will behave nearly the same.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
 }

@@ -190,6 +190,16 @@ public class ArgumentParserTest {
 //		System.out.println("Actual:\n\n" + actual);
 		assertEquals(expected, actual);
 	}
+        
+        @Test
+        public void test13() throws Exception{
+                ArgumentParser p = ArgumentParser.GetParser()
+                        .addArgument('a', ArgumentParser.Type.STRING, "", "", true)
+                        .addArgument('b', ArgumentParser.Type.STRING, "", "", true);
+                ArgumentParser.ArgumentParserResults r = p.match(new String[]{"-b", "\"This is a quoted\" 'string'", "-a", "argument with spaces"});
+                assertEquals("argument with spaces", r.getStringArgument('a'));
+                assertEquals("\"This is a quoted\" 'string'", r.getStringArgument('b'));
+        }
 	
 	
 }

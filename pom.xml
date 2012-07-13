@@ -220,6 +220,13 @@
             <scope>compile</scope>
         </dependency>
         
+        <!-- Yaml parsing -->
+        <dependency>
+            <groupId>org.yaml</groupId>
+            <artifactId>snakeyaml</artifactId>
+            <version>1.10</version>
+        </dependency>
+        
         <!-- Evil-y things (currently not used) -->
         <!--<dependency>
             <groupId>cglib</groupId>
@@ -369,6 +376,8 @@
                                     <include>com.nijikokun:register:jar:*</include>
                                     <include>org.perf4j:perf4j:jar:*</include>
                                     <include>log4j:log4j:jar:*</include>
+                                    <include>org.yaml:snakeyaml:jar:*</include>
+                                    <include>com.googlecode.json-simple:json-simple:jar:*</include>
                                 </includes>
                             </artifactSet>
                             <filters>
@@ -382,6 +391,10 @@
                                         <include>com/sk89q/worldedit/Vector.*</include>
                                         <!-- Expression Parser -->
                                         <include>com/sk89q/worldedit/expression/**</include>
+                                        <!-- SnakeYAML -->
+                                        <include>org/yaml/**</include>
+                                        <!-- Simple JSON -->
+                                        <include>org/json/**</include>
                                     </includes>
                                     <excludes>
                                         <exclude>com/sk89q/jchronic/**</exclude>

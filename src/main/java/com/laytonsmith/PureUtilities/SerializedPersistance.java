@@ -23,15 +23,6 @@ public class SerializedPersistance implements Persistance{
      */
     private File storageLocation;
     
-    /**
-     * @deprecated 
-     * @param database
-     * @param user 
-     */
-    public SerializedPersistance(File database, Object user){
-        storageLocation = database;
-    }
-    
     public SerializedPersistance(File database){
         storageLocation = database;
     }
@@ -291,9 +282,9 @@ public class SerializedPersistance implements Persistance{
     }
 
     public static void main(String[] args) throws Exception{
-        SerializedPersistance p = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), new Object());
+        SerializedPersistance p = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
         p.setValue(new String[]{"player", "wraithguard01", "name"}, "wraithguard01");
-        p.setValue(new String[]{"player", "wraithguard01", "age"}, "22");
+        p.setValue(new String[]{"player", "wraithguard01", "age"}, "24");
         p.setValue(new String[]{"player", "other", "name"}, "other");
         System.out.println(p.getNamespaceValues(new String[]{"player", "wraithguard01", "age"}));
         System.out.println();

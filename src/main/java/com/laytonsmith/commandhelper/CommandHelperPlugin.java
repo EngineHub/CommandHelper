@@ -55,13 +55,10 @@ import org.bukkit.plugin.java.JavaPlugin;
  *
  * @author sk89q
  */
-public class CommandHelperPlugin extends JavaPlugin {
-    public static final Logger logger = Logger.getLogger("Minecraft.CommandHelper");
+public class CommandHelperPlugin extends JavaPlugin {    
     //Do not rename this field, it is changed reflectively in unit tests.
     private static AliasCore ac;
-    public static MCServer myServer;
-    public static SerializedPersistance persist;
-    public static PermissionsResolverManager perms;
+    public static MCServer myServer;        
     public static Version version;
     public static CommandHelperPlugin self;
     public static WorldEditPlugin wep;
@@ -99,11 +96,11 @@ public class CommandHelperPlugin extends JavaPlugin {
     public void onEnable() {       
         self = this;
         myServer = StaticLayer.GetServer();
-        persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), this);
-        logger.info("CommandHelper/CommandHelper " + getDescription().getVersion() + " enabled");
+        Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
+        Static.getLogger().info("CommandHelper/CommandHelper " + getDescription().getVersion() + " enabled");
         version = new Version(getDescription().getVersion());
         PermissionsResolverManager.initialize(this);
-        perms = PermissionsResolverManager.getInstance();
+        Static.perms = PermissionsResolverManager.getInstance();
         Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
         if(pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin){
             wep = (WorldEditPlugin)pwep;
@@ -126,10 +123,10 @@ public class CommandHelperPlugin extends JavaPlugin {
                 //System.out.flush();
                 System.out.println("\n\n\n" + Static.Logo());
             }
-            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), new File("plugins/CommandHelper/LocalPackages"), prefsFile, new File("plugins/CommandHelper/" + main_file), perms, this);
+            ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), new File("plugins/CommandHelper/LocalPackages"), prefsFile, new File("plugins/CommandHelper/" + main_file), Static.perms, this);
             ac.reload(null);
         } catch (IOException ex) {
-            logger.log(Level.SEVERE, null, ex);
+            Static.getLogger().log(Level.SEVERE, null, ex);
         }
         
         //Clear out our hostname cache
@@ -193,8 +190,8 @@ public class CommandHelperPlugin extends JavaPlugin {
      */
     @Override
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-        if((sender.isOp() || (sender instanceof Player && (perms.hasPermission(((Player)sender).getName(), "commandhelper.reloadaliases") 
-                || perms.hasPermission(((Player)sender).getName(), "ch.reloadaliases"))))
+        if((sender.isOp() || (sender instanceof Player && (Static.perms.hasPermission(((Player)sender).getName(), "commandhelper.reloadaliases") 
+                || Static.perms.hasPermission(((Player)sender).getName(), "ch.reloadaliases"))))
                 && (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))){
             MCPlayer player = null;
             if(sender instanceof Player){
@@ -252,8 +249,8 @@ public class CommandHelperPlugin extends JavaPlugin {
         UserManager um = UserManager.GetUserManager(player.getName());
         // Repeat command
         if (cmd.equals("repeat")) {
-            if(player.isOp() || perms.hasPermission(player.getName(), "commandhelper.repeat") ||
-                    perms.hasPermission(player.getName(), "ch.repeat")){
+            if(player.isOp() || Static.perms.hasPermission(player.getName(), "commandhelper.repeat") ||
+                    Static.perms.hasPermission(player.getName(), "ch.repeat")){
                 //Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
                 //an infinite loop though, because the preprocessor won't try to fire off a repeat command
                 commandRunning.remove(player);
@@ -273,7 +270,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         // Save alias
         } else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper")
                 /*&& player.canUseCommand("/alias")*/) {
-            if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
+            if(!Static.perms.hasPermission(player.getName(), "commandhelper.useralias") && !Static.perms.hasPermission(player.getName(), "ch.useralias")){
                 Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the alias command");
                 commandRunning.remove(player);
                 return true;
@@ -301,7 +298,7 @@ public class CommandHelperPlugin extends JavaPlugin {
             return true;
         //View all aliases for this user
         } else if(cmd.equalsIgnoreCase("viewalias")){
-            if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
+            if(!Static.perms.hasPermission(player.getName(), "commandhelper.useralias") && !Static.perms.hasPermission(player.getName(), "ch.useralias")){
                 Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the viewalias command");
                 commandRunning.remove(player);
                 return true;
@@ -317,7 +314,7 @@ public class CommandHelperPlugin extends JavaPlugin {
             return true;
         // Delete alias
         } else if (cmd.equalsIgnoreCase("delalias")) {
-            if(!perms.hasPermission(player.getName(), "commandhelper.useralias") && !perms.hasPermission(player.getName(), "ch.useralias")){
+            if(!Static.perms.hasPermission(player.getName(), "commandhelper.useralias") && !Static.perms.hasPermission(player.getName(), "ch.useralias")){
                 Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the delalias command");
                 commandRunning.remove(player);
                 return true;
@@ -344,7 +341,7 @@ public class CommandHelperPlugin extends JavaPlugin {
             return true;
     
         } else if(cmd.equalsIgnoreCase("interpreter")){
-            if(perms.hasPermission(player.getName(), "commandhelper.interpreter")){
+            if(Static.perms.hasPermission(player.getName(), "commandhelper.interpreter")){
                 if(Prefs.EnableInterpreter()){
                     interpreterListener.startInterpret(player.getName());
                     Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"

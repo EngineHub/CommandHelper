@@ -124,6 +124,7 @@ public class DocGen {
                         + "! scope=\"col\" width=\"3%\" | Since\n"
                         + "! scope=\"col\" width=\"5%\" | Restricted" + "\n");
             } else if (type.equals("text")) {
+                intro.append("\n").append(className).append("\n");
                 intro.append("**********************************************************************************************" + "\n");
                 if (className != null) {
                     intro.append(classDocs == null ? "" : classDocs).append("\n");
@@ -199,7 +200,7 @@ public class DocGen {
                             + "| " + restricted);
 
                 } else if (type.equals("text")) {
-                    System.out.println(ret + f.getName() + "(" + args + ")" + " {" + thrown.toString() + "}\n\t" + desc + "\n\t" + since + ((f instanceof Function?((Function)f).isRestricted():false) ? "\n\tThis function is restricted"
+                    System.out.println(ret + " " + f.getName() + "(" + args + ")" + " {" + thrown.toString() + "}\n\t" + desc + "\n\t" + since + ((f instanceof Function?((Function)f).isRestricted():false) ? "\n\tThis function is restricted"
                             : "\n\tThis function is not restricted"));
                 }
             }

@@ -36,9 +36,8 @@ public class GeneralTest {
 
     @BeforeClass
     public static void setUpClass(){
-        //StaticTest.StartServer();
-        Plugin fakePlugin = mock(Plugin.class);        
-        CommandHelperPlugin.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"), fakePlugin);
+        //StaticTest.StartServer();     
+        Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
     }
     @Before
     public void setUp() throws Exception {        

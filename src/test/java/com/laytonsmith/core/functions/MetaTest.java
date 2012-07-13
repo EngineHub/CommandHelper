@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.*;
 import com.sk89q.wepif.PermissionsResolverManager;
@@ -40,7 +41,7 @@ public class MetaTest {
     public void setUp() {
         fakePlayer = GetOnlinePlayer();
         fakeServer = GetFakeServer();
-        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+        Static.perms = mock(PermissionsResolverManager.class);
         CommandHelperPlugin.myServer = fakeServer;
         env.SetPlayer(fakePlayer);
     }

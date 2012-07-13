@@ -67,7 +67,7 @@ public class Manager {
             } else if(input.equalsIgnoreCase("interpreter")){
                 Interpreter.start();
             } else if (input.equalsIgnoreCase("exit")) {
-                pl("Thanks for using the " + CYAN + "Data Manager!");
+                pl("Thanks for using the " + CYAN + "Data Manager!" + reset());
                 finished = true;
             } else {
                 pl("I'm sorry, that's not a valid command. Here's the help:");
@@ -298,7 +298,7 @@ public class Manager {
                 pl("Looks like you haven't used your persistance file yet.");
                 return;
             }
-            SerializedPersistance sp = new SerializedPersistance(db, null);
+            SerializedPersistance sp = new SerializedPersistance(db);
             try {
                 sp.load();
             } catch (Exception ex) {
@@ -345,7 +345,7 @@ public class Manager {
                     }
                     FileUtility.copy(db, new File("CommandHelper/persistance.ser.bak"));
                     //Now, load in all the data
-                    SerializedPersistance sp = new SerializedPersistance(db, null);
+                    SerializedPersistance sp = new SerializedPersistance(db);
                     try {
                         sp.load();
                     } catch (Exception ex) {
@@ -415,7 +415,7 @@ public class Manager {
     public static Persistance GetDB(){
         //Figure out what engine they're using
         //For now, it's obviously SerializedPersistance
-        return new SerializedPersistance(new File("CommandHelper/persistance.ser"), null);
+        return new SerializedPersistance(new File("CommandHelper/persistance.ser"));
     }
 
     

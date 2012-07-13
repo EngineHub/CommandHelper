@@ -10,11 +10,15 @@ import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
 import java.util.List;
 import java.util.Scanner;
@@ -34,7 +38,7 @@ public class Interpreter {
         try {
             MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
         } catch (ConfigCompileException ex) {}        
-        CommandHelperPlugin.persist = new SerializedPersistance(new File("CommandHelper/persistance.ser"));
+        Static.persist = new SerializedPersistance(new File("CommandHelper/persistance.ser"));
         if(TermColors.SYSTEM == TermColors.SYS.WINDOWS){
             TermColors.DisableColors();
         }
@@ -51,7 +55,7 @@ public class Interpreter {
     public static boolean textLine(String line) {
         if (line.equals("-")) {
             //Exit interpreter mode
-            pl(YELLOW + "Now exiting interpreter mode");
+            pl(YELLOW + "Now exiting interpreter mode" + reset());
             return false;
         } else if (line.equals(">>>")) {
             //Start multiline mode
@@ -70,19 +74,18 @@ public class Interpreter {
                 execute(script);
                 script = "";
             } catch (ConfigCompileException e) {
-                pl(RED + e.getMessage() + ":" + e.getLineNum());
+                ConfigRuntimeException.DoReport(e, null, null);
             }
         } else {
             if (multilineMode) {
                 //Queue multiline
                 script = script + line + "\n";
-                pl(":" + WHITE + line);
             } else {
                 try {
                     //Execute single line
                     execute(line);
                 } catch (ConfigCompileException ex) {
-                    pl(RED + ex.getMessage());
+                    ConfigRuntimeException.DoReport(ex, null, null);
                 }
             }
         }
@@ -115,9 +118,17 @@ public class Interpreter {
             }, null);
         } catch (CancelCommandException e) {
             pl(":");
+        } catch (ConfigRuntimeException e){
+            ConfigRuntimeException.DoReport(e);
+            //No need for the full stack trace        
         } catch(Exception e){
             pl(RED + e.toString());
             e.printStackTrace();
+        } catch(NoClassDefFoundError e){
+            System.err.println(RED + Main.getNoClassDefFoundErrorMessage(e) + reset());
+            System.err.println("Since you're running from standalone interpreter mode, this is not a fatal error, but one of the functions you just used required"
+                    + " an actual backing engine that isn't currently loaded. (It still might fail even if you load the engine though.) You simply won't be"
+                    + " able to use that function here.");
         }
     }
 }

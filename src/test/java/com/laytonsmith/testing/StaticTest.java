@@ -486,7 +486,7 @@ public class StaticTest {
         }
         when(fakeServer.getOnlinePlayers()).thenReturn(pps.toArray(new MCPlayer[]{}));  
         CommandHelperPlugin.myServer = fakeServer;  
-        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+        Static.perms = mock(PermissionsResolverManager.class);
         return fakeServer;
     }
     

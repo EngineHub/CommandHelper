@@ -36,6 +36,16 @@ import java.util.logging.Logger;
  * @author Layton
  */
 public class Static {
+    
+    private static final Logger logger = Logger.getLogger("CommandHelper");
+    /**
+     * This is the SerializedPersistance database. Note that this will go away in lieu of a more
+     * robust solution once the database stuff is all set up.
+     * @deprecated
+     */
+    public static SerializedPersistance persist;
+    
+    public static PermissionsResolverManager perms;
 
     /**
      * This function pulls a numerical equivalent from any given construct. It throws a ConfigRuntimeException
@@ -185,14 +195,9 @@ public class Static {
     /**
      * Returns the logger for the plugin
      * @return
-     * @throws NotInitializedYetException 
      */
-    public static Logger getLogger() throws NotInitializedYetException {
-        Logger l = com.laytonsmith.commandhelper.CommandHelperPlugin.logger;
-        if (l == null) {
-            throw new NotInitializedYetException("The logger has not been initialized yet");
-        }
-        return l;
+    public static Logger getLogger() {
+        return logger;
     }
 
     /**
@@ -227,7 +232,7 @@ public class Static {
      * @throws NotInitializedYetException 
      */
     public static SerializedPersistance getPersistance() throws NotInitializedYetException {
-        SerializedPersistance p = com.laytonsmith.commandhelper.CommandHelperPlugin.persist;
+        SerializedPersistance p = persist;
         if (p == null) {
             throw new NotInitializedYetException("The persistance framework has not been initialized yet");
         }
@@ -240,11 +245,7 @@ public class Static {
      * @throws NotInitializedYetException 
      */
     public static PermissionsResolverManager getPermissionsResolverManager() throws NotInitializedYetException {
-        PermissionsResolverManager prm = com.laytonsmith.commandhelper.CommandHelperPlugin.perms;
-        if (prm == null) {
-            throw new NotInitializedYetException("The permissions framework has not been initialized yet");
-        }
-        return prm;
+        return perms;
     }
 
     /**

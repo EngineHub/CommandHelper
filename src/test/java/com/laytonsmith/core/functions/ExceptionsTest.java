@@ -9,6 +9,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
@@ -41,7 +42,7 @@ public class ExceptionsTest {
 
     @Before
     public void setUp() {
-        CommandHelperPlugin.perms = mock(PermissionsResolverManager.class);
+        Static.perms = mock(PermissionsResolverManager.class);
         CommandHelperPlugin.myServer = fakeServer;
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();

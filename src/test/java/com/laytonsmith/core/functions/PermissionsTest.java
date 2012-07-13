@@ -63,7 +63,7 @@ public class PermissionsTest {
         when(fakePlayer.getWorld()).thenReturn(fakeWorld);
         fakeServer = StaticTest.GetFakeServer();
         fakePerms = mock(PermissionsResolverManager.class);
-        com.laytonsmith.commandhelper.CommandHelperPlugin.perms = fakePerms;
+        Static.perms = fakePerms;
         env.SetPlayer(fakePlayer);        
         spy(Static.class);      
         doReturn(fakePerms).when(Static.class);

@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities;
 
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -233,11 +234,15 @@ public class ArgumentParser {
 			if (a == null) {
 				return;
 			}
+                        List<Argument> toRemove = new ArrayList<Argument>();
 			for (Argument arg : arguments) {
 				if (arg.modelEquals(a)) {
-					arguments.remove(arg);
+					toRemove.add(arg);
 				}
 			}
+                        for(Argument arg : toRemove){
+                            arguments.remove(arg);
+                        }
 			arguments.add(a);
 		}
 
@@ -249,12 +254,7 @@ public class ArgumentParser {
 		 * @return
 		 */
 		public boolean isFlagSet(Character flag) {
-			try {
-				getArg(flag);
-				return true;
-			} catch (ResultUseException e) {
-				return false;
-			}
+			return getArg(flag) != null;
 		}
 
 		/**
@@ -265,12 +265,7 @@ public class ArgumentParser {
 		 * @return
 		 */
 		public boolean isFlagSet(String flag) {
-			try {
-				getArg(flag);
-				return true;
-			} catch (ResultUseException e) {
-				return false;
-			}
+			return getArg(flag) != null;
 		}
 
 		/**
@@ -331,10 +326,11 @@ public class ArgumentParser {
 		}
 
 		private String getStringArgument(Argument arg) {
-			if (arg.argType != Type.STRING) {
-				throw new ClassCastException("Argument type not set to " + Type.STRING.name() + ". Cannot return a " + "string" + ".");
-			}
-			return arg.singleVal;
+                        if(arg == null) return null;
+                        if (arg.argType != Type.STRING) {
+                                throw new ClassCastException("Argument type not set to " + Type.STRING.name() + ". Cannot return a " + "string" + ".");
+                        }
+                        return arg.singleVal;
 		}
 
 		/**
@@ -366,7 +362,8 @@ public class ArgumentParser {
 		}
 
 		private Double getNumberArgument(Argument arg) {
-			if (arg.argType != Type.NUMBER) {
+			if(arg == null) return null;
+                        if (arg.argType != Type.NUMBER) {
 				throw new ClassCastException("Argument type not set to " + Type.NUMBER.name() + ". Cannot return a " + "number" + ".");
 			}
 			return Double.parseDouble(arg.singleVal);
@@ -423,6 +420,7 @@ public class ArgumentParser {
 		}
 
 		private List<String> getStringListArgument(Argument arg) {
+                        if(arg == null) return null;
 			if (arg.argType != Type.ARRAY_OF_STRINGS) {
 				throw new ClassCastException("Argument type not set to " + Type.ARRAY_OF_STRINGS.name() + ". Cannot return a " + "string list" + ".");
 			}
@@ -456,6 +454,7 @@ public class ArgumentParser {
 		}
 
 		private List<Double> getNumberListArgument(Argument arg) {
+                        if(arg == null) return null;
 			if (arg.argType != Type.ARRAY_OF_NUMBERS) {
 				throw new ClassCastException("Argument type not set to " + Type.ARRAY_OF_NUMBERS.name() + ". Cannot return a " + "number list" + ".");
 			}
@@ -485,7 +484,7 @@ public class ArgumentParser {
 					return a;
 				}
 			}
-			throw new ResultUseException("Unable to find the argument specified by the short code " + flag);
+			return null;
 		}
 
 		private Argument getArg(String flag) throws ResultUseException {
@@ -497,7 +496,7 @@ public class ArgumentParser {
 					return a;
 				}
 			}
-			throw new ResultUseException("Unable to find the argument specified by the long code " + flag);
+			return null;
 		}
 
 		@Override
@@ -982,7 +981,7 @@ public class ArgumentParser {
 
 			//Our regexes have a star, because -(-) is a valid argument that is an empty string.
 			//"" != null.
-			if (arg.matches("--[a-zA-Z0-9]*")) {
+			if (arg.matches("--[a-zA-Z0-9\\-]*")) {
 				//Finish up the last argument
 				results.updateArgument(validateArgument(lastArg, looseArgs));
 				//This is a long arg, and so it is the only one.
@@ -1037,6 +1036,8 @@ public class ArgumentParser {
 			a.setValue(looseArgs);
 			results.updateArgument(a);
 		}
+                
+                //TODO: Check to see if all the required values are here
 
 		return results;
 	}
@@ -1048,17 +1049,22 @@ public class ArgumentParser {
 		Argument finishedArgument = new Argument(arg);
 		if (arg.isSingle()) {
 			//Just the first loose argument is associated with this argument, 
-			//the rest (if any) belong to the default loose argument list
-			String looseArg = looseArgs.get(0);
-			looseArgs.remove(0);
-			finishedArgument.setValue(looseArg);
-			if (arg.isNumeric()) {
-				try {
-					Double.parseDouble(looseArg);
-				} catch (NumberFormatException e) {
-					throw new ValidationException("Expecting a numeric value, but \"" + looseArg + "\" was encountered.");
-				}
-			}
+			//the rest (if any) belong to the default loose argument list.
+                        //Of course, looseArgs could be empty, in which case we won't add anything to the list.
+                        if(looseArgs.size() > 0){
+                            String looseArg = looseArgs.get(0);
+                            looseArgs.remove(0);
+                            finishedArgument.setValue(looseArg);
+                            if (arg.isNumeric()) {
+                                    try {
+                                            Double.parseDouble(looseArg);
+                                    } catch (NumberFormatException e) {
+                                            throw new ValidationException("Expecting a numeric value, but \"" + looseArg + "\" was encountered.");
+                                    }
+                            }
+                        } else {
+                            finishedArgument.setValue("");
+                        }
 		} else if(arg.isArray()){
 			finishedArgument.setValue(looseArgs);
 			if (arg.isNumeric()) {
@@ -1087,18 +1093,6 @@ public class ArgumentParser {
 	 * @return
 	 */
 	public ArgumentParserResults match(String[] args) throws ValidationException {
-		StringBuilder b = new StringBuilder();
-		for (int i = 0; i < args.length; i++) {
-			if (i != 0) {
-				b.append(" ");
-			}
-			//If it's a flag, we don't want to quote it
-			String arg = args[i];
-			if (!args[i].startsWith("-")) {
-				arg = "\"" + arg.replaceAll("\"", "\\\"") + "\"";
-			}
-			b.append(arg);
-		}
-		return match(b.toString());
+		return parse(Arrays.asList(args));
 	}
 }
