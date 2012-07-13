@@ -380,8 +380,8 @@ public class BlockEvents {
 
                 CArray blk = new CArray(Target.UNKNOWN);
                 blk.set("X", new CInt(sce.getBlock().getX(), Target.UNKNOWN));
-                blk.set("Y", new CInt(sce.getBlock().getX(), Target.UNKNOWN));
-                blk.set("Z", new CInt(sce.getBlock().getX(), Target.UNKNOWN));
+                blk.set("Y", new CInt(sce.getBlock().getY(), Target.UNKNOWN));
+                blk.set("Z", new CInt(sce.getBlock().getZ(), Target.UNKNOWN));
                 blk.set("world", new CString(sce.getBlock().getWorld().getName(), Target.UNKNOWN));
                 map.put("location", blk);
 
