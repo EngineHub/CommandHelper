@@ -611,4 +611,48 @@ public class Echoes {
         }
         
     }
+    
+    @api public static class exit extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            int exit_code = 0;
+            if(args.length == 1){
+                exit_code = (int)Static.getInt(args[0]);
+            }
+            if(environment.GetCustom("cmdline") instanceof Boolean && (Boolean)environment.GetCustom("cmdline")){
+                System.exit(exit_code);
+            }
+            return new die().exec(t, environment, args);
+        }
+
+        public String getName() {
+            return "exit";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[int]} Exits the program. If this is being run from the command line, works by exiting the interpreter, with "
+                    + " the specified exit code (defaulting to 0). If this is being run from in-game, works just like die().";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
 }
