@@ -284,7 +284,7 @@ public class Script {
                 Construct ret = f.exec(m.getTarget(), env, ca);
                 return ret;
 
-        } else if (m.getCType() == ConstructType.VARIABLE) {
+        } else if (m.getCType() == ConstructType.VARIABLE) {            ;
             return Static.resolveConstruct(m.val(), m.getTarget());
         } else {
             return m;
@@ -763,4 +763,5 @@ public class Script {
     public void setLabel(String label) {
         this.label = label;
     }
+
 }

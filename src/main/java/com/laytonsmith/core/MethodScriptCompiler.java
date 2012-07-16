@@ -1247,9 +1247,39 @@ public class MethodScriptCompiler {
      * @param done
      * @param script
      */
-    public static Construct execute(GenericTreeNode<Construct> root, Env env, MethodScriptComplete done, Script script) {
+    public static Construct execute(GenericTreeNode<Construct> root, Env env, MethodScriptComplete done, Script script){
+        return execute(root, env, done, script, null);
+    }
+    
+    /**
+     * Executes a pre-compiled MethodScript, given the specified Script environment,
+     * but also provides a method to set the constants in the script.
+     * @param root
+     * @param env
+     * @param done
+     * @param script
+     * @param vars
+     * @return 
+     */
+    public static Construct execute(GenericTreeNode<Construct> root, Env env, MethodScriptComplete done, Script script, List<Variable> vars) {
         if (script == null) {
             script = new Script(null, null);
+        }
+        if(vars != null){
+            Map<String, Variable> varMap = new HashMap<String, Variable>();
+            for(Variable v : vars){
+                varMap.put(v.getName(), v);
+            }
+            GenericTree<Construct> tree = new GenericTree<Construct>();
+            tree.setRoot(root);
+            for (GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)) {
+                if (tempNode.data instanceof Variable) {
+                    ((Variable) tempNode.data).setVal(
+                            Static.resolveConstruct(
+                            Static.resolveDollarVar(varMap.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getTarget()));
+                }
+            }
+            root = tree.getRoot();
         }
         StringBuilder b = new StringBuilder();
         Construct returnable = null;

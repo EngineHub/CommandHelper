@@ -48,6 +48,7 @@ public class Main {
                     .addArgument("docs", ArgumentParser.Type.STRING, "Prints documentation for the functions that CommandHelper knows about, then exits.\n" +
                             "'type' can be one of the following: " + doctypes.toString() + ". Defaults to 'html'.", "[type]", false)
                     .addFlag("verify", "Compiles all the files in the system, simply checking for compile errors, then exits.")
+                    .addFlag("install-cmdline", "Installs MethodScript to your system, so that commandline scripts work. (Currently only unix is supported.)")
                     .addArgument("syntax", ArgumentParser.Type.ARRAY_OF_STRINGS, "Generates the syntax highlighter for the specified editor (if available).\n"
                     + "Don't specify a type to see the available options.", "type", false)
             ;
@@ -59,7 +60,12 @@ public class Main {
                 System.exit(0);
             }
             if(switches.isFlagSet("interpreter")){
-                Interpreter.start();
+                Interpreter.start(switches.getStringListArgument());
+                System.exit(0);
+            }
+            
+            if(switches.isFlagSet("install-cmdline")){
+                Interpreter.install();
                 System.exit(0);
             }
             

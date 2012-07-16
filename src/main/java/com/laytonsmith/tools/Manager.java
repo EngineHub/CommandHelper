@@ -65,7 +65,7 @@ public class Manager {
             } else if (input.equalsIgnoreCase("upgrade")) {
                 upgrade();
             } else if(input.equalsIgnoreCase("interpreter")){
-                Interpreter.start();
+                Interpreter.start(null);
             } else if (input.equalsIgnoreCase("exit")) {
                 pl("Thanks for using the " + CYAN + "Data Manager!" + reset());
                 finished = true;
