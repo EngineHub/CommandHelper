@@ -45,6 +45,13 @@ import java.util.logging.Logger;
  * @author layton
  */
 public class Interpreter {
+    
+    /**
+     * THIS MUST NEVER EVER EVER EVER EVER EVER EVER CHANGE. EVER.
+     * 
+     * BAD THINGS WILL HAPPEN TO EVERYBODY YOU LOVE IF THIS IS CHANGED! 
+     */
+    private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/mscript";
     static boolean multilineMode = false;
     static String script;
 
@@ -209,7 +216,7 @@ public class Interpreter {
         if(TermColors.SYSTEM == TermColors.SYS.UNIX){
             try{
                 URL jar = Interpreter.class.getProtectionDomain().getCodeSource().getLocation();
-                File exe = new File("/bin/mscript");
+                File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
                 String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
                 try {
                     bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
@@ -221,7 +228,7 @@ public class Interpreter {
                     throw new IOException();
                 }
                 FileUtility.write(bashScript, exe);
-                exe.setExecutable(true);
+                exe.setExecutable(true, false);                
             } catch(IOException e){
                 System.err.println("Cannot install. You must run the command with sudo for it to succeed, however, did you do that?");
                 return;
@@ -231,9 +238,27 @@ public class Interpreter {
             return;
         }
         System.out.println("MethodScript has successfully been installed on your system. Note that you may need to rerun the install command"
-                + " if you change locations of the jar, or rename it. Be sure to put \"#!/bin/mscript\" at the top of all your scripts,"
+                + " if you change locations of the jar, or rename it. Be sure to put \"#!" + INTERPRETER_INSTALLATION_LOCATION + "\" at the top of all your scripts,"
                 + " if you wish them to be executable on unix systems, and set the execution bit with chmod +x <script name> on unix systems.");
         System.out.println("Try this script to test out the basic features of the scripting system:\n");
         System.out.println(Static.GetStringResource("/interpreter-helpers/sample.ms"));
+    }
+    
+    public static void uninstall(){
+        if(TermColors.SYSTEM == TermColors.SYS.UNIX){
+            try{
+                File exe = new File(INTERPRETER_INSTALLATION_LOCATION);
+                if(!exe.delete()){
+                    throw new IOException();
+                }
+            } catch(IOException e){
+                System.err.println("Cannot uninstall. You must run the command with sudo for it to succeed, however, did you do that?");
+                return;
+            }
+        } else {
+            System.err.println("Sorry, cmdline functionality is currently only supported on unix systems! Check back soon though!"); 
+            return;
+        }
+        System.out.println("MethodScript has been uninstalled from this system.");
     }
 }

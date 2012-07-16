@@ -1,4 +1,4 @@
-#!/bin/mscript
+#!/usr/local/bin/mscript
 
 sys_out('@arguments: ' @arguments)
 sys_out('$0:' $0)
