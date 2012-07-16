@@ -212,7 +212,7 @@ public class Interpreter {
                 File exe = new File("/bin/mscript");
                 String bashScript = Static.GetStringResource("/interpreter-helpers/bash.sh");
                 try {
-                    bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().toString());
+                    bashScript = bashScript.replaceAll("%%LOCATION%%", jar.toURI().getPath());
                 } catch (URISyntaxException ex) {
                     ex.printStackTrace();
                 }
