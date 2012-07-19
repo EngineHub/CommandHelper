@@ -512,147 +512,17 @@ public class Echoes {
             if(args.length > 1){
                 prefix = Static.getBoolean(args[1]);
             }
-            mes = Static.MCToANSIColors(mes);
-            com.laytonsmith.core.Static.getLogger().log(Level.INFO, (prefix?"CommandHelper: ":"") + mes);
+            mes = (prefix?"CommandHelper: ":"") + Static.MCToANSIColors(mes);
+            if(mes.matches("(?m).*\033.*")){
+                //We have terminal colors, we need to reset them at the end
+                mes += TermColors.reset();
+            }
+            com.laytonsmith.core.Static.getLogger().log(Level.INFO, mes);
             return new CVoid(t);
         }
         public Boolean runAsync(){
             return null;
         }
         
-    }
-    
-    @api public static class sys_out extends AbstractFunction{
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            System.out.print(args[0].val());
-            if(args[0].val().matches("(?m).*\033.*")){
-                //We have color codes in it, we need to reset them
-                System.out.print(TermColors.reset());
-            }
-            System.out.println();
-            return new CVoid(t);
-        }
-
-        public String getName() {
-            return "sys_out";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "void {text} Writes the text to the system's std out. Unlike console(), this does not use anything else to format the output, though in many"
-                    + " cases they will behave the same. However, colors and other formatting characters will not \"bleed\" through, so"
-                    + " sys_out(color(RED) . 'This is red') will not cause the next line to also be red, so if you need to print multiple lines out, you should"
-                    + " manually add \\n to create your linebreaks, and only make one call to sys_out.";
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-        
-    }
-    
-    @api public static class sys_err extends AbstractFunction{
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            System.err.print(args[0].val());
-            if(args[0].val().matches("(?m).*\033.*")){
-                //We have color codes in it, we need to reset them
-                System.err.print(TermColors.reset());
-            }
-            System.err.println();
-            return new CVoid(t);
-        }
-
-        public String getName() {
-            return "sys_err";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "void {text} Writes the text to the system's std err. Unlike console(), this does not use anything else to format the output, though in many"
-                    + " cases they will behave nearly the same. However, colors and other formatting characters will not \"bleed\" through, so"
-                    + " sys_err(color(RED) . 'This is red') will not cause the next line to also be red, so if you need to print multiple lines out, you should"
-                    + " manually add \\n to create your linebreaks, and only make one call to sys_err.";
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-        
-    }
-    
-    @api public static class exit extends AbstractFunction{
-
-        public ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public Boolean runAsync() {
-            return false;
-        }
-
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            int exit_code = 0;
-            if(args.length == 1){
-                exit_code = (int)Static.getInt(args[0]);
-            }
-            if(environment.GetCustom("cmdline") instanceof Boolean && (Boolean)environment.GetCustom("cmdline")){
-                System.exit(exit_code);
-            }
-            return new die().exec(t, environment, args);
-        }
-
-        public String getName() {
-            return "exit";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0, 1};
-        }
-
-        public String docs() {
-            return "void {[int]} Exits the program. If this is being run from the command line, works by exiting the interpreter, with "
-                    + " the specified exit code (defaulting to 0). If this is being run from in-game, works just like die().";
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-        
-    }
+    }        
 }
