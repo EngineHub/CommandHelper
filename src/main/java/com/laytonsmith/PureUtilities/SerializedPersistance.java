@@ -16,7 +16,7 @@ public class SerializedPersistance implements Persistance{
     /**
      * This is the data structure that the registry is stored in
      */
-    private HashMap<String, Serializable> data = new HashMap<String, Serializable>();
+    private Map<String, Serializable> data = new HashMap<String, Serializable>();
     private boolean isLoaded = false;
     /**
      * The storage location of the persistance database. 
@@ -31,7 +31,7 @@ public class SerializedPersistance implements Persistance{
      * Unless you're the data manager, don't use this method.
      * @return 
      */
-    public HashMap<String, Serializable> rawData(){
+    public Map<String, Serializable> rawData(){
         return data;
     }
     
