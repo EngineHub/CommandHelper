@@ -6,7 +6,9 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.api;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -16,6 +18,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import org.mindrot.jbcrypt.BCrypt;
 
 /**
  * @author Layton
@@ -206,6 +209,88 @@ public class Crypto {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+    }
+    
+    @api public static class bcrypt extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.CastException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            int log_rounds = 5;
+            if(args.length == 2){
+                log_rounds = (int)Static.getInt(args[1]);
+            }
+            String hash = BCrypt.hashpw(args[0].val(), BCrypt.gensalt(log_rounds));
+            return new CString(hash, t);
+        }
+
+        public String getName() {
+            return "bcrypt";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "string {val, [workload]} Encrypts a value using bcrypt, using the specified workload, or 5 if none provided. BCrypt is supposedly more secure than SHA1, and"
+                    + " certainly more secure than md5. Note that using bcrypt is slower, which is one of its security advantages, however, setting the workload to higher numbers"
+                    + " will take exponentially more time. A workload of 5 is a moderate operation, which should complete in under a second, however, setting it to 10 will take"
+                    + " many seconds, and setting it to 15 will take a few minutes. See the documentation for check_bcrypt for full usage.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
+    
+    @api public static class check_bcrypt extends AbstractFunction{
+
+        public ExceptionType[] thrown() {
+            return null;
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            boolean match = BCrypt.checkpw(args[0].val(), args[1].val());
+            return new CBoolean(match, t);
+        }
+
+        public String getName() {
+            return "check_bcrypt";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "boolean {plaintext, hash} Checks to see if this plaintext password does in fact hash to the hash specified. Unlike md5 or sha1, simply comparing hashes won't work. Consider the following usage:"
+                    + " assign(@plain, 'plaintext') assign(@hash, bcrypt(@plain)) msg(if(check_bcrypt(@plain, @hash), 'They match!', 'They do not match!'))";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
     }
 
     public static String toHex(byte[] bytes) {
