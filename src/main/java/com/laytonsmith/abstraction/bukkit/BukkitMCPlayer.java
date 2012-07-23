@@ -330,4 +330,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public String getPlayerListName() {
         return p.getPlayerListName();
     }
+
+    public boolean isNewPlayer() {
+        //Note the reversed logic here. If they have NOT played before, they are
+        //a new player.
+        return !p.getServer().getOfflinePlayer(p.getName()).hasPlayedBefore();
+    }
 }

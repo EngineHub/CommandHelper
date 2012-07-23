@@ -80,4 +80,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public void setTotalExperience(int total);
     
     public void setVanished(boolean set, MCPlayer to);
+    
+    public boolean isNewPlayer();
 }

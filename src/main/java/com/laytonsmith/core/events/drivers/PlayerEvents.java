@@ -228,7 +228,8 @@ public class PlayerEvents {
                     + "join_message: <regex>} This event is called when a player logs in. "
                     + "Setting join_message to null causes it to not be displayed at all. Cancelling "
                     + "the event does not prevent them from logging in. Instead, you should just kick() them."
-                    + "{player: The player's name | join_message: The default join message}"
+                    + "{player: The player's name | join_message: The default join message | first_login: True if this is the first time"
+                    + " the player has logged in.}"
                     + "{join_message}"
                     + "{player|join_message}";
         }
@@ -261,6 +262,7 @@ public class PlayerEvents {
                 Map<String, Construct> map = evaluate_helper(e);
                 //map.put("player", new CString(ple.getPlayer().getName(), Target.UNKNOWN));
                 map.put("join_message", new CString(ple.getJoinMessage(), Target.UNKNOWN));
+                map.put("first_login", new CBoolean(ple.getPlayer().isNewPlayer(), Target.UNKNOWN));
                 return map;
             } else{
                 throw new EventException("Cannot convert e to PlayerLoginEvent");
@@ -284,7 +286,8 @@ public class PlayerEvents {
         }
         
         public BindableEvent convert(CArray manual){
-            MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN), manual.get("join_message").val());
+            MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN), 
+                    manual.get("join_message").val());
             return e;
         }
         
