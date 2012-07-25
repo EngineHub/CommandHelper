@@ -19,13 +19,14 @@
 
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.PureUtilities.SerializedPersistance;
+import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.persistance.DataSourceException;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
@@ -38,6 +39,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -95,7 +97,11 @@ public class CommandHelperPlugin extends JavaPlugin {
     public void onEnable() {       
         self = this;
         myServer = StaticLayer.GetServer();
-        Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
+        try {
+            Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
+        } catch (DataSourceException ex) {
+            Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+        }
         Static.getLogger().info("CommandHelper/CommandHelper " + getDescription().getVersion() + " enabled");
         version = new Version(getDescription().getVersion());
         PermissionsResolverManager.initialize(this);

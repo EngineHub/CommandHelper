@@ -40,14 +40,14 @@ public interface Persistance {
      * @param value The value to store. If value is null, the key is simply removed.
      * @return The object that was in this key, or null if the value did not exist.
      */
-    public Object setValue(String[] key, Object value);
+    public String setValue(String[] key, String value);
     
     /**
      * Returns the value of a particular key
      * @param key
      * @return
      */
-    public Object getValue(String[] key);
+    public String getValue(String[] key);
     
     /**
      * Checks to see if a particular key is set. Unlike isNamespaceSet, this requires that

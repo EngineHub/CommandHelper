@@ -1,6 +1,9 @@
-package com.laytonsmith.PureUtilities;
+package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.Persistance;
+import com.laytonsmith.core.CHVersion;
 import java.io.*;
+import java.net.URI;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -12,20 +15,34 @@ import java.util.logging.Logger;
  *
  * @author layton
  */
-public class SerializedPersistance implements Persistance {
+@datasource("ser")
+public class SerializedPersistance extends AbstractDataSource implements Persistance {
 
     /**
      * This is the data structure that the registry is stored in
      */
-    private Map<String, Serializable> data = new HashMap<String, Serializable>();
+    private Map<String, String> data = new HashMap<String, String>();
     private boolean isLoaded = false;
+    private boolean finishedInitializing = false;
     /**
      * The storage location of the persistance database.
      */
     private File storageLocation;
 
-    public SerializedPersistance(File database) {
+    public SerializedPersistance(File database) throws DataSourceException {
+        super(database.toURI());
         storageLocation = database;
+    }
+    
+    public SerializedPersistance(URI uri) throws DataSourceException{
+        super(uri);
+        String file = uri.getSchemeSpecificPart();
+        if(file.startsWith("//")){
+            file = file.substring(2);
+        }
+        storageLocation = new File(file);
+        finishedInitializing = true;
+        populate();
     }
 
     /**
@@ -33,7 +50,7 @@ public class SerializedPersistance implements Persistance {
      *
      * @return
      */
-    public Map<String, Serializable> rawData() {
+    public Map<String, String> rawData() {
         return data;
     }
 
@@ -43,7 +60,7 @@ public class SerializedPersistance implements Persistance {
      * after this, if you wish the changes to be written out to disk.
      */
     public void clearAllData() {
-        data = new HashMap<String, Serializable>();
+        data = new HashMap<String, String>();
     }
 
     /**
@@ -59,7 +76,7 @@ public class SerializedPersistance implements Persistance {
                 ObjectInputStream in = null;
                 fis = new FileInputStream(storageLocation);
                 in = new ObjectInputStream(fis);
-                data = (HashMap<String, Serializable>) in.readObject();
+                data = (HashMap<String, String>) in.readObject();
                 in.close();
                 isLoaded = true;
             }
@@ -77,11 +94,13 @@ public class SerializedPersistance implements Persistance {
      *
      * @throws IOException
      */
-    public synchronized void save() throws Exception {
+    public synchronized void save() throws IOException {
         try {
             FileOutputStream fos = null;
             ObjectOutputStream out = null;
-            storageLocation.getParentFile().mkdirs();
+            if(storageLocation.getParentFile() != null){
+                storageLocation.getParentFile().mkdirs();
+            }
             if (!storageLocation.exists()) {
                 storageLocation.createNewFile();
             }
@@ -90,7 +109,7 @@ public class SerializedPersistance implements Persistance {
             out.writeObject(data);
             out.close();
         }
-        catch (Exception ex) {
+        catch (IOException ex) {
             throw ex;
         }
     }
@@ -99,7 +118,7 @@ public class SerializedPersistance implements Persistance {
      * You should not usually use this method. Please see
      * <code>setValue(String[] key, Serializable value)</code>
      */
-    private synchronized Object setValue(String key, Serializable value) {
+    private synchronized String setValue(String key, String value) {
         //defer loading until we actually try and use the data structure
         if (isLoaded == false) {
             try {
@@ -109,7 +128,7 @@ public class SerializedPersistance implements Persistance {
                 Logger.getLogger("Minecraft").log(Level.SEVERE, null, ex);
             }
         }
-        Serializable oldVal = data.get(key);
+        String oldVal = data.get(key);
         if (value == null) {
             data.remove(key);
         } else {
@@ -124,7 +143,7 @@ public class SerializedPersistance implements Persistance {
         return oldVal;
     }
 
-    private synchronized Object getValue(String key) {
+    private synchronized String getValue(String key) {
         //defer loading until we actually try and use the data structure
         if (isLoaded == false) {
             try {
@@ -162,8 +181,8 @@ public class SerializedPersistance implements Persistance {
      * @return The object that was in this key, or null if the value did not
      * exist.
      */
-    public synchronized Object setValue(String[] key, Object value) {
-        return setValue(getNamespace(key), (Serializable) value);
+    public synchronized String setValue(String[] key, String value) {
+        return setValue(getNamespace(key), (String) value);
     }
 
     /**
@@ -172,7 +191,7 @@ public class SerializedPersistance implements Persistance {
      * @param key
      * @return
      */
-    public synchronized Object getValue(String[] key) {
+    public synchronized String getValue(String[] key) {
         return getValue(getNamespace(key));
     }
 
@@ -312,5 +331,55 @@ public class SerializedPersistance implements Persistance {
         System.out.println(p.getNamespaceValues(new String[]{"player", "wraithguard01", "age"}));
         System.out.println();
         p.save();
+    }
+
+    public List<String[]> keySet() {
+        List<String[]> list = new ArrayList<String[]>();
+        for (String key : data.keySet()) {
+            list.add(key.split("\\."));
+        }
+        return list;
+    }
+
+    public String get(String[] key) {
+        return getValue(key);
+    }
+
+    public boolean set(String[] key, String value) throws ReadOnlyException, IOException {
+        checkSet();
+        setValue(key, value);
+        save();
+        return true;
+    }
+
+    public void populate() throws DataSourceException {
+        if(!finishedInitializing){
+            return;
+        }
+        try {
+            load();
+        } catch (Exception ex) {
+            throw new DataSourceException(null, ex);
+        }
+    }
+
+    public DataSourceModifier[] implicitModifiers() {
+        return null;
+    }
+
+    public DataSourceModifier[] invalidModifiers() {
+        return null;
+    }
+
+    public String docs() {
+        return "Serialized Persistance {ser:///path/to/persistance.ser} The default type,"
+                + " this simply uses java serialization to store data. Extremely simple"
+                + " to use, it is less scalable than database driven solutions, but for"
+                + " a file based solution, is relatively efficient, since it is stored as"
+                + " binary data. This means that it cannot be easily edited however.";
+    }
+
+    public CHVersion since() {
+        return CHVersion.V3_0_2;
     }
 }

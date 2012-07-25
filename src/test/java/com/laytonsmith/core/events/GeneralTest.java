@@ -1,14 +1,17 @@
 package com.laytonsmith.core.events;
 
 
-import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.events.MCPlayerJoinEvent;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -32,8 +35,13 @@ public class GeneralTest {
 
     @BeforeClass
     public static void setUpClass(){
-        //StaticTest.StartServer();     
-        Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
+        try {
+            //StaticTest.StartServer();     
+            Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
+        }
+        catch (DataSourceException ex) {
+            Logger.getLogger(GeneralTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     @Before
     public void setUp() throws Exception {        

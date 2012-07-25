@@ -12,7 +12,7 @@ import java.util.Arrays;
  */
 public class MainSandbox {
     public static void main(String[] argv) throws Exception {
-        DataSource ds = DataSourceFactory.GetDataSource("ini://test.ini");
+        DataSource ds = DataSourceFactory.GetDataSource("ser://test.ser");
         ds.set(new String[]{"key", "value"}, "blah");
         ds.set(new String[]{"key", "val1"}, "blah");
         ds.set(new String[]{"key", "val2"}, "blah");

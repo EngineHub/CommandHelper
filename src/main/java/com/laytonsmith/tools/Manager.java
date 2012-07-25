@@ -4,7 +4,7 @@ package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.Persistance;
-import com.laytonsmith.PureUtilities.SerializedPersistance;
+import com.laytonsmith.persistance.SerializedPersistance;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.PureUtilities.TermColors.SYS;
 import com.laytonsmith.core.Env;
@@ -13,12 +13,15 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.persistance.DataSourceException;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
 import java.io.Serializable;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 /**
@@ -296,13 +299,19 @@ public class Manager {
                 pl("Looks like you haven't used your persistance file yet.");
                 return;
             }
-            SerializedPersistance sp = new SerializedPersistance(db);
+            SerializedPersistance sp;
             try {
-                sp.load();
-            } catch (Exception ex) {
-                pl(RED + ex.getMessage());
+                sp = new SerializedPersistance(db);
+                try {
+                    sp.load();
+                } catch (Exception ex) {
+                    pl(RED + ex.getMessage());
+                }
+                data = sp.rawData();
             }
-            data = sp.rawData();
+            catch (DataSourceException ex) {
+                Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+            }
         }
         pl();
         if (data != null) {
@@ -343,63 +352,69 @@ public class Manager {
                     }
                     FileUtility.copy(db, new File("CommandHelper/persistance.ser.bak"));
                     //Now, load in all the data
-                    SerializedPersistance sp = new SerializedPersistance(db);
+                    SerializedPersistance sp;
                     try {
-                        sp.load();
-                    } catch (Exception ex) {
-                        pl(RED + ex.getMessage());
-                    }
-                    Map<String, Serializable> data = sp.rawData();
-                    if (data.isEmpty()) {
-                        pl("Looks like you haven't used your persistance file yet.");
-                        return;
-                    }
-                    sp.clearAllData(); //Bye bye!
-                    //Ok, now we need to determine the type of data we're currently working with
-                    p(WHITE + "Working");
-                    int counter = 0;
-                    int changes = 0;
-                    Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA};
-                    for (String key : data.keySet()) {
-                        counter++;
-                        int c = counter / 20;
-                        if(c == ((double)counter / 20.0)){
-                            p(color(colors[c % 6]) + ".");
+                        sp = new SerializedPersistance(db);
+                        try {
+                            sp.load();
+                        } catch (Exception ex) {
+                            pl(RED + ex.getMessage());
                         }
-                        if (key.matches("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.commandhelper\\.function\\.storage\\..*")) {
-                            //We're in version 1, and we need to upgrade to version 2
-                            String newKey = "storage." + key.replaceFirst("plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.commandhelper\\.function\\.storage\\.", "");
-                            sp.rawData().put(newKey, data.get(key));
-                            changes++;
-                        } else if(key.matches("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\..*?\\.aliases\\.\\d+$")){
-                            //Pull out the parts we need
-                            Pattern p = Pattern.compile("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.(.*?)\\.aliases\\.(\\d+)$");
-                            Matcher m = p.matcher(key);
-                            String newKey = null;
-                            if(m.find()){
-                                String username = m.group(1);
-                                String id = m.group(2);
-                                newKey = "user." + username + ".aliases." + id;
+                        Map<String, String> data = sp.rawData();
+                        if (data.isEmpty()) {
+                            pl("Looks like you haven't used your persistance file yet.");
+                            return;
+                        }
+                        sp.clearAllData(); //Bye bye!
+                        //Ok, now we need to determine the type of data we're currently working with
+                        p(WHITE + "Working");
+                        int counter = 0;
+                        int changes = 0;
+                        Color[] colors = new Color[]{Color.RED, Color.YELLOW, Color.GREEN, Color.CYAN, Color.BLUE, Color.MAGENTA};
+                        for (String key : data.keySet()) {
+                            counter++;
+                            int c = counter / 20;
+                            if(c == ((double)counter / 20.0)){
+                                p(color(colors[c % 6]) + ".");
                             }
-                            //If something went wrong, just put the old one back in
-                            if(newKey == null){
-                                sp.rawData().put(key, data.get(key));
-                            } else {
+                            if (key.matches("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.commandhelper\\.function\\.storage\\..*")) {
+                                //We're in version 1, and we need to upgrade to version 2
+                                String newKey = "storage." + key.replaceFirst("plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.commandhelper\\.function\\.storage\\.", "");
                                 sp.rawData().put(newKey, data.get(key));
                                 changes++;
+                            } else if(key.matches("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\..*?\\.aliases\\.\\d+$")){
+                                //Pull out the parts we need
+                                Pattern p = Pattern.compile("^plugin\\.com\\.sk89q\\.commandhelper\\.CommandHelperPlugin\\.(.*?)\\.aliases\\.(\\d+)$");
+                                Matcher m = p.matcher(key);
+                                String newKey = null;
+                                if(m.find()){
+                                    String username = m.group(1);
+                                    String id = m.group(2);
+                                    newKey = "user." + username + ".aliases." + id;
+                                }
+                                //If something went wrong, just put the old one back in
+                                if(newKey == null){
+                                    sp.rawData().put(key, data.get(key));
+                                } else {
+                                    sp.rawData().put(newKey, data.get(key));
+                                    changes++;
+                                }
+                            } else {
+                                sp.rawData().put(key, data.get(key));
                             }
-                        } else {
-                            sp.rawData().put(key, data.get(key));
                         }
+                        try {
+                            sp.save();
+                        } catch (Exception ex) {
+                            pl(RED + ex.getMessage());
+                        }
+                        pl();
+                        pl(GREEN + "Assuming there are no error messages above, it should be upgraded now! (Use print to verify)");
+                        pl(CYAN.toString() + changes + " change" + (changes==1?" was":"s were") + " made");
                     }
-                    try {
-                        sp.save();
-                    } catch (Exception ex) {
-                        pl(RED + ex.getMessage());
+                    catch (DataSourceException ex) {
+                        Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
                     }
-                    pl();
-                    pl(GREEN + "Assuming there are no error messages above, it should be upgraded now! (Use print to verify)");
-                    pl(CYAN.toString() + changes + " change" + (changes==1?" was":"s were") + " made");
 
                 } catch (IOException ex) {
                     pl(RED + ex.getMessage());
@@ -411,9 +426,15 @@ public class Manager {
     }
     
     public static Persistance GetDB(){
-        //Figure out what engine they're using
-        //For now, it's obviously SerializedPersistance
-        return new SerializedPersistance(new File("CommandHelper/persistance.ser"));
+        try {
+            //Figure out what engine they're using
+            //For now, it's obviously SerializedPersistance
+            return new SerializedPersistance(new File("CommandHelper/persistance.ser"));
+        }
+        catch (DataSourceException ex) {
+            Logger.getLogger(Manager.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
     }
 
     

@@ -2,13 +2,16 @@
 
 package com.laytonsmith.testing;
 
-import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistance.SerializedPersistance;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.BeforeClass;
@@ -27,7 +30,12 @@ public class ArrayTest {
 
     @BeforeClass
     public static void setUpClass(){      
-        Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
+        try {
+            Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
+        }
+        catch (DataSourceException ex) {
+            Logger.getLogger(ArrayTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
     @Before
     public void setUp() {

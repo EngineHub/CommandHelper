@@ -1,7 +1,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.FileUtility;
-import com.laytonsmith.PureUtilities.SerializedPersistance;
+import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.core.Env;
@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.persistance.DataSourceException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -27,6 +28,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * This is a command line implementation of the in game interpreter mode. This
@@ -53,7 +56,12 @@ public class Interpreter {
         }
         catch (ConfigCompileException ex) {
         }
-        Static.persist = new SerializedPersistance(new File("CommandHelper/persistance.ser"));
+        try {
+            Static.persist = new SerializedPersistance(new File("CommandHelper/persistance.ser"));
+        }
+        catch (DataSourceException ex) {
+            Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
+        }
         if (TermColors.SYSTEM == TermColors.SYS.WINDOWS) {
             TermColors.DisableColors();
         }
