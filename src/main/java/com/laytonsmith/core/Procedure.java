@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.*;
@@ -18,14 +14,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author Layton
  */
 public class Procedure implements Cloneable {
+
     private String name;
     private Map<String, IVariable> varList;
     private Map<String, Construct> originals = new HashMap<String, Construct>();
@@ -33,21 +28,21 @@ public class Procedure implements Cloneable {
     private GenericTreeNode<Construct> tree;
     private boolean possiblyConstant = false;
 
-    
-    public Procedure(String name, List<IVariable> varList, GenericTreeNode<Construct> tree, Target t){
+    public Procedure(String name, List<IVariable> varList, GenericTreeNode<Construct> tree, Target t) {
         this.name = name;
         this.varList = new HashMap<String, IVariable>();
-        for(IVariable var : varList){
-            try{
+        for (IVariable var : varList) {
+            try {
                 this.varList.put(var.getName(), var.clone());
-            } catch(CloneNotSupportedException e){
+            }
+            catch (CloneNotSupportedException e) {
                 this.varList.put(var.getName(), var);
             }
             this.varIndex.add(var);
             this.originals.put(var.getName(), var.ival());
-        }        
+        }
         this.tree = tree;
-        if(!this.name.matches("^_[^_].*")){
+        if (!this.name.matches("^_[^_].*")) {
             throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, t);
         }
         //Let's look through the tree now, and see if this is possibly constant or not.
@@ -55,45 +50,46 @@ public class Procedure implements Cloneable {
         //we can be sure that we cannot inline this in any way.
         this.possiblyConstant = checkPossiblyConstant(tree);
     }
-    
-    private boolean checkPossiblyConstant(GenericTreeNode<Construct> tree){
-        if(!tree.data.isDynamic()){
+
+    private boolean checkPossiblyConstant(GenericTreeNode<Construct> tree) {
+        if (!tree.data.isDynamic()) {
             //If it isn't dynamic, it certainly could be constant
             return true;
-        } else if(tree.data instanceof IVariable){
+        } else if (tree.data instanceof IVariable) {
             //Variables will return true for isDynamic, but they are technically constant, because
             //they are being declared in this scope, or passed in. An import() would break this
             //contract, but import() itself is dynamic, so this is not an issue.
             return true;
-        } else if(tree.data instanceof CFunction){
-                //If the function itself is not optimizable, we needn't recurse.
-            try{
+        } else if (tree.data instanceof CFunction) {
+            //If the function itself is not optimizable, we needn't recurse.
+            try {
                 FunctionBase fb = FunctionList.getFunction(tree.data);
-                if(fb instanceof Function){
-                    Function f = (Function)fb;
-                    if(f instanceof DataHandling._return){
+                if (fb instanceof Function) {
+                    Function f = (Function) fb;
+                    if (f instanceof DataHandling._return) {
                         //This is a special exception. Return itself is not optimizable,
                         //but if the contents are optimizable, it is still considered constant.
-                        if(tree.children.isEmpty()){
+                        if (tree.children.isEmpty()) {
                             return true;
                         } else {
-                            return checkPossiblyConstant(tree.children.get(0)); 
+                            return checkPossiblyConstant(tree.children.get(0));
                         }
                     }
                     //If it's optimizable, it's possible. If it's restricted, it doesn't matter, because
                     //we can't optimize it out anyways, because we need to do the permission check
-                    if(!((f.canOptimizeDynamic() || f.canOptimize()) && !f.isRestricted())){
+                    if (!( ( f.canOptimizeDynamic() || f.canOptimize() ) && !f.isRestricted() )) {
                         return false; //Nope. Doesn't matter if the children are or not
                     }
                 } else {
                     return false;
                 }
-            } catch(ConfigCompileException e){
+            }
+            catch (ConfigCompileException e) {
                 //It's a proc. We will treat this just like any other function call, 
             }
             //Ok, well, we have to check the children first.
-            for(GenericTreeNode<Construct> child : tree.getChildren()){
-                if(!checkPossiblyConstant(child)){
+            for (GenericTreeNode<Construct> child : tree.getChildren()) {
+                if (!checkPossiblyConstant(child)) {
                     return false; //Nope, since our child can't be constant, neither can we
                 }
             }
@@ -104,45 +100,47 @@ public class Procedure implements Cloneable {
             return false;
         }
     }
-    
-    public boolean isPossiblyConstant(){
+
+    public boolean isPossiblyConstant() {
         return this.possiblyConstant;
     }
-    
-    public String getName(){
+
+    public String getName() {
         return name;
     }
-    
+
     @Override
-    public String toString(){
+    public String toString() {
         return name + "(" + StringUtil.joinString(varList.keySet(), ", ", 0) + ")";
     }
-    
+
     /**
      * Convenience wrapper around executing a procedure if the parameters are in
      * tree mode still.
+     *
      * @param args
      * @param env
-     * @return 
+     * @return
      */
-    public Construct cexecute(List<GenericTreeNode<Construct>> args, Env env){
+    public Construct cexecute(List<GenericTreeNode<Construct>> args, Env env) {
         List<Construct> list = new ArrayList<Construct>();
-        for(GenericTreeNode<Construct> arg : args){
+        for (GenericTreeNode<Construct> arg : args) {
             list.add(env.GetScript().seval(arg, env));
         }
         return execute(list, env);
     }
-    
+
     /**
      * Executes this procedure, with the arguments that were passed in
+     *
      * @param args
      * @param env
-     * @return 
+     * @return
      */
-    public Construct execute(List<Construct> args, Env env){
+    public Construct execute(List<Construct> args, Env env) {
         env.SetVarList(new IVariableList());
-        CArray array = new CArray(Target.UNKNOWN);        
-        for(String key : originals.keySet()){
+        CArray array = new CArray(Target.UNKNOWN);
+        for (String key : originals.keySet()) {
             Construct c = originals.get(key);
             env.GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
             array.push(c);
@@ -150,29 +148,34 @@ public class Procedure implements Cloneable {
         GenericTree<Construct> root = new GenericTree<Construct>();
         root.setRoot(tree);
         Script fakeScript = Script.GenerateScript(tree, env.GetLabel());//new Script(null, null);        
-        for(int i = 0; i < args.size(); i++){
+        for (int i = 0; i < args.size(); i++) {
             Construct c = args.get(i);
             array.set(i, c);
-            if(varIndex.size() > i){
+            if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getName();
                 env.GetVarList().set(new IVariable(varname, c, c.getTarget()));
             }
         }
         env.GetVarList().set(new IVariable("@arguments", array, Target.UNKNOWN));
-        
-        try{
+
+        try {
             fakeScript.eval(tree, env);
-        } catch(FunctionReturnException e){
+        }
+        catch (FunctionReturnException e) {
             return e.getReturn();
         }
         return new CVoid(Target.UNKNOWN);
     }
-    
+
     @Override
-    public Procedure clone() throws CloneNotSupportedException{
+    public Procedure clone() throws CloneNotSupportedException {
         Procedure clone = (Procedure) super.clone();
-        if(this.varList != null) clone.varList = new HashMap<String, IVariable>(this.varList);
-        if(this.tree != null) clone.tree = this.tree.clone();
+        if (this.varList != null) {
+            clone.varList = new HashMap<String, IVariable>(this.varList);
+        }
+        if (this.tree != null) {
+            clone.tree = this.tree.clone();
+        }
         return clone;
     }
 }

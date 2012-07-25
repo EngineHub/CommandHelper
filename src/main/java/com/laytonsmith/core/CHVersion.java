@@ -27,6 +27,7 @@ public enum CHVersion {
         return this.version.toString();
     }
     
+    @Override
     public String toString(){
         return this.version.toString();
     }

@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.*;
@@ -35,7 +33,9 @@ import java.util.logging.Logger;
  * level though, so it shouldn't bubble up too far.
  * @author Layton
  */
-public class Static {
+public final class Static {
+    
+    private Static(){}
     
     private static final Logger logger = Logger.getLogger("CommandHelper");
     /**

@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.*;
@@ -51,12 +49,6 @@ public class ArrayHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public CHVersion since() {
@@ -279,11 +271,6 @@ public class ArrayHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -328,11 +315,6 @@ public class ArrayHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -379,11 +361,6 @@ public class ArrayHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -414,10 +391,6 @@ public class ArrayHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public CHVersion since() {
@@ -465,12 +438,6 @@ public class ArrayHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public CHVersion since() {
@@ -528,11 +495,6 @@ public class ArrayHandling {
             return false;
         }
 
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -582,12 +544,6 @@ public class ArrayHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public CHVersion since() {
@@ -647,12 +603,6 @@ public class ArrayHandling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -697,12 +647,6 @@ public class ArrayHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public CHVersion since() {
@@ -750,10 +694,6 @@ public class ArrayHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public CHVersion since() {
@@ -815,10 +755,6 @@ public class ArrayHandling {
             return false;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -860,10 +796,6 @@ public class ArrayHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public Boolean runAsync() {
@@ -922,10 +854,6 @@ public class ArrayHandling {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public Boolean runAsync() {

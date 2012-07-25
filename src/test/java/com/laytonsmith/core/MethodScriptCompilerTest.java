@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -19,8 +17,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
-import static org.junit.Assert.*;
 import org.junit.*;
+import static org.junit.Assert.*;
 import org.junit.runner.RunWith;
 import static org.mockito.Mockito.*;
 import org.powermock.api.mockito.PowerMockito;

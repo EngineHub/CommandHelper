@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
@@ -324,7 +322,7 @@ public class DocGen {
             StringBuilder b = new StringBuilder();
             boolean first = true;
             for (String d : data) {
-                int split = d.indexOf(":");
+                int split = d.indexOf(':');
                 String name = d.substring(0, split).trim();
                 String description = ExpandMacro(d.substring(split + 1).trim(), type);
                 if (type.equals("html")) {
@@ -375,7 +373,7 @@ public class DocGen {
             StringBuilder b = new StringBuilder();
             boolean first = true;
             for (String d : data) {
-                int split = d.indexOf(":");
+                int split = d.indexOf(':');
                 String name;
                 String description;
                 if(split == -1){                    
@@ -404,7 +402,7 @@ public class DocGen {
             StringBuilder b = new StringBuilder();
             boolean first = true;
             for (String d : data) {
-                int split = d.indexOf(":");
+                int split = d.indexOf(':');
                 if (split == -1) {
                     if (type.equals("html")) {
                         b.append(first ? "" : "<br />").append("<strong>").append(d.trim()).append("</strong>");

@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
@@ -9,9 +7,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.api;
-import com.laytonsmith.core.exceptions.EventException;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -21,7 +17,10 @@ import java.util.logging.Logger;
  *
  * @author layton
  */
-public class EventList {
+public final class EventList {
+    
+    private EventList(){}
+    
     private static final Map<Driver, SortedSet<Event>> event_list =
             new EnumMap<Driver, SortedSet<Event>>(Driver.class);
     static {

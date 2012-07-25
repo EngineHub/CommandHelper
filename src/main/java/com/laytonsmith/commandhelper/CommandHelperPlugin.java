@@ -19,7 +19,6 @@
 
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;
@@ -39,7 +38,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -93,6 +91,7 @@ public class CommandHelperPlugin extends JavaPlugin {
     /**
      * Called on plugin enable.
      */
+    @Override
     public void onEnable() {       
         self = this;
         myServer = StaticLayer.GetServer();

@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
@@ -12,7 +10,9 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
  * Unfortunately some methods just can't be overridden.
  * @author layton
  */
-public class StaticLayer {
+public final class StaticLayer {
+    
+    private StaticLayer(){}
     //Do not rename this field, it is used reflectively in testing
     private static Convertor convertor = null;
     static{

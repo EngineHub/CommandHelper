@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCEnchantment;
@@ -27,66 +23,69 @@ public class Enchantments {
     public static String docs() {
         return "Provides methods for dealing with enchanted items";
     }
-    
+
     /**
-     * Converts the wiki version string to the bukkit version string. If the specified string isn't
-     * in the wiki, the string is returned unchanged.
+     * Converts the wiki version string to the bukkit version string. If the
+     * specified string isn't in the wiki, the string is returned unchanged.
+     *
      * @param wikiVersion
-     * @return 
+     * @return
      */
-    public static String ConvertName(String wikiVersion){
+    public static String ConvertName(String wikiVersion) {
         String lc = wikiVersion.toLowerCase().trim();
-        if(lc.equals("protection")){
+        if (lc.equals("protection")) {
             return "PROTECTION_ENVIRONMENTAL";
-        } else if(lc.equals("fire protection")){
+        } else if (lc.equals("fire protection")) {
             return "PROTECTION_FIRE";
-        } else if(lc.equals("feather falling")){
+        } else if (lc.equals("feather falling")) {
             return "PROTECTION_FALL";
-        } else if(lc.equals("blast protection")){
+        } else if (lc.equals("blast protection")) {
             return "PROTECTION_EXPLOSIONS";
-        } else if(lc.equals("projectile protection")){
+        } else if (lc.equals("projectile protection")) {
             return "PROTECTION_PROJECTILE";
-        } else if(lc.equals("respiration")){
+        } else if (lc.equals("respiration")) {
             return "OXYGEN";
-        } else if(lc.equals("aqua affinity")){
+        } else if (lc.equals("aqua affinity")) {
             return "WATER_WORKER";
-        } else if(lc.equals("sharpness")){
+        } else if (lc.equals("sharpness")) {
             return "DAMAGE_ALL";
-        } else if(lc.equals("smite")){
+        } else if (lc.equals("smite")) {
             return "DAMAGE_UNDEAD";
-        } else if(lc.equals("bane of arthropods")){
+        } else if (lc.equals("bane of arthropods")) {
             return "DAMAGE_ARTHROPODS";
-        } else if(lc.equals("knockback")){
+        } else if (lc.equals("knockback")) {
             return "KNOCKBACK";
-        } else if(lc.equals("fire aspect")){
+        } else if (lc.equals("fire aspect")) {
             return "FIRE_ASPECT";
-        } else if(lc.equals("looting")){
+        } else if (lc.equals("looting")) {
             return "LOOT_BONUS_MOBS";
-        } else if(lc.equals("efficiency")){
+        } else if (lc.equals("efficiency")) {
             return "DIG_SPEED";
-        } else if(lc.equals("silk touch")){
+        } else if (lc.equals("silk touch")) {
             return "SILK_TOUCH";
-        } else if(lc.equals("unbreaking")){
+        } else if (lc.equals("unbreaking")) {
             return "DURABILITY";
-        } else if(lc.equals("fortune")){
+        } else if (lc.equals("fortune")) {
             return "LOOT_BONUS_BLOCKS";
         } else {
             return wikiVersion;
         }
     }
-    
+
     /**
      * Converts the roman numeral into an integer (as a string). If the value
      * passed in is already an integer, it is returned as is.
+     *
      * @param romanNumeral
-     * @return 
+     * @return
      */
-    public static String ConvertLevel(String romanNumeral){
+    public static String ConvertLevel(String romanNumeral) {
         String lc = romanNumeral.toLowerCase().trim();
-        try{
+        try {
             Integer.parseInt(lc);
             return lc;
-        } catch(NumberFormatException e){
+        }
+        catch (NumberFormatException e) {
             //Maybe roman numeral?
         }
         int i = romanToWestern(lc);
@@ -105,22 +104,22 @@ public class Enchantments {
 //        }
         return Integer.toString(i);
     }
-    
+
     public static int romanToWestern(String roman) {
-         
+
         int western = 0; //the numerical version
         char currentChar;
         char nextChar;
-         
-        int i=0;
-         
-        while(i<roman.length()) {
+
+        int i = 0;
+
+        while (i < roman.length()) {
             currentChar = roman.charAt(i);
-            if(i<roman.length()-1) {
-                nextChar = roman.charAt(i+1);
-                if(getValue(currentChar)<getValue(nextChar)) {
-                    western += (getValue(nextChar) - getValue(currentChar));
-                    i+=2;
+            if (i < roman.length() - 1) {
+                nextChar = roman.charAt(i + 1);
+                if (getValue(currentChar) < getValue(nextChar)) {
+                    western += ( getValue(nextChar) - getValue(currentChar) );
+                    i += 2;
                 } else {
                     western += getValue(currentChar);
                     i++;
@@ -131,18 +130,32 @@ public class Enchantments {
             }
         }
         return western;
-         
+
     }
-     
+
     private static int getValue(char l) { //Converts the numeral to a number
         String letter = String.valueOf(l);
-        if(letter.equalsIgnoreCase("I")) return 1;
-        if(letter.equalsIgnoreCase("V")) return 5;
-        if(letter.equalsIgnoreCase("X")) return 10;
-        if(letter.equalsIgnoreCase("L")) return 50;
-        if(letter.equalsIgnoreCase("C")) return 100;
-        if(letter.equalsIgnoreCase("D")) return 500;
-        if(letter.equalsIgnoreCase("M")) return 1000;
+        if (letter.equalsIgnoreCase("I")) {
+            return 1;
+        }
+        if (letter.equalsIgnoreCase("V")) {
+            return 5;
+        }
+        if (letter.equalsIgnoreCase("X")) {
+            return 10;
+        }
+        if (letter.equalsIgnoreCase("L")) {
+            return 50;
+        }
+        if (letter.equalsIgnoreCase("C")) {
+            return 100;
+        }
+        if (letter.equalsIgnoreCase("D")) {
+            return 500;
+        }
+        if (letter.equalsIgnoreCase("M")) {
+            return 1000;
+        }
         return 0;
     }
 
@@ -174,10 +187,6 @@ public class Enchantments {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -201,21 +210,21 @@ public class Enchantments {
 //                is = m.getInventory().getItem(slot);
 //            }
             CArray enchantArray = new CArray(t);
-            if (!(args[2 - offset] instanceof CArray)) {
+            if (!( args[2 - offset] instanceof CArray )) {
                 enchantArray.push(args[2 - offset]);
             } else {
                 enchantArray = (CArray) args[2 - offset];
             }
 
             CArray levelArray = new CArray(t);
-            if (!(args[3 - offset] instanceof CArray)) {
+            if (!( args[3 - offset] instanceof CArray )) {
                 levelArray.push(args[3 - offset]);
             } else {
                 levelArray = (CArray) args[3 - offset];
             }
             for (String key : enchantArray.keySet()) {
                 MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
-                if(e.getHandle() == null){
+                if (e.getHandle() == null) {
                     throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
                 }
                 if (e.canEnchantItem(is)) {
@@ -232,8 +241,6 @@ public class Enchantments {
             return new CVoid(t);
         }
     }
-    
-    
 
     @api
     public static class enchant_rm_inv extends AbstractFunction {
@@ -261,10 +268,6 @@ public class Enchantments {
         }
 
         @Override
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -290,7 +293,7 @@ public class Enchantments {
 //            }
 
             CArray enchantArray = new CArray(t);
-            if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
+            if (!( args[2 - offset] instanceof CArray ) && !( args[2 - offset] instanceof CNull )) {
                 enchantArray.push(args[2 - offset]);
             } else if (args[2 - offset] instanceof CNull) {
                 for (MCEnchantment e : is.getEnchantments().keySet()) {
@@ -306,8 +309,9 @@ public class Enchantments {
             return new CVoid(t);
         }
     }
-    
-    @api public static class get_enchant_inv extends AbstractFunction{
+
+    @api
+    public static class get_enchant_inv extends AbstractFunction {
 
         public String getName() {
             return "get_enchant_inv";
@@ -330,10 +334,6 @@ public class Enchantments {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -345,12 +345,12 @@ public class Enchantments {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             Construct slot;
-            if(args.length == 2){
+            if (args.length == 2) {
                 m = Static.GetPlayer(args[0].val(), t);
                 slot = args[1];
             } else {
                 slot = args[0];
-            }            
+            }
             MCItemStack is = m.getItemAt(slot);
 //            if(slot instanceof CNull){
 //                is = m.getItemInHand();
@@ -360,19 +360,19 @@ public class Enchantments {
 //            }
             CArray enchants = new CArray(t);
             CArray levels = new CArray(t);
-            for(Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()){
+            for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
                 MCEnchantment e = entry.getKey();
                 Integer l = entry.getValue();
                 enchants.push(new CString(e.getName(), t));
                 levels.push(new CInt(l, t));
             }
-            
+
             return new CArray(t, enchants, levels);
         }
-        
     }
-    
-    @api public static class can_enchant_target extends AbstractFunction{
+
+    @api
+    public static class can_enchant_target extends AbstractFunction {
 
         public String getName() {
             return "can_enchant_target";
@@ -397,10 +397,6 @@ public class Enchantments {
             return false;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -415,10 +411,10 @@ public class Enchantments {
             MCItemStack is = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
             return new CBoolean(e.canEnchantItem(is), t);
         }
-        
     }
-    
-    @api public static class get_enchant_max extends AbstractFunction{
+
+    @api
+    public static class get_enchant_max extends AbstractFunction {
 
         public String getName() {
             return "get_enchant_max";
@@ -441,10 +437,6 @@ public class Enchantments {
             return false;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -458,11 +450,11 @@ public class Enchantments {
             MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
             return new CInt(e.getMaxLevel(), t);
         }
-        
     }
-    
-    @api public static class get_enchants extends AbstractFunction{
-        
+
+    @api
+    public static class get_enchants extends AbstractFunction {
+
         private static Map<String, CArray> cache = new HashMap<String, CArray>();
 
         public String getName() {
@@ -486,10 +478,6 @@ public class Enchantments {
             return false;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -504,30 +492,32 @@ public class Enchantments {
              * Because enchantment types won't change from run to run, we can
              * cache here, and save time on duplicate lookups.
              */
-            if(cache.containsKey(args[0].val())){
+            if (cache.containsKey(args[0].val())) {
                 try {
                     return cache.get(args[0].val()).clone();
-                } catch (CloneNotSupportedException ex) {
+                }
+                catch (CloneNotSupportedException ex) {
                     throw new ConfigRuntimeException(ex.getMessage(), null, t, ex);
                 }
             }
             CArray ca = new CArray(t);
-            for(MCEnchantment e : StaticLayer.GetEnchantmentValues()){
-                if(e.canEnchantItem(is)){
+            for (MCEnchantment e : StaticLayer.GetEnchantmentValues()) {
+                if (e.canEnchantItem(is)) {
                     ca.push(new CString(e.getName(), t));
                 }
             }
             cache.put(args[0].val(), ca);
             try {
                 return ca.clone();
-            } catch (CloneNotSupportedException ex) {
+            }
+            catch (CloneNotSupportedException ex) {
                 throw new ConfigRuntimeException(ex.getMessage(), null, t, ex);
             }
         }
-        
     }
-    
-    @api public static class is_enchantment extends AbstractFunction{
+
+    @api
+    public static class is_enchantment extends AbstractFunction {
 
         public String getName() {
             return "is_enchantment";
@@ -550,10 +540,6 @@ public class Enchantments {
             return false;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -566,6 +552,5 @@ public class Enchantments {
             MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
             return new CBoolean(e != null, t);
         }
-        
     }
 }

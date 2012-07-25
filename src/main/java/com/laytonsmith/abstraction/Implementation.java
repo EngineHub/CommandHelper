@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.abstraction;
 
 /**
@@ -9,7 +6,9 @@ package com.laytonsmith.abstraction;
  * checks as needed.
  * @author layton
  */
-public class Implementation {
+public final class Implementation {
+    
+    private Implementation(){}
     
     private static Implementation.Type serverType = null;
     

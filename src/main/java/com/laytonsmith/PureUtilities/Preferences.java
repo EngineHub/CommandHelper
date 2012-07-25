@@ -84,7 +84,7 @@ public class Preferences {
         for(Preference p : defaults){
             prefs.put(p.name, p);
         }
-        if(!header.trim().equals("")){
+        if(!header.trim().isEmpty()){
             this.header = "#  " + header.replaceAll("\n", "\n#  ");
         }
     }
@@ -226,7 +226,7 @@ public class Preferences {
                     .append(nl)
                     .append("#will persist, but changes to comments will not.")
                     .append(nl).append(nl);
-            if(!header.trim().equals("")){
+            if(!header.trim().isEmpty()){
                 b.append(header).append(nl).append(nl);
             }
             Iterator it = prefs.entrySet().iterator();
@@ -234,7 +234,7 @@ public class Preferences {
                 Map.Entry<String, Preference> e = (Map.Entry<String, Preference>) it.next();
                 Preference p = e.getValue();
                 String description = "This value is not used in " + appName;
-                if(!p.description.trim().equals("")){
+                if(!p.description.trim().isEmpty()){
                     description = p.description;
                 }
                 StringBuilder c = new StringBuilder();

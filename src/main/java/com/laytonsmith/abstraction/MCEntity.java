@@ -1,13 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import java.util.List;
 import java.util.UUID;
-
-import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 
 /**
  * 

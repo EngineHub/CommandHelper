@@ -5,16 +5,8 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import static com.laytonsmith.testing.StaticTest.SRun;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
-import static org.junit.Assert.*;
 import org.junit.*;
-import org.junit.runner.RunWith;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 /**
  * This class tests optimizations by looking at the tree after optimization occurs to see

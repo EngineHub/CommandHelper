@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCLocation;
@@ -82,11 +80,6 @@ public class Weather {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -134,11 +127,6 @@ public class Weather {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }

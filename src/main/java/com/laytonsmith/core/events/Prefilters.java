@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.Static;
@@ -17,7 +15,10 @@ import java.util.Map;
  *
  * @author layton
  */
-public class Prefilters {
+public final class Prefilters {
+    
+    private Prefilters(){}
+    
     public enum PrefilterType{
         /**
          * Item matches are fuzzy matches for item notation. Red wool and black wool
@@ -75,9 +76,7 @@ public class Prefilters {
      */
     public static void match(Map<String, Construct> map, String key,
             Construct actualValue, PrefilterType type) throws PrefilterNonMatchException{
-        if(!map.containsKey(key)){
-            return;
-        } else {
+        if(map.containsKey(key)){
             switch(type){
                 case ITEM_MATCH:
                     ItemMatch(map.get(key), actualValue);

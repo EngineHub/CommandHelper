@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;

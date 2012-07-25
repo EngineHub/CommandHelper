@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.abstraction.MCChatColor;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * This class provides a method for working around the not so pretty line breaks
@@ -9,15 +10,17 @@ import java.util.ArrayList;
  * by Reil.
  * @author Layton
  */
-public class rParser {
+public final class rParser {
+    
+    private rParser(){}
 
-    protected static final int lineLength = 312;
+    private static final int lineLength = 312;
 
     /*
      * Finds the last color sequence used in the string
      */
     public static String lastColor(String findColor) {
-        int i = findColor.lastIndexOf("§");
+        int i = findColor.lastIndexOf('§');
         if (i != -1 && i != findColor.length() - 1) {
             return "§" + findColor.charAt(i + 1);
         } else {
@@ -32,7 +35,7 @@ public class rParser {
         StringBuilder combined = new StringBuilder(split[beginHere]);
         if (beginHere + 1 < split.length) {
             for (int i = beginHere + 1; i < split.length; i++) {
-                combined.append(seperator + split[i]);
+                combined.append(seperator).append(split[i]);
             }
         }
         return combined.toString();
@@ -53,9 +56,7 @@ public class rParser {
     public static String[] wordWrap(String msg, String prefix, int lineLength) {
         //Split each word apart
         ArrayList<String> split = new ArrayList<String>();
-        for (String in : msg.split(" ")) {
-            split.add(in);
-        }
+        split.addAll(Arrays.asList(msg.split(" ")));
 
         //Create an arraylist for the output
         ArrayList<String> out = new ArrayList<String>();

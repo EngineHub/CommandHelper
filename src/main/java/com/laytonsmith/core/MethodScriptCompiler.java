@@ -1,11 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Compiler;
@@ -22,7 +20,9 @@ import java.util.concurrent.atomic.AtomicInteger;
  *
  * @author Layton
  */
-public class MethodScriptCompiler {
+public final class MethodScriptCompiler {
+    
+    private MethodScriptCompiler(){}
 
     public static List<Token> lex(String config, File file) throws ConfigCompileException {
         config = config.replaceAll("\r\n", "\n");
@@ -1289,7 +1289,7 @@ public class MethodScriptCompiler {
                 returnable = retc;
             }
             String ret = retc instanceof CNull ? "null" : retc.val();
-            if (ret != null && !ret.trim().equals("")) {
+            if (ret != null && !ret.trim().isEmpty()) {
                 b.append(ret).append(" ");
             }
         }

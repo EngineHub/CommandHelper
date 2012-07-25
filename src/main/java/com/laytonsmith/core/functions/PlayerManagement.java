@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.*;
@@ -18,7 +14,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 /**
  *
@@ -43,13 +38,13 @@ public class PlayerManagement {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCCommandSender p = env.GetCommandSender();
-            
+
             if (args.length == 1) {
                 p = Static.GetPlayer(args[0]);
-            }            
-            
+            }
+
             if (p != null && p instanceof MCPlayer) {
-                return new CString(((MCPlayer) p).getName(), t);
+                return new CString(( (MCPlayer) p ).getName(), t);
             } else if (p != null && p instanceof MCConsoleCommandSender) {
                 return new CString("~console", t);
             } else {
@@ -70,13 +65,6 @@ public class PlayerManagement {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
         }
 
         public CHVersion since() {
@@ -117,13 +105,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -179,13 +160,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -221,13 +195,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_0;
         }
@@ -247,12 +214,12 @@ public class PlayerManagement {
             if (args.length == 1) {
                 if (args[0] instanceof CArray) {
                     CArray ca = (CArray) args[0];
-                    l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), t);
+                    l = ObjectGenerator.GetGenerator().location(ca, ( p instanceof MCPlayer ? ( (MCPlayer) p ).getWorld() : null ), t);
                     x = Static.getNumber(ca.get(0, t));
                     y = Static.getNumber(ca.get(1, t));
                     z = Static.getNumber(ca.get(2, t));
                     if (p instanceof MCPlayer) {
-                        m = ((MCPlayer) p);
+                        m = ( (MCPlayer) p );
                     }
 
                 } else {
@@ -316,13 +283,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -395,13 +355,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -434,7 +387,7 @@ public class PlayerManagement {
             }
 
             Static.AssertPlayerNonNull(m, t);
-            
+
             String[] sa = Static.getPermissionsResolverManager().getGroups(m.getName());
             Construct[] ca = new Construct[sa.length];
             for (int i = 0; i < sa.length; i++) {
@@ -453,13 +406,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -506,13 +452,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_0;
         }
@@ -526,7 +465,7 @@ public class PlayerManagement {
             String player = "";
             int index = -1;
             if (args.length == 0) {
-                player = (m instanceof MCPlayer ? ((MCPlayer) m).getName() : null);
+                player = ( m instanceof MCPlayer ? ( (MCPlayer) m ).getName() : null );
                 index = -1;
             } else if (args.length == 1) {
                 player = args[0].val();
@@ -535,7 +474,7 @@ public class PlayerManagement {
                 player = args[0].val();
                 index = (int) Static.getInt(args[1]);
             }
-            
+
             MCPlayer p = Static.GetPlayer(player, t);
 
             Static.AssertPlayerNonNull(p, t);
@@ -565,13 +504,14 @@ public class PlayerManagement {
             }
             if (index == 3 || index == -1) {
                 //MCPlayer IP       
-            	String add;
-            	try {
-            		add = p.getAddress().getAddress().getHostAddress();
-            	} catch (NullPointerException npe) {
-            		add = "";
-            	}
-            	
+                String add;
+                try {
+                    add = p.getAddress().getAddress().getHostAddress();
+                }
+                catch (NullPointerException npe) {
+                    add = "";
+                }
+
                 retVals.add(new CString(add, t));
             }
             if (index == 4 || index == -1) {
@@ -586,7 +526,7 @@ public class PlayerManagement {
                 //Item in hand
                 MCItemStack is = p.getItemInHand();
                 int data;
-                if(is.getTypeId() < 256){
+                if (is.getTypeId() < 256) {
                     if (is.getData() != null) {
                         data = is.getData().getData();
                     } else {
@@ -616,20 +556,21 @@ public class PlayerManagement {
                 retVals.add(a);
             }
             if (index == 10 || index == -1) {
-            	String hostname;
-            	try {
-                	hostname = p.getAddress().getAddress().getHostAddress();
-            	} catch (NullPointerException npe) {
-            		hostname = "";
-            	}
-            	
-                if(CommandHelperPlugin.hostnameLookupCache.containsKey(p.getName())){
+                String hostname;
+                try {
+                    hostname = p.getAddress().getAddress().getHostAddress();
+                }
+                catch (NullPointerException npe) {
+                    hostname = "";
+                }
+
+                if (CommandHelperPlugin.hostnameLookupCache.containsKey(p.getName())) {
                     hostname = CommandHelperPlugin.hostnameLookupCache.get(p.getName());
                 }
-                
+
                 retVals.add(new CString(hostname, t));
             }
-            if(index == 11 || index == -1){
+            if (index == 11 || index == -1) {
                 retVals.add(new CBoolean(p.isSneaking(), t));
             }
             if (retVals.size() == 1) {
@@ -664,13 +605,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -718,13 +652,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -783,13 +710,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -838,13 +758,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -904,13 +817,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -926,15 +832,16 @@ public class PlayerManagement {
                 MCLocation l = null;
                 if (args.length == 0) {
                     if (p instanceof MCPlayer) {
-                        l = ((MCPlayer) p).getLocation();
+                        l = ( (MCPlayer) p ).getLocation();
                     }
                 } else if (args.length == 1) {
                     //if it's a number, we are setting F. Otherwise, it's a getter for the MCPlayer specified.
                     try {
                         Integer.parseInt(args[0].val());
-                    } catch (NumberFormatException e) {
+                    }
+                    catch (NumberFormatException e) {
                         MCPlayer p2 = Static.GetPlayer(args[0]);
-                        l = p2.getLocation();                        
+                        l = p2.getLocation();
                     }
                 }
                 if (l != null) {
@@ -942,7 +849,7 @@ public class PlayerManagement {
                     float pitch = l.getPitch();
                     //normalize yaw
                     if (yaw < 0) {
-                        yaw = (((yaw) % 360) + 360);
+                        yaw = ( ( ( yaw ) % 360 ) + 360 );
                     }
                     return new CArray(t, new CDouble(yaw, t), new CDouble(pitch, t));
                 }
@@ -974,7 +881,8 @@ public class PlayerManagement {
                     }
                     yaw = (float) Static.getNumber(args[0]);
                     pitch = (float) Static.getNumber(args[1]);
-                } catch (NumberFormatException e) {
+                }
+                catch (NumberFormatException e) {
                     //It's the MCPlayer, F variation
                     toSet = Static.GetPlayer(args[0]);
                     pitch = toSet.getLocation().getPitch();
@@ -1003,7 +911,7 @@ public class PlayerManagement {
             toSet.teleport(l);
             return new CVoid(t);
         }
-    }    
+    }
 
     @api
     public static class pmode extends AbstractFunction {
@@ -1028,13 +936,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -1052,7 +953,7 @@ public class PlayerManagement {
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0]);
             }
-            
+
             Static.AssertPlayerNonNull(m, t);
             String mode = m.getGameMode().name();
             return new CString(mode, t);
@@ -1083,13 +984,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -1115,7 +1009,8 @@ public class PlayerManagement {
 
             try {
                 gm = MCGameMode.valueOf(mode.toUpperCase());
-            } catch (IllegalArgumentException e) {
+            }
+            catch (IllegalArgumentException e) {
                 throw new ConfigRuntimeException("Mode must be either 'CREATIVE' or 'SURVIVAL'", ExceptionType.FormatException, t);
             }
             Static.AssertPlayerNonNull(m, t);
@@ -1148,13 +1043,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -1173,7 +1061,7 @@ public class PlayerManagement {
                 m = Static.GetPlayer(args[0].val(), t);
             }
             Static.AssertPlayerNonNull(m, t);
-            return new CInt((int) (m.getExp() * 100), t);
+            return new CInt((int) ( m.getExp() * 100 ), t);
         }
     }
 
@@ -1200,13 +1088,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -1229,7 +1110,7 @@ public class PlayerManagement {
                 xp = (int) Static.getInt(args[0]);
             }
             Static.AssertPlayerNonNull(m, t);
-            m.setExp(((float) xp) / 100.0F);
+            m.setExp(( (float) xp ) / 100.0F);
             return new CVoid(t);
         }
     }
@@ -1254,10 +1135,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -1312,13 +1189,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -1361,13 +1231,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -1421,13 +1284,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -1470,13 +1326,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -1534,13 +1383,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -1583,13 +1425,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -1643,17 +1478,10 @@ public class PlayerManagement {
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException,
-            ExceptionType.RangeException};
+                        ExceptionType.RangeException};
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -1672,7 +1500,7 @@ public class PlayerManagement {
             //To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
             //otherwise the client crashes, and requires deletion of
             //player data to fix.
-            if(effect < 1 || effect > 19){
+            if (effect < 1 || effect > 19) {
                 throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-19", ExceptionType.RangeException, t);
             }
             int strength = (int) Static.getInt(args[2]);
@@ -1681,7 +1509,7 @@ public class PlayerManagement {
                 seconds = (int) Static.getInt(args[3]);
             }
             Static.AssertPlayerNonNull(m, t);
-            if(seconds == 0 || strength == 0){
+            if (seconds == 0 || strength == 0) {
                 return new CBoolean(m.removeEffect(effect), t);
             } else {
                 m.addEffect(effect, strength, seconds);
@@ -1710,13 +1538,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -1775,13 +1596,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1795,19 +1609,20 @@ public class PlayerManagement {
             //of an event, in which the player is offline, but not really. It will
             //throw an exception if the player doesn't exist
             MCPlayer p = null;
-            try{
+            try {
                 p = Static.GetPlayer(args[0]);
-            } catch(ConfigRuntimeException e){
+            }
+            catch (ConfigRuntimeException e) {
                 //They aren't in the player list
             }
             //If the player we grabbed doesn't match exactly, we're referring to another player
             //However, we had to check with Static.GetPlayer first, in case this is an injected player.
             //Otherwise, we need to use the player returned from Static.GetPlayer, not the one returned
             //from the server directly
-            if(p != null && !p.getName().equals(args[0].val())){
-                MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());                
+            if (p != null && !p.getName().equals(args[0].val())) {
+                MCOfflinePlayer player = Static.getServer().getOfflinePlayer(args[0].val());
                 return new CBoolean(player.isOnline(), t);
-            } else if(p != null){
+            } else if (p != null) {
                 return new CBoolean(p.isOnline(), t);
             } else {
                 return new CBoolean(false, t);
@@ -1836,13 +1651,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -1881,13 +1689,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -1934,13 +1735,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1979,13 +1773,6 @@ public class PlayerManagement {
         }
 
         public boolean isRestricted() {
-            return true;
-        }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
             return true;
         }
 
@@ -2029,10 +1816,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -2050,8 +1833,9 @@ public class PlayerManagement {
             return new CBoolean(m.isOp(), t);
         }
     }
-    
-    @api public static class set_compass_target extends AbstractFunction{
+
+    @api
+    public static class set_compass_target extends AbstractFunction {
 
         public String getName() {
             return "set_compass_target";
@@ -2073,10 +1857,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -2088,7 +1868,7 @@ public class PlayerManagement {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l;
-            if(args.length == 1){
+            if (args.length == 1) {
                 l = ObjectGenerator.GetGenerator().location(args[0], null, t);
             } else {
                 m = Static.GetPlayer(args[0].val(), t);
@@ -2102,10 +1882,10 @@ public class PlayerManagement {
             m.setCompassTarget(l);
             return ObjectGenerator.GetGenerator().location(old);
         }
-        
     }
-    
-    @api public static class get_compass_target extends AbstractFunction{
+
+    @api
+    public static class get_compass_target extends AbstractFunction {
 
         public String getName() {
             return "get_compass_target";
@@ -2127,10 +1907,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -2141,16 +1917,16 @@ public class PlayerManagement {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
-            if(args.length == 1){
+            if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), t);
             }
             Static.AssertPlayerNonNull(m, t);
             return ObjectGenerator.GetGenerator().location(m.getCompassTarget());
         }
-        
     }
-    
-    @api public static class ponfire extends AbstractFunction{
+
+    @api
+    public static class ponfire extends AbstractFunction {
 
         public String getName() {
             return "ponfire";
@@ -2174,10 +1950,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -2188,17 +1960,17 @@ public class PlayerManagement {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
-            if(args.length == 1){
+            if (args.length == 1) {
                 p = Static.GetPlayer(args[0]);
             }
             Static.AssertPlayerNonNull(p, t);
             int left = p.getRemainingFireTicks();
             return new CInt(left, t);
         }
-        
     }
-    
-    @api public static class set_ponfire extends AbstractFunction{
+
+    @api
+    public static class set_ponfire extends AbstractFunction {
 
         public String getName() {
             return "set_ponfire";
@@ -2221,10 +1993,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -2236,16 +2004,16 @@ public class PlayerManagement {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
             Construct ticks;
-            if(args.length == 2){
+            if (args.length == 2) {
                 p = Static.GetPlayer(args[0]);
                 ticks = args[1];
             } else {
                 ticks = args[0];
             }
             int tick = 0;
-            if(ticks instanceof CBoolean){
-                boolean value = ((CBoolean)ticks).getBoolean();
-                if(value){
+            if (ticks instanceof CBoolean) {
+                boolean value = ( (CBoolean) ticks ).getBoolean();
+                if (value) {
                     tick = 20;
                 }
             } else {
@@ -2255,10 +2023,10 @@ public class PlayerManagement {
             p.setRemainingFireTicks(tick);
             return new CVoid(t);
         }
-        
     }
-    
-    @api public static class phas_flight extends AbstractFunction{
+
+    @api
+    public static class phas_flight extends AbstractFunction {
 
         public String getName() {
             return "phas_flight";
@@ -2280,17 +2048,13 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
-            if(args.length == 1){
+            if (args.length == 1) {
                 p = Static.GetPlayer(args[0]);
             }
             Static.AssertPlayerNonNull(p, t);
@@ -2300,10 +2064,10 @@ public class PlayerManagement {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-        
     }
-    
-    @api public static class pset_flight extends AbstractFunction{
+
+    @api
+    public static class pset_flight extends AbstractFunction {
 
         public String getName() {
             return "pset_flight";
@@ -2325,10 +2089,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -2336,7 +2096,7 @@ public class PlayerManagement {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.GetPlayer();
             boolean flight;
-            if(args.length == 1){
+            if (args.length == 1) {
                 flight = Static.getBoolean(args[0]);
             } else {
                 p = Static.GetPlayer(args[0]);
@@ -2350,25 +2110,26 @@ public class PlayerManagement {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-        
     }
-
     private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
-    static{
+
+    static {
         Properties p = new Properties();
         try {
             p.load(Minecraft.class.getResourceAsStream("/time_names.txt"));
             Enumeration e = p.propertyNames();
-            while(e.hasMoreElements()){
+            while (e.hasMoreElements()) {
                 String name = e.nextElement().toString();
                 TimeLookup.put(name, new CString(p.getProperty(name).toString(), Target.UNKNOWN));
             }
-        } catch (IOException ex) {
+        }
+        catch (IOException ex) {
             Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
 
-    @api public static class pset_time extends AbstractFunction{
+    @api
+    public static class pset_time extends AbstractFunction {
 
         public String getName() {
             return "pset_time";
@@ -2382,10 +2143,9 @@ public class PlayerManagement {
             StringBuilder doc = new StringBuilder();
             doc.append("void {[player], time} Sets the time of a given player. Should be a number from 0 to"
                     + " 24000, if not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am)"
-                    + " is acceptable, and convenient english mappings also exist:"
-            );
+                    + " is acceptable, and convenient english mappings also exist:");
             doc.append("<ul>");
-            for(String key : TimeLookup.keySet()){
+            for (String key : TimeLookup.keySet()) {
                 doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>\n");
             }
             doc.append("</ul>");
@@ -2400,10 +2160,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -2414,57 +2170,60 @@ public class PlayerManagement {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = null;
-            if(environment.GetPlayer() != null){
+            if (environment.GetPlayer() != null) {
                 p = environment.GetPlayer();
             }
-            if(args.length == 2){
+            if (args.length == 2) {
                 p = Static.GetPlayer(args[0]);
             }
             Static.AssertPlayerNonNull(p, t);
             long time = 0;
-            String stime = (args.length == 1?args[0]:args[1]).val().toLowerCase();
-            if(TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))){
+            String stime = ( args.length == 1 ? args[0] : args[1] ).val().toLowerCase();
+            if (TimeLookup.containsKey(stime.replaceAll("[^a-z]", ""))) {
                 stime = TimeLookup.get(stime.replaceAll("[^a-z]", "")).val();
             }
-            if(stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")){
+            if (stime.matches("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$")) {
                 Pattern pa = Pattern.compile("^([\\d]+)[:.]([\\d]+)[ ]*?(?:([pa])\\.*m\\.*){0,1}$");
                 Matcher m = pa.matcher(stime);
                 m.find();
                 int hour = Integer.parseInt(m.group(1));
                 int minute = Integer.parseInt(m.group(2));
                 String offset = "a";
-                if(m.group(3) != null){
+                if (m.group(3) != null) {
                     offset = m.group(3);
                 }
-                if(offset.equals("p")){
+                if (offset.equals("p")) {
                     hour += 12;
                 }
-                if(hour == 24) hour = 0;
-                if(hour > 24){
+                if (hour == 24) {
+                    hour = 0;
+                }
+                if (hour > 24) {
                     throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
                 }
-                if(minute > 59){
+                if (minute > 59) {
                     throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
                 }
                 hour -= 6;
                 hour = hour % 24;
                 long ttime = hour * 1000;
-                ttime += ((minute / 60.0) * 1000);
+                ttime += ( ( minute / 60.0 ) * 1000 );
                 stime = Long.toString(ttime);
             }
-            try{
+            try {
                 Long.valueOf(stime);
-            } catch(NumberFormatException e){
+            }
+            catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Invalid time provided", ExceptionType.FormatException, t);
             }
             time = Long.parseLong(stime);
             p.setPlayerTime(time);
             return new CVoid(t);
         }
-
     }
 
-    @api public static class pget_time extends AbstractFunction{
+    @api
+    public static class pget_time extends AbstractFunction {
 
         public String getName() {
             return "pget_time";
@@ -2487,10 +2246,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -2501,19 +2256,19 @@ public class PlayerManagement {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = null;
-            if(environment.GetPlayer() != null){
+            if (environment.GetPlayer() != null) {
                 p = environment.GetPlayer();
             }
-            if(args.length == 1){
+            if (args.length == 1) {
                 p = Static.GetPlayer(args[0]);
             }
             Static.AssertPlayerNonNull(p, t);
             return new CInt(p.getPlayerTime(), t);
         }
-
     }
 
-    @api public static class preset_time extends AbstractFunction{
+    @api
+    public static class preset_time extends AbstractFunction {
 
         public String getName() {
             return "preset_time";
@@ -2535,10 +2290,6 @@ public class PlayerManagement {
             return true;
         }
 
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
@@ -2549,20 +2300,20 @@ public class PlayerManagement {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = null;
-            if(environment.GetPlayer() != null){
+            if (environment.GetPlayer() != null) {
                 p = environment.GetPlayer();
             }
-            if(args.length == 1){
+            if (args.length == 1) {
                 p = Static.GetPlayer(args[0]);
             }
             Static.AssertPlayerNonNull(p, t);
             p.resetPlayerTime();
             return new CVoid(t);
         }
-
     }
-    
-    @api public static class set_list_name extends AbstractFunction{
+
+    @api
+    public static class set_list_name extends AbstractFunction {
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.LengthException, ExceptionType.FormatException};
@@ -2579,7 +2330,7 @@ public class PlayerManagement {
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
             String listName;
-            if(args.length == 2){
+            if (args.length == 2) {
                 m = Static.GetPlayer(args[0]);
                 listName = args[1].nval();
             } else {
@@ -2589,7 +2340,7 @@ public class PlayerManagement {
             if (listName.length() > 16) {
                 throw new ConfigRuntimeException("set_list_name([player,] name) expects name to be 16 characters or less", Exceptions.ExceptionType.LengthException, t);
             }
-            
+
             Static.AssertPlayerNonNull(m, t);
             m.setPlayerListName(listName);
             return new CVoid(t);
@@ -2614,10 +2365,10 @@ public class PlayerManagement {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-        
     }
-    
-    @api public static class get_list_name extends AbstractFunction{
+
+    @api
+    public static class get_list_name extends AbstractFunction {
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -2633,7 +2384,7 @@ public class PlayerManagement {
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer m = environment.GetPlayer();
-            if(args.length == 1){
+            if (args.length == 1) {
                 m = Static.GetPlayer(args[0]);
             }
             return new CString(m.getPlayerListName(), t);
@@ -2654,9 +2405,7 @@ public class PlayerManagement {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-        
     }
-
     //Disabled until bukkit fixes their bug
 //    @api public static class pvelocity extends AbstractFunction{
 //
@@ -2711,5 +2460,4 @@ public class PlayerManagement {
 //        }
 //        
 //    }
-    
 }

@@ -134,8 +134,6 @@ public class CommandHelperListener implements Listener {
                     //Super cancel the event
                     BukkitDirtyRegisteredListener.setCancelled(event);
                 }
-                //System.out.println("Command Cancelled: " + cmd);
-                return;
             }
         } catch (InternalException e) {
             logger.log(Level.SEVERE, e.getMessage());
@@ -146,7 +144,6 @@ public class CommandHelperListener implements Listener {
             //Obviously the command is registered, but it somehow failed. Cancel the event.
             event.setCancelled(true);
             e.printStackTrace();
-            return;
         }
     }
 

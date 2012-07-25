@@ -6,7 +6,10 @@ import java.util.Calendar;
  *
  * @author layton
  */
-public class DateUtil {
+public final class DateUtil {
+    
+    private DateUtil(){}
+    
     /**
      * Convenience notation for ParseCalendarNotation(name, null)
      */

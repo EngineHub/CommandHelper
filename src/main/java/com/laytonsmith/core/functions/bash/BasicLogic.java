@@ -2,9 +2,7 @@ package com.laytonsmith.core.functions.bash;
 
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.api;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.functions.FunctionBase;
 
 /**
  *
@@ -42,10 +40,6 @@ public class BasicLogic {
             s += "fi\n";
             
             return s;
-        }
-
-        public boolean appearInDocumentation() {
-            return true;
         }
 
         public CHVersion since() {

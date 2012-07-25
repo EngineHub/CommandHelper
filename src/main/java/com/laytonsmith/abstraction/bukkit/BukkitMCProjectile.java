@@ -1,12 +1,10 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.entity.Entity;
-import org.bukkit.entity.LivingEntity;
-import org.bukkit.entity.Projectile;
-
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCProjectile;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.Projectile;
 
 public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	

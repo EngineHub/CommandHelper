@@ -1,28 +1,23 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package com.laytonsmith.abstraction.bukkit;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
+
+package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import org.bukkit.util.Vector;
-
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.EntityEffect;
-import org.bukkit.Location;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
+import org.bukkit.util.Vector;
 
 /**
  *
@@ -61,6 +56,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 		return e.getFireTicks();
 	}
 
+    @Override
     public Object getHandle(){
         return e;
     }

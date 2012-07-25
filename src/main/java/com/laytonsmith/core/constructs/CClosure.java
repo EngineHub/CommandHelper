@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.Env;
@@ -14,49 +10,50 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * A closure is just an anonymous procedure. 
+ * A closure is just an anonymous procedure.
+ *
  * @author Layton
  */
 public class CClosure extends Construct {
-    
-    public static final long serialVersionUID = 1L;
 
+    public static final long serialVersionUID = 1L;
     GenericTreeNode<Construct> node;
     Env env;
     String[] names;
     Construct[] defaults;
 
     public CClosure(GenericTreeNode<Construct> node, Env env, String[] names, Construct[] defaults, Target t) {
-        super(node!=null?node.toString():"", ConstructType.CLOSURE, t);
+        super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
         this.node = node;
         try {
             this.env = env.clone();
-        } catch (CloneNotSupportedException ex) {
+        }
+        catch (CloneNotSupportedException ex) {
             throw new ConfigRuntimeException("A failure occured while trying to clone the environment.", t);
         }
         this.names = names;
         this.defaults = defaults;
     }
-    
+
     @Override
-    public String val(){
+    public String val() {
         StringBuilder b = new StringBuilder();
         condense(getNode(), b);
         return b.toString();
     }
-    
-    private void condense(GenericTreeNode<Construct> node, StringBuilder b){
-        if(node.data instanceof CFunction){            
-            b.append(((CFunction)node.data).val()).append("(");
-            for(int i = 0; i < node.children.size(); i++){
+
+    private void condense(GenericTreeNode<Construct> node, StringBuilder b) {
+        if (node.data instanceof CFunction) {
+            b.append(( (CFunction) node.data ).val()).append("(");
+            for (int i = 0; i < node.children.size(); i++) {
                 condense(node.children.get(i), b);
-                if(i > 0 && !((CFunction)node.data).val().equals("__autoconcat__")){
+                if (i > 0 && !( (CFunction) node.data ).val().equals("__autoconcat__")) {
                     b.append(",");
                 }
             }
             b.append(")");
-        } else if(node.data instanceof CString){
-            CString data = (CString)node.data;
+        } else if (node.data instanceof CString) {
+            CString data = (CString) node.data;
             // Convert: \ -> \\ and ' -> \'
             b.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
         } else {
@@ -66,53 +63,57 @@ public class CClosure extends Construct {
 
     public GenericTreeNode<Construct> getNode() {
         return node;
-    }        
-    
+    }
+
     @Override
-    public CClosure clone() throws CloneNotSupportedException{
+    public CClosure clone() throws CloneNotSupportedException {
         CClosure clone = (CClosure) super.clone();
-        if(this.node != null) clone.node = this.node.clone();
+        if (this.node != null) {
+            clone.node = this.node.clone();
+        }
         return clone;
     }
-    
+
     /**
-     * If meta code needs to affect this closure's environment, it can
-     * access it with this function. Note that changing this will only
-     * affect future runs of the closure, it will not affect the currently
-     * running closure, (if any) due to the environment being cloned right
-     * before running.
-     * @return 
+     * If meta code needs to affect this closure's environment, it can access it
+     * with this function. Note that changing this will only affect future runs
+     * of the closure, it will not affect the currently running closure, (if
+     * any) due to the environment being cloned right before running.
+     *
+     * @return
      */
-    public synchronized Env getEnv(){        
+    public synchronized Env getEnv() {
         return env;
     }
-    
+
     /**
-     * Executes the closure, giving it the supplied arguments. {@code values} may be null, which means that
-     * no arguments are being sent.
-     * @param values 
+     * Executes the closure, giving it the supplied arguments. {@code values}
+     * may be null, which means that no arguments are being sent.
+     *
+     * @param values
      */
-    public void execute(Construct[] values){
+    public void execute(Construct[] values) {
         try {
             Env environment;
-            synchronized(this){
+            synchronized (this) {
                 environment = env.clone();
             }
-            if(values != null){
-                for(int i = 0; i < names.length; i++){
+            if (values != null) {
+                for (int i = 0; i < names.length; i++) {
                     String name = names[i];
                     Construct value;
-                    try{
+                    try {
                         value = values[i];
-                    } catch(Exception e) {
+                    }
+                    catch (Exception e) {
                         value = defaults[i].clone();
                     }
                     environment.GetVarList().set(new IVariable(name, value, getTarget()));
                 }
             }
             CArray arguments = new CArray(node.data.getTarget());
-            if(values != null){
-                for(Construct value : values){
+            if (values != null) {
+                for (Construct value : values) {
                     arguments.push(value);
                 }
             }
@@ -121,12 +122,14 @@ public class CClosure extends Construct {
             List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
             children.add(node);
             newNode.setChildren(children);
-            try{
-                MethodScriptCompiler.execute(newNode, environment, null, environment.GetScript());                
-            } catch(ConfigRuntimeException e){
+            try {
+                MethodScriptCompiler.execute(newNode, environment, null, environment.GetScript());
+            }
+            catch (ConfigRuntimeException e) {
                 ConfigRuntimeException.React(e);
             }
-        } catch (CloneNotSupportedException ex) {
+        }
+        catch (CloneNotSupportedException ex) {
             Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);
         }
     }

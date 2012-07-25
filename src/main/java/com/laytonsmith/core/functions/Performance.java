@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.*;
@@ -60,11 +58,6 @@ public class Performance {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }

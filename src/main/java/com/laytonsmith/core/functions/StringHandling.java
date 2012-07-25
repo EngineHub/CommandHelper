@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ZipReader;
@@ -50,6 +48,7 @@ public class StringHandling {
             return false;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -130,14 +129,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -233,14 +224,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -309,14 +292,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -356,14 +331,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -398,7 +365,7 @@ public class StringHandling {
             String[] sa = args[0].val().split(" ");
             ArrayList<Construct> a = new ArrayList<Construct>();
             for (String s : sa) {
-                if (!s.trim().equals("")) {
+                if (!s.trim().isEmpty()) {
                     a.add(new CString(s.trim(), t));
                 }
             }
@@ -422,14 +389,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -471,14 +430,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -524,14 +475,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -581,14 +524,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -634,14 +569,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -690,14 +617,6 @@ public class StringHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }

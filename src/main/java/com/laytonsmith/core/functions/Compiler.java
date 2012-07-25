@@ -41,14 +41,6 @@ public class Compiler {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -103,11 +95,6 @@ public class Compiler {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -164,14 +151,6 @@ public class Compiler {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V0_0_0;
         }
@@ -452,14 +431,6 @@ public class Compiler {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V0_0_0;
         }

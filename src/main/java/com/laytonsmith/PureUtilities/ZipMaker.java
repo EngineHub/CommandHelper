@@ -17,7 +17,9 @@ import java.util.zip.ZipOutputStream;
  *
  * @author layton
  */
-public class ZipMaker {
+public final class ZipMaker {
+    
+    private ZipMaker(){}
 
     public static void MakeZip(File startingDir, String filename) {
         if(startingDir.isDirectory()){

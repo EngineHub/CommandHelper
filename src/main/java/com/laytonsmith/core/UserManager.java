@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Persistance;
@@ -85,7 +83,8 @@ public class UserManager {
         if(script_cache.containsKey(alias)){
             tokens = script_cache.get(alias);
         } else {
-            tokens = MethodScriptCompiler.lex(alias, new File("User Alias"));            
+            tokens = MethodScriptCompiler.lex(alias, new File("User Alias"));
+            script_cache.put(alias, tokens);
         }
         return MethodScriptCompiler.preprocess(tokens, env).get(0);
     }

@@ -57,11 +57,6 @@ public class Reflection {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }

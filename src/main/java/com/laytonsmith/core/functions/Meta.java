@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -12,7 +10,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.sk89q.wepif.PermissionsResolverManager;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -121,14 +118,6 @@ public class Meta {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -218,14 +207,6 @@ public class Meta {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -264,14 +245,6 @@ public class Meta {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -304,14 +277,6 @@ public class Meta {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_0;
         }      
@@ -326,7 +291,7 @@ public class Meta {
                 int count = 0;
                 for (GenericTreeNode<Construct> child : root.getChildren()) {
                     Construct s = parent.seval(child, env);
-                    if (!s.val().trim().equals("")) {
+                    if (!s.val().trim().isEmpty()) {
                         if(count > 0){
                             b.append(" ");
                         }
@@ -440,14 +405,6 @@ public class Meta {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -497,6 +454,7 @@ public class Meta {
             return true;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -564,11 +522,6 @@ public class Meta {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }

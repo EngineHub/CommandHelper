@@ -93,13 +93,14 @@ public abstract class AbstractFunction implements Function{
      * @param varList 
      */
     public void varList(IVariableList varList) {
-        return;
+        
     }
 
     /**
      * Most functions want the atomic values, not the variable itself.
      * @return 
      */
+    @Override
     public boolean preResolveVariables() {
         return true;
     }

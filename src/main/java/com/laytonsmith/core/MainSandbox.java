@@ -1,18 +1,9 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.WebUtility;
-import com.laytonsmith.PureUtilities.WebUtility.HTTPResponse;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.DataSourceFactory;
-import com.laytonsmith.persistance.YMLDataSource;
-import java.io.File;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URL;
 import java.util.Arrays;
 
 /**

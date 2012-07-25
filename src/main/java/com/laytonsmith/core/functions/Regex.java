@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.*;
@@ -53,12 +51,7 @@ public class Regex {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -134,12 +127,7 @@ public class Regex {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -213,12 +201,7 @@ public class Regex {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -291,12 +274,7 @@ public class Regex {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -363,12 +341,7 @@ public class Regex {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }

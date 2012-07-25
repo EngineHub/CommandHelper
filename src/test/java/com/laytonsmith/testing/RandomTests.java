@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.testing;
 
 import com.laytonsmith.abstraction.*;
@@ -10,11 +8,9 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.MarshalException;
-import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import static com.laytonsmith.testing.StaticTest.SRun;

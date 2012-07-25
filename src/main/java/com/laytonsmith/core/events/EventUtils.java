@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.constructs.CArray;
@@ -19,7 +17,9 @@ import java.util.*;
  *
  * @author layton
  */
-public class EventUtils {
+public final class EventUtils {
+    
+    private EventUtils(){}
 
     private static final Map<Driver, SortedSet<BoundEvent>> event_handles =
             new EnumMap<Driver, SortedSet<BoundEvent>>(Driver.class);

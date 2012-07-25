@@ -10,8 +10,9 @@ import java.util.logging.Logger;
  *
  * @author layton
  */
-public class LogAppender {
+public final class LogAppender {
     
+    private LogAppender(){}
     
     /**
      * Get the system's line endings

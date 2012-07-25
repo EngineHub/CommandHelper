@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.*;
@@ -50,8 +48,9 @@ public class EventBinding {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
+        
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -153,12 +152,7 @@ public class EventBinding {
             return true;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -195,11 +189,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -249,11 +238,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -303,11 +287,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -356,11 +335,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -419,11 +393,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -490,11 +459,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -557,11 +521,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -603,11 +562,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -650,11 +604,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -702,11 +651,6 @@ public class EventBinding {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }

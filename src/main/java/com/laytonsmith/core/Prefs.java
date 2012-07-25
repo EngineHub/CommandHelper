@@ -3,7 +3,6 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -11,7 +10,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 
-public class Prefs {
+public final class Prefs {
+    
+    private Prefs(){}
+    
     private static Object pref(PNames name){
         if(prefs == null){
             //Uh oh. Default!

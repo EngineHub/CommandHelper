@@ -15,7 +15,10 @@ import java.util.logging.Logger;
  *
  * @author layton
  */
-public class TermColors {
+public final class TermColors {
+    
+    private TermColors(){}
+    
     public enum SYS {
 
         WINDOWS,

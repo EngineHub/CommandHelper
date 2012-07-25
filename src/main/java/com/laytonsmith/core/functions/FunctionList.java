@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
@@ -21,7 +19,7 @@ import java.util.logging.Logger;
  */
 public class FunctionList {
 
-    private final static Map<api.Platforms, Map<String, FunctionBase>> functions = new HashMap<api.Platforms, Map<String, FunctionBase>>();
+    private final static Map<api.Platforms, Map<String, FunctionBase>> functions = new EnumMap<api.Platforms, Map<String, FunctionBase>>(api.Platforms.class);
     private final static Map<String, Set<api.Platforms>> supportedPlatforms = new HashMap<String, Set<api.Platforms>>();
     static {
         for(api.Platforms p : api.Platforms.values()){

@@ -46,14 +46,6 @@ public class InventoryManagement {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -171,14 +163,6 @@ public class InventoryManagement {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -212,7 +196,7 @@ public class InventoryManagement {
                     try{
                         index = Integer.parseInt(key);
                     } catch(NumberFormatException e){
-                        if(key.equals("")){
+                        if(key.isEmpty()){
                             //It was a null key
                             index = -1;
                         } else {
@@ -274,11 +258,6 @@ public class InventoryManagement {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -347,11 +326,6 @@ public class InventoryManagement {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -427,11 +401,6 @@ public class InventoryManagement {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -518,11 +487,6 @@ public class InventoryManagement {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }

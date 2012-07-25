@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.abstraction.MCChatColor;
@@ -113,7 +111,7 @@ public class CommandHelperInterpreterListener implements Listener {
 
                 public void done(String output) {
                     output = output.trim();
-                    if (output.equals("")) {
+                    if (output.isEmpty()) {
                         Static.SendMessage(p, ":");
                     } else {
                         if (output.startsWith("/")) {

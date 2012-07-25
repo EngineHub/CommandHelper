@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
@@ -49,11 +47,6 @@ public class Permissions {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -86,7 +79,7 @@ public class Permissions {
                 }
             }
             
-            if(player.toLowerCase() == "~console") {
+            if("~console".equals(player.toLowerCase())) {
             	//Console always has permission
             	return new CBoolean(true, t);
             }

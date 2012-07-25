@@ -3,15 +3,13 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCGameMode;
 import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
-
 import org.bukkit.entity.HumanEntity;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
  * @author layton
  */
-class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
+public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHumanEntity {
     
     HumanEntity he;
 

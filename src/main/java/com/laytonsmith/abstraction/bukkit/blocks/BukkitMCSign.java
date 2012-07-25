@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.MCMaterialData;
@@ -13,7 +11,7 @@ import org.bukkit.block.Sign;
  *
  * @author layton
  */
-class BukkitMCSign implements MCSign {
+public class BukkitMCSign implements MCSign {
     
     Sign s;
 

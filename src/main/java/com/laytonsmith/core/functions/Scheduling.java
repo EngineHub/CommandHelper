@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
@@ -11,9 +9,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -53,12 +48,7 @@ public class Scheduling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_1_0;
         }
@@ -96,12 +86,7 @@ public class Scheduling {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_1_0;
         }
@@ -139,14 +124,6 @@ public class Scheduling {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_0;
         }
@@ -203,11 +180,6 @@ public class Scheduling {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -273,11 +245,6 @@ public class Scheduling {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -340,11 +307,6 @@ public class Scheduling {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }

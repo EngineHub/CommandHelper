@@ -1,9 +1,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import org.bukkit.metadata.MetadataValue;
-
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCPlugin;
+import org.bukkit.metadata.MetadataValue;
 
 public class BukkitMCMetadataValue implements MCMetadataValue {
 

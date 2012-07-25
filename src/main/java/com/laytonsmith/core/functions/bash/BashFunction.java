@@ -1,8 +1,6 @@
 package com.laytonsmith.core.functions.bash;
 
 import com.laytonsmith.core.Documentation;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.CompiledFunction;
 import com.laytonsmith.core.functions.FunctionBase;
 

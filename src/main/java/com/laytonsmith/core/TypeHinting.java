@@ -12,6 +12,7 @@ import java.util.List;
 public class TypeHinting {
     
     List<TypeHintingEntry> types = new ArrayList<TypeHintingEntry>();
+    @Override
     public String toString(){
         StringBuilder b = new StringBuilder();
         for(TypeHintingEntry the : types){
@@ -22,10 +23,11 @@ public class TypeHinting {
     
     private class TypeHintingEntry{
         List<HintEntry> types = new ArrayList<HintEntry>();
-        public TypeHintingEntry(List<HintEntry> types){
+        private TypeHintingEntry(List<HintEntry> types){
             this.types = types;
         }
         
+        @Override
         public String toString(){
             StringBuilder b = new StringBuilder();
             for(HintEntry h : types){
@@ -36,7 +38,7 @@ public class TypeHinting {
     }
     
     //Marker class
-    public static class Hint{}
+    public static interface Hint{}
     
     /**
      * Combines the modifiers and type into one class
@@ -72,6 +74,7 @@ public class TypeHinting {
             return false;
         }
         
+        @Override
         public String toString(){
             StringBuilder b = new StringBuilder();
             for(Modifier m : modifiers){
@@ -84,7 +87,7 @@ public class TypeHinting {
     /**
      * The type is the actual data type required.
      */
-    public static class Type extends Hint{
+    public static class Type implements Hint{
         public final static Type MIXED = new Type(1, "MIXED");
         public final static Type ARRAY = new Type(2, "ARRAY");
         public static Type ARRAY(String ... keys){
@@ -128,6 +131,7 @@ public class TypeHinting {
             this.toString = name;
         }
         
+        @Override
         public String toString(){
             return toString;
         }
@@ -139,7 +143,7 @@ public class TypeHinting {
      * There can only be one VARARGS in an entire sequence.
      *  
      */
-    public static class Modifier extends Hint{
+    public static class Modifier implements Hint{
         public final static Modifier OPTIONAL = new Modifier(1, "OPTIONAL");
         public final static Modifier VARARGS = new Modifier(2, "VARARGS");
         String object = null;
@@ -150,6 +154,7 @@ public class TypeHinting {
             this.toString = name;
         }
         
+        @Override
         public String toString(){
             return toString;
         }

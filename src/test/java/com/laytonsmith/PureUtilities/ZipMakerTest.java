@@ -1,15 +1,11 @@
 package com.laytonsmith.PureUtilities;
 
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import org.junit.After;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
-import org.junit.Test;
 
 /**
  *

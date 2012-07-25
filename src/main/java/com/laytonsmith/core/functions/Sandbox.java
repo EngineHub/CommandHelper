@@ -4,13 +4,11 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.BoundEvent;
-import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import org.bukkit.event.Cancellable;
-
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.bukkit.event.Cancellable;
 
 /**
  * @author Layton
@@ -47,9 +45,7 @@ public class Sandbox {
 //            return true;
 //        }
 //
-//        public void varList(IVariableList varList) {
-//        }
-//
+//        //
 //        public boolean preResolveVariables() {
 //            return true;
 //        }
@@ -135,14 +131,6 @@ public class Sandbox {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -235,11 +223,6 @@ public class Sandbox {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -288,11 +271,6 @@ public class Sandbox {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V0_0_0;
         }
@@ -367,11 +345,6 @@ public class Sandbox {
         public boolean isRestricted() {
             return true; //lol, very
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -424,11 +397,6 @@ public class Sandbox {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return false;
         }
@@ -474,12 +442,7 @@ public class Sandbox {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }

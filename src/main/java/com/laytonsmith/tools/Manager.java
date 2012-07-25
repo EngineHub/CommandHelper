@@ -1,14 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
-import com.laytonsmith.PureUtilities.TermColors.SYS;
 import static com.laytonsmith.PureUtilities.TermColors.*;
+import com.laytonsmith.PureUtilities.TermColors.SYS;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
@@ -147,7 +145,7 @@ public class Manager {
     }
     
     public static void help(String [] args){
-        if(args[0].equals("")){
+        if(args[0].isEmpty()){
             pl("Currently, your options are:\n"
                             + "\t" + BLUE + "refactor" + WHITE + " - Options for refactoring your persisted data from one backend to another\n"
                             + "\t" + GREEN + "upgrade" + WHITE + " - Runs upgrade scripts on your persisted data\n"
@@ -310,7 +308,7 @@ public class Manager {
         if (data != null) {
             int count = 0;
             for (Object key : data.keySet()) {
-                if(!args[0].equals("")){
+                if(!args[0].isEmpty()){
                     //We are splitting by namespace
                     if(!key.toString().toLowerCase().startsWith(args[0] + ".")){
                         continue;

@@ -1,15 +1,12 @@
 package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This utility class provides the means to interact with given data sources.

@@ -14,7 +14,10 @@ import java.util.Map;
  *
  * @author layton
  */
-public class EventBuilder {    
+public final class EventBuilder {  
+    
+    private EventBuilder(){}
+    
     private static final Map<Class<BindableEvent>, Method> methods = new HashMap<Class<BindableEvent>, Method>();
     private static final Map<Class<BindableEvent>, Constructor<? extends BindableEvent>> constructors = new HashMap<Class<BindableEvent>, Constructor<? extends BindableEvent>>();
     private static final Map<Class<BindableEvent>, Class<BindableEvent>> eventImplementations = new HashMap<Class<BindableEvent>, Class<BindableEvent>>();

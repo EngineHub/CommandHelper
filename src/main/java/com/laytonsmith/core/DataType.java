@@ -1,14 +1,10 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
+import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.Map;
-import java.util.SortedSet;
-import java.util.TreeSet;
 
 /**
  * All constructs have or can return a certain data type. Sometimes it is useful
@@ -70,7 +66,7 @@ public class DataType {
         this.subType = subType;
     }
     
-    Map<DataTypes, Boolean> cachedCastableTo = new HashMap<DataTypes, Boolean>();
+    Map<DataTypes, Boolean> cachedCastableTo = new EnumMap<DataTypes, Boolean>(DataTypes.class);
     public boolean castableTo(DataType type){
         return castableTo(type.type, null);
     }

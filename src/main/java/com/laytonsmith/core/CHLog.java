@@ -16,7 +16,10 @@ import java.util.List;
  * is to use the preferences file and output to the debug log file.
  * @author layton
  */
-public class CHLog {
+public final class CHLog {
+    
+    private CHLog(){}
+    
     private static String header = "The logger preferences allow you to granularly define what information\n"
             + "is written out to file, to assist you in debugging or general logging.\n"
             + "You may set the granularity of all the tags individually, to any one of\n"

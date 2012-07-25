@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 
 package com.laytonsmith.core.constructs;
 
@@ -34,6 +32,7 @@ public class CInt extends Construct implements Cloneable{
         return val;
     }
     
+    @Override
     public CInt clone() throws CloneNotSupportedException{
         return this;
     }

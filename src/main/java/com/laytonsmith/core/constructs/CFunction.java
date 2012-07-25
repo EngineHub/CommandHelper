@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.constructs;
 
 /**
@@ -16,6 +14,7 @@ public class CFunction extends Construct {
         super(name, ConstructType.FUNCTION, t);
     }
 
+    @Override
     public String toString() {
         return getValue();
     }

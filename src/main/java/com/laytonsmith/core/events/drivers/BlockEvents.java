@@ -1,14 +1,11 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.*;
@@ -16,7 +13,6 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
-
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.Map;
@@ -433,10 +429,10 @@ public class BlockEvents {
 
                 if (value instanceof CNull) {
                     sce.setLine(index, "");
-                    return sce.getLine(index).toString() == "";
+                    return "".equals(sce.getLine(index).toString());
                 } else {
                     sce.setLine(index, value.val());
-                    return sce.getLine(index).toString() == value.val();
+                    return ( sce.getLine(index).toString() == null ? value.val() == null : sce.getLine(index).toString().equals(value.val()) );
                 }
             }
 

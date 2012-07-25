@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.Static;
@@ -11,15 +7,13 @@ import com.laytonsmith.core.Static;
  * @author layton
  */
 public class Variable extends Construct {
-    
-    public static final long serialVersionUID = 1L;
 
+    public static final long serialVersionUID = 1L;
     final private String name;
     private String def;
     private boolean optional;
     private boolean final_var;
     private Construct var_value;
-    
 
     public Variable(String name, String def, boolean optional, boolean final_var, Target t) {
         super(name, ConstructType.VARIABLE, t);
@@ -29,8 +23,8 @@ public class Variable extends Construct {
         this.optional = optional;
         this.var_value = Static.resolveConstruct(def, t);
     }
-    
-    public Variable(String name, String def, Target t){
+
+    public Variable(String name, String def, Target t) {
         this(name, def, false, false, t);
     }
 
@@ -38,38 +32,50 @@ public class Variable extends Construct {
     public String toString() {
         return "var:" + name;
     }
-    public String getName(){
+
+    public String getName() {
         return name;
     }
-    public void setFinal(boolean final_var){
+
+    public void setFinal(boolean final_var) {
         this.final_var = final_var;
     }
-    public boolean isFinal(){
+
+    public boolean isFinal() {
         return final_var;
     }
-    public void setOptional(boolean optional){
+
+    public void setOptional(boolean optional) {
         this.optional = optional;
     }
-    public boolean isOptional(){
+
+    public boolean isOptional() {
         return optional;
     }
-    public String getDefault(){
+
+    public String getDefault() {
         return def;
     }
-    public void setDefault(String def){
+
+    public void setDefault(String def) {
         this.def = def;
     }
+
     @Override
-    public String val(){
+    public String val() {
         return var_value.toString();
     }
-    public void setVal(Construct val){
+
+    public void setVal(Construct val) {
         this.var_value = val;
     }
+
     @Override
-    public Variable clone() throws CloneNotSupportedException{
+    public Variable clone() throws CloneNotSupportedException {
         Variable clone = (Variable) super.clone();
-        if(this.var_value != null) clone.var_value = var_value;
+        if (this.var_value != null) {
+            clone.var_value = var_value;
+        }
         return clone;
     }
 
@@ -77,5 +83,4 @@ public class Variable extends Construct {
     public boolean isDynamic() {
         return true;
     }
-
 }

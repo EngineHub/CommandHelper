@@ -70,10 +70,7 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
+                @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -157,6 +154,7 @@ public class BasicLogic {
             return false;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -237,6 +235,7 @@ public class BasicLogic {
             return false;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -453,14 +452,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -506,11 +497,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -562,11 +548,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -613,11 +594,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -666,14 +642,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -762,11 +730,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -819,14 +782,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -874,14 +829,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -929,14 +876,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -984,14 +923,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -1050,14 +981,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -1110,14 +1033,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -1158,14 +1073,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -1207,11 +1114,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1259,11 +1161,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1311,11 +1208,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1363,11 +1255,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1415,11 +1302,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1472,11 +1354,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1529,11 +1406,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1579,11 +1451,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1631,11 +1498,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1684,11 +1546,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1737,11 +1594,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -1803,11 +1655,6 @@ public class BasicLogic {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }

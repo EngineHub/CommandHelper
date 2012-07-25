@@ -1,14 +1,12 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.constructs.Token.TType;
-import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.DataHandling.assign;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -369,27 +367,27 @@ public class Script {
         if (cleft.size() != cmds.length && !lastIsFinal) {
             isAMatch = false;
         }
-        ArrayList<Variable> vars = new ArrayList<Variable>();
-        Variable v = null;
-        for (int j = 0; j < cleft.size(); j++) {
-            try {
-                if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
-                    if (((Variable) cleft.get(j)).getName().equals("$")) {
-                        v = new Variable(((Variable) cleft.get(j)).getName(),
-                                lastVar.toString(), Target.UNKNOWN);
-                    } else {
-                        v = new Variable(((Variable) cleft.get(j)).getName(),
-                                args.get(j), Target.UNKNOWN);
-                    }
-                }
-            } catch (IndexOutOfBoundsException e) {
-                v = new Variable(((Variable) cleft.get(j)).getName(),
-                        ((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
-            }
-            if (v != null) {
-                vars.add(v);
-            }
-        }
+//        ArrayList<Variable> vars = new ArrayList<Variable>();
+//        Variable v = null;
+//        for (int j = 0; j < cleft.size(); j++) {
+//            try {
+//                if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
+//                    if (((Variable) cleft.get(j)).getName().equals("$")) {
+//                        v = new Variable(((Variable) cleft.get(j)).getName(),
+//                                lastVar.toString(), Target.UNKNOWN);
+//                    } else {
+//                        v = new Variable(((Variable) cleft.get(j)).getName(),
+//                                args.get(j), Target.UNKNOWN);
+//                    }
+//                }
+//            } catch (IndexOutOfBoundsException e) {
+//                v = new Variable(((Variable) cleft.get(j)).getName(),
+//                        ((Variable) cleft.get(j)).getDefault(), Target.UNKNOWN);
+//            }
+//            if (v != null) {
+//                vars.add(v);
+//            }
+//        }
         return isAMatch;
     }
 

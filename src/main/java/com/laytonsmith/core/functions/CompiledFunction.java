@@ -1,6 +1,5 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 
 /**

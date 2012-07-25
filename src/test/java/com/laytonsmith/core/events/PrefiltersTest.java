@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.constructs.Construct;
@@ -10,8 +8,8 @@ import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
 import com.laytonsmith.testing.C;
 import java.util.HashMap;
 import java.util.Map;
-import static org.junit.Assert.fail;
 import org.junit.*;
+import static org.junit.Assert.fail;
 
 /**
  *

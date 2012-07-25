@@ -8,7 +8,9 @@ import java.io.Writer;
  * Completely standalone generic functions live here.
  * @author lsmith
  */
-public class Util {
+public final class Util {
+    
+    private Util(){}
     
     public static String GetStacktrace(Throwable t){
         final Writer result = new StringWriter();

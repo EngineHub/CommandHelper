@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.CHLog;
@@ -11,8 +9,6 @@ import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
-import java.math.BigDecimal;
-import java.net.InetAddress;
 import java.util.*;
 
 /**
@@ -459,7 +455,7 @@ public class CArray extends Construct implements ArrayAccess{
                 //o1 == o2 -> 0
                 //o1 > o2 -> 1
                 for(int i = 0; i < 2; i++){
-                    Construct c = null;
+                    Construct c;
                     if(i == 0){
                         c = o1;
                     } else {

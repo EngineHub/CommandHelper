@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.*;
@@ -12,7 +10,9 @@ import java.util.Map;
  *
  * @author layton
  */
-public class Globals {
+public final class Globals {
+    
+    private Globals(){}
     
     public static Map<String, IVariable> global_ivar = new HashMap<String, IVariable>();
     public static Map<String, Construct> global_construct = new HashMap<String, Construct>();

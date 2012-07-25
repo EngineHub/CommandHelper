@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.CHVersion;
@@ -60,12 +58,7 @@ public class Math {
 
         public boolean isRestricted() {
             return false;
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-        public CHVersion since() {
+        }        public CHVersion since() {
             return CHVersion.V3_0_1;
         }
         public Boolean runAsync(){
@@ -117,11 +110,6 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -174,11 +162,6 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -236,11 +219,6 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -248,10 +226,12 @@ public class Math {
             return null;
         }
         
+        @Override
         public boolean canOptimize(){
             return true;
         }
         
+        @Override
         public Construct optimize(Target t, Construct ... args){
             return exec(t, null, args);
         }
@@ -285,11 +265,6 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -336,11 +311,6 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -413,6 +383,7 @@ public class Math {
             return false;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -496,6 +467,7 @@ public class Math {
             return false;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -574,6 +546,7 @@ public class Math {
             return false;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -657,6 +630,7 @@ public class Math {
             return false;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -707,12 +681,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -770,12 +739,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -823,12 +787,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -875,12 +834,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_1_3;
         }
@@ -927,15 +881,6 @@ public class Math {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-            
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -992,12 +937,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -1075,12 +1015,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -1157,12 +1092,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1209,12 +1139,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1261,12 +1186,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1313,12 +1233,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1365,12 +1280,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1417,12 +1327,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1469,12 +1374,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1521,12 +1421,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1577,12 +1472,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1629,12 +1519,7 @@ public class Math {
             return false;
         }
 
-        public void varList(IVariableList varList) {}
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
+        
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1685,11 +1570,6 @@ public class Math {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1765,11 +1645,6 @@ public class Math {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }

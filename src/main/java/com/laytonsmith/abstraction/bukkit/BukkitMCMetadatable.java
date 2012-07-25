@@ -1,16 +1,13 @@
 package com.laytonsmith.abstraction.bukkit;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import org.bukkit.metadata.MetadataValue;
-import org.bukkit.metadata.Metadatable;
-import org.bukkit.plugin.Plugin;
-
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCMetadataValue;
 import com.laytonsmith.abstraction.MCMetadatable;
 import com.laytonsmith.abstraction.MCPlugin;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.metadata.MetadataValue;
+import org.bukkit.metadata.Metadatable;
 
 public class BukkitMCMetadatable implements MCMetadatable {
 	Metadatable meta;

@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.constructs.Target;
@@ -9,8 +7,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
-import static org.junit.Assert.assertEquals;
 import org.junit.*;
+import static org.junit.Assert.assertEquals;
 
 /**
  *

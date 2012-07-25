@@ -6,7 +6,9 @@ import java.util.List;
  *
  * @author lsmith
  */
-public class StringUtils {
+public final class StringUtils {
+    
+    private StringUtils(){}
     
     public static String Join(Object [] list, String glue){
         StringBuilder b = new StringBuilder();

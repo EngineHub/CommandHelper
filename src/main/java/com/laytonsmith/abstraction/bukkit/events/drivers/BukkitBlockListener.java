@@ -1,19 +1,16 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
+import com.laytonsmith.core.events.Driver;
+import com.laytonsmith.core.events.EventUtils;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
-
-import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents;
-import com.laytonsmith.core.events.Driver;
-import com.laytonsmith.core.events.EventUtils;
 
 
 /**

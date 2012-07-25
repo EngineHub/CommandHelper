@@ -4,7 +4,6 @@ import com.laytonsmith.core.api;
 import com.laytonsmith.core.compiler.MethodScriptStaticCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import org.junit.*;
-import org.junit.runner.RunWith;
 import static org.junit.Assert.*;
 
 /**

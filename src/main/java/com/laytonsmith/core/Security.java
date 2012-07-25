@@ -6,7 +6,10 @@ import java.io.File;
  *
  * @author layton
  */
-public class Security {
+public final class Security {
+    
+    private Security(){}
+    
     /**
      * Returns true if this filepath is accessible to CH, false otherwise.
      * @param location
@@ -14,7 +17,7 @@ public class Security {
      */
     public static boolean CheckSecurity(String location) {
         String pref = Prefs.BaseDir();
-        if (pref.trim().equals("")) {
+        if (pref.trim().isEmpty()) {
             pref = ".";
         }
         File base_dir = new File(pref);

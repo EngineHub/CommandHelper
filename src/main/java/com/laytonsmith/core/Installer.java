@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.FileUtility;
@@ -16,7 +14,9 @@ import java.util.logging.Logger;
  *
  * @author Layton
  */
-public class Installer {
+public final class Installer {
+    
+    private Installer(){}
 
     public static void Install() {
         //Check to see if the auto_include file exists. If not, include it now

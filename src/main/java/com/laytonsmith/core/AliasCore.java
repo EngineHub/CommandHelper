@@ -1,10 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -60,7 +57,7 @@ public class AliasCore {
         this.auxAliases = auxAliases;
         this.prefFile = prefFile;
         this.perms = perms;
-        this.parent = parent;
+        AliasCore.parent = parent;
         this.mainFile = mainFile;
     }
     
@@ -117,7 +114,7 @@ public class AliasCore {
                                 public void done(String output) {
                                     try {
                                         if (output != null) {
-                                            if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                            if (!output.trim().isEmpty() && output.trim().startsWith("/")) {
                                                 if (Prefs.DebugMode()) {
                                                     if (player instanceof MCPlayer) {
                                                         Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer) player).getName() + ": " + output.trim());
@@ -176,7 +173,7 @@ public class AliasCore {
 
                                     public void done(String output) {
                                         if (output != null) {
-                                            if (!output.trim().equals("") && output.trim().startsWith("/")) {
+                                            if (!output.trim().isEmpty() && output.trim().startsWith("/")) {
                                                 if (Prefs.DebugMode()) {
                                                     Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + ((MCPlayer)player).getName() + ": " + output.trim());
                                                 }

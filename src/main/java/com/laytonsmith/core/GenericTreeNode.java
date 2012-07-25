@@ -97,6 +97,7 @@ public class GenericTreeNode<T> implements Cloneable{
         this.data = data;
     }
 
+    @Override
     public String toString() {
         return getData().toString();
     }

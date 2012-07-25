@@ -1,30 +1,20 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.Util;
-import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.YMLDataSource;
 import com.laytonsmith.tools.*;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
-import org.yaml.snakeyaml.Yaml;
 
 /**
  *

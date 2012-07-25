@@ -1,7 +1,5 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
@@ -15,8 +13,8 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
-import static org.junit.Assert.fail;
 import org.junit.*;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
 
 /**

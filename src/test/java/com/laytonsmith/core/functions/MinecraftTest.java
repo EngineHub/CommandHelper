@@ -1,28 +1,21 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
-import static com.laytonsmith.testing.StaticTest.SRun;
 import com.sk89q.wepif.PermissionsResolverManager;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.mockito.Matchers.*;
+import org.junit.runner.RunWith;
+import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.mockStatic;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 
 
 /**

@@ -4,10 +4,8 @@ import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.api;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.CompiledFunction;
-import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
@@ -20,7 +18,9 @@ import java.util.List;
  * to another language entirely.
  * @author layton
  */
-public class MethodScriptStaticCompiler {
+public final class MethodScriptStaticCompiler {
+    
+    private MethodScriptStaticCompiler(){}
     
     /**
      * Compiles the script, converting it into mid level object code, or in

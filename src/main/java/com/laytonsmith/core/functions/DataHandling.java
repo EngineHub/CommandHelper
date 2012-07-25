@@ -1,10 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
+
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.*;
@@ -12,7 +9,6 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -53,14 +49,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -170,6 +158,7 @@ public class DataHandling {
             return false;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -274,11 +263,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -389,11 +373,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_0_1;
         }
@@ -566,14 +545,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_0;
         }
@@ -615,14 +586,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_0;
         }
@@ -662,14 +625,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -715,11 +670,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -767,11 +717,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -819,14 +764,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -873,14 +810,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -926,14 +855,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_1_2;
         }
@@ -980,11 +901,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -1041,11 +957,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -1099,6 +1010,7 @@ public class DataHandling {
             return true;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -1229,14 +1141,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -1273,14 +1177,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -1346,14 +1242,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -1418,14 +1306,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return true;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_2_0;
         }
@@ -1461,14 +1341,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public void varList(IVariableList varList) {
-        }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
@@ -1519,11 +1391,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -1568,6 +1435,7 @@ public class DataHandling {
             return true;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -1622,6 +1490,7 @@ public class DataHandling {
             return true;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -1689,6 +1558,7 @@ public class DataHandling {
             return true;
         }
 
+        @Override
         public boolean preResolveVariables() {
             return false;
         }
@@ -1760,11 +1630,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return true;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -1810,11 +1675,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -1865,11 +1725,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -1917,11 +1772,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }
@@ -1970,11 +1820,6 @@ public class DataHandling {
         public boolean isRestricted() {
             return false;
         }
-
-        public boolean preResolveVariables() {
-            return true;
-        }
-
         public Boolean runAsync() {
             return null;
         }

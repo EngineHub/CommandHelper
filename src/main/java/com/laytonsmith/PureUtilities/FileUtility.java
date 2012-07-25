@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.PureUtilities;
 
 import java.io.*;
@@ -12,6 +9,8 @@ import java.util.Scanner;
  * @author layton
  */
 public class FileUtility {
+    
+    private FileUtility(){}
 
     public static final int OVERWRITE = 0;
     public static final int APPEND = 1;
