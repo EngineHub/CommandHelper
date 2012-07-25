@@ -7,6 +7,9 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.SerializedPersistance;
 import com.laytonsmith.PureUtilities.Util;
+import com.laytonsmith.PureUtilities.ZipReader;
+import com.laytonsmith.persistance.DataSource;
+import com.laytonsmith.persistance.YMLDataSource;
 import com.laytonsmith.tools.*;
 import java.io.File;
 import java.io.FileInputStream;
@@ -185,35 +188,15 @@ public class Main {
     private static String loadSelfVersion() throws Exception{
         String version = null;
 
-        File file = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        File file = new File(new File(Main.class.getProtectionDomain().getCodeSource().getLocation().toURI()), "plugin.yml");
         if (!file.exists()) {
             throw new Exception(new FileNotFoundException(String.format("%s does not exist", file.getPath())));
         }
         try {
-            Yaml yaml = new Yaml();
-            Object obj = null;
-            if(file.isFile()){
-                JarFile jar = new JarFile(file);
-                JarEntry entry = jar.getJarEntry("plugin.yml");
-
-                if (entry == null) {
-                    throw new Exception(new FileNotFoundException("Jar does not contain plugin.yml"));
-                }
-
-                InputStream stream = jar.getInputStream(entry);
-                obj = yaml.load(stream);                
-
-                stream.close();
-                jar.close();
-            } else {
-                InputStream stream = new FileInputStream(new File(file, "plugin.yml"));
-                obj = yaml.load(stream);
-                stream.close();
-            }
-            if(!(obj instanceof HashMap)){
+            DataSource ds = new YMLDataSource(new URI("yml://" + file.getAbsolutePath()));
+            version = ds.get(new String[]{"version"});
+            if(version == null){
                 throw new Exception("Invalid plugin.yml supplied");
-            } else {
-                version = (String)((HashMap)obj).get("version");
             }
         } catch (IOException ex) {
             throw new Exception(ex);

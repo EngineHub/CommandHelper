@@ -2,6 +2,7 @@ package com.laytonsmith.persistance;
 
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
+import java.io.IOException;
 import java.util.List;
 
 /**
@@ -13,16 +14,13 @@ import java.util.List;
 public interface DataSource extends Documentation {    
     
     /**
-     * Returns a list of keys stored in this interface. If this data source is transient,
-     * this method may return null if it would be too much trouble to get the information.
-     * That is to say, transient data sources are not required to be able to enumerate
-     * through all the entries in their source.
+     * Returns a list of keys stored in this interface.
      * @return 
      */
     public List<String> keySet();
     
     /**
-     * Retrieves a value from the data source.
+     * Retrieves a value from the data source. 
      * @param key
      * @return 
      */
@@ -36,7 +34,7 @@ public interface DataSource extends Documentation {
      * @throws ReadOnlyException If this data source is inherently read only, 
      * it will throw a read only exception if this method is called.
      */
-    public boolean set(String [] key, String value) throws ReadOnlyException;
+    public boolean set(String [] key, String value) throws ReadOnlyException, IOException;
     
     /**
      * Instructs this data source to repopulate its internal structure based on

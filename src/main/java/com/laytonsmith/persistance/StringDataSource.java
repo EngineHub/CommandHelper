@@ -20,6 +20,12 @@ public abstract class StringDataSource extends AbstractDataSource {
      */
     private Object output;
     
+    /**
+     * A reference to the DataSourceModel used by the set and get methods.
+     */
+    protected DataSourceModel model;
+    
+    
     protected StringDataSource(URI uri) throws DataSourceException{
         super(uri);
     }
@@ -53,7 +59,12 @@ public abstract class StringDataSource extends AbstractDataSource {
         if(!processed){
             if(!modifiers.contains(DataSourceModifier.HTTP) && !modifiers.contains(DataSourceModifier.HTTPS)){
                 //It's a file output
-                output = new ZipReader(new File(new File("."), uri.getHost() + uri.getPath()));
+                String filePath = uri.getSchemeSpecificPart();
+                if(filePath.startsWith("//")){
+                    filePath = filePath.substring(2);
+                }
+                //TODO: The relative path needs to be set properly here
+                output = new ZipReader(new File(filePath));
             } else {
                 //It's an HTTP output. This is not currently supported, but it should have already added the read only flag
                 //for us in the top of the implementation's set function. If not, it's an Error here.
@@ -80,13 +91,40 @@ public abstract class StringDataSource extends AbstractDataSource {
         populateModel(data);
     }
     
-    private String fileInput(ZipReader source) throws FileNotFoundException, IOException{
+    private String fileInput(ZipReader source) throws IOException{
         //TODO: Check for a locking file, and block if it isn't there
-        return source.getFileContents();
+        try{
+            return source.getFileContents();
+        } catch(FileNotFoundException e){
+            if(!source.isZipped()){
+                File outputFile = source.getFile();
+                String contents = getBlankDataModel();
+                FileUtility.write(contents, outputFile);
+                return contents;
+            } else {
+                throw e;
+            }
+        }
     }
     
     private String urlInput(URL source) throws IOException{
         return WebUtility.GetPageContents(source);
+    }
+    
+    public String get(String [] key) {
+        return model.get(key);
+    }  
+
+    public boolean set(String [] key, String value) throws ReadOnlyException, IOException {
+        checkSet();
+        String old = get(key);
+        if((old == null && value == null) || (old != null && old.equals(value))){
+            return false;
+        }
+        model.set(key, value);
+        //We need to output the model now
+        writeData(serializeModel());
+        return true;
     }
     
     /**
@@ -95,5 +133,20 @@ public abstract class StringDataSource extends AbstractDataSource {
      * @throws Exception 
      */
     protected abstract void populateModel(String data) throws DataSourceException;
+    
+    /**
+     * Serializes the underlying model to a string, which can be written out to disk/network
+     * @return 
+     */
+    protected abstract String serializeModel();
+    
+    /**
+     * Subclasses that need a certain type of file to be the "blank" version of a data model can override this.
+     * By default, an empty string is returned.
+     * @return 
+     */
+    protected String getBlankDataModel(){
+        return "";
+    }
         
 }

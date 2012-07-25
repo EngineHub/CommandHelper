@@ -20,8 +20,7 @@ import java.net.URL;
  */
 public class MainSandbox {
     public static void main(String[] argv) throws Exception {
-        DataSource ds = DataSourceFactory.GetDataSource(new URI("readonly:yml://src/main/resources/plugin.yml"));
-        System.out.println(DataSourceFactory.Get(ds,new String[]{"commands", "repeat", "description"}));
+        Main.main(new String[]{"--version"});
     }
     
     

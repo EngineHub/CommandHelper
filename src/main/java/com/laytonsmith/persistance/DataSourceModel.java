@@ -1,0 +1,123 @@
+package com.laytonsmith.persistance;
+
+import com.laytonsmith.PureUtilities.Pair;
+import com.laytonsmith.core.GenericTreeNode;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
+
+/**
+ * This class represents a data source model. The underlying model is just a map
+ * of values or maps, but this class abstracts accessing and storing the data. If
+ * a value in a model can be more efficiently lazily loaded, this class perhaps
+ * should not be used, but for non event driven models, it should suffice for many
+ * cases. If a data source inherently has a better way to store the data, then
+ * it may choose to not use this class. Note: Not all data sources
+ * can store a key in both namespace.value and namespace.value.other, in that case,
+ * to make namespace.value's actual value, it should be stored as namespace.value.~
+ * @author lsmith
+ */
+public class DataSourceModel {
+    private GenericTreeNode<Pair<String, String>> tree = new GenericTreeNode<Pair<String, String>>();   
+        
+    public DataSourceModel(Map<String, Object> model){
+        //We have to do a depth first traversal here to get all the keys
+        if(model != null){
+            build(model, tree);
+        }
+    }
+    
+    private void build(Object node, GenericTreeNode<Pair<String, String>> treeNode){
+        if(node instanceof Map){
+            //We need to iterate through all the keys, creating children as we go
+            for(String key : ((Map<String, Object>)node).keySet()){
+                if(key.equals("_")){
+                    //Special case, this is a reserved key
+                    build(((Map<String, Object>)node).get(key), treeNode);
+                } else {
+                    GenericTreeNode<Pair<String, String>> newNode = 
+                            new GenericTreeNode<Pair<String, String>>(new Pair<String, String>(key, null));
+                    treeNode.addChild(newNode);
+                    build(((Map<String, Object>)node).get(key), newNode);
+                }
+            }
+        } else {
+            //This is the node we want to put the data in
+            treeNode.data.setValue(node.toString());
+        }
+    }
+    
+    public Map<String, Object> toMap(){
+        Map<String, Object> map = new HashMap<String, Object>();
+        for(GenericTreeNode<Pair<String, String>> child : tree.getChildren()){
+            decompose(map, child);
+        }
+        return map;
+    }
+    
+    private void decompose(Map<String, Object> node, GenericTreeNode<Pair<String, String>> treeNode){
+        if(treeNode.hasChildren()){
+            //If it's not a leaf node, we need to add a new child to the map. 
+            //However, if the data isn't null, we need to add the data now as a _ key
+            Map<String, Object> map = new HashMap<String, Object>();
+            if(treeNode.getData().getValue() != null){
+                map.put("_", treeNode.getData().getValue());
+            }
+            node.put(treeNode.getData().getKey(), map);
+            for(GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()){
+                decompose(map, child);
+            }
+        } else {
+            //It's a leaf node, so we just put the data in the map and call it a day
+            node.put(treeNode.getData().getKey(), treeNode.getData().getValue());
+        }
+    }
+    
+    public String get(String [] key){
+        return getValue(new ArrayList<String>(Arrays.asList(key)), tree);
+    }
+    
+    public void set(String [] key, String value){
+        setValue(new ArrayList<String>(Arrays.asList(key)), tree, value);
+    }
+    
+    private String getValue(List<String> keys, GenericTreeNode<Pair<String, String>> treeNode){
+        String value = null;
+        if(!keys.isEmpty()){
+            String key = keys.get(0);
+            keys.remove(0);
+            for(GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()){
+                if(child.getData().getKey().equals(key)){
+                    return getValue(keys, child);
+                }
+            }
+        } else {
+            value = treeNode.getData().getValue();
+        }
+        return value;
+    }
+    
+    private void setValue(List<String> keys, GenericTreeNode<Pair<String, String>> treeNode, String value){
+        if(keys.isEmpty()){
+            treeNode.getData().setValue(value);
+        } else {
+            GenericTreeNode<Pair<String, String>> found = null;
+            String key = keys.get(0);
+            keys.remove(0);
+            for(GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()){
+                if(child.getData().getKey().equals(key)){
+                    found = child;
+                    break;
+                }
+            }
+            if(found == null){
+                found = new GenericTreeNode<Pair<String, String>>(new Pair<String, String>(key, null));
+                treeNode.addChild(found);
+            }
+            setValue(keys, found, value);
+        }
+    }
+}

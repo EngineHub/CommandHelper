@@ -13,7 +13,7 @@ import java.util.List;
 public abstract class AbstractDataSource implements DataSource{
 
     protected final URI uri;
-    protected final List<DataSourceModifier> modifiers = new ArrayList<DataSourceModifier>();
+    protected final List<DataSourceModifier> modifiers = new ArrayList<DataSourceModifier>();    
     
     protected AbstractDataSource(URI uri) throws DataSourceException{
         this.uri = uri;

@@ -121,7 +121,9 @@ public class ZipReader {
     
     /**
      * Returns true if this file has write permissions. Note that if the file is nested
-     * in a zip, then this will always return false
+     * in a zip, then this will always return false. If the file doesn't exist, this will
+     * also return false, but that doesn't imply that you won't be able to create file here,
+     * so you may also need to check isZipped().
      * @return 
      */
     public boolean canWrite(){
@@ -130,6 +132,14 @@ public class ZipReader {
         } else {
             return topZip.canWrite();
         }
+    }
+    
+    /**
+     * Returns whether or not the file is inside of a zip file or not.
+     * @return 
+     */
+    public boolean isZipped(){
+        return isZipped;
     }
 
     /*

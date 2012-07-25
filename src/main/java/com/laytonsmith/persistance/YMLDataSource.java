@@ -19,44 +19,13 @@ public class YMLDataSource extends StringDataSource{
         super(uri);
     }
 
-    private Object model;
     
-    public String protocol() {
-        return "yml";
-    }
 
     public List<String> keySet() {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
-    public String get(String [] key) {
-        return getValue(new ArrayList<String>(Arrays.asList(key)), model);
-    }
     
-    private String getValue(List<String> keys, Object object){
-        if(object == null){
-            return null;
-        }
-        if(object instanceof Map){
-            if(keys.isEmpty()){
-                return null;
-            }
-            String key = keys.get(0);
-            keys.remove(0);
-            Map map = (Map)object;
-            if(map.containsKey(key)){
-                return getValue(keys, map.get(key));
-            } else {
-                return null;
-            }
-        }
-        return object.toString();
-    }
-
-    public boolean set(String [] key, String value) throws ReadOnlyException {
-        checkSet();
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
 
     public DataSourceModifier[] implicitModifiers() {
         return null;
@@ -81,7 +50,13 @@ public class YMLDataSource extends StringDataSource{
     @Override
     protected void populateModel(String data) throws DataSourceException {
         Yaml yaml = new Yaml();
-        model = yaml.load(data);
+        model = new DataSourceModel((Map<String, Object>)yaml.load(data));
+    }
+
+    @Override
+    protected String serializeModel() {
+        Yaml yaml = new Yaml();
+        return yaml.dump(model.toMap());
     }
     
 }
