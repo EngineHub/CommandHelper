@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.Arrays;
 
 /**
  * This class is for testing concepts
@@ -20,7 +21,13 @@ import java.net.URL;
  */
 public class MainSandbox {
     public static void main(String[] argv) throws Exception {
-        Main.main(new String[]{"--version"});
+        DataSource ds = DataSourceFactory.GetDataSource("ini://test.ini");
+        ds.set(new String[]{"key", "value"}, "blah");
+        ds.set(new String[]{"key", "val1"}, "blah");
+        ds.set(new String[]{"key", "val2"}, "blah");
+        for(String[] array : ds.keySet()){
+            System.out.println(Arrays.toString(array));
+        }
     }
     
     

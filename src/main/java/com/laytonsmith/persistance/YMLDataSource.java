@@ -17,15 +17,7 @@ public class YMLDataSource extends StringDataSource{
     
     public YMLDataSource(URI uri) throws DataSourceException{
         super(uri);
-    }
-
-    
-
-    public List<String> keySet() {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
-
-    
+    }    
 
     public DataSourceModifier[] implicitModifiers() {
         return null;

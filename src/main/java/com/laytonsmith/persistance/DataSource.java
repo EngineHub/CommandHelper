@@ -17,7 +17,7 @@ public interface DataSource extends Documentation {
      * Returns a list of keys stored in this interface.
      * @return 
      */
-    public List<String> keySet();
+    public List<String[]> keySet();
     
     /**
      * Retrieves a value from the data source. 

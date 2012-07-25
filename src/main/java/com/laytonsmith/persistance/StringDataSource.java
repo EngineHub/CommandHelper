@@ -8,6 +8,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * For data sources that can input and output strings, this class should
@@ -109,7 +111,11 @@ public abstract class StringDataSource extends AbstractDataSource {
     
     private String urlInput(URL source) throws IOException{
         return WebUtility.GetPageContents(source);
-    }
+    }        
+
+    public List<String[]> keySet() {
+        return model.keySet();
+    }        
     
     public String get(String [] key) {
         return model.get(key);

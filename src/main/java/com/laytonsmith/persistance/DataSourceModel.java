@@ -7,7 +7,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 
 /**
  * This class represents a data source model. The underlying model is just a map
@@ -20,13 +19,24 @@ import java.util.Map.Entry;
  * to make namespace.value's actual value, it should be stored as namespace.value.~
  * @author lsmith
  */
-public class DataSourceModel {
+public final class DataSourceModel {
     private GenericTreeNode<Pair<String, String>> tree = new GenericTreeNode<Pair<String, String>>();   
         
     public DataSourceModel(Map<String, Object> model){
         //We have to do a depth first traversal here to get all the keys
         if(model != null){
             build(model, tree);
+        }
+    }
+    
+    /**
+     * This constructor assumes that the key is fully specified in dot notation.
+     * @param list 
+     */
+    public DataSourceModel(List<Pair<String, String>> list){
+        for(Pair<String, String> pair : list){
+            String [] key = pair.getKey().split("\\.");
+            set(key, pair.getValue());
         }
     }
     
@@ -56,6 +66,12 @@ public class DataSourceModel {
             decompose(map, child);
         }
         return map;
+    }
+    
+    public List<Pair<String[], String>> toList(){
+        List<Pair<String[], String>> list = new ArrayList<Pair<String[], String>>();
+        //TODO
+        return list;
     }
     
     private void decompose(Map<String, Object> node, GenericTreeNode<Pair<String, String>> treeNode){
@@ -118,6 +134,33 @@ public class DataSourceModel {
                 treeNode.addChild(found);
             }
             setValue(keys, found, value);
+        }
+    }
+
+    public List<String[]> keySet() {
+        List<String[]> keys = new ArrayList<String[]>();
+        for(GenericTreeNode child : tree.getChildren()){
+            traverse(child, new ArrayList<String>(), keys);
+        }
+        return keys;
+    }
+    
+    private void traverse(GenericTreeNode<Pair<String, String>> treeNode, List<String> ongoingKey, List<String[]> keys){        
+        if(treeNode.hasChildren()){
+            ongoingKey.add(treeNode.getData().getKey());
+            if(treeNode.getData().getValue() != null){
+                //Data and children
+                keys.add(ongoingKey.toArray(new String[ongoingKey.size()]));
+            }
+            for(GenericTreeNode<Pair<String, String>> child : treeNode.getChildren()){
+                //recurse down now
+                traverse(child, ongoingKey, keys);
+            }
+        } else {
+            //This is it, we're done here, so we can put the key in the list now, then pop off the last element in the ongoingKey
+            ongoingKey.add(treeNode.getData().getKey());
+            keys.add(ongoingKey.toArray(new String[ongoingKey.size()]));
+            ongoingKey.remove(ongoingKey.size() - 1);
         }
     }
 }

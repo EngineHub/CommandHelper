@@ -17,6 +17,10 @@ import java.util.logging.Logger;
  */
 public class DataSourceFactory {
     
+    public static DataSource GetDataSource(String uri) throws DataSourceException, URISyntaxException{
+        return GetDataSource(new URI(uri));
+    }
+    
     public static DataSource GetDataSource(URI uri) throws DataSourceException{
         init();
         List<DataSource.DataSourceModifier> modifiers = new ArrayList<DataSource.DataSourceModifier>();
