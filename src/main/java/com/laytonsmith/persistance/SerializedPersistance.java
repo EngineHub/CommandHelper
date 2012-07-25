@@ -36,10 +36,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
     
     public SerializedPersistance(URI uri) throws DataSourceException{
         super(uri);
-        String file = uri.getSchemeSpecificPart();
-        if(file.startsWith("//")){
-            file = file.substring(2);
-        }
+        String file = GetFilePath(uri);
         storageLocation = new File(file);
         finishedInitializing = true;
         populate();
@@ -368,7 +365,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
     }
 
     public DataSourceModifier[] invalidModifiers() {
-        return null;
+        return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS};
     }
 
     public String docs() {

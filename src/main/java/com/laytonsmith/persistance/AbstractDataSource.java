@@ -43,5 +43,15 @@ public abstract class AbstractDataSource implements DataSource{
         return new ArrayList<DataSourceModifier>(modifiers);
     }       
     
-    
+    /**
+     * Given a URI, extracts the file path from it. Unlike URI.getPath(), this
+     * will actually pull the appropriate information from the URI, regardless of if
+     * this is relative or absolute.
+     * @param uri
+     * @return 
+     */
+    protected static String GetFilePath(URI uri){
+        String file = (uri.getHost() == null?"":uri.getHost()) + uri.getPath();
+        return file;
+    }
 }

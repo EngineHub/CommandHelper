@@ -60,10 +60,7 @@ public abstract class StringDataSource extends AbstractDataSource {
         if(!processed){
             if(!modifiers.contains(DataSourceModifier.HTTP) && !modifiers.contains(DataSourceModifier.HTTPS)){
                 //It's a file output
-                String filePath = uri.getSchemeSpecificPart();
-                if(filePath.startsWith("//")){
-                    filePath = filePath.substring(2);
-                }
+                String filePath = uri.getPath();
                 //TODO: The relative path needs to be set properly here
                 output = new ZipReader(new File(filePath));
             } else {
