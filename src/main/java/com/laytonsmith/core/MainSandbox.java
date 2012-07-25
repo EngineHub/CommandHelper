@@ -4,17 +4,24 @@
  */
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.WebUtility;
+import com.laytonsmith.PureUtilities.WebUtility.HTTPResponse;
+import com.laytonsmith.persistance.DataSource;
+import com.laytonsmith.persistance.DataSourceFactory;
+import com.laytonsmith.persistance.YMLDataSource;
 import java.io.File;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URL;
 
 /**
  * This class is for testing concepts
  * @author Layton
  */
 public class MainSandbox {
-    public static void main(String[] argv) {
-        File f = new File("target/test/file.zip/blah/file.txt");
-        System.out.println(f.getAbsolutePath());
-        
+    public static void main(String[] argv) throws Exception {
+        DataSource ds = DataSourceFactory.GetDataSource(new URI("readonly:yml://src/main/resources/plugin.yml"));
+        System.out.println(DataSourceFactory.Get(ds,new String[]{"commands", "repeat", "description"}));
     }
     
     
