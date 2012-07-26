@@ -25,6 +25,8 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -636,6 +638,65 @@ public class StaticTest {
             return cancelled;
         }
         
+    }
+    
+    /**
+     * Returns the value of a private (or any other variable for that matter) data member contained in the object provided.
+     * If the value isn't there, the test fails automatically.
+     * @param in The object to look in.
+     * @param name The name of the variable to get.
+     * @return 
+     */
+    public static <T> T GetPrivate(Object in, String name, Class<T> expected){
+        return GetSetPrivate(in, name, null, false, expected);
+    }
+    
+    public static void SetPrivate(Object in, String name, Object value, Class expected){
+        GetSetPrivate(in, name, value, true, expected);
+    }
+    
+    private static <T> T GetSetPrivate(Object in, String name, Object value, boolean isSet, Class<T> expected){
+        Object ret = null;
+        try {
+            Field f = null;
+            Class search = in.getClass();
+            while(search != null){
+                try{
+                    f = search.getDeclaredField(name);
+                    break;
+                } catch(NoSuchFieldException e){
+                    search = search.getSuperclass();
+                    continue;
+                }
+            }
+            if(f == null){
+                throw new NoSuchFieldException();
+            }
+            f.setAccessible(true);
+            if(expected != null && !expected.isAssignableFrom(f.getType())){
+                fail("Expected the value to be a " + expected.getName() + ", but it was actually a " + f.getType().getName());
+            }
+            if(isSet){
+                f.set(in, value);
+            } else {
+                ret = f.get(in);               
+            }
+        }
+        catch (IllegalArgumentException ex) {
+            //This shouldn't happen ever, since we are using the class provided by in, and sending
+            //get/set in as well.
+            fail(ex.getMessage());
+        }
+        catch (IllegalAccessException ex) {
+            //This shouldn't happen ever, since we set it to accessible
+            fail(ex.getMessage());
+        }
+        catch (NoSuchFieldException ex) {
+            fail("No such field \"" + name + "\" exists in the class " + in.getClass().getName());
+        } catch (SecurityException ex) {
+            fail("A security policy is preventing the test from getting \"" + name + "\" in the object provided.");
+        }
+        return (T)ret;
     }
     
 }

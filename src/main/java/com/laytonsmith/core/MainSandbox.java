@@ -29,7 +29,7 @@ public class MainSandbox {
 //            System.out.println("\n\n***********************************\n\n");
 //        }
 //        System.out.println();
-        String [] srcs = new String[]{"yml://test.yml", "ini://test.ini", "ser://test.ser"};
+        String [] srcs = new String[]{"yml://test.yml", "prettyprint:yml://testpretty.yml", "ini://test.ini", "ser://test.ser", "json://test.json"};
         for(String src : srcs){
             System.out.println("For source: " + src);
             DataSource ds = DataSourceFactory.GetDataSource(new URI(src));

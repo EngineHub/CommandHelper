@@ -18,7 +18,10 @@ import java.util.Set;
  */
 public abstract class StringDataSource extends AbstractDataSource {
     /**
-     * A reference to the data needed to output the specified data
+     * A reference to the data needed to output the specified data.
+     * 
+     * Do not change the name of this object, it is retrieved reflectively during
+     * testing.
      */
     private Object output;
     
