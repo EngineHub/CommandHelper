@@ -83,7 +83,17 @@ public class FileUtility {
         write(s, f, OVERWRITE);
     }
 
-    public static void copy(File fromFile, File toFile)
+    /**
+     * Copies a file from one location to another. If overwrite is null, prompts
+     * the user on the console if the file already exists. If overwrite is false, the
+     * operation throws an exception if the file already exists. If overwrite is true,
+     * the file is overwritten without prompting if it already exists.
+     * @param fromFile
+     * @param toFile
+     * @param overwrite
+     * @throws IOException 
+     */
+    public static void copy(File fromFile, File toFile, Boolean overwrite)
             throws IOException {
 
         if (!fromFile.exists()) {
@@ -108,16 +118,21 @@ public class FileUtility {
                 throw new IOException("FileCopy: "
                         + "destination file is unwriteable: " + toFile.getName());
             }
-            System.out.print("Overwrite existing file " + toFile.getName()
-                    + "? (Y/N): ");
-            System.out.flush();
-            BufferedReader in = new BufferedReader(new InputStreamReader(
-                    System.in));
-            String response = in.readLine();
-            if (!response.equals("Y") && !response.equals("y")) {
+            
+            String response = null;
+            if(overwrite == null){
+                System.out.print("Overwrite existing file " + toFile.getName()
+                        + "? (Y/N): ");
+                System.out.flush();
+                BufferedReader in = new BufferedReader(new InputStreamReader(
+                        System.in));
+                response = in.readLine();
+            }
+            if ((overwrite != null && overwrite == false) || (!response.equals("Y") && !response.equals("y"))) {
                 throw new IOException("FileCopy: "
                         + "existing file was not overwritten.");
             }
+            //overwrite being true falls through
         } else {
             String parent = toFile.getParent();
             if (parent == null) {
@@ -165,5 +180,15 @@ public class FileUtility {
                 }
             }
         }
+    }
+    
+    /**
+     * Moves a file from one location to another. This is a simple wrapper
+     * around File.renameTo.
+     * @param from
+     * @param to 
+     */
+    public static boolean move(File from, File to){
+        return from.renameTo(to);
     }
 }

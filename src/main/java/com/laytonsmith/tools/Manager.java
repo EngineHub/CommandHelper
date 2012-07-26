@@ -350,7 +350,7 @@ public class Manager {
                         pl("Looks like you haven't used your persistance file yet.");
                         return;
                     }
-                    FileUtility.copy(db, new File("CommandHelper/persistance.ser.bak"));
+                    FileUtility.copy(db, new File("CommandHelper/persistance.ser.bak"), null);
                     //Now, load in all the data
                     SerializedPersistance sp;
                     try {
