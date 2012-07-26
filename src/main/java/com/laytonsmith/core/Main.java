@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.PureUtilities.Util;

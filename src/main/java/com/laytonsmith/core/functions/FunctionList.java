@@ -4,8 +4,8 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.api;
-import com.laytonsmith.core.api.Platforms;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;

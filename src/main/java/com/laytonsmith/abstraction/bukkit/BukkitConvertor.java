@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.annotations.convert;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;

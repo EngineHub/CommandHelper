@@ -5,7 +5,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;

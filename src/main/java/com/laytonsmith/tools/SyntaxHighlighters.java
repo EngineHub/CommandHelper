@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.api;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;

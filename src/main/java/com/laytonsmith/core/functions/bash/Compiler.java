@@ -1,7 +1,7 @@
 package com.laytonsmith.core.functions.bash;
 
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.api;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.constructs.Target;
 
 /**

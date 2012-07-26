@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.annotations.convert;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 

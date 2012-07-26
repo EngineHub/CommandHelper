@@ -1,6 +1,6 @@
 
 
-package com.laytonsmith.core.events;
+package com.laytonsmith.annotations;
 
 import com.laytonsmith.abstraction.Implementation;
 import java.lang.annotation.ElementType;
@@ -9,13 +9,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * This tag is to denote that a class is a implementation of a specific abstraction interface.
- * This isn't always needed however, only when a reverse lookup may need to be done should
- * this be needed.
+ * This annotation denotes that the marked class implements the noted
+ * server type's Convertor. Only one class should exist for each type,
+ * otherwise the behavior is undefined, but an error will be thrown.
  * @author layton
  */
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-public @interface abstraction {
+public @interface convert {
     Implementation.Type type();
 }

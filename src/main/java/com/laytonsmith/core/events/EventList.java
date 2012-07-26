@@ -6,7 +6,7 @@ import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.api;
+import com.laytonsmith.annotations.api;
 import java.lang.reflect.Constructor;
 import java.util.*;
 import java.util.logging.Level;

@@ -13,7 +13,7 @@ import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.events.abstraction;
+import com.laytonsmith.annotations.abstraction;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;

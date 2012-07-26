@@ -1,7 +1,8 @@
 
 
-package com.laytonsmith.core;
+package com.laytonsmith.annotations;
 
+import com.laytonsmith.core.PlatformResolver;
 import com.laytonsmith.core.functions.bash.BashPlatformResolver;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

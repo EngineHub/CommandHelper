@@ -11,7 +11,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.events.*;
-import com.laytonsmith.core.events.abstraction;
+import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.block.BlockFace;

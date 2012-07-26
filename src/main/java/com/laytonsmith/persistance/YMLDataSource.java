@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import java.net.URI;
 import java.util.Map;

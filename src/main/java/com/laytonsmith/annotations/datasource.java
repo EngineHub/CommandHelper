@@ -1,4 +1,4 @@
-package com.laytonsmith.persistance;
+package com.laytonsmith.annotations;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
