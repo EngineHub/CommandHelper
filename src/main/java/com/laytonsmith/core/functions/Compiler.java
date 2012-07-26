@@ -491,6 +491,11 @@ public class Compiler {
         public CHVersion since() {
             return CHVersion.V0_0_0;
         }               
-        
+
+        @Override
+        public boolean appearInDocumentation() {
+            return false;
+        }
+                       
     }
 }
