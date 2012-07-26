@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * This utility class provides the means to interact with given data sources.
@@ -39,6 +40,14 @@ public class DataSourceFactory {
             DataSource ds = (DataSource)c.getConstructor(URI.class).newInstance(uri);
             for(DataSource.DataSourceModifier m : modifiers){
                 ds.addModifier(m);
+            }
+            try{
+                if(ds instanceof AbstractDataSource){
+                    ((AbstractDataSource)ds).checkModifiers();
+                }
+            } catch(DataSourceException e){
+                //TODO: Do something other than this
+                System.err.println(e.getMessage());
             }
             return ds;
         } catch (Exception ex) {

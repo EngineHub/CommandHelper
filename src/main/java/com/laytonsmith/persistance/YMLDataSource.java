@@ -4,6 +4,8 @@ import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import java.net.URI;
 import java.util.Map;
+import java.util.Set;
+import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 
 /**
@@ -45,7 +47,11 @@ public class YMLDataSource extends StringDataSource{
 
     @Override
     protected String serializeModel() {
-        Yaml yaml = new Yaml();
+        DumperOptions options = new DumperOptions();
+        if(hasModifier(DataSourceModifier.PRETTYPRINT)){
+            options.setPrettyFlow(true);
+        }
+        Yaml yaml = new Yaml(options);
         return yaml.dump(model.toMap());
     }
     

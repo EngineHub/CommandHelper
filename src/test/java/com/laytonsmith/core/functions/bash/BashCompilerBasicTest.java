@@ -1,6 +1,6 @@
 package com.laytonsmith.core.functions.bash;
 
-import com.laytonsmith.core.api;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.compiler.MethodScriptStaticCompiler;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import org.junit.*;

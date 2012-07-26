@@ -29,12 +29,16 @@ public class MainSandbox {
 //            System.out.println("\n\n***********************************\n\n");
 //        }
 //        System.out.println();
-        DataSource ds = DataSourceFactory.GetDataSource("ser://test.ser");
-        ds.set(new String[]{"key", "value"}, "blah");
-        ds.set(new String[]{"key", "val1"}, "blah");
-        ds.set(new String[]{"key", "val2"}, "blah");
-        for(String[] array : ds.keySet()){
-            System.out.println(Arrays.toString(array));
+        String [] srcs = new String[]{"yml://test.yml", "ini://test.ini", "ser://test.ser"};
+        for(String src : srcs){
+            System.out.println("For source: " + src);
+            DataSource ds = DataSourceFactory.GetDataSource(new URI(src));
+            ds.set(new String[]{"a", "b"}, "value1");
+            ds.set(new String[]{"a", "b", "c1"}, "value2");
+            ds.set(new String[]{"a", "b", "c2"}, "value3");
+            for(String[] array : ds.keySet()){
+                System.out.println(Arrays.toString(array));
+            }
         }
     }
     

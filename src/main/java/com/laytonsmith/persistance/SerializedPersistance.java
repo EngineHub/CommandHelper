@@ -20,9 +20,11 @@ import java.util.logging.Logger;
 public class SerializedPersistance extends AbstractDataSource implements Persistance {
 
     /**
-     * This is the data structure that the registry is stored in
+     * This is the data structure that the registry is stored in. It is a HashMap, not a Map, since
+     * we are depending on the implementation to remain constant, since it is serialized. Do not change
+     * this ever, or it will break all current serialized databases.
      */
-    private Map<String, String> data = new HashMap<String, String>();
+    private HashMap<String, String> data = new HashMap<String, String>();
     private boolean isLoaded = false;
     private boolean finishedInitializing = false;
     /**
@@ -366,7 +368,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
     }
 
     public DataSourceModifier[] invalidModifiers() {
-        return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS};
+        return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.PRETTYPRINT};
     }
 
     public String docs() {

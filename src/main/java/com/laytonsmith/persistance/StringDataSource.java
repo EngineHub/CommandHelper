@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.util.List;
+import java.util.Set;
 
 /**
  * For data sources that can input and output strings, this class should
@@ -60,7 +61,7 @@ public abstract class StringDataSource extends AbstractDataSource {
         if(!processed){
             if(!modifiers.contains(DataSourceModifier.HTTP) && !modifiers.contains(DataSourceModifier.HTTPS)){
                 //It's a file output
-                String filePath = uri.getPath();
+                String filePath = GetFilePath(uri);
                 //TODO: The relative path needs to be set properly here
                 output = new ZipReader(new File(filePath));
             } else {

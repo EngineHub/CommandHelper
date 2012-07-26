@@ -1,8 +1,8 @@
 package com.laytonsmith.persistance;
 
-import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import java.io.IOException;
 import java.io.StringReader;
@@ -52,14 +52,15 @@ public class INIDataSource extends StringDataSource {
     }
 
     public DataSourceModifier[] invalidModifiers() {
-        return null;
+        return new DataSourceModifier[]{DataSourceModifier.PRETTYPRINT};
     }
 
     public String docs() {
         return "INI {ini:///path/to/ini/file.ini} This type stores data in plain"
                 + " text, in a ini style. All the pros and cons of yml apply here,"
                 + " but instead of using the yml style to store the data, values"
-                + " are stored with key=value\\n signatures. ";
+                + " are stored with key=value\\n signatures. Pretty print is not supported,"
+                + " since whitespace is relevant to the meta information.";
     }
 
     public CHVersion since() {

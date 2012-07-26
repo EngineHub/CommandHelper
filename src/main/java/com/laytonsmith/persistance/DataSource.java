@@ -99,7 +99,10 @@ public interface DataSource extends Documentation {
                 + " If the connection is also transient, a call to get_value() cannot be used in synchronous mode, and will fail if async"
                 + " mode is not used. ", CHVersion.V3_3_1),
         ASYNC("Forces retrievals to this connection to require asyncronous usage. This is handy if an otherwise blocking data source has gotten"
-                + " too large to allow synchonous connections, or if you are using a medium/large data source transiently.", CHVersion.V3_3_1);        
+                + " too large to allow synchonous connections, or if you are using a medium/large data source transiently.", CHVersion.V3_3_1),
+        PRETTYPRINT("For text based files, where it is applicable and possible, if there is a way to \"Pretty Print\" the data, do so. This usually comes"
+                + " at the cost of file size, but makes it easier to read in a text editor. For some data sources, this is not possible, due to the file"
+                + " layout requirements of the protocol itself.", CHVersion.V3_3_1);
         
         
         private CHVersion since;
