@@ -1,6 +1,7 @@
 package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
 import com.laytonsmith.PureUtilities.ZipReader;
 import java.net.URISyntaxException;
@@ -13,6 +14,7 @@ import org.junit.Test;
 
 import static com.laytonsmith.testing.StaticTest.*;
 import java.io.File;
+import java.net.URI;
 import static org.junit.Assert.*;
 
 /**
@@ -145,6 +147,37 @@ public class TestPersistance {
         } catch(DataSourceException e){
             //Pass
         }
+    }
+    
+    @Test
+    public void testMatch1() throws DataSourceException{
+        assertEquals("yml://test.yml", getConnection("a.b.c", "a.b.c=yml://test.yml", "a.b.c.d=yml://no.yml"));
+    }
+    
+    @Test
+    public void testMatch2() throws DataSourceException{
+        assertEquals("yml://yes.yml", getConnection("a.b.c", "a.b.*=yml://yes.yml", "a.b.c.d=yml://no.yml"));
+    }
+    
+    @Test
+    public void testMatch3() throws DataSourceException{
+        assertEquals("yml://yes.yml", getConnection("a.b.c.d", "a.b.**=yml://no.yml", "a.b.c.*=yml://yes.yml"));
+        assertEquals("yml://yes.yml", getConnection("a.b.c.d", "a.b.c.*=yml://yes.yml", "a.b.**=yml://no.yml"));        
+        assertEquals("yml://yes.yml", getConnection("a.b.c.d", "a.b.(c).(*)=yml://yes.yml", "a.b.**=yml://no.yml"));
+    }
+    
+    @Test
+    public void testMatchCapture1() throws DataSourceException{
+        assertEquals("yml://yes.yml", getConnection("a.b.yes", "a.b.(*)=yml://$1.yml"));
+    }
+    
+    public String getConnection(String key, String ... mapping) throws DataSourceException{
+        return getConnection(key, StringUtils.Join(mapping, "\n"));
+    }
+    public String getConnection(String key, String mapping) throws DataSourceException{
+        DataSourceFilter dsf = new DataSourceFilter(mapping);
+        URI conn = dsf.getConnection(key);
+        return conn==null?null:conn.toString();
     }
     
     

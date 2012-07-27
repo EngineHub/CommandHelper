@@ -728,11 +728,14 @@ public final class Static {
     /**
      * Pulls out the MCChatColors from the string, and replaces them
      * with the nearest match ANSI terminal color.
-     * @param mes
+     * @param mes If null, simply returns null
      * @return 
      */
     public static String MCToANSIColors(String mes) {
         //Pull out the MC colors
+        if(mes == null){
+            return null;
+        }
         return mes
                 .replaceAll("§0", TermColors.BLACK + TermColors.BG_WHITE)
                 .replaceAll("§1", TermColors.BLUE)

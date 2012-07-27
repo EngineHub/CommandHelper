@@ -2,6 +2,8 @@ package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.constructs.Target;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -25,6 +27,7 @@ import java.util.regex.Pattern;
 public class DataSourceFilter {
     
     Map<Pattern, String> mappings = new HashMap<Pattern, String>();
+    Map<Pattern, String> original = new HashMap<Pattern, String>();
     private static Pattern captureUsage = Pattern.compile("\\$(\\d+)");
     
     public DataSourceFilter(File file) throws FileNotFoundException, DataSourceException{
@@ -75,7 +78,7 @@ public class DataSourceFilter {
                 //We need to change * into [^\.]*? and ** into .*? and . into \.
                 //Parenthesis are kept as is.
                 String newKey = key.replaceAll("\\.", "\\\\.");
-                StringBuilder b = new StringBuilder();
+                StringBuilder b = new StringBuilder("^");
                 for(int i = 0; i < newKey.length(); i++){
                     Character c1 = newKey.charAt(i);
                     Character c2 = null;
@@ -94,6 +97,7 @@ public class DataSourceFilter {
                         b.append(c1);
                     }                    
                 }
+                b.append("$");
                 String regexKey = b.toString();
                 
                 //This is the number of expected capture usages to be found in the
@@ -173,6 +177,7 @@ public class DataSourceFilter {
                 }                
                 //Alright. It's cool. Add it to the list.
                 mappings.put(pattern, value);
+                original.put(pattern, key);
             }
             //else it's an alias, and we've already dealt with it
         }
@@ -191,12 +196,54 @@ public class DataSourceFilter {
         }
         //Ok, we have a list of the actual matches, we have to narrow it down to the closest
         //match.
-        String connection = null;
         Pattern closest = null;
-        for(Pattern p : matches){
-            //TODO: Finish this
+        if(matches.isEmpty()){
+            //Trivial case
+            return null;
+        } else if(matches.size() == 1){
+            //Yay! Also a trivial case!            
+            closest = matches.get(0);
+        } else {
+            int lowest = Integer.MAX_VALUE;
+            for(Pattern p : matches){
+                //The closest match is defined as a filter that, minus wild cards, matches more characters.
+                //So, for instance, if the key is a.b.c.d, then this matches a.*.c.d better than a.*.*.d
+                //The easiest way to detect this is to simply remove *() characters, and do a Levenshtein distance on the strings, and
+                //whichever one is lowest, is the closest.
+                String originalKey = original.get(p);
+                int dist = StringUtils.LevenshteinDistance(key, originalKey.replaceAll("\\*", "").replaceAll("[\\(\\)]", ""));
+                //TODO: Unfortunately, the properties file doesn't keep crap in order for us, so right now,
+                //if there is a tie, it is undefined what will happen. Instead of letting this happen
+                //without a warning, we want to issue a warning, though we will arbitrarily select one.
+                if(dist == lowest){
+                    CHLog.Log(CHLog.Tags.PERSISTANCE, "Two keys equally match for the key \"" + key 
+                            + "\". Both " + original.get(closest) + " and " + original.get(p) 
+                            + " match just as well. For the time being, this is an undefined result, but"
+                            + " for this time, " + original.get(closest) + " is being selected.", Target.UNKNOWN);
+                }
+                if(dist < lowest){
+                    closest = p;
+                    lowest = dist;
+                }
+            }
         }
         
-        return null;
+        try {
+            if(closest == null){
+                return null;
+            }
+            String uri = mappings.get(closest);
+            Matcher m = closest.matcher(key);
+            while(m.find()){
+                //We need to replace the captures
+                for(int i = 1; i <= m.groupCount(); i++){
+                    uri = uri.replaceAll("\\$" + i, m.group(i));
+                }
+            }
+            return new URI(uri);
+        } catch (URISyntaxException ex) {
+            //We already verified that this won't happen, so yeah.
+            return null;
+        }        
     }
 }
