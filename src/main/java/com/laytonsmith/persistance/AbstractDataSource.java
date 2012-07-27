@@ -6,8 +6,10 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -30,6 +32,33 @@ public abstract class AbstractDataSource implements DataSource{
             }
         }
         populate();
+    }        
+        
+
+    /**
+     * The default implementation of string simply walks through keySet, and
+     * manually joins the keys together. If an implementation can provide a more
+     * efficient method, this should be overridden.
+     * @return 
+     */
+    public List<String> stringKeySet() {
+        List<String> keys = new ArrayList<String>();
+        for(String [] key : keySet()){
+            keys.add(StringUtils.Join(key, "."));
+        }
+        return keys;
+    }
+
+    public List<String[]> getNamespace(String[] namespace) throws DataSourceException {
+        List<String[]> list = new ArrayList<String[]>();
+        String ns = StringUtils.Join(namespace, ".");
+        for(String key : stringKeySet()){
+            if(key.startsWith(ns)){
+                String[] split = key.split("\\.");
+                list.add(split);
+            }
+        }
+        return list;
     }
     
     private void setInvalidModifiers(){
@@ -50,6 +79,7 @@ public abstract class AbstractDataSource implements DataSource{
         }
         if(modifier == DataSourceModifier.HTTP || modifier == DataSourceModifier.HTTPS){
             modifiers.add(DataSourceModifier.READONLY);
+            modifiers.add(DataSourceModifier.ASYNC);
         }
         modifiers.add(modifier);
     }
@@ -92,6 +122,16 @@ public abstract class AbstractDataSource implements DataSource{
     protected final void checkSet() throws ReadOnlyException {
         if(modifiers.contains(DataSourceModifier.READONLY)){
             throw new ReadOnlyException();
+        }
+    }
+    
+    /**
+     * This method checks to see if get operations should re-populate at this
+     * time. If the data set is transient, it will do so.
+     */
+    protected final void checkGet() throws DataSourceException {
+        if(hasModifier(DataSourceModifier.TRANSIENT)){
+            populate();
         }
     }
 

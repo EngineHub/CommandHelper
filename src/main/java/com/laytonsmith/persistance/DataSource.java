@@ -4,6 +4,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 /**
  * All data sources must implement this interface. It provides methods to
@@ -20,21 +21,42 @@ public interface DataSource extends Documentation {
     public List<String[]> keySet();
     
     /**
-     * Retrieves a value from the data source. 
+     * Returns a list of keys, pre-concatenated into dot notation.
+     * This may be equally inefficient for all data sources (getting keySet, then
+     * doing the concatenation one at a time), however if a data source is
+     * able to optimize for this, it is able.
+     * @return 
+     */
+    public List<String> stringKeySet();
+    
+    /**
+     * Given a namespace, returns all the keys in this data source that are in the namespace.
+     * For instance, if a.b.c is requested, then both the keys a.b.c.d and a.b.c.e would be
+     * returned.
+     * @param namespace
+     * @return 
+     */
+    public List<String[]> getNamespace(String[] namespace) throws DataSourceException;
+    
+    /**
+     * Retrieves a value from the data source. If bypassTransient is true, then
+     * this should not re-populate the data (if transient isn't inherently an option, that is).
+     * This indicates that it is being used in a transaction, and the data source should
+     * not refresh during this period. If the key doesn't exist, null is returned.
      * @param key
      * @return 
      */
-    public String get(String [] key);
+    public String get(String [] key, boolean bypassTransient) throws DataSourceException;
     
     /**
-     * Sets a value in the data source.
+     * Sets a value in the data source. If value is null, the key is removed.
      * @param key
      * @param value
      * @return True if the value was changed, false otherwise.
      * @throws ReadOnlyException If this data source is inherently read only, 
      * it will throw a read only exception if this method is called.
      */
-    public boolean set(String [] key, String value) throws ReadOnlyException, IOException;
+    public boolean set(String [] key, String value) throws ReadOnlyException, DataSourceException, IOException;
     
     /**
      * Instructs this data source to repopulate its internal structure based on
@@ -43,7 +65,7 @@ public interface DataSource extends Documentation {
      * If the data source is unable to populate itself, it may throw an exception
      * informing the user that there is no way to read the data at this time.
      */
-    public void populate() throws DataSourceException;   
+    public void populate() throws DataSourceException;      
     
     /**
      * For this instance of the data source, adds a modifier flag to the data source.

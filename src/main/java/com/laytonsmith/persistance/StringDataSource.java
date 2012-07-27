@@ -117,13 +117,16 @@ public abstract class StringDataSource extends AbstractDataSource {
         return model.keySet();
     }        
     
-    public String get(String [] key) {
+    public String get(String [] key, boolean bypassTransient) throws DataSourceException {
+        if(!bypassTransient){
+            checkGet();
+        }
         return model.get(key);
     }  
 
-    public boolean set(String [] key, String value) throws ReadOnlyException, IOException {
+    public boolean set(String [] key, String value) throws ReadOnlyException, IOException, DataSourceException {
         checkSet();
-        String old = get(key);
+        String old = get(key, false);
         if((old == null && value == null) || (old != null && old.equals(value))){
             return false;
         }
@@ -134,7 +137,7 @@ public abstract class StringDataSource extends AbstractDataSource {
     }
     
     /**
-     * Given some data retrieved from who knows where, populate the 
+     * Given some data retrieved from who knows where, populate the model.
      * @param data
      * @throws Exception 
      */

@@ -2,6 +2,7 @@ package com.laytonsmith.persistance;
 
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.PureUtilities.Persistance;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.core.CHVersion;
 import java.io.*;
 import java.net.URI;
@@ -143,9 +144,9 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
         return oldVal;
     }
 
-    private synchronized String getValue(String key) {
+    private synchronized String getValue(String key, boolean bypassTransient) {
         //defer loading until we actually try and use the data structure
-        if (isLoaded == false) {
+        if (isLoaded == false && !bypassTransient) {
             try {
                 load();
             }
@@ -182,7 +183,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
      * exist.
      */
     public synchronized String setValue(String[] key, String value) {
-        return setValue(getNamespace(key), (String) value);
+        return setValue(getNamespace0(key), (String) value);
     }
 
     /**
@@ -192,7 +193,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
      * @return
      */
     public synchronized String getValue(String[] key) {
-        return getValue(getNamespace(key));
+        return getValue(getNamespace0(key), false);
     }
 
     /**
@@ -203,7 +204,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
      * @return
      */
     public synchronized boolean isKeySet(String[] key) {
-        String k = getNamespace(key);
+        String k = getNamespace0(key);
         return data.containsKey(k);
     }
 
@@ -219,7 +220,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
      * @return
      */
     public synchronized boolean isNamespaceSet(String[] partialKey) {
-        String m = getNamespace(partialKey);
+        String m = getNamespace0(partialKey);
         partialKey = m.split("\\.");
         Iterator i = data.entrySet().iterator();
         while (i.hasNext()) {
@@ -252,7 +253,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
     public synchronized List<Map.Entry<String, Object>> getNamespaceValues(String[] partialKey) {
 
         List<Map.Entry<String, Object>> matches = new ArrayList<Map.Entry<String, Object>>();
-        String m = getNamespace(partialKey);
+        String m = getNamespace0(partialKey);
         partialKey = m.split("\\.");
         if (!isLoaded) {
             try {
@@ -291,7 +292,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
      * @param key
      * @return
      */
-    private synchronized static String getNamespace(String[] key) {
+    private synchronized static String getNamespace0(String[] key) {
         StringBuilder b = new StringBuilder();
         for (int i = 0; i < key.length; i++) {
             if (i > 0) {
@@ -341,8 +342,8 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
         return list;
     }
 
-    public String get(String[] key) {
-        return getValue(key);
+    public String get(String[] key, boolean bypassTransient) {
+        return getValue(StringUtils.Join(key, "."), bypassTransient);
     }
 
     public boolean set(String[] key, String value) throws ReadOnlyException, IOException {

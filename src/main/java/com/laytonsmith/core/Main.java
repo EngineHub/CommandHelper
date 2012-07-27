@@ -185,7 +185,7 @@ public class Main {
         }
         try {
             DataSource ds = new YMLDataSource(new URI("yml://" + file.getAbsolutePath()));
-            version = ds.get(new String[]{"version"});
+            version = ds.get(new String[]{"version"}, false);
             if(version == null){
                 throw new Exception("Invalid plugin.yml supplied");
             }

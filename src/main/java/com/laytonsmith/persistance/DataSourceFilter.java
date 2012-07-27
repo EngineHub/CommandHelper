@@ -15,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.TreeMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -26,23 +27,26 @@ import java.util.regex.Pattern;
  */
 public class DataSourceFilter {
     
-    Map<Pattern, String> mappings = new HashMap<Pattern, String>();
-    Map<Pattern, String> original = new HashMap<Pattern, String>();
+    private Map<Pattern, String> mappings = new HashMap<Pattern, String>();
+    private Map<Pattern, String> multimap = new HashMap<Pattern, String>();
+    private Map<Pattern, String> original = new HashMap<Pattern, String>();
     private static Pattern captureUsage = Pattern.compile("\\$(\\d+)");
+    //Since data lookups are expensive, cache them.
+    private Map<String, URI> cache = new TreeMap<String, URI>();
     
-    public DataSourceFilter(File file) throws FileNotFoundException, DataSourceException{
+    public DataSourceFilter(File file, URI defaultURI) throws FileNotFoundException, DataSourceException{
         try{
-            process(FileUtility.read(file));
+            process(FileUtility.read(file), defaultURI);
         } catch(DataSourceException e){
             throw new DataSourceException("Could not process filter file located at " + file.getAbsolutePath() + ": " + e.getMessage());
         }
     }
     
-    public DataSourceFilter(String filters) throws DataSourceException{
-        process(filters);
+    public DataSourceFilter(String filters, URI defaultURI) throws DataSourceException{
+        process(filters, defaultURI);
     }
     
-    private void process(String filters) throws DataSourceException{
+    private void process(String filters, URI defaultURI) throws DataSourceException{
         Properties p = new Properties();
         try {
             StringReader sr = new StringReader(filters);
@@ -66,9 +70,14 @@ public class DataSourceFilter {
             }
         }
         
+        boolean hasDefault = false;
+        
         //Ok, now let's load up the actual connections.
         for(String key : p.stringPropertyNames()){
             if(!key.matches("\\$.*")){
+                if(key.equals("**")){
+                    
+                }
                 if(key.matches("[^a-zA-Z0-9_\\(\\)\\*]")){
                     //Bad character in the filter. Bail.
                     throw new DataSourceException("Invalid character in filter. Only"
@@ -97,7 +106,6 @@ public class DataSourceFilter {
                         b.append(c1);
                     }                    
                 }
-                b.append("$");
                 String regexKey = b.toString();
                 
                 //This is the number of expected capture usages to be found in the
@@ -130,7 +138,8 @@ public class DataSourceFilter {
                     throw new DataSourceException("Invalid filter, capture group not ended (did you"
                             + " forget to close a left parenthesis?) in: " + key);
                 }
-                Pattern pattern = Pattern.compile(regexKey);
+                Pattern pattern = Pattern.compile(regexKey + "$");
+                Pattern multipattern = Pattern.compile(regexKey + ".*");
                 
                 //Ok, have the pattern, now lets see if the value is an alias
                 
@@ -177,17 +186,62 @@ public class DataSourceFilter {
                 }                
                 //Alright. It's cool. Add it to the list.
                 mappings.put(pattern, value);
+                multimap.put(multipattern, value);
                 original.put(pattern, key);
             }
             //else it's an alias, and we've already dealt with it
         }
     }
     
+    /**
+     * Given a full key, returns the connection that contains it.
+     * @param key
+     * @return 
+     */
     public URI getConnection(String [] key){
         return getConnection(StringUtils.Join(key, "."));
     }
     
+    /**
+     * Returns all the connections that actually match this key.
+     * @param key
+     * @return 
+     */
+    public List<URI> getAllConnections(String [] key){
+        return getAllConnections(StringUtils.Join(key, "."));
+    }
+    
+    /**
+     * Returns all the connections that actually match this key. This is typically
+     * used to get a subset of keys based on namespace.
+     * @param key
+     * @return 
+     */
+    public List<URI> getAllConnections(String key){
+        List<URI> matches = new ArrayList<URI>();
+        for(Pattern p : multimap.keySet()){
+            if(p.matcher(key).matches()){
+                try {
+                    matches.add(new URI(multimap.get(p)));
+                } catch (URISyntaxException ex) {
+                    //won't happen
+                }
+            }
+        }
+        return matches;
+    }
+    
+    /**
+     * Given a full key, returns the connection that contains it.
+     * @param key
+     * @return 
+     */
     public URI getConnection(String key){
+        //Since looking through these patterns, doing the matches, calculating string distance are all
+        //fairly expensive operations, let's improve the runtime complexity by using a cache
+        if(cache.containsKey(key)){
+                return cache.get(key);
+        }
         List<Pattern> matches = new ArrayList<Pattern>();
         for(Pattern p : mappings.keySet()){
             if(p.matcher(key).matches()){
@@ -240,7 +294,10 @@ public class DataSourceFilter {
                     uri = uri.replaceAll("\\$" + i, m.group(i));
                 }
             }
-            return new URI(uri);
+            URI u = new URI(uri);
+            //Store it in our cache
+            cache.put(key, u);
+            return u;
         } catch (URISyntaxException ex) {
             //We already verified that this won't happen, so yeah.
             return null;
