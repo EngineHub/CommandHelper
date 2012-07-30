@@ -34,6 +34,14 @@ public class DataSourceFilter {
     //Since data lookups are expensive, cache them.
     private Map<String, URI> cache = new TreeMap<String, URI>();
     
+    /**
+     * Creates a new data source filter. This is represented by a file that contains mappings to the filters.
+     * @param file The file that contains the filter network
+     * @param defaultURI The URI to be used in the case that no ** filter is found in the file
+     * @throws FileNotFoundException If the file cannot be found
+     * @throws DataSourceException If any condition causes the data sources to be unreadable
+     * @throws NullPointerException If the defaultURI is null
+     */
     public DataSourceFilter(File file, URI defaultURI) throws FileNotFoundException, DataSourceException{
         try{
             process(FileUtility.read(file), defaultURI);
@@ -42,11 +50,23 @@ public class DataSourceFilter {
         }
     }
     
+    /**
+     * Creates a new data source filter. This is represented by a string that contains mappings to the filters.
+     * @param filters The filter configuration that contains the filter network
+     * @param defaultURI The URI to be used in the case that no ** filter is found in the file
+     * @throws DataSourceException If any condition causes the data sources to be unreadable
+     * @throws NullPointerException If the defaultURI is null
+     */
     public DataSourceFilter(String filters, URI defaultURI) throws DataSourceException{
         process(filters, defaultURI);
     }
     
     private void process(String filters, URI defaultURI) throws DataSourceException{
+        if(defaultURI == null){
+            throw new NullPointerException("defaultURI cannot be null");
+        }
+        
+        //TODO: Finish with defaultURI
         Properties p = new Properties();
         try {
             StringReader sr = new StringReader(filters);

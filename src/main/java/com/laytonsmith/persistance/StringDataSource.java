@@ -101,6 +101,9 @@ public abstract class StringDataSource extends AbstractDataSource {
             if(!source.isZipped()){
                 File outputFile = source.getFile();
                 String contents = getBlankDataModel();
+                if(outputFile.getParentFile() != null){
+                    outputFile.getParentFile().mkdirs();
+                }
                 FileUtility.write(contents, outputFile);
                 return contents;
             } else {
