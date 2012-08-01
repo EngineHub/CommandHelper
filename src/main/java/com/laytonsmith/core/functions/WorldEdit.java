@@ -500,27 +500,30 @@ public class WorldEdit {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException};
+            return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException, ExceptionType.InsufficientArgumentsException};
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
-            MCPlayer m = null;
 
             if (!( args[0] instanceof CArray )) {
                 throw new ConfigRuntimeException(this.getName() + " needs a locationarray", ExceptionType.CastException, t);
             }
 
-            if (!( env.GetCommandSender() instanceof MCPlayer )) {
-                throw new ConfigRuntimeException(this.getName() + " needs a player", ExceptionType.PlayerOfflineException, t);
+            MCWorld w = null;
+            
+            if (!( env.GetCommandSender() instanceof MCPlayer)) {
+                w = env.GetPlayer().getWorld();
             }
-
-            m = env.GetPlayer();
-            MCWorld w = m.getWorld();
+            
             MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 
-            world = Bukkit.getServer().getWorld(w.getName());
+            if (loc.getWorld() == null) {
+                throw new ConfigRuntimeException(this.getName() + " needs a world", ExceptionType.InsufficientArgumentsException, t);
+            }
+            
+            world = Bukkit.getServer().getWorld(loc.getWorld().getName());
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
             Vector pt = new Vector(loc.getBlockX(), loc.getBlockY(), loc.getBlockZ());
