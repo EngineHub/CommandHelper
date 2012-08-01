@@ -5,7 +5,7 @@
     <artifactId>commandhelper</artifactId>
     <version>3.3.1-SNAPSHOT</version>
     <name>CommandHelper</name>
-    <description>CommandHelper a full blown scripting language right into minecraft</description>
+    <description>CommandHelper is a full blown scripting language built right into Minecraft</description>
     <inceptionYear>2010</inceptionYear>
     <organization>
         <name>Mostly Layton Smith</name>
@@ -77,8 +77,8 @@
         </contributor>
     </contributors>
     <issueManagement>
-        <system>BukkitDev</system>
-        <url>http://dev.bukkit.org/server-mods/commandhelper/create-ticket/</url>
+        <system>sk89q's Redmine</system>
+        <url>http://redmine.sk89q.com/projects/commandhelper/</url>
     </issueManagement>
     <ciManagement>
         <system>Jenkins</system>
@@ -479,14 +479,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>cobertura-maven-plugin</artifactId>
                 <version>2.4</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-checkstyle-plugin</artifactId>
-                <version>1.0.0</version>
-                <configuration>
-                    <configLocation>config/sun_checks.xml</configLocation>
-                </configuration>
             </plugin>
         </plugins>
     </reporting>

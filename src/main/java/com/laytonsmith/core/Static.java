@@ -57,7 +57,7 @@ public final class Static {
      */
     public static double getNumber(Construct c) {
         double d;
-        if (c == null) {
+        if (c == null || c instanceof CNull) {
             return 0.0;
         }
         if (c instanceof CInt) {
@@ -106,7 +106,7 @@ public final class Static {
      */
     public static long getInt(Construct c) {
         long i;
-        if (c == null) {
+        if (c == null || c instanceof CNull) {
             return 0;
         }
         if (c instanceof CInt) {

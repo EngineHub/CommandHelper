@@ -4,26 +4,23 @@ import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
 import com.laytonsmith.PureUtilities.ZipReader;
-import java.net.URISyntaxException;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import org.junit.Before;
-import org.junit.Test;
-
 import static com.laytonsmith.testing.StaticTest.*;
 import java.io.File;
-import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.After;
 import static org.junit.Assert.*;
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  *
@@ -184,16 +181,25 @@ public class TestPersistance {
         assertEquals(getSet("yml://yes1.yml", "yml://yes2.yml"), getConnections("a.b.c", "a.**=yml://yes1.yml", "a.b.**=yml://yes2.yml", "b.**=yml://no.yml"));
     }
     
-    @Test
-    public void testCaptureGetNamespace() throws Exception{
+    @Test(expected=UnresolvedCaptureException.class)
+    public void testCaptureGetNamespaceException() throws Exception{
         PersistanceNetwork network = new PersistanceNetwork("**=yml://folder/default.yml\nsubset.(*)=yml://folder/$1.yml", new URI(""));
         network.set(new String[]{"subset", "file1"}, "value");
         network.set(new String[]{"subset", "file2"}, "value");
-        Map<String[], String> namespace = new HashMap<String[], String>();
-        namespace.put(new String[]{"subset", "file1"}, "value");
-        namespace.put(new String[]{"subset", "file2"}, "value");
-        assertEquals(stringifyMap(namespace), stringifyMap(network.getNamespace(new String[]{"subset"})));
+        network.getNamespace(new String[]{"subset"});
     }
+    
+    @Test
+    public void testCaptureGetNamespace() throws Exception{
+        PersistanceNetwork network = new PersistanceNetwork("**=yml://folder/default.yml\nsubset.(*)=yml://folder/$1.yml", new URI(""));
+        network.set(new String[]{"subset", "subset", "file1"}, "value");
+        network.set(new String[]{"subset", "subset", "file2"}, "value");
+        Map<String[], String> namespace = new HashMap<String[], String>();
+        namespace.put(new String[]{"subset", "subset", "file1"}, "value");
+        namespace.put(new String[]{"subset", "subset", "file2"}, "value");
+        assertEquals(stringifyMap(namespace), stringifyMap(network.getNamespace(new String[]{"subset", "subset"})));	    
+    }
+    
 
     public String doOutput(String uri, Map<String[], String> data) {
         try {
@@ -277,14 +283,12 @@ public class TestPersistance {
 
     public SortedSet<String> getSet(String... strings) {
         SortedSet<String> set = new TreeSet<String>();
-        for (String s : strings) {
-            set.add(s);
-        }
+	set.addAll(Arrays.asList(strings));
         return set;
     }
     
     public String stringifyMap(Map<String[], String> map){
-        List<String> append = new ArrayList<String>();
+        SortedSet<String> append = new TreeSet<String>();
         for(String [] key : map.keySet()){
             append.add(Arrays.toString(key) + "=" + map.get(key));
         }

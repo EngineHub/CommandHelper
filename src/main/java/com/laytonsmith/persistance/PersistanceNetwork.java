@@ -75,9 +75,7 @@ public class PersistanceNetwork {
      * @param namespace
      * @return 
      */
-    public synchronized Map<String[], String> getNamespace(String [] namespace) throws DataSourceException{
-        //TODO: Captures make this very hard to do, and in some cases, make it impossible. Without a comprehensive
-        //list of possible keys, it's impossible to actually gather all the key's possible locations.
+    public synchronized Map<String[], String> getNamespace(String [] namespace) throws DataSourceException, UnresolvedCaptureException{
         List<URI> uris = filter.getAllConnections(namespace);
         //First we have to get the namespaces. We can get a list of all the connections
         //we need to search, then grab all the data in them, but then we need to use

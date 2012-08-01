@@ -755,7 +755,7 @@ public class DataHandling {
         public String docs() {
             return "boolean {item} Returns whether or not the given item is an integer. Note that numeric strings can usually be used as integers,"
                     + " however this function checks the actual datatype of the item. If you just want to see if an item can be used as a number,"
-                    + " use is_numeric() instead.";
+                    + " use is_integral() or is_numeric() instead.";
         }
 
         public ExceptionType[] thrown() {
@@ -891,7 +891,7 @@ public class DataHandling {
         }
 
         public String docs() {
-            return "string {item} Returns false if the item would fail if it were used as a numeric value."
+            return "boolean {item} Returns false if the item would fail if it were used as a numeric value."
                     + " If it can be parsed or otherwise converted into a numeric value, true is returned.";
         }
 
