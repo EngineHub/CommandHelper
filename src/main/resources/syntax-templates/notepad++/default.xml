@@ -1,19 +1,19 @@
 <NotepadPlus>
-    <UserLang name="CmdHelper" ext="ms">
+    <UserLang name="CommandHelper" ext="ms msa" commentStart="/*" commentEnd="*/">
         <Settings>
-            <Global caseIgnored="yes" escapeChar="\" />
-            <TreatAsSymbol comment="yes" commentLine="yes" />
-            <Prefix words1="no" words2="yes" words3="yes" words4="yes" />
+            <Global caseIgnored="yes" escapeChar="\"/>
+            <TreatAsSymbol comment="yes" commentLine="yes"/>
+            <Prefix words1="no" words2="yes" words3="yes" words4="yes"/>
         </Settings>
         <KeywordLists>
             <Keywords name="Delimiters">&apos;&quot;0&apos;&quot;0</Keywords>
             <Keywords name="Folder+">&gt;&gt;&gt;</Keywords>
             <Keywords name="Folder-">&lt;&lt;&lt;</Keywords>
-            <Keywords name="Operators">- ! % &amp; ( ) * , . / : [ \ ] { | } + &lt; = &gt;</Keywords>
+            <Keywords name="Operators">( ) , : [ \ ] ! . < > { } =</Keywords>
             <Keywords name="Comment">1/* 2*/ 0#</Keywords>
             <Keywords name="Words1">%%space:functions%%</Keywords>
             <Keywords name="Words2">%%space:exceptions%% %%space:events%%</Keywords>
-            <Keywords name="Words3">_</Keywords>
+            <Keywords name="Words3">/ _</Keywords>
             <Keywords name="Words4">$ @</Keywords>
         </KeywordLists>
         <Styles>
