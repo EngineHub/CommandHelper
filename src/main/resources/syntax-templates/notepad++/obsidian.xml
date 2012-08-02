@@ -3,7 +3,7 @@
         <Settings>
             <Global caseIgnored="yes" escapeChar="\"/>
             <TreatAsSymbol comment="yes" commentLine="yes"/>
-            <Prefix words1="no" words2="yes" words3="yes" words4="yes"/>
+            <Prefix words1="no" words2="no" words3="yes" words4="yes"/>
         </Settings>
         <KeywordLists>
             <Keywords name="Delimiters">&apos;&quot;0&apos;&quot;0</Keywords>
