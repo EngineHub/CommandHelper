@@ -145,12 +145,16 @@
         <!-- Bukkit -->
         <dependency>
             <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
-            <version>1.2.5-R4.0</version>
+            <artifactId>bukkit</artifactId>
+            <version>1.3.1-R0.1-SNAPSHOT</version>
         </dependency>
         
         <!-- CraftBukkit Dependency for experimental features -->
-        
+        <dependency>
+            <groupId>org.bukkit</groupId>
+            <artifactId>craftbukkit</artifactId>
+            <version>1.3.1-R0.1-SNAPSHOT</version>
+        </dependency>        
         
         <!-- WorldGuard for some of the sk functions -->
         <dependency>
@@ -273,12 +277,7 @@
             <artifactId>powermock-api-mockito</artifactId>
             <version>1.4.10</version>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.2.5-R4.0</version>
-        </dependency>
+        </dependency>        
     </dependencies>
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

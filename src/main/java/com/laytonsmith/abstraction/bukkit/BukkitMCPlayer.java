@@ -17,8 +17,10 @@ import net.minecraft.server.EntityLiving;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MobEffect;
 import net.minecraft.server.ServerConfigurationManager;
+import net.minecraft.server.ServerConfigurationManagerAbstract;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -282,18 +284,34 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
             throw new IllegalStateException("Running server isn't CraftBukkit");
         }
 
-        Field opSetField;
-
-        try {
-            opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
-        } catch (NoSuchFieldException e) {
-            opSetField = ServerConfigurationManager.class.getDeclaredField("h");
+        
+        CraftServer cserver = (CraftServer)server;
+        ServerConfigurationManagerAbstract obj = cserver.getServer().getServerConfigurationManager();
+        //obj contains the operators set
+        
+        Set opSet;
+        try{
+            opSet = (Set)ServerConfigurationManager.class.getField("operators").get(obj);
+        } catch(NoSuchFieldException e){
+            throw e;
         }
-
-        opSetField.setAccessible(true); // make field accessible for reflection 
-
-        // Reflection magic
-        Set opSet = (Set) opSetField.get((ServerConfigurationManager) serverClass.getMethod("getHandle").invoke(server));
+        
+        //I'm not worried about backwards compatibility here, so we'll just make
+        //the minimum required version for this build onward to be > 1.3
+        //I'm also not going to branch from the last release, since massive changes have
+        //been made, and it would be too much trouble to forward merge.
+//        Field opSetField;
+//
+//        try {
+//            opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
+//        } catch (NoSuchFieldException e) {
+//            opSetField = ServerConfigurationManager.class.getDeclaredField("h");
+//        }
+//
+//        opSetField.setAccessible(true); // make field accessible for reflection 
+//
+//        // Reflection magic
+//        Set opSet = (Set) opSetField.get((ServerConfigurationManager) serverClass.getMethod("getHandle").invoke(server));
 
         // since all Java objects pass by reference, we don't need to set field back to object
         if (value) {
