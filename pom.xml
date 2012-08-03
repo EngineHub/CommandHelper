@@ -1,503 +1,513 @@
 
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-    <modelVersion>4.0.0</modelVersion>
-    <groupId>com.sk89q</groupId>
-    <artifactId>commandhelper</artifactId>
-    <version>3.3.1-SNAPSHOT</version>
-    <name>CommandHelper</name>
-    <description>CommandHelper is a full blown scripting language built right into Minecraft</description>
-    <inceptionYear>2010</inceptionYear>
-    <organization>
-        <name>Mostly Layton Smith</name>
-        <url>http://wiki.sk89q.com/CommandHelper</url>
-    </organization>
-    <developers>
-        <developer>
-            <id>layton</id>
-            <name>Layton Smith</name>
-            <email>gmail: laytonsmith14</email>
-            <url>http://www.laytonsmith.com#donations</url>
-            <organization>Enable IC</organization>
-            <organizationUrl>http://www.laytonsmith.com</organizationUrl>
-            <roles>
-                <role>project manager</role>
-                <role>developer</role>
-                <role>tester</role>
-            </roles>
-            <timezone>-6</timezone>
-        </developer>
-        <developer>
-            <id>sk89q</id>
-            <name>sk89q</name>
-            <url>http://www.sk89q.com</url>
-            <roles>                
-                <role>infrastructure maintainer</role>
-            </roles>
-            <timezone>-8</timezone>
-        </developer>
-    </developers>
-    <contributors>
-        <!-- If I left you out, let me know, and I'll gladly add you! Also, there are more
-        fields that can be filled out, if you want more information added in, I'll do that too -->
-        <contributor>
-            <name>opoq</name>
-            <roles>
-                <role>testing wench</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <name>EntityReborn</name>
-            <roles>
-                <role>contributor</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <name>Deaygo</name>
-            <roles>
-                <role>contributor</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <name>t3hk0d3</name>
-            <roles>
-                <role>contributor</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <name>zml2008</name>
-            <roles>
-                <role>contributor</role>
-            </roles>
-        </contributor>
-        <contributor>
-            <name>albatrossen</name>
-            <roles>
-                <role>contributor</role>
-            </roles>
-        </contributor>
-    </contributors>
-    <issueManagement>
-        <system>sk89q's Redmine</system>
-        <url>http://redmine.sk89q.com/projects/commandhelper/</url>
-    </issueManagement>
-    <ciManagement>
-        <system>Jenkins</system>
-        <url>http://build.sk89q.com/job/CommandHelper/</url>
-    </ciManagement>
-    <licenses>
-        <license>
-            <name>The MIT License</name>
-            <url>http://www.opensource.org/licenses/MIT</url>
-            <distribution>repo</distribution>            
-        </license>
-    </licenses>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.sk89q</groupId>
+	<artifactId>commandhelper</artifactId>
+	<version>3.3.1-SNAPSHOT</version>
+	<name>CommandHelper</name>
+	<description>CommandHelper is a full blown scripting language built right into Minecraft</description>
+	<inceptionYear>2010</inceptionYear>
+	<organization>
+		<name>Mostly Layton Smith</name>
+		<url>http://wiki.sk89q.com/CommandHelper</url>
+	</organization>
+	<developers>
+		<developer>
+			<id>layton</id>
+			<name>Layton Smith</name>
+			<email>gmail: laytonsmith14</email>
+			<url>http://www.laytonsmith.com#donations</url>
+			<organization>Enable IC</organization>
+			<organizationUrl>http://www.laytonsmith.com</organizationUrl>
+			<roles>
+				<role>project manager</role>
+				<role>developer</role>
+				<role>tester</role>
+			</roles>
+			<timezone>-6</timezone>
+		</developer>
+		<developer>
+			<id>sk89q</id>
+			<name>sk89q</name>
+			<url>http://www.sk89q.com</url>
+			<roles>                
+				<role>infrastructure maintainer</role>
+			</roles>
+			<timezone>-8</timezone>
+		</developer>
+	</developers>
+	<contributors>
+		<!-- If I left you out, let me know, and I'll gladly add you! Also, there are more
+  fields that can be filled out, if you want more information added in, I'll do that too -->
+		<contributor>
+			<name>opoq</name>
+			<roles>
+				<role>testing wench</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>EntityReborn</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>Deaygo</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>t3hk0d3</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>zml2008</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+		<contributor>
+			<name>albatrossen</name>
+			<roles>
+				<role>contributor</role>
+			</roles>
+		</contributor>
+	</contributors>
+	<issueManagement>
+		<system>sk89q's Redmine</system>
+		<url>http://redmine.sk89q.com/projects/commandhelper/</url>
+	</issueManagement>
+	<ciManagement>
+		<system>Jenkins</system>
+		<url>http://build.sk89q.com/job/CommandHelper/</url>
+	</ciManagement>
+	<licenses>
+		<license>
+			<name>The MIT License</name>
+			<url>http://www.opensource.org/licenses/MIT</url>
+			<distribution>repo</distribution>            
+		</license>
+	</licenses>
   
-    <scm>
-        <connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
-        <url>https://github.com/sk89q/commandhelper</url>
-        <developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
-    </scm>
+	<scm>
+		<connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
+		<url>https://github.com/sk89q/commandhelper</url>
+		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
+	</scm>
 
-    <repositories>
-        <!-- Repository for other dependencies of SK's -->
-        <repository>
-            <id>sk89q-mvn2</id>
-            <url>http://mvn2.sk89q.com/repo</url>
-        </repository>
-        <!-- Repository for Bukkit -->
+	<repositories>
+		<!-- Repository for other dependencies of SK's -->
+		<repository>
+			<id>sk89q-mvn2</id>
+			<url>http://mvn2.sk89q.com/repo</url>
+		</repository>
+		<!-- Repository for Bukkit -->
         
-        <repository>
-            <id>bukkit-repo</id>
-            <url>http://repo.bukkit.org/content/groups/public/</url>
-        </repository>
+		<repository>
+			<id>bukkit-repo</id>
+			<url>http://repo.bukkit.org/content/groups/public/</url>
+		</repository>
         
-        <repository>
-            <id>bukkit-maven</id>
-            <url>http://repo.bukkit.org/content/repositories/releases/</url>
-            <snapshots>
-                <enabled>true</enabled>
-            </snapshots>
-        </repository>
-        <repository>
-            <id>maven-central</id>
-            <url>http://repo1.maven.org/maven2/</url>
-        </repository>
-        <repository>
-            <id>zml2008</id>
-            <url>http://files.zachsthings.com/repo/</url>
-        </repository>
-    </repositories>
+		<repository>
+			<id>bukkit-maven</id>
+			<url>http://repo.bukkit.org/content/repositories/releases/</url>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+		</repository>
+		<repository>
+			<id>maven-central</id>
+			<url>http://repo1.maven.org/maven2/</url>
+		</repository>
+		<repository>
+			<id>zml2008</id>
+			<url>http://files.zachsthings.com/repo/</url>
+		</repository>
+	</repositories>
 
-    <dependencies>
-        <!-- Required component -->
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldedit</artifactId>
-            <version>5.4-SNAPSHOT</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.spout</groupId>
-                    <artifactId>spoutapi</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+	<dependencies>
+		<!-- Required component -->
+		<dependency>
+			<groupId>com.sk89q</groupId>
+			<artifactId>worldedit</artifactId>
+			<version>5.4-SNAPSHOT</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.spout</groupId>
+					<artifactId>spoutapi</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
     
-        <!-- Bukkit -->
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>craftbukkit</artifactId>
-            <version>1.2.5-R4.0</version>
-        </dependency>
+		<!-- Bukkit -->
+		<dependency>
+			<groupId>org.bukkit</groupId>
+			<artifactId>craftbukkit</artifactId>
+			<version>1.2.5-R4.0</version>
+		</dependency>
         
-        <!-- CraftBukkit Dependency for experimental features -->
+		<!-- CraftBukkit Dependency for experimental features -->
         
         
-        <!-- WorldGuard for some of the sk functions -->
-        <dependency>
-            <groupId>com.sk89q</groupId>
-            <artifactId>worldguard</artifactId>
-            <version>5.5</version>
-        </dependency>
+		<!-- WorldGuard for some of the sk functions -->
+		<dependency>
+			<groupId>com.sk89q</groupId>
+			<artifactId>worldguard</artifactId>
+			<version>5.5</version>
+		</dependency>
     
         
         
-        <!-- Used for economy stuff -->
-        <dependency>
-            <groupId>net.milkbowl</groupId>
-            <artifactId>vault</artifactId>
-            <version>1.2.12</version>
-        </dependency>
+		<!-- Used for economy stuff -->
+		<dependency>
+			<groupId>net.milkbowl</groupId>
+			<artifactId>vault</artifactId>
+			<version>1.2.12</version>
+		</dependency>
         
-        <!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
-        <dependency>
-            <groupId>com.googlecode.json-simple</groupId>
-            <artifactId>json-simple</artifactId>
-            <version>1.1</version>
-        </dependency>
+		<!-- Used for storing and retreiving Constructs in a storage transparent medium: JSONs -->
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>1.1</version>
+		</dependency>
         
-        <!-- BCrypt -->
-        <dependency>
-            <groupId>org.mindrot</groupId>
-            <artifactId>jBCrypt</artifactId>
-            <version>1.0</version>
-        </dependency>
+		<!-- BCrypt -->
+		<dependency>
+			<groupId>org.mindrot</groupId>
+			<artifactId>jBCrypt</artifactId>
+			<version>1.0</version>
+		</dependency>
         
-        <!-- Used for potion effects
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>minecraft-server</artifactId>
-            <version>1.8.1</version>
-            <type>jar</type>
-        </dependency> -->
-        
-        <!-- Used for IRC hooks -->
-        <!--<dependency> NOT READY YET
-            <groupId>org.jibble</groupId>
-            <artifactId>pircbot</artifactId>
-            <version>1.5.0</version>
-            <scope>compile</scope>
-        </dependency>-->
-        
-        <!-- Profiling library -->
-        <dependency>
-            <groupId>org.perf4j</groupId>
-            <artifactId>perf4j</artifactId>
-            <version>0.9.16</version>
-            <scope>compile</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>log4j</groupId>
-            <artifactId>log4j</artifactId>
-            <version>1.2.16</version>
-            <scope>compile</scope>
-        </dependency>
-        
-        <!-- Database -->
-        <dependency>
-            <groupId>org.xerial</groupId>
-            <artifactId>sqlite-jdbc</artifactId>
-            <version>3.7.2</version>
-            <scope>compile</scope>
-        </dependency>
-        
-        <!-- Yaml parsing -->
-        <dependency>
-            <groupId>org.yaml</groupId>
-            <artifactId>snakeyaml</artifactId>
-            <version>1.10</version>
-        </dependency>
-        
-        <!-- Evil-y things (currently not used) -->
-        <!--<dependency>
-            <groupId>cglib</groupId>
-            <artifactId>cglib</artifactId>
-            <version>2.2.2</version>
-            <scope>compile</scope>
-            <type>jar</type>
-        </dependency>
-        <dependency>
-            <groupId>org.javassist</groupId>
-            <artifactId>javassist</artifactId>
-            <version>3.15.0-GA</version>
-            <type>jar</type>
-        </dependency>-->
-        
-        <!-- Test libraries -->
-        <dependency>
-            <groupId>junit</groupId>
-            <artifactId>junit</artifactId>
-            <version>4.8.1</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.mockito</groupId>
-            <artifactId>mockito-core</artifactId>  
-            <version>1.8.5</version> 
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.avaje</groupId>
-            <artifactId>ebean</artifactId>
-            <version>2.7.3</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-module-junit4</artifactId>
-            <version>1.4.10</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.powermock</groupId>
-            <artifactId>powermock-api-mockito</artifactId>
-            <version>1.4.10</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.bukkit</groupId>
-            <artifactId>bukkit</artifactId>
-            <version>1.2.5-R4.0</version>
-        </dependency>
-    </dependencies>
-    <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    </properties>
+		<!-- Used for potion effects
+		  <dependency>
+		      <groupId>org.bukkit</groupId>
+		      <artifactId>minecraft-server</artifactId>
+		      <version>1.8.1</version>
+		      <type>jar</type>
+		  </dependency> -->
 
-    <build>
-        <sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+				<!-- Used for IRC hooks -->
+				<!--<dependency> NOT READY YET
+		      <groupId>org.jibble</groupId>
+		      <artifactId>pircbot</artifactId>
+		      <version>1.5.0</version>
+		      <scope>compile</scope>
+		  </dependency>-->
+        
+		<!-- Profiling library -->
+		<dependency>
+			<groupId>org.perf4j</groupId>
+			<artifactId>perf4j</artifactId>
+			<version>0.9.16</version>
+			<scope>compile</scope>
+			<type>jar</type>
+		</dependency>
+		<dependency>
+			<groupId>log4j</groupId>
+			<artifactId>log4j</artifactId>
+			<version>1.2.16</version>
+			<scope>compile</scope>
+		</dependency>
+        
+		<!-- Database -->
+		<dependency>
+			<groupId>org.xerial</groupId>
+			<artifactId>sqlite-jdbc</artifactId>
+			<version>3.7.2</version>
+			<scope>compile</scope>
+		</dependency>
+        
+		<!-- Yaml parsing -->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>1.10</version>
+		</dependency>
+        
+		<!-- Evil-y things (currently not used) -->
+		<!--<dependency>
+		      <groupId>cglib</groupId>
+		      <artifactId>cglib</artifactId>
+		      <version>2.2.2</version>
+		      <scope>compile</scope>
+		      <type>jar</type>
+		  </dependency>
+		  <dependency>
+		      <groupId>org.javassist</groupId>
+		      <artifactId>javassist</artifactId>
+		      <version>3.15.0-GA</version>
+		      <type>jar</type>
+		  </dependency>-->
 
-        <!-- Resources -->
-        <resources>
-            <resource>
-                <targetPath>.</targetPath>
-                <filtering>true</filtering>
-                <directory>${basedir}/src/main/resources/</directory>
-                <includes>
-                    <include>**</include>
-                </includes>
-            </resource>
-        </resources>
-        <testResources>
-            <testResource>
-                <targetPath>.</targetPath>
-                <directory>${basedir}/src/test/resources</directory>
-            </testResource>
-        </testResources>
+		<!-- Embedded SSH Client -->
+		<dependency>
+			<groupId>com.jcraft</groupId>
+			<artifactId>jsch</artifactId>
+			<version>0.1.48</version>
+		</dependency>
+        
+		<!-- Test libraries -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.8.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.mockito</groupId>
+			<artifactId>mockito-core</artifactId>  
+			<version>1.8.5</version> 
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.avaje</groupId>
+			<artifactId>ebean</artifactId>
+			<version>2.7.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-module-junit4</artifactId>
+			<version>1.4.10</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.powermock</groupId>
+			<artifactId>powermock-api-mockito</artifactId>
+			<version>1.4.10</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.bukkit</groupId>
+			<artifactId>bukkit</artifactId>
+			<version>1.2.5-R4.0</version>
+		</dependency>
+	</dependencies>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 
-        <!-- Plugins -->
-        <plugins>
-            <!-- Compile plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <version>2.3.2</version>
-            </plugin>
+	<build>
+		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
 
-            <!-- JAR creation plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-jar-plugin</artifactId>
-                <version>2.3.1</version>
-                <configuration>
-                    <archive>
-                        <addMavenDescriptor>true</addMavenDescriptor>
-                        <pomPropertiesFile>true</pomPropertiesFile>
-                        <manifest>
-                            <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
-                            <addDefaultImplementationEntries>true</addDefaultImplementationEntries>
-                            <mainClass>com.laytonsmith.core.Main</mainClass>
-                            <!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
-                        </manifest>
-                        <manifestEntries>
-                            <Class-Path>WorldEdit.jar CommandHelper/WorldEdit.jar lib/WorldEdit.jar ../lib/WorldEdit.jar ../WorldEdit.jar ../craftbukkit-0.0.1-SNAPSHOT.jar ../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
-                        </manifestEntries>
-                    </archive>
-                </configuration>
-            </plugin>
+		<!-- Resources -->
+		<resources>
+			<resource>
+				<targetPath>.</targetPath>
+				<filtering>true</filtering>
+				<directory>${basedir}/src/main/resources/</directory>
+				<includes>
+					<include>**</include>
+				</includes>
+			</resource>
+		</resources>
+		<testResources>
+			<testResource>
+				<targetPath>.</targetPath>
+				<directory>${basedir}/src/test/resources</directory>
+			</testResource>
+		</testResources>
 
-            <!-- Assembly -->
-            <plugin>
-                <artifactId>maven-assembly-plugin</artifactId>
-                <version>2.2-beta-2</version>
-                <configuration>
-                    <descriptor>${basedir}/src/main/assembly/default.xml</descriptor>
-                </configuration>
-            </plugin>
+		<!-- Plugins -->
+		<plugins>
+			<!-- Compile plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>2.3.2</version>
+			</plugin>
 
-            <!-- Release -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-release-plugin</artifactId>
-                <version>2.2.2</version>
-                <configuration>
-                    <preparationGoals>assembly:assembly</preparationGoals>
-                    <goals>assembly:assembly</goals>
-                </configuration>
-            </plugin>
+			<!-- JAR creation plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>2.3.1</version>
+				<configuration>
+					<archive>
+						<addMavenDescriptor>true</addMavenDescriptor>
+						<pomPropertiesFile>true</pomPropertiesFile>
+						<manifest>
+							<addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
+							<addDefaultImplementationEntries>true</addDefaultImplementationEntries>
+							<mainClass>com.laytonsmith.core.Main</mainClass>
+							<!--<mainClass>com.laytonsmith.core.MainSandbox</mainClass>-->
+						</manifest>
+						<manifestEntries>
+							<Class-Path>WorldEdit.jar CommandHelper/WorldEdit.jar lib/WorldEdit.jar ../lib/WorldEdit.jar ../WorldEdit.jar ../craftbukkit-0.0.1-SNAPSHOT.jar ../bukkit.jar CommandHelper/bukkit.jar</Class-Path>
+						</manifestEntries>
+					</archive>
+				</configuration>
+			</plugin>
+
+			<!-- Assembly -->
+			<plugin>
+				<artifactId>maven-assembly-plugin</artifactId>
+				<version>2.2-beta-2</version>
+				<configuration>
+					<descriptor>${basedir}/src/main/assembly/default.xml</descriptor>
+				</configuration>
+			</plugin>
+
+			<!-- Release -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-release-plugin</artifactId>
+				<version>2.2.2</version>
+				<configuration>
+					<preparationGoals>assembly:assembly</preparationGoals>
+					<goals>assembly:assembly</goals>
+				</configuration>
+			</plugin>
             
-            <!-- Shade plugin -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>1.4</version>
-                <executions>
-                    <execution>
-                        <id>ShadedBundle</id>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                        <configuration>
-                            <shadedArtifactAttached>false</shadedArtifactAttached>
-                            <shadedClassifierName>WEBundle</shadedClassifierName>
-                            <artifactSet>
-                                <includes>
-                                    <include>com.sk89q:worldedit:jar:*</include>
-                                    <include>com.nijikokun:register:jar:*</include>
-                                    <include>org.perf4j:perf4j:jar:*</include>
-                                    <include>log4j:log4j:jar:*</include>
-                                    <include>org.yaml:snakeyaml:jar:*</include>
-                                    <include>com.googlecode.json-simple:json-simple:jar:*</include>
-                                    <include>org.mindrot:jBCrypt:jar:*</include>
-                                </includes>
-                            </artifactSet>
-                            <filters>
-                                <filter>
-                                    <artifact>com.sk89q:worldedit:jar:*</artifact>
-                                    <includes>
-                                        <!-- Permissions Items -->
-                                        <include>com/sk89q/bukkit/migration/**</include> 
-                                        <include>com/sk89q/wepif/**</include> 
-                                        <include>com/sk89q/util/**</include>
-                                        <include>com/sk89q/worldedit/Vector.*</include>
-                                        <!-- Expression Parser -->
-                                        <include>com/sk89q/worldedit/expression/**</include>
-                                        <!-- SnakeYAML -->
-                                        <include>org/yaml/**</include>
-                                        <!-- Simple JSON -->
-                                        <include>org/json/**</include>
-                                        <!-- BCrypt -->
-                                        <include>org/mindrot/**</include>
-                                    </includes>
-                                    <excludes>
-                                        <exclude>com/sk89q/jchronic/**</exclude>
-                                        <exclude>com/google/**</exclude>
-                                    </excludes>
-                                </filter>
-                                <!-- Profiler -->
-                                <filter>
-                                    <artifact>org.perf4j:perf4j:jar:*</artifact>
-                                    <includes>
-                                        <include>**</include>
-                                    </includes>
-                                </filter>
-                                <filter>
-                                    <artifact>log4j:log4j:jar:*</artifact>
-                                    <includes>
-                                        <include>**</include>
-                                    </includes>
-                                </filter>
+			<!-- Shade plugin -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>1.4</version>
+				<executions>
+					<execution>
+						<id>ShadedBundle</id>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<shadedArtifactAttached>false</shadedArtifactAttached>
+							<shadedClassifierName>WEBundle</shadedClassifierName>
+							<artifactSet>
+								<includes>
+									<include>com.sk89q:worldedit:jar:*</include>
+									<include>com.nijikokun:register:jar:*</include>
+									<include>org.perf4j:perf4j:jar:*</include>
+									<include>log4j:log4j:jar:*</include>
+									<include>org.yaml:snakeyaml:jar:*</include>
+									<include>com.googlecode.json-simple:json-simple:jar:*</include>
+									<include>org.mindrot:jBCrypt:jar:*</include>
+									<include>com.jcraft:jsch:jar:*</include>
+								</includes>
+							</artifactSet>
+							<filters>
+								<filter>
+									<artifact>com.sk89q:worldedit:jar:*</artifact>
+									<includes>
+										<!-- Permissions Items -->
+										<include>com/sk89q/bukkit/migration/**</include> 
+										<include>com/sk89q/wepif/**</include> 
+										<include>com/sk89q/util/**</include>
+										<include>com/sk89q/worldedit/Vector.*</include>
+										<!-- Expression Parser -->
+										<include>com/sk89q/worldedit/expression/**</include>
+										<!-- SnakeYAML -->
+										<include>org/yaml/**</include>
+										<!-- Simple JSON -->
+										<include>org/json/**</include>
+										<!-- BCrypt -->
+										<include>org/mindrot/**</include>
+										<!-- JSch -->
+										<include>com/jcraft/jsch/**</include>
+									</includes>
+									<excludes>
+										<exclude>com/sk89q/jchronic/**</exclude>
+										<exclude>com/google/**</exclude>
+									</excludes>
+								</filter>
+								<!-- Profiler -->
+								<filter>
+									<artifact>org.perf4j:perf4j:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
+								<filter>
+									<artifact>log4j:log4j:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>
                                 
-                                <!-- Register -->
-                                <filter>
-                                    <artifact>com.nijikokun:register:jar:*</artifact>
-                                    <includes>
-                                        <include>**</include>
-                                    </includes>
-                                </filter>                                
+								<!-- Register -->
+								<filter>
+									<artifact>com.nijikokun:register:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>                                
                                 
-                            </filters>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+							</filters>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
             
-            <!-- Getting rid of maven warnings by providing versions for the following plugins -->
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-javadoc-plugin</artifactId>
-                <version>2.4</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-deploy-plugin</artifactId>
-                <version>2.6</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-source-plugin</artifactId>
-                <version>2.1.2</version>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-surefire-plugin</artifactId>
-                <version>2.9</version>
-                <configuration>
-                    <includes>
-                        <!-- Include the default test cases, since we're overwriting them -->
-                        <include>**/*Test.java</include>
-                        <include>**/Test*.java</include>
-                        <include>**/*TestCase.java</include>
+			<!-- Getting rid of maven warnings by providing versions for the following plugins -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-deploy-plugin</artifactId>
+				<version>2.6</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.1.2</version>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.9</version>
+				<configuration>
+					<includes>
+						<!-- Include the default test cases, since we're overwriting them -->
+						<include>**/*Test.java</include>
+						<include>**/Test*.java</include>
+						<include>**/*TestCase.java</include>
                         
-                        <!-- Include custom, none specific classes -->
-                        <include>**/RandomTests.java</include>
-                    </includes>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.4</version>
-            </plugin>
-        </plugins>
-    </build>
-    <!-- Adds JUnit test coverage reports -->
-    <reporting>
-        <plugins>
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>cobertura-maven-plugin</artifactId>
-                <version>2.4</version>
-            </plugin>
-        </plugins>
-    </reporting>
+						<!-- Include custom, none specific classes -->
+						<include>**/RandomTests.java</include>
+					</includes>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+		</plugins>
+	</build>
+	<!-- Adds JUnit test coverage reports -->
+	<reporting>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>cobertura-maven-plugin</artifactId>
+				<version>2.4</version>
+			</plugin>
+		</plugins>
+	</reporting>
     
-    <profiles>
-        <profile>
-            <id>provisional-build</id>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-surefire-plugin</artifactId>
-                        <version>2.9</version>
-                        <configuration>
-                            <skipTests>true</skipTests>
-                        </configuration>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
+	<profiles>
+		<profile>
+			<id>provisional-build</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-surefire-plugin</artifactId>
+						<version>2.9</version>
+						<configuration>
+							<skipTests>true</skipTests>
+						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

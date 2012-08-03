@@ -124,7 +124,11 @@ public interface DataSource extends Documentation {
                 + " too large to allow synchonous connections, or if you are using a medium/large data source transiently.", CHVersion.V3_3_1),
         PRETTYPRINT("For text based files, where it is applicable and possible, if there is a way to \"Pretty Print\" the data, do so. This usually comes"
                 + " at the cost of file size, but makes it easier to read in a text editor. For some data sources, this is not possible, due to the file"
-                + " layout requirements of the protocol itself.", CHVersion.V3_3_1);
+                + " layout requirements of the protocol itself.", CHVersion.V3_3_1),
+	SSH("Retrieves the file via SSH. This cannot be used in combination with the HTTP or HTTPS flags. The file path must match the syntax used"
+		+ " by SCP connections, for instance: ssh:yml://user@host:/path/to/file/over/ssh.yml. This will only work with public-key authentication"
+		+ " however, since there is no practical way to input your password otherwise. Since this is a remote IO connection, async is implied if this"
+		+ " modifier is set.", CHVersion.V3_3_1);
         
         
         private CHVersion since;

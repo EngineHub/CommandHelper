@@ -16,6 +16,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Arrays;
 import org.mindrot.jbcrypt.BCrypt;
 
 /**
@@ -192,6 +193,59 @@ public class Crypto {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+    }
+    
+    @api public static class sha256 extends AbstractFunction{
+
+	public String getName() {
+            return "sha256";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {val} Returns the sha256 hash of the specified string. Note that sha256 is considered more secure than sha1 and md5, and is"
+                    + " typically used when storing sensitive data. It is a one way hashing algorithm.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PluginInternalException};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            try {
+                MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
+                digest.update(args[0].val().getBytes());
+                String hash = toHex(digest.digest()).toLowerCase();
+                return new CString(hash, t);
+            } catch (NoSuchAlgorithmException ex) {
+                throw new ConfigRuntimeException("An error occured while trying to hash your data", ExceptionType.PluginInternalException, t, ex);
+            }
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+	    
     }
     
     @api public static class bcrypt extends AbstractFunction{
