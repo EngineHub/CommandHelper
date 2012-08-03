@@ -77,4 +77,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public void setVanished(boolean set, MCPlayer to);
     
     public boolean isNewPlayer();
+    
+    public String getHost();
 }

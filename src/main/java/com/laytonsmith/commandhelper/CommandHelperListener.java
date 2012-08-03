@@ -40,6 +40,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.event.player.PlayerLoginEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
 /**
@@ -161,6 +162,11 @@ public class CommandHelperListener implements Listener {
     @EventHandler(priority= EventPriority.NORMAL)
     public void onPlayerJoin(PlayerJoinEvent event) {
         Static.HostnameCache(new BukkitMCPlayer(event.getPlayer()));
+    }
+    
+    @EventHandler(priority= EventPriority.NORMAL)
+    public void onPlayerLogin(PlayerLoginEvent event){
+        Static.SetPlayerHost(new BukkitMCPlayer(event.getPlayer()), event.getHostname());
     }
     
 

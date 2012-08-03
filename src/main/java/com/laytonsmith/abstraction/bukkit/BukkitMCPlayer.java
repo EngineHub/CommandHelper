@@ -356,4 +356,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         //a new player.
         return !p.getServer().getOfflinePlayer(p.getName()).hasPlayedBefore();
     }
+    
+    public String getHost(){
+        return Static.GetHost(this);
+    }
 }

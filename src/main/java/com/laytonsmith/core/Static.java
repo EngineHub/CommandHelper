@@ -47,6 +47,8 @@ public final class Static {
     public static SerializedPersistance persist;
     
     public static PermissionsResolverManager perms;
+    
+    private static Map<String, String> hostCache = new HashMap<String, String>();
 
     /**
      * This function pulls a numerical equivalent from any given construct. It throws a ConfigRuntimeException
@@ -778,6 +780,13 @@ public final class Static {
                        p.getAddress().getHostName());
            } 
         });
+    }
+    
+    public static void SetPlayerHost(MCPlayer p, String host){
+        hostCache.put(p.getName(), host);
+    }
+    public static String GetHost(MCPlayer p){
+        return hostCache.get(p.getName());
     }
     
     public static void AssertPlayerNonNull(MCPlayer p, Target t){
