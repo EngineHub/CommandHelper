@@ -322,10 +322,13 @@ public class DataHandlingTest {
 
     @Test(timeout = 10000)
     public void testIsNumeric() throws ConfigCompileException {
-        SRun("msg(is_numeric('s')) msg(is_numeric(null)) msg(is_numeric(true)) msg(is_numeric(2))"
+        SRun("msg(is_numeric('s')) "
+		+ " msg(is_numeric(null))"
+		+ " msg(is_numeric(true))"
+		+ " msg(is_numeric(2))"
                 + " msg(is_numeric(2.0))", fakePlayer);
-        verify(fakePlayer, times(2)).sendMessage("false");
-        verify(fakePlayer, times(3)).sendMessage("true");
+        verify(fakePlayer, times(1)).sendMessage("false");
+        verify(fakePlayer, times(4)).sendMessage("true");
     }
 
     @Test(timeout = 10000)

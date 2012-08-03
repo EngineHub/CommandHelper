@@ -6,6 +6,7 @@ import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
@@ -31,6 +32,7 @@ public class Cmdline {
     }
 
     @api
+    @noboilerplate
     public static class sys_out extends AbstractFunction {
 
         public Exceptions.ExceptionType[] thrown() {
@@ -76,6 +78,7 @@ public class Cmdline {
     }
 
     @api
+    @noboilerplate
     public static class sys_err extends AbstractFunction {
 
         public Exceptions.ExceptionType[] thrown() {
@@ -121,6 +124,7 @@ public class Cmdline {
     }
 
     @api
+    @noboilerplate
     public static class exit extends AbstractFunction {
 
         public Exceptions.ExceptionType[] thrown() {

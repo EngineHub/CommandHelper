@@ -12,6 +12,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -431,7 +432,9 @@ public class Echoes {
         
     }
     
-    @api public static class console extends AbstractFunction{
+    @api 
+    @noboilerplate
+    public static class console extends AbstractFunction{
 
         public String getName() {
             return "console";
