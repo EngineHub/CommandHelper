@@ -205,4 +205,11 @@ public class RandomTests {
         BukkitMCCommandSender c = new BukkitMCCommandSender(new BukkitMCPlayer(p));
     }
     
+    @Test
+    public void testBlah() throws Throwable{
+	    StaticTest.InstallFakeConvertor(fakePlayer);
+	    SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
+		    + "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
+    }
+    
 }

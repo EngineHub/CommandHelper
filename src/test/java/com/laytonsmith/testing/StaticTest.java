@@ -584,7 +584,9 @@ public class StaticTest {
         }
 
         public int SetFutureRunnable(long ms, Runnable r) {
-            throw new UnsupportedOperationException("Not supported yet.");
+		//This needs fixing later
+		Threader.GetThreader().submit(r);
+		return 0;
         }
 
         public void ClearAllRunnables() {

@@ -206,11 +206,7 @@ public class Exceptions {
                 }
                 if(e.getExceptionType() != null  && (interest.isEmpty() || interest.contains(e.getExceptionType().toString()))){
                     if(catchCode != null){
-                        CArray ex = new CArray(t);
-                        ex.push(new CString(e.getExceptionType().toString(), t));
-                        ex.push(new CString(e.getMessage(), t));
-                        ex.push(new CString((e.getFile()!=null?e.getFile().getAbsolutePath():"null"), t));
-                        ex.push(new CInt(e.getLineNum(), t));
+                        CArray ex = ObjectGenerator.GetGenerator().exception(e, t);
                         if(ivar != null){
                             ivar.setIval(ex);
                             env.GetVarList().set(ivar);

@@ -108,6 +108,13 @@ public final class StaticLayer {
         return convertor.LookupMaterialName(id);
     }
     
+    /**
+     * Adds a runnable to the main thread, if required by this platform,
+     * if a multithreaded user code would be dangerous.
+     * @param ms
+     * @param r
+     * @return 
+     */
     public static int SetFutureRunnable(long ms, Runnable r){
         return convertor.SetFutureRunnable(ms, r);
     }

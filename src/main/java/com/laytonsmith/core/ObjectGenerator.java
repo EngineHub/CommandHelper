@@ -288,4 +288,13 @@ public class ObjectGenerator {
     private static MCItemStack EmptyItem() {
         return StaticLayer.GetItemStack(0, 1);
     }
+    
+    public CArray exception(ConfigRuntimeException e, Target t) {
+		CArray ex = new CArray(t);
+		ex.push(new CString(e.getExceptionType().toString(), t));
+		ex.push(new CString(e.getMessage(), t));
+		ex.push(new CString((e.getFile() != null ? e.getFile().getAbsolutePath() : "null"), t));
+		ex.push(new CInt(e.getLineNum(), t));
+		return ex;
+    }
 }

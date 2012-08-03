@@ -242,66 +242,7 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
         }  
-    }
-
-    @api
-    public static class read extends AbstractFunction {
-
-        public static String file_get_contents(String file_location) throws Exception {
-            return new ZipReader(new File(file_location)).getFileContents();
-        }
-
-        public String getName() {
-            return "read";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            String location = args[0].val();
-            location = new File(t.file().getParentFile(), location).getAbsolutePath();
-            //Verify this file is not above the craftbukkit directory (or whatever directory the user specified
-            if (!Security.CheckSecurity(location)) {
-                throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'",
-                        ExceptionType.SecurityException, t);
-            }
-            try {
-                String s = file_get_contents(location);
-                s = s.replaceAll("\n|\r\n", "\n");
-                return new CString(s, t);
-            } catch (Exception ex) {
-                Static.getLogger().log(Level.SEVERE, "Could not read in file while attempting to find " + new File(location).getAbsolutePath()
-                        + "\nFile " + (new File(location).exists() ? "exists" : "does not exist"));
-                throw new ConfigRuntimeException("File could not be read in.",
-                        ExceptionType.IOException, t);
-            }
-        }
-
-        public String docs() {
-            return "string {file} Reads in a file from the file system at location var1 and returns it as a string. The path is relative to"
-                    + " the server, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
-                    + " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
-                    + " The line endings for the string returned will always be \\n, even if they originally were \\r\\n.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.IOException, ExceptionType.SecurityException};
-        }
-
-        public boolean isRestricted() {
-            return true;
-        }
-        public CHVersion since() {
-            return CHVersion.V3_0_1;
-        }
-
-        public Boolean runAsync() {
-            //Because we do disk IO
-            return true;
-        }
-    }
+    }    
 
     @api
     public static class replace extends AbstractFunction {

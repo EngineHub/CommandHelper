@@ -6,6 +6,7 @@ import com.jcraft.jsch.JSch;
 import com.jcraft.jsch.JSchException;
 import com.jcraft.jsch.Session;
 import com.jcraft.jsch.UserInfo;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -349,6 +350,49 @@ public class SSHWrapper {
 		}
 		return b;
 	}
+	
+	/**
+	 * Given an input stream, writes it out to a remote file system.	 
+	 * The path given (to) must be a remote path.
+	 * @param is 
+	 */
+	public static void SCPWrite(InputStream is, String to) throws IOException{
+		File temp = File.createTempFile("methodscript-temp-file", ".tmp");
+		FileOutputStream fos = new FileOutputStream(temp);
+		StreamUtils.Copy(fos, is);
+		fos.close();
+		SCP(temp.getAbsolutePath(), to);
+		temp.delete();
+	}
+	
+	/**
+	 * Returns an OutputStream to a file on a remote file system.
+	 * @param from
+	 * @return 
+	 */
+	public static OutputStream SCPRead(String from) throws IOException{
+		File temp = File.createTempFile("methodscript-temp-file", ".tmp");
+		SCP(from, temp.getAbsolutePath());
+		OutputStream out = new ByteArrayOutputStream();
+		FileInputStream fis = new FileInputStream(temp);
+		StreamUtils.Copy(out, fis);
+		temp.delete();
+		return out;
+	}
+	
+	/**
+	 * Writes some textual contents to a remote file.
+	 * @param contents
+	 * @param to 
+	 */
+	public static void SCPWrite(String contents, String to) throws IOException{
+		SCPWrite(StreamUtils.GetInputStream(contents), to);
+	}
+	
+	public static String SCPReadString(String from) throws IOException{
+		return StreamUtils.GetString(SCPRead(from));
+	}
+	
 //	/**
 //	 * Executes a command over ssh.
 //	 */

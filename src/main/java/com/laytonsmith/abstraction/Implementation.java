@@ -29,6 +29,7 @@ public final class Implementation {
     public static enum Type{
         TEST,
         BUKKIT,
+	SHELL,
         //GLOWSTONE,
         //SINGLE_PLAYER
     }
