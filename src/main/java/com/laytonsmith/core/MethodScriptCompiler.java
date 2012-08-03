@@ -61,26 +61,42 @@ public final class MethodScriptCompiler {
                 column = 1;
             }
             target = new Target(line_num, file, column);
-//            if ((token_list.isEmpty() || token_list.get(token_list.size() - 1).type.equals(TType.NEWLINE))
-//                    && c == '#') {
-            if ((c == '#' || (c == '/' && (c2 == '*'))) && !in_comment && !state_in_quote) {
+
+            //Comment handling
+            //Block comments start
+            if(c == '/' && c2 == '*' && !in_comment){
                 in_comment = true;
-                if (c == '/' && c2 == '*') {
-                    comment_is_block = true;
-                    commentLineNumberStart = line_num;
-                    i++;
-                }
+                comment_is_block = true;
+                commentLineNumberStart = line_num;
+                i++;
                 continue;
             }
-            if (in_comment) {
-                if (!comment_is_block && c != '\n' || comment_is_block && c != '*' && (c2 != null && c2 != '/')) {
-                    continue;
-                }
-            }
-            if (c == '*' && c2 == '/' && in_comment && comment_is_block) {
-                in_comment = false;
+            //Line comment start
+            if(c == '#' && !in_comment){
+                in_comment = true;
                 comment_is_block = false;
-                i++;
+                continue;
+            }
+            //Block comment end
+            if (c == '*' && c2 == '/' && in_comment && comment_is_block) {
+                if(in_comment && comment_is_block){
+                    in_comment = false;
+                    comment_is_block = false;
+                    i++;
+                    continue;
+                } else if(!in_comment){
+                    throw new ConfigCompileException("Unexpected block comment end", target);
+                } //else they put it in a line comment, which is fine
+            }
+            //Line comment end
+            if(c == '\n' && in_comment && !comment_is_block){
+                in_comment = false;
+                continue;
+            }
+            //Currently, if they are in a comment, we completely throw this away. Eventually block
+            //comments that were started with /** will be kept and applied to the next identifier, but for the time
+            //being, nothing.
+            if (in_comment) {
                 continue;
             }
             //This has to come before subtraction and greater than
