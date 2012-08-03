@@ -1,11 +1,17 @@
 package com.laytonsmith.PureUtilities;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.io.StringReader;
+import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
+import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -23,7 +29,7 @@ public class StreamUtils {
 	 * @param in
 	 * @throws IOException 
 	 */
-	public static void Copy(OutputStream out, InputStream in) throws IOException {
+	public static void Copy(InputStream in, OutputStream out) throws IOException {
 		byte[] buffer = new byte[1024];
 		int len = in.read(buffer);
 		while (len != -1) {
@@ -33,14 +39,42 @@ public class StreamUtils {
 	}
 	
 	/**
-	 * Given an output stream, a UTF-8 encoded string is returned, which
+	 * Given an input stream, a UTF-8 encoded string is returned, which
 	 * is a reasonable assumption for most textual data.
 	 * @param out
 	 * @return 
 	 */
-	public static String GetString(OutputStream out){
-		PrintWriter pw = new PrintWriter(out);
-		return pw.toString();
+	public static String GetString(InputStream in){
+		try {
+			return GetString(in, "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			throw new Error(ex);
+		}
+	}
+	
+	/**
+	 * Gets a string from an input stream, assuming the given encoding.
+	 * @param in
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedEncodingException 
+	 */
+	public static String GetString(InputStream in, String encoding) throws UnsupportedEncodingException{
+		InputStreamReader input;
+		input = new InputStreamReader(in, encoding);
+		final int CHARS_PER_PAGE = 5000; //counting spaces
+		final char[] buffer = new char[CHARS_PER_PAGE];
+		StringBuilder output = new StringBuilder(CHARS_PER_PAGE);
+		try {
+		    for(int read = input.read(buffer, 0, buffer.length);
+			    read != -1;
+			    read = input.read(buffer, 0, buffer.length)) {
+			output.append(buffer, 0, read);
+		    }
+		} catch (IOException ignore) { }
+
+		return output.toString();
+
 	}
 	
 	/**
@@ -51,9 +85,21 @@ public class StreamUtils {
 	 */
 	public static InputStream GetInputStream(String contents){
 		try {
-			return new ByteArrayInputStream(contents.getBytes("UTF-8"));
+			return GetInputStream(contents, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
+	}
+	
+	/**
+	 * Returns an InputStream for a given string, using the given
+	 * encoding.
+	 * @param contents
+	 * @param encoding
+	 * @return
+	 * @throws UnsupportedEncodingException 
+	 */
+	public static InputStream GetInputStream(String contents, String encoding) throws UnsupportedEncodingException{		
+		return new ByteArrayInputStream(contents.getBytes(encoding));
 	}
 }

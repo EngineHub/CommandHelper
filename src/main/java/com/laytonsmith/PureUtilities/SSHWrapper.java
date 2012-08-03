@@ -359,25 +359,27 @@ public class SSHWrapper {
 	public static void SCPWrite(InputStream is, String to) throws IOException{
 		File temp = File.createTempFile("methodscript-temp-file", ".tmp");
 		FileOutputStream fos = new FileOutputStream(temp);
-		StreamUtils.Copy(fos, is);
+		StreamUtils.Copy(is, fos);
 		fos.close();
-		SCP(temp.getAbsolutePath(), to);
-		temp.delete();
+		try{
+			SCP(temp.getAbsolutePath(), to);
+		} finally {
+			temp.delete();
+			temp.deleteOnExit();
+		}
 	}
 	
 	/**
-	 * Returns an OutputStream to a file on a remote file system.
+	 * Returns an InputStream to a file on a remote file system.
 	 * @param from
 	 * @return 
 	 */
-	public static OutputStream SCPRead(String from) throws IOException{
+	public static InputStream SCPRead(String from) throws IOException{
 		File temp = File.createTempFile("methodscript-temp-file", ".tmp");
 		SCP(from, temp.getAbsolutePath());
-		OutputStream out = new ByteArrayOutputStream();
 		FileInputStream fis = new FileInputStream(temp);
-		StreamUtils.Copy(out, fis);
-		temp.delete();
-		return out;
+		temp.deleteOnExit();
+		return fis;
 	}
 	
 	/**
