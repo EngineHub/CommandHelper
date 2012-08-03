@@ -857,4 +857,12 @@ public class MethodScriptCompilerTest {
         }
     }
     
+    @Test
+    public void testBlockComments1() throws ConfigCompileException{
+        SRun(     "/*\n"
+                + " * Herp\n"
+                + " * Derp\n"
+                + " */\n", fakePlayer);
+    }
+    
 }

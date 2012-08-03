@@ -72,7 +72,7 @@ public class BukkitMCLocation implements MCLocation{
     }
 
     public MCBlock getBlock() {
-        if(l.getBlock() == null){
+        if(l == null || l.getBlock() == null){
             return null;
         }
         return new BukkitMCBlock(l.getBlock());

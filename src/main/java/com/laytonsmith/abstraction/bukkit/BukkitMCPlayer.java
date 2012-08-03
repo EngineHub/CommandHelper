@@ -17,8 +17,10 @@ import net.minecraft.server.EntityLiving;
 import net.minecraft.server.EntityPlayer;
 import net.minecraft.server.MobEffect;
 import net.minecraft.server.ServerConfigurationManager;
+import net.minecraft.server.ServerConfigurationManagerAbstract;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
+import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -282,18 +284,39 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
             throw new IllegalStateException("Running server isn't CraftBukkit");
         }
 
+        Set opSet = null;
         Field opSetField;
+        
+        if(opSet == null){
+            //For 1.3
+            CraftServer cserver = (CraftServer)server;
+            ServerConfigurationManagerAbstract obj = cserver.getServer().getServerConfigurationManager();
+            //obj contains the operators set
 
-        try {
-            opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
-        } catch (NoSuchFieldException e) {
-            opSetField = ServerConfigurationManager.class.getDeclaredField("h");
+            try{
+                opSetField = ServerConfigurationManagerAbstract.class.getDeclaredField("operators");
+                opSetField.setAccessible(true);
+                opSet = (Set)opSetField.get(obj);
+            } catch(NoSuchFieldException e){
+
+            }
         }
+        
+        if(opSet == null){
+            //For versions < 1.3
 
-        opSetField.setAccessible(true); // make field accessible for reflection 
+            try {
+                opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
+            } catch (NoSuchFieldException e) {
+                //For even older versions
+                opSetField = ServerConfigurationManager.class.getDeclaredField("h");
+            }
 
-        // Reflection magic
-        Set opSet = (Set) opSetField.get((ServerConfigurationManager) serverClass.getMethod("getHandle").invoke(server));
+            opSetField.setAccessible(true); // make field accessible for reflection 
+
+            // Reflection magic
+            opSet = (Set) opSetField.get((ServerConfigurationManager) serverClass.getMethod("getHandle").invoke(server));
+        }
 
         // since all Java objects pass by reference, we don't need to set field back to object
         if (value) {
@@ -332,5 +355,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         //Note the reversed logic here. If they have NOT played before, they are
         //a new player.
         return !p.getServer().getOfflinePlayer(p.getName()).hasPlayedBefore();
+    }
+    
+    public String getHost(){
+        return Static.GetHost(this);
     }
 }
