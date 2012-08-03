@@ -62,37 +62,39 @@ public final class MethodScriptCompiler {
             }
             target = new Target(line_num, file, column);
 
-            //Comment handling
-            //Block comments start
-            if(c == '/' && c2 == '*' && !in_comment){
-                in_comment = true;
-                comment_is_block = true;
-                commentLineNumberStart = line_num;
-                i++;
-                continue;
-            }
-            //Line comment start
-            if(c == '#' && !in_comment){
-                in_comment = true;
-                comment_is_block = false;
-                continue;
-            }
-            //Block comment end
-            if (c == '*' && c2 == '/' && in_comment && comment_is_block) {
-                if(in_comment && comment_is_block){
-                    in_comment = false;
-                    comment_is_block = false;
-                    i++;
-                    continue;
-                } else if(!in_comment){
-                    throw new ConfigCompileException("Unexpected block comment end", target);
-                } //else they put it in a line comment, which is fine
-            }
-            //Line comment end
-            if(c == '\n' && in_comment && !comment_is_block){
-                in_comment = false;
-                continue;
-            }
+            //Comment handling. If we're inside a string, bypass this though
+	    if(!state_in_quote && !in_smart_quote){
+		    //Block comments start
+		    if(c == '/' && c2 == '*' && !in_comment){
+			in_comment = true;
+			comment_is_block = true;
+			commentLineNumberStart = line_num;
+			i++;
+			continue;
+		    }
+		    //Line comment start
+		    if(c == '#' && !in_comment){
+			in_comment = true;
+			comment_is_block = false;
+			continue;
+		    }
+		    //Block comment end
+		    if (c == '*' && c2 == '/' && in_comment && comment_is_block) {
+			if(in_comment && comment_is_block){
+			    in_comment = false;
+			    comment_is_block = false;
+			    i++;
+			    continue;
+			} else if(!in_comment){
+			    throw new ConfigCompileException("Unexpected block comment end", target);
+			} //else they put it in a line comment, which is fine
+		    }
+		    //Line comment end
+		    if(c == '\n' && in_comment && !comment_is_block){
+			in_comment = false;
+			continue;
+		    }
+	    }
             //Currently, if they are in a comment, we completely throw this away. Eventually block
             //comments that were started with /** will be kept and applied to the next identifier, but for the time
             //being, nothing.

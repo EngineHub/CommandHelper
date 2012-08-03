@@ -865,4 +865,14 @@ public class MethodScriptCompilerTest {
                 + " */\n", fakePlayer);
     }
     
+    @Test
+    public void testCommentsInStrings() throws ConfigCompileException{
+	    SRun("'#'", fakePlayer);
+    }
+    
+    @Test
+    public void testCommentsInStrings2() throws ConfigCompileException{
+	    SRun("'/*'", fakePlayer);
+    }
+    
 }
