@@ -285,6 +285,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         }
 
         Set opSet = null;
+        Field opSetField;
         
         if(opSet == null){
             //For 1.3
@@ -293,7 +294,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
             //obj contains the operators set
 
             try{
-                opSet = (Set)ServerConfigurationManager.class.getField("operators").get(obj);
+                opSetField = ServerConfigurationManagerAbstract.class.getDeclaredField("operators");
+                opSetField.setAccessible(true);
+                opSet = (Set)opSetField.get(obj);
             } catch(NoSuchFieldException e){
 
             }
@@ -301,7 +304,6 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         
         if(opSet == null){
             //For versions < 1.3
-            Field opSetField;
 
             try {
                 opSetField = ServerConfigurationManager.class.getDeclaredField("operators");

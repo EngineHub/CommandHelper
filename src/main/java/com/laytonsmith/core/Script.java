@@ -553,7 +553,7 @@ public class Script {
             if (after_no_def_opt_var && !inside_opt_var) {
                 if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
                     throw new ConfigCompileException("You cannot have anything other than optional arguments after your"
-                            + " first optional argument, other that other optional arguments with no default", t.target);
+                            + " first optional argument.", t.target);
                 }
             }
             if (!t.type.equals(TType.LSQUARE_BRACKET)
