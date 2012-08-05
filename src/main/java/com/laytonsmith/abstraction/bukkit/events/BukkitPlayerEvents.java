@@ -13,7 +13,10 @@ import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import org.bukkit.Bukkit;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.block.Action;
@@ -109,8 +112,8 @@ public class BukkitPlayerEvents {
 
 	@abstraction(type=Implementation.Type.BUKKIT)
     public static class BukkitMCPlayerChatEvent implements MCPlayerChatEvent{
-        PlayerChatEvent pce;
-        public BukkitMCPlayerChatEvent(PlayerChatEvent event) {
+        AsyncPlayerChatEvent pce;
+        public BukkitMCPlayerChatEvent(AsyncPlayerChatEvent event) {
             pce = event;            
         }
         
@@ -123,7 +126,8 @@ public class BukkitPlayerEvents {
         }
         
         public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message){
-            return new BukkitMCPlayerChatEvent(new PlayerChatEvent(((BukkitMCPlayer)player)._Player(), message));
+            return new BukkitMCPlayerChatEvent(new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message, 
+                    new HashSet<Player>(Arrays.asList(Bukkit.getServer().getOnlinePlayers()))));
         }
 
         public String getMessage() {

@@ -4,6 +4,7 @@ package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.Token;
@@ -14,7 +15,7 @@ import java.util.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.player.PlayerQuitEvent;
 
@@ -24,7 +25,7 @@ import org.bukkit.event.player.PlayerQuitEvent;
  */
 public class CommandHelperInterpreterListener implements Listener {
 
-    Set<String> interpreterMode = new HashSet<String>();
+    private Set<String> interpreterMode = Collections.synchronizedSet(new HashSet<String>());
     Map<String, String> multilineMode = new HashMap<String, String>();
     
     public boolean isInInterpreterMode(MCPlayer p){
@@ -32,11 +33,16 @@ public class CommandHelperInterpreterListener implements Listener {
     }
 
     @EventHandler(priority= EventPriority.LOWEST)
-    public void onPlayerChat(PlayerChatEvent event) {
+    public void onPlayerChat(final AsyncPlayerChatEvent event) {
         if (interpreterMode.contains(event.getPlayer().getName())) {
-            MCPlayer p = new BukkitMCPlayer(event.getPlayer());
-            textLine(p, event.getMessage());
-            event.setCancelled(true);
+            final MCPlayer p = new BukkitMCPlayer(event.getPlayer());
+            event.setCancelled(true);                    
+            StaticLayer.SetFutureRunnable(0, new Runnable() {
+
+                public void run() {
+                    textLine(p, event.getMessage());
+                }
+            });
         }
 
     }
