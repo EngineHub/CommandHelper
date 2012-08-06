@@ -173,12 +173,12 @@ public class TestPersistance {
 
     @Test
     public void testMultimatch1() throws Exception {
-        assertEquals(getSet("yml://yes.yml"), getConnections("a.b.c", "a.**=yml://yes.yml"));
+        assertEquals(getSet("default", "yml://yes.yml"), getConnections("a.b.c", "a.**=yml://yes.yml"));
     }
 
     @Test
     public void testMultimatch2() throws Exception {
-        assertEquals(getSet("yml://yes1.yml", "yml://yes2.yml"), getConnections("a.b.c", "a.**=yml://yes1.yml", "a.b.**=yml://yes2.yml", "b.**=yml://no.yml"));
+        assertEquals(getSet("default", "yml://yes1.yml", "yml://yes2.yml"), getConnections("a.b.c", "a.**=yml://yes1.yml", "a.b.**=yml://yes2.yml", "b.**=yml://no.yml"));
     }
     
     @Test(expected=UnresolvedCaptureException.class)
@@ -272,7 +272,7 @@ public class TestPersistance {
     }
 
     public SortedSet<String> getConnections(String key, String... mapping) throws Exception {
-        DataSourceFilter dsf = new DataSourceFilter(StringUtils.Join(mapping, "\n"), new URI(""));
+        DataSourceFilter dsf = new DataSourceFilter(StringUtils.Join(mapping, "\n"), new URI("default"));
         List<URI> uris = dsf.getAllConnections(key);
         SortedSet<String> set = new TreeSet<String>();
         for (URI uri : uris) {

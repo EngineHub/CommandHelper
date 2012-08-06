@@ -294,13 +294,14 @@ public class DataSourceFilter {
 		}
 		Map<String[], String> matches = new HashMap<String[], String>();
 		String [] split = key.split("\\.");
-		for(String [] comparison : namespaced.keySet()){
-			for(int comparing = 0; comparing < split.length; comparing++){
+		outer: for(String [] comparison : namespaced.keySet()){
+			inner: for(int comparing = 0; comparing < split.length; comparing++){
 				//If the length of the key is greater than this comparison, it's not a match, unless
 				//the key had a ** in it at some point before this index
 				if(arrayContains(comparison, "**", 0, comparing)){
 					//Yes, it matches, regardless.
 					matches.put(comparison, namespaced.get(comparison));
+					break inner;
 				} else if(comparison.length > comparing){
 					//Ok, so we know that it has the correct number of parts.					
 					String requestedPart = split[comparing];
@@ -309,18 +310,19 @@ public class DataSourceFilter {
 						//It's got a wildcard, so we need to convert it to a regex and compare from there
 						String regexPart = toRegex(myPart);
 						if(!requestedPart.matches(regexPart)){							
-							continue;
+							continue outer;
 						}
 					} else {
 						//Else it's a simple a string match
 						if(!requestedPart.equals(myPart)){
-							continue;
+							continue outer;
 						}
 					}
 					//It matched this part, so let's continue with the investigation.
 					//If this was the last part we need to compare, it's good, we can add it to the list now.
 					if(comparing == split.length - 1){
 						matches.put(comparison, namespaced.get(comparison));
+						break inner;
 					}
 				}
 			}
