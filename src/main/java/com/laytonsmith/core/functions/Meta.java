@@ -144,6 +144,7 @@ public class Meta {
             } catch (IllegalStateException e) {
             } catch (Throwable e) {
                 Static.getLogger().log(Level.WARNING, "[CommandHelper]: Failed to OP player " + player.getName());
+                System.err.println("Extra information about the error: ");
 		e.printStackTrace();
             }
         }

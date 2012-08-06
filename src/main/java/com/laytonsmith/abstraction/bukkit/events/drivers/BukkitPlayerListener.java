@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.core.Static;
@@ -44,8 +45,15 @@ public class BukkitPlayerListener implements Listener{
     }
     
     @EventHandler(priority= EventPriority.LOWEST)
-    public void onPlayerChat(PlayerChatEvent event){
-        EventUtils.TriggerListener(Driver.PLAYER_CHAT, "player_chat", new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event));
+    public void onPlayerChat(final AsyncPlayerChatEvent event){
+        if(!EventUtils.GetEvents(Driver.PLAYER_CHAT).isEmpty()){
+            StaticLayer.SetFutureRunnable(0, new Runnable() {
+
+                public void run() {
+                    EventUtils.TriggerListener(Driver.PLAYER_CHAT, "player_chat", new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event));
+                }
+            });
+        }
     }
     
     @EventHandler(priority= EventPriority.LOWEST)
