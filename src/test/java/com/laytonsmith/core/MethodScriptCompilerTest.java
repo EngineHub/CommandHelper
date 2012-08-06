@@ -875,4 +875,23 @@ public class MethodScriptCompilerTest {
 	    SRun("'/*'", fakePlayer);
     }
     
+    //TODO: Once the lexer is rewritten, this should work
+//    @Test
+//    public void testAssignmentWithEquals1() throws ConfigCompileException{
+//	    SRun("@var=yep nope msg(@var)", fakePlayer);
+//	    verify(fakePlayer).sendMessage("yep");
+//    }
+//    
+//    @Test
+//    public void testAssignmentWithEquals2() throws ConfigCompileException{
+//	    SRun("@var = yep nope msg(@var)", fakePlayer);
+//	    verify(fakePlayer).sendMessage("yep");	    
+//    }
+//    
+//    @Test
+//    public void testAssignmentWithEquals3() throws ConfigCompileException{
+//	    SRun("@var = 'yep yep' msg(@var)", fakePlayer);
+//	    verify(fakePlayer).sendMessage("yep yep");	    	    
+//    }
+    
 }
