@@ -8,16 +8,20 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
+import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.event.Event;
+import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
+import org.bukkit.plugin.EventExecutor;
 
 /**
  *
@@ -49,7 +53,7 @@ public class BukkitPlayerListener implements Listener {
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         EventUtils.TriggerListener(Driver.PLAYER_SPAWN, "player_spawn", new BukkitPlayerEvents.BukkitMCPlayerRespawnEvent(event));
     }
-
+    
     @EventHandler(priority = EventPriority.LOWEST)
     public void onPlayerChat(final AsyncPlayerChatEvent event) {
         if (EventUtils.GetEvents(Driver.PLAYER_CHAT) != null
@@ -59,27 +63,19 @@ public class BukkitPlayerListener implements Listener {
             if (event.isAsynchronous()) {
                 //We have to do the full processing on the main server thread, and
                 //block on it as well, so if we cancel it or something, the change
-                //will actually take effect.
-                Future<Object> resp = Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable<Object>() {
+                //will actually take effect. The easiest way to do this is to cancel the
+                //chat event, then re-run it on the main server thread. Since we're
+                //registering on lowest, this will hopefully not cause any problems,
+                //but if it does, tough. Barring play-dirty mode, there's not a whole
+                //lot that can be done reasonably.
+                final AsyncPlayerChatEvent copy = new AsyncPlayerChatEvent(false, event.getPlayer(), event.getMessage(), event.getRecipients());
+                event.setCancelled(true);
+                Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable() {
                     public Object call() throws Exception {
-                        fireChat(event);
+                        Bukkit.getServer().getPluginManager().callEvent(copy);
                         return null;
                     }
                 });
-
-                while (true) {
-                    try {
-                        //Try one more again.
-                        if (resp.get() == null) {
-                            break;
-                        }
-                    } catch (InterruptedException e) {
-                        //Nope, we're gonna try again.
-                    } catch (ExecutionException e) {
-                        e.printStackTrace();
-                        break;
-                    }
-                }
 
             } else {
                 fireChat(event);

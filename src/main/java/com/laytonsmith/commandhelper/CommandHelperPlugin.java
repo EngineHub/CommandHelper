@@ -23,6 +23,7 @@ import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.bukkit.events.drivers.BukkitPlayerListener;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -152,7 +153,7 @@ public class CommandHelperPlugin extends JavaPlugin {
         }
         
         Static.PlayDirty();
-        registerEvent(playerListener);
+        registerEvent(playerListener);        
         
         //interpreter events
         registerEvent(interpreterListener);

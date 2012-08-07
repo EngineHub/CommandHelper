@@ -111,7 +111,7 @@ public class BukkitPlayerEvents {
 	}
 
 	@abstraction(type=Implementation.Type.BUKKIT)
-    public static class BukkitMCPlayerChatEvent implements MCPlayerChatEvent{
+        public static class BukkitMCPlayerChatEvent implements MCPlayerChatEvent{
         AsyncPlayerChatEvent pce;
         public BukkitMCPlayerChatEvent(AsyncPlayerChatEvent event) {
             pce = event;            
