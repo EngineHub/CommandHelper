@@ -1,6 +1,5 @@
 package com.laytonsmith.abstraction.bukkit.events.drivers;
 
-import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.events.BukkitPlayerEvents;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -8,20 +7,12 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
-import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.Bukkit;
-import org.bukkit.event.Event;
-import org.bukkit.event.EventException;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.*;
-import org.bukkit.plugin.EventExecutor;
 
 /**
  *
@@ -68,6 +59,11 @@ public class BukkitPlayerListener implements Listener {
                 //registering on lowest, this will hopefully not cause any problems,
                 //but if it does, tough. Barring play-dirty mode, there's not a whole
                 //lot that can be done reasonably.
+                
+                //TODO: If none of the prefilters match, we can also not re-fire here.
+                //However, we have to check to make sure all the prefilters can be
+                //run async, so we can't implement this until we implement the code above
+                //too.
                 final AsyncPlayerChatEvent copy = new AsyncPlayerChatEvent(false, event.getPlayer(), event.getMessage(), event.getRecipients());
                 event.setCancelled(true);
                 Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable() {
@@ -75,7 +71,7 @@ public class BukkitPlayerListener implements Listener {
                         Bukkit.getServer().getPluginManager().callEvent(copy);
                         return null;
                     }
-                });
+                });                
 
             } else {
                 fireChat(event);
