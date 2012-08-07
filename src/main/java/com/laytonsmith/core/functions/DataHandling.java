@@ -1091,6 +1091,11 @@ public class DataHandling {
                     //Yup! It worked. It's a const proc.
                     return c;
                 } catch(ConfigRuntimeException e){
+                    if(e.getExceptionType() == ExceptionType.InvalidProcedureException){
+                        //This is the only valid exception that doesn't strictly mean it's a bad
+                        //call.
+                        return null;
+                    }
                     throw e; //Rethrow it. Since the functions are all static, and we actually are
                     //running it with a mostly legit environment, this is a real runtime error,
                     //and we can safely convert it to a compile error upstream
