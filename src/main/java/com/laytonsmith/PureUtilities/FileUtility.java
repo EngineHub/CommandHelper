@@ -32,24 +32,21 @@ public class FileUtility {
         }
     }
 
+    public static String read(File f) throws FileNotFoundException{
+		try {
+			return read(f, "UTF-8");
+		} catch (UnsupportedEncodingException ex) {
+			throw new Error(ex);
+		}
+    }
     /**
      * Returns the contents of this file as a string
      * @param f The file to read
      * @return a string with the contents of the file
      * @throws FileNotFoundException 
      */
-    public static String read(File f) throws FileNotFoundException {
-        StringBuilder t = new StringBuilder();
-        String NL = System.getProperty("line.separator");
-        Scanner scanner = new Scanner(new FileInputStream(f));
-        try {
-            while (scanner.hasNextLine()) {
-                t.append(scanner.nextLine()).append(NL);
-            }
-        } finally {
-            scanner.close();
-        }
-        return t.toString();
+    public static String read(File f, String charset) throws FileNotFoundException, UnsupportedEncodingException {	
+	return StreamUtils.GetString(new FileInputStream(f), charset);
     }
 
     /**
@@ -190,5 +187,26 @@ public class FileUtility {
      */
     public static boolean move(File from, File to){
         return from.renameTo(to);
+    }
+    
+    /**
+     * Recursively deletes a file/folder structure. True is returned
+     * if ALL files were deleted. If it returns false, some or none of the
+     * files may have been deleted.
+     * @param file
+     * @return 
+     */
+    public static boolean recursiveDelete(File file){
+	    if(file.isDirectory()){
+		    boolean ret = true;
+		    for(File f : file.listFiles()){
+			    if(!recursiveDelete(f)){
+				    ret = false;
+			    }
+		    }
+		    return ret;
+	    } else {
+		    return file.delete();
+	    }
     }
 }

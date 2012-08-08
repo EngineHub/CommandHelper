@@ -100,6 +100,10 @@ public final class DataSourceModel {
         setValue(new ArrayList<String>(Arrays.asList(key)), tree, value);
     }
     
+    public void clearKey(String [] key){
+	    set(key, null);
+    }
+    
     private String getValue(List<String> keys, GenericTreeNode<Pair<String, String>> treeNode){
         String value = null;
         if(!keys.isEmpty()){
@@ -133,6 +137,19 @@ public final class DataSourceModel {
                 found = new GenericTreeNode<Pair<String, String>>(new Pair<String, String>(key, null));
                 treeNode.addChild(found);
             }
+	    if(value == null){
+		    if(keys.isEmpty()){
+			    //We need to remove this node.
+			    for(int i = 0; i < treeNode.getNumberOfChildren(); i++){
+				    GenericTreeNode<Pair<String, String>> node = treeNode.getChildAt(i);
+				    if(node.getData().getKey().equals(key)){
+					    treeNode.removeChildAt(i);
+					    break;
+				    }
+			    }
+			    return;
+		    }
+	    }
             setValue(keys, found, value);
         }
     }

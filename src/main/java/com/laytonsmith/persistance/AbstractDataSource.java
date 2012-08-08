@@ -2,6 +2,7 @@ package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.datasource;
+import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,6 +22,15 @@ public abstract class AbstractDataSource implements DataSource {
 	protected final URI uri;
 	protected final Set<DataSourceModifier> modifiers = EnumSet.noneOf(DataSourceModifier.class);
 	private Set<DataSourceModifier> invalidModifiers;
+	
+	public String toString(){
+		StringBuilder b = new StringBuilder();
+		for(DataSourceModifier m : modifiers){
+			b.append(m.getName().toLowerCase()).append(":");
+		}
+		b.append(uri.toString());
+		return b.toString();
+	}
 
 	protected AbstractDataSource(URI uri) throws DataSourceException {
 		this.uri = uri;
@@ -85,6 +95,22 @@ public abstract class AbstractDataSource implements DataSource {
 			modifiers.add(DataSourceModifier.ASYNC);
 		}
 		modifiers.add(modifier);
+	}
+		
+
+	public boolean hasKey(String[] key) throws DataSourceException {
+		return get(key, false) != null;
+	}
+	
+	/**
+	 * By default, setting the value to null should clear the value.
+	 * @param key
+	 * @throws ReadOnlyException
+	 * @throws DataSourceException
+	 * @throws IOException 
+	 */
+	public void clearKey(String [] key) throws ReadOnlyException, DataSourceException, IOException{
+		set(key, null);
 	}
 
 	/**

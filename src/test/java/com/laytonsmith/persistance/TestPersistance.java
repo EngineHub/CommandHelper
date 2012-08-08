@@ -11,10 +11,8 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import org.junit.After;
@@ -78,7 +76,7 @@ public class TestPersistance {
 //    }
     @Test
     public void testJSON() {
-        assertEquals("{\"a\":{\"b\":{\"c1\":\"value2\",\"c2\":\"value3\",\"_\":\"value1\"}}}\n", doOutput("json://test.json", testData));
+        assertEquals("{\"a\":{\"b\":{\"c1\":\"value2\",\"c2\":\"value3\",\"_\":\"value1\"}}}", doOutput("json://test.json", testData));
     }
 
     @Test
@@ -187,6 +185,7 @@ public class TestPersistance {
         network.set(new String[]{"subset", "file1"}, "value");
         network.set(new String[]{"subset", "file2"}, "value");
         network.getNamespace(new String[]{"subset"});
+	deleteFiles("folder/");
     }
     
     @Test
@@ -198,7 +197,27 @@ public class TestPersistance {
         namespace.put(new String[]{"subset", "subset", "file1"}, "value");
         namespace.put(new String[]{"subset", "subset", "file2"}, "value");
         assertEquals(stringifyMap(namespace), stringifyMap(network.getNamespace(new String[]{"subset", "subset"})));	    
+	deleteFiles("folder/");
     }
+    
+    @Test
+    public void testHasValue() throws Exception{
+	    PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"));
+	    network.set(new String[]{"key"}, "value");
+	    assertTrue(network.hasKey(new String[]{"key"}));
+	    deleteFiles("folder/");
+    }
+    
+    @Test
+    public void testClearValue1() throws Exception{
+	    PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"));
+	    network.set(new String[]{"key"}, "value");
+	    assertTrue(network.get(new String[]{"key"}).equals("value"));
+	    network.clearKey(new String[]{"key"});
+	    assertFalse(network.hasKey(new String[]{"key"}));
+	    assertEquals("{}", FileUtility.read(new File("folder/default.json")));
+	    deleteFiles("folder/");
+    }    
     
 
     public String doOutput(String uri, Map<String[], String> data) {
@@ -259,6 +278,12 @@ public class TestPersistance {
             String[] split = value.split("=");
             ds.set(split[0].split("\\."), split[1]);
         }
+    }
+    
+    public static void deleteFiles(String ... files){
+	    for(String f : files){
+		    FileUtility.recursiveDelete(new File(f));
+	    }
     }
 
     public String getConnection(String key, String... mapping) throws Exception {

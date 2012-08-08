@@ -52,6 +52,12 @@ public class PersistanceNetwork {
         //Data sources are lazily loaded, so we don't need to do anything right now to load them.
     }
     
+    /**
+     * Returns the data source object for this URI.
+     * @param uri
+     * @return
+     * @throws DataSourceException 
+     */
     private DataSource getDataSource(URI uri) throws DataSourceException{        
         if(!dsCache.containsKey(uri)){
             dsCache.put(uri, DataSourceFactory.GetDataSource(uri));
@@ -59,14 +65,53 @@ public class PersistanceNetwork {
         return dsCache.get(uri);
     }
     
+    /**
+     * Returns the value for this key, or null if it doesn't exist.
+     * @param key
+     * @return
+     * @throws DataSourceException 
+     */
     public synchronized String get(String [] key) throws DataSourceException{        
         DataSource ds = getDataSource(filter.getConnection(key));
         return ds.get(key, false);
     }
     
+    /**
+     * Sets the value for this key, and returns true if it was actually
+     * changed. (Which typically implies that the model was changed.)
+     * @param key
+     * @param value
+     * @return
+     * @throws DataSourceException
+     * @throws ReadOnlyException
+     * @throws IOException 
+     */
     public synchronized boolean set(String [] key, String value) throws DataSourceException, ReadOnlyException, IOException{
         DataSource ds = getDataSource(filter.getConnection(key));
         return ds.set(key, value);
+    }
+    
+    /**
+     * Returns true if the key is actually set; that is if a call to get() would
+     * not return null.
+     * @param key
+     * @return
+     * @throws DataSourceException 
+     */
+    public synchronized boolean hasKey(String[] key) throws DataSourceException{
+	    DataSource ds = getDataSource(filter.getConnection(key));
+	    return ds.hasKey(key);
+    }
+    
+    /**
+     * Removes the key entirely.
+     * @param key
+     * @return
+     * @throws DataSourceException 
+     */
+    public synchronized void clearKey(String[] key) throws DataSourceException, ReadOnlyException, IOException{
+	    DataSource ds = getDataSource(filter.getConnection(key));
+	    ds.clearKey(key);
     }
     
     /**
