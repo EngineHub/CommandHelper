@@ -2,6 +2,8 @@ package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.datasource;
+import com.laytonsmith.persistance.io.ConnectionMixin;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
@@ -22,18 +24,13 @@ public abstract class AbstractDataSource implements DataSource {
 	protected final URI uri;
 	protected final Set<DataSourceModifier> modifiers = EnumSet.noneOf(DataSourceModifier.class);
 	private Set<DataSourceModifier> invalidModifiers;
-	
-	public String toString(){
-		StringBuilder b = new StringBuilder();
-		for(DataSourceModifier m : modifiers){
-			b.append(m.getName().toLowerCase()).append(":");
-		}
-		b.append(uri.toString());
-		return b.toString();
-	}
+	private ConnectionMixin connectionMixin;
+	private ConnectionMixinFactory.ConnectionMixinOptions mixinOptions;
+			
 
-	protected AbstractDataSource(URI uri) throws DataSourceException {
+	protected AbstractDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions mixinOptions) throws DataSourceException {
 		this.uri = uri;
+		this.mixinOptions = mixinOptions;
 		setInvalidModifiers();
 		DataSourceModifier[] implicit = this.implicitModifiers();
 		if (implicit != null) {
@@ -41,7 +38,13 @@ public abstract class AbstractDataSource implements DataSource {
 				addModifier(dsm);
 			}
 		}
-		populate();
+	}
+	
+	protected ConnectionMixin getConnectionMixin() throws DataSourceException{
+		if(connectionMixin == null){
+			connectionMixin = ConnectionMixinFactory.GetConnectionMixin(uri, modifiers, mixinOptions, getBlankDataModel());
+		}
+		return connectionMixin;
 	}
 
 	/**
@@ -172,17 +175,24 @@ public abstract class AbstractDataSource implements DataSource {
 	public final List<DataSourceModifier> getModifiers() {
 		return new ArrayList<DataSourceModifier>(modifiers);
 	}
-
+	
 	/**
-	 * Given a URI, extracts the file path from it. Unlike URI.getPath(),
-	 * this will actually pull the appropriate information from the URI,
-	 * regardless of if this is relative or absolute.
+	 * Subclasses that need a certain type of file to be the "blank" version
+	 * of a data model can override this. By default, null is
+	 * returned.
 	 *
-	 * @param uri
 	 * @return
 	 */
-	protected static String GetFilePath(URI uri) {
-		String file = (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath();
-		return file;
+	protected String getBlankDataModel() {
+		return "";
+	}
+	
+	public String toString(){
+		StringBuilder b = new StringBuilder();
+		for(DataSourceModifier m : modifiers){
+			b.append(m.getName().toLowerCase()).append(":");
+		}
+		b.append(uri.toString());
+		return b.toString();
 	}
 }

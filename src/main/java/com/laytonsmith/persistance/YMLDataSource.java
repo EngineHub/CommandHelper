@@ -2,6 +2,7 @@ package com.laytonsmith.persistance;
 
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.net.URI;
 import java.util.Map;
 import java.util.Set;
@@ -15,8 +16,8 @@ import org.yaml.snakeyaml.Yaml;
 @datasource("yml")
 public class YMLDataSource extends StringDataSource{
     
-    public YMLDataSource(URI uri) throws DataSourceException{
-        super(uri);
+    public YMLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
+        super(uri, options);
     }    
 
     public DataSourceModifier[] implicitModifiers() {

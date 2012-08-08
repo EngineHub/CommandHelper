@@ -18,5 +18,13 @@ public class DataSourceException extends Exception {
     
     public DataSourceException(String msg, Throwable reason) {
         super(msg, reason);
-    }        
+    }
+    
+    public Throwable getRootCause(){
+	    Throwable t = this.getCause();
+	    while(t != null){
+		    t = t.getCause();
+	    }
+	    return t;
+    }
 }

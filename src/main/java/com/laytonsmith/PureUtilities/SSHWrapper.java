@@ -125,7 +125,7 @@ public class SSHWrapper {
 				});
 				//10 second timeout
 				sshSession.connect(10 * 1000);
-				//TODO: Finish this http://www.jcraft.com/jsch/examples/
+				// http://www.jcraft.com/jsch/examples/
 				if (from.contains("@")) {
 					//We are pulling a remote file here, so we need to use SCPFrom
 					File localFile = new File(to);
@@ -294,7 +294,7 @@ public class SSHWrapper {
 			out.write(buf, 0, 1);
 			out.flush();
 		}
-		
+
 		channel.disconnect();
 	}
 
@@ -350,51 +350,53 @@ public class SSHWrapper {
 		}
 		return b;
 	}
-	
+
 	/**
-	 * Given an input stream, writes it out to a remote file system.	 
-	 * The path given (to) must be a remote path.
-	 * @param is 
+	 * Given an input stream, writes it out to a remote file system. The
+	 * path given (to) must be a remote path.
+	 *
+	 * @param is
 	 */
-	public static void SCPWrite(InputStream is, String to) throws IOException{
+	public static void SCPWrite(InputStream is, String to) throws IOException {
 		File temp = File.createTempFile("methodscript-temp-file", ".tmp");
 		FileOutputStream fos = new FileOutputStream(temp);
 		StreamUtils.Copy(is, fos);
 		fos.close();
-		try{
+		try {
 			SCP(temp.getAbsolutePath(), to);
 		} finally {
 			temp.delete();
 			temp.deleteOnExit();
 		}
 	}
-	
+
 	/**
 	 * Returns an InputStream to a file on a remote file system.
+	 *
 	 * @param from
-	 * @return 
+	 * @return
 	 */
-	public static InputStream SCPRead(String from) throws IOException{
+	public static InputStream SCPRead(String from) throws IOException {
 		File temp = File.createTempFile("methodscript-temp-file", ".tmp");
 		SCP(from, temp.getAbsolutePath());
 		FileInputStream fis = new FileInputStream(temp);
 		temp.deleteOnExit();
 		return fis;
 	}
-	
+
 	/**
 	 * Writes some textual contents to a remote file.
+	 *
 	 * @param contents
-	 * @param to 
+	 * @param to
 	 */
-	public static void SCPWrite(String contents, String to) throws IOException{
+	public static void SCPWrite(String contents, String to) throws IOException {
 		SCPWrite(StreamUtils.GetInputStream(contents), to);
 	}
-	
-	public static String SCPReadString(String from) throws IOException{
+
+	public static String SCPReadString(String from) throws IOException {
 		return StreamUtils.GetString(SCPRead(from));
 	}
-	
 //	/**
 //	 * Executes a command over ssh.
 //	 */

@@ -1,6 +1,7 @@
 package com.laytonsmith.persistance;
 
 import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -27,6 +28,7 @@ public class PersistanceNetwork {
     
     private DataSourceFilter filter;
     private Map<URI, DataSource> dsCache;
+    private ConnectionMixinFactory.ConnectionMixinOptions options;
     /**
      * Given a configuration and a default URI, constructs a new
      * persistance network. The defaultURI is used in the event that the
@@ -35,8 +37,8 @@ public class PersistanceNetwork {
      * @param configuration
      * @param defaultURI 
      */
-    public PersistanceNetwork(File configuration, URI defaultURI) throws FileNotFoundException, DataSourceException{
-        this(FileUtility.read(configuration), defaultURI);
+    public PersistanceNetwork(File configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws FileNotFoundException, DataSourceException{
+        this(FileUtility.read(configuration), defaultURI, options);
     }
     /**
      * Given a configuration and a default URI, constructs a new
@@ -46,9 +48,10 @@ public class PersistanceNetwork {
      * @param configuration 
      * @param defaultURI 
      */
-    public PersistanceNetwork(String configuration, URI defaultURI) throws DataSourceException{
+    public PersistanceNetwork(String configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
         filter = new DataSourceFilter(configuration, defaultURI);
         dsCache = new TreeMap<URI, DataSource>();
+	this.options = options;
         //Data sources are lazily loaded, so we don't need to do anything right now to load them.
     }
     
@@ -60,7 +63,7 @@ public class PersistanceNetwork {
      */
     private DataSource getDataSource(URI uri) throws DataSourceException{        
         if(!dsCache.containsKey(uri)){
-            dsCache.put(uri, DataSourceFactory.GetDataSource(uri));
+            dsCache.put(uri, DataSourceFactory.GetDataSource(uri, options));
         }
         return dsCache.get(uri);
     }

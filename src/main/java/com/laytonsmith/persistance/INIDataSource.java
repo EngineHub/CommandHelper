@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.URI;
@@ -18,8 +19,8 @@ import java.util.Properties;
 @datasource("ini")
 public class INIDataSource extends StringDataSource {
 
-    public INIDataSource(URI uri) throws DataSourceException{
-        super(uri);
+    public INIDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
+        super(uri, options);
     }
     
     @Override

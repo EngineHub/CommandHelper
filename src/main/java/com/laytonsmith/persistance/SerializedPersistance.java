@@ -4,6 +4,7 @@ import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
@@ -34,16 +35,15 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
     private File storageLocation;
 
     public SerializedPersistance(File database) throws DataSourceException {
-        super(database.toURI());
+        super(database.toURI(), new ConnectionMixinFactory.ConnectionMixinOptions());
         storageLocation = database;
     }
     
-    public SerializedPersistance(URI uri) throws DataSourceException{
-        super(uri);
-        String file = GetFilePath(uri);
+    public SerializedPersistance(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
+        super(uri, options);
+        String file = (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath();
         storageLocation = new File(file);
         finishedInitializing = true;
-        populate();
     }
 
     /**

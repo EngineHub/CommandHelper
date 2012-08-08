@@ -8,6 +8,7 @@ import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.PureUtilities.Util;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.YMLDataSource;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -184,7 +185,7 @@ public class Main {
             throw new Exception(new FileNotFoundException(String.format("%s does not exist", file.getPath())));
         }
         try {
-            DataSource ds = new YMLDataSource(new URI("yml://" + file.getAbsolutePath()));
+            DataSource ds = new YMLDataSource(new URI("yml://" + file.getAbsolutePath()), new ConnectionMixinFactory.ConnectionMixinOptions());
             version = ds.get(new String[]{"version"}, false);
             if(version == null){
                 throw new Exception("Invalid plugin.yml supplied");
