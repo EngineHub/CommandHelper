@@ -26,7 +26,8 @@ public class DocGen {
 
     public static void main(String[] args) {
         //functions("wiki", api.Platforms.INTERPRETER_JAVA);
-        events("wiki");
+        //events("wiki");
+	    System.out.println(Template("persistance_network"));
     }
 
     public static void functions(String type, api.Platforms platform) {
@@ -227,6 +228,10 @@ public class DocGen {
                     + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]"
                     + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page</div>");
         }
+    }
+    
+    public static String Template(String template){
+	    return DocGenTemplates.Generate(template);
     }
 
     public static void events(String type) {

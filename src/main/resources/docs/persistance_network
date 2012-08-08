@@ -1,0 +1,215 @@
+{{unimplemented}}
+
+The Persistance Network allows for a flexible, efficient, and intuitive way to store your persistance data. 
+The general idea is that your code doesn't need to know exactly where the data is stored, it simply needs to
+know what it's address is. Much like the DNS system, you don't need to remember 173.194.37.65, you just need
+to remember google.com. Persistance data is stored the same way as normal, as far as your code is concerned,
+but there is an extra layer of abstraction on top that allows you to customize precisely where data is stored 
+Like the DNS system, instead of knowing precisely how or where the data is stored, you just remember its 
+"address" (the key name). There are three factors you need to understand when dealing with the Persistance Network: connections, filters, and controls.
+
+==Connections==
+A connection is a read/write or read-only data source, to which persistance data is mapped.
+There are several supported formats, and there is the potential to add more in the future.
+In your configuration file, a connection can be aliased, to make re-specifying a connection 
+easier, but the actual connection specification is a URI that maps to a specific data source. 
+For instance, the default serialized persistance format is simply a pointer to a file:
+<pre>ser:///home/data/persistance.ser</pre>
+
+There are several different connection types supported, and each has a slightly different requirement:
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" align="left" class="wikitable"
+|-
+! scope="col" width="10%" | Type
+! scope="col" width="50%" | Description
+! scope="col" width="30%" | Example
+! scope="col" width="10%" | Since
+%%persistance_connections%%
+|}
+
+In addition, several modifier types can be specified, which modify the connection type. 
+They are specified as extra protocols at the start of the URI.
+<pre>transient:readonly:file://persistance.ser</pre>
+
+In the above example, the <code>transient</code> and <code>read-only</code> flags have been 
+added to the connection. The specific meaning of each flag is as follows, and they aren't always 
+applicable to all connection types.
+
+{| width="100%" cellspacing="1" cellpadding="1" border="1" align="left" class="wikitable"
+|-
+! scope="col" width="20%" | Flag Name
+! scope="col" width="80%" | Description
+%%data_source_modifiers%%
+|}
+
+Invalid modifiers will cause a warning to be raised during startup, but will otherwise be ignored.
+
+A note on file based URIs: The file path is specified after two forward slashes, so an absolute 
+path on unix looks like this: yml:///path/to/file, and an absolute path on windows looks like 
+this: yml://C:/path/to/file (alternatively yml://C:\path\to\file will also work). On all 
+platforms, a relative path would look like this: yml://path/to/file.
+
+There are special implementation considerations you must take into account if you are writing 
+an external system that integrates with the persistance network, (including if you edit the 
+files by hand), so you should read up on the [[CommandHelper/Persistance_Network_Integration|Persistance Network Integration]] 
+guide before you attempt to edit the output files.
+
+===Connection Aliases===
+Often times you will want to re-use a connection, but you don't want to have to re-specify the 
+full connection details for each filter. In this case, you can use connection aliases. A 
+connection alias looks just like a filter, but the filter name starts with a dollar sign.
+<pre>
+$connection=mysql://username:password@host:3304/database/table
+</pre>
+
+Then, elsewhere, instead of rewriting the entire connection string, you may simply use <code>$connection</code>
+
+==Filters==
+
+Filters are what map namespaces to connections. The configuration file (persistance_network.ini) 
+is used to specify the actual filters. (An example is shown below). It is important to note that 
+the namespace conventions followed by the filter system map to the REAL namespace conventions, not 
+the namespaces you use in code. For instance, if you were to make a call to 
+<code>store_value('name.of.key', 'value')</code>, the value will actually be stored in 
+<code>storage.name.of.key</code>. For a more detailed description of the namespaces, see 
+[[CommandHelper/Data_Manager#Namespaces|this wiki page]].
+
+A filter is a simple regex style matcher; if a key matches this filter, it is stored via 
+this connection. Filters are specified as such: <code>filter=connection</code> where 
+connection is either a full connection URI, or an alias, and filter is a matcher as 
+specified below. Filters are matched from best fit to worst fit, top to bottom. The 
+following wildcards are supported:
+
+{| cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|- 
+| * || Any value in this namespace, but don't cross namespace boundries
+|-
+| ** || Any value in this namespace, and cross namespace boundries
+|}
+
+Additionally, captures are also supported using parenthesis.
+
+If we are attempting to store a value in "storage.key.name", and we have the following 
+two filters defined:
+<pre>
+storage.**.name=$connection1
+storage.**=$connection2
+</pre>
+Then it would be stored in $connection1, since that is a more specific match. It is defined 
+as a more specific match, because, minus wildcards, more namespaces match. This mechanism of 
+filter competition allows for very specific control over what data goes where, while also not 
+having to worry about providing specific filters for all possible namespaces. If not otherwise 
+specified, or if the connection is invalid, The filter ** is ALWAYS defined to be a connection 
+to the default serialized persistance file, so all otherwise unmatched keys will go there.
+
+=== Captures ===
+
+Captures can be used to use a portion of the key name to determine where the file is stored. 
+This is useful for automatically delimiting your output files based on a namespace, for instance, 
+if you wanted to have a separate file for each player, this becomes trivial to map. To capture, 
+use parenthesis. To use a value, use $1, $2, $3, etc. For example, let's say we want to have a 
+separate file for the data of each player, and assume that if we store player data, we will 
+always use <code>store_value('player.playername.key', 'value')</code>. In this case, the 
+following mapping would work:
+
+<pre>
+storage.players.(*).**=yml://players/$1.yml
+</pre>
+
+Now, if we run <code>store_value('players.wraithguard01.key', 'value')</code>, this will 
+create a file at players/wraithguard01.yml, with the value "value" stored at "storage.players.wraithguard01.key". 
+This works because files (and parent folders) are created automatically as needed.
+
+One limitation of captures: If you try to use get_values() on a namespace that retains an unresolved 
+capture, the call will fail. For instance, assume the following configuration:
+
+<pre>
+a.b.(*)=yml://folder/$1.yml
+a.z.y.x=yml://file1.yml
+a.z.a=yml://file2.yml
+a.b.c.(*)=yml://folder2/$1.yml
+z.(*).m=yml://file-$1.yml
+</pre>
+
+In this case, the key "a.b.c" will map to "yml://folder/c.yml" and "a.b.c.d" will map to 
+"yml://folder2/d.yml". If we call <code>get_value('a.b.c')</code>, it is known that it 
+should map to the first entry in configuration, because we have a complete match. The 
+capture will be filled in with "c" in this case, so the resulting connection would be 
+"yml://folder/c.yml". For single keys, this will always work, because matches will be 
+always fully resolved. However, in the case of get_values(), we must enumerate all the 
+data sources that all the namespaces could be in. Lets look at a case with no issue: 
+<code>get_values('a.z')</code>. When we look at all the possible connections, the only 
+two that could possibly match are the "a.z.y.x" and "a.z.a" connections. This will work, 
+because we can see that all connections will be resolved, we know we need to look in 
+"yml://file1.yml" and "yml://file2.yml", and those are the only connections that could 
+possibly contain those keys. However, let's consider the case where we look for 
+<code>get_values('a.b')</code>. Just at a glance, we know we want to look in the 
+first and fourth connections, but wait! Both of them still have wildcards! If we 
+try to match up the connections, we get connections that still have wildcards in them. 
+We can't enumerate through these connections' values, because we don't have a full 
+connection path. What if there are files littered all in folder/*? We cannot reasonably 
+connect to all these possible files in the folder, to see if it is a valid connection or 
+not. Further, assuming you had something with infinite possibilities, this becomes an 
+impossible problem.
+
+If you ask for a namespace, and it ends up not resolving all the possible connections, 
+the call to get_values will throw an UnresolvedCaptureException.
+
+==Controls==
+
+It is sometimes necessary to transfer data from one data source to another, in which 
+case you can use the data manager tools to do so. This should be done while the server 
+is off, to ensure corruption does not occur, though it is possible to do this with the 
+server running if you're careful. To transfer data, simply specify the keys to match, 
+and the destination connection. The data will be transferred appropriately. If a 
+conflict would occur, you will interactively be prompted with an action. Additionally, 
+when you re-map these keys, your persistance_network.ini file will AUTOMATICALLY be 
+updated to reflect the new mappings. This is the appropriate way to make modifications 
+to your data mappings, while ensuring that no data is lost in the process. Consider the 
+following scenario:
+
+We have data stored in a file, persistance.ser, and we want to change the mapping of 
+storage.player.** over to a database. If we simply changed it in the mapping file, all 
+the existing data would be hidden. We would then have to manually export/import the 
+individual data beforehand, then change the mappings; a tedious process. Instead, we 
+can use the transfer tool. The tool will move the data from the persistance.ser file, 
+into the database, delete the data in the persistance.ser file, then add an entry into 
+the mapping file (or change the existing one): <code>storage.player.**=$mysql</code>. 
+All this is done for you, in one step.
+
+Sometimes, however, you have data in a source that isn't currently mapped in. In this 
+case, you want to use the import tool, not the transfer tool. Accordingly, if you want 
+to copy data, and not move it, you want to use the export tool. You can also use the 
+data manager to show hidden data, that is, data that is stored in the data store 
+somewhere, but isn't accessible due to bad mappings.
+
+==Usage==
+
+Your code will not change. To use this feature, you simply need to change the key -> 
+connection mappings in the persistance_network.ini file. In the configuration file, 
+mappings and connection aliases are stored INI style, as shown below. Local file 
+paths are relative to the configuration file itself.
+
+===Example===
+
+<pre>
+#Lines starting with # are considered comments
+
+#These are our aliases
+$mysql=mysql://root:password@localhost/database/table
+$sp=ser://persistance.ser
+$remote=transient:readonly:http:yml://www.example.com/data.yml
+
+#Catch all default
+**=$sp
+
+#User based settings should be stored in the database
+storage.players.**=$mysql
+
+#Assuming the page at www.example.com/data.yml was serving a yml file
+#that got server information, we might map that accordingly
+storage.server_info.**=$remote
+
+</pre>
+
+{{LearningTrail}}
