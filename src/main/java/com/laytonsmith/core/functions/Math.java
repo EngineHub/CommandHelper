@@ -2,14 +2,15 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.functions.Math;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.ArrayList;

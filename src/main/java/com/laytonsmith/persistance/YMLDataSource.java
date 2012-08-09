@@ -5,7 +5,6 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.net.URI;
 import java.util.Map;
-import java.util.Set;
 import org.yaml.snakeyaml.DumperOptions;
 import org.yaml.snakeyaml.Yaml;
 

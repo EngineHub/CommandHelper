@@ -1,6 +1,5 @@
 package com.laytonsmith.persistance;
 
-import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.net.URI;
@@ -9,7 +8,7 @@ import java.net.URI;
  *
  * @author lsmith
  */
-@datasource("csv")
+//@datasource("csv")
 public class CSVDataSource extends StringDataSource {
 	
 	public CSVDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{

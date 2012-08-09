@@ -3,12 +3,10 @@ package com.laytonsmith.persistance.io;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.DataSourceException;
 import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;
-import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A ConnectionMixin class dictates how a data source connects to its data.
@@ -60,10 +58,14 @@ public class ConnectionMixinFactory {
 		} else {
 			//Else it's a file connection, or null, but we will go ahead
 			//and assume it's file.
-			if(modifiers.contains(DataSource.DataSourceModifier.READONLY)){
-				return new ReadOnlyFileConnection(uri, options.workingDirectory, blankDataModel);
-			} else {
-				return new ReadWriteFileConnection(uri, options.workingDirectory, blankDataModel);
+			try {
+				if(modifiers.contains(DataSource.DataSourceModifier.READONLY)){
+					return new ReadOnlyFileConnection(uri, options.workingDirectory, blankDataModel);
+				} else {
+					return new ReadWriteFileConnection(uri, options.workingDirectory, blankDataModel);
+				}
+			} catch (IOException ex) {
+				throw new DataSourceException("IOException.", ex);
 			}
 		}
 	}

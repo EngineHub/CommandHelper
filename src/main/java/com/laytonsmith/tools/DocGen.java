@@ -3,8 +3,8 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.core.Documentation;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.events.Event;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;

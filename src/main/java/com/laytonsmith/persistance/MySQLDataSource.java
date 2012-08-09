@@ -1,6 +1,5 @@
 package com.laytonsmith.persistance;
 
-import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
@@ -11,7 +10,7 @@ import java.util.List;
  *
  * @author lsmith
  */
-@datasource("mysql")
+//@datasource("mysql")
 public class MySQLDataSource extends AbstractDataSource{
 	
 	public MySQLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{

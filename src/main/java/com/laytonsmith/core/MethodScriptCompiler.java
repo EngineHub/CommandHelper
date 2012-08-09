@@ -173,7 +173,7 @@ public final class MethodScriptCompiler {
                     buf = new StringBuffer();
                 }
                 token_list.add(new Token(TType.SUBTRACTION, "-", target));  
-                continue;
+               continue;
             }
             //Protect against commands
             if(c == '/' && !Character.isLetter(c2) && !state_in_quote){

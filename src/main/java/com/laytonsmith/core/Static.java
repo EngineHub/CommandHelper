@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.PureUtilities.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -12,6 +11,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Debug;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.persistance.SerializedPersistance;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;

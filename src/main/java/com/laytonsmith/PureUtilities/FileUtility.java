@@ -21,7 +21,7 @@ public class FileUtility {
      * @param r The LineCallback callback object
      */
     public static void CallbackReader(File f, LineCallback lc) throws FileNotFoundException {
-        String NL = System.getProperty("line.separator");
+        String NL = System.getProperty("line.separator");	
         Scanner scanner = new Scanner(new FileInputStream(f));
         try {
             while (scanner.hasNextLine()) {
@@ -32,7 +32,7 @@ public class FileUtility {
         }
     }
 
-    public static String read(File f) throws FileNotFoundException{
+    public static String read(File f) throws IOException{
 		try {
 			return read(f, "UTF-8");
 		} catch (UnsupportedEncodingException ex) {
@@ -45,8 +45,15 @@ public class FileUtility {
      * @return a string with the contents of the file
      * @throws FileNotFoundException 
      */
-    public static String read(File f, String charset) throws FileNotFoundException, UnsupportedEncodingException {	
-	return StreamUtils.GetString(new FileInputStream(f), charset);
+    public static String read(File f, String charset) throws IOException, UnsupportedEncodingException {
+	    FileInputStream fis = new FileInputStream(f);
+	    try{
+		return StreamUtils.GetString(fis, charset);
+	    } finally {
+		    fis.close();
+		    fis = null;
+		    System.gc();
+	    }
     }
 
     /**
@@ -204,8 +211,11 @@ public class FileUtility {
 				    ret = false;
 			    }
 		    }
+		    if(!file.delete()) {
+			    ret = false;
+		    }
 		    return ret;
-	    } else {
+	    } else {		    
 		    return file.delete();
 	    }
     }

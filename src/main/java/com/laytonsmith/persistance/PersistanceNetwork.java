@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
-import org.bukkit.util.FileUtil;
 
 /**
  * A persistance network is a group of data sources that can act transparently
@@ -37,7 +36,7 @@ public class PersistanceNetwork {
      * @param configuration
      * @param defaultURI 
      */
-    public PersistanceNetwork(File configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws FileNotFoundException, DataSourceException{
+    public PersistanceNetwork(File configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws IOException, DataSourceException{
         this(FileUtility.read(configuration), defaultURI, options);
     }
     /**

@@ -205,10 +205,11 @@ public class TestPersistance {
 	public void testClearValue1() throws Exception {
 		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"), options);
 		network.set(new String[]{"key"}, "value");
+		network.set(new String[]{"key2"}, "value");
 		assertTrue(network.get(new String[]{"key"}).equals("value"));
 		network.clearKey(new String[]{"key"});
 		assertFalse(network.hasKey(new String[]{"key"}));
-		assertEquals("{}", FileUtility.read(new File("folder/default.json")));
+		assertEquals("{\"key2\":\"value\"}", FileUtility.read(new File("folder/default.json")));
 		deleteFiles("folder/");
 	}
 

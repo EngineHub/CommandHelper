@@ -4,7 +4,6 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 /**
  * All data sources must implement this interface. It provides methods to gather

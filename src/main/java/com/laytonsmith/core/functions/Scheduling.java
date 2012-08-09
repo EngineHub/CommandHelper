@@ -2,8 +2,8 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;

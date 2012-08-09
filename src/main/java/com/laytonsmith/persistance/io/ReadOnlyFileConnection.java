@@ -1,6 +1,5 @@
 package com.laytonsmith.persistance.io;
 
-import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.ReadOnlyException;
 import java.io.File;
 import java.io.IOException;
@@ -11,7 +10,7 @@ import java.net.URI;
  * @author lsmith
  */
 public class ReadOnlyFileConnection extends ReadWriteFileConnection{
-	public ReadOnlyFileConnection(URI uri, File workingDirectory, String blankDataModel){
+	public ReadOnlyFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException{
 		super(uri, workingDirectory, blankDataModel);
 	}
 

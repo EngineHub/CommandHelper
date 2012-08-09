@@ -1,8 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;

@@ -15,11 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.Set;
 import java.util.TreeMap;
-import java.util.TreeSet;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -69,7 +65,7 @@ public class DataSourceFilter {
 	 * to be unreadable
 	 * @throws NullPointerException If the defaultURI is null
 	 */
-	public DataSourceFilter(File file, URI defaultURI) throws FileNotFoundException, DataSourceException {
+	public DataSourceFilter(File file, URI defaultURI) throws IOException, DataSourceException {
 		try {
 			process(FileUtility.read(file), defaultURI);
 		} catch (DataSourceException e) {

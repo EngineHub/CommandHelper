@@ -1,7 +1,6 @@
 package com.laytonsmith.persistance.io;
 
 import com.laytonsmith.PureUtilities.WebUtility;
-import com.laytonsmith.persistance.DataSourceException;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URI;

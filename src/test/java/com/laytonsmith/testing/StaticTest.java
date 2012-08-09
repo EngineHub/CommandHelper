@@ -25,8 +25,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;

@@ -1,16 +1,9 @@
 package com.laytonsmith.persistance;
 
-import com.laytonsmith.PureUtilities.FileUtility;
-import com.laytonsmith.PureUtilities.WebUtility;
-import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
 import java.util.List;
-import java.util.Set;
 
 /**
  * For data sources that can input and output strings, this class should be
