@@ -28,7 +28,7 @@ public class Echoes {
     public static String docs(){
         return "These functions allow you to echo information to the screen";
     }
-    @api public static class die extends AbstractFunction{
+    @api @noboilerplate public static class die extends AbstractFunction{
         public Integer []numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
@@ -69,7 +69,7 @@ public class Echoes {
         }
     }
     
-    @api public static class msg extends AbstractFunction{
+    @api @noboilerplate public static class msg extends AbstractFunction{
 
         public String getName() {
             return "msg";

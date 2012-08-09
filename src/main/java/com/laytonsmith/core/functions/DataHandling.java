@@ -3,6 +3,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.*;
@@ -190,6 +191,7 @@ public class DataHandling {
     }
 
     @api
+    @noboilerplate
     public static class _for extends AbstractFunction {
 
         public String getName() {
@@ -396,6 +398,7 @@ public class DataHandling {
     }
 
     @api
+    @noboilerplate
     public static class _while extends AbstractFunction{
 
         public String getName() {
@@ -459,6 +462,7 @@ public class DataHandling {
     }
 
     @api
+    @noboilerplate
     public static class _dowhile extends AbstractFunction{
 
         public ExceptionType[] thrown() {
@@ -1035,10 +1039,18 @@ public class DataHandling {
             String name = "";
             List<IVariable> vars = new ArrayList<IVariable>();
             GenericTreeNode<Construct> tree = null;
+	    boolean usesAssign = false;
             for (int i = 0; i < nodes.length; i++) {
                 if (i == nodes.length - 1) {
                     tree = nodes[i];
                 } else {
+			if(nodes[i].getData() instanceof CFunction){
+				if(((CFunction)nodes[i].getData()).getValue().equals("assign")){
+					if(nodes[i].getChildAt(1).getData().isDynamic()){
+						usesAssign = true;						
+					}
+				}
+			}
                     Construct cons = parent.eval(nodes[i], env);
                     if (i == 0 && cons instanceof IVariable) {
                         throw new ConfigRuntimeException("Anonymous Procedures are not allowed", ExceptionType.InvalidProcedureException, t);
@@ -1049,14 +1061,27 @@ public class DataHandling {
                             if (!(cons instanceof IVariable)) {
                                 throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, t);
                             } else {
-                                vars.add((IVariable) cons);
+				IVariable ivar = null;
+				try {
+					Construct c = cons;
+					while(c instanceof IVariable){
+						c = env.GetVarList().get(((IVariable)c).getName(), t).ival();
+					}
+					ivar = new IVariable(((IVariable)cons).getName(), c.clone(), t);
+				} catch (CloneNotSupportedException ex) {
+					//
+				}
+                                vars.add(ivar);
                             }
                         }
                     }
                 }
             }
             Procedure myProc = new Procedure(name, vars, tree, t);
-            return myProc;
+	    if(usesAssign){
+		    myProc.definitelyNotConstant();
+	    }
+	    return myProc;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {

@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.ObjectGenerator;
@@ -37,6 +38,7 @@ public class FileHandling {
 	}
 	
 	@api
+	@noboilerplate
 	public static class read extends AbstractFunction {
 
 		public static String file_get_contents(String file_location) throws Exception {
@@ -97,6 +99,7 @@ public class FileHandling {
 	}
 	
 	@api
+	@noboilerplate
 	public static class async_read extends AbstractFunction{
 
 		public ExceptionType[] thrown() {

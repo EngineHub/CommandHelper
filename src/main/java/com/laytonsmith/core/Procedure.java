@@ -178,4 +178,8 @@ public class Procedure implements Cloneable {
         }
         return clone;
     }
+
+	public void definitelyNotConstant() {
+		possiblyConstant = false;
+	}
 }
