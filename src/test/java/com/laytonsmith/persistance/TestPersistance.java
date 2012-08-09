@@ -208,6 +208,7 @@ public class TestPersistance {
 		network.set(new String[]{"key2"}, "value");
 		assertTrue(network.get(new String[]{"key"}).equals("value"));
 		network.clearKey(new String[]{"key"});
+		Thread.sleep(1000); //TODO:
 		assertFalse(network.hasKey(new String[]{"key"}));
 		assertEquals("{\"key2\":\"value\"}", FileUtility.read(new File("folder/default.json")));
 		deleteFiles("folder/");
@@ -224,6 +225,11 @@ public class TestPersistance {
 					for (String[] key : data.keySet()) {
 						ds.set(key, data.get(key));
 					}
+					Thread.sleep(1000); //TODO: This is hacky, but it should work atm.
+								//Since the file io is async, we need to wait for
+								//it to finish before we get the data.
+								//Ideally, we grab a read thread from
+								//the executor, and use that to read the file.
 					File output = GetPrivate(sdc.getConnectionMixin(), "file", File.class);
 					String out = FileUtility.read(output);
 					output.delete();

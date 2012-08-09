@@ -11,6 +11,13 @@ import java.io.RandomAccessFile;
 import java.net.URI;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.ThreadFactory;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -21,7 +28,30 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 	protected final File file;
 	protected final ZipReader reader;
 	protected final String blankDataModel;
+	/**
+	 * The executor service allows for reads and writes to be synchronized. Writes
+	 * needn't be synchronous, just merely synchronized with reads and other writes.
+	 * Reads of course need to be synchronous, at least as far as the thread
+	 * that runs the getData function is concerned, but we still need to actually
+	 * run the task on the executor service thread, so it will be synced with the
+	 * writes. All file based persistance systems should use this executor to do
+	 * the reads and writes.
+	 */
+	protected static ExecutorService Executor;	
 	public ReadWriteFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException{
+		synchronized(ReadWriteFileConnection.class){
+			if(Executor == null){
+				//We needn't set this up until we are used at least once
+				Executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
+
+					public Thread newThread(Runnable r) {
+						Thread t = new Thread(r, "MethodScriptFileQueue");
+						t.setDaemon(false);
+						return t;
+					}
+				});
+			}
+		}
 		file = new File(workingDirectory, (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath());
 		reader = new ZipReader(file);
 		if(!reader.isZipped()){
@@ -43,25 +73,35 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 			//without worrying about corruption from a write operation.
 			return reader.getFileContents();
 		}
-		RandomAccessFile raf = new RandomAccessFile(file, "rw");
-		FileLock lock = null;
-		try {
-			lock = raf.getChannel().lock();			
-			ByteBuffer buffer = ByteBuffer.allocate((int)raf.length());
-			raf.getChannel().read(buffer);
-			String s = StreamUtils.GetString(new ByteArrayInputStream(buffer.array()), "UTF-8");
-			return s;
-		} catch (FileNotFoundException e) {
-			return blankDataModel;
-		} finally {
-			if(lock != null) {
-				lock.release();
+		Future<String> future = Executor.submit(new Callable<String>(){
+
+			public String call() throws Exception {
+				RandomAccessFile raf = new RandomAccessFile(file, "rw");
+				FileLock lock = null;
+				try {
+					lock = raf.getChannel().lock();			
+					ByteBuffer buffer = ByteBuffer.allocate((int)raf.length());
+					raf.getChannel().read(buffer);
+					String s = StreamUtils.GetString(new ByteArrayInputStream(buffer.array()), "UTF-8");
+					return s;
+				} catch (FileNotFoundException e) {
+					return blankDataModel;
+				} finally {
+					if(lock != null) {
+						lock.release();
+					}
+					raf.close();
+				}				
 			}
-			raf.close();
+		});
+		try {
+			return future.get();
+		} catch (Exception ex) {
+			throw new IOException(ex);
 		}
 	}
 
-	public void writeData(String data) throws  ReadOnlyException, IOException, UnsupportedOperationException {		
+	public void writeData(final String data) throws  ReadOnlyException, IOException, UnsupportedOperationException {		
 		File outputFile = reader.getFile();
 		if(reader.isZipped()){
 			throw new ReadOnlyException("Cannot write to a zipped file.");
@@ -69,20 +109,32 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		if (outputFile.getParentFile() != null) {
 			outputFile.getParentFile().mkdirs();
 		}
-		
-		RandomAccessFile raf = new RandomAccessFile(file, "rw");
-		FileLock lock = null;
-		try{
-			lock = raf.getChannel().lock();
-			//Clear out the file
-			raf.getChannel().truncate(0);
-			//Write out the data
-			raf.getChannel().write(ByteBuffer.wrap(data.getBytes("UTF-8")));
-		} finally {
-			if(lock != null){
-				lock.release();
-			}
-			raf.close();
+		if(!file.exists()){
+			throw new FileNotFoundException(file.getAbsolutePath() + " does not exist!");
 		}
+		Executor.submit(new Callable() {
+
+			public Object call() {
+				try{
+					RandomAccessFile raf = new RandomAccessFile(file, "rw");
+					FileLock lock = null;
+					try{
+						lock = raf.getChannel().lock();
+						//Clear out the file
+						raf.getChannel().truncate(0);
+						//Write out the data
+						raf.getChannel().write(ByteBuffer.wrap(data.getBytes("UTF-8")));
+					} finally {
+						if(lock != null){
+							lock.release();
+						}
+						raf.close();
+					}				
+				} catch (Exception ex) {
+					Logger.getLogger(ReadWriteFileConnection.class.getName()).log(Level.SEVERE, null, ex);
+				}
+				return null;
+			}
+		});
 	}
 }
