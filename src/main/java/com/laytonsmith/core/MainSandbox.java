@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.core.functions.Meta;
 import com.laytonsmith.persistance.PersistanceNetwork;
@@ -29,6 +30,30 @@ public class MainSandbox {
 //			System.out.println("Fragment: " + uri.getFragment());
 //			System.out.println("\n\n***********************************\n\n");
 //		}
+		final ExecutionQueue queue = new ExecutionQueue("Test", "default");
+		for(int i = 0; i < 3; i++){
+			final int j = i;
+			new Thread(new Runnable() {
+
+				public void run() {
+					for(int i = 0; i < 10; i++){
+						final int k = i;
+						queue.push("queue-" + j, new Runnable(){
+
+							public void run() {
+								String space = "";
+								switch(j){
+									case 1: space = "     "; break;
+									case 2: space = "          "; break;
+								}
+								System.err.println("In Queue " + space + j + ": " + k);
+							}
+						});
+					}
+					System.err.println("Finished queueing up events for queue " + j);
+				}
+			}, "Thread-" + i).start();
+		}
 	}
 	
 	
