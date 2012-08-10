@@ -205,11 +205,33 @@ public class TestPersistance {
 	public void testClearValue1() throws Exception {
 		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"), options);
 		network.set(new String[]{"key"}, "value");
+		network.set(new String[]{"key2"}, "value");
 		assertTrue(network.get(new String[]{"key"}).equals("value"));
 		network.clearKey(new String[]{"key"});
+		Thread.sleep(1000); //TODO:
 		assertFalse(network.hasKey(new String[]{"key"}));
-		assertEquals("{}", FileUtility.read(new File("folder/default.json")));
+		assertEquals("{\"key2\":\"value\"}", FileUtility.read(new File("folder/default.json")));
 		deleteFiles("folder/");
+	}
+	
+	@Test
+	public void testNotTransient() throws Exception{
+		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"), options);
+		network.set(new String[]{"key"}, "value");
+		assertEquals("value", network.get(new String[]{"key"}));
+		FileUtility.write("{\"key\":\"nope\"}", new File("folder/default.json"));
+		//This should be cached in memory
+		assertEquals("value", network.get(new String[]{"key"}));
+	}
+	
+	@Test
+	public void testTransient() throws Exception{
+		PersistanceNetwork network = new PersistanceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
+		network.set(new String[]{"key"}, "value1");
+		assertEquals("value1", network.get(new String[]{"key"}));
+		FileUtility.write("{\"key\":\"value2\"}", new File("folder/default.json"));
+		//This should not be cached in memory
+		assertEquals("value2", network.get(new String[]{"key"}));		
 	}
 
 	public String doOutput(String uri, Map<String[], String> data) {
@@ -223,6 +245,11 @@ public class TestPersistance {
 					for (String[] key : data.keySet()) {
 						ds.set(key, data.get(key));
 					}
+					Thread.sleep(1000); //TODO: This is hacky, but it should work atm.
+								//Since the file io is async, we need to wait for
+								//it to finish before we get the data.
+								//Ideally, we grab a read thread from
+								//the executor, and use that to read the file.
 					File output = GetPrivate(sdc.getConnectionMixin(), "file", File.class);
 					String out = FileUtility.read(output);
 					output.delete();

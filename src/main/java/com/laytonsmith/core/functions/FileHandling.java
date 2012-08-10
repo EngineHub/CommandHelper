@@ -3,16 +3,15 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.PureUtilities.ZipReader;
-import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
@@ -26,7 +25,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -40,6 +38,7 @@ public class FileHandling {
 	}
 	
 	@api
+	@noboilerplate
 	public static class read extends AbstractFunction {
 
 		public static String file_get_contents(String file_location) throws Exception {
@@ -100,6 +99,7 @@ public class FileHandling {
 	}
 	
 	@api
+	@noboilerplate
 	public static class async_read extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
@@ -138,7 +138,7 @@ public class FileHandling {
 						try {
 							//It's a local file read
 							returnString = FileUtility.read(new File(file));
-						} catch (FileNotFoundException ex) {
+						} catch (IOException ex) {
 							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 						}
 					}

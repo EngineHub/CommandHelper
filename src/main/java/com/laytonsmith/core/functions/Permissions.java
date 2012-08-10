@@ -3,10 +3,10 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;

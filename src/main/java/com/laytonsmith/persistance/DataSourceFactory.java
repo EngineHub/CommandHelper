@@ -1,7 +1,7 @@
 package com.laytonsmith.persistance;
 
-import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 /**
  * This utility class provides the means to interact with given data sources.

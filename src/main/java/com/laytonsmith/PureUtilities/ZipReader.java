@@ -94,6 +94,18 @@ public class ZipReader {
     }
     
     /**
+     * Returns the top level file for the underlying file. If this is not zipped, the file
+     * returned will be the file this object was constructed with. Otherwise, the File
+     * representing the actual file on the filesystem will be returned. This is mostly
+     * useful for the case where locks need to be implemented, or to find the "root" of
+     * the directory.
+     * @return 
+     */
+    public File getTopLevelFile(){
+	    return topZip;
+    }
+    
+    /**
      * Returns if this file exists or not. Note this is a non-trivial operation.
      * 
      * @return 
@@ -214,10 +226,10 @@ public class ZipReader {
      * @throws FileNotFoundException If the file is not found
      * @throws IOException If you specify a file that isn't a zip file as if it were a folder
      */
-    public InputStream getInputStream() throws FileNotFoundException, IOException {
+    public InputStream getInputStream() throws FileNotFoundException, IOException {	    
         if (!isZipped) {           
             return new FileInputStream(file);
-        } else {            
+        } else {
             return getFile(chainedPath, topZip.getAbsolutePath(), new ZipInputStream(new FileInputStream(topZip)));
         }
     }
@@ -233,30 +245,8 @@ public class ZipReader {
         if (!isZipped) {
             return FileUtility.read(file);
         } else {            
-            return getStringFromInputStream(getInputStream());
+            return StreamUtils.GetString(getInputStream());
         }
-    }
-    
-    /*
-     * Converts an input stream into a string
-     */
-    private String getStringFromInputStream(InputStream is) throws IOException {
-        BufferedReader din = new BufferedReader(new InputStreamReader(is));
-        StringBuilder sb = new StringBuilder();
-        try {
-            String line;
-            while ((line = din.readLine()) != null) {
-                sb.append(line).append("\n");
-            }
-        } catch (IOException ex) {
-            throw ex;
-        } finally {
-            try {
-                is.close();
-            } catch (Exception ex) {
-            }
-        }
-        return sb.toString();
     }
 
     /**

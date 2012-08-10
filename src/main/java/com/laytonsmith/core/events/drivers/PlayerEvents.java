@@ -2,11 +2,11 @@
 
 package com.laytonsmith.core.events.drivers;
 
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
 import com.laytonsmith.abstraction.events.*;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -676,6 +676,25 @@ public class PlayerEvents {
                 return true;
             }
             return false;
+        }
+	
+	@Override
+        public void preExecution(Env env, ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
+                //Static lookups of the player don't seem to work here, but
+                //the player is passed in with the event.
+                MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
+                env.SetPlayer(player);
+                Static.InjectPlayer(player);
+            }
+        }
+
+        @Override
+        public void postExecution(Env env, ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
+                MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
+                Static.UninjectPlayer(player);
+            }
         }
     }
     

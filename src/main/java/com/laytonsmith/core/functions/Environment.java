@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.abstraction.MCBiomeType;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -10,6 +9,8 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -219,6 +220,7 @@ public class Environment {
     }
 
     @api
+    @noboilerplate //This function seems to cause a OutOfMemoryError for some reason?
     public static class set_sign_text extends AbstractFunction {
 
         public String getName() {

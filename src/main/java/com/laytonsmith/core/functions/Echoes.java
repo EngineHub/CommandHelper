@@ -8,11 +8,11 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.annotations.api;
-import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -28,7 +28,7 @@ public class Echoes {
     public static String docs(){
         return "These functions allow you to echo information to the screen";
     }
-    @api public static class die extends AbstractFunction{
+    @api @noboilerplate public static class die extends AbstractFunction{
         public Integer []numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
@@ -69,7 +69,7 @@ public class Echoes {
         }
     }
     
-    @api public static class msg extends AbstractFunction{
+    @api @noboilerplate public static class msg extends AbstractFunction{
 
         public String getName() {
             return "msg";

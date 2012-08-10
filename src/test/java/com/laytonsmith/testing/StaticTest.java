@@ -25,8 +25,6 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -93,6 +91,7 @@ public class StaticTest {
         //with random data to see if it fails in expected ways (to simulate how a user could run the scripts)
         //If we are interested in tests that are specific to the functions however, we shouldn't run this.
         if (!runQualityTestsOnly && f.getClass().getAnnotation(noboilerplate.class) == null) {
+		System.out.println("Now testing " + f.getName());
             TestExec(f, fakePlayer, "fake player");
             TestExec(f, null, "null command sender");
             TestExec(f, StaticTest.GetFakeConsoleCommandSender(), "fake console command sender");

@@ -2,10 +2,10 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -16,7 +16,6 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Arrays;
 import org.mindrot.jbcrypt.BCrypt;
 
 /**

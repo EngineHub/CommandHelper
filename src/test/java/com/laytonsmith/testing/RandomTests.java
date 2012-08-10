@@ -20,6 +20,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.entity.Player;
@@ -45,14 +47,23 @@ public class RandomTests {
         fakePlayer = StaticTest.GetOnlinePlayer();
         StaticTest.InstallFakeConvertor(fakePlayer);
     }
+    
+    private static Set<String> testedFunctions = new TreeSet<String>();
     /**
      * This function automatically tests all the boilerplate portions of all functions. Note that
      * this can be disabled in the StaticTest class, so that high quality test coverage can be measured.
      */
     @Test public void testAllBoilerplate(){
         Map<String, Throwable> uhohs = new HashMap<String, Throwable>();
+	Set<String> classDocs = new TreeSet<String>();
+	
         for(FunctionBase f : FunctionList.getFunctionList(null)){
             try{
+		    if(testedFunctions.contains(f.getName())){
+			    continue;
+		    }
+		    testedFunctions.add(f.getName());
+		    
                 StaticTest.TestBoilerplate(f, f.getName());
                 Class upper = f.getClass().getEnclosingClass();
                 if(upper == null){
@@ -62,7 +73,10 @@ public class RandomTests {
                     Method m = upper.getMethod("docs", new Class[]{});
                     try{
                         String docs = m.invoke(null, new Object[]{}).toString();
-                        StaticTest.TestClassDocs(docs, upper);
+			if(!classDocs.contains(docs)){
+				StaticTest.TestClassDocs(docs, upper);
+				classDocs.add(docs);
+			}
                     } catch (NullPointerException ex){
                         fail(upper.getName() + "'s docs function should be static");
                     }
@@ -205,11 +219,11 @@ public class RandomTests {
         BukkitMCCommandSender c = new BukkitMCCommandSender(new BukkitMCPlayer(p));
     }
     
-    @Test
-    public void testBlah() throws Throwable{
-	    StaticTest.InstallFakeConvertor(fakePlayer);
-	    SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
-		    + "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
-    }
+//    @Test
+//    public void testBlah() throws Throwable{
+//	    StaticTest.InstallFakeConvertor(fakePlayer);
+//	    SRun("async_read('lsmith@localhost:/home/lsmith/test.txt', closure(@ret, @ex,"
+//		    + "if(@ex != null, sys_out(@ex), sys_out(@ret))))", null);
+//    }
     
 }
