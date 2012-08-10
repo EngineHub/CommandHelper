@@ -222,6 +222,7 @@ public class TestPersistance {
 		FileUtility.write("{\"key\":\"nope\"}", new File("folder/default.json"));
 		//This should be cached in memory
 		assertEquals("value", network.get(new String[]{"key"}));
+		deleteFiles("folder/");
 	}
 	
 	@Test
@@ -231,7 +232,8 @@ public class TestPersistance {
 		assertEquals("value1", network.get(new String[]{"key"}));
 		FileUtility.write("{\"key\":\"value2\"}", new File("folder/default.json"));
 		//This should not be cached in memory
-		assertEquals("value2", network.get(new String[]{"key"}));		
+		assertEquals("value2", network.get(new String[]{"key"}));
+		deleteFiles("folder/");
 	}
 
 	public String doOutput(String uri, Map<String[], String> data) {

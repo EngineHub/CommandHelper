@@ -3,6 +3,8 @@ package com.laytonsmith.PureUtilities;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.channels.FileLock;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Scanner;
 
 /**
@@ -15,6 +17,23 @@ public class FileUtility {
 	}
 	public static final int OVERWRITE = 0;
 	public static final int APPEND = 1;
+	
+	private static final Map<String, Object> fileLocks = new HashMap<String, Object>();
+	/**
+	 * A more complicated mechanism is required to ensure global access across the JVM
+	 * is synchronized, so file system accesses do not throw OverlappingFileLockExceptions.
+	 * Though process safe, file locks are not thread safe -.-
+	 * @param file
+	 * @return
+	 * @throws IOException 
+	 */
+	private static Object getLock(File file) throws IOException{
+		String canonical = file.getAbsoluteFile().getCanonicalPath();
+		if(!fileLocks.containsKey(canonical)){
+			fileLocks.put(canonical, new Object());
+		}
+		return fileLocks.get(canonical);
+	}
 
 	public static String read(File f) throws IOException {
 		try {
@@ -32,7 +51,7 @@ public class FileUtility {
 	 * @throws FileNotFoundException
 	 */
 	public static String read(File file, String charset) throws IOException, UnsupportedEncodingException {
-		synchronized (file.getAbsoluteFile().getCanonicalPath()) {
+		synchronized (getLock(file)) {
 			RandomAccessFile raf = new RandomAccessFile(file, "rw");
 			FileLock lock = null;
 			try {
@@ -74,7 +93,7 @@ public class FileUtility {
 		} else {
 			append = true;
 		}
-		synchronized (file.getAbsoluteFile().getCanonicalPath()) {
+		synchronized (getLock(file)) {
 			RandomAccessFile raf = new RandomAccessFile(file, "rw");
 			FileLock lock = null;
 			try {
