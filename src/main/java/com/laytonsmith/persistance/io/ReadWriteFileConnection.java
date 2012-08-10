@@ -1,16 +1,12 @@
 package com.laytonsmith.persistance.io;
 
-import com.laytonsmith.PureUtilities.StreamUtils;
+import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistance.ReadOnlyException;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.RandomAccessFile;
 import java.net.URI;
-import java.nio.ByteBuffer;
-import java.nio.channels.FileLock;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -75,22 +71,11 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		}
 		Future<String> future = Executor.submit(new Callable<String>(){
 
-			public String call() throws Exception {
-				RandomAccessFile raf = new RandomAccessFile(file, "rw");
-				FileLock lock = null;
+			public String call() throws Exception {				
 				try {
-					lock = raf.getChannel().lock();			
-					ByteBuffer buffer = ByteBuffer.allocate((int)raf.length());
-					raf.getChannel().read(buffer);
-					String s = StreamUtils.GetString(new ByteArrayInputStream(buffer.array()), "UTF-8");
-					return s;
+					return FileUtility.read(file);
 				} catch (FileNotFoundException e) {
 					return blankDataModel;
-				} finally {
-					if(lock != null) {
-						lock.release();
-					}
-					raf.close();
 				}				
 			}
 		});
@@ -116,20 +101,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 
 			public Object call() {
 				try{
-					RandomAccessFile raf = new RandomAccessFile(file, "rw");
-					FileLock lock = null;
-					try{
-						lock = raf.getChannel().lock();
-						//Clear out the file
-						raf.getChannel().truncate(0);
-						//Write out the data
-						raf.getChannel().write(ByteBuffer.wrap(data.getBytes("UTF-8")));
-					} finally {
-						if(lock != null){
-							lock.release();
-						}
-						raf.close();
-					}				
+					FileUtility.write(data, file, FileUtility.OVERWRITE);		
 				} catch (Exception ex) {
 					Logger.getLogger(ReadWriteFileConnection.class.getName()).log(Level.SEVERE, null, ex);
 				}

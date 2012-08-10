@@ -677,6 +677,25 @@ public class PlayerEvents {
             }
             return false;
         }
+	
+	@Override
+        public void preExecution(Env env, ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
+                //Static lookups of the player don't seem to work here, but
+                //the player is passed in with the event.
+                MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
+                env.SetPlayer(player);
+                Static.InjectPlayer(player);
+            }
+        }
+
+        @Override
+        public void postExecution(Env env, ActiveEvent activeEvent) {
+            if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
+                MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
+                Static.UninjectPlayer(player);
+            }
+        }
     }
     
     @api

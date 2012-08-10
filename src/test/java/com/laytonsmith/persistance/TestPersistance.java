@@ -213,6 +213,26 @@ public class TestPersistance {
 		assertEquals("{\"key2\":\"value\"}", FileUtility.read(new File("folder/default.json")));
 		deleteFiles("folder/");
 	}
+	
+	@Test
+	public void testNotTransient() throws Exception{
+		PersistanceNetwork network = new PersistanceNetwork("**=json://folder/default.json", new URI("default"), options);
+		network.set(new String[]{"key"}, "value");
+		assertEquals("value", network.get(new String[]{"key"}));
+		FileUtility.write("{\"key\":\"nope\"}", new File("folder/default.json"));
+		//This should be cached in memory
+		assertEquals("value", network.get(new String[]{"key"}));
+	}
+	
+	@Test
+	public void testTransient() throws Exception{
+		PersistanceNetwork network = new PersistanceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
+		network.set(new String[]{"key"}, "value1");
+		assertEquals("value1", network.get(new String[]{"key"}));
+		FileUtility.write("{\"key\":\"value2\"}", new File("folder/default.json"));
+		//This should not be cached in memory
+		assertEquals("value2", network.get(new String[]{"key"}));		
+	}
 
 	public String doOutput(String uri, Map<String[], String> data) {
 		try {
