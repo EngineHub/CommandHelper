@@ -1,6 +1,6 @@
-
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-	<modelVersion>4.0.0</modelVersion>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
 	<groupId>com.sk89q</groupId>
 	<artifactId>commandhelper</artifactId>
 	<version>3.3.1-SNAPSHOT</version>
@@ -91,26 +91,26 @@
 			<distribution>repo</distribution>            
 		</license>
 	</licenses>
-  
 	<scm>
 		<connection>scm:git:git://github.com/sk89q/commandhelper.git</connection>
 		<url>https://github.com/sk89q/commandhelper</url>
 		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
 	</scm>
-
+  <properties>
+    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+  </properties>
 	<repositories>
 		<!-- Repository for other dependencies of SK's -->
-		<repository>
-			<id>sk89q-mvn2</id>
-			<url>http://mvn2.sk89q.com/repo</url>
-		</repository>
+    <repository>
+      <id>sk89q-repo</id>
+      <url>http://maven.sk89q.com/repo/</url>
+    </repository>
+    
 		<!-- Repository for Bukkit -->
-        
 		<repository>
 			<id>bukkit-repo</id>
 			<url>http://repo.bukkit.org/content/groups/public/</url>
 		</repository>
-        
 		<repository>
 			<id>bukkit-maven</id>
 			<url>http://repo.bukkit.org/content/repositories/releases/</url>
@@ -118,6 +118,8 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</repository>
+    
+    <!-- Other repositories -->
 		<repository>
 			<id>maven-central</id>
 			<url>http://repo1.maven.org/maven2/</url>
@@ -127,7 +129,6 @@
 			<url>http://files.zachsthings.com/repo/</url>
 		</repository>
 	</repositories>
-
 	<dependencies>
 		<!-- Required component -->
 		<dependency>
@@ -163,8 +164,6 @@
 			<version>5.5</version>
 		</dependency>
     
-        
-        
 		<!-- Used for economy stuff -->
 		<dependency>
 			<groupId>net.milkbowl</groupId>
@@ -285,12 +284,22 @@
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
-	<properties>
-		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-	</properties>
-
+  <distributionManagement>
+    <site>
+      <id>sk89q-docs-upload</id>
+      <url>ftp://sk89q-maven-deploy/commandhelper/</url>
+    </site>
+  </distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
+    
+    <extensions>
+      <extension>
+        <groupId>org.apache.maven.wagon</groupId>
+         <artifactId>wagon-ftp</artifactId>
+         <version>1.0-beta-6</version>
+      </extension>
+    </extensions>
 
 		<!-- Resources -->
 		<resources>
@@ -478,19 +487,42 @@
 				<artifactId>cobertura-maven-plugin</artifactId>
 				<version>2.4</version>
 			</plugin>
+      
+      <!-- Site / report generation -->
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-site-plugin</artifactId>
+        <version>3.1</version>
+        <configuration>
+          <reportPlugins>
+          <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-project-info-reports-plugin</artifactId>
+            <version>2.5</version>
+            <reportSets>
+              <reportSet>
+                <reports>
+                  <report>license</report>
+                  <report>index</report>
+                </reports>
+              </reportSet>
+            </reportSets>
+          </plugin>
+            <plugin>
+              <groupId>org.apache.maven.plugins</groupId>
+              <artifactId>maven-javadoc-plugin</artifactId>
+              <version>2.8.1</version>
+            </plugin>
+            <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>cobertura-maven-plugin</artifactId>
+              <version>2.4</version>
+            </plugin>
+          </reportPlugins>
+        </configuration>
+      </plugin>
 		</plugins>
 	</build>
-	<!-- Adds JUnit test coverage reports -->
-	<reporting>
-		<plugins>
-			<plugin>
-				<groupId>org.codehaus.mojo</groupId>
-				<artifactId>cobertura-maven-plugin</artifactId>
-				<version>2.4</version>
-			</plugin>
-		</plugins>
-	</reporting>
-    
 	<profiles>
 		<profile>
 			<id>provisional-build</id>
