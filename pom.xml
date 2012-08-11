@@ -87,7 +87,7 @@
 	<licenses>
 		<license>
 			<name>The MIT License</name>
-			<url>http://www.opensource.org/licenses/MIT</url>
+      <url>LICENSE.txt</url>
 			<distribution>repo</distribution>            
 		</license>
 	</licenses>
@@ -102,8 +102,8 @@
 	<repositories>
 		<!-- Repository for other dependencies of SK's -->
     <repository>
-      <id>sk89q-repo</id>
-      <url>http://maven.sk89q.com/repo/</url>
+      <id>sk89q-mvn2</id>
+      <url>http://mvn2.sk89q.com/repo</url>
     </repository>
     
 		<!-- Repository for Bukkit -->
