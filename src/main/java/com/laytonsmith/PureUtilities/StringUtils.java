@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -79,4 +80,84 @@ public final class StringUtils {
 
         return distance[str1.length()][str2.length()];
     }
+    
+    /**
+	 * Splits an argument string into arguments. It is expected that the string:
+	 * 
+	 * <code>this is "a 'quoted'" '\'string\''</code>
+	 * 
+	 * would parse into 4 arguments, individually, "this", "is", "a 'quoted'", "'string'".
+	 * It essentially handles the very basic case of command line argument parsing.
+	 * @param args
+	 * @return 
+	 */
+	public static List<String> ArgParser(String args) {
+		//First, we have to tokenize the strings. Since we can have quoted arguments, we can't simply split on spaces.
+		List<String> arguments = new ArrayList<String>();
+		StringBuilder buf = new StringBuilder();
+		boolean state_in_single_quote = false;
+		boolean state_in_double_quote = false;
+		for (int i = 0; i < args.length(); i++) {
+			Character c0 = args.charAt(i);
+			Character c1 = i + 1 < args.length() ? args.charAt(i + 1) : null;
+
+			if (c0 == '\\') {
+				if (c1 == '\'' && state_in_single_quote
+					|| c1 == '"' && state_in_double_quote
+					|| c1 == ' ' && !state_in_double_quote && !state_in_single_quote
+					|| c1 == '\\' && (state_in_double_quote || state_in_single_quote)) {
+					//We are escaping the next character. Add it to the buffer instead, and
+					//skip ahead two
+					buf.append(c1);
+					i++;
+					continue;
+				}
+
+			}
+
+			if (c0 == ' ') {
+				if (!state_in_double_quote && !state_in_single_quote) {
+					//argument split
+					if (buf.length() != 0) {
+						arguments.add(buf.toString());
+						buf = new StringBuilder();
+					}
+					continue;
+				}
+			}
+			if (c0 == '\'' && !state_in_double_quote) {
+				if (state_in_single_quote) {
+					state_in_single_quote = false;
+					arguments.add(buf.toString());
+					buf = new StringBuilder();
+				} else {
+					if (buf.length() != 0) {
+						arguments.add(buf.toString());
+						buf = new StringBuilder();
+					}
+					state_in_single_quote = true;
+				}
+				continue;
+			}
+			if (c0 == '"' && !state_in_single_quote) {
+				if (state_in_double_quote) {
+					state_in_double_quote = false;
+					arguments.add(buf.toString());
+					buf = new StringBuilder();
+				} else {
+					if (buf.length() != 0) {
+						arguments.add(buf.toString());
+						buf = new StringBuilder();
+					}
+					state_in_double_quote = true;
+				}
+				continue;
+			}
+			buf.append(c0);
+		}
+		if (buf.length() != 0) {
+			arguments.add(buf.toString());
+		}
+		return arguments;
+	}
 }

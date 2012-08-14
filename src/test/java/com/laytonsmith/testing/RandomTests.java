@@ -218,6 +218,12 @@ public class RandomTests {
         Player p = mock(Player.class);
         BukkitMCCommandSender c = new BukkitMCCommandSender(new BukkitMCPlayer(p));
     }
+	
+	@Test
+	public void testReflectDocs() throws Throwable{
+		String ret = SRun("reflect_docs('reflect_docs', 'return')", null);
+		assertEquals("string", ret);
+	}
     
 //    @Test
 //    public void testBlah() throws Throwable{
