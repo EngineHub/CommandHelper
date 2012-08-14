@@ -25,7 +25,7 @@ public class ParseTree implements Cloneable{
 	
 
 	private enum CacheTypes{
-		IS_SYNC, IS_ASYNC
+		IS_SYNC, IS_ASYNC, FUNCTIONS
 	}
 	
 	/**
@@ -241,26 +241,13 @@ public class ParseTree implements Cloneable{
 		if(isCached(this, CacheTypes.IS_ASYNC)){
 			return (Boolean)getCache(this, CacheTypes.IS_ASYNC);
 		} else {
-			List<Construct> allChildren = getAllData();
 			boolean ret = false;
-			loop: for(Construct c : allChildren){
-				if(c instanceof CFunction){
-					try {
-						FunctionBase f = FunctionList.getFunction(c);
-						if(f instanceof Function){
-							Function ff = (Function)f;
-							Boolean runAsync = ff.runAsync();
-							if(runAsync != null && runAsync == true){
-								//We're done here. It's definitely async only,
-								//so we can stop looking.
-								ret = true;
-								break loop;
-							}
-						}
-					} catch (ConfigCompileException ex) {
-						throw new Error(ex);
-					}
-					
+			for(Function ff : getFunctions()){
+				Boolean runAsync = ff.runAsync();
+				if(runAsync != null && runAsync == true){
+					//We're done here. It's definitely async only,
+					//so we can stop looking.
+					ret = true;				
 				}
 			}
 			setCache(this, CacheTypes.IS_ASYNC, ret);
@@ -278,30 +265,46 @@ public class ParseTree implements Cloneable{
 		if(isCached(this, CacheTypes.IS_SYNC)){
 			return (Boolean)getCache(this, CacheTypes.IS_SYNC);
 		} else {
-			List<Construct> allChildren = getAllData();
 			boolean ret = false;
+			for(Function ff : getFunctions()){
+				Boolean runAsync = ff.runAsync();
+				if(runAsync != null && runAsync == false){
+					//We're done here. It's definitely sync only,
+					//so we can stop looking.
+					ret = true;
+				}
+			}
+			setCache(this, CacheTypes.IS_SYNC, ret);
+			return ret;
+		}
+	}
+	
+	/**
+	 * Returns a list of all functions contained in this parse tree.
+	 * @return 
+	 */
+	public List<Function> getFunctions(){
+		if(isCached(this, CacheTypes.FUNCTIONS)){
+			return new ArrayList<Function>((List<Function>)getCache(this, CacheTypes.FUNCTIONS));
+		} else {
+			List<Function> functions = new ArrayList<Function>();
+			List<Construct> allChildren = getAllData();
 			loop: for(Construct c : allChildren){
 				if(c instanceof CFunction){
 					try {
 						FunctionBase f = FunctionList.getFunction(c);
 						if(f instanceof Function){
 							Function ff = (Function)f;
-							Boolean runAsync = ff.runAsync();
-							if(runAsync != null && runAsync == false){
-								//We're done here. It's definitely sync only,
-								//so we can stop looking.
-								ret = true;
-								break loop;
-							}
+							functions.add(ff);
 						}
 					} catch (ConfigCompileException ex) {
 						throw new Error(ex);
 					}
 					
 				}
-			}
-			setCache(this, CacheTypes.IS_SYNC, ret);
-			return ret;
+			}			
+			setCache(this, CacheTypes.FUNCTIONS, functions);
+			return new ArrayList<Function>(functions);
 		}
 	}
 

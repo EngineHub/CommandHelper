@@ -289,6 +289,26 @@ public class BoundEvent implements Comparable<BoundEvent> {
     }
     
     /**
+     * Returns true if this event MUST be synchronous.
+     * @return 
+     */
+    public boolean isSync(){
+	    return tree.isSync();
+    }
+    
+    /**
+     * Returns true if this event MUST be asynchronous.
+     * @return 
+     */
+    public boolean isAsync(){
+	    return tree.isAsync();
+    }
+    
+    public ParseTree getParseTree(){
+	    return tree;
+    }
+    
+    /**
      * Returns the Event driver that knows how to handle this event.
      * @return 
      */
