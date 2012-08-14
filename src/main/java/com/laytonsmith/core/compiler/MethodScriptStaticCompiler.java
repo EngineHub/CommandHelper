@@ -3,6 +3,7 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.CompiledFunction;
@@ -32,33 +33,33 @@ public final class MethodScriptStaticCompiler {
     public static String compile(String script, api.Platforms platform, File file) throws ConfigCompileException{
         //First, we optimize. The "core" functions are always run through
         //the native interpreter's compiler for optimization.
-        GenericTreeNode<Construct> tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file));
+        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file));
         StringBuilder b = new StringBuilder();
-        for(GenericTreeNode<Construct> node : tree.getChildren()){
+        for(ParseTree node : tree.getChildren()){
             go(node, b, platform);
         }
         return b.toString();
     }
     
-    private static void go(GenericTreeNode<Construct> node, StringBuilder b, api.Platforms platform) throws ConfigCompileException{
+    private static void go(ParseTree node, StringBuilder b, api.Platforms platform) throws ConfigCompileException{
         if(node.hasChildren()){
-            FunctionBase f = FunctionList.getFunction(node.data, platform);            
+            FunctionBase f = FunctionList.getFunction(node.getData(), platform);            
             if(!(f instanceof CompiledFunction)){
-                throw new ConfigCompileException("The function " + f.getName() + " is unknown in this platform.", node.data.getTarget());
+                throw new ConfigCompileException("The function " + f.getName() + " is unknown in this platform.", node.getData().getTarget());
             }
             CompiledFunction cf = (CompiledFunction)f;
             List<String> children = new ArrayList<String>();
-            for(GenericTreeNode<Construct> baby : node.getChildren()){
+            for(ParseTree baby : node.getChildren()){
                 StringBuilder bb = new StringBuilder();
                 go(baby, bb, platform);
                 children.add(bb.toString());
             }
-            b.append(cf.compile(node.data.getTarget(), children.toArray(new String[children.size()])));
+            b.append(cf.compile(node.getData().getTarget(), children.toArray(new String[children.size()])));
         } else {
             if(platform.getResolver() == null){
-                b.append(node.data.val());
+                b.append(node.getData().val());
             } else {
-                b.append(platform.getResolver().outputConstant(node.data));
+                b.append(platform.getResolver().outputConstant(node.getData()));
             }
         }
     }

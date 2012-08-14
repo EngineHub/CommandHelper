@@ -737,7 +737,7 @@ public final class MethodScriptCompiler {
         return scripts;
     }
 
-    public static GenericTreeNode<Construct> compile(List<Token> stream) throws ConfigCompileException {
+    public static ParseTree compile(List<Token> stream) throws ConfigCompileException {
         Target unknown;
         try{
             //Instead of using Target.UNKNOWN, we can at least set the file.
@@ -845,15 +845,15 @@ public final class MethodScriptCompiler {
         }
         stream = tempStream;
         
-        GenericTreeNode<Construct> tree = new GenericTreeNode<Construct>();
+        ParseTree tree = new ParseTree();
         tree.setData(new CNull(unknown));
-        Stack<GenericTreeNode> parents = new Stack<GenericTreeNode>();
+        Stack<ParseTree> parents = new Stack<ParseTree>();
         Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
         Stack<AtomicBoolean> usesBraces = new Stack<AtomicBoolean>();
         constructCount.push(new AtomicInteger(0));
         parents.push(tree);
         
-        tree.addChild(new GenericTreeNode<Construct>(new CFunction("__autoconcat__", unknown)));
+        tree.addChild(new ParseTree(new CFunction("__autoconcat__", unknown)));
         parents.push(tree.getChildAt(0));
         tree = tree.getChildAt(0);
         constructCount.push(new AtomicInteger(0));
@@ -874,7 +874,7 @@ public final class MethodScriptCompiler {
 
             //Associative array handling
             if (next1.type.equals(TType.LABEL)) {
-                tree.addChild(new GenericTreeNode<Construct>(new CLabel(Static.resolveConstruct(t.val(), t.target))));
+                tree.addChild(new ParseTree(new CLabel(Static.resolveConstruct(t.val(), t.target))));
                 constructCount.peek().incrementAndGet();
                 i++;
                 continue;
@@ -896,7 +896,7 @@ public final class MethodScriptCompiler {
                     i++;
                 }
                 i++;
-                tree.addChild(new GenericTreeNode<Construct>(slice));
+                tree.addChild(new ParseTree(slice));
                 continue;
             }
             //Array notation handling
@@ -916,30 +916,30 @@ public final class MethodScriptCompiler {
                 int array = arrayStack.pop().get();
                 //index is the location of the first node with the index
                 int index = array + 1;
-                GenericTreeNode<Construct> myArray = tree.getChildAt(array);
-                GenericTreeNode<Construct> myIndex;
+                ParseTree myArray = tree.getChildAt(array);
+                ParseTree myIndex;
                 if (!emptyArray) {
-                    myIndex = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", unknown));
-                    for(int j = index; j < tree.getNumberOfChildren(); j++){
+                    myIndex = new ParseTree(new CFunction("__autoconcat__", unknown));
+                    for(int j = index; j < tree.numberOfChildren(); j++){
                         myIndex.addChild(tree.getChildAt(j));
                     }
                 } else {
-                    myIndex = new GenericTreeNode<Construct>(new CSlice("0..-1", t.target));
+                    myIndex = new ParseTree(new CSlice("0..-1", t.target));
                 }
                 tree.setChildren(tree.getChildren().subList(0, array));
-                GenericTreeNode<Construct> arrayGet = new GenericTreeNode<Construct>(new CFunction("array_get", t.target));
+                ParseTree arrayGet = new ParseTree(new CFunction("array_get", t.target));
                 arrayGet.addChild(myArray);
                 arrayGet.addChild(myIndex);
                 tree.addChild(arrayGet);
-                constructCount.peek().set(constructCount.peek().get() - myIndex.getNumberOfChildren());
+                constructCount.peek().set(constructCount.peek().get() - myIndex.numberOfChildren());
                 continue;
             }
 
             //Smart strings
             if (t.type == TType.SMART_STRING) {
-                GenericTreeNode<Construct> function = new GenericTreeNode<Construct>();
+                ParseTree function = new ParseTree();
                 function.setData(new CFunction("smart_string", t.target));
-                GenericTreeNode<Construct> string = new GenericTreeNode<Construct>();
+                ParseTree string = new ParseTree();
                 string.setData(new CString(t.value, t.target));
                 function.addChild(string);
                 tree.addChild(function);
@@ -953,25 +953,25 @@ public final class MethodScriptCompiler {
             }
 
             if (t.type == TType.LIT) {
-                tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.target)));
+                tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
-                tree.addChild(new GenericTreeNode<Construct>(new CString(t.val(), t.target)));
+                tree.addChild(new ParseTree(new CString(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
             } else if(t.type.equals(TType.IDENTIFIER)){
-                tree.addChild(new GenericTreeNode<Construct>(new CPreIdentifier(t.val(), t.target)));
+                tree.addChild(new ParseTree(new CPreIdentifier(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.IVARIABLE)) {
-                tree.addChild(new GenericTreeNode<Construct>(new IVariable(t.val(), t.target)));
+                tree.addChild(new ParseTree(new IVariable(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.UNKNOWN)) {
-                tree.addChild(new GenericTreeNode<Construct>(Static.resolveConstruct(t.val(), t.target)));
+                tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target)));
                 constructCount.peek().incrementAndGet();
             } else if(t.type.isSymbol()){ //Logic and math symbols
-                tree.addChild(new GenericTreeNode<Construct>(new CSymbol(t.val(), t.type, t.target)));
+                tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target)));
                 constructCount.peek().incrementAndGet();
             } else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-                tree.addChild(new GenericTreeNode<Construct>(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target)));
+                tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target)));
                 constructCount.peek().incrementAndGet();
                 //right_vars.add(new Variable(t.val(), null, t.line_num));
             } else if (t.type.equals(TType.FUNC_NAME)) {
@@ -980,7 +980,7 @@ public final class MethodScriptCompiler {
                 if (!func.val().matches("^_[^_].*")) {
                     FunctionList.getFunction(func);
                 }
-                GenericTreeNode<Construct> f = new GenericTreeNode<Construct>(func);
+                ParseTree f = new ParseTree(func);
                 tree.addChild(f);
                 constructCount.push(new AtomicInteger(0));
                 tree = f;
@@ -996,13 +996,13 @@ public final class MethodScriptCompiler {
                     throw new ConfigCompileException("Unexpected parenthesis", t.target);
                 }
                 parens--;
-                GenericTreeNode<Construct> function = parents.pop();
+                ParseTree function = parents.pop();
                 if(usesBraces.peek().get()){
                     Function f;
                     try{
-                        f = (Function)FunctionList.getFunction(function.data);
+                        f = (Function)FunctionList.getFunction(function.getData());
                     } catch(Exception e){
-                        throw new ConfigCompileException("Could not find function " + function.data.val(), t.target);
+                        throw new ConfigCompileException("Could not find function " + function.getData().val(), t.target);
                     }
                     if(!f.allowBraces()){
                         throw new ConfigCompileException("Improper use of braces with " + f.getName() + "()", t.target);
@@ -1012,14 +1012,14 @@ public final class MethodScriptCompiler {
                     //We need to autoconcat some stuff
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
-                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", unknown));
-                    List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
-                    for (int b = replaceAt; b < tree.getNumberOfChildren(); b++) {
+                    ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown));
+                    List<ParseTree> subChildren = new ArrayList<ParseTree>();
+                    for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
                         subChildren.add(tree.getChildAt(b));
                     }
                     c.setChildren(subChildren);
                     if (replaceAt > 0) {
-                        List<GenericTreeNode<Construct>> firstChildren = new ArrayList<GenericTreeNode<Construct>>();
+                        List<ParseTree> firstChildren = new ArrayList<ParseTree>();
                         for (int d = 0; d < replaceAt; d++) {
                             firstChildren.add(tree.getChildAt(d));
                         }
@@ -1057,14 +1057,14 @@ public final class MethodScriptCompiler {
                 if (constructCount.peek().get() > 1) {
                     int stacks = constructCount.peek().get();
                     int replaceAt = tree.getChildren().size() - stacks;
-                    GenericTreeNode<Construct> c = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", unknown));
-                    List<GenericTreeNode<Construct>> subChildren = new ArrayList<GenericTreeNode<Construct>>();
-                    for (int b = replaceAt; b < tree.getNumberOfChildren(); b++) {
+                    ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown));
+                    List<ParseTree> subChildren = new ArrayList<ParseTree>();
+                    for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
                         subChildren.add(tree.getChildAt(b));
                     }
                     c.setChildren(subChildren);
                     if (replaceAt > 0) {
-                        List<GenericTreeNode<Construct>> firstChildren = new ArrayList<GenericTreeNode<Construct>>();
+                        List<ParseTree> firstChildren = new ArrayList<ParseTree>();
                         for (int d = 0; d < replaceAt; d++) {
                             firstChildren.add(tree.getChildAt(d));
                         }
@@ -1100,57 +1100,57 @@ public final class MethodScriptCompiler {
      * @param tree
      * @return 
      */
-    private static void optimize(GenericTreeNode<Construct> tree, Stack<List<Procedure>> procs) throws ConfigCompileException{
-        if(tree.optimized){
+    private static void optimize(ParseTree tree, Stack<List<Procedure>> procs) throws ConfigCompileException{
+        if(tree.isOptimized()){
             return; //Don't need to re-run this
         }
-        if(tree.data instanceof CIdentifier){
-            optimize(((CIdentifier)tree.data).contained(), procs);
+        if(tree.getData() instanceof CIdentifier){
+            optimize(((CIdentifier)tree.getData()).contained(), procs);
             return;
         }
-        if(!(tree.data instanceof CFunction)){
+        if(!(tree.getData() instanceof CFunction)){
             //There's no way to optimize something that's not a function
             return;
         }
         //cc has to be inb4 other autoconcats, so sconcats on the lower level won't get run
-        if(tree.data.val().equals("cc")){
+        if(tree.getData().val().equals("cc")){
             for(int i = 0; i < tree.getChildren().size(); i++){
-                GenericTreeNode<Construct> node = tree.getChildAt(i);
-                if(node.data.val().equals("__autoconcat__")){
-                    Compiler.__autoconcat__ func = (Compiler.__autoconcat__)FunctionList.getFunction(node.data);
-                    GenericTreeNode<Construct> tempNode = func.optimizeSpecial(node.data.getTarget(), node.children, false);
-                    tree.data = tempNode.data;
-                    tree.children = tempNode.children;
+                ParseTree node = tree.getChildAt(i);
+                if(node.getData().val().equals("__autoconcat__")){
+                    Compiler.__autoconcat__ func = (Compiler.__autoconcat__)FunctionList.getFunction(node.getData());
+                    ParseTree tempNode = func.optimizeSpecial(node.getData().getTarget(), node.getChildren(), false);
+                    tree.setData(tempNode.getData());
+                    tree.setChildren(tempNode.getChildren());
                     optimize(tree, procs);
                     return;
                 }
             }
         }
         //If it is a proc definition, we need to go ahead and see if we can add it to the const proc stack
-        if(tree.data.val().equals("proc")){
+        if(tree.getData().val().equals("proc")){
             procs.push(new ArrayList<Procedure>());
         }
-        List<GenericTreeNode<Construct>> children = tree.getChildren();
+        List<ParseTree> children = tree.getChildren();
         boolean fullyStatic = true;
         boolean hasIVars = false;
         for(int i = 0; i < children.size(); i++){
-            GenericTreeNode<Construct> node = children.get(i);            
-            if(node.data instanceof CFunction){
+            ParseTree node = children.get(i);            
+            if(node.getData() instanceof CFunction){
                 optimize(node, procs);
             }            
             
-            if(node.data.isDynamic() && !(node.data instanceof IVariable)){
+            if(node.getData().isDynamic() && !(node.getData() instanceof IVariable)){
                 fullyStatic = false;
             }
-            if(node.data instanceof IVariable){
+            if(node.getData() instanceof IVariable){
                 hasIVars = true;
             }
         }   
         //In all cases, at this point, we are either unable to optimize, or we will
         //optimize, so set our optimized variable at this point.
-        tree.optimized = true;
+        tree.setOptimized(true);
         
-        CFunction cFunction = (CFunction)tree.data;
+        CFunction cFunction = (CFunction)tree.getData();
         Function func;
         try{
             func = (Function)FunctionList.getFunction(cFunction);
@@ -1172,8 +1172,8 @@ public final class MethodScriptCompiler {
                 try{
                     Construct c = DataHandling.proc.optimizeProcedure(Target.UNKNOWN, p, children);
                     if(c != null){
-                        tree.data = c;
-                        tree.children = new ArrayList<GenericTreeNode<Construct>>();
+                        tree.setData(c);
+                        tree.removeChildren();
                         return;
                     }//else Nope, couldn't optimize.
                 } catch(ConfigRuntimeException ex){
@@ -1184,16 +1184,16 @@ public final class MethodScriptCompiler {
             //so we can't for sure say, but we do know we can't optimize this
             return;
         }
-        if(tree.data.val().equals("proc")){
+        if(tree.getData().val().equals("proc")){
             //We just went out of scope, so we need to pop the layer of Procedures that
             //are internal to us
             procs.pop();
             //However, as a special function, we *might* be able to get a const proc out of this
             //Let's see.
             try{
-                GenericTreeNode<Construct> root = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
+                ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN));
                 Script fakeScript = Script.GenerateScript(root, "*");            
-                Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, new Env(), fakeScript, children.toArray(new GenericTreeNode[children.size()]));
+                Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, new Env(), fakeScript, children.toArray(new ParseTree[children.size()]));
                 procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
             } catch(ConfigRuntimeException e){
                 //Well, they have an error in there somewhere
@@ -1207,20 +1207,18 @@ public final class MethodScriptCompiler {
         //the compiler trick functions know how to deal with it specially, even if everything isn't
         //static, so do this first.
         if(func.canOptimizeDynamic()){            
-            GenericTreeNode<Construct> tempNode;
+            ParseTree tempNode;
             try{
-                tempNode = func.optimizeDynamic(tree.data.getTarget(), tree.getChildren());
+                tempNode = func.optimizeDynamic(tree.getData().getTarget(), tree.getChildren());
             } catch(ConfigRuntimeException e){
                 //Turn it into a compile exception, then rethrow
                 throw new ConfigCompileException(e);
             }
             if(tempNode != null){
-                tree.data = tempNode.data;
-                tree.children = tempNode.children;
-                tree.optimized = tempNode.optimized;
+                tree = tempNode;
             } //else it wasn't an optimization, but a compile check
             optimize(tree, procs);
-            tree.optimized = true;
+            tree.setOptimized(true);
             return;
         }
         if(!fullyStatic){
@@ -1236,15 +1234,15 @@ public final class MethodScriptCompiler {
         if(func.canOptimize()){
             Construct [] constructs = new Construct[tree.getChildren().size()];
             for(int i = 0; i < tree.getChildren().size(); i++){
-                constructs[i] = tree.getChildAt(i).data;
+                constructs[i] = tree.getChildAt(i).getData();
             }
             try{
-                Construct result = func.optimize(tree.data.getTarget(), constructs);
+                Construct result = func.optimize(tree.getData().getTarget(), constructs);
 
                 //If the result is null, it was just a check, it can't optimize further.
                 if(result != null){
-                    tree.data = result;
-                    tree.children = new ArrayList<GenericTreeNode<Construct>>();
+                    tree.setData(result);
+                    tree.removeChildren();
                 }
             } catch(ConfigRuntimeException e){
                 //Turn this into a ConfigCompileException, then rethrow
@@ -1265,7 +1263,7 @@ public final class MethodScriptCompiler {
      * @param done
      * @param script
      */
-    public static Construct execute(GenericTreeNode<Construct> root, Env env, MethodScriptComplete done, Script script){
+    public static Construct execute(ParseTree root, Env env, MethodScriptComplete done, Script script){
         return execute(root, env, done, script, null);
     }
     
@@ -1279,7 +1277,7 @@ public final class MethodScriptCompiler {
      * @param vars
      * @return 
      */
-    public static Construct execute(GenericTreeNode<Construct> root, Env env, MethodScriptComplete done, Script script, List<Variable> vars) {
+    public static Construct execute(ParseTree root, Env env, MethodScriptComplete done, Script script, List<Variable> vars) {
         if (script == null) {
             script = new Script(null, null);
         }
@@ -1288,22 +1286,19 @@ public final class MethodScriptCompiler {
             for(Variable v : vars){
                 varMap.put(v.getName(), v);
             }
-            GenericTree<Construct> tree = new GenericTree<Construct>();
-            tree.setRoot(root);
-            for (GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)) {
-                if (tempNode.data instanceof Variable) {
-                    ((Variable) tempNode.data).setVal(
+            for (Construct tempNode : root.getAllData()) {
+                if (tempNode instanceof Variable) {
+                    ((Variable) tempNode).setVal(
                             Static.resolveConstruct(
-                            Static.resolveDollarVar(varMap.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getTarget()));
+                            Static.resolveDollarVar(varMap.get(((Variable) tempNode).getName()), vars).toString(), tempNode.getTarget()));
                 }
             }
-            root = tree.getRoot();
         }
         StringBuilder b = new StringBuilder();
         Construct returnable = null;
-        for (GenericTreeNode<Construct> gg : root.getChildren()) {
+        for (ParseTree gg : root.getChildren()) {
             Construct retc = script.eval(gg, env);
-            if (root.getNumberOfChildren() == 1) {
+            if (root.numberOfChildren() == 1) {
                 returnable = retc;
             }
             String ret = retc instanceof CNull ? "null" : retc.val();

@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -21,13 +22,13 @@ import java.util.HashMap;
  */
 public class IncludeCache {
     private static final CHLog.Tags TAG = CHLog.Tags.INCLUDES;
-    private static HashMap<File, GenericTreeNode<Construct>> cache = new HashMap<File, GenericTreeNode<Construct>>();
+    private static HashMap<File, ParseTree> cache = new HashMap<File, ParseTree>();
     
-    private static void add(File file, GenericTreeNode<Construct> tree){
+    private static void add(File file, ParseTree tree){
         cache.put(file, tree);
     }
     
-    public static GenericTreeNode<Construct> get(File file, Target t){
+    public static ParseTree get(File file, Target t){
         CHLog.Log(TAG, CHLog.Level.DEBUG, "Loading " + file.getAbsolutePath(), t);
         if(!cache.containsKey(file)){
             CHLog.Log(TAG, CHLog.Level.VERBOSE, "Cache does not already contain include file, compiling, then caching.", t);
@@ -36,7 +37,7 @@ public class IncludeCache {
                 CHLog.Log(TAG, CHLog.Level.VERBOSE, "Security check passed", t);
                 try {
                     String s = new ZipReader(file).getFileContents();
-                    GenericTreeNode<Construct> tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("g(\n" + s + "\n)", file));
+                    ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("g(\n" + s + "\n)", file));
                     CHLog.Log(TAG, CHLog.Level.VERBOSE, "Compilation succeeded, adding to cache.", t);
                     IncludeCache.add(file, tree);
                 } catch (ConfigCompileException ex) {

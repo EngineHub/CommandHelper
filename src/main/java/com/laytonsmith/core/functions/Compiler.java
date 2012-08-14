@@ -57,7 +57,7 @@ public class Compiler {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             if(nodes.length == 1){
                 return parent.eval(nodes[0], env);
             } else {
@@ -166,7 +166,7 @@ public class Compiler {
         }
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> list) throws ConfigCompileException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> list) throws ConfigCompileException {
             return optimizeSpecial(t, list, true);
         }
 
@@ -182,24 +182,24 @@ public class Compiler {
          * @param list
          * @return
          */
-        public GenericTreeNode<Construct> optimizeSpecial(Target t, List<GenericTreeNode<Construct>> list, boolean returnSConcat) throws ConfigCompileException {
+        public ParseTree optimizeSpecial(Target t, List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
             //If any of our nodes are CSymbols, we have different behavior
             boolean inSymbolMode = false; //catching this can save Xn
 
             //postfix
             for (int i = 0; i < list.size(); i++) {
-                GenericTreeNode<Construct> node = list.get(i);
-                if (node.data instanceof CSymbol) {
+                ParseTree node = list.get(i);
+                if (node.getData() instanceof CSymbol) {
                     inSymbolMode = true;
                 }
-                if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isPostfix()) {
-                    if (i - 1 >= 0 && list.get(i - 1).data instanceof IVariable) {
-                        CSymbol sy = (CSymbol) node.data;
-                        GenericTreeNode<Construct> conversion;
+                if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isPostfix()) {
+                    if (i - 1 >= 0 && list.get(i - 1).getData() instanceof IVariable) {
+                        CSymbol sy = (CSymbol) node.getData();
+                        ParseTree conversion;
                         if (sy.val().equals("++")) {
-                            conversion = new GenericTreeNode<Construct>(new CFunction("postinc", t));
+                            conversion = new ParseTree(new CFunction("postinc", t));
                         } else {
-                            conversion = new GenericTreeNode<Construct>(new CFunction("postdec", t));
+                            conversion = new ParseTree(new CFunction("postdec", t));
                         }
                         conversion.addChild(list.get(i - 1));
                         list.set(i - 1, conversion);
@@ -212,25 +212,25 @@ public class Compiler {
                 try {
                     //look for unary operators
                     for (int i = 0; i < list.size() - 1; i++) {
-                        GenericTreeNode<Construct> node = list.get(i);
-                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isUnary()) {
-                            GenericTreeNode<Construct> conversion;
-                            if (node.data.val().equals("-") || node.data.val().equals("+")) {
+                        ParseTree node = list.get(i);
+                        if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isUnary()) {
+                            ParseTree conversion;
+                            if (node.getData().val().equals("-") || node.getData().val().equals("+")) {
                                 //These are special, because if the values to the left isn't a symbol,
                                 //it's not unary
-                                if ((i == 0 || list.get(i - 1).data instanceof CSymbol)
-                                        && !(list.get(i + 1).data instanceof CSymbol)) {
-                                    if (node.data.val().equals("-")) {
+                                if ((i == 0 || list.get(i - 1).getData() instanceof CSymbol)
+                                        && !(list.get(i + 1).getData() instanceof CSymbol)) {
+                                    if (node.getData().val().equals("-")) {
                                         //We have to negate it
-                                        conversion = new GenericTreeNode<Construct>(new CFunction("neg", t));
+                                        conversion = new ParseTree(new CFunction("neg", t));
                                     } else {
-                                        conversion = new GenericTreeNode<Construct>(new CFunction("p", t));
+                                        conversion = new ParseTree(new CFunction("p", t));
                                     }
                                 } else {
                                     continue;
                                 }
                             } else {
-                                conversion = new GenericTreeNode<Construct>(new CFunction(( (CSymbol) node.data ).convert(), t));
+                                conversion = new ParseTree(new CFunction(( (CSymbol) node.getData() ).convert(), t));
                             }
                             conversion.addChild(list.get(i + 1));
                             list.set(i, conversion);
@@ -240,10 +240,10 @@ public class Compiler {
                     }
                     
                     for(int i = 0; i < list.size() - 1; i++){
-                        GenericTreeNode<Construct> next = list.get(i + 1);
-                        if(next.data instanceof CSymbol){
-                            if(((CSymbol)next.data).isExponential()){
-                                GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(((CSymbol)next.data).convert(), t));
+                        ParseTree next = list.get(i + 1);
+                        if(next.getData() instanceof CSymbol){
+                            if(((CSymbol)next.getData()).isExponential()){
+                                ParseTree conversion = new ParseTree(new CFunction(((CSymbol)next.getData()).convert(), t));
                                 conversion.addChild(list.get(i));
                                 conversion.addChild(list.get(i + 2));
                                 list.set(i, conversion);
@@ -256,10 +256,10 @@ public class Compiler {
 
                     //Multiplicative
                     for (int i = 0; i < list.size() - 1; i++) {
-                        GenericTreeNode<Construct> next = list.get(i + 1);
-                        if (next.data instanceof CSymbol) {
-                            if (( (CSymbol) next.data ).isMultaplicative()) {
-                                GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(( (CSymbol) next.data ).convert(), t));
+                        ParseTree next = list.get(i + 1);
+                        if (next.getData() instanceof CSymbol) {
+                            if (( (CSymbol) next.getData() ).isMultaplicative()) {
+                                ParseTree conversion = new ParseTree(new CFunction(( (CSymbol) next.getData() ).convert(), t));
                                 conversion.addChild(list.get(i));
                                 conversion.addChild(list.get(i + 2));
                                 list.set(i, conversion);
@@ -271,9 +271,9 @@ public class Compiler {
                     }
                     //Additive
                     for (int i = 0; i < list.size() - 1; i++) {
-                        GenericTreeNode<Construct> next = list.get(i + 1);
-                        if (next.data instanceof CSymbol && ( (CSymbol) next.data ).isAdditive()) {
-                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(( (CSymbol) next.data ).convert(), t));
+                        ParseTree next = list.get(i + 1);
+                        if (next.getData() instanceof CSymbol && ( (CSymbol) next.getData() ).isAdditive()) {
+                            ParseTree conversion = new ParseTree(new CFunction(( (CSymbol) next.getData() ).convert(), t));
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -284,10 +284,10 @@ public class Compiler {
                     }
                     //relational
                     for (int i = 0; i < list.size() - 1; i++) {
-                        GenericTreeNode<Construct> node = list.get(i + 1);
-                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isRelational()) {
-                            CSymbol sy = (CSymbol) node.data;
-                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        ParseTree node = list.get(i + 1);
+                        if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isRelational()) {
+                            CSymbol sy = (CSymbol) node.getData();
+                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t));
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -298,10 +298,10 @@ public class Compiler {
                     }
                     //equality
                     for (int i = 0; i < list.size() - 1; i++) {
-                        GenericTreeNode<Construct> node = list.get(i + 1);
-                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isEquality()) {
-                            CSymbol sy = (CSymbol) node.data;
-                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        ParseTree node = list.get(i + 1);
+                        if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isEquality()) {
+                            CSymbol sy = (CSymbol) node.getData();
+                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t));
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -312,10 +312,10 @@ public class Compiler {
                     }
                     //logical and
                     for (int i = 0; i < list.size() - 1; i++) {
-                        GenericTreeNode<Construct> node = list.get(i + 1);
-                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isLogicalAnd()) {
-                            CSymbol sy = (CSymbol) node.data;
-                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        ParseTree node = list.get(i + 1);
+                        if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isLogicalAnd()) {
+                            CSymbol sy = (CSymbol) node.getData();
+                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t));
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -326,10 +326,10 @@ public class Compiler {
                     }
                     //logical or
                     for (int i = 0; i < list.size() - 1; i++) {
-                        GenericTreeNode<Construct> node = list.get(i + 1);
-                        if (node.data instanceof CSymbol && ( (CSymbol) node.data ).isLogicalOr()) {
-                            CSymbol sy = (CSymbol) node.data;
-                            GenericTreeNode<Construct> conversion = new GenericTreeNode<Construct>(new CFunction(sy.convert(), t));
+                        ParseTree node = list.get(i + 1);
+                        if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isLogicalOr()) {
+                            CSymbol sy = (CSymbol) node.getData();
+                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t));
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -340,19 +340,19 @@ public class Compiler {
                     }
                 }
                 catch (IndexOutOfBoundsException e) {
-                    throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).data.val() + "). Did you forget to quote your symbols?", t);
+                    throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", t);
                 }
             }
 
             //Look for a CEntry here
             if (list.size() >= 1) {
-                GenericTreeNode<Construct> node = list.get(0);
-                if (node.data instanceof CLabel) {
-                    GenericTreeNode<Construct> value = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", t));
+                ParseTree node = list.get(0);
+                if (node.getData() instanceof CLabel) {
+                    ParseTree value = new ParseTree(new CFunction("__autoconcat__", t));
                     for (int i = 1; i < list.size(); i++) {
                         value.addChild(list.get(i));
                     }
-                    GenericTreeNode<Construct> ce = new GenericTreeNode<Construct>(new CFunction("centry", t));
+                    ParseTree ce = new ParseTree(new CFunction("centry", t));
                     ce.addChild(node);
                     ce.addChild(value);
                     return ce;
@@ -367,20 +367,20 @@ public class Compiler {
                 return list.get(0);
             } else {
                 for(int i = 0; i < list.size(); i++){
-                    if(list.get(i).data.getCType() == Construct.ConstructType.IDENTIFIER){
+                    if(list.get(i).getData().getCType() == Construct.ConstructType.IDENTIFIER){
                         if(i == 0){
                             //Yup, it's an identifier
-                            CFunction identifier = new CFunction(list.get(i).data.val(), t);
+                            CFunction identifier = new CFunction(list.get(i).getData().val(), t);
                             list.remove(0);
-                            GenericTreeNode<Construct> child = list.get(0);
+                            ParseTree child = list.get(0);
                             if(list.size() > 1){
-                                child = new GenericTreeNode<Construct>(new CFunction("sconcat", t));
+                                child = new ParseTree(new CFunction("sconcat", t));
                                 child.setChildren(list);
                             }
                             try{
                                 Function f = (Function)FunctionList.getFunction(identifier);                                
-                                GenericTreeNode<Construct> node 
-                                        = new GenericTreeNode<Construct>(f.execs(t, null, null, child));                                
+                                ParseTree node 
+                                        = new ParseTree(f.execs(t, null, null, child));                                
                                 return node;
                             } catch(Exception e){
                                 throw new Error("Unknown function " + identifier.val() + "?");
@@ -392,11 +392,11 @@ public class Compiler {
                         }
                     }
                 }
-                GenericTreeNode<Construct> tree;
+                ParseTree tree;
                 if (returnSConcat) {
-                    tree = new GenericTreeNode<Construct>(new CFunction("sconcat", t));
+                    tree = new ParseTree(new CFunction("sconcat", t));
                 } else {
-                    tree = new GenericTreeNode<Construct>(new CFunction("concat", t));
+                    tree = new ParseTree(new CFunction("concat", t));
                 }
                 tree.setChildren(list);
                 return tree;

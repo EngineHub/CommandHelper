@@ -64,12 +64,12 @@ public class StringHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             //if any of the nodes are sconcat, move their children up a level
-            List<GenericTreeNode<Construct>> list = new ArrayList<GenericTreeNode<Construct>>();
-            for(GenericTreeNode<Construct> node : nodes){
+            List<ParseTree> list = new ArrayList<ParseTree>();
+            for(ParseTree node : nodes){
                 if(node.getData().val().equals("sconcat")){
-                    for(GenericTreeNode<Construct> sub : node.getChildren()){
+                    for(ParseTree sub : node.getChildren()){
                         list.add(sub);
                     }
                 } else {
@@ -78,7 +78,7 @@ public class StringHandling {
             }
             
             StringBuilder b = new StringBuilder();
-            for(GenericTreeNode<Construct> node : list){
+            for(ParseTree node : list){
                 Construct c = parent.seval(node, env);
                 b.append(c.val());
             }
@@ -90,7 +90,7 @@ public class StringHandling {
             return true;
         }
 
-        public GenericTreeNode<Construct> optimizeSpecial(Target target, List<GenericTreeNode<Construct>> children) {
+        public ParseTree optimizeSpecial(Target target, List<ParseTree> children) {
             throw new UnsupportedOperationException("Not yet implemented");
         }
                 
@@ -169,7 +169,7 @@ public class StringHandling {
         }        
 
 //        @Override
-//        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+//        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
 //            StringBuilder b = new StringBuilder();
 //            boolean centry = false;
 //            Construct key = null;

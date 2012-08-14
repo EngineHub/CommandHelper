@@ -18,6 +18,7 @@ import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
 import com.laytonsmith.core.constructs.CArray;
@@ -158,7 +159,7 @@ public class Interpreter {
 
 	public static void execute(String script, List<String> args) throws ConfigCompileException {
 		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
-		GenericTreeNode tree = MethodScriptCompiler.compile(stream);
+		ParseTree tree = MethodScriptCompiler.compile(stream);
 		Env env = new Env();
 		env.SetPlayer(null);
 		env.SetLabel("*");

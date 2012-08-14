@@ -32,15 +32,15 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            for (GenericTreeNode<Construct> node : nodes) {
-                if (node.data instanceof CIdentifier) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+            for (ParseTree node : nodes) {
+                if (node.getData() instanceof CIdentifier) {
                     return new ifelse().execs(t, env, parent, nodes);
                 }
             }
-            GenericTreeNode<Construct> condition = nodes[0];
-            GenericTreeNode<Construct> __if = nodes[1];
-            GenericTreeNode<Construct> __else = null;
+            ParseTree condition = nodes[0];
+            ParseTree __if = nodes[1];
+            ParseTree __else = null;
             if (nodes.length == 3) {
                 __else = nodes[2];
             }
@@ -96,10 +96,10 @@ public class BasicLogic {
         }
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> args) throws ConfigCompileException {
-            for (GenericTreeNode<Construct> arg : args) {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> args) throws ConfigCompileException {
+            for (ParseTree arg : args) {
                 //If any are CIdentifiers, forward this to ifelse
-                if (arg.data instanceof CIdentifier) {
+                if (arg.getData() instanceof CIdentifier) {
                     return new ifelse().optimizeDynamic(t, args);
                 }
             }
@@ -107,17 +107,17 @@ public class BasicLogic {
             if (args.size() == 1 || args.size() > 3) {
                 throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
             }
-            if (args.get(0).data.isDynamic()) {
+            if (args.get(0).getData().isDynamic()) {
                 return super.optimizeDynamic(t, args); //Can't optimize
             } else {
-                if (Static.getBoolean(args.get(0).data)) {
+                if (Static.getBoolean(args.get(0).getData())) {
                     return args.get(1);
                 } else {
                     if (args.size() == 3) {
                         return args.get(2);
                     } else {
-                        GenericTreeNode<Construct> node = new GenericTreeNode<Construct>(new CVoid(t));
-                        node.optimized = true;
+                        ParseTree node = new ParseTree(new CVoid(t));
+                        node.setOptimized(true);
                         return node;
                     }
                 }
@@ -173,12 +173,12 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             Construct value = parent.seval(nodes[0], env);
             equals equals = new equals();
             for (int i = 1; i <= nodes.length - 2; i += 2) {
-                GenericTreeNode<Construct> statement = nodes[i];
-                GenericTreeNode<Construct> code = nodes[i + 1];
+                ParseTree statement = nodes[i];
+                ParseTree code = nodes[i + 1];
                 Construct evalStatement = parent.seval(statement, env);
                 if (evalStatement instanceof CArray) {
                     for (String index : ( (CArray) evalStatement ).keySet()) {
@@ -254,13 +254,13 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             if (nodes.length < 2) {
                 throw new ConfigRuntimeException("ifelse expects at least 2 arguments", ExceptionType.InsufficientArgumentsException, t);
             }
             for (int i = 0; i <= nodes.length - 2; i += 2) {
-                GenericTreeNode<Construct> statement = nodes[i];
-                GenericTreeNode<Construct> code = nodes[i + 1];
+                ParseTree statement = nodes[i];
+                ParseTree code = nodes[i + 1];
                 Construct evalStatement = parent.seval(statement, env);
                 if (evalStatement instanceof CIdentifier) {
                     evalStatement = parent.seval(( (CIdentifier) evalStatement ).contained(), env);
@@ -292,25 +292,25 @@ public class BasicLogic {
         }
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 
-            List<GenericTreeNode<Construct>> optimizedTree = new ArrayList<GenericTreeNode<Construct>>();
+            List<ParseTree> optimizedTree = new ArrayList<ParseTree>();
             //We have to cache the return value if even if we find it, so we can check for syntax errors
             //in all the branches, not just the ones before the first hardcoded true
-            GenericTreeNode<Construct> toReturn = null;
+            ParseTree toReturn = null;
             for (int i = 0; i <= children.size() - 2; i += 2) {
-                GenericTreeNode<Construct> statement = children.get(i);
-                GenericTreeNode<Construct> code = children.get(i + 1);
-                Construct evalStatement = statement.data;
+                ParseTree statement = children.get(i);
+                ParseTree code = children.get(i + 1);
+                Construct evalStatement = statement.getData();
                 if (evalStatement instanceof CIdentifier) {
                     //check for an else here, if so, it's a compile error
                     if(evalStatement.val().equals("else")){
                         throw new ConfigCompileException("Unexpected else", t);
                     }
                 }
-                if(!statement.data.isDynamic()){
+                if(!statement.getData().isDynamic()){
                     if (evalStatement instanceof CIdentifier) {
-                        evalStatement = ( (CIdentifier) evalStatement ).contained().data;                       
+                        evalStatement = ( (CIdentifier) evalStatement ).contained().getData();                       
                     }
                     //If it's hardcoded true, we found it.
                     if (Static.getBoolean(evalStatement)) {
@@ -327,9 +327,9 @@ public class BasicLogic {
                 return toReturn;
             }
             if (children.size() % 2 == 1) {
-                GenericTreeNode<Construct> ret = children.get(children.size() - 1);
-                if (ret.data instanceof CIdentifier) {
-                    optimizedTree.add(( (CIdentifier) ret.data ).contained());
+                ParseTree ret = children.get(children.size() - 1);
+                if (ret.getData() instanceof CIdentifier) {
+                    optimizedTree.add(( (CIdentifier) ret.getData() ).contained());
                 } else {
                     optimizedTree.add(ret);
                 }
@@ -340,11 +340,11 @@ public class BasicLogic {
             }
             if(optimizedTree.size() == 1){
                 //The whole tree has been optimized out. Return void
-                return new GenericTreeNode<Construct>(new CVoid(t));
+                return new ParseTree(new CVoid(t));
             }
-            GenericTreeNode<Construct> node = new GenericTreeNode<Construct>(new CFunction(this.getName(), t));
-            node.children = optimizedTree;
-            node.optimized = true;
+            ParseTree node = new ParseTree(new CFunction(this.getName(), t));
+            node.setChildren(optimizedTree);
+            node.setOptimized(true);
             return node;
             
         }
@@ -380,7 +380,7 @@ public class BasicLogic {
 //            }
 //        }
 //
-//        public GenericTreeNode<Construct> optimizeSpecial(Target target, List<GenericTreeNode<Construct>> children) {
+//        public ParseTree optimizeSpecial(Target target, List<ParseTree> children) {
 //            throw new UnsupportedOperationException("Not yet implemented");
 //        }
     }
@@ -959,8 +959,8 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            for (GenericTreeNode<Construct> tree : nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+            for (ParseTree tree : nodes) {
                 Construct c = env.GetScript().seval(tree, env);
                 boolean b = Static.getBoolean(c);
                 if (b == false) {
@@ -1012,8 +1012,8 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            for (GenericTreeNode<Construct> tree : nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+            for (ParseTree tree : nodes) {
                 Construct c = env.GetScript().eval(tree, env);
                 if (Static.getBoolean(c)) {
                     return new CBoolean(true, t);
@@ -1175,7 +1175,7 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             and and = new and();
             boolean val = ( (CBoolean) and.execs(t, env, parent, nodes) ).getBoolean();
             return new CBoolean(!val, t);
@@ -1222,7 +1222,7 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env environment, Script parent, GenericTreeNode<Construct>... args) throws ConfigRuntimeException {
+        public Construct execs(Target t, Env environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
             or or = new or();
             boolean val = ( (CBoolean) or.execs(t, environment, parent, args) ).getBoolean();
             return new CBoolean(!val, t);
@@ -1600,7 +1600,7 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             return new CIdentifier("elseif", nodes[0], t);
         }
 
@@ -1666,7 +1666,7 @@ public class BasicLogic {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             return new CIdentifier("else", nodes[0], t);
         }
 
@@ -1679,7 +1679,7 @@ public class BasicLogic {
         }          
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {            
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {            
             return super.optimizeDynamic(t, children);
         }
 

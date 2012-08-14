@@ -69,7 +69,7 @@ public class EventBinding {
         }               
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             if(nodes.length < 5){
                 throw new ConfigRuntimeException("bind accepts 5 or more parameters", ExceptionType.InsufficientArgumentsException, t);
             }
@@ -92,7 +92,7 @@ public class EventBinding {
                 newEnv = env.clone();
             } catch(Exception e){}
             newEnv.SetVarList(custom_params);
-            GenericTreeNode<Construct> tree = nodes[nodes.length - 1];
+            ParseTree tree = nodes[nodes.length - 1];
 
             //Check to see if our arguments are correct
             if(!(options instanceof CNull || options instanceof CArray)){

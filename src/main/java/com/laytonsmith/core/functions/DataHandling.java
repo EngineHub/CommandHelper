@@ -212,11 +212,11 @@ public class DataHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            GenericTreeNode<Construct> assign = nodes[0];
-            GenericTreeNode<Construct> condition = nodes[1];
-            GenericTreeNode<Construct> expression = nodes[2];
-            GenericTreeNode<Construct> runnable = nodes[3];
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+            ParseTree assign = nodes[0];
+            ParseTree condition = nodes[1];
+            ParseTree expression = nodes[2];
+            ParseTree runnable = nodes[3];
 
             Construct counter = parent.eval(assign, env);
             if (!(counter instanceof IVariable)) {
@@ -298,10 +298,10 @@ public class DataHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script that, GenericTreeNode<Construct>... nodes) {
-            GenericTreeNode<Construct> array = nodes[0];
-            GenericTreeNode<Construct> ivar = nodes[1];
-            GenericTreeNode<Construct> code = nodes[2];
+        public Construct execs(Target t, Env env, Script that, ParseTree... nodes) {
+            ParseTree array = nodes[0];
+            ParseTree ivar = nodes[1];
+            ParseTree code = nodes[2];
 
             Construct arr = that.seval(array, env);
             Construct iv = that.eval(ivar, env);
@@ -432,7 +432,7 @@ public class DataHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             try{
                 while(Static.getBoolean(parent.seval(nodes[0], env))){
                     try{
@@ -506,7 +506,7 @@ public class DataHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             try{
                 do{
                     try{
@@ -1029,16 +1029,16 @@ public class DataHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             Procedure myProc = getProcedure(t, env, parent, nodes);
             env.GetProcs().put(myProc.getName(), myProc);
             return new CVoid(t);
         }
         
-        public static Procedure getProcedure(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes){
+        public static Procedure getProcedure(Target t, Env env, Script parent, ParseTree ... nodes){
             String name = "";
             List<IVariable> vars = new ArrayList<IVariable>();
-            GenericTreeNode<Construct> tree = null;
+            ParseTree tree = null;
 	    boolean usesAssign = false;
             for (int i = 0; i < nodes.length; i++) {
                 if (i == nodes.length - 1) {
@@ -1104,11 +1104,11 @@ public class DataHandling {
          * @throws ConfigCompileException
          * @throws ConfigRuntimeException 
          */
-        public static Construct optimizeProcedure(Target t, Procedure myProc, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {            
+        public static Construct optimizeProcedure(Target t, Procedure myProc, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {            
             if(myProc.isPossiblyConstant()){
                 //Oooh, it's possibly constant. So, let's run it with our children.
                 try{
-                    GenericTreeNode<Construct> root = new GenericTreeNode<Construct>(new CFunction("__autoconcat__", Target.UNKNOWN));
+                    ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN));
                     Script fakeScript = Script.GenerateScript(root, "*");
                     Env env = new Env();
                     env.SetScript(fakeScript);
@@ -1141,7 +1141,7 @@ public class DataHandling {
 //        }
 //
 //        @Override
-//        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+//        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 //            //We seriously lose out on the ability to optimize this procedure
 //            //if we are assigning a dynamic value as a default, but we have to check
 //            //that here. If we don't, we lose the information
@@ -1221,11 +1221,11 @@ public class DataHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            GenericTreeNode<Construct> tree = nodes[0];
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+            ParseTree tree = nodes[0];
             Construct arg = parent.seval(tree, env);
             String location = arg.val();
-            GenericTreeNode<Construct> include = IncludeCache.get(new File(t.file().getParent(), location), t);
+            ParseTree include = IncludeCache.get(new File(t.file().getParent(), location), t);
             parent.eval(include.getChildAt(0), env);
             return new CVoid(t);
         }
@@ -1286,7 +1286,7 @@ public class DataHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             if(nodes.length < 1){
                 throw new ConfigRuntimeException("Expecting at least one argument to call_proc", ExceptionType.InsufficientArgumentsException, t);
             }
@@ -1603,13 +1603,13 @@ public class DataHandling {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
             String[] names = new String[nodes.length - 1];
             Construct[] defaults = new Construct[nodes.length - 1];
             for (int i = 0; i < nodes.length - 1; i++) {
-                GenericTreeNode<Construct> node = nodes[i];
-                GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("g", t));
-                List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
+                ParseTree node = nodes[i];
+                ParseTree newNode = new ParseTree(new CFunction("g", t));
+                List<ParseTree> children = new ArrayList<ParseTree>();
                 children.add(node);
                 newNode.setChildren(children);
                 Script fakeScript = Script.GenerateScript(newNode, env.GetLabel());

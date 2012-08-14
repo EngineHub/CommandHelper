@@ -1,7 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.Env;
-import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -21,7 +21,7 @@ public abstract class AbstractFunction implements Function{
      * @param nodes
      * @return 
      */
-    public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
+    public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
         return new CVoid(t);
     }
 
@@ -76,7 +76,7 @@ public abstract class AbstractFunction implements Function{
      * @param children
      * @return 
      */
-    public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException{
+    public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException{
         return null;
     }
 

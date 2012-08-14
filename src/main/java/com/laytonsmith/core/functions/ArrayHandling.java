@@ -940,11 +940,11 @@ public class ArrayHandling {
         }
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(children.size() == 2){
-                if(!children.get(1).data.isDynamic()){
+                if(!children.get(1).getData().isDynamic()){
                     try{
-                        CArray.SortType.valueOf(children.get(1).data.val().toUpperCase());
+                        CArray.SortType.valueOf(children.get(1).getData().val().toUpperCase());
                     } catch(IllegalArgumentException e){
                         throw new ConfigCompileException("The sort type must be one of either: REGULAR, NUMERIC, STRING, or STRING_CI", t);
                     }

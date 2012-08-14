@@ -5,6 +5,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -95,7 +96,7 @@ public interface Function extends FunctionBase, Documentation {
      * @param nodes
      * @return 
      */
-    public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct> ... nodes);    
+    public Construct execs(Target t, Env env, Script parent, ParseTree ... nodes);    
     
     /**
      * If a function can possibly optimize during compilation, this should return true. This is only
@@ -143,7 +144,7 @@ public interface Function extends FunctionBase, Documentation {
      * @param children
      * @return 
      */
-    public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException;
+    public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException;
 
     /**
      * If a function's syntax allows { braces }, then this method should return true. Exceedingly few functions
@@ -163,6 +164,6 @@ public interface Function extends FunctionBase, Documentation {
      * branch anyways, but some optimizations require knowledge about code branches.
      */
     public interface CodeBranch{
-        public List<GenericTreeNode<Construct>> getBranches();
+        public List<ParseTree> getBranches();
     }
 }

@@ -2,7 +2,6 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import org.junit.*;
@@ -16,20 +15,20 @@ import static org.junit.Assert.*;
 public class OptimizationTest {
     
     public String optimize(String script) throws ConfigCompileException{
-        GenericTreeNode<Construct> tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));        
+        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));        
         StringBuilder b = new StringBuilder();
         //The root always contains null.
-        for(GenericTreeNode<Construct> child : tree.getChildren()){
+        for(ParseTree child : tree.getChildren()){
             b.append(optimize0(child));
         }        
         return b.toString();
     }
-    private String optimize0(GenericTreeNode<Construct> node){
-        if(node.data instanceof CFunction){
+    private String optimize0(ParseTree node){
+        if(node.getData() instanceof CFunction){
             StringBuilder b = new StringBuilder();
             boolean first = true;
-            b.append(((CFunction)node.data).val()).append("(");
-            for(GenericTreeNode<Construct> child : node.children){
+            b.append(((CFunction)node.getData()).val()).append("(");
+            for(ParseTree child : node.getChildren()){
                 if(!first){
                     b.append(",");
                 }
@@ -38,14 +37,14 @@ public class OptimizationTest {
             }
             b.append(")");
             return b.toString();
-        } else if(node.data instanceof CString){
+        } else if(node.getData() instanceof CString){
             //strings
-            return new StringBuilder().append("'").append(node.data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'").toString();
-        } else if(node.data instanceof IVariable){
-            return ((IVariable)node.data).getName();
+            return new StringBuilder().append("'").append(node.getData().val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'").toString();
+        } else if(node.getData() instanceof IVariable){
+            return ((IVariable)node.getData()).getName();
         } else {
             //static
-            return node.data.toString();
+            return node.getData().toString();
         }
     }
     

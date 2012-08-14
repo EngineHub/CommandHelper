@@ -25,10 +25,10 @@ public class Procedure implements Cloneable {
     private Map<String, IVariable> varList;
     private Map<String, Construct> originals = new HashMap<String, Construct>();
     private List<IVariable> varIndex = new ArrayList<IVariable>();
-    private GenericTreeNode<Construct> tree;
+    private ParseTree tree;
     private boolean possiblyConstant = false;
 
-    public Procedure(String name, List<IVariable> varList, GenericTreeNode<Construct> tree, Target t) {
+    public Procedure(String name, List<IVariable> varList, ParseTree tree, Target t) {
         this.name = name;
         this.varList = new HashMap<String, IVariable>();
         for (IVariable var : varList) {
@@ -51,28 +51,28 @@ public class Procedure implements Cloneable {
         this.possiblyConstant = checkPossiblyConstant(tree);
     }
 
-    private boolean checkPossiblyConstant(GenericTreeNode<Construct> tree) {
-        if (!tree.data.isDynamic()) {
+    private boolean checkPossiblyConstant(ParseTree tree) {
+        if (!tree.getData().isDynamic()) {
             //If it isn't dynamic, it certainly could be constant
             return true;
-        } else if (tree.data instanceof IVariable) {
+        } else if (tree.getData() instanceof IVariable) {
             //Variables will return true for isDynamic, but they are technically constant, because
             //they are being declared in this scope, or passed in. An import() would break this
             //contract, but import() itself is dynamic, so this is not an issue.
             return true;
-        } else if (tree.data instanceof CFunction) {
+        } else if (tree.getData() instanceof CFunction) {
             //If the function itself is not optimizable, we needn't recurse.
             try {
-                FunctionBase fb = FunctionList.getFunction(tree.data);
+                FunctionBase fb = FunctionList.getFunction(tree.getData());
                 if (fb instanceof Function) {
                     Function f = (Function) fb;
                     if (f instanceof DataHandling._return) {
                         //This is a special exception. Return itself is not optimizable,
                         //but if the contents are optimizable, it is still considered constant.
-                        if (tree.children.isEmpty()) {
+                        if (!tree.hasChildren()) {
                             return true;
                         } else {
-                            return checkPossiblyConstant(tree.children.get(0));
+                            return checkPossiblyConstant(tree.getChildAt(0));
                         }
                     }
                     //If it's optimizable, it's possible. If it's restricted, it doesn't matter, because
@@ -88,7 +88,7 @@ public class Procedure implements Cloneable {
                 //It's a proc. We will treat this just like any other function call, 
             }
             //Ok, well, we have to check the children first.
-            for (GenericTreeNode<Construct> child : tree.getChildren()) {
+            for (ParseTree child : tree.getChildren()) {
                 if (!checkPossiblyConstant(child)) {
                     return false; //Nope, since our child can't be constant, neither can we
                 }
@@ -122,9 +122,9 @@ public class Procedure implements Cloneable {
      * @param env
      * @return
      */
-    public Construct cexecute(List<GenericTreeNode<Construct>> args, Env env) {
+    public Construct cexecute(List<ParseTree> args, Env env) {
         List<Construct> list = new ArrayList<Construct>();
-        for (GenericTreeNode<Construct> arg : args) {
+        for (ParseTree arg : args) {
             list.add(env.GetScript().seval(arg, env));
         }
         return execute(list, env);
@@ -145,8 +145,6 @@ public class Procedure implements Cloneable {
             env.GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
             array.push(c);
         }
-        GenericTree<Construct> root = new GenericTree<Construct>();
-        root.setRoot(tree);
         Script fakeScript = Script.GenerateScript(tree, env.GetLabel());//new Script(null, null);        
         for (int i = 0; i < args.size(); i++) {
             Construct c = args.get(i);

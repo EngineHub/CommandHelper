@@ -285,14 +285,14 @@ public class Meta {
         }      
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, GenericTreeNode<Construct>... nodes) {
-            GenericTreeNode<Construct> node = nodes[0];
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+            ParseTree node = nodes[0];
             try{
                 Construct script = parent.seval(node, env);
-                GenericTreeNode<Construct> root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file()));
+                ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file()));
                 StringBuilder b = new StringBuilder();
                 int count = 0;
-                for (GenericTreeNode<Construct> child : root.getChildren()) {
+                for (ParseTree child : root.getChildren()) {
                     Construct s = parent.seval(child, env);
                     if (!s.val().trim().isEmpty()) {
                         if(count > 0){
@@ -475,7 +475,7 @@ public class Meta {
         }
 
         @Override
-        public Construct execs(Target t, Env environment, Script parent, GenericTreeNode<Construct> ... nodes) throws ConfigRuntimeException {
+        public Construct execs(Target t, Env environment, Script parent, ParseTree ... nodes) throws ConfigRuntimeException {
             MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
             MCCommandSender originalPlayer = environment.GetCommandSender();
             int offset = 0;
@@ -487,7 +487,7 @@ public class Meta {
                 environment.GetScript().setLabel(label);
             }
             environment.SetPlayer(p);
-            GenericTreeNode<Construct> tree = nodes[1 + offset];
+            ParseTree tree = nodes[1 + offset];
             environment.GetScript().eval(tree, environment);
             environment.SetCommandSender(originalPlayer);
             environment.SetLabel(originalLabel);

@@ -148,11 +148,11 @@ public class Exceptions {
         }        
 
         @Override
-        public Construct execs(Target t, Env env, Script that, GenericTreeNode<Construct>... nodes) {
-            GenericTreeNode<Construct> tryCode = nodes[0];
-            GenericTreeNode<Construct> varName = null;
-            GenericTreeNode<Construct> catchCode = null;
-            GenericTreeNode<Construct> types = null;
+        public Construct execs(Target t, Env env, Script that, ParseTree... nodes) {
+            ParseTree tryCode = nodes[0];
+            ParseTree varName = null;
+            ParseTree catchCode = null;
+            ParseTree types = null;
             if(nodes.length == 2){
                 catchCode = nodes[1];
             } else if(nodes.length == 3){

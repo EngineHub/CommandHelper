@@ -96,7 +96,7 @@ public class Regex {
         }                
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }
@@ -170,7 +170,7 @@ public class Regex {
         }                
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }
@@ -243,7 +243,7 @@ public class Regex {
         }                
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }
@@ -311,7 +311,7 @@ public class Regex {
         }                
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }
@@ -378,7 +378,7 @@ public class Regex {
         }                
 
         @Override
-        public GenericTreeNode<Construct> optimizeDynamic(Target t, List<GenericTreeNode<Construct>> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }

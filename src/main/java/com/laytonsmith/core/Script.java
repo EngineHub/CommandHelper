@@ -35,7 +35,7 @@ public class Script {
     private List<List<Token>> right;
     private List<Token> fullRight;
     private List<Construct> cleft;
-    private List<GenericTreeNode<Construct>> cright;
+    private List<ParseTree> cright;
     //This should be null if we are running in non-alias mode
     private Map<String, Variable> left_vars;
     boolean hasBeenCompiled = false;
@@ -74,22 +74,14 @@ public class Script {
     
     private Script(){}
     
-    public static Script GenerateScript(GenericTreeNode<Construct> tree, String label){
+    public static Script GenerateScript(ParseTree tree, String label){
         Script s = new Script();
         
         s.hasBeenCompiled = true;
         s.compilerError = false;
-        s.cright = new ArrayList<GenericTreeNode<Construct>>();
+        s.cright = new ArrayList<ParseTree>();
         s.cright.add(tree);
         s.label = label;
-        //s.OriginalEnv = env;
-        GenericTree<Construct> root = new GenericTree<Construct>();
-        root.setRoot(tree);
-//        for(GenericTreeNode<Construct> node : root.build(GenericTreeTraversalOrderEnum.PRE_ORDER)){
-//            if(node.getData() instanceof IVariable){
-//                s.OriginalEnv.GetVarList().set((IVariable)node.getData());
-//            }
-//        }
         
         return s;
     }
@@ -134,22 +126,20 @@ public class Script {
         }
 
         try {
-            for (GenericTreeNode<Construct> rootNode : cright) {
-                GenericTree<Construct> tree = new GenericTree<Construct>();
-                tree.setRoot(rootNode);
-                for (GenericTreeNode<Construct> tempNode : tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER)) {
-                    if (tempNode.data instanceof Variable) {
+            for (ParseTree rootNode : cright) {
+                for (Construct tempNode : rootNode.getAllData()) {
+                    if (tempNode instanceof Variable) {
                         if(left_vars == null){
-                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.data.getTarget());
+                            throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.getTarget());
                         }
-                        ((Variable) tempNode.data).setVal(
+                        ((Variable) tempNode).setVal(
                                 Static.resolveConstruct(
-                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode.data).getName()), vars).toString(), tempNode.data.getTarget()));
+                                Static.resolveDollarVar(left_vars.get(((Variable) tempNode).getName()), vars).toString(), tempNode.getTarget()));
                     }
                 }
                 
                 MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
-                MethodScriptCompiler.execute(tree.getRoot(), CurrentEnv, done, this);
+                MethodScriptCompiler.execute(rootNode, CurrentEnv, done, this);
             }
         } catch (ConfigRuntimeException ex) {
             //We don't know how to handle this really, so let's pass it up the chain.
@@ -194,7 +184,7 @@ public class Script {
      * @param env
      * @return 
      */
-    public Construct seval(GenericTreeNode<Construct> c, final Env env){
+    public Construct seval(ParseTree c, final Env env){
         Construct ret = eval(c, env);
         if(ret instanceof IVariable){
             IVariable cur = (IVariable)ret;
@@ -203,7 +193,7 @@ public class Script {
         return ret;
     }
 
-    public Construct eval(GenericTreeNode<Construct> c, final Env env) throws CancelCommandException {
+    public Construct eval(ParseTree c, final Env env) throws CancelCommandException {
         final Construct m = c.getData();
         CurrentEnv = env;
         CurrentEnv.SetLabel(this.label);
@@ -242,11 +232,11 @@ public class Script {
                 }
                 
                 if(f.useSpecialExec()){
-                    return f.execs(m.getTarget(), env, this, c.getChildren().toArray(new GenericTreeNode[]{}));
+                    return f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
                 }
 
                 ArrayList<Construct> args = new ArrayList<Construct>();
-                for (GenericTreeNode<Construct> c2 : c.getChildren()) {
+                for (ParseTree c2 : c.getChildren()) {
                     args.add(eval(c2, env));
                 }
                 if (f.isRestricted()) {
@@ -650,7 +640,7 @@ public class Script {
             }
         }
         right.add(temp);
-        cright = new ArrayList<GenericTreeNode<Construct>>();
+        cright = new ArrayList<ParseTree>();
         for (List<Token> l : right) {
             cright.add(MethodScriptCompiler.compile(l));
         }
@@ -728,29 +718,29 @@ public class Script {
             }
         }
 
-        //Also, check for undefined variables on the right, and unused variables on the left
-        ArrayList<String> left_copy = new ArrayList<String>();
-        for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
-            left_copy.add(v.getValue().getName());
-        }
-        Arrays.asList(new String[]{}).toArray(new String[]{});
-        for (GenericTreeNode<Construct> gtn : cright) {
-            GenericTree<Construct> tree = new GenericTree<Construct>();
-            tree.setRoot(gtn);
-            List<GenericTreeNode<Construct>> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
-            for (GenericTreeNode<Construct> c : builtTree) {
-                if (c.getData() instanceof Variable) {
-                    for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
-                        if (v.getValue().getName().equals(((Variable) c.getData()).getName())) {
-                            //Found it, remove this from the left_copy, and break
-                            left_copy.remove(v.getValue().getName());
-                            break;
-                            //TODO: Layton!
-                        }
-                    }
-                }
-            }
-        }
+//        //Also, check for undefined variables on the right, and unused variables on the left
+//        ArrayList<String> left_copy = new ArrayList<String>();
+//        for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
+//            left_copy.add(v.getValue().getName());
+//        }
+//        Arrays.asList(new String[]{}).toArray(new String[]{});
+//        for (ParseTree gtn : cright) {
+//            GenericTree<Construct> tree = new GenericTree<Construct>();
+//            tree.setRoot(gtn);
+//            List<ParseTree> builtTree = tree.build(GenericTreeTraversalOrderEnum.PRE_ORDER);
+//            for (ParseTree c : builtTree) {
+//                if (c.getData() instanceof Variable) {
+//                    for (Map.Entry<String, Variable> v : left_vars.entrySet()) {
+//                        if (v.getValue().getName().equals(((Variable) c.getData()).getName())) {
+//                            //Found it, remove this from the left_copy, and break
+//                            left_copy.remove(v.getValue().getName());
+//                            break;
+//                            //TODO: Layton!
+//                        }
+//                    }
+//                }
+//            }
+//        }
         //}
     }
 

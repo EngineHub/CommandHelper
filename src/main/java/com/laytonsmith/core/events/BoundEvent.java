@@ -31,7 +31,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private final Map<String, Construct> prefilter;
     private final String eventObjName;
     private Env originalEnv;
-    private final GenericTreeNode<Construct> tree; //The code closure for this event
+    private final ParseTree tree; //The code closure for this event
     private final Driver driver; //For efficiency sake, cache it here
     private static int EventID = 0;
     private final Target target;
@@ -113,7 +113,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * @throws EventException If the priority or id are improperly specified
      */
     public BoundEvent(String name, CArray options, CArray prefilter, String eventObjName,
-            Env env, GenericTreeNode<Construct> tree, Target t) throws EventException {
+            Env env, ParseTree tree, Target t) throws EventException {
         this.eventName = name;
 
         if (options != null && options.containsKey("id")) {
@@ -281,7 +281,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     }
     
     private void execute(Env env, ActiveEvent activeEvent) throws EventException{
-        GenericTreeNode<Construct> superRoot = new GenericTreeNode<Construct>(null);
+        ParseTree superRoot = new ParseTree(null);
         superRoot.addChild(tree);
         Script s = Script.GenerateScript(superRoot, "*");        
         Event myDriver = this.getEventDriver();

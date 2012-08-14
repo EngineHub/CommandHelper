@@ -3,6 +3,7 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,12 +18,12 @@ import java.util.logging.Logger;
 public class CClosure extends Construct {
 
     public static final long serialVersionUID = 1L;
-    GenericTreeNode<Construct> node;
+    ParseTree node;
     Env env;
     String[] names;
     Construct[] defaults;
 
-    public CClosure(GenericTreeNode<Construct> node, Env env, String[] names, Construct[] defaults, Target t) {
+    public CClosure(ParseTree node, Env env, String[] names, Construct[] defaults, Target t) {
         super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
         this.node = node;
         try {
@@ -42,26 +43,26 @@ public class CClosure extends Construct {
         return b.toString();
     }
 
-    private void condense(GenericTreeNode<Construct> node, StringBuilder b) {
-        if (node.data instanceof CFunction) {
-            b.append(( (CFunction) node.data ).val()).append("(");
-            for (int i = 0; i < node.children.size(); i++) {
-                condense(node.children.get(i), b);
-                if (i > 0 && !( (CFunction) node.data ).val().equals("__autoconcat__")) {
+    private void condense(ParseTree node, StringBuilder b) {
+        if (node.getData() instanceof CFunction) {
+            b.append(( (CFunction) node.getData() ).val()).append("(");
+            for (int i = 0; i < node.numberOfChildren(); i++) {
+                condense(node.getChildAt(i), b);
+                if (i > 0 && !( (CFunction) node.getData() ).val().equals("__autoconcat__")) {
                     b.append(",");
                 }
             }
             b.append(")");
-        } else if (node.data instanceof CString) {
-            CString data = (CString) node.data;
+        } else if (node.getData() instanceof CString) {
+            CString data = (CString) node.getData();
             // Convert: \ -> \\ and ' -> \'
             b.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
         } else {
-            b.append(node.data.val());
+            b.append(node.getData().val());
         }
     }
 
-    public GenericTreeNode<Construct> getNode() {
+    public ParseTree getNode() {
         return node;
     }
 
@@ -111,15 +112,15 @@ public class CClosure extends Construct {
                     environment.GetVarList().set(new IVariable(name, value, getTarget()));
                 }
             }
-            CArray arguments = new CArray(node.data.getTarget());
+            CArray arguments = new CArray(node.getData().getTarget());
             if (values != null) {
                 for (Construct value : values) {
                     arguments.push(value);
                 }
             }
-            environment.GetVarList().set(new IVariable("@arguments", arguments, node.data.getTarget()));
-            GenericTreeNode<Construct> newNode = new GenericTreeNode<Construct>(new CFunction("g", getTarget()));
-            List<GenericTreeNode<Construct>> children = new ArrayList<GenericTreeNode<Construct>>();
+            environment.GetVarList().set(new IVariable("@arguments", arguments, node.getData().getTarget()));
+            ParseTree newNode = new ParseTree(new CFunction("g", getTarget()));
+            List<ParseTree> children = new ArrayList<ParseTree>();
             children.add(node);
             newNode.setChildren(children);
             try {

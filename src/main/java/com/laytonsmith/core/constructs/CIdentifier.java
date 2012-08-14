@@ -1,6 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.ParseTree;
 
 /**
  *
@@ -8,18 +9,18 @@ import com.laytonsmith.core.GenericTreeNode;
  */
 public class CIdentifier extends Construct{
 
-    private final GenericTreeNode<Construct> contained;
-    public CIdentifier(String type, GenericTreeNode<Construct> c, Target t){
+    private final ParseTree contained;
+    public CIdentifier(String type, ParseTree c, Target t){
         super(type, ConstructType.IDENTIFIER, t);
         contained = c;
     }
     
     @Override
     public boolean isDynamic() {
-        return contained.data.isDynamic();
+        return contained.getData().isDynamic();
     }
     
-    public GenericTreeNode<Construct> contained(){
+    public ParseTree contained(){
         return contained;
     }
     
