@@ -15,6 +15,8 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * A parse tree wraps a generic tree node, but provides functions that are commonly used to discover
@@ -73,14 +75,15 @@ public class ParseTree implements Cloneable{
 	}
 	
 	
-	private GenericTreeNode<Construct> tree;
+	private Construct data = null;
 	private boolean isOptimized = false;
+	private List<ParseTree> children = null;
 	
 	/**
 	 * Creates a new empty tree node
 	 */
 	public ParseTree(){
-		this.tree = new GenericTreeNode<Construct>();
+		children = new ArrayList<ParseTree>();
 	}
 	
 	/**
@@ -89,19 +92,11 @@ public class ParseTree implements Cloneable{
 	 */
 	public ParseTree(Construct construct){
 		this();
-		tree.setData(construct);
-	}
-	
-	/**
-	 * Creates a new ParseTree, using the GenericTreeNode as the backing.
-	 * @param tree 
-	 */
-	private ParseTree(GenericTreeNode<Construct> tree){
-		this.tree = tree;
+		setData(construct);
 	}
 	
 	public void setData(Construct data) {
-		tree.setData(data);
+		this.data = data;
 	}
 	
 	public void setOptimized(boolean optimized){
@@ -119,9 +114,9 @@ public class ParseTree implements Cloneable{
 	 */
 	public List<Construct> getAllData(){
 		List<Construct> list = new ArrayList<Construct>();
-		list.add(tree.getData());
-		for(GenericTreeNode<Construct> node : tree.getChildren()){
-			list.addAll(new ParseTree(node).getAllData());
+		list.add(getData());
+		for(ParseTree node : getChildren()){
+			list.addAll(node.getAllData());
 		}
 		return list;
 	}
@@ -131,10 +126,6 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public List<ParseTree> getChildren(){
-		List<ParseTree> children = new ArrayList<ParseTree>();
-		for(GenericTreeNode<Construct> node : tree.getChildren()){
-			children.add(new ParseTree(node));
-		}
 		return children;
 	}
 	
@@ -145,7 +136,7 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public ParseTree getChildAt(int index){
-		return new ParseTree(tree.getChildAt(index));
+		return children.get(index);
 	}
 	
 	/**
@@ -153,7 +144,7 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public Construct getData(){
-		return tree.getData();
+		return data;
 	}
 	
 	/**
@@ -161,15 +152,11 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public boolean hasChildren(){		
-		return tree.hasChildren();
+		return !children.isEmpty();
 	}
 	
 	public void setChildren(List<ParseTree> children){
-		List<GenericTreeNode<Construct>> gtnChildren = new ArrayList<GenericTreeNode<Construct>>();
-		for(ParseTree child : children){
-			gtnChildren.add(child.tree);
-		}
-		tree.children = gtnChildren;
+		this.children = children;
 	}
 	
 	/**
@@ -177,7 +164,7 @@ public class ParseTree implements Cloneable{
 	 * @param node 
 	 */
 	public void addChild(ParseTree node){
-		tree.addChild(node.tree);
+		children.add(node);
 	}
 	
 	/**
@@ -186,7 +173,7 @@ public class ParseTree implements Cloneable{
 	 * @param node 
 	 */
 	public void addChildAt(int index, ParseTree node){
-		tree.addChildAt(index, node.tree);
+		children.add(index, node);
 	}
 	
 	/**
@@ -194,7 +181,7 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public int numberOfChildren(){
-		return tree.getNumberOfChildren();
+		return children.size();
 	}
 	
 	/**
@@ -202,14 +189,14 @@ public class ParseTree implements Cloneable{
 	 * @param index 
 	 */
 	public void removeChildAt(int index){
-		tree.removeChildAt(index);
+		children.remove(index);
 	}
 	
 	/**
 	 * Removes all children from this node
 	 */
 	public void removeChildren(){
-		tree.removeChildren();
+		children.clear();
 	}
 	
 	/**
@@ -220,7 +207,7 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public boolean isConst(){
-		return !tree.data.isDynamic();
+		return !data.isDynamic();
 	}
 	
 	/**
@@ -228,7 +215,7 @@ public class ParseTree implements Cloneable{
 	 * @return 
 	 */
 	public boolean isDynamic(){
-		return tree.data.isDynamic();
+		return data.isDynamic();
 	}
 	
 	/**
@@ -310,8 +297,32 @@ public class ParseTree implements Cloneable{
 
 	@Override
 	public ParseTree clone() throws CloneNotSupportedException {
-		return new ParseTree(tree.clone());
-	}		
+		ParseTree clone = (ParseTree)super.clone();
+		clone.data = data.clone();
+		clone.children = new ArrayList<ParseTree>(this.children);
+		return clone;
+	}
+	
+	public String toString(){
+		return data.toString();
+	}
+	
+	public String toStringVerbose(){
+		String stringRepresentation = getData().toString() + ":[";
+
+        for (ParseTree node : getChildren()) {
+            stringRepresentation += node.getData().toString() + ", ";
+        }
+
+        //Pattern.DOTALL causes ^ and $ to match. Otherwise it won't. It's retarded.
+        Pattern pattern = Pattern.compile(", $", Pattern.DOTALL);
+        Matcher matcher = pattern.matcher(stringRepresentation);
+
+        stringRepresentation = matcher.replaceFirst("");
+        stringRepresentation += "]";
+
+        return stringRepresentation;
+	}
 	
 	
 }

@@ -1215,7 +1215,9 @@ public final class MethodScriptCompiler {
                 throw new ConfigCompileException(e);
             }
             if(tempNode != null){
-                tree = tempNode;
+                tree.setData(tempNode.getData());
+		tree.setOptimized(tempNode.isOptimized());
+		tree.setChildren(tempNode.getChildren());
             } //else it wasn't an optimization, but a compile check
             optimize(tree, procs);
             tree.setOptimized(true);

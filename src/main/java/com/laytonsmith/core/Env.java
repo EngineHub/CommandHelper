@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.IVariableList;
@@ -27,6 +28,7 @@ public final class Env implements Cloneable{
     private Script script = null;
     private BoundEvent.ActiveEvent event = null;
     private String command = null;
+    private ExecutionQueue executionQueue = null;
     
     /*
      * The constructor has relatively little to do, most things are lazy
@@ -199,27 +201,22 @@ public final class Env implements Cloneable{
     }
     
     @Override
-    public Env clone() throws CloneNotSupportedException{
-        Env clone = new Env();
+    public Env clone() throws CloneNotSupportedException{	    
+        Env clone = (Env)super.clone();
         clone.custom = new HashMap<String, Object>(this.custom);
-        clone.commandSender = commandSender;
-        clone.event = event;
         if(flags != null){
             clone.flags = new HashMap<String, Boolean>(flags);
         } else {
             clone.flags = new HashMap<String, Boolean>();
         }
-        clone.label = label;
         if(procs != null){
             clone.procs = new HashMap<String, Procedure>(procs);
         } else {
             clone.procs = new HashMap<String, Procedure>();
         }
-        clone.script = script;
         if(iVariableList != null){
             clone.iVariableList = (IVariableList) iVariableList.clone();
         }
-        clone.command = command;
         return clone;
     }
 
@@ -229,5 +226,13 @@ public final class Env implements Cloneable{
     
     public String GetCommand(){
         return this.command;
+    }
+    
+    public void SetExecutionQueue(ExecutionQueue ex){
+	    this.executionQueue = ex;
+    }
+    
+    public ExecutionQueue GetExecutionQueue(){
+	    return this.executionQueue;
     }
 }
