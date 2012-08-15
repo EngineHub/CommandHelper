@@ -218,53 +218,54 @@ public class ParseTree implements Cloneable{
 		return data.isDynamic();
 	}
 	
-	/**
-	 * If ANY data node REQUIRES this to be async, this will return true. If
-	 * NONE of the data nodes REQUIRE this to be async, or if NONE of them care,
-	 * it returns false.
-	 * @return 
-	 */
-	public boolean isAsync(){
-		if(isCached(this, CacheTypes.IS_ASYNC)){
-			return (Boolean)getCache(this, CacheTypes.IS_ASYNC);
-		} else {
-			boolean ret = false;
-			for(Function ff : getFunctions()){
-				Boolean runAsync = ff.runAsync();
-				if(runAsync != null && runAsync == true){
-					//We're done here. It's definitely async only,
-					//so we can stop looking.
-					ret = true;				
-				}
-			}
-			setCache(this, CacheTypes.IS_ASYNC, ret);
-			return ret;
-		}		
-	}
-	
-	/**
-	 * If ANY data node REQUIRES this to be sync, this will return true. If
-	 * NONE of the data nodes REQUIRE this to be sync, or if NONE of them care,
-	 * it returns false.
-	 * @return 
-	 */
-	public boolean isSync(){
-		if(isCached(this, CacheTypes.IS_SYNC)){
-			return (Boolean)getCache(this, CacheTypes.IS_SYNC);
-		} else {
-			boolean ret = false;
-			for(Function ff : getFunctions()){
-				Boolean runAsync = ff.runAsync();
-				if(runAsync != null && runAsync == false){
-					//We're done here. It's definitely sync only,
-					//so we can stop looking.
-					ret = true;
-				}
-			}
-			setCache(this, CacheTypes.IS_SYNC, ret);
-			return ret;
-		}
-	}
+	//TODO: None of this will work until we deeply consider procs, which can't happen yet.
+//	/**
+//	 * If ANY data node REQUIRES this to be async, this will return true. If
+//	 * NONE of the data nodes REQUIRE this to be async, or if NONE of them care,
+//	 * it returns false.
+//	 * @return 
+//	 */
+//	public boolean isAsync(){
+//		if(isCached(this, CacheTypes.IS_ASYNC)){
+//			return (Boolean)getCache(this, CacheTypes.IS_ASYNC);
+//		} else {
+//			boolean ret = false;
+//			for(Function ff : getFunctions()){
+//				Boolean runAsync = ff.runAsync();
+//				if(runAsync != null && runAsync == true){
+//					//We're done here. It's definitely async only,
+//					//so we can stop looking.
+//					ret = true;				
+//				}
+//			}
+//			setCache(this, CacheTypes.IS_ASYNC, ret);
+//			return ret;
+//		}		
+//	}
+//	
+//	/**
+//	 * If ANY data node REQUIRES this to be sync, this will return true. If
+//	 * NONE of the data nodes REQUIRE this to be sync, or if NONE of them care,
+//	 * it returns false.
+//	 * @return 
+//	 */
+//	public boolean isSync(){
+//		if(isCached(this, CacheTypes.IS_SYNC)){
+//			return (Boolean)getCache(this, CacheTypes.IS_SYNC);
+//		} else {
+//			boolean ret = false;
+//			for(Function ff : getFunctions()){
+//				Boolean runAsync = ff.runAsync();
+//				if(runAsync != null && runAsync == false){
+//					//We're done here. It's definitely sync only,
+//					//so we can stop looking.
+//					ret = true;
+//				}
+//			}
+//			setCache(this, CacheTypes.IS_SYNC, ret);
+//			return ret;
+//		}
+//	}
 	
 	/**
 	 * Returns a list of all functions contained in this parse tree.

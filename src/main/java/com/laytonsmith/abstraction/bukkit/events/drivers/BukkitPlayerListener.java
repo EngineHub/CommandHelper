@@ -67,41 +67,44 @@ public class BukkitPlayerListener implements Listener {
 				//but if it does, tough. Barring play-dirty mode, there's not a whole
 				//lot that can be done reasonably.
 				
-				SortedSet<BoundEvent> events = EventUtils.GetEvents(Driver.PLAYER_CHAT);
-				Event driver = EventList.getEvent(Driver.PLAYER_CHAT, "player_chat");				
-				//Unfortunately, due to priority issues, if any event is syncronous, all of them
-				//have to be synchronous.
-				boolean canBeAsync = true;
-				boolean actuallyNeedToFire = false;
-				//If all the events are asynchronous, we can just run it as is.
-				for(BoundEvent b : events){
-					//We can't just use isSync here, because cancel and modify event,
-					//normally synchronous, aren't in this case, so we need to manually
-					//check the full function list.
-					for(Function f : b.getParseTree().getFunctions()){
-						if(f instanceof EventBinding.cancel || f instanceof EventBinding.modify_event){
-							continue;
-						}
-						if(f.runAsync() != null && f.runAsync() == false){
-							//Nope, can't be run async :(
-							canBeAsync = false;
-						}						
-					}
-					try {
-						if(driver.matches(b.getPrefilter(), new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event))){
-							//Yeah, we need to fire it, so we have to continue
-							actuallyNeedToFire = true;
-						}
-					} catch (PrefilterNonMatchException ex) {
-						//No need to fire this one
-					}
-				}
+//				SortedSet<BoundEvent> events = EventUtils.GetEvents(Driver.PLAYER_CHAT);
+//				Event driver = EventList.getEvent(Driver.PLAYER_CHAT, "player_chat");				
+//				//Unfortunately, due to priority issues, if any event is syncronous, all of them
+//				//have to be synchronous.
+//				boolean canBeAsync = true;
+//				boolean actuallyNeedToFire = false;
+//				//If all the events are asynchronous, we can just run it as is.
+//				for(BoundEvent b : events){
+//					//We can't just use isSync here, because cancel and modify event,
+//					//normally synchronous, aren't in this case, so we need to manually
+//					//check the full function list.
+//					for(Function f : b.getParseTree().getFunctions()){
+//						if(f instanceof EventBinding.cancel || f instanceof EventBinding.modify_event){
+//							continue;
+//						}
+//						if(f.runAsync() != null && f.runAsync() == false){
+//							//Nope, can't be run async :(
+//							canBeAsync = false;
+//						}						
+//					}
+//					try {
+//						if(driver.matches(b.getPrefilter(), new BukkitPlayerEvents.BukkitMCPlayerChatEvent(event))){
+//							//Yeah, we need to fire it, so we have to continue
+//							actuallyNeedToFire = true;
+//						}
+//					} catch (PrefilterNonMatchException ex) {
+//						//No need to fire this one
+//					}
+//				}
+//				
+//				if(!actuallyNeedToFire){
+//					//Yay! Prefilters finally actually optimized something!
+//					return;
+//				}
 				
-				if(!actuallyNeedToFire){
-					//Yay! Prefilters finally actually optimized something!
-					return;
-				}
-				
+				//Until there is a more reliable way to detect isConst() on a parse tree, (that supports procs)
+				//this must always be synchronous.
+				boolean canBeAsync = false;
 				if(canBeAsync){
 					//Fire away!
 					fireChat(event);
