@@ -242,4 +242,29 @@ public class ArrayHandlingTest {
         Run("msg(array_implode(array(1,2,3,4,5,6,7,8,9,1,2,3,4,5)))", fakePlayer);
         verify(fakePlayer).sendMessage("1 2 3 4 5 6 7 8 9 1 2 3 4 5");
     }
+	
+	@Test public void testArrayRemoveValues() throws ConfigCompileException{
+		Run("assign(@array, array(1, 2, 2, 3)) array_remove_values(@array, 2) msg(@array)", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 3}");
+	}
+	
+	@Test public void testArrayIndex() throws ConfigCompileException{
+		Run("assign(@array, array(1, 2, 2, 3)) msg(array_index(@array, 2))", fakePlayer);
+		verify(fakePlayer).sendMessage("1");
+	}
+	
+	@Test public void testArrayIndexMissing() throws ConfigCompileException{
+		Run("assign(@array, array(1, 3)) msg(array_index(@array, 2))", fakePlayer);
+		verify(fakePlayer).sendMessage("null");
+	}
+	
+	@Test public void testArrayIndexes() throws ConfigCompileException{
+		Run("assign(@array, array(1, 2, 2, 3)) msg(array_indexes(@array, 2))", fakePlayer);
+		verify(fakePlayer).sendMessage("{1, 2}");
+	}
+	
+	@Test public void testArrayIndexesMissing() throws ConfigCompileException{
+		Run("assign(@array, array(1, 3)) msg(array_indexes(@array, 2))", fakePlayer);
+		verify(fakePlayer).sendMessage("{}");
+	}
 }

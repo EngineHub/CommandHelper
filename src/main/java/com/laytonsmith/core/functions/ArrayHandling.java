@@ -970,4 +970,131 @@ public class ArrayHandling {
 			return null;
 		}
 	}
+	
+	@api public static class array_remove_values extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			if(!(args[0] instanceof CArray)){
+				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
+			}
+			((CArray)args[0]).removeValues(args[1]);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "array_remove_values";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "void {array, value} Removes all instances of value from the specified array."
+					+ " For instance, array_remove_values(array(1, 2, 2, 3), 2) would produce the"
+					+ " array(1, 3). Note that it returns void however, so it will simply in place"
+					+ " modify the array passed in, much like array_remove.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api public static class array_indexes extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			if(!(args[0] instanceof CArray)){
+				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
+			}
+			return ((CArray)args[0]).indexesOf(args[1]);
+		}
+
+		public String getName() {
+			return "array_indexes";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "array {array, value} Returns an array with all the keys of the specified array"
+					+ " at which the specified value is equal. That is, for the array(1, 2, 2, 3), if"
+					+ " value were 2, would return array(1, 2)";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api public static class array_index extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			CArray ca = (CArray)new array_indexes().exec(t, environment, args);
+			if(ca.isEmpty()){
+				return new CNull(t);
+			} else {
+				return ca.get(0);
+			}
+		}
+
+		public String getName() {
+			return "array_index";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "mixed {array, value} Works exactly like array_indexes(array, value)[0], except in the case where"
+					+ " the value is not found, returns null. That is to say, if the value is contained in an"
+					+ " array (even multiple times) the index of the first element is returned.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }

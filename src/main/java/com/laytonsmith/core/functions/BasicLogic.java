@@ -7,6 +7,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.sun.org.apache.bcel.internal.generic.Select;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -387,6 +388,20 @@ public class BasicLogic {
 
     @api
     public static class equals extends AbstractFunction {
+		
+		private static equals self = new equals();
+		/**
+		 * Returns the results that this function would provide, but
+		 * in a java specific manner, so other code may easily determine
+		 * how this method would respond.
+		 * @param one
+		 * @param two
+		 * @return 
+		 */
+		public static boolean doEquals(Construct one, Construct two){
+			CBoolean ret = (CBoolean)self.exec(Target.UNKNOWN, null, one, two);
+			return ret.getBoolean();
+		}
 
         public String getName() {
             return "equals";

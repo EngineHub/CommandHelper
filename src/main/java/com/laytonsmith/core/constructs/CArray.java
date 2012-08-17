@@ -6,6 +6,7 @@ import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.ArrayHandling;
+import com.laytonsmith.core.functions.BasicLogic;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
@@ -23,6 +24,7 @@ public class CArray extends Construct implements ArrayAccess{
     private SortedMap<String, Construct> associative_array;
     private String mutVal;
     CArray parent = null;
+	private boolean valueDirty = true;
     
     
     public CArray(Target t){
@@ -97,33 +99,13 @@ public class CArray extends Construct implements ArrayAccess{
         associative_mode = true;
     }
 
+	/**
+	 * This must be called every time the underlying model is changed, which
+	 * sets the toString value to dirty, which means that the value will be regenerated
+	 * next time it is requested.
+	 */
     private void regenValue() {
-        StringBuilder b = new StringBuilder();
-        b.append("{");
-        if (!associative_mode) {
-            for (int i = 0; i < array.size(); i++) {
-                if (i > 0) {
-                    b.append(", ");
-                    b.append(array.get(i).val());
-                } else {
-                    b.append(array.get(i).val());
-                }
-            }
-        } else {
-            boolean first = true;
-            for(String key : associative_array.keySet()){
-                if(!first){
-                    b.append(", ");
-                }
-                first = false;
-                b.append(key).append(": ").append(associative_array.get(key).val());
-            }
-        }
-        b.append("}");
-        mutVal = b.toString();
-        if(parent != null){
-            parent.regenValue();
-        }
+        valueDirty = true;
     }
 
     /**
@@ -297,15 +279,68 @@ public class CArray extends Construct implements ArrayAccess{
     public boolean contains(int i){
         return contains(new CString(Integer.toString(i), Target.UNKNOWN));
     }
+	
+	/**
+	 * Returns an array of the keys of all the values that are
+	 * equal to the value specified
+	 * @param value
+	 * @return 
+	 */
+	public CArray indexesOf(Construct value){
+		CArray ret = new CArray(Target.UNKNOWN);
+		if(associative_mode){
+			for(String key : associative_array.keySet()){
+				if(BasicLogic.equals.doEquals(associative_array.get(key), value)){
+					ret.push(new CString(key, Target.UNKNOWN));
+				}
+			}
+		} else {
+			for(int i = 0; i < array.size(); i++){
+				if(BasicLogic.equals.doEquals(array.get(i), value)){
+					ret.push(new CInt(i, Target.UNKNOWN));
+				}
+			}
+		}
+		return ret;
+	}
 
     @Override
     public String val() {
+		if(valueDirty){
+			StringBuilder b = new StringBuilder();
+			b.append("{");
+			if (!associative_mode) {
+				for (int i = 0; i < array.size(); i++) {
+					if (i > 0) {
+						b.append(", ");
+						b.append(array.get(i).val());
+					} else {
+						b.append(array.get(i).val());
+					}
+				}
+			} else {
+				boolean first = true;
+				for(String key : associative_array.keySet()){
+					if(!first){
+						b.append(", ");
+					}
+					first = false;
+					b.append(key).append(": ").append(associative_array.get(key).val());
+				}
+			}
+			b.append("}");
+			mutVal = b.toString();
+			if(parent != null){
+				parent.regenValue();
+			}
+			valueDirty = false;
+		}
         return mutVal;
     }
 
     @Override
     public String toString() {
-        return mutVal;
+        return val();
     }
 
     public int size() {
@@ -370,6 +405,32 @@ public class CArray extends Construct implements ArrayAccess{
         regenValue();
         return ret;
     }
+	
+	/**
+	 * Removes all values that are equal to the specified construct
+	 * from this array
+	 * @param construct 
+	 */
+	public void removeValues(Construct construct){
+		if(associative_mode){
+			Iterator<Construct> it;
+			it = associative_array.values().iterator();
+			while(it.hasNext()){
+				Construct c = it.next();
+				if(BasicLogic.equals.doEquals(c, construct)){
+					it.remove();
+				}
+			}
+		} else {
+			for(int i = array.size() - 1; i >= 0; i--){
+				Construct c = array.get(i);
+				if(BasicLogic.equals.doEquals(c, construct)){
+					array.remove(i);
+				}
+			}
+		}
+		regenValue();
+	}
     
     private Comparator<String> comparator = new Comparator<String>(){
 
@@ -527,4 +588,8 @@ public class CArray extends Construct implements ArrayAccess{
         this.array = list;  
         this.regenValue();
     }
+	
+	public boolean isEmpty(){
+		return size() == 0;
+	}
 }

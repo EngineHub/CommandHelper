@@ -874,6 +874,11 @@ public class MethodScriptCompilerTest {
     public void testCommentsInStrings2() throws ConfigCompileException{
 	    SRun("'/*'", fakePlayer);
     }
+	
+	@Test
+	public void testDoubleQuotesInSingleQuotes() throws Exception{
+		SRun("'This \"should work\" correctly, and not throw an exception'", null);
+	}
     
     //TODO: Once the lexer is rewritten, this should work
 //    @Test
