@@ -1046,7 +1046,8 @@ public class ArrayHandling {
 		public String docs() {
 			return "array {array, value} Returns an array with all the keys of the specified array"
 					+ " at which the specified value is equal. That is, for the array(1, 2, 2, 3), if"
-					+ " value were 2, would return array(1, 2)";
+					+ " value were 2, would return array(1, 2). If the value cannot be found in the"
+					+ " array at all, an empty array will be returned.";
 		}
 
 		public CHVersion since() {
