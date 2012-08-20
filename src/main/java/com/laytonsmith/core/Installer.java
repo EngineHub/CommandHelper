@@ -19,8 +19,11 @@ public final class Installer {
     private Installer(){}
 
     public static void Install() {
-        //Check to see if the auto_include file exists. If not, include it now
+		//Make the main folder
+		new File("plugins/CommandHelper").mkdirs();
+		//Create the includes folder
         new File("plugins/CommandHelper/includes").mkdirs();
+        //Check to see if the auto_include file exists. If not, include it now
         File auto_include = new File("plugins/CommandHelper/auto_include.ms");
         if(!auto_include.exists()){
             String sample = parseISToString(Installer.class.getResourceAsStream("/samp_auto_include.txt"));
@@ -31,7 +34,14 @@ public final class Installer {
                 Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
+		//Create the local packages folder
         new File("plugins/CommandHelper/LocalPackages").mkdirs();
+		try {
+			//Let the profiler get set up
+			Profiler.Install(new File("plugins/CommandHelper/profiler.config"));
+		} catch (IOException ex) {
+			Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
+		}
     }
 
     public static String parseISToString(java.io.InputStream is) {

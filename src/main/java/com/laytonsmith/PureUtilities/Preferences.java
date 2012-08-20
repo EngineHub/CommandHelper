@@ -251,7 +251,7 @@ public class Preferences {
             }
             BufferedWriter out = null;
             if(!prefFile.exists()){
-                prefFile.getParentFile().mkdirs();
+                prefFile.getAbsoluteFile().getParentFile().mkdirs();
                 prefFile.createNewFile();
             }
             out = new BufferedWriter(new FileWriter(prefFile.getAbsolutePath()));

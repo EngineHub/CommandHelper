@@ -25,9 +25,9 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) {
-        //functions("wiki", api.Platforms.INTERPRETER_JAVA);
+        functions("wiki", api.Platforms.INTERPRETER_JAVA);
         //events("wiki");
-	    System.out.println(Template("persistance_network"));
+	    //System.out.println(Template("persistance_network"));
     }
 
     public static void functions(String type, api.Platforms platform) {
