@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -12,6 +13,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
+import com.laytonsmith.core.profiler.ProfilePoint;
 import com.sk89q.util.StringUtil;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.*;
@@ -82,6 +84,7 @@ public class AliasCore {
 	public boolean alias(String command, final MCCommandSender player, List<Script> playerCommands) {
 
 		Env env = new Env();
+		env.SetProfiler(parent.profiler);
 		env.SetCommandSender(player);
 		env.SetExecutionQueue(parent.executionQueue);
 
@@ -227,6 +230,7 @@ public class AliasCore {
 	public final void reload(MCPlayer player) {
 		try {
 			CHLog.Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
+			parent.profiler = new Profiler(new File("plugins/CommandHelper/profiler.config"));
 			Globals.clear();
 			Scheduling.ClearScheduledRunners();
 			EventUtils.UnregisterAll();
@@ -276,8 +280,12 @@ public class AliasCore {
 
 			autoIncludes = localPackages.getAutoIncludes();
 
+			ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
 			localPackages.compileMS(player);
+			compilerMS.stop();
+			ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
 			localPackages.compileMSA(scripts, player);
+			compilerMSA.stop();
 
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
@@ -480,6 +488,7 @@ public class AliasCore {
 				boolean exception = false;
 				try {
 					Env env = new Env();
+					env.SetProfiler(parent.profiler);
 					MethodScriptCompiler.registerAutoIncludes(env, null);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), env, null, null);
 				} catch (ConfigCompileException e) {

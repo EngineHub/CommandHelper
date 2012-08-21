@@ -1192,8 +1192,9 @@ public final class MethodScriptCompiler {
             //Let's see.
             try{
                 ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN));
-                Script fakeScript = Script.GenerateScript(root, "*");            
-                Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, new Env(), fakeScript, children.toArray(new ParseTree[children.size()]));
+                Script fakeScript = Script.GenerateScript(root, "*");
+				Env env = new Env();
+                Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, env, fakeScript, children.toArray(new ParseTree[children.size()]));
                 procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
             } catch(ConfigRuntimeException e){
                 //Well, they have an error in there somewhere

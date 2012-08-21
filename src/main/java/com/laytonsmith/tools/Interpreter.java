@@ -30,6 +30,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.SerializedPersistance;
 import java.io.File;
@@ -66,7 +67,14 @@ public class Interpreter {
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
 		try {
-			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
+			Env env = new Env();
+			try {
+				env.SetProfiler(new Profiler(new File("CommandHelper/profiler.config")));
+			} catch (IOException ex) {
+				//Oh well, it's not the end of the world.
+				Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), env, null, null);
 		} catch (ConfigCompileException ex) {
 		}
 		try {

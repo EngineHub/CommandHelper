@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.*;
@@ -12,6 +13,7 @@ import com.laytonsmith.core.functions.DataHandling.assign;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.profiler.ProfilePoint;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.util.*;
 
@@ -138,8 +140,17 @@ public class Script {
                     }
                 }
                 
+				String cmdname = "";
+				if(CurrentEnv.GetProfiler().isLoggable(LogLevel.ERROR)){
+					for(Token t : left){
+						cmdname += " " + t.val();
+					}
+					cmdname = "\"" + cmdname.trim() + "\"";
+				}
+				ProfilePoint alias = CurrentEnv.GetProfiler().start("Alias - " + cmdname, LogLevel.ERROR);
                 MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
                 MethodScriptCompiler.execute(rootNode, CurrentEnv, done, this);
+				alias.stop();
             }
         } catch (ConfigRuntimeException ex) {
             //We don't know how to handle this really, so let's pass it up the chain.

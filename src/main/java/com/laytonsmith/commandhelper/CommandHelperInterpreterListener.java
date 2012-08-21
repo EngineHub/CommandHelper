@@ -10,6 +10,7 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.profiler.Profiler;
 import java.io.File;
 import java.util.*;
 import org.bukkit.event.EventHandler;
@@ -26,11 +27,16 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class CommandHelperInterpreterListener implements Listener {
 
     private Set<String> interpreterMode = Collections.synchronizedSet(new HashSet<String>());
+	private Profiler profiler;
     Map<String, String> multilineMode = new HashMap<String, String>();
     
     public boolean isInInterpreterMode(MCPlayer p){
         return (interpreterMode.contains(p.getName()));
     }
+	
+	public CommandHelperInterpreterListener(Profiler profiler){
+		this.profiler = profiler;
+	}
 
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerChat(final AsyncPlayerChatEvent event) {
@@ -110,6 +116,7 @@ public class CommandHelperInterpreterListener implements Listener {
         ParseTree tree = MethodScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
         Env env = new Env();
+		env.SetProfiler(profiler);
         env.SetPlayer(p);
         try {
             MethodScriptCompiler.registerAutoIncludes(env, null);

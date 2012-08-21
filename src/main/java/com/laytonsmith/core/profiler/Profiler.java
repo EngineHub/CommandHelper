@@ -1,34 +1,38 @@
-package com.laytonsmith.core;
+package com.laytonsmith.core.profiler;
 
 import com.laytonsmith.PureUtilities.DateUtil;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
+import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Static;
 import java.io.File;
 import java.io.IOException;
-import java.lang.management.GarbageCollectorMXBean;
-import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Stack;
-import java.util.TreeMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
- * TODO: The following points need profile hooks: 1 - Alias run times 1 - Event
- * run times 1 - Execution Queue task run times 1 - set_timeout() closure run
- * times 1 - set_interval() closure run times 2 - for() run times (with
- * parameters) 2 - foreach() run times (with parameters) 2 - while() run times
- * (with parameters) 2 - dowhile() run times (with parameters) 3 - Procedure
- * execution run times (with parameters) 4 - read() run times 4 - get_value()
- * run times 4 - get_values() run times 4 - store_value() run times 4 -
- * clear_value() run times 4 - has_value() run times 5 - All functions run times
+ * TODO: The following points need profile hooks: 
+ * 1 - Alias run times 1 - Event run times 
+ * 1 - Execution Queue task run times 
+ * 1 - set_timeout() closure run times 
+ * 1 - set_interval() closure run times 
+ * 2 - for() run times (with parameters) 
+ * 2 - foreach() run times (with parameters) 
+ * 2 - while() run times (with parameters) 
+ * 2 - dowhile() run times (with parameters) 
+ * 3 - Procedure execution run times (with parameters) 
+ * 4 - read() run times 
+ * 4 - get_value() run times 
+ * 4 - get_values() run times 
+ * 4 - store_value() run times 
+ * 4 - clear_value() run times 
+ * 4 - has_value() run times 
+ * 5 - All functions run times
  * 5 - Compilation run time
  */
 /**
@@ -42,12 +46,12 @@ public final class Profiler {
 		GetPrefs(initFile);
 	}
 
-	public static Preferences GetPrefs(File initFile) throws IOException {
+	private static Preferences GetPrefs(File initFile) throws IOException {
 		List<Preference> defaults = new ArrayList<Preference>(Arrays.asList(new Preference[]{
 					new Preference("profiler-on", "false", Preferences.Type.BOOLEAN, "Turns the profiler on or off. The profiler can cause a slight amount of lag, so generally speaking"
 					+ " you don't leave it on during normal operation."),
 					new Preference("profiler-granularity", "1", Preferences.Type.INT, "Sets the granularity of the profiler. 1 logs some things, while 5 logs everything possible."),
-					new Preference("profiler-log", "%Y-%M-%D-profiler.log", Preferences.Type.STRING, "The location of the profiler output log. The following macros are supported"
+					new Preference("profiler-log", "logs/profiling/internal/%Y-%M-%D-profiler.log", Preferences.Type.STRING, "The location of the profiler output log. The following macros are supported"
 					+ " and will expand to the specified values: %Y - Year, %M - Month, %D - Day, %h - Hour, %m - Minute, %s - Second"),
 					new Preference("write-to-file", "true", Preferences.Type.BOOLEAN, "If true, will write results out to file."),
 					new Preference("write-to-screen", "false", Preferences.Type.BOOLEAN, "If true, will write results out to screen."),}));
@@ -55,22 +59,26 @@ public final class Profiler {
 		prefs.init(initFile);
 		return prefs;
 	}
-	private Map<ProfilePoint, Long> operations;
+	//Needs to be package protected
+	Map<ProfilePoint, Long> operations;
+	long queuedProfilePoints = 0;
+	
 	private LogLevel configGranularity;
 	private boolean profilerOn;
 	private String logFile;
 	private boolean writeToFile;
 	private boolean writeToScreen;
 	private Preferences prefs;
-	private long queuedProfilePoints = 0;
+	private File initFile;
 	//To prevent file fights across threads, we only want one outputQueue.
 	private static ExecutionQueue outputQueue;
-	private final static ProfilePoint NULL_OP = new ProfilePoint("NULL_OP");
+	private final ProfilePoint NULL_OP = new ProfilePoint("NULL_OP", this);
 
 	public Profiler(File initFile) throws IOException {
 		prefs = GetPrefs(initFile);
 		//We want speed here, not memory usage, so lets put an excessively large capacity, and excessively low load factor
 		operations = new HashMap<ProfilePoint, Long>(1024, 0.25f);
+		this.initFile = initFile;
 
 		configGranularity = LogLevel.getEnum((Integer) prefs.getPreference("profiler-granularity"));
 		if (configGranularity == null) {
@@ -83,7 +91,7 @@ public final class Profiler {
 		if (outputQueue == null) {
 			outputQueue = new ExecutionQueue("CommandHelper-Profiler", "default");
 		}
-		new GarbageCollectionDetector();
+		new GarbageCollectionDetector(this);
 		//As a form of calibration, we want to "warm up" a point.
 		//For whatever reason, this levels out the profile points pretty well.
 		ProfilePoint warmupPoint = this.start("Warming up the profiler", LogLevel.VERBOSE);
@@ -105,7 +113,7 @@ public final class Profiler {
 		if (!isLoggable(granularity)) {
 			return NULL_OP;
 		}
-		ProfilePoint p = new ProfilePoint(name);
+		ProfilePoint p = new ProfilePoint(name, this);
 		start0(p, granularity);
 		return p;
 	}
@@ -167,64 +175,18 @@ public final class Profiler {
 					System.out.println(message);
 				}
 				if (writeToFile) {
+					File file = new File(initFile.getParentFile(), DateUtil.ParseCalendarNotation(logFile));
 					try {
 						FileUtility.write(DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s") + ": " + message + Static.LF(), //Message to log
-								new File(DateUtil.ParseCalendarNotation(logFile)), //File to output to
+								file, //File to output to
 								FileUtility.APPEND, //We want to append
 								true); //Create it for us if it doesn't exist
 					} catch (IOException ex) {
-						System.err.println("While trying to write to the profiler log file, recieved an IOException: " + ex.getMessage());
+						System.err.println("While trying to write to the profiler log file (" + file.getAbsolutePath() + "), recieved an IOException: " + ex.getMessage());
 					}
 				}
 
 			}
 		});
-	}
-
-	private final class GarbageCollectionDetector {
-
-		@Override
-		protected void finalize() throws Throwable {
-			if (queuedProfilePoints > 0) {
-				for (ProfilePoint p : operations.keySet()) {
-					p.garbageCollectorRun();
-				}
-			}
-			new GarbageCollectionDetector();
-		}
-	}
-
-	public static class ProfilePoint implements Comparable<ProfilePoint> {
-
-		private String name;
-		boolean GCRun;
-
-		public ProfilePoint(String name) {
-			this.name = name;
-			GCRun = false;
-		}
-
-		@Override
-		public String toString() {
-			return name;
-		}
-
-		void garbageCollectorRun() {
-			GCRun = true;
-		}
-
-		boolean wasGCd() {
-			return GCRun;
-		}
-
-		/**
-		 * This is an arbitrary comparison, for the sake of fast tree searches.
-		 *
-		 * @param o
-		 * @return
-		 */
-		public int compareTo(ProfilePoint o) {
-			return o.name.compareTo(name);
-		}
 	}
 }

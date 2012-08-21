@@ -25,6 +25,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.SerializedPersistance;
 import com.sk89q.wepif.PermissionsResolverManager;
@@ -62,6 +63,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static MCServer myServer;
 	public static Version version;
 	public static CommandHelperPlugin self;
+	public Profiler profiler;
 	public static WorldEditPlugin wep;
 	public static ExecutorService hostnameLookupThreadPool;
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
@@ -82,7 +84,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 * Interpreter listener
 	 */
 	public final CommandHelperInterpreterListener interpreterListener =
-		new CommandHelperInterpreterListener();
+		new CommandHelperInterpreterListener(profiler);
 	/**
 	 * Server Command Listener, for console commands
 	 */

@@ -12,6 +12,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.SerializedPersistance;
 import java.awt.Color;
@@ -30,15 +31,19 @@ import java.util.regex.Pattern;
 public class Manager {
 
     private static Scanner scanner;
+	private static Profiler profiler;
 
-    public static void start() {
+    public static void start() throws IOException {
         cls();
         pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
+		profiler = new Profiler(new File("CommandHelper/profiler.config"));
         
         pl("Starting the Data Manager...");
         try {
-            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), new Env(), null, null);
+			Env env = new Env();
+			env.SetProfiler(profiler);
+            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), env, null, null);
         } catch (ConfigCompileException ex) {}
         pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
         pl(BLINKON + RED + "Warning!" + BLINKOFF + YELLOW + " Be sure your server is not running before using this tool to make changes to your database!");
@@ -261,7 +266,9 @@ public class Manager {
     
     public static boolean doAddEdit(String key, String valueScript){
         try {
-            Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null)), new Env(), null, null);
+			Env env = new Env();
+			env.SetProfiler(profiler);
+            Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null)), env, null, null);
             String value = Construct.json_encode(c, Target.UNKNOWN);
             pl(CYAN + "Adding: " + WHITE + value);
             Persistance db = GetDB();

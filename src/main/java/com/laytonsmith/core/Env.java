@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.events.BoundEvent;
+import com.laytonsmith.core.profiler.Profiler;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -29,6 +30,7 @@ public final class Env implements Cloneable{
     private BoundEvent.ActiveEvent event = null;
     private String command = null;
     private ExecutionQueue executionQueue = null;
+	private Profiler profiler = null;
     
     /*
      * The constructor has relatively little to do, most things are lazy
@@ -199,6 +201,14 @@ public final class Env implements Cloneable{
     public BoundEvent.ActiveEvent GetEvent(){
         return event;
     }
+	
+	public void SetProfiler(Profiler profiler){
+		this.profiler = profiler;
+	}
+	
+	public Profiler GetProfiler(){
+		return this.profiler;
+	}
     
     @Override
     public Env clone() throws CloneNotSupportedException{	    

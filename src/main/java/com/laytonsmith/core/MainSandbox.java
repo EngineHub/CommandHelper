@@ -1,8 +1,10 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.SSHWrapper;
 import com.laytonsmith.core.functions.Meta;
+import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.persistance.PersistanceNetwork;
 import java.io.File;
 import java.net.URI;
@@ -57,11 +59,11 @@ public class MainSandbox {
 //		}
 		Profiler p = new Profiler(new File("profiler.config"));
 		p.doLog("Starting profiling");
-		Profiler.ProfilePoint ProfilerTop = p.start("Profiler Top", LogLevel.ERROR);
-		Profiler.ProfilePoint ProfilerMiddle = p.start("Profiler Middle", LogLevel.WARNING);
-		Profiler.ProfilePoint ProfilerBottom = p.start("Profiler Bottom", LogLevel.INFO);
-		Profiler.ProfilePoint InnerMost1 = p.start("InnerMost1", LogLevel.DEBUG);
-		Profiler.ProfilePoint InnerMost2 = p.start("InnerMost2", LogLevel.VERBOSE);
+		ProfilePoint ProfilerTop = p.start("Profiler Top", LogLevel.ERROR);
+		ProfilePoint ProfilerMiddle = p.start("Profiler Middle", LogLevel.WARNING);
+		ProfilePoint ProfilerBottom = p.start("Profiler Bottom", LogLevel.INFO);
+		ProfilePoint InnerMost1 = p.start("InnerMost1", LogLevel.DEBUG);
+		ProfilePoint InnerMost2 = p.start("InnerMost2", LogLevel.VERBOSE);
 //		System.gc();
 		p.stop(InnerMost2);
 		p.stop(InnerMost1);
