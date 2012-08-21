@@ -118,6 +118,7 @@ public class AliasCore {
 						}
 						try {
 							env.SetCommand(command);
+							ProfilePoint alias = env.GetProfiler().start("Global Alias - \"" + command + "\"", LogLevel.ERROR);
 							s.run(s.getVariables(command), env, new MethodScriptComplete() {
 								public void done(String output) {
 									try {
@@ -146,6 +147,7 @@ public class AliasCore {
 									}
 								}
 							});
+							alias.stop();
 						} catch (ConfigRuntimeException ex) {
 							ex.setEnv(env);
 							ConfigRuntimeException.React(ex);
@@ -177,6 +179,7 @@ public class AliasCore {
 
 							if (ac.match(command)) {
 								Static.getAliasCore().addPlayerReference(player);
+								ProfilePoint alias = env.GetProfiler().start("User Alias (" + player.getName() + ") - \"" + command + "\"", LogLevel.ERROR);
 								ac.run(ac.getVariables(command), env, new MethodScriptComplete() {
 									public void done(String output) {
 										if (output != null) {
@@ -190,6 +193,7 @@ public class AliasCore {
 										Static.getAliasCore().removePlayerReference(player);
 									}
 								});
+								alias.stop();
 								match = true;
 								break;
 							}

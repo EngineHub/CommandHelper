@@ -138,19 +138,10 @@ public class Script {
                                 Static.resolveConstruct(
                                 Static.resolveDollarVar(left_vars.get(((Variable) tempNode).getName()), vars).toString(), tempNode.getTarget()));
                     }
-                }
-                
-				String cmdname = "";
-				if(CurrentEnv.GetProfiler().isLoggable(LogLevel.ERROR)){
-					for(Token t : left){
-						cmdname += " " + t.val();
-					}
-					cmdname = "\"" + cmdname.trim() + "\"";
-				}
-				ProfilePoint alias = CurrentEnv.GetProfiler().start("Alias - " + cmdname, LogLevel.ERROR);
+                }                
+				
                 MethodScriptCompiler.registerAutoIncludes(CurrentEnv, this);
                 MethodScriptCompiler.execute(rootNode, CurrentEnv, done, this);
-				alias.stop();
             }
         } catch (ConfigRuntimeException ex) {
             //We don't know how to handle this really, so let's pass it up the chain.

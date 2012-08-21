@@ -3,12 +3,14 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
+import com.laytonsmith.core.profiler.ProfilePoint;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -61,7 +63,9 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         } catch(UnsupportedOperationException e){
             //Ignore. This particular event doesn't need to customize
         }
+		ProfilePoint event = env.GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
         s.run(null, env, null);
+		event.stop();
         try{
             this.postExecution(env, activeEvent);
         } catch(UnsupportedOperationException e){
