@@ -243,6 +243,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
             }
             env.GetVarList().set(new IVariable(eventObjName, ca, Target.UNKNOWN));
             env.SetEvent(activeEvent);
+			env.SetProfiler(originalEnv.GetProfiler());
             activeEvent.addHistory("Triggering bound event: " + this);
             try{
                 this.execute(env, activeEvent);
