@@ -19,12 +19,16 @@ import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
+import com.laytonsmith.core.profiler.Profiler;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -415,6 +419,13 @@ public class StaticTest {
     
     public static void Run(String script, MCCommandSender player, MethodScriptComplete done) throws ConfigCompileException{
         Env env = new Env();
+		File file = new File("profiler.config");
+		file.deleteOnExit();
+		try {
+			env.SetProfiler(new Profiler(file));
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
         env.SetCommandSender(player);
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, done, null);
     }
@@ -422,6 +433,13 @@ public class StaticTest {
     public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws ConfigCompileException{
         InstallFakeServerFrontend();
         Env env = new Env();
+		File file = new File("profiler.config");
+		file.deleteOnExit();
+		try {
+			env.SetProfiler(new Profiler(file));
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
         env.SetCommandSender(player);
         List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null), env);
         for(Script s : scripts){

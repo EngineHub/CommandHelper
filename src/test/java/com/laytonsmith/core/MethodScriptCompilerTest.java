@@ -10,9 +10,11 @@ import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -42,17 +44,20 @@ public class MethodScriptCompilerTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+		
     }
 
     @AfterClass
     public static void tearDownClass() throws Exception {
+		new File("profiler.config").deleteOnExit();
     }
 
     @Before
-    public void setUp() {        
+    public void setUp() throws IOException {        
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
         env.SetPlayer(fakePlayer);
+		env.SetProfiler(new Profiler(new File("profiler.config")));
     }
 
     @After
@@ -447,7 +452,7 @@ public class MethodScriptCompilerTest {
         String config = "//cmd blah = msg('success')";
         Script s = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(config, null), env).get(0);
         s.compile();
-        env.SetPlayer(fakePlayer);
+        env.SetPlayer(fakePlayer);		
         s.run(Arrays.asList(new Variable("$var", "hello", Target.UNKNOWN)), env, null);
         verify(fakePlayer).sendMessage("success");
     }
