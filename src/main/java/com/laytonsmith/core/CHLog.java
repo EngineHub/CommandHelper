@@ -38,38 +38,30 @@ public final class CHLog {
             + "";
     
     private static Preferences prefs;
-    private static EnumMap<Tags, Level> lookup = new EnumMap<Tags, Level>(Tags.class);
+    private static EnumMap<Tags, LogLevel> lookup = new EnumMap<Tags, LogLevel>(Tags.class);
     public enum Tags{
-        COMPILER("compiler", "Logs compiler errors (but not runtime errors)", Level.ERROR),
-        RUNTIME("runtime", "Logs runtime errors, (exceptions that bubble all the way to the top)", Level.ERROR),
-        DEPRECATION("deprecation", "Shows deprecation warnings", Level.WARNING),
-        PERSISTANCE("persistance", "Logs when any persistance actions occur.", Level.OFF),
+        COMPILER("compiler", "Logs compiler errors (but not runtime errors)", LogLevel.ERROR),
+        RUNTIME("runtime", "Logs runtime errors, (exceptions that bubble all the way to the top)", LogLevel.ERROR),
+        DEPRECATION("deprecation", "Shows deprecation warnings", LogLevel.WARNING),
+        PERSISTANCE("persistance", "Logs when any persistance actions occur.", LogLevel.OFF),
         //TODO Add the rest of these hooks into the code
 //        IO("IO", "Logs when the filesystem is accessed.", Level.OFF),
 //        ALIAS("alias", "Logs use of user aliases.", Level.OFF),
 //        EVENTS("events", "Logs bindings and use of an event.", Level.OFF),
 //        PROCEDURES("procedures", "Logs when a procedure is created", Level.OFF),
-        INCLUDES("includes", "Logs what file is requested when include() is used", Level.OFF),
-        GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", Level.ERROR),
-        META("meta", "Functions in the meta class use this tag", Level.OFF)
+        INCLUDES("includes", "Logs what file is requested when include() is used", LogLevel.OFF),
+        GENERAL("general", "Anything that doesn't fit in a more specific category is logged here.", LogLevel.ERROR),
+        META("meta", "Functions in the meta class use this tag", LogLevel.OFF)
         ;
         
         
         String name;
         String description;
-        Level level;
-        private Tags(String name, String description, Level defaultLevel){
+        LogLevel level;
+        private Tags(String name, String description, LogLevel defaultLevel){
             this.name = name;
             this.description = description;
             this.level = defaultLevel;
-        }
-    }
-    
-    public enum Level{
-        OFF(0), ERROR(1), WARNING(2), INFO(3), DEBUG(4), VERBOSE(5);
-        int level;
-        Level(int i){
-            level = i;
         }
     }
     
@@ -96,15 +88,15 @@ public final class CHLog {
      * @param tag
      * @return 
      */
-    private static Level GetLevel(Tags tag){
+    private static LogLevel GetLevel(Tags tag){
         if(lookup.containsKey(tag)){
             return lookup.get(tag);
         }
-        Level level;
+        LogLevel level;
         try{
-            level = Level.valueOf((String)prefs.getPreference(tag.name));
+            level = LogLevel.valueOf((String)prefs.getPreference(tag.name));
         } catch(IllegalArgumentException e){
-            level = Level.ERROR;
+            level = LogLevel.ERROR;
         }
         lookup.put(tag, level);
         return level;
@@ -116,12 +108,12 @@ public final class CHLog {
      * @param l
      * @return 
      */
-    public static boolean WillLog(Tags tag, Level l){
-        Level level = GetLevel(tag);
-        if(level == Level.OFF){
+    public static boolean WillLog(Tags tag, LogLevel l){
+        LogLevel level = GetLevel(tag);
+        if(level == LogLevel.OFF){
             return false;
         } else {
-            return l.level <= level.level;
+            return l.getLevel() <= level.getLevel();
         }
         
     }
@@ -137,12 +129,12 @@ public final class CHLog {
      * @param messages 
      */
     public static void LogOne(Tags tag, Target t, MsgBundle ... messages){
-        if(GetLevel(tag) == Level.OFF){
+        if(GetLevel(tag) == LogLevel.OFF){
             return; //Bail!
         }
-        Level tagLevel = GetLevel(tag);
-        Level [] levels = new Level[]{Level.VERBOSE, Level.DEBUG, Level.INFO, Level.WARNING, Level.ERROR};
-        for(Level l : levels){
+        LogLevel tagLevel = GetLevel(tag);
+        LogLevel [] levels = new LogLevel[]{LogLevel.VERBOSE, LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARNING, LogLevel.ERROR};
+        for(LogLevel l : levels){
             for(MsgBundle b : messages){
                 if(b.level == l && b.level == tagLevel){
                     //Found it.
@@ -160,7 +152,7 @@ public final class CHLog {
      * @param messages 
      */
     public static void LogAll(Tags tag, Target t, MsgBundle ... messages){
-        if(GetLevel(tag) == Level.OFF){
+        if(GetLevel(tag) == LogLevel.OFF){
             return; //For efficiency sake, go ahead and bail.
         }
         for(MsgBundle b : messages){
@@ -174,7 +166,7 @@ public final class CHLog {
      * @param message 
      */
     public static void Log(Tags module, String message, Target t){
-        Log(module, Level.ERROR, message, t);
+        Log(module, LogLevel.ERROR, message, t);
     }
     
     /**
@@ -183,9 +175,9 @@ public final class CHLog {
      * @param level
      * @param message 
      */
-    public static void Log(Tags modules, Level level, String message, Target t){
-        Level moduleLevel = GetLevel(modules);
-        if(moduleLevel == Level.OFF){
+    public static void Log(Tags modules, LogLevel level, String message, Target t){
+        LogLevel moduleLevel = GetLevel(modules);
+        if(moduleLevel == LogLevel.OFF){
             return; //Bail as quick as we can!
         }
         if(moduleLevel.level <= level.level){
@@ -206,9 +198,9 @@ public final class CHLog {
     
     
     public static class MsgBundle{
-        private Level level;
+        private LogLevel level;
         private String message;
-        public MsgBundle(Level level, String message){
+        public MsgBundle(LogLevel level, String message){
             this.level = level;
             this.message = message;
         }

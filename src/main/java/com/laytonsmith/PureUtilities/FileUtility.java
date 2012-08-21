@@ -76,22 +76,40 @@ public class FileUtility {
 //		    System.gc();
 //	    }
 	}
+	
+	/**
+	 * Works the same as write(String, File, int, false).
+	 * @param data
+	 * @param file
+	 * @param mode
+	 * @throws IOException 
+	 */
+	public static void write(String data, File file, int mode) throws IOException{		
+		write(data, file, mode, false);
+	}
 
 	/**
 	 * Writes out a String to the given file, either appending or
-	 * overwriting, depending on the selected mode
+	 * overwriting, depending on the selected mode. If create is true,
+	 * will attempt to create the file and parent directories if need be.
 	 *
 	 * @param data The string to write to the file
 	 * @param file The File to write to
 	 * @param mode Either OVERWRITE or APPEND
 	 * @throws IOException If the File f cannot be written to
 	 */
-	public static void write(String data, File file, int mode) throws IOException {
+	public static void write(String data, File file, int mode, boolean create) throws IOException {
 		boolean append;
 		if (mode == OVERWRITE) {
 			append = false;
 		} else {
 			append = true;
+		}
+		if(create && !file.exists()){
+			if(file.getAbsoluteFile().getParentFile() != null){
+				file.getAbsoluteFile().getParentFile().mkdirs();
+			}
+			file.getAbsoluteFile().createNewFile();
 		}
 		synchronized (getLock(file)) {
 			RandomAccessFile raf = new RandomAccessFile(file, "rw");
@@ -102,7 +120,7 @@ public class FileUtility {
 				if (!append) {
 					raf.getChannel().truncate(0);
 				} else {
-					raf.seek(raf.length() - 1);
+					raf.seek(raf.length());
 				}
 				//Write out the data
 				raf.getChannel().write(ByteBuffer.wrap(data.getBytes("UTF-8")));

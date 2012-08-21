@@ -56,12 +56,18 @@ public class MainSandbox {
 //			}, "Thread-" + i).start();
 //		}
 		Profiler p = new Profiler(new File("profiler.config"));
-		p.DoStart("Profiler", 1);
-		Thread.sleep(1000);
-		p.DoStart("Sleeptime", 1);
-		Thread.sleep(1000);
-		p.DoStop("Sleeptime");
-		p.DoStop("Profiler");
+		p.doLog("Starting profiling");
+		Profiler.ProfilePoint ProfilerTop = p.start("Profiler Top", LogLevel.ERROR);
+		Profiler.ProfilePoint ProfilerMiddle = p.start("Profiler Middle", LogLevel.WARNING);
+		Profiler.ProfilePoint ProfilerBottom = p.start("Profiler Bottom", LogLevel.INFO);
+		Profiler.ProfilePoint InnerMost1 = p.start("InnerMost1", LogLevel.DEBUG);
+		Profiler.ProfilePoint InnerMost2 = p.start("InnerMost2", LogLevel.VERBOSE);
+//		System.gc();
+		p.stop(InnerMost2);
+		p.stop(InnerMost1);
+		p.stop(ProfilerBottom);
+		p.stop(ProfilerMiddle);
+		p.stop(ProfilerTop);
 	}
 	
 	

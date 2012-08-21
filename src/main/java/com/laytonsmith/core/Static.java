@@ -613,6 +613,10 @@ public final class Static {
         return b.toString();
     }
 
+	/**
+	 * Returns the system based line seperator character
+	 * @return 
+	 */
     public static String LF() {
         return System.getProperty("line.separator");
     }

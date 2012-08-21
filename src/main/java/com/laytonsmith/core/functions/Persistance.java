@@ -193,7 +193,7 @@ public class Persistance {
             keyChain.addAll(Arrays.asList(namespace.split("\\.")));
             List<Map.Entry<String, Object>> list = p.getNamespaceValues(keyChain.toArray(new String[]{}));
             CArray ca = new CArray(t);
-            CHLog.Log(CHLog.Tags.PERSISTANCE, CHLog.Level.DEBUG, list.size() + " value(s) are being returned", t);
+            CHLog.Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
             for(Map.Entry<String, Object> e : list){
                 try {
                     String key = ((String)e.getKey()).replaceFirst("storage\\.", ""); //Get that junk out of here

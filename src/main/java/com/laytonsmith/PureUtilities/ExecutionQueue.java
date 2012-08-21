@@ -64,7 +64,7 @@ public class ExecutionQueue {
 			}
 		};
 		service = new ThreadPoolExecutor(0, Integer.MAX_VALUE,
-                                      5L, TimeUnit.SECONDS,
+                                      50L, TimeUnit.MILLISECONDS,
                                       new SynchronousQueue<Runnable>(),
                                       threadFactory);
 		queues = new HashMap<String, Deque<Runnable>>();
