@@ -40,6 +40,17 @@ import java.util.Map;
  * @author lsmith
  */
 public final class Profiler {
+	
+	/**
+	 * Useful for test cases and other places where a profiler is needed, but not desired,
+	 * this can be called to generate a fake Profiler.
+	 * @return 
+	 */
+	public static Profiler FakeProfiler(){
+		Profiler p = new Profiler();
+		p.profilerOn = false;
+		return p;
+	}
 
 	public static void Install(File initFile) throws IOException {
 		//We just want to create the config file initially
@@ -73,7 +84,11 @@ public final class Profiler {
 	//To prevent file fights across threads, we only want one outputQueue.
 	private static ExecutionQueue outputQueue;
 	private final ProfilePoint NULL_OP = new ProfilePoint("NULL_OP", this);
-
+	
+	private Profiler(){
+		//Private constructor for FakeProfiler
+	}
+	
 	public Profiler(File initFile) throws IOException {
 		prefs = GetPrefs(initFile);
 		//We want speed here, not memory usage, so lets put an excessively large capacity, and excessively low load factor

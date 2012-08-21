@@ -5,7 +5,11 @@ package com.laytonsmith.tools;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -24,11 +28,27 @@ import java.util.regex.Pattern;
  */
 public class DocGen {
 
-    public static void main(String[] args) {
-        functions("wiki", api.Platforms.INTERPRETER_JAVA);
+    public static void main(String[] args) throws Exception {
+        //functions("wiki", api.Platforms.INTERPRETER_JAVA);
+		examples("add");
         //events("wiki");
 	    //System.out.println(Template("persistance_network"));
     }
+	
+	public static void examples(String function) throws ConfigCompileException{
+		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
+		if(fb instanceof Function){
+			Function f = (Function)fb;
+			if(f.examples() != null && f.examples().length > 0){
+				for(ExampleScript es : f.examples()){
+					System.out.println("For this script:\n" + es.getScript() + "\n");
+					System.out.println("There will be the following output:\n" + es.getOutput() + "\n");
+				}
+			}
+		} else {
+			throw new RuntimeException(function + " does not implement Function");
+		}
+	}
 
     public static void functions(String type, api.Platforms platform) {
         List<FunctionBase> functions = FunctionList.getFunctionList(platform);
@@ -113,7 +133,7 @@ public class DocGen {
                 } else {
                     intro.append("===Other Functions===" + "\n");
                 }
-                intro.append("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" align=\"left\" class=\"wikitable\"\n"
+                intro.append("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
                         + "|-\n"
                         + "! scope=\"col\" width=\"6%\" | Function Name\n"
                         + "! scope=\"col\" width=\"5%\" | Returns\n"

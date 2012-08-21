@@ -105,4 +105,8 @@ public abstract class AbstractFunction implements Function{
         return true;
     }
 
+	public ExampleScript[] examples() throws ConfigCompileException{
+		return null;
+	}	
+
 }

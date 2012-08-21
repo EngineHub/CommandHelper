@@ -8,6 +8,7 @@ import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Math;
@@ -74,7 +75,16 @@ public class Math {
         @Override
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
-        }                
+        }
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))", "14"),
+				new ExampleScript("Demonstrates adding two numbers together, using the symbol notation", "2 + 2")
+			};
+		}
+				
     }
     
     @api public static class subtract extends AbstractFunction{

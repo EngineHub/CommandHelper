@@ -152,6 +152,12 @@ public interface Function extends FunctionBase, Documentation {
      * @return 
      */
     public boolean allowBraces();
+	
+	/**
+	 * Returns an array of example scripts, which are used for documentation purposes.
+	 * @return 
+	 */
+	public ExampleScript[] examples() throws ConfigCompileException;
     
     
     
