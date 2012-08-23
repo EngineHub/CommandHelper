@@ -271,7 +271,29 @@ public class Script {
                     }
                 }
 
+				//It takes a moment to generate the toString of some things, so lets not do it
+				//if we actually aren't going to profile
+				ProfilePoint p = null;
+				if(env.GetProfiler().isLoggable(LogLevel.VERBOSE)){
+					StringBuilder b = new StringBuilder();
+					boolean first = true;
+					for(Construct ccc : ca){
+						if(!first){
+							b.append(", ");
+						}
+						first = false;
+						if(ccc instanceof CString){
+							b.append("'").append(ccc.val().replace("\\", "\\\\").replace("'", "\\'")).append("'");
+						} else{
+							b.append(ccc.val());
+						}			
+					}
+					p = env.GetProfiler().start("Executing function: " + ((CFunction)m).val() + "(" + b.toString() + ")", LogLevel.OFF);
+				}
                 Construct ret = f.exec(m.getTarget(), env, ca);
+				if(p != null){
+					p.stop();
+				}
                 return ret;
 
         } else if (m.getCType() == ConstructType.VARIABLE) {            

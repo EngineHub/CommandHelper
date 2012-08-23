@@ -25,6 +25,7 @@ import java.util.List;
 public class Main {
 
     static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
+	private static File jarFolder = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();;
 
     public static void main(String[] args) throws Exception {
         try {
@@ -50,7 +51,7 @@ public class Main {
             ;
             ArgumentParser.ArgumentParserResults switches = argParser.match(args);            
             
-            Prefs.init(new File("CommandHelper/preferences.txt"));
+            Prefs.init(new File(jarFolder, "CommandHelper/preferences.txt"));
             if(switches.isFlagSet("manager")){
                 Manager.start();
                 System.exit(0);

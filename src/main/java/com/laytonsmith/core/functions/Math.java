@@ -80,7 +80,7 @@ public class Math {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))", "14"),
+				new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))"),
 				new ExampleScript("Demonstrates adding two numbers together, using the symbol notation", "2 + 2")
 			};
 		}

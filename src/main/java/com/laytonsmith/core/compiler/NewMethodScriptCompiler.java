@@ -1,5 +1,8 @@
-package com.laytonsmith.core;
+package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.core.Env;
+import com.laytonsmith.core.NewScript;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;

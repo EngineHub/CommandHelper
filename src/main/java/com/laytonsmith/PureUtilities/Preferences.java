@@ -249,16 +249,13 @@ public class Preferences {
                 }
                 b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
             }
-            BufferedWriter out = null;
             if(!prefFile.exists()){
                 prefFile.getAbsoluteFile().getParentFile().mkdirs();
                 prefFile.createNewFile();
             }
-            out = new BufferedWriter(new FileWriter(prefFile.getAbsolutePath()));
-            out.write(b.toString());
-            out.close();
+			FileUtility.write(b.toString(), prefFile);
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file");
+            logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file: " + prefFile.getAbsolutePath(), ex);
         }
     }
     

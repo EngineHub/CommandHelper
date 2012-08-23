@@ -32,7 +32,6 @@ import java.util.Map;
  * 4 - store_value() run times 
  * 4 - clear_value() run times 
  * 4 - has_value() run times 
- * 5 - All functions run times
  * 5 - Compilation run time
  */
 /**

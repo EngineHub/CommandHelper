@@ -7,7 +7,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.sun.org.apache.bcel.internal.generic.Select;
 import java.util.ArrayList;
 import java.util.List;
 

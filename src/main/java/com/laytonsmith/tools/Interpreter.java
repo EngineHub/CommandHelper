@@ -15,10 +15,12 @@ import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
 import com.laytonsmith.core.constructs.CArray;
@@ -30,6 +32,7 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.SerializedPersistance;
@@ -62,23 +65,24 @@ public class Interpreter {
 	private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/mscript";
 	static boolean multilineMode = false;
 	static String script;
+	private static File jarLocation;
+	private static Profiler profiler;
 
-	public static void start(List<String> args) {
+	public static void start(List<String> args) throws IOException {
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
+		//Next, we need to get the "installation location", so we won't spew config files everywhere
+		jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+		Prefs.init(new File(jarLocation, "CommandHelper/preferences.txt"));
+		profiler = new Profiler(new File(jarLocation, "CommandHelper/profiler.config"));
+//		try {
+//			Env env = new Env();
+//			env.SetProfiler(profiler);
+//			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), env, null, null);
+//		} catch (ConfigCompileException ex) {
+//		}
 		try {
-			Env env = new Env();
-			try {
-				env.SetProfiler(new Profiler(new File("CommandHelper/profiler.config")));
-			} catch (IOException ex) {
-				//Oh well, it's not the end of the world.
-				Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-			}
-			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), env, null, null);
-		} catch (ConfigCompileException ex) {
-		}
-		try {
-			Static.persist = new SerializedPersistance(new File("CommandHelper/persistance.ser"));
+			Static.persist = new SerializedPersistance(new File(jarLocation, "CommandHelper/persistance.ser"));
 		} catch (DataSourceException ex) {
 			Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
 		}
@@ -125,7 +129,7 @@ public class Interpreter {
 		}
 	}
 
-	public static boolean textLine(String line) {
+	public static boolean textLine(String line) throws IOException {
 		if (line.equals("-")) {
 			//Exit interpreter mode
 			pl(YELLOW + "Now exiting interpreter mode" + reset());
@@ -165,12 +169,15 @@ public class Interpreter {
 		return true;
 	}
 
-	public static void execute(String script, List<String> args) throws ConfigCompileException {
+	public static void execute(String script, List<String> args) throws ConfigCompileException, IOException {
+		ProfilePoint compile = profiler.start("Compilation", LogLevel.VERBOSE);
 		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
 		ParseTree tree = MethodScriptCompiler.compile(stream);
+		compile.stop();
 		Env env = new Env();
 		env.SetPlayer(null);
 		env.SetLabel("*");
+		env.SetProfiler(profiler);
 		env.SetCustom("cmdline", true);
 		List<Variable> vars = null;
 		if (args != null) {
@@ -200,6 +207,7 @@ public class Interpreter {
 			env.GetVarList().set(new IVariable("@arguments", arguments, Target.UNKNOWN));
 		}
 		try {
+			ProfilePoint p = profiler.start("Interpreter Script", LogLevel.ERROR);
 			MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 				public void done(String output) {
 					output = output.trim();
@@ -218,6 +226,7 @@ public class Interpreter {
 					}
 				}
 			}, null, vars);
+			p.stop();
 		} catch (CancelCommandException e) {
 			if (System.console() != null) {
 				pl(":");
