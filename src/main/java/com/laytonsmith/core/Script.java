@@ -273,8 +273,8 @@ public class Script {
 
 				//It takes a moment to generate the toString of some things, so lets not do it
 				//if we actually aren't going to profile
-				ProfilePoint p = null;
-				if(env.GetProfiler().isLoggable(LogLevel.VERBOSE)){
+				ProfilePoint p = null;				
+				if(env.GetProfiler() != null && env.GetProfiler().isLoggable(LogLevel.VERBOSE)){
 					StringBuilder b = new StringBuilder();
 					boolean first = true;
 					for(Construct ccc : ca){
