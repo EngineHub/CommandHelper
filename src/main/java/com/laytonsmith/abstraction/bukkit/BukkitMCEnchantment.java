@@ -14,6 +14,9 @@ import org.bukkit.enchantments.Enchantment;
 public class BukkitMCEnchantment implements MCEnchantment{
     Enchantment e;
     public BukkitMCEnchantment(Enchantment e){
+		if(e == null){
+			throw new NullPointerException();
+		}
         this.e = e;
     }
     
