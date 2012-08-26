@@ -204,4 +204,10 @@ public class MathTest {
     public void testMax() throws ConfigCompileException {
         assertEquals("50", StaticTest.SRun("max(6, 7, array(4, 4, 50), 2, 5)", fakePlayer));
     }
+	
+	@Test
+	public void testChained() throws Exception{
+		assertEquals("8", SRun("2 + 2 + 2 + 2", null));
+		assertEquals("20", SRun("2 * 2 + 2 * 2 * 2 + 2 * 2 * 2", null));
+	}
 }

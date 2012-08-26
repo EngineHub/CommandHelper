@@ -158,6 +158,14 @@ public interface Function extends FunctionBase, Documentation {
 	 * @return 
 	 */
 	public ExampleScript[] examples() throws ConfigCompileException;
+	
+	/**
+	 * Returns true if this function should be profilable. Only a very select few functions
+	 * should avoid profiling. AbstractFunction handles this by checking if the noprofile
+	 * annotation is present.
+	 * @return 
+	 */
+	public boolean shouldProfile();	
     
     
     

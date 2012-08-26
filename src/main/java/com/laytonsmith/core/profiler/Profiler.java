@@ -64,7 +64,11 @@ public final class Profiler {
 					new Preference("profiler-log", "logs/profiling/internal/%Y-%M-%D-profiler.log", Preferences.Type.STRING, "The location of the profiler output log. The following macros are supported"
 					+ " and will expand to the specified values: %Y - Year, %M - Month, %D - Day, %h - Hour, %m - Minute, %s - Second"),
 					new Preference("write-to-file", "true", Preferences.Type.BOOLEAN, "If true, will write results out to file."),
-					new Preference("write-to-screen", "false", Preferences.Type.BOOLEAN, "If true, will write results out to screen."),}));
+					new Preference("write-to-screen", "false", Preferences.Type.BOOLEAN, "If true, will write results out to screen."),
+					new Preference("profile-log-threshold", "0.005", Preferences.Type.DOUBLE, "If a profile point took less than this amount of time (in ms) to run, it won't be logged. This is good for reducing data blindness"
+					+ " caused by too much data being displayed. Normally you only care about things that took longer than a certain amount, not things that took less than a certain amount. Setting this to 0"
+					+ " will trigger everything."),
+		}));
 		Preferences prefs = new Preferences("CommandHelper", Static.getLogger(), defaults, "These settings control the integrated profiler");
 		prefs.init(initFile);
 		return prefs;
@@ -80,15 +84,20 @@ public final class Profiler {
 	private boolean writeToScreen;
 	private Preferences prefs;
 	private File initFile;
+	private double logThreshold;
 	//To prevent file fights across threads, we only want one outputQueue.
 	private static ExecutionQueue outputQueue;
 	private final ProfilePoint NULL_OP = new ProfilePoint("NULL_OP", this);
 	
 	private Profiler(){
 		//Private constructor for FakeProfiler
+		if (outputQueue == null) {
+			outputQueue = new ExecutionQueue("CommandHelper-Profiler", "default");
+		}
 	}
 	
 	public Profiler(File initFile) throws IOException {
+		this();
 		prefs = GetPrefs(initFile);
 		//We want speed here, not memory usage, so lets put an excessively large capacity, and excessively low load factor
 		operations = new HashMap<ProfilePoint, Long>(1024, 0.25f);
@@ -102,9 +111,7 @@ public final class Profiler {
 		logFile = (String) prefs.getPreference("profiler-log");
 		writeToFile = (Boolean) prefs.getPreference("write-to-file");
 		writeToScreen = (Boolean) prefs.getPreference("write-to-screen");
-		if (outputQueue == null) {
-			outputQueue = new ExecutionQueue("CommandHelper-Profiler", "default");
-		}
+		logThreshold = (Double) prefs.getPreference("profile-log-threshold");
 		new GarbageCollectionDetector(this);
 		//As a form of calibration, we want to "warm up" a point.
 		//For whatever reason, this levels out the profile points pretty well.
@@ -165,7 +172,9 @@ public final class Profiler {
 		//1 million nano seconds in 1 ms. We want x.xxx ms shown, so divide by 1000, round (well, integer truncate, since it's faster), then divide by 1000 again.
 		//voila, significant figure to the 3rd degree.
 		double time = (total / 1000) / 1000.0;
-		doLog(operationName.toString() + " took a total of " + time + "ms" + (operationName.wasGCd()?gcString:""));
+		if(time >= logThreshold){
+			doLog(operationName.toString() + " took a total of " + time + "ms" + (operationName.wasGCd()?gcString:""));
+		}
 		queuedProfilePoints--;
 	}
 

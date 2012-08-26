@@ -5,7 +5,9 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -84,6 +86,19 @@ public class Math {
 				new ExampleScript("Demonstrates adding two numbers together, using the symbol notation", "2 + 2")
 			};
 		}
+
+		@Override
+		public boolean canOptimizeDynamic() {
+			return true;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			return null;
+		}
+		
+		
 				
     }
     
@@ -137,6 +152,17 @@ public class Math {
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
         }
+		
+		@Override
+		public boolean canOptimizeDynamic() {
+			return true;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			return null;
+		}
     }
     
     @api public static class multiply extends AbstractFunction{
@@ -189,6 +215,17 @@ public class Math {
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
         }
+		
+		@Override
+		public boolean canOptimizeDynamic() {
+			return true;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			return null;
+		}
     }
     
     @api public static class divide extends AbstractFunction{
@@ -246,6 +283,18 @@ public class Math {
         public Construct optimize(Target t, Construct ... args){
             return exec(t, null, args);
         }
+		
+		@Override
+		public boolean canOptimizeDynamic() {
+			return true;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			return null;
+		}
+		
     }
     
     @api public static class mod extends AbstractFunction{

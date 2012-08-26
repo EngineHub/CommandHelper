@@ -82,12 +82,6 @@ public class Persistance {
             }
             CHLog.Log(CHLog.Tags.PERSISTANCE, "Storing: " + key + " -> " + value, t);
             Static.getPersistance().setValue(new String[]{"storage", key}, value);
-            try {
-                Static.getPersistance().save();
-            } catch (Exception ex) {
-                Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
-                throw new ConfigRuntimeException(ex.getMessage(), null, t, ex);
-            }
             return new CVoid(t);
         }
         

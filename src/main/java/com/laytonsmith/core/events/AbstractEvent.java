@@ -63,9 +63,14 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         } catch(UnsupportedOperationException e){
             //Ignore. This particular event doesn't need to customize
         }
-		ProfilePoint event = env.GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
+		ProfilePoint event = null;
+		if(env.GetProfiler() != null){
+			env.GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
+		}
         s.run(null, env, null);
-		event.stop();
+		if(event != null){
+			event.stop();
+		}
         try{
             this.postExecution(env, activeEvent);
         } catch(UnsupportedOperationException e){

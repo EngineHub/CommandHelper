@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -21,6 +22,7 @@ public class Compiler {
     }
     
     @api
+	@noprofile
     public static class p extends AbstractFunction {
 
         public String getName() {
@@ -74,7 +76,9 @@ public class Compiler {
         }                
     }
     
-    @api public static class centry extends AbstractFunction{
+    @api 
+	@noprofile
+	public static class centry extends AbstractFunction{
 
         public String getName() {
             return "centry";
@@ -126,6 +130,7 @@ public class Compiler {
     
     
     @api
+	@noprofile
     public static class __autoconcat__ extends AbstractFunction {
 
         public String getName() {
@@ -453,7 +458,9 @@ public class Compiler {
                 
     }
     
-    @api public static class dyn extends AbstractFunction{
+    @api 
+	@noprofile
+	public static class dyn extends AbstractFunction{
 
         public String getName() {
             return "dyn";
