@@ -74,12 +74,6 @@ public class Echoes {
     }
     
     @api @noboilerplate public static class msg extends AbstractFunction{
-		
-		public msg(){
-			System.out.println("Instantiating msg");
-		}
-		RunnableQueue messageQueue 
-				= new RunnableQueue("MethodScript-messageQueue");
 
         public String getName() {
             return "msg";
@@ -91,16 +85,11 @@ public class Echoes {
 
         public Construct exec(final Target t, Env env, final Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			final MCPlayer p = env.GetPlayer();
-			messageQueue.invokeLater(new Runnable() {
-
-				public void run() {
-					StringBuilder b = new StringBuilder();
-					for(int i = 0; i < args.length; i++){
-						b.append(args[i].val());
-					}
-					Static.SendMessage(p, b.toString(), t);					
-				}
-			});
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < args.length; i++){
+				b.append(args[i].val());
+			}
+			Static.SendMessage(p, b.toString(), t);					
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){

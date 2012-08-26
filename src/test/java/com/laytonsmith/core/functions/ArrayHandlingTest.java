@@ -65,7 +65,10 @@ public class ArrayHandlingTest {
     @Test//(timeout = 10000)
     public void testArraySet1() throws ConfigCompileException {
         String script =
-                "assign(@array, array(1,2,3)) msg(@array) array_set(@array, 2, 1) msg(@array)";
+                "assign(@array, array(1,2,3)) "
+				+ "msg(@array) "
+				+ "array_set(@array, 2, 1) "
+				+ "msg(@array)";
         StaticTest.Run(script, fakePlayer);
         verify(fakePlayer).sendMessage("{1, 2, 3}");
         verify(fakePlayer).sendMessage("{1, 2, 1}");
