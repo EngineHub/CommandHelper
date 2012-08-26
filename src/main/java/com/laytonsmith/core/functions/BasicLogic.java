@@ -414,6 +414,16 @@ public class BasicLogic {
             if (args.length <= 1) {
                 throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, t);
             }
+			boolean referenceMatch = true;
+			for(int i = 0; i < args.length - 1; i++){
+				if(args[i] != args[i + 1]){
+					referenceMatch = false;
+					break;
+				}
+			}
+			if(referenceMatch){
+				return new CBoolean(true, t);
+			}
             if (Static.anyBooleans(args)) {
                 boolean equals = true;
                 for (int i = 1; i < args.length; i++) {
