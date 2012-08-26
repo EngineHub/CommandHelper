@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.LineCallback;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.annotations.api;
@@ -84,7 +85,7 @@ public class Echoes {
         }
 
         public Construct exec(final Target t, Env env, final Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			final MCPlayer p = env.GetPlayer();
+			final MCCommandSender p = env.GetCommandSender();
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++){
 				b.append(args[i].val());
