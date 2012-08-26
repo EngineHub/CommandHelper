@@ -110,7 +110,6 @@ public class BukkitPlayerListener implements Listener {
 					fireChat(event);
 				} else {
 					final AsyncPlayerChatEvent copy = new AsyncPlayerChatEvent(false, event.getPlayer(), event.getMessage(), event.getRecipients());
-					event.setCancelled(true);
 					Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable() {
 						public Object call() throws Exception {
 							Bukkit.getServer().getPluginManager().callEvent(copy);

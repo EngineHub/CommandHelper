@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -969,6 +970,54 @@ public class ArrayHandling {
 			}
 			return null;
 		}
+	}
+	
+	@api public static class array_sort_async extends AbstractFunction{
+		
+		RunnableQueue queue = new RunnableQueue("MethodScript-arraySortAsync");
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			final CArray array = Static.getArray(args[0], t);
+			final CString sortType = new CString(args.length > 2?args[1].val():CArray.SortType.REGULAR.name(), t);
+			final CClosure callback = Static.getObject((args.length==2?args[1]:args[2]), t, "closure", CClosure.class);
+			queue.invokeLater(new Runnable() {
+
+				public void run() {
+					Construct c = new array_sort().exec(Target.UNKNOWN, null, array, sortType);
+					callback.execute(new Construct[]{c});
+				}
+			});
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "array_sort_async";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "void ";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 	
 	@api public static class array_remove_values extends AbstractFunction{
