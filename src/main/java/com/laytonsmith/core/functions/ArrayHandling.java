@@ -975,6 +975,15 @@ public class ArrayHandling {
 	@api public static class array_sort_async extends AbstractFunction{
 		
 		RunnableQueue queue = new RunnableQueue("MethodScript-arraySortAsync");
+		
+		public array_sort_async(){
+			queue.invokeLater(new Runnable() {
+
+				public void run() {
+					//This warms up the queue. Apparently.
+				}
+			});
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1011,7 +1020,9 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "void ";
+			return "void {array, [sortType], closure(array)} Works like array_sort, but does the sort on another"
+					+ " thread, then calls the closure and sends it the sorted array. This is useful if the array"
+					+ " is large enough to actually \"stall\" the server when doing the sort.";
 		}
 
 		public CHVersion since() {
