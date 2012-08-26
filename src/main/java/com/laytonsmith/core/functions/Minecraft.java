@@ -527,7 +527,7 @@ public class Minecraft {
         public String docs() {
             return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
                     + " the radius (or 64 by default). The effect can be one of the following:"
-                    + " BOW_FIRE, CLICK1, CLICK2, DOOR_TOGGLE, EXTINGUISH.";
+                    + " BOW_FIRE, CLICK1, CLICK2, DOOR_TOGGLE, EXTINGUISH, GHAST_SHOOT, POTION_BREAK, MOBSPAWNER_FLAMES.";
         }
 
         public ExceptionType[] thrown() {
