@@ -17,7 +17,9 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -27,7 +29,7 @@ import java.util.TreeSet;
  */
 public class NewMethodScriptCompiler {
 
-	public static List<Token> lex(String script, File file, boolean startInPureMscript) throws ConfigCompileException {
+	public static TokenStream lex(String script, File file, boolean startInPureMscript) throws ConfigCompileException {
 		script = script.replaceAll("\r\n", "\n");
 		script = script + "\n";
 
@@ -211,6 +213,8 @@ public class NewMethodScriptCompiler {
 		boolean state_in_opt_var = false;
 		boolean state_in_var = false;
 		boolean state_in_ivar = false;
+		boolean state_in_fileopts = false;
+		StringBuffer fileopts = new StringBuffer();
 		int start_single_quote = 1;
 		int start_double_quote = 1;
 		int start_multiline = 1;
@@ -373,9 +377,9 @@ public class NewMethodScriptCompiler {
 			token_list.add(t);
 		}
 
-		public List<Token> lex() throws ConfigCompileException {
+		public TokenStream lex() throws ConfigCompileException {
 			if (token_list != null) {
-				return new ArrayList<Token>(token_list);
+				return new TokenStream(new ArrayList<Token>(token_list), "");
 			} else {
 				token_list = new ArrayList<Token>();
 			}
@@ -399,6 +403,23 @@ public class NewMethodScriptCompiler {
 				target = new Target(line_num, file, column);
 
 				//First, lets identify our stateful parameters
+				
+				//File Options
+				if(state_in_fileopts){
+					if(c == '\\' && c2 == '>'){
+						//literal >
+						fileopts.append('>');
+						i++;
+						continue;
+					} else if(c == '>'){
+						state_in_fileopts = false;
+						continue;
+					} else {
+						fileopts.append(c);
+						continue;
+					}
+				}
+				
 				//Comments are only applicable if we are not inside a string
 				if (!state_in_double_quote && !state_in_single_quote) {
 					//If we aren't already in a comment, we might be starting one here
@@ -580,6 +601,15 @@ public class NewMethodScriptCompiler {
 					continue;
 				}
 				
+				if(c == '<' && c2 == '!'){
+					if(!token_list.isEmpty()){
+						throw new ConfigCompileException("File options must come first in the file.", target);
+					}
+					state_in_fileopts = true;
+					i++;
+					continue;
+				}
+				
 				//To simplify token processing later, we will go ahead and do special handling if we're
 				//not in pure mscript. Therefore, = will
 				//get special handling up here, as well as square brackets
@@ -680,7 +710,7 @@ public class NewMethodScriptCompiler {
 				buffer(c);
 
 			}
-			return new ArrayList<Token>(token_list);
+			return new TokenStream(new ArrayList<Token>(token_list), fileopts.toString());
 		}
 		
 		/**
@@ -729,8 +759,73 @@ public class NewMethodScriptCompiler {
 		}
 	}
 	
+	public static class TokenStream extends ArrayList<Token>{
+		FileOptions fileOptions;
+		public TokenStream(List<Token> list, String fileOptions){
+			super(list);
+			this.fileOptions = parseFileOptions(fileOptions);
+		}
+		
+		private static FileOptions parseFileOptions(String options){
+			//Only ; needs escaping. Everything else is just trimmed, and added to the map.
+			Map<String, String> map = new HashMap<String, String>();
+			boolean inKey = true;
+			StringBuilder buffer = new StringBuilder();
+			String keyName = "";
+			for(int i = 0; i < options.length(); i++){
+				Character c = options.charAt(i);
+				Character c2 = null;
+				if (i < options.length() - 1) {
+					c2 = options.charAt(i + 1);
+				}
+				if(inKey){
+					if(c == '='){
+						keyName = buffer.toString();
+						buffer = new StringBuilder();						
+						inKey = false;
+					} else if(c == ';'){
+						//Self closed
+						map.put(buffer.toString().trim().toLowerCase(), "true");
+						buffer = new StringBuilder();
+						keyName = "";
+						//We don't reset the inKey parameter
+					}else {
+						buffer.append(c);
+					}
+				} else {
+					if(c == '\\' && c2 == ';'){
+						buffer.append(';');
+						i++;
+					} else if(c == ';'){
+						//We're done
+						inKey = true;
+						map.put(keyName.trim().toLowerCase(), buffer.toString());
+						buffer = new StringBuilder();
+					} else {
+						buffer.append(c);
+					}
+				}
+			}
+			if(buffer.length() > 0){
+				if(!inKey){
+					map.put(keyName.trim().toLowerCase(), buffer.toString());		
+				} else {
+					if(!buffer.toString().trim().isEmpty()){
+						map.put(buffer.toString().trim().toLowerCase(), "true");
+					}
+				}
+			}
+			FileOptions fo = new FileOptions(map);
+			return fo;
+		}
+		
+		
+	}
+	
+	
+	
 	public static void main(String [] args) throws ConfigCompileException{
-		List<Token> stream = lex("~var * . * / label:/cmd lit [$]= /blah \n /cmd2 = /blah", null, false);
+		List<Token> stream = lex("<! strict; > ~var * . * / label:/cmd lit [$]= /blah \n /cmd2 = /blah", null, false);
 		System.out.println(stream + "\n");
 		Env env = new Env();
 		List<NewScript> scripts = preprocess(stream, env);
