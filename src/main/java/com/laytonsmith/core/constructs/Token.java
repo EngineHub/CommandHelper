@@ -74,7 +74,7 @@ public class Token {
 		DECREMENT(TokenVariant.SYMBOL, TokenVariant.POSTFIX, TokenVariant.UNARY),
 		MODULO(TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
 		CONCAT(TokenVariant.SYMBOL, TokenVariant.ADDITIVE),
-		EXPONENTIAL(TokenVariant.EXPONENTIAL),
+		EXPONENTIAL(TokenVariant.SYMBOL, TokenVariant.EXPONENTIAL),
 		
 		WHITESPACE(),
 		LCURLY_BRACKET(),
@@ -85,7 +85,7 @@ public class Token {
 		INTEGER(),
 		ASSIGNMENT();
 		
-		private Set<TokenVariant> variants = EnumSet.allOf(TokenVariant.class);
+		private Set<TokenVariant> variants = EnumSet.noneOf(TokenVariant.class);
 		private TType(TokenVariant ... variants){
 			this.variants.addAll(Arrays.asList(variants));
 		}
