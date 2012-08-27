@@ -163,7 +163,7 @@ public final class MethodScriptCompiler {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuffer();
 				}
-				token_list.add(new Token(TType.ADDITION, "+", target));
+				token_list.add(new Token(TType.PLUS, "+", target));
 				continue;
 			}
 			if (c == '-' && !state_in_quote) {
@@ -171,7 +171,7 @@ public final class MethodScriptCompiler {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuffer();
 				}
-				token_list.add(new Token(TType.SUBTRACTION, "-", target));
+				token_list.add(new Token(TType.MINUS, "-", target));
 				continue;
 			}
 			//Protect against commands
