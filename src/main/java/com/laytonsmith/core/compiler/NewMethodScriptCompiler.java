@@ -4,11 +4,15 @@ import com.laytonsmith.PureUtilities.LogicUtils;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.NewScript;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBareString;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
@@ -17,10 +21,12 @@ import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.SortedSet;
+import java.util.Stack;
 import java.util.TreeSet;
 
 /**
@@ -38,7 +44,7 @@ public class NewMethodScriptCompiler {
 		return lo.lex();
 	}
 	
-	public static List<NewScript> preprocess(List<Token> tokenStream, Env env) throws ConfigCompileException{
+	public static List<NewScript> preprocess(TokenStream tokenStream, Env env) throws ConfigCompileException{
 		List<NewScript> scripts = new ArrayList<NewScript>();
 		//We need to split the command definition and the pure mscript parts. First,
 		//we split on newlines, those are each going to be our alias definitions
@@ -61,7 +67,7 @@ public class NewMethodScriptCompiler {
 			//function, but we need to parse the left ourselves
 			//We *should* only have (bare) strings, numbers, brackets on the left
 			List<Token> left = new ArrayList<Token>();
-			List<Token> right = new ArrayList<Token>();
+			TokenStream right = new TokenStream(new ArrayList<Token>(), tokenStream.fileOptions);
 			boolean inLeft = true;
 			boolean hasLabel = false;
 			for(Token t : stream){
@@ -154,8 +160,8 @@ public class NewMethodScriptCompiler {
 		return scripts;
 	}
 	
-	public static ParseTree compile(List<Token> tokenStream){
-		ParseTree root = new ParseTree(new CFunction("sconcat", Target.UNKNOWN));
+	public static ParseTree compile(TokenStream tokenStream) throws ConfigCompileException{
+		ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN));
 		new CompilerObject(tokenStream).compile(root);
 		return root;
 	}
@@ -177,23 +183,122 @@ public class NewMethodScriptCompiler {
 	}
 	
 	private static class CompilerObject{
-		List<Token> stream;
-		int counter = 0;
+		TokenStream stream;
+		Stack<ParseTree> nodes = new Stack<ParseTree>();
+		int autoConcatCounter = 0;
+		ParseTree pointer;
 		
-		private CompilerObject(List<Token> stream){
+		private CompilerObject(TokenStream stream){
 			this.stream = stream;
 		}
 		
 		Token peek(){
-			return stream.get(counter);
+			return stream.get(0);
 		}
 		
 		Token consume(){
-			return stream.get(counter++);
+			return stream.remove(0);
 		}
 		
-		void compile(ParseTree root){
-			
+		void compile(ParseTree root) throws ConfigCompileException{
+			nodes.push(root);
+			pointer = root;
+			while(!stream.isEmpty()){
+				compile0();
+			}
+		}
+		
+		void compile0() throws ConfigCompileException{
+			Token t = consume();
+			if(t.type == TType.NEWLINE){
+				return;
+			}
+			if(t.type == TType.BARE_STRING && peek().type == TType.FUNC_START){
+				consume();
+				CFunction f = new CFunction(t.val(), t.getTarget());
+				pushNode(f);
+				return;
+			}
+			if(t.type == TType.FUNC_END || t.type == TType.COMMA){
+				if(autoConcatCounter > 0){
+					autoConcatCounter--;
+					popNode(t.getTarget());
+				}
+			}
+			if(t.type == TType.FUNC_END){
+				//We're done with this child, so push it up
+				popNode(t.getTarget());
+				return;
+			}
+			//If the next token ISN'T a , or ), we need to autoconcat this
+			if(peek().type != TType.FUNC_END && peek().type != TType.COMMA){
+				//... unless we're already in an autoconcat
+				if(!(pointer.getData() instanceof CFunction && ((CFunction)pointer.getData()).val().equals("__autoconcat__"))){
+					CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
+					pushNode(f);
+					autoConcatCounter++;
+				}
+			}
+			if(t.type.isIdentifier()){
+				//If it's an atomic, put it in a construct and parse tree, then add it
+				pointer.addChild(new ParseTree(resolveIdentifier(t)));
+				return;
+			}
+			if(t.type.isSymbol()){
+				pointer.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.getTarget())));
+				return;
+			}
+			//Now we have to check ahead for commas and other division parameters.
+		}
+		
+		private void pushNode(CFunction node){
+			ParseTree n = new ParseTree(node);
+			pointer.addChild(n);
+			nodes.push(n);
+			pointer = n;			
+		}
+		
+		private void popNode(Target t) throws ConfigCompileException{
+			try{
+				nodes.pop();
+				pointer = nodes.peek();
+			} catch(EmptyStackException e){
+				throw new ConfigCompileException("Unmatched closing parenthesis. (Did you put too many right parenthesis?)", t);
+			}			
+		}
+		
+		private Construct resolveIdentifier(Token t) throws ConfigCompileException{
+			switch(t.type){
+				case STRING:
+					return new CString(t.val(), t.getTarget());
+//				case SMART_STRING:
+//					
+//				case VARIABLE:
+//					
+//				case IVARIABLE:
+//				case FINAL_VAR:
+					
+				case BARE_STRING:
+					if(t.val().equals("true")){
+						return new CBoolean(true, t.getTarget());
+					} else if(t.val().equals("false")){
+						return new CBoolean(false, t.getTarget());						
+					} else if(t.val().equals("null")){
+						return new CNull(t.getTarget());
+					} else {
+						if(stream.fileOptions.isStrict()){
+							throw new ConfigCompileException("Bare strings not allowed in strict mode.", t.getTarget());
+						} else {
+							return new CString(t.val(), t.getTarget());
+						}
+					}
+				case DOUBLE:
+					return new CDouble(t.val(), t.getTarget());
+				case INTEGER:
+					return new CInt(t.val(), t.getTarget());
+				default:
+					throw new ConfigCompileException("Unexpected identifier? Found '" + t.val() + "' but was not any expected value.", t.getTarget());
+			}
 		}
 	}
 
@@ -761,6 +866,10 @@ public class NewMethodScriptCompiler {
 	
 	public static class TokenStream extends ArrayList<Token>{
 		FileOptions fileOptions;
+		public TokenStream(List<Token> list, FileOptions options){
+			super(list);
+			this.fileOptions = options;
+		}
 		public TokenStream(List<Token> list, String fileOptions){
 			super(list);
 			this.fileOptions = parseFileOptions(fileOptions);
@@ -825,10 +934,8 @@ public class NewMethodScriptCompiler {
 	
 	
 	public static void main(String [] args) throws ConfigCompileException{
-		List<Token> stream = lex("<! strict; > ~var * . * / label:/cmd lit [$]= /blah \n /cmd2 = /blah", null, false);
+		TokenStream stream = lex("f(2 + f(2 + 2) + 2)", null, true);
 		System.out.println(stream + "\n");
-		Env env = new Env();
-		List<NewScript> scripts = preprocess(stream, env);
-		System.out.println(scripts);
+		compile(stream);
 	}
 }

@@ -45,6 +45,18 @@ public class FileOptions {
 		}
 		return l;
 	}
+	
+	public boolean isStrict(){
+		return strict;
+	}
+	
+	public boolean isWarningSupressed(String warning){
+		return warning.trim().contains(warning.toLowerCase());
+	}
+	
+	public String getDescription(){
+		return description;
+	}
 
 	@Override
 	public String toString() {

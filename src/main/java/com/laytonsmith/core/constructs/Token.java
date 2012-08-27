@@ -81,8 +81,8 @@ public class Token {
 		RCURLY_BRACKET(),
 		IDENTIFIER(),
 		
-		DOUBLE(),
-		INTEGER(),
+		DOUBLE(TokenVariant.IDENTIFIER),
+		INTEGER(TokenVariant.IDENTIFIER),
 		ASSIGNMENT();
 		
 		private Set<TokenVariant> variants = EnumSet.noneOf(TokenVariant.class);

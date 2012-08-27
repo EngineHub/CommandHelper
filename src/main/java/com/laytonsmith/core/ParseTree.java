@@ -309,20 +309,21 @@ public class ParseTree implements Cloneable{
 	}
 	
 	public String toStringVerbose(){
-		String stringRepresentation = getData().toString() + ":[";
-
-        for (ParseTree node : getChildren()) {
-            stringRepresentation += node.getData().toString() + ", ";
-        }
-
-        //Pattern.DOTALL causes ^ and $ to match. Otherwise it won't. It's retarded.
-        Pattern pattern = Pattern.compile(", $", Pattern.DOTALL);
-        Matcher matcher = pattern.matcher(stringRepresentation);
-
-        stringRepresentation = matcher.replaceFirst("");
-        stringRepresentation += "]";
-
-        return stringRepresentation;
+		StringBuilder stringRepresentation = new StringBuilder();
+		stringRepresentation.append(data.toString());
+		if(data instanceof CFunction){
+			stringRepresentation.append("(");
+			boolean first = true;
+			for(ParseTree child : children){
+				if(!first){
+					stringRepresentation.append(", ");
+				}
+				first = false;
+				stringRepresentation.append(child.toStringVerbose());
+			}
+			stringRepresentation.append(")");
+		}
+        return stringRepresentation.toString();
 	}
 	
 	
