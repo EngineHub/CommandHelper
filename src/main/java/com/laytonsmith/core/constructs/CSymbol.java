@@ -16,10 +16,10 @@ public class CSymbol extends Construct {
             case CONCAT:
                 conversion = "concat";
                 break;
-            case ADDITION:
+            case PLUS:
                 conversion = "add";
                 break;
-            case SUBTRACTION:
+            case MINUS:
                 conversion = "subtract";
                 break;
             case MULTIPLICATION:

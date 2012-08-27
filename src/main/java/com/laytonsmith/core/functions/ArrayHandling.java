@@ -193,7 +193,7 @@ public class ArrayHandling {
 							throw e;
 						}
 					} catch (StringIndexOutOfBoundsException e) {
-						throw new ConfigRuntimeException("No index at " + args[0].val(), ExceptionType.RangeException, t);
+						throw new ConfigRuntimeException("No index at " + index, ExceptionType.RangeException, t);
 					}
 				}
 			} else if (args[0] instanceof ArrayAccess) {

@@ -8,12 +8,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
@@ -26,6 +30,13 @@ import java.util.logging.Logger;
  * @author lsmith
  */
 public final class WebUtility {
+	
+	public static void main(String [] args) throws Exception{
+		System.out.println(PublicSuffix.get().getEffectiveTLDLength("www.google2.google.com"));
+		System.exit(0);
+		HTTPCookies stash = new HTTPCookies();
+		HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, stash, true);
+	}
     
     private WebUtility(){}
 
@@ -83,11 +94,23 @@ public final class WebUtility {
             }
             return null;
         }
+		
+		public Set<String> getHeaderNames(){
+			Set<String> set = new HashSet<String>();
+			for(HTTPHeader h : headers){
+				if(h.getHeader() != null){
+					set.add(h.getHeader());
+				}
+			}
+			return set;
+		}
 
         public List<String> getHeaders(String key) {
             List<String> list = new ArrayList<String>();
             for (HTTPHeader header : headers) {
-                list.add(header.getValue());
+				if((header.getHeader() == null && key == null) || (header.getHeader() != null && header.getHeader().equals(key))){
+					list.add(header.getValue());
+				}
             }
             return list;
         }
@@ -114,7 +137,7 @@ public final class WebUtility {
 
     public static final class HTTPCookies {
 
-        private static final class HTTPCookie {
+        private static final class HTTPCookie implements Comparable<HTTPCookie> {
 
             String name;
             String value;
@@ -123,11 +146,32 @@ public final class WebUtility {
             long expiration = 0;
             boolean httpOnly = false;
             boolean secureOnly = false;
+
+			public int compareTo(HTTPCookie o) {
+				return (this.domain + this.name).compareTo(o.domain + o.name);
+			}
         }
-        private final List<HTTPCookie> cookies = new ArrayList<HTTPCookies.HTTPCookie>();
+        private final Set<HTTPCookie> cookies = new TreeSet<HTTPCookies.HTTPCookie>();
 
         public void addCookie(String unparsedValue) {
-            //TODO
+			HTTPCookie cookie = new HTTPCookie();
+            //Split on ;			
+			String [] parts = unparsedValue.split(";");
+			for(int i = 0; i < parts.length; i++){
+				String part = parts[i];
+				if(i == 0){
+					//This is the actual cookie value
+					String [] nameVal = part.split("=", 1);
+					cookie.name = nameVal[0].trim();
+					cookie.value = nameVal[1].trim();
+					continue;
+				}
+				//The rest of the fields are standard fields
+				String [] keyval = part.split("=", 1);
+				String key = keyval[0].trim();
+				String val = keyval[1].trim();
+				
+			}
         }
 
         public void addCookie(String name, String value, String domain, String path, long expiration, Boolean httpOnly) {
@@ -156,6 +200,8 @@ public final class WebUtility {
 
         public String getCookies(URL url) {
             List<HTTPCookie> usable = new ArrayList<HTTPCookies.HTTPCookie>();
+			//So we can iterate linearly
+			List<HTTPCookie> cookies = new ArrayList<HTTPCookie>(this.cookies);
             for (int i = 0; i < cookies.size(); i++) {
                 HTTPCookie cookie = cookies.get(i);
                 if (cookie.expiration > ( System.currentTimeMillis() / 1000 )) {
@@ -235,7 +281,7 @@ public final class WebUtility {
      * @param url The url to navigate to
      * @param method The HTTP method to use
      * @param parameters The parameters to be sent. Parameters can be also
-     * specified directly in the URL, and they will be merged.
+     * specified directly in the URL, and they will be merged. May be null.
      * @param cookieStash An instance of a cookie stash to use, or null if none
      * is needed. Cookies will automatically be added and used from this
      * instance.
@@ -245,9 +291,9 @@ public final class WebUtility {
      * @throws IOException
      */
     public static HTTPResponse GetPage(URL url, HTTPMethod method, Map<String, String> parameters, HTTPCookies cookieStash, boolean followRedirects) throws IOException {
-        if (cookieStash != null) {
-            throw new UnsupportedOperationException("Cookies are not yet supported. Send null for the cookieStash parameter for the time being.");
-        }
+//        if (cookieStash != null) {
+//            throw new UnsupportedOperationException("Cookies are not yet supported. Send null for the cookieStash parameter for the time being.");
+//        }
         //First, let's check to see that the url is properly formatted. If there are parameters, and this is a GET request, we want to tack them on to the end.
         if (parameters != null && !parameters.isEmpty() && method == HTTPMethod.GET) {
             StringBuilder b = new StringBuilder(url.getQuery() == null ? "" : url.getQuery());
@@ -285,7 +331,14 @@ public final class WebUtility {
             b.append(line).append("\n");
         }
         in.close();
-        return new HTTPResponse(conn.getResponseMessage(), conn.getResponseCode(), conn.getHeaderFields(), b.toString());
+        HTTPResponse resp = new HTTPResponse(conn.getResponseMessage(), conn.getResponseCode(), conn.getHeaderFields(), b.toString());
+		if(cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")){
+			//We need to add the cookie to the stash
+			for(String h : resp.getHeaders("Set-Cookie")){
+				cookieStash.addCookie(h);
+			}
+		}
+		return resp;
     }
 
     private static String encodeParameters(Map<String, String> parameters) {

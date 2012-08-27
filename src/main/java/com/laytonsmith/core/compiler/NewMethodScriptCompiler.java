@@ -1,5 +1,6 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.PureUtilities.LogicUtils;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.NewScript;
 import com.laytonsmith.core.ParseTree;
@@ -255,6 +256,7 @@ public class NewMethodScriptCompiler {
 			}						
 			
 		}
+				
 		/**
 		 * Adds simple tokens to the auto-identifier list. Order does not
 		 * matter, it is sorted appropriately for you.
@@ -277,8 +279,8 @@ public class NewMethodScriptCompiler {
 			tokenMap.add(new TokenMap("||", Token.TType.LOGICAL_OR));			
 			tokenMap.add(new TokenMap("!", Token.TType.LOGICAL_NOT));			
 			
-			tokenMap.add(new TokenMap("+", Token.TType.ADDITION));
-			tokenMap.add(new TokenMap("-", Token.TType.SUBTRACTION));
+			tokenMap.add(new TokenMap("+", Token.TType.PLUS));
+			tokenMap.add(new TokenMap("-", Token.TType.MINUS));
 			tokenMap.add(new TokenMap("*", Token.TType.MULTIPLICATION));
 			tokenMap.add(new TokenMap("/", Token.TType.DIVISION));
 			
@@ -320,12 +322,6 @@ public class NewMethodScriptCompiler {
 
 		private void buffer(Object s) {
 			buffer.append(s);
-		}
-
-		private void processBuffer() {
-			if (buffer.length() != 0) {
-				token_list.add(identifyToken(clearBuffer()));
-			}
 		}
 
 		private void parseBuffer(){
@@ -663,7 +659,7 @@ public class NewMethodScriptCompiler {
 					//It'll get identified automatically in a bit
 					buffer(c);
 					continue;
-				}
+				}				
 				
 				//We need to handle /cmd vs division
 				if(c == '/' && (c2 == '/' || Character.isLetter(c2))){

@@ -3,6 +3,9 @@
 package com.laytonsmith.core.constructs;
 
 import java.io.File;
+import java.util.Arrays;
+import java.util.EnumSet;
+import java.util.Set;
 
 /**
  *
@@ -17,55 +20,102 @@ public class Token {
     public final File file;
     public final Target target;
 
+	private enum TokenVariant{
+		ADDITIVE, EQUALITY, EXPONENTIAL, IDENTIFIER, LOGICAL_AND, LOGICAL_OR, 
+		MULTIPLICATIVE, PLUS_MINUS, POSTFIX, RELATIONAL, SYMBOL, UNARY
+	}
     public enum TType {
 
-        UNKNOWN, LSQUARE_BRACKET, RSQUARE_BRACKET, OPT_VAR_ASSIGN, ALIAS_END, COMMA, SCOMMA, FUNC_NAME, FUNC_START,
-        FUNC_END, STRING, NEWLINE, MULTILINE_START, MULTILINE_END, COMMAND, SEPERATOR, VARIABLE,
-        IVARIABLE, FINAL_VAR, LIT, ROOT, LABEL, DEREFERENCE, SMART_STRING, SLICE, 
-        MULTIPLICATION, SUBTRACTION, DIVISION, ADDITION, NOT_EQUALS, EQUALS, STRICT_NOT_EQUALS, 
-        STRICT_EQUALS, GT, LT, LTE, GTE, LOGICAL_AND, LOGICAL_OR, LOGICAL_NOT,
-        INCREMENT, DECREMENT, MODULO, CONCAT, WHITESPACE, LCURLY_BRACKET, RCURLY_BRACKET, IDENTIFIER, 
-		EXPONENTIAL, BARE_STRING, DOUBLE, INTEGER, ASSIGNMENT;
+		//TODO: Comment this out once the compiler is replaced, and clean up unused ones
+        UNKNOWN(TokenVariant.IDENTIFIER), 
+		LSQUARE_BRACKET(), 
+		RSQUARE_BRACKET(), 
+		OPT_VAR_ASSIGN(),
+		ALIAS_END(),
+		COMMA(),
+		SCOMMA(),
+		FUNC_NAME(),
+		FUNC_START,
+        FUNC_END(),
+		NEWLINE(),
+		MULTILINE_START(),
+		MULTILINE_END(),
+		COMMAND(),
+		SEPERATOR(),
+		STRING(TokenVariant.IDENTIFIER),
+		VARIABLE(TokenVariant.IDENTIFIER),
+        IVARIABLE(TokenVariant.IDENTIFIER),
+		FINAL_VAR(TokenVariant.IDENTIFIER),
+		LIT(TokenVariant.IDENTIFIER),
+		SMART_STRING(TokenVariant.IDENTIFIER),
+		BARE_STRING(TokenVariant.IDENTIFIER),
+		ROOT(),
+		LABEL(),
+		DEREFERENCE(),
+		SLICE(),
+		
+		PLUS(TokenVariant.SYMBOL, TokenVariant.UNARY, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
+		MINUS(TokenVariant.SYMBOL, TokenVariant.UNARY, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
+        MULTIPLICATION(TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
+		DIVISION(TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
+		EQUALS(TokenVariant.SYMBOL, TokenVariant.EQUALITY),
+		NOT_EQUALS(TokenVariant.SYMBOL, TokenVariant.EQUALITY),
+        STRICT_EQUALS(TokenVariant.SYMBOL, TokenVariant.EQUALITY),
+		STRICT_NOT_EQUALS(TokenVariant.SYMBOL, TokenVariant.EQUALITY),
+		
+		GT(TokenVariant.SYMBOL, TokenVariant.RELATIONAL),
+		LT(TokenVariant.SYMBOL, TokenVariant.RELATIONAL),
+		LTE(TokenVariant.SYMBOL, TokenVariant.RELATIONAL),
+		GTE(TokenVariant.SYMBOL, TokenVariant.RELATIONAL),
+		LOGICAL_AND(TokenVariant.SYMBOL, TokenVariant.LOGICAL_AND),
+		LOGICAL_OR(TokenVariant.SYMBOL, TokenVariant.LOGICAL_OR),
+		LOGICAL_NOT(TokenVariant.SYMBOL, TokenVariant.UNARY),
+        INCREMENT(TokenVariant.SYMBOL, TokenVariant.POSTFIX, TokenVariant.UNARY),
+		DECREMENT(TokenVariant.SYMBOL, TokenVariant.POSTFIX, TokenVariant.UNARY),
+		MODULO(TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
+		CONCAT(TokenVariant.SYMBOL, TokenVariant.ADDITIVE),
+		EXPONENTIAL(TokenVariant.EXPONENTIAL),
+		
+		WHITESPACE(),
+		LCURLY_BRACKET(),
+		RCURLY_BRACKET(),
+		IDENTIFIER(),
+		
+		DOUBLE(),
+		INTEGER(),
+		ASSIGNMENT();
+		
+		private Set<TokenVariant> variants = EnumSet.allOf(TokenVariant.class);
+		private TType(TokenVariant ... variants){
+			this.variants.addAll(Arrays.asList(variants));
+		}
 
         public boolean isSymbol() {
-            if(this.equals(TType.ADDITION) || this.equals(TType.SUBTRACTION) || this.equals(TType.MULTIPLICATION) 
-                    || this.equals(TType.DIVISION) || this.equals(TType.EQUALS) || this.equals(TType.NOT_EQUALS) ||
-                    this.equals(TType.STRICT_EQUALS) || this.equals(TType.STRICT_NOT_EQUALS) || this.equals(TType.GT) ||
-                    this.equals(TType.LT) || this.equals(TType.GTE) || this.equals(TType.LTE)
-                    || this.equals(TType.LOGICAL_AND) || this.equals(TType.LOGICAL_OR) || this.equals(TType.LOGICAL_NOT)
-                    //|| this.equals(TType.BIT_AND) || this.equals(TType.BIT_OR) || this == BIT_XOR
-                    || this == EXPONENTIAL
-                    || this == INCREMENT || this == DECREMENT || this == MODULO || this == CONCAT){
-                return true;
-            } else {
-                return false;
-            }
+            return this.variants.contains(TokenVariant.SYMBOL);
         }      
 
         public boolean isPostfix(){
-            return (this == INCREMENT || this == DECREMENT);
+            return this.variants.contains(TokenVariant.POSTFIX);
         }
         
         public boolean isUnary() {
-            return (this == LOGICAL_NOT || this == ADDITION || this == SUBTRACTION
-                    || this == INCREMENT || this == DECREMENT);
+            return this.variants.contains(TokenVariant.UNARY);
         }
 
         public boolean isMultaplicative() {
-            return (this == MULTIPLICATION || this == DIVISION || this == MODULO);
+            return this.variants.contains(TokenVariant.MULTIPLICATIVE);
         }
         
         public boolean isAdditive(){
-            //String concatenation happens at the same level
-            return (this == ADDITION || this == SUBTRACTION || this == CONCAT);
+            return this.variants.contains(TokenVariant.ADDITIVE);
         }
         
         public boolean isRelational(){
-            return (this == LT || this == GT || this == LTE || this == GTE);
+            return this.variants.contains(TokenVariant.RELATIONAL);
         }
         
         public boolean isEquality(){
-            return (this == STRICT_EQUALS || this == STRICT_NOT_EQUALS || this == EQUALS || this == NOT_EQUALS);
+            return this.variants.contains(TokenVariant.EQUALITY);
         }
         
 //        public boolean isBitwiseAnd(){
@@ -81,25 +131,23 @@ public class Token {
 //        }
         
         public boolean isLogicalAnd(){
-            return this == LOGICAL_AND;
+            return this.variants.contains(TokenVariant.LOGICAL_AND);
         }
         
         public boolean isLogicalOr(){
-            return this == LOGICAL_OR;
+            return this.variants.contains(TokenVariant.LOGICAL_OR);          
         }
 
         public boolean isPlusMinus() {
-            return this == ADDITION || this == SUBTRACTION;
+            return this.variants.contains(TokenVariant.PLUS_MINUS);
         }
 
         public boolean isIdentifier() {
-            return this == UNKNOWN || this == LIT || this == IVARIABLE 
-                    || this == VARIABLE || this == FINAL_VAR || this == STRING
-                    || this == SMART_STRING;
+            return this.variants.contains(TokenVariant.IDENTIFIER);
         }
 
         boolean isExponential() {
-            return this == EXPONENTIAL;
+            return this.variants.contains(TokenVariant.EXPONENTIAL);
         }
         
     }
@@ -140,7 +188,7 @@ public class Token {
             return "newline";
         }
         if (type.equals(TType.STRING)) {
-            return "string:'" + value + "'";
+            return "'" + value + "'";
         }
         return type + ":" + value;
     }
@@ -154,7 +202,7 @@ public class Token {
 
     public String toOutputString() {
         if (type.equals(TType.STRING)) {
-            return value.replace("'", "\\'");
+            return value.replace("\\", "\\\\").replace("'", "\\'");
         }
         return value;
     }
