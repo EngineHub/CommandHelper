@@ -293,9 +293,7 @@ public class Scheduling {
         public String docs() {
             return "void {[id]} Stops the interval or timeout that is specified. The id can be gotten by"
                     + " storing the integer returned from either set_timeout or set_interval."
-                    + " An invalid id is simply ignored. Also note that you can cancel an interval"
-                    + " (and technically a timeout, though this is pointless) from within the interval"
-                    + " by using the cancel function. This clear_task function is more useful for set_timeout, where"
+                    + " An invalid id is simply ignored. The clear_task function is more useful for set_timeout, where"
                     + " you may queue up some task to happen in the far future, yet have some trigger to"
                     + " prevent it from happening. ID is optional, but only if called from within a set_interval or set_timeout"
                     + " closure, in which case it defaults to the id of that particular task.";

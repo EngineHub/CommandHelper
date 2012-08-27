@@ -3,7 +3,9 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -143,10 +145,24 @@ public class StringHandling {
         @Override
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
-        }                
+        }        
+
+		@Override
+		public boolean canOptimizeDynamic() {
+			return true;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			return null;
+		}
+		
+		
     }
 
     @api
+	@noprofile
     public static class sconcat extends AbstractFunction {
 
         public String getName() {
@@ -238,7 +254,20 @@ public class StringHandling {
         @Override
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
-        }  
+        }
+
+		@Override
+		public boolean canOptimizeDynamic() {
+			return true;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			return null;
+		}
+		
+		
     }    
 
     @api

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
@@ -13,6 +14,13 @@ import java.util.List;
  * @author layton
  */
 public abstract class AbstractFunction implements Function{
+	
+	private boolean shouldProfile = true;
+	
+	protected AbstractFunction(){
+		//If we have the noprofile annotation, cache that we don't want to profile.
+		shouldProfile = !this.getClass().isAnnotationPresent(noprofile.class);
+	}
 
     /**
      * By default, we return CVoid.
@@ -71,7 +79,8 @@ public abstract class AbstractFunction implements Function{
     /**
      * It may be that a function can simply check for compile errors, but not optimize. In this
      * case, it is appropriate to use this definition of optimizeDynamic, to return a value
-     * that will essentially make no changes.
+     * that will essentially make no changes, or in the case where it can optimize anyways, even
+	 * if some values are undetermined at the moment.
      * @param t
      * @param children
      * @return 
@@ -108,5 +117,9 @@ public abstract class AbstractFunction implements Function{
 	public ExampleScript[] examples() throws ConfigCompileException{
 		return null;
 	}	
+
+	public boolean shouldProfile() {
+		return shouldProfile;
+	}		
 
 }

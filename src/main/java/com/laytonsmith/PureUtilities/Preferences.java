@@ -68,7 +68,7 @@ public class Preferences {
             this.name = name;
             this.value = def;
             this.allowed = allowed;
-            this.description = description;
+            this.description = description;			
         }
     }
     

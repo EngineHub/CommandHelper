@@ -527,7 +527,7 @@ public class Minecraft {
         public String docs() {
             return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
                     + " the radius (or 64 by default). The effect can be one of the following:"
-                    + " BOW_FIRE, CLICK1, CLICK2, DOOR_TOGGLE, EXTINGUISH.";
+                    + " BOW_FIRE, CLICK1, CLICK2, DOOR_TOGGLE, EXTINGUISH, GHAST_SHOOT, POTION_BREAK, MOBSPAWNER_FLAMES.";
         }
 
         public ExceptionType[] thrown() {
@@ -552,7 +552,9 @@ public class Minecraft {
             MCEffect e = null;
             try{
                 e = MCEffect.valueOf(args[1].val().toUpperCase());
-                if(e.equals(MCEffect.RECORD_PLAY) || e.equals(MCEffect.SMOKE) || e.equals(MCEffect.STEP_SOUND)){
+                if(e.equals(MCEffect.RECORD_PLAY) || e.equals(MCEffect.SMOKE) 
+						|| e.equals(MCEffect.STEP_SOUND) || e.equals(MCEffect.BLAZE_SHOOT)
+						|| e.equals(MCEffect.ENDER_SIGNAL)){
                     throw new IllegalArgumentException();
                 }
             } catch(IllegalArgumentException ex){

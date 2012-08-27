@@ -49,6 +49,22 @@ public final class Static {
     public static PermissionsResolverManager perms;
     
     private static Map<String, String> hostCache = new HashMap<String, String>();
+	
+	public static CArray getArray(Construct construct, Target t) {
+		if(construct instanceof CArray){
+			return ((CArray)construct);
+		} else {
+			throw new ConfigRuntimeException("Expecting array, but received " + construct.val(), ExceptionType.CastException, t);
+		}
+	}
+	
+	public static <T extends Construct> T getObject(Construct construct, Target t, String expectedClassName, Class<T> clazz){
+		if(clazz.isAssignableFrom(construct.getClass())){
+			return (T)construct;
+		} else {
+			throw new ConfigRuntimeException("Expecting " + expectedClassName + " but receieved " + construct.val() + " instead.", ExceptionType.CastException, t);
+		}
+	}
 
     /**
      * This function pulls a numerical equivalent from any given construct. It throws a ConfigRuntimeException

@@ -43,6 +43,10 @@ public class FileUtility {
 		}
 	}
 
+	public static String read(File file, String charset) throws IOException{
+		return StreamUtils.GetString(readAsStream(file), charset);
+	}
+	
 	/**
 	 * Returns the contents of this file as a string
 	 *
@@ -50,7 +54,7 @@ public class FileUtility {
 	 * @return a string with the contents of the file
 	 * @throws FileNotFoundException
 	 */
-	public static String read(File file, String charset) throws IOException, UnsupportedEncodingException {
+	public static InputStream readAsStream(File file) throws IOException {
 		synchronized (getLock(file)) {
 			RandomAccessFile raf = new RandomAccessFile(file, "rw");
 			FileLock lock = null;
@@ -58,8 +62,7 @@ public class FileUtility {
 				lock = raf.getChannel().lock();
 				ByteBuffer buffer = ByteBuffer.allocate((int) raf.length());
 				raf.getChannel().read(buffer);
-				String s = StreamUtils.GetString(new ByteArrayInputStream(buffer.array()), charset);
-				return s;
+				return new ByteArrayInputStream(buffer.array());
 			} finally {
 				if (lock != null) {
 					lock.release();
@@ -88,6 +91,9 @@ public class FileUtility {
 		write(data, file, mode, false);
 	}
 
+	public static void write(String data, File file, int mode, boolean create) throws IOException{
+		write(data.getBytes("UTF-8"), file, mode, create);
+	}
 	/**
 	 * Writes out a String to the given file, either appending or
 	 * overwriting, depending on the selected mode. If create is true,
@@ -98,7 +104,7 @@ public class FileUtility {
 	 * @param mode Either OVERWRITE or APPEND
 	 * @throws IOException If the File f cannot be written to
 	 */
-	public static void write(String data, File file, int mode, boolean create) throws IOException {
+	public static void write(byte[] data, File file, int mode, boolean create) throws IOException {
 		boolean append;
 		if (mode == OVERWRITE) {
 			append = false;
@@ -123,7 +129,7 @@ public class FileUtility {
 					raf.seek(raf.length());
 				}
 				//Write out the data
-				raf.getChannel().write(ByteBuffer.wrap(data.getBytes("UTF-8")));
+				raf.getChannel().write(ByteBuffer.wrap(data));
 			} finally {
 				if (lock != null) {
 					lock.release();

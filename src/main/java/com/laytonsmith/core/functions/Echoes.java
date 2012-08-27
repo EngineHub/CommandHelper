@@ -4,8 +4,10 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.LineCallback;
+import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.annotations.api;
@@ -15,9 +17,12 @@ import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.util.StringUtil;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.logging.Level;
 
 /**
@@ -79,12 +84,13 @@ public class Echoes {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            StringBuilder b = new StringBuilder();
-            for(int i = 0; i < args.length; i++){
-                b.append(args[i].val());
-            }
-            Static.SendMessage(env.GetCommandSender(), b.toString(), t);
+        public Construct exec(final Target t, Env env, final Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			final MCCommandSender p = env.GetCommandSender();
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < args.length; i++){
+				b.append(args[i].val());
+			}
+			Static.SendMessage(p, b.toString(), t);					
 //            int start = 0;
 //            String s = b.toString();
 //            while(true){
@@ -169,6 +175,8 @@ public class Echoes {
     }
     
     @api public static class color extends AbstractFunction{
+		
+		private Map<String, CString> colors = new TreeMap<String, CString>();
 
         public String getName() {
             return "color";
@@ -180,11 +188,14 @@ public class Echoes {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String color = null;
-            
+			String val = args[0].nval();
+            if(colors.containsKey(val)){
+				return colors.get(val);
+			}
             try{
-                color = MCChatColor.valueOf(args[0].val().toUpperCase()).toString();
+                color = MCChatColor.valueOf(val.toUpperCase()).toString();
             } catch(IllegalArgumentException e){}
-            String a = args[0].val().toLowerCase();
+            String a = val.toLowerCase();
             if(a.equals("10")){
                 a = "a";
             } else if(a.equals("11")){
@@ -224,10 +235,13 @@ public class Echoes {
             if(color == null){
                 color = MCChatColor.WHITE.toString();
             }
-            if(env.GetCustom("cmdline") instanceof Boolean && (Boolean)env.GetCustom("cmdline") == true){
-                color = Static.MCToANSIColors(color);
-            }
-            return new CString(color, t);
+			//Until we get a compilation environment going, this must be removed so we can optimize it out.
+//            if(env.GetCustom("cmdline") instanceof Boolean && (Boolean)env.GetCustom("cmdline") == true){
+//                color = Static.MCToANSIColors(color);
+//            }
+			CString ret = new CString(color, t);
+			colors.put(val, ret);
+            return ret;
         }
 
         public String docs() {
@@ -257,6 +271,17 @@ public class Echoes {
         public Boolean runAsync(){
             return null;
         }
+
+		@Override
+		public boolean canOptimize() {
+			return true;
+		}
+
+		@Override
+		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {			
+			return this.exec(t, null, args);
+		}
+				
     }
     
     @api public static class strip_colors extends AbstractFunction{

@@ -5,6 +5,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -220,6 +221,7 @@ public class Meta {
     }
 
     @api
+	@noprofile
     public static class g extends AbstractFunction {
 
         public String getName() {
