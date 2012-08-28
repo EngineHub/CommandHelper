@@ -211,7 +211,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		if ((sender.isOp() || (sender instanceof Player && (Static.perms.hasPermission(((Player) sender).getName(), "commandhelper.reloadaliases")
 			|| Static.perms.hasPermission(((Player) sender).getName(), "ch.reloadaliases"))))
-			&& (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias"))) {
+			&& (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias") || cmd.getName().equals("recompile"))) {
 			MCPlayer player = null;
 			if (sender instanceof Player) {
 				player = new BukkitMCPlayer((Player) sender);

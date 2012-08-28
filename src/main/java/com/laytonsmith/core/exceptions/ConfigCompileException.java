@@ -50,10 +50,10 @@ public class ConfigCompileException extends Exception{
     @Override
     public String toString(){
         if(line_num != 0){
-            return "Configuration Compile Exception: " + message + " near line " + line_num + " of configuration file. Please "
-                    + "check your config file and try again. " + (file!=null?"(" + file.getAbsolutePath() + ")":"");
+            return "Configuration Compile Exception: " + message + " near line " + line_num + ". Please "
+                    + "check your code and try again. " + (file!=null?"(" + file.getAbsolutePath() + ")":"");
         } else{
-            return "Configuration Compile Exception: " + message + ". Please check your config file and try again. " 
+            return "Configuration Compile Exception: " + message + ". Please check your code and try again. " 
                     + (file!=null?"(" + file.getAbsolutePath() + ")":"");
         }
     }

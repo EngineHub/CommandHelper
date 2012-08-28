@@ -7,7 +7,6 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.List;
 
 /**
@@ -23,33 +22,14 @@ public class Compiler {
     
     @api
 	@noprofile
-    public static class p extends AbstractFunction {
+    public static class p extends DummyFunction {
 
         public String getName() {
             return "p";
         }
 
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
-
         public String docs() {
             return "mixed {c...} Used internally by the compiler. You shouldn't use it.";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-        public CHVersion since() {
-            return CHVersion.V3_1_2;
-        }
-
-        public Boolean runAsync() {
-            return null;
         }
        
 
@@ -59,7 +39,7 @@ public class Compiler {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {			
             if(nodes.length == 1){
                 return parent.eval(nodes[0], env);
             } else {
@@ -68,53 +48,20 @@ public class Compiler {
         }
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(t);
-        }
-
-        @Override
-        public boolean appearInDocumentation() {
-            return false;
-        }                
+        }               
     }
     
     @api 
 	@noprofile
-	public static class centry extends AbstractFunction{
-
-        public String getName() {
-            return "centry";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{2};
-        }
+	public static class centry extends DummyFunction{
 
         public String docs() {
             return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
                     + "compiler.";
         }
 
-        public Exceptions.ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-        public Boolean runAsync() {
-            return null;
-        }
-
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
             return new CEntry(args[0], args[1], t);
-        }
-
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-
-        @Override
-        public boolean appearInDocumentation() {
-            return false;
         }
 
         @Override
@@ -131,15 +78,7 @@ public class Compiler {
     
     @api
 	@noprofile
-    public static class __autoconcat__ extends AbstractFunction {
-
-        public String getName() {
-            return "__autoconcat__";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{Integer.MAX_VALUE};
-        }
+    public static class __autoconcat__ extends DummyFunction {
 
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             throw new Error("Should not have gotten here");
@@ -148,21 +87,6 @@ public class Compiler {
         public String docs() {
             return "string {var1, [var2...]} This function should only be used by the compiler, behavior"
                     + " may be undefined if it is used in code.";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return new Exceptions.ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-        public CHVersion since() {
-            return CHVersion.V0_0_0;
-        }
-
-        public Boolean runAsync() {
-            return null;
         }
 
         @Override
@@ -407,85 +331,36 @@ public class Compiler {
                 return tree;
             }
         }
-
-        @Override
-        public boolean appearInDocumentation() {
-            return false;
-        }
                 
     }
     
     @api
-    public static class npe extends AbstractFunction {
-
-        public String getName() {
-            return "npe";
-        }
+    public static class npe extends DummyFunction {
 
         public Integer[] numArgs() {
             return new Integer[]{0};
         }
 
-        public String docs() {
-            return "void {}";
-        }
-
-        public Exceptions.ExceptionType[] thrown() {
-            return null;
-        }
-
         public boolean isRestricted() {
             return true;
-        }
-        public CHVersion since() {
-            return CHVersion.V0_0_0;
-        }
-
-        public Boolean runAsync() {
-            return null;
         }
 
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             Object o = null;
             o.toString();
             return new CVoid(t);
-        }
-
-        @Override
-        public boolean appearInDocumentation() {
-            return false;
-        }
+		}
                 
     }
     
     @api 
 	@noprofile
-	public static class dyn extends AbstractFunction{
-
-        public String getName() {
-            return "dyn";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{0, 1};
-        }
+	public static class dyn extends DummyFunction{
 
         public String docs() {
             return "exception {[argument]} Registers as a dynamic component, for optimization testing; that is"
                     + " to say, this will not be optimizable ever."
                     + " It simply returns the argument provided, or void if none.";
-        }
-
-        public ExceptionType[] thrown() {
-            return null;
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        public Boolean runAsync() {
-            return null;
         }
 
         public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
@@ -494,15 +369,64 @@ public class Compiler {
             }
             return args[0];
         }
-
-        public CHVersion since() {
-            return CHVersion.V0_0_0;
-        }               
-
-        @Override
-        public boolean appearInDocumentation() {
-            return false;
-        }
                        
     }
+	
+	@api public static class __cbracket__ extends DummyFunction{
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean canOptimizeDynamic() {
+			return true;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			ParseTree node;
+			if(children.isEmpty()){
+				node = new ParseTree(new CVoid(t));
+			} else if(children.size() == 1){
+				node = children.get(0);
+			} else {
+				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
+				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
+						+ " report this error to the developer.", t);
+			}
+			return new ParseTree(new CBracket(node));
+		}
+		
+		
+		
+	}
+	
+	@api public static class __cbrace__ extends DummyFunction{
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public boolean canOptimizeDynamic() {
+			return true;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			ParseTree node;
+			if(children.isEmpty()){
+				node = new ParseTree(new CVoid(t));
+			} else if(children.size() == 1){
+				node = children.get(0);
+			} else {
+				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
+				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
+						+ " report this error to the developer.", t);
+			}
+			return new ParseTree(new CBrace(node));
+		}				
+		
+	}
 }

@@ -24,7 +24,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
         TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
         DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
-        SYMBOL, IDENTIFIER
+        SYMBOL, IDENTIFIER, BRACE, BRACKET
     }
     private final ConstructType ctype;
     private final String value;

@@ -23,4 +23,10 @@ public class CLabel extends Construct{
     public boolean isDynamic() {
         return false;
     }
+
+	@Override
+	public String toString() {
+		return label.toString() + ":";
+	}
+		
 }

@@ -83,7 +83,8 @@ public class Token {
 		
 		DOUBLE(TokenVariant.IDENTIFIER),
 		INTEGER(TokenVariant.IDENTIFIER),
-		ASSIGNMENT();
+		ASSIGNMENT(), 
+		CONST_START();
 		
 		private Set<TokenVariant> variants = EnumSet.noneOf(TokenVariant.class);
 		private TType(TokenVariant ... variants){

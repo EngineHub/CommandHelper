@@ -16,7 +16,7 @@ commands:
     reloadaliases:
         description: Reloads aliases
         usage: /<command>
-        aliases: reloadalias
+        aliases: reloadalias, recompile
     viewalias:
         description: View all user defined aliases
         usage: /<command>

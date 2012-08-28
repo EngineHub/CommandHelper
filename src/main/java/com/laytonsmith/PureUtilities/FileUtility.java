@@ -153,6 +153,13 @@ public class FileUtility {
 	public static void write(String s, File f) throws IOException {
 		write(s, f, OVERWRITE);
 	}
+	
+	/**
+	 * Shorthand for write(s, f, OVERWRITE, create)
+	 */
+	public static void write(String s, File f, boolean create) throws IOException{
+		write(s, f, OVERWRITE, create);
+	}
 
 	/**
 	 * Copies a file from one location to another. If overwrite is null,

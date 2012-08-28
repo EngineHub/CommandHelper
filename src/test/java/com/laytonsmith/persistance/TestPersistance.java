@@ -29,8 +29,8 @@ import org.junit.Test;
 public class TestPersistance {
 
 	/**
-	 * TODO: Need to test the following: * Removing a key from a data source
-	 * * Ensuring correct behavior with hidden keys that conflict *
+	 * TODO: Need to test the following: 
+	 * Ensuring correct behavior with hidden keys that conflict
 	 */
 	public TestPersistance() {
 	}
@@ -233,6 +233,27 @@ public class TestPersistance {
 		FileUtility.write("{\"key\":\"value2\"}", new File("folder/default.json"));
 		//This should not be cached in memory
 		assertEquals("value2", network.get(new String[]{"key"}));
+		deleteFiles("folder/");
+	}
+	
+	@Test
+	public void testSer() throws Exception{
+		//This is hard to test, since it's binary data. Instead, we just check for the file's existance, and to see if 
+		//contains the key and value somewhere in the data
+		PersistanceNetwork network = new PersistanceNetwork("**=ser://folder/default.ser", new URI("default"), options);
+		network.set(new String[]{"key"}, "value");
+		String contents = FileUtility.read(new File("folder/default.ser"));
+		assertTrue(contents.contains("value") && contents.contains("key") && contents.contains("java.util.HashMap"));
+		deleteFiles("folder/");
+	}
+	
+	@Test
+	public void testConflictingKeys() throws Exception{
+		//If two data sources have the same key, only one should be currently operated on.
+		PersistanceNetwork network = new PersistanceNetwork("**=transient:json://folder/default.json\nkey.*=transient:json://folder/other.json\n", new URI("default"), options);
+		FileUtility.write("{\"key\":{\"key\":\"value1\"}}", new File("folder/other.json"), true);
+		FileUtility.write("{\"key\":{\"key\":\"nope\"}}", new File("folder/default.json"), true);
+		assertEquals("value1", network.get(new String[]{"key", "key"}));
 		deleteFiles("folder/");
 	}
 

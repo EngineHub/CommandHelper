@@ -1,15 +1,14 @@
 package com.laytonsmith.core.compiler;
 
-import com.laytonsmith.PureUtilities.LogicUtils;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.NewScript;
 import com.laytonsmith.core.ParseTree;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CKeyword;
+import com.laytonsmith.core.constructs.CLabel;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
@@ -18,9 +17,11 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.environments.Env;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.List;
@@ -44,7 +45,7 @@ public class NewMethodScriptCompiler {
 		return lo.lex();
 	}
 	
-	public static List<NewScript> preprocess(TokenStream tokenStream, Env env) throws ConfigCompileException{
+	public static List<NewScript> preprocess(TokenStream tokenStream, Env compilerEnvironment) throws ConfigCompileException{
 		List<NewScript> scripts = new ArrayList<NewScript>();
 		//We need to split the command definition and the pure mscript parts. First,
 		//we split on newlines, those are each going to be our alias definitions
@@ -84,7 +85,7 @@ public class NewMethodScriptCompiler {
 					right.add(t);
 				}
 			}
-			ParseTree cright = compile(right);
+			ParseTree cright = compile(right, compilerEnvironment);
 			List<Construct> cleft = new ArrayList<Construct>();
 			boolean atFinalVar = false;
 			boolean atOptionalVars = false;
@@ -128,7 +129,7 @@ public class NewMethodScriptCompiler {
 							next = left.get(i + 1);
 						}
 						if(next.type != TType.RSQUARE_BRACKET){
-							throw new ConfigCompileException("Expecting a right square bracket, but found " + next.val() + " instead.", next.getTarget());
+							throw new ConfigCompileException("Expecting a right square bracket, but found " + next.val() + " instead. (Did you forget to quote a multi word string?)", next.getTarget());
 						}
 						i++;
 						Variable v = new Variable(tname.val(), defaultVal, true, (tname.val().equals("$")), tname.getTarget());
@@ -160,9 +161,9 @@ public class NewMethodScriptCompiler {
 		return scripts;
 	}
 	
-	public static ParseTree compile(TokenStream tokenStream) throws ConfigCompileException{
+	public static ParseTree compile(TokenStream tokenStream, Env compilerEnvironment) throws ConfigCompileException{
 		ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN));
-		new CompilerObject(tokenStream).compile(root);
+		new CompilerObject(tokenStream).compile(root, compilerEnvironment);
 		return root;
 	}
 	
@@ -186,13 +187,23 @@ public class NewMethodScriptCompiler {
 		TokenStream stream;
 		Stack<ParseTree> nodes = new Stack<ParseTree>();
 		int autoConcatCounter = 0;
+		int bracketCounter = 0;
+		Stack<Target> bracketLines = new Stack<Target>();		
+		int braceCounter = 0;
+		Stack<Target> braceLines = new Stack<Target>();
+		Stack<Target> functionLines = new Stack<Target>();
 		ParseTree pointer;
+		ParseTree root;
+		CompilerEnvironment env;
 		
 		private CompilerObject(TokenStream stream){
 			this.stream = stream;
 		}
 		
 		Token peek(){
+			if(stream.isEmpty()){
+				return new Token(TType.UNKNOWN, "", Target.UNKNOWN);
+			}
 			return stream.get(0);
 		}
 		
@@ -200,11 +211,22 @@ public class NewMethodScriptCompiler {
 			return stream.remove(0);
 		}
 		
-		void compile(ParseTree root) throws ConfigCompileException{
+		void compile(ParseTree root, Env compilerEnv) throws ConfigCompileException{
+			this.root = root;
 			nodes.push(root);
 			pointer = root;
+			this.env = compilerEnv.getEnv(CompilerEnvironment.class);
 			while(!stream.isEmpty()){
 				compile0();
+			}
+			if(bracketCounter > 0){
+				throw new ConfigCompileException("Unclosed brackets. (Did you forget a right bracket (])?)", bracketLines.peek());
+			}
+			if(braceCounter > 0){
+				throw new ConfigCompileException("Unclosed braces. (Did you forget a right brace (})?)", braceLines.peek());
+			}
+			if(!functionLines.isEmpty()){
+				throw new ConfigCompileException("Unclosed left parenthesis. (Did you forget to close a function?)", functionLines.peek());
 			}
 		}
 		
@@ -213,9 +235,24 @@ public class NewMethodScriptCompiler {
 			if(t.type == TType.NEWLINE){
 				return;
 			}
+			if(t.type == TType.CONST_START){
+				StringBuilder constName = new StringBuilder();
+				while((t = consume()).type != TType.RCURLY_BRACKET){
+					if(t.type != TType.BARE_STRING && t.type != TType.CONCAT){
+						throw new ConfigCompileException("Constant names may only contain names and dots.", t.getTarget());
+					}
+					constName.append(t.val());
+				}
+				Construct constant = env.getConstant(constName.toString());
+				if(constant == null){
+					throw new ConfigCompileException("Expected the constant ${" + constName.toString() + "} to be provided in the compilation options, but it wasn't.", t.getTarget());
+				}
+				t = new Token(TType.STRING, constant.val(), constant.getTarget());
+			}
 			if(t.type == TType.BARE_STRING && peek().type == TType.FUNC_START){
 				consume();
 				CFunction f = new CFunction(t.val(), t.getTarget());
+				functionLines.add(peek().getTarget());
 				pushNode(f);
 				return;
 			}
@@ -225,19 +262,60 @@ public class NewMethodScriptCompiler {
 					popNode(t.getTarget());
 				}
 			}
+			if(t.type == TType.COMMA){
+				return;
+			}
 			if(t.type == TType.FUNC_END){
 				//We're done with this child, so push it up
 				popNode(t.getTarget());
+				functionLines.pop();
 				return;
 			}
-			//If the next token ISN'T a , or ), we need to autoconcat this
-			if(peek().type != TType.FUNC_END && peek().type != TType.COMMA){
+			if(t.type == TType.LSQUARE_BRACKET){
+				CFunction f = new CFunction("__cbracket__", Target.UNKNOWN);
+				pushNode(f);
+				bracketCounter++;
+				bracketLines.push(t.getTarget());
+				return;
+			}
+			if(t.type == TType.RSQUARE_BRACKET){
+				if(bracketCounter == 0){
+					throw new ConfigCompileException("Unexpected right bracket. (Did you have too many right square brackets (]) in your code?)", t.getTarget());
+				}
+				bracketCounter--;
+				bracketLines.pop();
+				popNode(t.getTarget());
+				return;
+			}
+			if(t.type == TType.LCURLY_BRACKET){
+				CFunction f = new CFunction("__cbrace__", Target.UNKNOWN);
+				pushNode(f);
+				braceCounter++;
+				braceLines.push(t.getTarget());
+				return;
+			}
+			if(t.type == TType.RCURLY_BRACKET){
+				if(braceCounter == 0){
+					throw new ConfigCompileException("Unexpected right brace. (Did you have too many right braces (}) in your code?)", t.getTarget());
+				}
+				braceCounter--;
+				braceLines.pop();
+				popNode(t.getTarget());
+				return;
+			}
+			//If the next token ISN'T a ) , } ] we need to autoconcat this
+			if(peek().type != TType.FUNC_END && peek().type != TType.COMMA && peek().type != TType.RCURLY_BRACKET && peek().type != TType.RSQUARE_BRACKET){
 				//... unless we're already in an autoconcat
 				if(!(pointer.getData() instanceof CFunction && ((CFunction)pointer.getData()).val().equals("__autoconcat__"))){
 					CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
 					pushNode(f);
 					autoConcatCounter++;
 				}
+			}
+			if(t.type == TType.BARE_STRING && peek().type == TType.LABEL){
+				consume();
+				pointer.addChild(new ParseTree(new CLabel(new CString(t.val(), t.getTarget()))));
+				return;
 			}
 			if(t.type.isIdentifier()){
 				//If it's an atomic, put it in a construct and parse tree, then add it
@@ -267,6 +345,9 @@ public class NewMethodScriptCompiler {
 			}			
 		}
 		
+		private static List<String> keywords = Arrays.asList(new String[]{
+			"else", "bind", "proc"
+		});
 		private Construct resolveIdentifier(Token t) throws ConfigCompileException{
 			switch(t.type){
 				case STRING:
@@ -285,9 +366,11 @@ public class NewMethodScriptCompiler {
 						return new CBoolean(false, t.getTarget());						
 					} else if(t.val().equals("null")){
 						return new CNull(t.getTarget());
+					} else if(keywords.contains(t.val())){
+						return new CKeyword(t.val(), t.getTarget());
 					} else {
 						if(stream.fileOptions.isStrict()){
-							throw new ConfigCompileException("Bare strings not allowed in strict mode.", t.getTarget());
+							throw new ConfigCompileException("Bare strings not allowed in strict mode. (" + t.val() + ")", t.getTarget());
 						} else {
 							return new CString(t.val(), t.getTarget());
 						}
@@ -401,6 +484,8 @@ public class NewMethodScriptCompiler {
 			tokenMap.add(new TokenMap(".", Token.TType.CONCAT));			
 			tokenMap.add(new TokenMap("->", Token.TType.DEREFERENCE));
 			tokenMap.add(new TokenMap("::", Token.TType.DEREFERENCE));
+			
+			tokenMap.add(new TokenMap("${", Token.TType.CONST_START));
 			
 			tokenMap.add(new TokenMap("{", Token.TType.LCURLY_BRACKET));
 			tokenMap.add(new TokenMap("}", Token.TType.RCURLY_BRACKET));
@@ -759,7 +844,9 @@ public class NewMethodScriptCompiler {
 					}
 					if(c == '\n'){
 						parseBuffer();
-						append("\n", TType.NEWLINE);
+						if(token_list.isEmpty() || token_list.get(token_list.size() - 1).type != TType.NEWLINE){
+							append("\n", TType.NEWLINE);
+						}
 						continue;
 					}
 
@@ -769,7 +856,7 @@ public class NewMethodScriptCompiler {
 				}
 				
 				//Newlines are handled differently if it's in multiline or not.
-				//Remember, if we are in multiline mode, newlines are simply removed, otherwise they are
+				//Remember, if we are in multiline mode (or pure mscript), newlines are simply removed, otherwise they are
 				//kept (except duplicate ones)
 				if(c == '\n'){
 					if(state_in_multiline){
@@ -777,12 +864,17 @@ public class NewMethodScriptCompiler {
 					} else {
 						if(!token_list.isEmpty() && token_list.get(token_list.size() - 1).type != Token.TType.NEWLINE){
 							parseBuffer();
-							append("\n", Token.TType.NEWLINE);
 							if(usingNonPure){
+								if(token_list.get(token_list.size() - 1).type != TType.NEWLINE){
+									//Don't add duplicates
+									append("\n", Token.TType.NEWLINE);							
+								}
 								//This also signals the end of pure mscript
 								state_in_pure_mscript = false;
 								continue;
-							}
+							} else if(state_in_pure_mscript){
+								continue;
+							}							
 						} else {
 							continue;
 						}
@@ -888,7 +980,7 @@ public class NewMethodScriptCompiler {
 					c2 = options.charAt(i + 1);
 				}
 				if(inKey){
-					if(c == '='){
+					if(c == ':'){
 						keyName = buffer.toString();
 						buffer = new StringBuilder();						
 						inKey = false;
@@ -934,8 +1026,12 @@ public class NewMethodScriptCompiler {
 	
 	
 	public static void main(String [] args) throws ConfigCompileException{
-		TokenStream stream = lex("f(2 + f(2 + 2) + 2)", null, true);
+		CompilerEnvironment env = new CompilerEnvironment();
+		env.setConstant("v.n", "value");
+		TokenStream stream = lex("${v.n}", null, true);
 		System.out.println(stream + "\n");
-		compile(stream);
+//		System.out.println(preprocess(stream).toString());
+		ParseTree tree = compile(stream, Env.createEnvironment(env));
+		System.out.println(tree.toStringVerbose());
 	}
 }

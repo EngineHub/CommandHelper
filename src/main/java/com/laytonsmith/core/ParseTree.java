@@ -6,6 +6,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -324,6 +325,14 @@ public class ParseTree implements Cloneable{
 			stringRepresentation.append(")");
 		}
         return stringRepresentation.toString();
+	}
+	
+	public Target getTarget(){
+		if(data == null){
+			return Target.UNKNOWN;
+		} else {
+			return data.getTarget();
+		}
 	}
 	
 	
