@@ -1,10 +1,13 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Env;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -17,7 +20,9 @@ import java.util.Map;
  * @author lsmith
  */
 public class CompilerEnvironment implements Env.EnvImpl{	
-	Map<String, Construct> constants = new HashMap<String, Construct>();
+	private Map<String, Construct> constants = new HashMap<String, Construct>();
+	private List<ParseTree> includes = new ArrayList<ParseTree>();
+	private List<String> knownProcs = new ArrayList<String>();
 	public void setConstant(String name, Construct value){
 		constants.put(name, value);
 	}
@@ -26,5 +31,21 @@ public class CompilerEnvironment implements Env.EnvImpl{
 	}
 	public Construct getConstant(String name){		
 		return constants.get(name);
+	}
+	
+	public void addInclude(ParseTree tree){
+		includes.add(tree);
+	}
+	
+	public List<ParseTree> getIncludes(){
+		return new ArrayList<ParseTree>(includes);
+	}
+	
+	public void addKnownProcName(String name){
+		knownProcs.add(name);
+	}
+	
+	public boolean isProcKnown(String name){
+		return knownProcs.contains(name);
 	}
 }

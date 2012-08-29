@@ -14,7 +14,8 @@ public class FileOptions {
 	private boolean strict;
 	private List<String> supressWarnings;
 	private String description;
-	FileOptions(Map<String, String> parsedOptions) {
+	//TODO: Make this non-public once this is all finished.
+	public FileOptions(Map<String, String> parsedOptions) {
 		strict = parseBoolean(getDefault(parsedOptions, "strict", "false"));
 		supressWarnings = parseList(getDefault(parsedOptions, "supresswarnings", ""));
 		description = getDefault(parsedOptions, "description", null);

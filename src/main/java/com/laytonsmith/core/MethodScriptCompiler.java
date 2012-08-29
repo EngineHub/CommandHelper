@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -19,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Layton
  */
 public final class MethodScriptCompiler {
+
+	private final static FileOptions fileOptions = new FileOptions(new HashMap<String, String>());
 
 	private MethodScriptCompiler() {
 	}
@@ -850,7 +853,7 @@ public final class MethodScriptCompiler {
 		}
 		stream = tempStream;
 
-		ParseTree tree = new ParseTree();
+		ParseTree tree = new ParseTree(fileOptions);
 		tree.setData(new CNull(unknown));
 		Stack<ParseTree> parents = new Stack<ParseTree>();
 		Stack<AtomicInteger> constructCount = new Stack<AtomicInteger>();
@@ -858,7 +861,7 @@ public final class MethodScriptCompiler {
 		constructCount.push(new AtomicInteger(0));
 		parents.push(tree);
 
-		tree.addChild(new ParseTree(new CFunction("__autoconcat__", unknown)));
+		tree.addChild(new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions));
 		parents.push(tree.getChildAt(0));
 		tree = tree.getChildAt(0);
 		constructCount.push(new AtomicInteger(0));
@@ -879,7 +882,7 @@ public final class MethodScriptCompiler {
 
 			//Associative array handling
 			if (next1.type.equals(TType.LABEL)) {
-				tree.addChild(new ParseTree(new CLabel(Static.resolveConstruct(t.val(), t.target))));
+				tree.addChild(new ParseTree(new CLabel(Static.resolveConstruct(t.val(), t.target)), fileOptions));
 				constructCount.peek().incrementAndGet();
 				i++;
 				continue;
@@ -901,7 +904,7 @@ public final class MethodScriptCompiler {
 					i++;
 				}
 				i++;
-				tree.addChild(new ParseTree(slice));
+				tree.addChild(new ParseTree(slice, fileOptions));
 				continue;
 			}
 			//Array notation handling
@@ -924,15 +927,15 @@ public final class MethodScriptCompiler {
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if (!emptyArray) {
-					myIndex = new ParseTree(new CFunction("__autoconcat__", unknown));
+					myIndex = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
 					for (int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
 					}
 				} else {
-					myIndex = new ParseTree(new CSlice("0..-1", t.target));
+					myIndex = new ParseTree(new CSlice("0..-1", t.target), fileOptions);
 				}
 				tree.setChildren(tree.getChildren().subList(0, array));
-				ParseTree arrayGet = new ParseTree(new CFunction("array_get", t.target));
+				ParseTree arrayGet = new ParseTree(new CFunction("array_get", t.target), fileOptions);
 				arrayGet.addChild(myArray);
 				arrayGet.addChild(myIndex);
 				tree.addChild(arrayGet);
@@ -942,9 +945,9 @@ public final class MethodScriptCompiler {
 
 			//Smart strings
 			if (t.type == TType.SMART_STRING) {
-				ParseTree function = new ParseTree();
+				ParseTree function = new ParseTree(fileOptions);
 				function.setData(new CFunction("smart_string", t.target));
-				ParseTree string = new ParseTree();
+				ParseTree string = new ParseTree(fileOptions);
 				string.setData(new CString(t.value, t.target));
 				function.addChild(string);
 				tree.addChild(function);
@@ -958,25 +961,25 @@ public final class MethodScriptCompiler {
 			}
 
 			if (t.type == TType.LIT) {
-				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target)));
+				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.STRING) || t.type.equals(TType.COMMAND)) {
-				tree.addChild(new ParseTree(new CString(t.val(), t.target)));
+				tree.addChild(new ParseTree(new CString(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.IDENTIFIER)) {
-				tree.addChild(new ParseTree(new CPreIdentifier(t.val(), t.target)));
+				tree.addChild(new ParseTree(new CPreIdentifier(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.IVARIABLE)) {
-				tree.addChild(new ParseTree(new IVariable(t.val(), t.target)));
+				tree.addChild(new ParseTree(new IVariable(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.UNKNOWN)) {
-				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target)));
+				tree.addChild(new ParseTree(Static.resolveConstruct(t.val(), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.isSymbol()) { //Logic and math symbols
-				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target)));
+				tree.addChild(new ParseTree(new CSymbol(t.val(), t.type, t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 			} else if (t.type.equals(TType.VARIABLE) || t.type.equals(TType.FINAL_VAR)) {
-				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target)));
+				tree.addChild(new ParseTree(new Variable(t.val(), null, false, t.type.equals(TType.FINAL_VAR), t.target), fileOptions));
 				constructCount.peek().incrementAndGet();
 				//right_vars.add(new Variable(t.val(), null, t.line_num));
 			} else if (t.type.equals(TType.FUNC_NAME)) {
@@ -985,7 +988,7 @@ public final class MethodScriptCompiler {
 				if (!func.val().matches("^_[^_].*")) {
 					FunctionList.getFunction(func);
 				}
-				ParseTree f = new ParseTree(func);
+				ParseTree f = new ParseTree(func, fileOptions);
 				tree.addChild(f);
 				constructCount.push(new AtomicInteger(0));
 				tree = f;
@@ -1017,7 +1020,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown));
+					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<ParseTree>();
 					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1062,7 +1065,7 @@ public final class MethodScriptCompiler {
 				if (constructCount.peek().get() > 1) {
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown));
+					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<ParseTree>();
 					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
@@ -1198,7 +1201,7 @@ public final class MethodScriptCompiler {
 			//However, as a special function, we *might* be able to get a const proc out of this
 			//Let's see.
 			try {
-				ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN));
+				ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), fileOptions);
 				Script fakeScript = Script.GenerateScript(root, "*");
 				Env env = new Env();
 				Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, env, fakeScript, children.toArray(new ParseTree[children.size()]));

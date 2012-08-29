@@ -119,7 +119,7 @@ public class CClosure extends Construct {
                 }
             }
             environment.GetVarList().set(new IVariable("@arguments", arguments, node.getData().getTarget()));
-            ParseTree newNode = new ParseTree(new CFunction("g", getTarget()));
+            ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
             List<ParseTree> children = new ArrayList<ParseTree>();
             children.add(node);
             newNode.setChildren(children);

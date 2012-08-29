@@ -1,5 +1,6 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.StringUtils;
@@ -91,16 +92,27 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		}
 	}
 
+	private byte[] byteData = new byte[0];
+	private MemoryMapFileUtil writer = null;
+	private MemoryMapFileUtil.DataGrabber grabber = new MemoryMapFileUtil.DataGrabber() {
+
+		public byte[] getData() {
+			return byteData;
+		}
+	};
 	/**
 	 * Causes the database to be saved to disk
 	 *
 	 * @throws IOException
 	 */
-	public void save(){		
+	public void save() throws IOException{
+		if(writer == null){
+			writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
+		}
 		queue.invokeLater(new Runnable() {
 			public void run() {
 				ObjectOutputStream out = null;
-				FileOutputStream fos = null;
+				ByteArrayOutputStream baos = null;
 				try {
 					if (storageLocation.getParentFile() != null) {
 						storageLocation.getParentFile().mkdirs();
@@ -108,15 +120,18 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 					if (!storageLocation.exists()) {
 						storageLocation.createNewFile();
 					}
-					fos = new FileOutputStream(storageLocation);
-					out = new ObjectOutputStream(fos);
+//					fos = new FileOutputStream(storageLocation);
+					baos = new ByteArrayOutputStream();
+					out = new ObjectOutputStream(baos);
 					out.writeObject(new HashMap(data));
+					byteData = baos.toByteArray();
+					writer.mark();
 				} catch (IOException ex) {
 					Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
 					try {
-						if (fos != null) {
-							fos.close();
+						if (baos != null) {
+							baos.close();
 						}
 					} catch (IOException ex) {
 						Logger.getLogger(SerializedPersistance.class.getName()).log(Level.SEVERE, null, ex);

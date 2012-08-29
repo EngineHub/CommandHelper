@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -78,22 +79,28 @@ public class ParseTree implements Cloneable{
 	
 	private Construct data = null;
 	private boolean isOptimized = false;
+	private final FileOptions fileOptions;
 	private List<ParseTree> children = null;
 	
 	/**
 	 * Creates a new empty tree node
 	 */
-	public ParseTree(){
+	public ParseTree(FileOptions options){
 		children = new ArrayList<ParseTree>();
+		this.fileOptions = options;
 	}
 	
 	/**
 	 * Creates a new tree node, with this construct as the data
 	 * @param construct 
 	 */
-	public ParseTree(Construct construct){
-		this();
+	public ParseTree(Construct construct, FileOptions options){
+		this(options);
 		setData(construct);
+	}
+	
+	public FileOptions getFileOptions(){
+		return fileOptions;
 	}
 	
 	public void setData(Construct data) {

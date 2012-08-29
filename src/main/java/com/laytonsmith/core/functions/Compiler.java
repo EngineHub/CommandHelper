@@ -3,10 +3,12 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -126,9 +128,9 @@ public class Compiler {
                         CSymbol sy = (CSymbol) node.getData();
                         ParseTree conversion;
                         if (sy.val().equals("++")) {
-                            conversion = new ParseTree(new CFunction("postinc", t));
+                            conversion = new ParseTree(new CFunction("postinc", t), node.getFileOptions());
                         } else {
-                            conversion = new ParseTree(new CFunction("postdec", t));
+                            conversion = new ParseTree(new CFunction("postdec", t), node.getFileOptions());
                         }
                         conversion.addChild(list.get(i - 1));
                         list.set(i - 1, conversion);
@@ -151,15 +153,15 @@ public class Compiler {
                                         && !(list.get(i + 1).getData() instanceof CSymbol)) {
                                     if (node.getData().val().equals("-")) {
                                         //We have to negate it
-                                        conversion = new ParseTree(new CFunction("neg", t));
+                                        conversion = new ParseTree(new CFunction("neg", t), node.getFileOptions());
                                     } else {
-                                        conversion = new ParseTree(new CFunction("p", t));
+                                        conversion = new ParseTree(new CFunction("p", t), node.getFileOptions());
                                     }
                                 } else {
                                     continue;
                                 }
                             } else {
-                                conversion = new ParseTree(new CFunction(( (CSymbol) node.getData() ).convert(), t));
+                                conversion = new ParseTree(new CFunction(( (CSymbol) node.getData() ).convert(), t), node.getFileOptions());
                             }
                             conversion.addChild(list.get(i + 1));
                             list.set(i, conversion);
@@ -172,7 +174,7 @@ public class Compiler {
                         ParseTree next = list.get(i + 1);
                         if(next.getData() instanceof CSymbol){
                             if(((CSymbol)next.getData()).isExponential()){
-                                ParseTree conversion = new ParseTree(new CFunction(((CSymbol)next.getData()).convert(), t));
+                                ParseTree conversion = new ParseTree(new CFunction(((CSymbol)next.getData()).convert(), t), next.getFileOptions());
                                 conversion.addChild(list.get(i));
                                 conversion.addChild(list.get(i + 2));
                                 list.set(i, conversion);
@@ -188,7 +190,7 @@ public class Compiler {
                         ParseTree next = list.get(i + 1);
                         if (next.getData() instanceof CSymbol) {
                             if (( (CSymbol) next.getData() ).isMultaplicative()) {
-                                ParseTree conversion = new ParseTree(new CFunction(( (CSymbol) next.getData() ).convert(), t));
+                                ParseTree conversion = new ParseTree(new CFunction(( (CSymbol) next.getData() ).convert(), t), next.getFileOptions());
                                 conversion.addChild(list.get(i));
                                 conversion.addChild(list.get(i + 2));
                                 list.set(i, conversion);
@@ -202,7 +204,7 @@ public class Compiler {
                     for (int i = 0; i < list.size() - 1; i++) {
                         ParseTree next = list.get(i + 1);
                         if (next.getData() instanceof CSymbol && ( (CSymbol) next.getData() ).isAdditive()) {
-                            ParseTree conversion = new ParseTree(new CFunction(( (CSymbol) next.getData() ).convert(), t));
+                            ParseTree conversion = new ParseTree(new CFunction(( (CSymbol) next.getData() ).convert(), t), next.getFileOptions());
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -216,7 +218,7 @@ public class Compiler {
                         ParseTree node = list.get(i + 1);
                         if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isRelational()) {
                             CSymbol sy = (CSymbol) node.getData();
-                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t));
+                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t), node.getFileOptions());
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -230,7 +232,7 @@ public class Compiler {
                         ParseTree node = list.get(i + 1);
                         if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isEquality()) {
                             CSymbol sy = (CSymbol) node.getData();
-                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t));
+                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t), node.getFileOptions());
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -244,7 +246,7 @@ public class Compiler {
                         ParseTree node = list.get(i + 1);
                         if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isLogicalAnd()) {
                             CSymbol sy = (CSymbol) node.getData();
-                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t));
+                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t), node.getFileOptions());
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -258,7 +260,7 @@ public class Compiler {
                         ParseTree node = list.get(i + 1);
                         if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isLogicalOr()) {
                             CSymbol sy = (CSymbol) node.getData();
-                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t));
+                            ParseTree conversion = new ParseTree(new CFunction(sy.convert(), t), node.getFileOptions());
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
                             list.set(i, conversion);
@@ -277,11 +279,11 @@ public class Compiler {
             if (list.size() >= 1) {
                 ParseTree node = list.get(0);
                 if (node.getData() instanceof CLabel) {
-                    ParseTree value = new ParseTree(new CFunction("__autoconcat__", t));
+                    ParseTree value = new ParseTree(new CFunction("__autoconcat__", t), node.getFileOptions());
                     for (int i = 1; i < list.size(); i++) {
                         value.addChild(list.get(i));
                     }
-                    ParseTree ce = new ParseTree(new CFunction("centry", t));
+                    ParseTree ce = new ParseTree(new CFunction("centry", t), node.getFileOptions());
                     ce.addChild(node);
                     ce.addChild(value);
                     return ce;
@@ -303,13 +305,13 @@ public class Compiler {
                             list.remove(0);
                             ParseTree child = list.get(0);
                             if(list.size() > 1){
-                                child = new ParseTree(new CFunction("sconcat", t));
+                                child = new ParseTree(new CFunction("sconcat", t), child.getFileOptions());
                                 child.setChildren(list);
                             }
                             try{
                                 Function f = (Function)FunctionList.getFunction(identifier);                                
                                 ParseTree node 
-                                        = new ParseTree(f.execs(t, null, null, child));                                
+                                        = new ParseTree(f.execs(t, null, null, child), child.getFileOptions());                                
                                 return node;
                             } catch(Exception e){
                                 throw new Error("Unknown function " + identifier.val() + "?");
@@ -322,10 +324,14 @@ public class Compiler {
                     }
                 }
                 ParseTree tree;
+				FileOptions options = new FileOptions(new HashMap<String, String>());
+				if(!list.isEmpty()){
+					options = list.get(0).getFileOptions();
+				}
                 if (returnSConcat) {
-                    tree = new ParseTree(new CFunction("sconcat", t));
+                    tree = new ParseTree(new CFunction("sconcat", t), options);
                 } else {
-                    tree = new ParseTree(new CFunction("concat", t));
+                    tree = new ParseTree(new CFunction("concat", t), options);
                 }
                 tree.setChildren(list);
                 return tree;
@@ -385,9 +391,13 @@ public class Compiler {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			FileOptions options = new FileOptions(new HashMap<String, String>());
+			if(!children.isEmpty()){
+				options = children.get(0).getFileOptions();
+			}
 			ParseTree node;
 			if(children.isEmpty()){
-				node = new ParseTree(new CVoid(t));
+				node = new ParseTree(new CVoid(t), options);
 			} else if(children.size() == 1){
 				node = children.get(0);
 			} else {
@@ -395,7 +405,7 @@ public class Compiler {
 				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
 						+ " report this error to the developer.", t);
 			}
-			return new ParseTree(new CBracket(node));
+			return new ParseTree(new CBracket(node), options);
 		}
 		
 		
@@ -415,9 +425,13 @@ public class Compiler {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			FileOptions options = new FileOptions(new HashMap<String, String>());
+			if(!children.isEmpty()){
+				options = children.get(0).getFileOptions();
+			}
 			ParseTree node;
 			if(children.isEmpty()){
-				node = new ParseTree(new CVoid(t));
+				node = new ParseTree(new CVoid(t), options);
 			} else if(children.size() == 1){
 				node = children.get(0);
 			} else {
@@ -425,7 +439,7 @@ public class Compiler {
 				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
 						+ " report this error to the developer.", t);
 			}
-			return new ParseTree(new CBrace(node));
+			return new ParseTree(new CBrace(node), options);
 		}				
 		
 	}

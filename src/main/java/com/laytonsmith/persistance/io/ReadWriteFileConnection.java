@@ -1,6 +1,7 @@
 package com.laytonsmith.persistance.io;
 
 import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.MemoryMapFileUtil;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistance.ReadOnlyException;
 import java.io.File;
@@ -14,6 +15,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.log4j.lf5.util.StreamUtils;
 
 /**
  *
@@ -24,6 +26,14 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 	protected final File file;
 	protected final ZipReader reader;
 	protected final String blankDataModel;
+	protected byte[] data = new byte[0];
+	protected MemoryMapFileUtil writer;
+	protected MemoryMapFileUtil.DataGrabber grabber = new MemoryMapFileUtil.DataGrabber() {
+
+		public byte[] getData() {
+			return data;
+		}
+	};
 	/**
 	 * The executor service allows for reads and writes to be synchronized. Writes
 	 * needn't be synchronous, just merely synchronized with reads and other writes.
@@ -33,21 +43,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 	 * writes. All file based persistance systems should use this executor to do
 	 * the reads and writes.
 	 */
-	protected static ExecutorService Executor;	
 	public ReadWriteFileConnection(URI uri, File workingDirectory, String blankDataModel) throws IOException{
-		synchronized(ReadWriteFileConnection.class){
-			if(Executor == null){
-				//We needn't set this up until we are used at least once
-				Executor = Executors.newSingleThreadExecutor(new ThreadFactory() {
-
-					public Thread newThread(Runnable r) {
-						Thread t = new Thread(r, "MethodScriptFileQueue");
-						t.setDaemon(false);
-						return t;
-					}
-				});
-			}
-		}
 		file = new File(workingDirectory, (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath());
 		reader = new ZipReader(file);
 		if(!reader.isZipped()){
@@ -58,7 +54,8 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		if(!reader.exists()){
 			reader.getTopLevelFile().createNewFile();			
 		}
-		this.blankDataModel = blankDataModel;		
+		this.blankDataModel = blankDataModel;
+		writer = MemoryMapFileUtil.getInstance(file, grabber);
 	}
 
 	public String getData() throws IOException {
@@ -69,21 +66,8 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 			//without worrying about corruption from a write operation.
 			return reader.getFileContents();
 		}
-		Future<String> future = Executor.submit(new Callable<String>(){
-
-			public String call() throws Exception {				
-				try {
-					return FileUtility.read(file);
-				} catch (FileNotFoundException e) {
-					return blankDataModel;
-				}				
-			}
-		});
-		try {
-			return future.get();
-		} catch (Exception ex) {
-			throw new IOException(ex);
-		}
+		this.data = StreamUtils.getBytes(FileUtility.readAsStream(file));
+		return new String(this.data, "UTF-8");
 	}
 
 	public void writeData(final String data) throws  ReadOnlyException, IOException, UnsupportedOperationException {		
@@ -97,16 +81,7 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		if(!file.exists()){
 			throw new FileNotFoundException(file.getAbsolutePath() + " does not exist!");
 		}
-		Executor.submit(new Callable() {
-
-			public Object call() {
-				try{
-					FileUtility.write(data, file, FileUtility.OVERWRITE);		
-				} catch (Exception ex) {
-					Logger.getLogger(ReadWriteFileConnection.class.getName()).log(Level.SEVERE, null, ex);
-				}
-				return null;
-			}
-		});
+		this.data = data.getBytes("UTF-8");
+		writer.mark();
 	}
 }

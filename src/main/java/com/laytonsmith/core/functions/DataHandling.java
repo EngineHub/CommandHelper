@@ -3,12 +3,14 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -1113,7 +1115,11 @@ public class DataHandling {
 			if (myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
-					ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN));
+					FileOptions options = new FileOptions(new HashMap<String, String>());
+					if(!children.isEmpty()){
+						options = children.get(0).getFileOptions();
+					}
+					ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), options);
 					Script fakeScript = Script.GenerateScript(root, "*");
 					Env env = new Env();
 					env.SetScript(fakeScript);
@@ -1620,7 +1626,7 @@ public class DataHandling {
 			Construct[] defaults = new Construct[nodes.length - 1];
 			for (int i = 0; i < nodes.length - 1; i++) {
 				ParseTree node = nodes[i];
-				ParseTree newNode = new ParseTree(new CFunction("g", t));
+				ParseTree newNode = new ParseTree(new CFunction("g", t), node.getFileOptions());
 				List<ParseTree> children = new ArrayList<ParseTree>();
 				children.add(node);
 				newNode.setChildren(children);
