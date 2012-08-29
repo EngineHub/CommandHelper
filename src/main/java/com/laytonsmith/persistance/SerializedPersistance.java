@@ -79,11 +79,20 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 			if (!isLoaded) {
 				FileInputStream fis = null;
 				ObjectInputStream in = null;
-				fis = new FileInputStream(storageLocation);
-				in = new ObjectInputStream(fis);
-				data = (HashMap<String, String>) in.readObject();
-				in.close();
-				isLoaded = true;
+				try{
+					fis = new FileInputStream(storageLocation);
+					in = new ObjectInputStream(fis);
+					data = (HashMap<String, String>) in.readObject();
+					in.close();
+					isLoaded = true;
+				} finally {
+					if(fis != null){
+						fis.close();
+					}
+					if(in != null){
+						in.close();
+					}
+				}
 			}
 		} catch (FileNotFoundException ex) {
 			//ignore this one

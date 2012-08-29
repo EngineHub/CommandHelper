@@ -63,13 +63,16 @@ public class MemoryMapFileUtil {
 					File temp = File.createTempFile("MemoryMapFile", ".tmp");
 					File permanent = new File(file);
 					FileUtility.write(grabber.getData(), temp, FileUtility.OVERWRITE, true);
-					FileUtility.move(temp, permanent);
-					temp.delete();
-					synchronized(this){
-						dirty = false;
+					if(!FileUtility.move(temp, permanent)){
+						throw new IOException("Unable to move file! (from " + temp + " to " + permanent + ")");
 					}
+					temp.delete();
 				} catch (IOException ex) {
 					Logger.getLogger(MemoryMapFileUtil.class.getName()).log(Level.SEVERE, null, ex);
+				} finally {
+					//At least only spam the logs each time this gets called,
+					//instead of all over the place.
+					dirty = false;
 				}
 			}
 		} finally{

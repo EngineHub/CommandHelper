@@ -264,13 +264,19 @@ public class FileUtility {
 
 	/**
 	 * Moves a file from one location to another. This is a simple wrapper
-	 * around File.renameTo.
+	 * around File.renameTo, but checks for a few conditions that could cause
+	 * the move operation to fail (and hopefully works around them).
 	 *
 	 * @param from
 	 * @param to
 	 */
-	public static boolean move(File from, File to) {
-		return from.renameTo(to);
+	public static boolean move(File from, File to) throws IOException {
+		synchronized(getLock(to)){
+			if(to.exists()){
+				to.delete();
+			}
+			return from.renameTo(to);
+		}
 	}
 
 	/**

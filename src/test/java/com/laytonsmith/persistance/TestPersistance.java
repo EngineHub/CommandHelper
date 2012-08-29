@@ -268,7 +268,7 @@ public class TestPersistance {
 					for (String[] key : data.keySet()) {
 						ds.set(key, data.get(key));
 					}
-					Thread.sleep(1000); //TODO: This is hacky, but it should work atm.
+					Thread.sleep(3000); //TODO: This is hacky, but it should work atm.
 								//Since the file io is async, we need to wait for
 								//it to finish before we get the data.
 								//Ideally, we grab a read thread from
