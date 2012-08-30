@@ -174,14 +174,14 @@ public class FileHandling {
 		}
 
 		public String docs() {
-			return "void {file, callback} Asyncronously reads in a file."
+			return "void {file, callback} Asyncronously reads in a file. ---- "
 				+ " This may be a remote file accessed with an SCP style path. (See the [[CommandHelper/SCP|wiki article]]"
 				+ " about SCP credentials for more information.) If the file is not found, or otherwise can't be read in, an IOException is thrown."
 				+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
 				+ " (This is not applicable for remote files)"
 				+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n."
 				+ " This method will immediately return, and asynchronously read in the file, and finally send the contents"
-				+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception, <code>)."
+				+ " to the callback once the task completes. The callback should have the following signature: closure(@contents, @exception, &lt;code&gt;)."
 				+ " If @contents is null, that indicates that an exception occured, and @exception will not be null, but instead have an"
 				+ " exeption array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
 				+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"

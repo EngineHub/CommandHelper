@@ -443,7 +443,7 @@ public class Environment {
 
         public String docs() {
             return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
-                    + " The location array's y value is ignored."
+                    + " The location array's y value is ignored. ----"
                     + " Biome may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
         }
 
@@ -505,7 +505,7 @@ public class Environment {
 
         public String docs() {
             return "string {x, z, [world] | locationArray} Returns the biome type of this block column. The location array's"
-                    + " y value is ignored. The value returned"
+                    + " y value is ignored. ---- The value returned"
                     + " may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
         }
 

@@ -376,7 +376,7 @@ public class EventBinding {
         public String docs() {
             return "boolean {parameter, value, [throwOnFailure]} Modifies the underlying event object, if applicable."
                     + " The documentation for each event will explain what parameters can be modified,"
-                    + " and what their expected values are. If an invalid parameter name is passed in,"
+                    + " and what their expected values are. ---- If an invalid parameter name is passed in,"
                     + " nothing will happen. If this function is called from outside an event"
                     + " handler, a BindException is thrown. Note that modifying the underlying event"
                     + " will NOT update the event object passed in to the event handler. The function returns"

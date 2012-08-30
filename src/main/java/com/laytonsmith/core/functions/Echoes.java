@@ -249,7 +249,7 @@ public class Echoes {
             for(int i = 0; i < b.length; i++){
                 b[i] = MCChatColor.values()[i].name(); Enum e = null;
             }
-            return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
+            return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead. ----"
                     + " The list of valid color names can be found in the MCChatColor class, and case doesn't matter. For your reference,"
                     + " here is the list of valid colors: " + StringUtil.joinString(b, ", ", 0) + ", in addition the integers 0-15 will work,"
                     + " or the hex numbers from 0-F, and k, l, m, n, o, and r, which represent styles. Unlike manually putting in the color symbol,"

@@ -431,7 +431,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "mixed {[pName], [value]} Returns various information about the player specified, or the current player if no argument was given."
+            return "mixed {[pName], [value]} Returns various information about the player specified, or the current player if no argument was given. ---- "
                     + "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
                     + " will be returned. Otherwise if value is not specified (or is -1), it returns an array of"
                     + " information with the following pieces of information in the specified index: "
@@ -801,7 +801,7 @@ public class PlayerManagement {
         }
 
         public String docs() {
-            return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;} Sets the direction the player is facing. When using the first variation, expects an integer 0-3, which will"
+            return "mixed {F | yaw, pitch | player, F | player, yaw, pitch | player | &lt;none&gt;} Sets the direction the player is facing. ---- When using the first variation, expects an integer 0-3, which will"
                     + " set the direction the player faces using their existing pitch (up and down) but sets their yaw (left and right) to one of the"
                     + " cardinal directions, as follows: 0 - West, 1 - South, 2 - East, 3 - North, which corresponds to the directions given by F when"
                     + " viewed with F3. In the second variation, specific yaw and pitches can be provided. If the player is not specified, the current player"
@@ -2150,7 +2150,7 @@ public class PlayerManagement {
                     + " is acceptable, and convenient english mappings also exist:");
             doc.append("<ul>");
             for (String key : TimeLookup.keySet()) {
-                doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>\n");
+                doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>");
             }
             doc.append("</ul>");
             return doc.toString();

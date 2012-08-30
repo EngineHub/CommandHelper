@@ -217,7 +217,7 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "mixed {array, index, [default]} Returns the element specified at the index of the array. If the element doesn't exist, an exception is thrown. "
+			return "mixed {array, index, [default]} Returns the element specified at the index of the array. ---- If the element doesn't exist, an exception is thrown. "
 					+ "array_get(array, index). Note also that as of 3.1.2, you can use a more traditional method to access elements in an array: "
 					+ "array[index] is the same as array_get(array, index), where array is a variable, or function that is an array. In fact, the compiler"
 					+ " does some magic under the covers, and literally converts array[index] into array_get(array, index), so if there is a problem "
@@ -999,7 +999,7 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "array {array, [sortType]} Sorts an array in place, and also returns a reference to the array. The"
+			return "array {array, [sortType]} Sorts an array in place, and also returns a reference to the array. ---- The"
 					+ " complexity of this sort algorithm is guaranteed to be no worse than n log n, as it uses merge sort."
 					+ " The array is sorted in place, a new array is not explicitly created, so if you sort an array that"
 					+ " is passed in as a variable, the contents of that variable will be sorted, even if you don't re-assign"

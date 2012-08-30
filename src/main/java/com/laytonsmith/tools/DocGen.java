@@ -31,7 +31,7 @@ public class DocGen {
 
     public static void main(String[] args) throws Exception {
         System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
-		//System.out.println(examples("parse_args"));
+		//System.out.println(examples("array_get"));
         //events("wiki");
 	    //System.out.println(Template("persistance_network"));
     }
@@ -87,7 +87,7 @@ public class DocGen {
 			templateFields.put("throws", thrown.toString());
 			templateFields.put("since", f.since().toString());
 			templateFields.put("restricted", restricted);
-			templateFields.put("description", di.desc);
+			templateFields.put("description", di.extendedDesc==null?di.desc:di.topDesc + "\n\n" + di.extendedDesc);
 			templateFields.put("usages", usageBuilder.toString());
 			templateFields.put("examples", exampleBuilder.toString());
 					
@@ -267,7 +267,7 @@ public class DocGen {
                             + "| " + di.ret + "\n"
                             + "| " + di.args + "\n"
                             + "| " + thrown.toString() + "\n"
-                            + "| " + di.desc + "\n"
+                            + "| " + (di.topDesc != null ? di.topDesc + " [[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "#Description|See More...]]" : di.desc) + "\n"
                             + "| " + since + "\n"
                             + "| " + restricted + "\n");
 
@@ -516,8 +516,10 @@ public class DocGen {
 	public static class DocInfo{
 		public String ret;
 		public String args;
-		public String originalArgs;
+		public String originalArgs;		
 		public String desc;
+		public String topDesc = null;
+		public String extendedDesc = null;
 		public DocInfo(String doc){
 			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
 			Matcher m = p.matcher(doc);
@@ -525,6 +527,11 @@ public class DocGen {
 				ret = m.group(1);
 				originalArgs = m.group(2);
 				desc = m.group(3);
+				if(desc.contains("----")){
+					String [] parts = desc.split("----", 2);
+					desc = topDesc = parts[0].trim();
+					extendedDesc = parts[1].trim();
+				}
 			}
 			args = originalArgs.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
 		}

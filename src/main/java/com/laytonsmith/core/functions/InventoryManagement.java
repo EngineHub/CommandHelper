@@ -32,7 +32,7 @@ public class InventoryManagement {
                     + " The index of the array in the array is 0 - 35, 100 - 103, which corresponds to the slot in the players inventory. To access armor"
                     + " slots, you may also specify the index. (100 - 103). The quick bar is 0 - 8. If index is null, the item in the player's hand is returned, regardless"
                     + " of what slot is selected. If there is no item at the slot specified, null is returned."
-                    + " If all slots are requested, an associative array of item objects is returned, and if"
+                    + " ---- If all slots are requested, an associative array of item objects is returned, and if"
                     + " only one item is requested, just that single item object is returned. An item object"
                     + " consists of the following associative array(type: The id of the item, data: The data value of the item,"
                     + " or the damage if a damagable item, qty: The number of items in their inventory, enchants: An array"
@@ -142,7 +142,7 @@ public class InventoryManagement {
         public String docs() {
             return "void {[player], pinvArray} Sets a player's inventory to the specified inventory object."
                     + " An inventory object is one that matches what is returned by pinv(), so set_pinv(pinv()),"
-                    + " while pointless, would be a correct call. The array must be associative, "
+                    + " while pointless, would be a correct call. ---- The array must be associative, "
                     + " however, it may skip items, in which case, only the specified values will be changed. If"
                     + " a key is out of range, or otherwise improper, a warning is emitted, and it is skipped,"
                     + " but the function will not fail as a whole. A simple way to set one item in a player's"

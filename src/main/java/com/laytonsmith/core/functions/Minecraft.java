@@ -294,7 +294,7 @@ public class Minecraft {
 
         public String docs() {
             return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
-                    + " to the location of the player. mobType can be one of: BLAZE, CAVESPIDER, CHICKEN, COW, CREEPER, ENDERDRAGON, ENDERMAN, GHAST,"
+                    + " to the location of the player. ---- mobType can be one of: BLAZE, CAVESPIDER, CHICKEN, COW, CREEPER, ENDERDRAGON, ENDERMAN, GHAST,"
                     + " IRONGOLEM, MAGMACUBE, MOOSHROOM, OCELOT, PIG, PIGZOMBIE, SHEEP, SILVERFISH, SKELETON, SLIME, SPIDER, SPIDERJOCKEY, SQUID, VILLAGER, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
                     + " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
                     + " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
@@ -672,7 +672,7 @@ public class Minecraft {
         public String docs() {
             return "mixed {[value]} Returns various information about server."
                     + "If value is set, it should be an integer of one of the following indexes, and only that information for that index"
-                    + " will be returned. Otherwise if value is not specified (or is -1), it returns an array of"
+                    + " will be returned. ---- Otherwise if value is not specified (or is -1), it returns an array of"
                     + " information with the following pieces of information in the specified index: "
                     + "<ul><li>0 - Server name; the name of the server in server.properties. "
                     + "</li><li>1 - API version; The bukkit api version that is implemented in this build.</li><li>2 - Bukkit version; The version of craftbukkit your using.  "

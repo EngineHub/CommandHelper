@@ -235,11 +235,11 @@ public class World {
             StringBuilder doc = new StringBuilder();
             synchronized (World.class) {
                 doc.append("void {[world], time} Sets the time of a given world. Should be a number from 0 to"
-                        + " 24000, if not, it is modulo scaled. Alternatively, common time notation (9:30pm, 4:00 am)"
+                        + " 24000, if not, it is modulo scaled. ---- Alternatively, common time notation (9:30pm, 4:00 am)"
                         + " is acceptable, and convenient english mappings also exist:");
                 doc.append("<ul>");
                 for (String key : TimeLookup.keySet()) {
-                    doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>\n");
+                    doc.append("<li>").append(key).append(" = ").append(TimeLookup.get(key)).append("</li>");
                 }
                 doc.append("</ul>");
             }

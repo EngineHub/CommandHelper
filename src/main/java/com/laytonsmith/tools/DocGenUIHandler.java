@@ -8,7 +8,9 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Crypto;
+import com.laytonsmith.core.functions.ExampleScript;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
@@ -110,6 +112,9 @@ public class DocGenUIHandler {
 			endpoint = new URL(url.toString() + "/w/api.php");
 			if(getPage(endpoint).getResponseCode() != 200){
 				throw new Exception("Unable to reach wiki API.");
+			}
+			if(doExamples){
+				testCompileExamples();
 			}
 			doLogin();
 			//Now, gather up the page count, so we can set our progress bar correctly
@@ -374,6 +379,19 @@ public class DocGenUIHandler {
         }
 		headers.put("Host", url.getHost());
 		return WebUtility.GetPage(url, WebUtility.HTTPMethod.POST, headers, params, cookieStash, true);
+	}
+	
+	public static void testCompileExamples(){
+		for(FunctionBase fb : FunctionList.getFunctionList(api.Platforms.INTERPRETER_JAVA)){
+			if(fb instanceof Function){
+				Function f = (Function)fb;
+				try{
+					f.examples();
+				} catch(ConfigCompileException e){
+					throw new RuntimeException("Compilation error while compiling examples for " + f.getName());
+				}
+			}
+		}
 	}
 	
 }

@@ -396,7 +396,7 @@ public class Meta {
             return "boolean {cmd} Allows a CommandHelper alias to be called from within another alias. Typically this is not possible, as"
                     + " a script that runs \"/jail = /jail\" for instance, would simply be calling whatever plugin that actually"
                     + " provides the jail functionality's /jail command. However, using this function makes the command loop back"
-                    + " to CommandHelper only. Returns true if the command was run, or false otherwise. Note however that if an alias"
+                    + " to CommandHelper only. ---- Returns true if the command was run, or false otherwise. Note however that if an alias"
                     + " ends up throwing an exception to the top level, it will not bubble up to this script, it will be caught and dealt"
                     + " with already; if this happens, this function will still return true, because essentially the return value"
                     + " simply indicates if the command matches an alias. Also, it is worth noting that this will trigger a player's"

@@ -209,7 +209,8 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "array {region, world} Given a region name, returns an array of information about that region, as follows:<ul>"
+            return "array {region, world} Given a region name, returns an array of information about that region."
+					+ " ---- The following information is returned:<ul>"
                     + " <li>0 - An array of points that define this region</li>"
                     + " <li>1 - An array of owners of this region</li>"
                     + " <li>2 - An array of members of this region</li>"

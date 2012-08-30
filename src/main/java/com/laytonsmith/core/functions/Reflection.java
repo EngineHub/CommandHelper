@@ -44,8 +44,8 @@ public class Reflection {
         public String docs() {
             return "mixed {param, [args, ...]} Returns information about the runtime in a usable"
                     + " format. Depending on the information returned, it may be useable directly,"
-                    + " or it may be more of a referential format. The following items can be retrieved:"
-                    + "<table><thead><tr><th>param</th><th>args</th><th>returns/description</th></tr></thead><tbody>"
+                    + " or it may be more of a referential format. ---- The following items can be retrieved:"
+                    + "<table><tr><th>param</th><th>args</th><th>returns/description</th></tr>"
                     + "<tr><td>label</td><td></td><td>Return the label that the script is currently running under</td></tr>"
                     + "<tr><td>command</td><td></td><td>Returns the command that was used to fire off this script (if applicable)</td></tr>"
                     + "<tr><td>varlist</td><td>[name]</td><td>Returns a list of currently in scope variables. If name"
@@ -54,7 +54,7 @@ public class Reflection {
                     + "<tr><td>file</td><td></td><td>The absolute path to the current file</td></tr>"
                     + "<tr><td>col</td><td></td><td>The current column number</td></tr>"
                     
-                    + "</tbody></table>";
+                    + "</table>";
                     //+ "<tr><td></td><td></td><td></td></tr>"
         }
 
