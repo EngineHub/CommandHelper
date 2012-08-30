@@ -30,8 +30,8 @@ import java.util.regex.Pattern;
 public class DocGen {
 
     public static void main(String[] args) throws Exception {
-        //functions("wiki", api.Platforms.INTERPRETER_JAVA);
-		System.out.println(examples("parse_args"));
+        System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
+		//System.out.println(examples("parse_args"));
         //events("wiki");
 	    //System.out.println(Template("persistance_network"));
     }
@@ -213,7 +213,13 @@ public class DocGen {
                 }
                 intro.append("**********************************************************************************************" + "\n");
             }
-            if(!entry.getValue().isEmpty()){
+			List<FunctionBase> documentableFunctions = new ArrayList<FunctionBase>();
+			for(FunctionBase f : entry.getValue()){
+				if(f.appearInDocumentation()){
+					documentableFunctions.add(f);
+				}
+			}
+            if(!documentableFunctions.isEmpty()){
                 out.append(intro.toString() + "\n");
             }
             List<FunctionBase> flist = entry.getValue();
@@ -223,11 +229,7 @@ public class DocGen {
                     return o1.getName().compareTo(o2.getName());
                 }
             });
-            for (FunctionBase f : entry.getValue()) {
-                if(!f.appearInDocumentation()){
-                    //Some functions don't need to be included in the documentation; for instance __autoconcat__
-                    continue;
-                }
+            for (FunctionBase f : documentableFunctions) {
                 total++;
                 String doc = f.docs();
                 String restricted = (f instanceof Function && ((Function)f).isRestricted()) ? "<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>"
@@ -274,7 +276,7 @@ public class DocGen {
                             : "\n\tThis function is not restricted\n"));
                 }
             }
-            if(!entry.getValue().isEmpty()){
+            if(!documentableFunctions.isEmpty()){
                 if (type.equals("html")) {
                     out.append("</table>\n");
                 } else if (type.equals("wiki")) {
