@@ -1,0 +1,325 @@
+package com.laytonsmith.PureUtilities;
+
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.OutputKeys;
+import javax.xml.transform.Transformer;
+import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.xpath.XPath;
+import javax.xml.xpath.XPathConstants;
+import javax.xml.xpath.XPathExpression;
+import javax.xml.xpath.XPathExpressionException;
+import javax.xml.xpath.XPathFactory;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.xml.sax.SAXException;
+
+/**
+ * This class abstracts up and simplifies XML document parsing. You give it an XML
+ * string, and it gives you the ability to manipulate and query the document
+ * @author lsmith
+ */
+public class XMLDocument {
+	
+	private DocumentBuilder docBuilder;
+	private Document doc;
+	private XPath xpath;
+	private boolean uglyDirty = true;
+	private boolean prettyDirty = true;
+	private String uglyRender;
+	private String prettyRender;
+	
+	/**
+	 * Creates a new, blank XMLDocument.
+	 */
+	public XMLDocument(){
+		try {
+			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			docBuilder = dbf.newDocumentBuilder();
+			doc = docBuilder.newDocument();
+			XPathFactory xpf = XPathFactory.newInstance();
+			xpath = xpf.newXPath();			
+		} catch (ParserConfigurationException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	/**
+	 * Given an XML document in a string, creates a new XMLDocument.
+	 * @param document 
+	 * @throws IOException If any IO error occurs
+	 */
+	public XMLDocument(String document, String encoding) throws UnsupportedEncodingException, SAXException{
+		this();
+		try {
+			doc = docBuilder.parse(new ByteArrayInputStream(document.getBytes(encoding)));
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	/**
+	 * Creates a new XMLDocument from an XML string, assuming UTF-8 encoding.
+	 * @param document
+	 * @throws SAXException 
+	 */
+	public XMLDocument(String document) throws SAXException{
+		this();
+		try {
+			doc = docBuilder.parse(new ByteArrayInputStream(document.getBytes("UTF-8")));
+		} catch (IOException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
+	
+	/**
+	 * Creates a new XMLDocument from an InputStream that represents an XML document.
+	 * @param in
+	 * @throws SAXException
+	 * @throws IOException 
+	 */
+	public XMLDocument(InputStream in) throws SAXException, IOException{
+		this();
+		doc = docBuilder.parse(in);
+	}
+	
+	/**
+	 * Returns an xpath expression from a given xpath string
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
+	private XPathExpression getXPath(String xpath) throws XPathExpressionException{
+		return this.xpath.compile(xpath);
+	}
+	
+	/**
+	 * Sets the value of a node, creating nodes as needed. If a node already exists and has
+	 * content, the content is replaced. Note that mixed node types are not supported, meaning
+	 * that a text node must be the final node in the sequence. Remember, all XPath expressions
+	 * are considered absolute, even if they don't start with a '/'.
+	 * @param xpath
+	 * @param value
+	 * @throws XPathExpressionException 
+	 */
+	public void setNode(String xpath, Object value) throws XPathExpressionException{
+		String sval = "";
+		if(value != null){
+			sval = value.toString();
+		}
+		getXPath(xpath); //Verifies this is a generally valid xpath, so we can roll with that assumption
+		while(xpath.startsWith("/")){
+			xpath = xpath.substring(1);
+		}
+		String [] xpathParts = xpath.split("/");
+		int count = xpathParts.length;
+		while(count > 0){
+			String newXPath = "/" + StringUtils.Join(ArrayUtils.slice(xpathParts, 0, count - 1), "/");
+			if(!nodeExists(newXPath)){
+				count--;
+			} else {
+				break;
+			}
+		}
+		if(count == xpathParts.length){
+			//We're at the node already, so just set it and bail
+			getElement(xpath).setTextContent(sval);
+			setDirty();
+			return;
+		}
+		//Ok, count now points to the topmost actually existing node, so we need to go down each part and
+		//create nodes as we go
+		Element parent = null;
+		Element newNode = null;
+		do{
+			String part = xpathParts[count];
+			String nodeName = getNodeName(part);
+			if(count > 0){
+				parent = getElement("/" + StringUtils.Join(ArrayUtils.slice(xpathParts, 0, count - 1), "/"));
+			}
+			if(nodeName == null){
+				//This is an attribute, edit the node above us
+				parent.setAttribute(getAttributeName(part), sval);
+				setDirty();
+				return; //Go ahead and bail
+			} else {
+				int position = getNodeIndex(part);
+				if(count == 0 && position != -1){
+					throw new XPathExpressionException("The root node cannot have multiple instances.");
+				}
+				newNode = doc.createElement(nodeName);
+				if(position == -1){
+					if(count == 0){
+						//Special case, we need to create a new element and put it in the root
+						doc.appendChild(newNode);
+					} else {
+						parent.appendChild(newNode);
+					}
+				} else {
+					//It's an array
+					if(!(countChildren(parent) + 1 >= position)){
+						//If /root/node[1] exists, but they try to create /root/node[3], this exception is thrown
+						throw new XPathExpressionException("Will not tolerate a jump in node numbers, will only create the next node in sequence.");
+					}
+					parent.appendChild(newNode);
+				}
+			}
+			count++;			
+		} while(count < xpathParts.length);
+		newNode.setTextContent(sval);
+		setDirty();
+	}
+	
+	private int countChildren(Element e){
+		Node child = e.getFirstChild();
+		if(child == null){
+			return 0;
+		}
+		int counter = 1;
+		while((child = child.getNextSibling()) != null){
+			counter++;
+		}
+		return counter;
+	}
+
+	/**
+	 * Returns the node name, or null if this is an attribute.
+	 * @param node
+	 * @return 
+	 */
+	private static String getNodeName(String node){
+		if(node.startsWith("@")){
+			return null;
+		}
+		int firstBracket = node.indexOf("[");
+		if(firstBracket != -1){
+			return node.substring(0, firstBracket).trim();
+		} else {
+			return node.trim();
+		}
+	}
+	
+	/**
+	 * Gets the position of the node, for instance, node[1] would return 1.
+	 * If no node position is specified, -1 is returned.
+	 * @param node
+	 * @return 
+	 */
+	private static int getNodeIndex(String node){
+		int indexFirst = node.indexOf("[");
+		int indexLast = node.indexOf("]");
+		if(indexFirst == -1){
+			return -1;
+		} else {
+			return Integer.parseInt(node.substring(indexFirst + 1, indexLast).trim());
+		}
+	}
+	
+	/**
+	 * Returns the attribute name, or null if this is not an attribute.
+	 * @param node
+	 * @return 
+	 */
+	private static String getAttributeName(String node){
+		if(node.trim().startsWith("@")){
+			return node.trim().substring(1);
+		} else {
+			return null;
+		}
+	}
+	
+	public String getNode(String xpath) throws XPathExpressionException{
+			return getXPath(xpath).evaluate(doc);
+	}
+	
+	public boolean getBoolean(String xpath) throws XPathExpressionException{
+		return Boolean.parseBoolean(getNode(xpath));
+	}
+	
+	public int getInt(String xpath) throws XPathExpressionException{
+		return Integer.parseInt(getNode(xpath));
+	}
+	
+	public long getLong(String xpath) throws XPathExpressionException{
+		return Long.parseLong(getNode(xpath));
+	}
+	
+	public double getDouble(String xpath) throws XPathExpressionException{
+		return Double.parseDouble(getNode(xpath));
+	}
+	
+	public boolean nodeExists(String xpath) throws XPathExpressionException{
+		return getElement(xpath) != null; 
+	}
+	
+	private Element getElement(String xpath) throws XPathExpressionException{
+		return (Element)getXPath(xpath).evaluate(doc, XPathConstants.NODE);
+	}
+	
+	/**
+	 * Signals to the getXML function that the cache is no longer valid.
+	 */
+	private void setDirty(){
+		uglyDirty = true;
+		prettyDirty = true;
+	}
+	
+	/**
+	 * Equivalent to getXML(false);
+	 * @return 
+	 */
+	public String getXML(){
+		return getXML(false);
+	}
+	
+	/**
+	 * Renders the XML as it currently stands. If pretty is true, it is formatted with
+	 * indentation, otherwise, no indentation is used.
+	 * @param pretty
+	 * @return 
+	 */
+	public String getXML(boolean pretty){
+		if(uglyDirty || prettyDirty){
+			try {
+				Transformer transformer = TransformerFactory.newInstance().newTransformer();
+				DOMSource source = new DOMSource(doc);
+				StringWriter writer = new StringWriter();
+				StreamResult result = new StreamResult(writer);
+				if(pretty){
+					transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount", "4");
+					transformer.setOutputProperty(OutputKeys.INDENT, "yes");
+				}
+				transformer.transform(source, result);
+				if(pretty){
+					prettyRender = writer.toString();
+					prettyDirty = false;
+				} else {
+					uglyRender = writer.toString();
+					uglyDirty = false;
+				}
+			} catch (Exception ex) {
+				throw new RuntimeException(ex);
+			}
+		}
+		if(pretty){
+			return prettyRender;
+		} else {
+			return uglyRender;
+		}
+	}
+
+	@Override
+	public String toString() {
+		return getXML(true);
+	}
+		
+}

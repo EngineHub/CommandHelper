@@ -12,6 +12,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.profiler.Profiler;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
@@ -140,6 +141,14 @@ public class ExampleScript {
 		}
 		
 	}
+
+	public String getDescription() {
+		return description;
+	}
+	
+	public boolean isAutomatic(){
+		return output == null;
+	}
 	
 	private class FakeCore extends AliasCore{
 		public FakeCore(){
@@ -224,18 +233,26 @@ public class ExampleScript {
 		env.SetPlayer(fakePlayer);
 		final StringBuilder finalOutput = new StringBuilder();
 		Static.perms = fakePermissions;
-		s.run(new ArrayList<Variable>(), env, new MethodScriptComplete() {
+		String thrown = null;
+		try{
+			s.run(new ArrayList<Variable>(), env, new MethodScriptComplete() {
 
-			public void done(String output) {
-				if(output != null){
-					finalOutput.append(output);
+				public void done(String output) {
+					if(output != null){
+						finalOutput.append(output);
+					}
 				}
-			}
-		});
+			});
+		} catch(ConfigRuntimeException e){
+			thrown = "\n(Throws " + e.getExceptionType().name() + ": " + e.getMessage() + ")";
+		}
 		String playerOut = playerOutput.toString().trim();
 		String finalOut = finalOutput.toString().trim();
 		
-		String out = (playerOut.equals("")?"":playerOut) + (finalOut.equals("")?"":":" + finalOut);
+		String out = (playerOut.equals("")?"":playerOut) + (finalOut.equals("")||!playerOut.trim().equals("") ?"":":" + finalOut);
+		if(thrown != null){
+			out += thrown;
+		}
 		return out;
 	}
 	

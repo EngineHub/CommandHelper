@@ -1,0 +1,36 @@
+__NOTOC__
+{{staged}}
+
+===Vital Info===
+{| width="40%" cellspacing="1" cellpadding="1" border="1" class="wikitable"
+|-
+! scope="col" width="20%" | 
+! scope="col" width="80%" | 
+|- 
+! scope="row" | Name
+| %%function_name%%
+|-
+! scope="row" | Returns
+| %%returns%%
+|-
+! scope="row" | Throws
+| %%throws%%
+|-
+! scope="row" | Since
+| %%since%%
+|-
+! scope="row" | Restricted
+| %%restricted%%
+|}
+
+===Description===
+%%description%%
+
+===Usages===
+
+%%usages%%
+
+===Examples===
+
+%%examples%%
+

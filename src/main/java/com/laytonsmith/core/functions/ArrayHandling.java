@@ -61,6 +61,14 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5))"),				
+			};
+		}
+				
 	}
 
 	@api
@@ -250,6 +258,16 @@ public class ArrayHandling {
 			}
 
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates basic usage", "array_get(array(1, 2, 3), 2)"),
+				new ExampleScript("Demonstrates exception", "array_get(array(), 1)"),
+				new ExampleScript("Demonstrates default", "array_get(array(), 1, 'default')"),
+				new ExampleScript("Demonstrates bracket notation", "array(0, 1, 2)[2]"),
+			};
+		}
 	}
 
 	@api
@@ -295,6 +313,14 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates usage", "assign(@array, array(null))\nmsg(@array)\narray_set(@array, 0, 'value0')\nmsg(@array)"),
+				new ExampleScript("Demonstrates using assign", "assign(@array, array(null))\nmsg(@array)\nassign(@array[0], 'value0')\nmsg(@array)"),
+			};
+		}
 	}
 
 	@api
@@ -339,6 +365,14 @@ public class ArrayHandling {
 
 		public Boolean runAsync() {
 			return null;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates usage", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0)\nmsg(@array)"),
+				new ExampleScript("Demonstrates pushing multiple values", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0, 1, 2)\nmsg(@array)"),
+			};
 		}
 	}
 
@@ -387,6 +421,16 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates finding a value", "array_contains(array(0, 1, 2), 2)"),
+				new ExampleScript("Demonstrates not finding a value", "array_contains(array(0, 1, 2), 5)"),
+				new ExampleScript("Demonstrates finding a value listed multiple times", "array_contains(array(1, 1, 1), 1)"),
+				new ExampleScript("Demonstrates finding a string", "array_contains(array('a', 'b', 'c'), 'b')"),
+			};
+		}
 	}
 
 	@api
@@ -433,6 +477,13 @@ public class ArrayHandling {
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, t);
 			}
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'a')"),
+			};
 		}
 	}
 
@@ -486,6 +537,16 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
 			}
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates a true condition", "array_index_exists(array(0, 1, 2), 0)"),
+				new ExampleScript("Demonstrates a false condition", "array_index_exists(array(0, 1, 2), 3)"),
+				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'a')"),
+				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'c')"),
+			};
+		}
 	}
 
 	@api
@@ -537,6 +598,14 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException("Argument 1 must be an array, and argument 2 must be an integer in array_resize", ExceptionType.CastException, t);
 			}
 			return new CVoid(t);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates basic usage", "assign(@array, array())\nmsg(@array)\narray_resize(@array, 2)\nmsg(@array)"),
+				new ExampleScript("Demonstrates custom fill", "assign(@array, array())\nmsg(@array)\narray_resize(@array, 2, 'a')\nmsg(@array)"),
+			};
 		}
 	}
 

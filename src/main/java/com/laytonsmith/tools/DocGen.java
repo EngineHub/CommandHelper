@@ -3,6 +3,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CFunction;
@@ -30,29 +31,89 @@ public class DocGen {
 
     public static void main(String[] args) throws Exception {
         //functions("wiki", api.Platforms.INTERPRETER_JAVA);
-		examples("add");
+		System.out.println(examples("parse_args"));
         //events("wiki");
 	    //System.out.println(Template("persistance_network"));
     }
 	
-	public static void examples(String function) throws ConfigCompileException{
+	public static String examples(String function) throws ConfigCompileException{
 		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
 		if(fb instanceof Function){
 			Function f = (Function)fb;
-			if(f.examples() != null && f.examples().length > 0){
-				for(ExampleScript es : f.examples()){
-					System.out.println("For this script:\n" + es.getScript() + "\n");
-					System.out.println("There will be the following output:\n" + es.getOutput() + "\n");
+			String restricted = (f instanceof Function && ((Function)f).isRestricted()) ? "<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>"
+                        : "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
+			DocInfo di = new DocInfo(f.docs());
+			StringBuilder thrown = new StringBuilder();
+			if (f instanceof Function && ((Function)f).thrown() != null) {
+				List thrownList = Arrays.asList(((Function)f).thrown());
+				for (int i = 0; i < thrownList.size(); i++) {
+					ExceptionType t = (ExceptionType) thrownList.get(i);
+					if (i != 0) {
+						thrown.append("<br />\n");
+					}
+					thrown.append("[[CommandHelper/Exceptions#").append(t.toString()).append("|").append(t.toString()).append("]]");
 				}
+			}
+			String [] usages = di.originalArgs.split("\\|");
+			StringBuilder usageBuilder = new StringBuilder();
+			for(String usage : usages){
+				usageBuilder.append("<pre>\n").append(f.getName()).append("(").append(usage.trim()).append(")\n</pre>");
+			}
+			StringBuilder exampleBuilder = new StringBuilder();
+			if(f.examples() != null && f.examples().length > 0){
+				int count = 1;
+				//If the output was automatically generated, change the color of the pre
+				for(ExampleScript es : f.examples()){
+					exampleBuilder.append("====Example ").append(count).append("====\n")
+							.append(es.getDescription()).append("\n\n"
+							+ "Given the following code:\n<pre>");
+					exampleBuilder.append(es.getScript()).append("\n</pre>");
+					String style = "";
+					if(es.isAutomatic()){
+						style = " style=\"background-color: #BDC7E9\"";
+					}
+					exampleBuilder.append("\n\nThe output would be:\n<pre")
+							.append(style).append(">").append(es.getOutput()).append("</pre>\n\n");
+					count++;
+				}
+			} else {
+				exampleBuilder.append("Sorry, there are no examples for this function! :(");
+			}
+			
+			
+			Map<String, String> templateFields = new HashMap<String, String>();
+			templateFields.put("function_name", f.getName());
+			templateFields.put("returns", di.ret);
+			templateFields.put("throws", thrown.toString());
+			templateFields.put("since", f.since().toString());
+			templateFields.put("restricted", restricted);
+			templateFields.put("description", di.desc);
+			templateFields.put("usages", usageBuilder.toString());
+			templateFields.put("examples", exampleBuilder.toString());
+					
+					
+			String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/templates/example_templates"));
+			//Find all the %%templates%% in the template
+			Matcher m = Pattern.compile("%%(.*?)%%").matcher(template);
+			try{
+				while(m.find()){
+					String name = m.group(1);
+					String templateValue = templateFields.get(name);
+					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue.replace("$", "\\$"));
+				}
+				return template;
+			} catch(RuntimeException e){
+				throw new RuntimeException("Caught a runtime exception while generating template for " + function, e);
 			}
 		} else {
 			throw new RuntimeException(function + " does not implement Function");
 		}
 	}
 
-    public static void functions(String type, api.Platforms platform) {
+    public static String functions(String type, api.Platforms platform, boolean staged) {
         List<FunctionBase> functions = FunctionList.getFunctionList(platform);
         HashMap<Class, ArrayList<FunctionBase>> functionlist = new HashMap<Class, ArrayList<FunctionBase>>();
+		StringBuilder out = new StringBuilder();
         for (int i = 0; i < functions.size(); i++) {
             //Sort the functions into classes
             FunctionBase f = functions.get(i);
@@ -66,25 +127,25 @@ public class DocGen {
             }
             fl.add(f);
         }
-        if (type.equals("html")) {
-            System.out.println("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
+        if (type.equals("html")) {			
+            out.append("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
                     + "and make the plugin a fully "
                     + "<a href=\"http://en.wikipedia.org/wiki/Turing_Complete\">Turing Complete</a> language. "
-                    + "There are several functions defined, and they are grouped into \"classes\". ");
+                    + "There are several functions defined, and they are grouped into \"classes\". \n");
         } else if (type.equals("wiki")) {
-            System.out.println("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
+            out.append("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
                     + "and make the plugin a fully "
                     + "[http://en.wikipedia.org/wiki/Turing_Complete Turing Complete] language. "
-                    + "There are several functions defined, and they are grouped into \"classes\". ");
-            System.out.println("<p>Each function has its own page for documentation, where you can put examples for how to use"
+                    + "There are several functions defined, and they are grouped into \"classes\". \n");
+            out.append("<p>Each function has its own page for documentation, where you can put examples for how to use"
                     + " particular functions. Because this is a wiki, it is encouraged that you edit the pages if you see errors, "
                     + "or can think of a better example to show. Please copy over [[CommandHelper/API/Function Template|this template]]"
-                    + " and use it.");
+                    + " and use it.\n");
         } else if (type.equals("text")) {
-            System.out.println("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
+            out.append("Command Helper uses a language called MethodScript, which greatly extend the capabilities of the plugin, "
                     + "and make the plugin a fully "
                     + "Turing Complete language [http://en.wikipedia.org/wiki/Turing_Complete].\n"
-                    + "There are several functions defined, and they are grouped into \"classes\".");
+                    + "There are several functions defined, and they are grouped into \"classes\".\n");
         }
         List<Map.Entry<Class, ArrayList<FunctionBase>>> entrySet = new ArrayList<Map.Entry<Class, ArrayList<FunctionBase>>>(functionlist.entrySet());
         Collections.sort(entrySet, new Comparator<Map.Entry<Class, ArrayList<FunctionBase>>>() {
@@ -153,7 +214,7 @@ public class DocGen {
                 intro.append("**********************************************************************************************" + "\n");
             }
             if(!entry.getValue().isEmpty()){
-                System.out.println(intro.toString());
+                out.append(intro.toString() + "\n");
             }
             List<FunctionBase> flist = entry.getValue();
             Collections.sort(flist, new Comparator<FunctionBase>() {
@@ -169,9 +230,6 @@ public class DocGen {
                 }
                 total++;
                 String doc = f.docs();
-                String ret = null;
-                String args = null;
-                String desc = null;
                 String restricted = (f instanceof Function && ((Function)f).isRestricted()) ? "<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>"
                         : "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
                 StringBuilder thrown = new StringBuilder();
@@ -194,60 +252,54 @@ public class DocGen {
                 }
 
                 String since = (f instanceof Documentation ?((Documentation)f).since().getVersionString():"0.0.0");
-                Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
-                Matcher m = p.matcher(doc);
-                if (m.find()) {
-                    ret = m.group(1);
-                    args = m.group(2);
-                    desc = m.group(3);
-                }
-                if (ret == null || args == null || desc == null) {
-                    System.out.println(f.getName() + "'s documentation is not correctly formatted. Please check it and try again.");
+                DocInfo di = new DocInfo(doc);
+                if (di.ret == null || di.args == null || di.desc == null) {
+                    out.append(f.getName() + "'s documentation is not correctly formatted. Please check it and try again.\n");
                 }
                 if (type.equals("html")) {
-                    System.out.println("<tr><td>" + ret + "</td><td>" + args + "</td><td>" + thrown.toString() + "</td><td>" + desc + "</td><td>" + since + "</td><td>" + restricted + "</td></tr>\n");
+                    out.append("<tr><td>" + di.ret + "</td><td>" + di.args + "</td><td>" + thrown.toString() + "</td><td>" + di.desc + "</td><td>" + since + "</td><td>" + restricted + "</td></tr>\n");
                 } else if (type.equals("wiki")) {
                     //Turn args into a prettified version
-                    args = args.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
-                    System.out.println("|- id=\"" + f.getName() + "\"\n"
-                            + "! scope=\"row\" | [[CommandHelper/API/" + f.getName() + "|" + f.getName() + "]]\n"
-                            + "| " + ret + "\n"
-                            + "| " + args + "\n"
+                    out.append("|- id=\"" + f.getName() + "\"\n"
+                            + "! scope=\"row\" | [[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "|" + f.getName() + "]]\n"
+                            + "| " + di.ret + "\n"
+                            + "| " + di.args + "\n"
                             + "| " + thrown.toString() + "\n"
-                            + "| " + desc + "\n"
+                            + "| " + di.desc + "\n"
                             + "| " + since + "\n"
-                            + "| " + restricted);
+                            + "| " + restricted + "\n");
 
                 } else if (type.equals("text")) {
-                    System.out.println(ret + " " + f.getName() + "(" + args + ")" + " {" + thrown.toString() + "}\n\t" + desc + "\n\t" + since + ((f instanceof Function?((Function)f).isRestricted():false) ? "\n\tThis function is restricted"
-                            : "\n\tThis function is not restricted"));
+                    out.append(di.ret + " " + f.getName() + "(" + di.args + ")" + " {" + thrown.toString() + "}\n\t" + di.desc + "\n\t" + since + ((f instanceof Function?((Function)f).isRestricted():false) ? "\n\tThis function is restricted"
+                            : "\n\tThis function is not restricted\n"));
                 }
             }
             if(!entry.getValue().isEmpty()){
                 if (type.equals("html")) {
-                    System.out.println("</table>");
+                    out.append("</table>\n");
                 } else if (type.equals("wiki")) {
-                    System.out.println("|}");
+                    out.append("|}\n");
                 } else if (type.equals("text")) {
-                    System.out.println();
+                    out.append("\n");
                 }
             }
         }
         if (type.equals("html")) {
-            System.out.println(""
+            out.append(""
                     + "<h2>Errors in documentation</h2>\n"
                     + "<em>Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
                     + " plugin itself!</em>"
-                    + "<div style='text-size:small; text-decoration:italics; color:grey'>There are " + total + " functions in this API page</div>");
+                    + "<div style='text-size:small; text-decoration:italics; color:grey'>There are " + total + " functions in this API page</div>\n");
         } else if (type.equals("wiki")) {
-            System.out.println(""
+            out.append(""
                     + "===Errors in documentation===\n"
                     + "''Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
                     + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]"
-                    + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page</div>");
+                    + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page</div>\n");
         }
+		return out.toString();
     }
     
     public static String Template(String template){
@@ -458,4 +510,21 @@ public class DocGen {
             throw new UnsupportedOperationException("FIXME");
         }
     }
+	
+	public static class DocInfo{
+		public String ret;
+		public String args;
+		public String originalArgs;
+		public String desc;
+		public DocInfo(String doc){
+			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
+			Matcher m = p.matcher(doc);
+			if (m.find()) {
+				ret = m.group(1);
+				originalArgs = m.group(2);
+				desc = m.group(3);
+			}
+			args = originalArgs.replaceAll("\\|", "<hr />").replaceAll("\\[(.*?)\\]", "<strong>[</strong>$1<strong>]</strong>");
+		}
+	}
 }

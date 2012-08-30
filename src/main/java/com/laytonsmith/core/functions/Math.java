@@ -83,7 +83,9 @@ public class Math {
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))"),
-				new ExampleScript("Demonstrates adding two numbers together, using the symbol notation", "2 + 2")
+				new ExampleScript("Demonstrates adding two numbers together, using the symbol notation", "2 + 2"),
+				new ExampleScript("Demonstrates grouping with parenthesis", "(2 + 5) * 2"),
+				new ExampleScript("Demonstrates order of operations", "2 + 5 * 2")
 			};
 		}
 
@@ -163,6 +165,14 @@ public class Math {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates basic usage", "subtract(4 - 3)"),
+				new ExampleScript("Demonstrates symbolic usage", "12 - 5"),
+			};
+		}
     }
     
     @api public static class multiply extends AbstractFunction{
@@ -225,6 +235,14 @@ public class Math {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates basic usage", "multiply(8, 8)"),
+				new ExampleScript("Demonstrates symbolic usage", "8 * 8"),
+			};
 		}
     }
     
@@ -295,6 +313,16 @@ public class Math {
 			return null;
 		}
 		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates basic usage", "divide(4, 2)"),
+				new ExampleScript("Demonstrates double return", "divide(2, 4)"),
+				new ExampleScript("Demonstrates symbolic usage", "2 / 4"),
+				new ExampleScript("Demonstrates divide by zero error", "assign(@zero, 0)\nmsg(1 / @zero)"),
+			};
+		}
+		
     }
     
     @api public static class mod extends AbstractFunction{
@@ -341,6 +369,14 @@ public class Math {
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates basic usage", "mod(2, 2)"),
+				new ExampleScript("Demonstrates symbolic usage", "2 % 2"),
+			};
+		}
     }
     
     @api public static class pow extends AbstractFunction{
@@ -387,6 +423,14 @@ public class Math {
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates basic usage", "pow(2, 4)"),
+				new ExampleScript("Demonstrates symbolic usage", "2 ** 4"),
+			};
+		}
     }
     
     @api public static class inc extends AbstractFunction{
@@ -466,6 +510,14 @@ public class Math {
             }
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates basic usage", "assign(@x, 0)\nmsg(@x)\ninc(@x)\nmsg(@x)"),
+				new ExampleScript("Demonstrates symbolic usage", "assign(@x, 0)\nmsg(@x)\n++@x\nmsg(@x)"),
+			};
+		}
     }
     
     @api public static class postinc extends AbstractFunction{
@@ -822,6 +874,15 @@ public class Math {
         public Construct optimize(Target t, Construct... args) {
             return exec(t, null, args);
         }
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Demonstrates a positive number", "abs(5)"),
+				new ExampleScript("Demonstrates a negative number", "abs(-5)")
+			};
+		}
+				
         
     }
     

@@ -1,8 +1,10 @@
 package com.laytonsmith.PureUtilities;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -39,6 +41,19 @@ public class ZipReader {
      * we can use trivial file operations.
      */
     private final boolean isZipped;
+	
+	/**
+	 * A list of zip entries, which is cached, so we don't need to re-read
+	 * the zip file each time we want to do enumerative stuff.
+	 */
+	private List<File> zipEntries = null;
+	
+	/**
+	 * The ZipEntry contains the information of whether or not the listed file is
+	 * a directory, but since we discard that information, we cache the list of directories
+	 * here.
+	 */
+	private List<File> zipDirectories = new ArrayList<File>();
 
     /**
      * Creates a new ZipReader object, which can be used to read from a zip
@@ -278,6 +293,51 @@ public class ZipReader {
     public File getFile(){
         return file;
     }
+	
+	private void initList() throws IOException{
+		if(!isZipped){
+			return;
+		}
+		if(this.zipEntries == null){
+			zipEntries = new ArrayList<File>();
+			ZipInputStream zis = new ZipInputStream(new FileInputStream(topZip));
+			ZipEntry entry;
+			while((entry = zis.getNextEntry()) != null){
+				File f = new File(topZip, entry.getName());
+				zipEntries.add(f);		
+				if(entry.isDirectory()){
+					zipDirectories.add(f);
+				}
+			}
+			zis.close();
+		}
+	}
+	
+	public boolean isDirectory() throws IOException{
+		if(!isZipped){
+			return file.isDirectory();
+		} else {
+			initList();
+			return zipDirectories.contains(file);
+		}
+	}
+	
+	public File [] listFiles() throws IOException{
+		if(!isZipped){
+			return file.listFiles();
+		} else {
+			initList();
+			List<File> files = new ArrayList<File>();
+			for(File f : zipEntries){
+				if(f.getName().startsWith(file.getName())){
+					if(!file.equals(f)){
+						files.add(f);
+					}
+				}
+			}
+			return ArrayUtils.asArray(files);
+		}
+	}
     
     
 }

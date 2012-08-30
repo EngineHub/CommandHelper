@@ -283,6 +283,11 @@
 			<version>1.4.10</version>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.java.net.substance</groupId>
+			<artifactId>substance</artifactId>
+			<version>6.0</version>
+		</dependency>
 	</dependencies>
   <distributionManagement>
     <site>
@@ -395,11 +400,13 @@
 									<include>com.googlecode.json-simple:json-simple:jar:*</include>
 									<include>org.mindrot:jBCrypt:jar:*</include>
 									<include>com.jcraft:jsch:jar:*</include>
+									<include>org.java.net.substance:substance:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
 								<filter>
 									<artifact>com.sk89q:worldedit:jar:*</artifact>
+									<artifact>org.java.net.substance:substance:jar:*</artifact>
 									<includes>
 										<!-- Permissions Items -->
 										<include>com/sk89q/bukkit/migration/**</include> 

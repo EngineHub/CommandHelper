@@ -11,6 +11,9 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -35,7 +38,7 @@ public final class WebUtility {
 		System.out.println(PublicSuffix.get().getEffectiveTLDLength("www.google2.google.com"));
 		System.exit(0);
 		HTTPCookies stash = new HTTPCookies();
-		HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, stash, true);
+		HTTPResponse resp = GetPage(new URL("http://www.google.com/"), HTTPMethod.GET, null, null, stash, true);
 	}
     
     private WebUtility(){}
@@ -49,7 +52,7 @@ public final class WebUtility {
 
     public enum HTTPMethod {
 
-        POST, GET
+        POST, GET, HEAD, OPTIONS, PUT, DELETE, TRACE
     }
 
     public static final class HTTPResponse {
@@ -146,14 +149,31 @@ public final class WebUtility {
             long expiration = 0;
             boolean httpOnly = false;
             boolean secureOnly = false;
+			
+			boolean expired = false;
 
 			public int compareTo(HTTPCookie o) {
 				return (this.domain + this.name).compareTo(o.domain + o.name);
 			}
         }
+
+		@Override
+		public String toString() {
+			StringBuilder b = new StringBuilder();
+			for(HTTPCookie cookie : cookies){
+				if(!cookie.expired){
+					b.append(cookie.name).append("=").append(cookie.value)
+							.append("; used in ").append(cookie.domain)
+							.append(cookie.path).append("\n");
+				}
+			}
+			return b.toString();
+		}
+		
+		
         private final Set<HTTPCookie> cookies = new TreeSet<HTTPCookies.HTTPCookie>();
 
-        public void addCookie(String unparsedValue) {
+        public void addCookie(String unparsedValue, URL currentURL) {
 			HTTPCookie cookie = new HTTPCookie();
             //Split on ;			
 			String [] parts = unparsedValue.split(";");
@@ -161,17 +181,53 @@ public final class WebUtility {
 				String part = parts[i];
 				if(i == 0){
 					//This is the actual cookie value
-					String [] nameVal = part.split("=", 1);
+					String [] nameVal = part.split("=", 2);
 					cookie.name = nameVal[0].trim();
 					cookie.value = nameVal[1].trim();
 					continue;
 				}
 				//The rest of the fields are standard fields
-				String [] keyval = part.split("=", 1);
-				String key = keyval[0].trim();
-				String val = keyval[1].trim();
-				
+				String [] keyval = part.split("=", 2);
+				String key = keyval[0].trim().toLowerCase();				
+				String val = null;
+				if(keyval.length >= 2){
+					val = keyval[1].trim();
+				}
+				if("expires".equals(key)){
+					DateFormat formatter = new SimpleDateFormat("EEE, dd-MMM-yyyy kk:mm:ss zzz");
+					try {
+						cookie.expiration = formatter.parse(val).getTime();
+					} catch (ParseException ex) {
+						Logger.getLogger(WebUtility.class.getName()).log(Level.SEVERE, null, ex);
+					}
+				}
+				if("path".equals(key)){
+					cookie.path = val;
+				}
+				if("domain".equals(key)){
+					//TODO: SECURITY FLAW!
+					//Finish the PublicSuffix stuff to validate this domain.
+					if(val.startsWith(".")){
+						//Remove the opening dot, this messes up our determination
+						//algorithm in getCookies
+						val = val.substring(1);
+					}
+					cookie.domain = val;
+				}
+				if("httponly".equals(key)){
+					cookie.httpOnly = true;
+				}
+				if("secureonly".equals(key)){
+					cookie.secureOnly = true;
+				}
 			}
+			if(cookie.domain == null){
+				cookie.domain = currentURL.getHost();
+			}
+			if(cookie.path == null){
+				cookie.path = currentURL.getPath();
+			}
+			cookies.add(cookie);
         }
 
         public void addCookie(String name, String value, String domain, String path, long expiration, Boolean httpOnly) {
@@ -204,11 +260,12 @@ public final class WebUtility {
 			List<HTTPCookie> cookies = new ArrayList<HTTPCookie>(this.cookies);
             for (int i = 0; i < cookies.size(); i++) {
                 HTTPCookie cookie = cookies.get(i);
-                if (cookie.expiration > ( System.currentTimeMillis() / 1000 )) {
-                    //This cookie is expired. Remove it.
-                    cookies.remove(i);
-                    i--;
-                    continue;
+				if (cookie.expiration != 0 && cookie.expiration < ( System.currentTimeMillis() )) {
+                    //This cookie is expired.
+					cookie.expired = true;
+					cookies.remove(i);
+					i--;
+					continue;
                 }
                 //If it's http only, and we aren't in http, continue.
                 if (cookie.httpOnly && !url.getProtocol().equals("http")) {
@@ -231,6 +288,9 @@ public final class WebUtility {
                 //If we're still here, it's good.
                 usable.add(cookie);
             }
+			if(usable.isEmpty()){
+				return null;
+			}
             StringBuilder b = new StringBuilder();
             for (HTTPCookie cookie : usable) {
                 if (b.length() != 0) {
@@ -290,7 +350,7 @@ public final class WebUtility {
      * @return
      * @throws IOException
      */
-    public static HTTPResponse GetPage(URL url, HTTPMethod method, Map<String, String> parameters, HTTPCookies cookieStash, boolean followRedirects) throws IOException {
+    public static HTTPResponse GetPage(URL url, HTTPMethod method, Map<String, String> headers, Map<String, String> parameters, HTTPCookies cookieStash, boolean followRedirects) throws IOException {
 //        if (cookieStash != null) {
 //            throw new UnsupportedOperationException("Cookies are not yet supported. Send null for the cookieStash parameter for the time being.");
 //        }
@@ -307,10 +367,21 @@ public final class WebUtility {
 
         HttpURLConnection conn = (HttpURLConnection) url.openConnection();
         conn.setInstanceFollowRedirects(followRedirects);
+		if(cookieStash != null){
+			String cookies = cookieStash.getCookies(url);
+			if(cookies != null){
+				conn.setRequestProperty("Cookie", cookies);
+			}
+		}
+		if(headers != null){
+			for(String key : headers.keySet()){
+				conn.setRequestProperty(key, headers.get(key));
+			}
+		}
+		conn.setRequestMethod(method.name());
         if (method == HTTPMethod.POST) {
             conn.setDoOutput(true);
             String params = encodeParameters(parameters);
-            conn.setRequestMethod("POST");
             conn.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
             conn.setRequestProperty("Content-Length", Integer.toString(params.length()));
             OutputStream os = new BufferedOutputStream(conn.getOutputStream());
@@ -335,19 +406,29 @@ public final class WebUtility {
 		if(cookieStash != null && resp.getHeaderNames().contains("Set-Cookie")){
 			//We need to add the cookie to the stash
 			for(String h : resp.getHeaders("Set-Cookie")){
-				cookieStash.addCookie(h);
+				cookieStash.addCookie(h, url);
 			}
 		}
 		return resp;
     }
 
-    private static String encodeParameters(Map<String, String> parameters) {
+	/**
+	 * Returns a properly encoded string of parameters.
+	 * @param parameters
+	 * @return 
+	 */
+    public static String encodeParameters(Map<String, String> parameters) {
         if (parameters == null) {
             return "";
         }
         StringBuilder b = new StringBuilder();
+		boolean first = true;
         for (String key : parameters.keySet()) {
             String value = parameters.get(key);
+			if(!first){
+				b.append("&");
+			}
+			first = false;
             try {
                 b.append(URLEncoder.encode(key, "UTF-8")).append("=").append(URLEncoder.encode(value, "UTF-8"));
             }
@@ -371,7 +452,7 @@ public final class WebUtility {
      * @return
      */
     public static HTTPResponse GetPage(URL url) throws IOException {
-        return GetPage(url, HTTPMethod.GET, null, null, true);
+        return GetPage(url, HTTPMethod.GET, null, null, null, true);
     }
 
     /**
@@ -412,11 +493,11 @@ public final class WebUtility {
     /**
      * Makes an asynchronous call to a URL, and runs the callback when finished.
      */
-    public static void GetPage(final URL url, final HTTPMethod method, final Map<String, String> parameters, final HTTPCookies cookieStash, final boolean followRedirects, final HTTPResponseCallback callback) {
+    public static void GetPage(final URL url, final HTTPMethod method, final Map<String, String> headers, final Map<String, String> parameters, final HTTPCookies cookieStash, final boolean followRedirects, final HTTPResponseCallback callback) {
         urlRetrieverPool.submit(new Runnable() {
             public void run() {
                 try {
-                    HTTPResponse response = GetPage(url, method, parameters, cookieStash, followRedirects);
+                    HTTPResponse response = GetPage(url, method, headers, parameters, cookieStash, followRedirects);
                     if (callback == null) {
                         return;
                     }

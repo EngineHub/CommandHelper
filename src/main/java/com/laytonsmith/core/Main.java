@@ -130,7 +130,7 @@ public class Main {
                     return;
                 }
                 System.err.print("Creating " + docs + " documentation...");
-                DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA);
+                DocGen.functions(docs, api.Platforms.INTERPRETER_JAVA, true);
                 System.err.println("Done.");
                 System.exit(0);
             } 
