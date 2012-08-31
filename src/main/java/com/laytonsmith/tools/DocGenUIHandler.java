@@ -4,12 +4,8 @@ import com.laytonsmith.PureUtilities.WebUtility;
 import com.laytonsmith.PureUtilities.XMLDocument;
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Crypto;
-import com.laytonsmith.core.functions.ExampleScript;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -61,6 +57,7 @@ public class DocGenUIHandler {
 	String username;
 	String password;
 	String prefix;
+	String rootPath;
 	boolean isStaged;
 	boolean doFunctions;
 	boolean doExamples;
@@ -74,7 +71,8 @@ public class DocGenUIHandler {
 	boolean stop = false;
 	URL endpoint;
 
-	public DocGenUIHandler(ProgressManager progress, URL url, String username, String password, String prefix, 
+	public DocGenUIHandler(ProgressManager progress, URL url, String username, String password, String prefix,
+			String rootPath,
 			boolean isStaged, boolean doFunctions,
 			boolean doExamples, boolean doEvents, boolean doTemplates) {
 		
@@ -84,6 +82,7 @@ public class DocGenUIHandler {
 		this.username = username;
 		this.password = password;
 		this.prefix = prefix;
+		this.rootPath = rootPath;
 		this.isStaged = isStaged;
 		this.doFunctions = doFunctions;
 		this.doExamples = doExamples;
@@ -150,7 +149,7 @@ public class DocGenUIHandler {
 	}
 	
 	private void doFunctions() throws XPathExpressionException{
-		doUpload(DocGen.functions("wiki", api.Platforms.INTERPRETER_JAVA, isStaged), "/API");
+		doUpload(DocGen.functions("wiki", api.Platforms.INTERPRETER_JAVA, isStaged), "/API", true);
 	}
 	
 	private void doExamples() throws ConfigCompileException, XPathExpressionException{
@@ -165,19 +164,44 @@ public class DocGenUIHandler {
 		}
 		for(String name : names){			
 			String docs = DocGen.examples(name);
-			doUpload(docs, "/API/" + name);
+			doUpload(docs, "/API/" + name, true);
 		}
 	}
 	
-	private void doEvents(){
-		//TODO
+	private void doEvents() throws XPathExpressionException{
+		doUpload(DocGen.events("wiki"), "/Event_API", true);
 	}
 	
-	private void doTemplates(){
-		//TODO
+	private void doTemplates() throws IOException, XPathExpressionException{
+		try {
+			File root = new File(DocGenUIHandler.class.getResource("/docs").toURI());
+			ZipReader reader = new ZipReader(root);
+			Queue<File> q = new LinkedList<File>();
+			q.addAll(Arrays.asList(reader.listFiles()));
+			while(q.peek() != null){
+				ZipReader r = new ZipReader(q.poll());
+				if(r.isDirectory()){
+					q.addAll(Arrays.asList(r.listFiles()));
+				} else {
+					String articleName = "/" + r.getFile().getName();
+					doUpload(DocGen.Template(r.getFile().getName()), articleName, true);
+				}
+			}
+		} catch (URISyntaxException ex) {
+			Logger.getLogger(DocGenUIHandler.class.getName()).log(Level.SEVERE, null, ex);
+		}
 	}
 	
-	private void doUpload(String wikiMarkup, String page) throws XPathExpressionException{
+	/**
+	 * Uploads a file to a page. If protect is null, the protections are left as is. If protect is false,
+	 * protections are removed if they are present. If protect is true, protections are added if they are
+	 * not present.
+	 * @param wikiMarkup
+	 * @param page
+	 * @param protect
+	 * @throws XPathExpressionException 
+	 */
+	private void doUpload(String wikiMarkup, String page, Boolean protect) throws XPathExpressionException{
 		checkStop();
 		if(page.startsWith("/")){
 			//The prefix already has this
@@ -220,7 +244,59 @@ public class DocGenUIHandler {
 					"token", edittoken
 			), false);
 		}
-		//TODO: Check protection on this page. It should be protected
+		if(protect != null){
+			XMLDocument query = getXML(endpoint, mapCreator(
+					"action", "query",
+					"titles", fullPath,
+					"prop", "info",
+					"inprop", "protection",
+					"intoken", "protect",
+					"format", "xml"
+			));
+			checkStop();
+			String protectToken = query.getNode("/api/query/pages/page/@protecttoken");
+			boolean isProtectedEdit = false;
+			boolean isProtectedMove = false;
+			if(query.nodeExists("/api/query/pages/page/protection/pr")){
+				for(int i = 1; i <= query.countChildren("/api/query/pages/page/protection"); i++){
+					//If only sysops can edit and move
+					if(query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@level").equals("sysop")
+							&& query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@type").equals("edit")){
+						isProtectedEdit = true;
+					}
+					if(query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@level").equals("sysop")
+							&& query.getNode("/api/query/pages/page/protection/pr[" + i + "]/@type").equals("move")){
+						isProtectedMove = true;
+					}
+				}
+			}
+			boolean isProtected = false;
+			if(isProtectedEdit && isProtectedMove){
+				isProtected = true;
+			}
+			if(protect && !isProtected){
+				//Protect it
+				getXML(endpoint, mapCreator(
+						"action", "protect",
+						"title", fullPath,
+						"token", protectToken,
+						"protections", "edit=sysop|move=sysop",
+						"expiry", "infinite",
+						"reason", "Autoprotecting page (This is a bot edit)"
+				));
+			} else if(!protect && isProtected){
+				//Unprotect it
+				getXML(endpoint, mapCreator(
+						"action", "protect",
+						"title", fullPath,
+						"token", protectToken,
+						"protections", "edit=autoconfirmed|move=autoconfirmed",
+						"expiry", "infinite",
+						"reason", "Autoprotecting page (This is a bot edit)"
+				));
+			}
+
+		}
 		incProgress();
 	}
 	

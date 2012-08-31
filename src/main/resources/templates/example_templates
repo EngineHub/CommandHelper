@@ -12,6 +12,9 @@ __NOTOC__
 ! scope="row" | Returns
 | %%returns%%
 |-
+! scope="row" | Usages
+| %%tableUsages%%
+|-
 ! scope="row" | Throws
 | %%throws%%
 |-

@@ -103,9 +103,8 @@ public class XMLDocument {
 	}
 	
 	/**
-	 * Sets the value of a node, creating nodes as needed. If a node already exists and has
-	 * content, the content is replaced. Note that mixed node types are not supported, meaning
-	 * that a text node must be the final node in the sequence. Remember, all XPath expressions
+	 * Sets the text value of a node, creating nodes as needed. If a node already exists and has
+	 * content, the content is replaced. All XPath expressions
 	 * are considered absolute, even if they don't start with a '/'.
 	 * @param xpath
 	 * @param value
@@ -237,32 +236,80 @@ public class XMLDocument {
 		}
 	}
 	
+	/**
+	 * Returns the text value at a particular node. All XPath expressions
+	 * are considered absolute, even if they don't start with a '/'
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
 	public String getNode(String xpath) throws XPathExpressionException{
 			return getXPath(xpath).evaluate(doc);
 	}
 	
+	/**
+	 * Shorthand for Boolean.parseBoolean(getNode(xpath))
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
 	public boolean getBoolean(String xpath) throws XPathExpressionException{
 		return Boolean.parseBoolean(getNode(xpath));
 	}
 	
+	/**
+	 * Shorthand for Integer.parseInt(getNode(xpath))
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
 	public int getInt(String xpath) throws XPathExpressionException{
 		return Integer.parseInt(getNode(xpath));
 	}
 	
+	/**
+	 * Shorthand for Long.parseLong(getNode(xpath))
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
 	public long getLong(String xpath) throws XPathExpressionException{
 		return Long.parseLong(getNode(xpath));
 	}
 	
+	/**
+	 * Shorthand for Double.parseDouble(getNode(xpath))
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
 	public double getDouble(String xpath) throws XPathExpressionException{
 		return Double.parseDouble(getNode(xpath));
 	}
 	
+	/**
+	 * Checks to see if a node exists or not.
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
 	public boolean nodeExists(String xpath) throws XPathExpressionException{
-		return getElement(xpath) != null; 
+		Object o = getXPath(xpath).evaluate(doc, XPathConstants.NODE); 
+		return o != null;
 	}
 	
 	private Element getElement(String xpath) throws XPathExpressionException{
 		return (Element)getXPath(xpath).evaluate(doc, XPathConstants.NODE);
+	}
+	
+	/**
+	 * Counts the number of direct descendants of this node.
+	 * @param xpath
+	 * @return 
+	 */
+	public int countChildren(String xpath) throws XPathExpressionException{
+		Element e = getElement(xpath);
+		return e.getChildNodes().getLength();
 	}
 	
 	/**

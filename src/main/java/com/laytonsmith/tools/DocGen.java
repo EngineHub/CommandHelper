@@ -29,12 +29,12 @@ import java.util.regex.Pattern;
  */
 public class DocGen {
 
-    public static void main(String[] args) throws Exception {
-        System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
-		//System.out.println(examples("array_get"));
-        //events("wiki");
-	    //System.out.println(Template("persistance_network"));
-    }
+//    public static void main(String[] args) throws Exception {
+//        //System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
+//		//System.out.println(examples("array_get"));
+//        //events("wiki");
+//	    //System.out.println(Template("persistance_network"));
+//    }
 	
 	public static String examples(String function) throws ConfigCompileException{
 		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
@@ -54,6 +54,7 @@ public class DocGen {
 					thrown.append("[[CommandHelper/Exceptions#").append(t.toString()).append("|").append(t.toString()).append("]]");
 				}
 			}
+			String tableUsages = di.originalArgs.replace("|", "<hr />");
 			String [] usages = di.originalArgs.split("\\|");
 			StringBuilder usageBuilder = new StringBuilder();
 			for(String usage : usages){
@@ -84,6 +85,7 @@ public class DocGen {
 			Map<String, String> templateFields = new HashMap<String, String>();
 			templateFields.put("function_name", f.getName());
 			templateFields.put("returns", di.ret);
+			templateFields.put("tableUsages", tableUsages);
 			templateFields.put("throws", thrown.toString());
 			templateFields.put("since", f.since().toString());
 			templateFields.put("restricted", restricted);
@@ -299,7 +301,7 @@ public class DocGen {
                     + "''Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
                     + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]"
-                    + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page</div>\n");
+                    + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page</div>\n\n{{LearningTrail}}\n");
         }
 		return out.toString();
     }
@@ -308,7 +310,7 @@ public class DocGen {
 	    return DocGenTemplates.Generate(template);
     }
 
-    public static void events(String type) {
+    public static String events(String type) {
         Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
         Set<Documentation> list = new TreeSet<Documentation>();
         for (Class c : classes) {
@@ -337,7 +339,7 @@ public class DocGen {
                     + " a player logging in, or a player breaking a block. See the [[CommandHelper/Events|documentation on events]] for"
                     + " more information<br />\n\n");
             
-            doc.append("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" align=\"left\" class=\"wikitable\"\n"
+            doc.append("{| width=\"100%\" cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
                         + "|-\n"
                         + "! scope=\"col\" width=\"7%\" | Event Name\n"
                         + "! scope=\"col\" width=\"36%\" | Description\n"
@@ -363,7 +365,7 @@ public class DocGen {
                 String since = d.since().getVersionString();
 
                 if (type.equals("html")) {
-                    doc.append("<tr><td style=\"vertical-align:top\">").append(name).append("</td><td style=\"vertical-align:top\">").append(description).append("</td><td style=\"vertical-align:top\">").append(prefilter).append("</td><td style=\"vertical-align:top\">").append(eventData).append("</td><td style=\"vertical-align:top\">").append(mutability).append("</td><td style=\"vertical-align:top\">").append(since).append("</td></tr>");
+                    doc.append("<tr><td style=\"vertical-align:top\">").append(name).append("</td><td style=\"vertical-align:top\">").append(description).append("</td><td style=\"vertical-align:top\">").append(prefilter).append("</td><td style=\"vertical-align:top\">").append(eventData).append("</td><td style=\"vertical-align:top\">").append(mutability).append("</td><td style=\"vertical-align:top\">").append(since).append("</td></tr>\n");
                 } else if (type.equals("wiki")) {
                     doc.append("|-\n" + "! scope=\"row\" | [[CommandHelper/Event API/").append(name).append("|").append(name).append("]]\n" + "| ").append(description).append("\n" + "| ").append(prefilter).append("\n" + "| ").append(eventData).append("\n" + "| ").append(mutability).append("\n" + "| ").append(since).append("\n");
                 } else if (type.equals("text")) {
@@ -373,26 +375,26 @@ public class DocGen {
         }
 
         if (type.equals("html")) {
-            doc.append("</tbody></table>");
+            doc.append("</tbody></table>\n");
         } else if (type.equals("wiki")) {
-            doc.append("|}");
+            doc.append("|}\n");
         }
 
-        System.out.println(doc.toString());
 
         if (type.equals("html")) {
-            System.out.println(""
+            doc.append(""
                     + "<h2>Errors in documentation</h2>\n"
                     + "<em>Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
-                    + " plugin itself!</em>");
+                    + " plugin itself!</em>\n");
         } else if (type.equals("wiki")) {
-            System.out.println(""
+            doc.append(""
                     + "===Errors in documentation===\n"
                     + "''Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
-                    + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]\n\n{{LearningTrail}}");
+                    + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]\n\n{{LearningTrail}}\n");
         }
+		return doc.toString();
     }
 
     private static class PrefilterData {
@@ -402,8 +404,15 @@ public class DocGen {
             boolean first = true;
             for (String d : data) {
                 int split = d.indexOf(':');
-                String name = d.substring(0, split).trim();
-                String description = ExpandMacro(d.substring(split + 1).trim(), type);
+                String name; 
+                String description; 
+				if(split == -1){                    
+                    name = d;
+                    description = "";
+                } else {
+                    name = d.substring(0, split).trim();
+                    description = ExpandMacro(d.substring(split + 1).trim(), type);
+                }
                 if (type.equals("html")) {
                     b.append(first ? "" : "<br />").append("<strong>").append(name).append("</strong>: ").append(description);
                 } else if (type.equals("wiki")) {

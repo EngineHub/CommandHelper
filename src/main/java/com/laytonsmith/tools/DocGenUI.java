@@ -1,6 +1,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.UIUtils;
+import com.laytonsmith.core.Prefs;
 import com.sun.awt.AWTUtilities;
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
@@ -64,7 +65,7 @@ public class DocGenUI extends javax.swing.JFrame {
 			try{
 				handler = new DocGenUIHandler(manager, new URL("http://" + wikiURL.getText()), username.getText(), 
 						new String(password.getPassword()), "CommandHelper/" + (staged.isSelected()?"Staged/":""),
-						staged.isSelected(),
+						"CommandHelper/", staged.isSelected(),
 						functions.isSelected(), examples.isSelected(), events.isSelected(), templates.isSelected());
 				handler.go();
 				manager.setStatus("Done.");
@@ -268,20 +269,27 @@ public class DocGenUI extends javax.swing.JFrame {
 	 */
 	public static void main(String args[]) {
 		
-		JFrame.setDefaultLookAndFeelDecorated(true);
 		try {
 			SwingUtilities.invokeAndWait(new Runnable() {
 
 				public void run() {
 					try {
 						UIManager.setLookAndFeel(new SubstanceGraphiteGlassLookAndFeel());
+						JFrame.setDefaultLookAndFeelDecorated(true);
 					} catch (UnsupportedLookAndFeelException ex) {
 						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
-					}				
+					} 
 				}
 			});
 		} catch (Exception ex) {
 			Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
+		} catch(NoClassDefFoundError e){
+			//This shouldn't be an error, they just won't have the awesome
+			//theme
+			System.err.println("NoClassDefFoundError occured while trying to install LaF. Do you have Substance installed?");
+			if(Prefs.DebugMode()){
+				e.printStackTrace(System.err);
+			}
 		}
 
 		/* Create and display the form */

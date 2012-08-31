@@ -48,6 +48,7 @@ public class Main {
                     .addFlag("uninstall-cmdline", "Uninstalls the MethodScript interpreter from your system.")
                     .addArgument("syntax", ArgumentParser.Type.ARRAY_OF_STRINGS, "Generates the syntax highlighter for the specified editor (if available).\n"
                     + "Don't specify a type to see the available options.", "type", false)
+					.addFlag("docgen", "Starts the automatic wiki uploader.")
             ;
             ArgumentParser.ArgumentParserResults switches = argParser.match(args);            
             
@@ -70,6 +71,11 @@ public class Main {
                 Interpreter.uninstall();
                 System.exit(0);
             }
+			
+			if(switches.isFlagSet("docgen")){
+				DocGenUI.main(args);
+				return;
+			}
             
             String mslp = switches.getStringArgument("mslp");
             if(mslp != null){

@@ -389,7 +389,7 @@
 						</goals>
 						<configuration>
 							<shadedArtifactAttached>false</shadedArtifactAttached>
-							<shadedClassifierName>WEBundle</shadedClassifierName>
+							<shadedClassifierName>Bundle</shadedClassifierName>
 							<artifactSet>
 								<includes>
 									<include>com.sk89q:worldedit:jar:*</include>
@@ -400,13 +400,11 @@
 									<include>com.googlecode.json-simple:json-simple:jar:*</include>
 									<include>org.mindrot:jBCrypt:jar:*</include>
 									<include>com.jcraft:jsch:jar:*</include>
-									<include>org.java.net.substance:substance:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
 								<filter>
 									<artifact>com.sk89q:worldedit:jar:*</artifact>
-									<artifact>org.java.net.substance:substance:jar:*</artifact>
 									<includes>
 										<!-- Permissions Items -->
 										<include>com/sk89q/bukkit/migration/**</include> 
@@ -414,15 +412,7 @@
 										<include>com/sk89q/util/**</include>
 										<include>com/sk89q/worldedit/Vector.*</include>
 										<!-- Expression Parser -->
-										<include>com/sk89q/worldedit/expression/**</include>
-										<!-- SnakeYAML -->
-										<include>org/yaml/**</include>
-										<!-- Simple JSON -->
-										<include>org/json/**</include>
-										<!-- BCrypt -->
-										<include>org/mindrot/**</include>
-										<!-- JSch -->
-										<include>com/jcraft/jsch/**</include>
+										<include>com/sk89q/worldedit/expression/**</include>										
 									</includes>
 									<excludes>
 										<exclude>com/sk89q/jchronic/**</exclude>
