@@ -328,7 +328,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
     public void setTotalExperience(int total) {
-        p.setTotalExperience(total);
+        p.setTotalExperience(0);
+		p.setLevel(0);
+		p.setExp(0);
+		p.giveExp(total);
     }
 
     public void setVanished(boolean set, MCPlayer to) {

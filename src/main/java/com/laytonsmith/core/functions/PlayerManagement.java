@@ -1015,7 +1015,7 @@ public class PlayerManagement {
                 gm = MCGameMode.valueOf(mode.toUpperCase());
             }
             catch (IllegalArgumentException e) {
-                throw new ConfigRuntimeException("Mode must be either 'CREATIVE' or 'SURVIVAL'", ExceptionType.FormatException, t);
+                throw new ConfigRuntimeException("Mode must be either 'CREATIVE', 'SURVIVAL', or 'ADVENTURE'", ExceptionType.FormatException, t);
             }
             Static.AssertPlayerNonNull(m, t);
             m.setGameMode(gm);
