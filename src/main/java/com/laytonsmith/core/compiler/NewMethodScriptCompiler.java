@@ -2,15 +2,10 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CBareString;
-import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CKeyword;
-import com.laytonsmith.core.constructs.CLabel;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
@@ -19,18 +14,10 @@ import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Env;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EmptyStackException;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.SortedSet;
-import java.util.Stack;
-import java.util.TreeSet;
 
 /**
  *
@@ -174,6 +161,13 @@ public class NewMethodScriptCompiler {
 		return scripts;
 	}
 
+	/**
+	 * TODO: Need a platform resolver here?
+	 * @param tokenStream
+	 * @param compilerEnvironment
+	 * @return
+	 * @throws ConfigCompileException 
+	 */
 	public static ParseTree compile(TokenStream tokenStream, Env compilerEnvironment) throws ConfigCompileException {
 		ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), tokenStream.getFileOptions());
 		new CompilerObject(tokenStream).compile(root, compilerEnvironment);
@@ -191,94 +185,12 @@ public class NewMethodScriptCompiler {
 			master.addChild(include);
 		}
 		master.addChild(root);
-		optimize01(root, compilerEnvirontment);
-		optimize02(root, compilerEnvirontment);
-		optimize03(root, compilerEnvirontment);
-		optimize04(root, compilerEnvirontment, new ArrayList<String>());
+		OptimizerObject optimizer = new OptimizerObject(root, compilerEnvirontment);
+		optimizer.optimize();
+		//root is now optimized
 	}
 
-	/**
-	 * This optimization level removes all the __autoconcat__s (and
-	 * inadvertently several other constructs as well)
-	 *
-	 * @param tree
-	 * @param compilerEnvironment
-	 * @throws ConfigCompileException
-	 */
-	private static void optimize01(ParseTree tree, Env compilerEnvironment) throws ConfigCompileException {
-		com.laytonsmith.core.functions.Compiler.__autoconcat__ autoconcat = (com.laytonsmith.core.functions.Compiler.__autoconcat__) FunctionList.getFunction("__autoconcat__");
-		if (tree.getData() instanceof CFunction && tree.getData().val().equals("cc")) {
-			for (int i = 0; i < tree.getChildren().size(); i++) {
-				ParseTree node = tree.getChildAt(i);
-				if (node.getData().val().equals("__autoconcat__")) {
-					ParseTree tempNode = autoconcat.optimizeSpecial(node.getData().getTarget(), node.getChildren(), false);
-					tree.setData(tempNode.getData());
-					tree.setChildren(tempNode.getChildren());
-					optimize01(tree, compilerEnvironment);
-					return;
-				}
-			}
-		} else {
-			if (tree.getData() instanceof CFunction && tree.getData().val().equals("__autoconcat__")) {
-				ParseTree tempNode = autoconcat.optimizeSpecial(tree.getData().getTarget(), tree.getChildren(), true);
-				tree.setData(tempNode.getData());
-				tree.setChildren(tempNode.getChildren());
-			}
-			for (int i = 0; i < tree.getChildren().size(); i++) {
-				ParseTree node = tree.getChildren().get(i);
-				optimize01(node, compilerEnvironment);
-			}
-		}
-	}
-
-	/**
-	 * This optimization level adds all known instances of procs to the
-	 * environment. After this pass, all procs, if not obtainable, are a compile
-	 * error.
-	 *
-	 * @param tree
-	 * @param compilerEnvironment
-	 * @throws ConfigCompileException
-	 */
-	private static void optimize02(ParseTree tree, Env compilerEnvironment) throws ConfigCompileException {
-	}
-
-	/**
-	 * This pass makes sure no weird constructs are left, for instance, a
-	 * CEntry, or any bare strings, if strict mode is on.
-	 *
-	 * @param tree
-	 * @param compilerEnvironment
-	 * @throws ConfigCompileException
-	 */
-	private static void optimize03(ParseTree tree, Env compilerEnvironment) throws ConfigCompileException {
-	}
-
-	/**
-	 * This pass makes sure that all variables are initialized before usage, if
-	 * strict mode is on. For the first call, send a new List for assignments.
-	 */
-	private static void optimize04(ParseTree tree, Env compilerEnvironment, List<String> assignments) throws ConfigCompileException {
-		if(tree.getFileOptions().isStrict()){
-			if(tree.getData() instanceof IVariable){
-				if(!assignments.contains(((IVariable)tree.getData()).getName())){
-					throw new ConfigCompileException("Variables must be declared before use, in strict mode.", tree.getTarget());
-				}
-			}
-		}
-		for (int i = 0; i < tree.getChildren().size(); i++) {
-			ParseTree node = tree.getChildren().get(i);
-			if(node.getData() instanceof CFunction && node.getData().val().equals("assign")){
-				if(node.getChildAt(0).getData() instanceof IVariable){
-					String name = ((IVariable)node.getChildAt(0).getData()).getName();
-					assignments.add(name);
-				} else {
-					throw new ConfigCompileException("An assignment can only occur on a variable.", node.getChildAt(0).getTarget());
-				}
-			}
-			optimize04(node, compilerEnvironment, assignments);
-		}
-	}
+	
 
 	private static Construct tokenToConstruct(Token t) {
 		if (t.type == Token.TType.STRING) {

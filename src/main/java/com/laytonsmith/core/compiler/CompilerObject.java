@@ -15,7 +15,7 @@ import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.NewIVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -95,7 +95,7 @@ class CompilerObject {
 				throw new ConfigCompileException("Expected the constant ${" + constName.toString() + "} to be provided in the compilation options, but it wasn't.", t.getTarget());
 			}
 			t = new Token(TType.STRING, constant.val(), constant.getTarget());
-		}
+		}							
 		if (t.type == TType.BARE_STRING && peek().type == TType.FUNC_START) {
 			consume();
 			CFunction f = new CFunction(t.val(), t.getTarget());
@@ -203,7 +203,7 @@ class CompilerObject {
 				//
 				//				case FINAL_VAR:
 			case IVARIABLE:
-				return new IVariable(t.val(), t.getTarget());
+				return new NewIVariable(t.val(), t.getTarget());
 			case BARE_STRING:
 				if (t.val().equals("true")) {
 					return new CBoolean(true, t.getTarget());

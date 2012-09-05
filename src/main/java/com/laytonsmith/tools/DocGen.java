@@ -112,7 +112,7 @@ public class DocGen {
 		}
 	}
 
-    public static String functions(String type, api.Platforms platform, boolean staged) {
+    public static String functions(String type, api.Platforms platform, boolean staged) throws ConfigCompileException {
         List<FunctionBase> functions = FunctionList.getFunctionList(platform);
         HashMap<Class, ArrayList<FunctionBase>> functionlist = new HashMap<Class, ArrayList<FunctionBase>>();
 		StringBuilder out = new StringBuilder();
@@ -158,6 +158,7 @@ public class DocGen {
         });
         int total = 0;
 
+		int workingExamples = 0;
         for (Map.Entry<Class, ArrayList<FunctionBase>> entry : entrySet) {
             Class apiClass = entry.getKey();
             String className = apiClass.getName().split("\\.")[apiClass.getName().split("\\.").length - 1];
@@ -224,8 +225,7 @@ public class DocGen {
             if(!documentableFunctions.isEmpty()){
                 out.append(intro.toString() + "\n");
             }
-            List<FunctionBase> flist = entry.getValue();
-            Collections.sort(flist, new Comparator<FunctionBase>() {
+            Collections.sort(documentableFunctions, new Comparator<FunctionBase>() {
 
                 public int compare(FunctionBase o1, FunctionBase o2) {
                     return o1.getName().compareTo(o2.getName());
@@ -257,6 +257,11 @@ public class DocGen {
 
                 String since = (f instanceof Documentation ?((Documentation)f).since().getVersionString():"0.0.0");
                 DocInfo di = new DocInfo(doc);
+				boolean hasExample = false;
+				if(f instanceof Function && ((Function)f).examples() != null && ((Function)f).examples().length > 0){
+					hasExample = true;
+					workingExamples++;
+				}
                 if (di.ret == null || di.args == null || di.desc == null) {
                     out.append(f.getName() + "'s documentation is not correctly formatted. Please check it and try again.\n");
                 }
@@ -269,7 +274,8 @@ public class DocGen {
                             + "| " + di.ret + "\n"
                             + "| " + di.args + "\n"
                             + "| " + thrown.toString() + "\n"
-                            + "| " + (di.topDesc != null ? di.topDesc + " [[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "#Description|See More...]]" : di.desc) + "\n"
+                            + "| " + (di.topDesc != null ? di.topDesc + " [[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "#Description|See More...]]" : di.desc) 
+							+ (hasExample?"<br />([[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "#Examples|Examples...]])":"") + "\n"
                             + "| " + since + "\n"
                             + "| " + restricted + "\n");
 
@@ -301,7 +307,8 @@ public class DocGen {
                     + "''Please note that this documentation is generated automatically,"
                     + " if you notice an error in the documentation, please file a bug report for the"
                     + " plugin itself!'' For information on undocumented functions, see [[CommandHelper/Sandbox|this page]]"
-                    + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page</div>\n\n{{LearningTrail}}\n");
+                    + "<div style='font-size:xx-small; font-style:italic; color:grey'>There are " + total + " functions in this API page, " + workingExamples + " of which"
+					+ " have examples.</div>\n\n{{LearningTrail}}\n");
         }
 		return out.toString();
     }
