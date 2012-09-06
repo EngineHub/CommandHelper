@@ -136,7 +136,11 @@ public class BukkitConvertor implements Convertor {
     	if (be == null) {
     		return null;
     	}
-    	
+    	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
+		if(be instanceof Item){
+			return new BukkitMCItem((Item)be);
+		}
+		
 		if(be instanceof EnderCrystal){
 			return new BukkitMCEnderCrystal((EnderCrystal)be);
 		}
