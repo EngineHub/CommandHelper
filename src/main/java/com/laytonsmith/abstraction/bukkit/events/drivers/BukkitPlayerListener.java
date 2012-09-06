@@ -15,6 +15,8 @@ import com.laytonsmith.core.functions.EventBinding;
 import com.laytonsmith.core.functions.Function;
 import java.util.SortedSet;
 import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.Future;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.Bukkit;
@@ -110,12 +112,26 @@ public class BukkitPlayerListener implements Listener {
 					fireChat(event);
 				} else {
 					final AsyncPlayerChatEvent copy = new AsyncPlayerChatEvent(false, event.getPlayer(), event.getMessage(), event.getRecipients());
-					Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable() {
+					//event.setCancelled(true);
+					Future f = Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable() {
 						public Object call() throws Exception {
 							Bukkit.getServer().getPluginManager().callEvent(copy);
 							return null;
 						}
-					});
+					});					
+					while(true){
+						try {
+								f.get();
+								break;
+						} catch (InterruptedException ex) {
+							//I don't know why this happens, but screw it, we're gonna try again, and it's gonna like it.
+						} catch (ExecutionException ex) {
+							Logger.getLogger(BukkitPlayerListener.class.getName()).log(Level.SEVERE, null, ex);
+							break;
+						}
+					}
+					event.setCancelled(copy.isCancelled());
+					event.setMessage(copy.getMessage());
 				}
 
 			} else {

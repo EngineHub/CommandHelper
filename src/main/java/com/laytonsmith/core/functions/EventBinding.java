@@ -260,7 +260,6 @@ public class EventBinding {
             if(original.getUnderlyingEvent() != null && original.isCancellable()){
                 original.setCancelled(cancelled);
             }
-            environment.GetEvent().setCancelled(true);
             return new CVoid(t);
         }
         
