@@ -148,7 +148,7 @@ public class DocGenUIHandler {
 		}
 	}
 	
-	private void doFunctions() throws XPathExpressionException{
+	private void doFunctions() throws XPathExpressionException, ConfigCompileException{
 		doUpload(DocGen.functions("wiki", api.Platforms.INTERPRETER_JAVA, isStaged), "/API", true);
 	}
 	
