@@ -814,4 +814,8 @@ public final class Static {
             throw new ConfigRuntimeException("No player was specified!", ExceptionType.PlayerOfflineException, t);
         }
     }
+	
+	public static int msToTicks(int ms){
+		return ms / 50;
+	}
 }

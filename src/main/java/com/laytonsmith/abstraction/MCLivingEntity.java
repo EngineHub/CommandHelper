@@ -10,12 +10,10 @@ import java.util.List;
  * @author layton
  */
 public interface MCLivingEntity extends MCEntity {
-    //public boolean addPotionEffect(MCPotionEffect effect);
-    //public boolean addPotionEffect(MCPotionEffect effect, boolean force);
-    //public boolean addPotionEffects(Collection<MCPotionEffect> effects);
+
+	public void addEffect(int potionID, int strength, int seconds);
     public void damage(int amount);
     public void damage(int amount, MCEntity source);
-    //public Collection<MCPotionEffect> getActivePotionEffects();
     public double getEyeHeight();
     public double getEyeHeight(boolean ignoreSneaking);
     public MCLocation getEyeLocation();
@@ -30,9 +28,7 @@ public interface MCLivingEntity extends MCEntity {
     public int getNoDamageTicks();
     public int getRemainingAir();
     public MCBlock getTargetBlock(HashSet<Byte> transparent, int maxDistance);
-    //public boolean hasPotionEffect(MCPotionEffectType type);
     public MCProjectile launchProjectile(MCProjectile projectile);
-    //public void removePotionEffect(MCPotionEffectType type);
     public void setHealth(int health);
     public void setLastDamage(int damage);
     public void setMaximumAir(int ticks);

@@ -10,7 +10,7 @@ import java.net.InetSocketAddress;
  */
 public interface MCPlayer extends MCCommandSender, MCHumanEntity,
         MCOfflinePlayer {
-    public void addEffect(int potionID, int strength, int seconds);
+    
     
     public boolean canSee(MCPlayer p);
     
