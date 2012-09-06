@@ -72,15 +72,15 @@ public class EntityEvents {
                 map.put("amount",  new CInt(event.getDamage(), Target.UNKNOWN));
                 
                 String data = "";
-                if(event.getDamager().getType() == MCEntityType.PLAYER) {
+                if(event.getDamager() instanceof MCPlayer) {
                 	data = ((MCPlayer)event.getDamager()).getName();
                 } else if (event.getDamager() instanceof MCProjectile) {
                 	MCEntity shooter = ((MCProjectile)event.getDamager()).getShooter();
                 	
-                	if(shooter.getType() == MCEntityType.PLAYER) {
-                		data = ((MCPlayer)event.getDamager()).getName();
+                	if(shooter instanceof MCPlayer) {
+                		data = ((MCPlayer)shooter).getName();
                 	} else {
-                		data = ((MCProjectile)event.getDamager()).getShooter().getType().name().toUpperCase();
+                		data = ((MCProjectile)shooter).getType().name().toUpperCase();
                 	}
                 }
                 map.put("data",  new CString(data, Target.UNKNOWN));

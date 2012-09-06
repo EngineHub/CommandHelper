@@ -137,6 +137,10 @@ public class BukkitConvertor implements Convertor {
     		return null;
     	}
     	
+		if(be instanceof EnderCrystal){
+			return new BukkitMCEnderCrystal((EnderCrystal)be);
+		}
+		
     	if(be instanceof Projectile){
             return new BukkitMCProjectile(be);
         }

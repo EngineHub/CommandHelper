@@ -1114,9 +1114,9 @@ public class BasicLogic {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Functional usage", "gt(5, 4)"),
-				new ExampleScript("Symbolic usage, true condition", "5 > 4"),
-				new ExampleScript("Symbolic usage, false condition", "4 > 5"),
+				new ExampleScript("Functional usage", "gte(5, 4)"),
+				new ExampleScript("Symbolic usage, true condition", "4 >= 4"),
+				new ExampleScript("Symbolic usage, false condition", "4 >= 5"),
 			};
 		}
 	}
