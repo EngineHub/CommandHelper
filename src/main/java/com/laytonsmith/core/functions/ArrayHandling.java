@@ -482,7 +482,9 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
+				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'A')"),
 				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'a')"),
+				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')"),
 			};
 		}
 	}
@@ -665,6 +667,19 @@ public class ArrayHandling {
 			}
 			return ret;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "range(10)"),
+				new ExampleScript("Complex usage", "range(0, 10)"),
+				new ExampleScript("With skips", "range(0, 10, 2)"),
+				new ExampleScript("Invalid input", "range(0, 10, -1)"),
+				new ExampleScript("In reverse", "range(10, 0, -1)"),
+			};
+		}
+		
+		
 	}
 
 	@api
@@ -711,6 +726,14 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
 			}
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "array_keys(array('a', 'b', 'c'))"),
+				new ExampleScript("With associative array", "array_keys(array(one: 'a', two: 'b', three: 'c'))"),
+			};
+		}
 	}
 
 	@api
@@ -756,6 +779,14 @@ public class ArrayHandling {
 			} else {
 				throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
 			}
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "array_normalize(array(one: 'a', two: 'b', three: 'c'))"),
+				new ExampleScript("Usage with normal array", "array_normalize(array(1, 2, 3))"),
+			};
 		}
 	}
 
@@ -815,6 +846,15 @@ public class ArrayHandling {
 			}
 			return newArray;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),				
+				new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),				
+				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))"),				
+			};
+		}
 	}
 
 	@api
@@ -858,6 +898,14 @@ public class ArrayHandling {
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_remove should be an array", ExceptionType.CastException, t);
 			}
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(array_remove(@array, 2))\nmsg(@array)"),
+				new ExampleScript("With associative array", "assign(@array, array(one: 'a', two: 'b', three: 'c'))\nmsg(array_remove(@array, 'two'))\nmsg(@array)"),
+			};
 		}
 	}
 
@@ -916,6 +964,14 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "array_implode(array(1, 2, 3), '-')"),
+				new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')"),
+			};
+		}
 	}
 
 	@api
@@ -955,6 +1011,14 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]"),
+			};
+		}
+		
 	}
 
 	@api
@@ -983,7 +1047,7 @@ public class ArrayHandling {
 					sortType = CArray.SortType.valueOf(args[1].val().toUpperCase());
 				}
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException("The sort type must be one of either: REGULAR, NUMERIC, STRING, or STRING_CI",
+				throw new ConfigRuntimeException("The sort type must be one of either: REGULAR, NUMERIC, STRING, or STRING_IC",
 						ExceptionType.FormatException, t);
 			}
 			ca.sort(sortType);
@@ -1005,9 +1069,9 @@ public class ArrayHandling {
 					+ " is passed in as a variable, the contents of that variable will be sorted, even if you don't re-assign"
 					+ " the returned array back to the variable. If you really need the old array, you should create a copy of"
 					+ " the array first, like so: assign(@sorted, array_sort(@array[])). The sort type may be one of the following:"
-					+ " REGULAR, NUMERIC, STRING, STRING_CI. A regular sort sorts the elements without changing types first. A"
+					+ " REGULAR, NUMERIC, STRING, STRING_IC. A regular sort sorts the elements without changing types first. A"
 					+ " numeric sort always converts numeric values to numbers first (so 001 becomes 1). A string sort compares"
-					+ " values as strings, and a string_ci sort is the same as a string sort, but the comparision is case-insensitive."
+					+ " values as strings, and a string_ic sort is the same as a string sort, but the comparision is case-insensitive."
 					+ " If the array contains array values, a CastException is thrown; inner arrays cannot be sorted against each"
 					+ " other. If the array is associative, a warning will be raised if the General logging channel is set to verbose,"
 					+ " because the array's keys will all be lost in the process. To avoid this warning, and to be more explicit,"
@@ -1038,6 +1102,17 @@ public class ArrayHandling {
 				}
 			}
 			return null;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Regular sort", "assign(@array, array('a', 2, 4, 'string'))\narray_sort(@array, 'REGULAR')\nmsg(@array)"),				
+				new ExampleScript("Numeric sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'NUMERIC')\nmsg(@array)"),				
+				new ExampleScript("String sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'STRING')\nmsg(@array)"),				
+				new ExampleScript("String sort (with words)", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING')\nmsg(@array)"),				
+				new ExampleScript("Ignore case sort", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING_IC')\nmsg(@array)"),				
+			};
 		}
 	}
 	
@@ -1141,6 +1216,13 @@ public class ArrayHandling {
 			return CHVersion.V3_3_1;
 		}
 		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)"),				
+			};
+		}
+		
 	}
 	
 	@api public static class array_indexes extends AbstractFunction{
@@ -1181,6 +1263,14 @@ public class ArrayHandling {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 2))"),				
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))"),				
+			};
 		}
 		
 	}
@@ -1224,6 +1314,14 @@ public class ArrayHandling {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 2))"),				
+				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))"),				
+			};
 		}
 		
 	}

@@ -135,6 +135,17 @@ public class BasicLogic {
 		public boolean allowBraces() {
 			return true;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "if(true, msg('This is true'), msg('This is false'))"),
+				new ExampleScript("With braces, true condition", "if(true){\n\tmsg('This is true')\n}"),
+				new ExampleScript("With braces, false condition", "msg('Start')\nif(false){\n\tmsg('This will not show')\n}\nmsg('Finish')"),
+			};
+		}
+		
+		
 	}
 
 	@api
@@ -214,6 +225,32 @@ public class BasicLogic {
 		@Override
 		public boolean allowBraces() {
 			return true;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "switch('theValue',\n"
+					+ "\t'notTheValue',\n"
+					+ "\t\tmsg('Nope'),\n"
+					+ "\t'theValue',\n"
+					+ "\t\tmsg('Success')\n"
+					+ ")"),
+				new ExampleScript("With braces", "switch('theValue'){\n"
+					+ "\t'notTheValue',\n"
+					+ "\t\tmsg('Nope'),\n"
+					+ "\t'theValue',\n"
+					+ "\t\tmsg('Success')\n"
+					+ "}"),
+				new ExampleScript("With default condition", "switch('noMatch',\n"
+					+ "\t'notIt1',\n"
+					+ "\t\tmsg('Nope'),\n"
+					+ "\t'notIt2',\n"
+					+ "\t\tmsg('Nope'),\n"
+					+ "\t, #Default:\n"
+					+ "\t\tmsg('Success')\n"
+					+ ")"),
+			};
 		}
 	}
 
@@ -393,6 +430,16 @@ public class BasicLogic {
 //        public ParseTree optimizeSpecial(Target target, List<ParseTree> children) {
 //            throw new UnsupportedOperationException("Not yet implemented");
 //        }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "ifelse(false, msg('This is false'), true, msg('This is true'))"),
+				new ExampleScript("With braces", "if(false){\n\tmsg('This is false')\n} else {\n\tmsg('This is true')\n}"),
+				new ExampleScript("With braces, with else if", "if(false){\n\tmsg('This will not show')\n} else if(false){\n"
+					+ "\n\tmsg('This will not show')\n} else {\n\tmsg('This will show')\n}"),
+			};
+		}
 	}
 
 	@api
@@ -506,6 +553,15 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "equals(1, 1.0, '1')"),
+				new ExampleScript("Symbolic usage", "1 == 1"),
+				new ExampleScript("Not equivalent", "'one' == 'two'"),
+			};
+		}
 	}
 
 	@api
@@ -562,6 +618,15 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "sequals('1', 1)"),
+				new ExampleScript("Symbolic usage", "'1' === 1"),
+				new ExampleScript("Symbolic usage", "'1' === '1'"),
+			};
+		}
 	}
 
 	@api
@@ -607,6 +672,14 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "snequals('1', 1)"),
+				new ExampleScript("Basic usage", "snequals('1', '1')"),
+			};
 		}
 	}
 
@@ -656,6 +729,14 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "nequals('one', 'two')"),
+				new ExampleScript("Basic usage", "nequals(1, 1)"),
+			};
 		}
 	}
 
@@ -745,6 +826,14 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "equals_ic('test', 'TEST')"),
+				new ExampleScript("Basic usage", "equals_ic('completely', 'DIFFERENT')"),
+			};
+		}
 	}
 
 	@api
@@ -792,6 +881,14 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "equals_ic('test', 'TEST')"),
+				new ExampleScript("Basic usage", "equals_ic('completely', 'DIFFERENT')"),
+			};
 		}
 	}
 
@@ -841,6 +938,15 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "lt(4, 5)"),
+				new ExampleScript("Symbolic usage, true condition", "4 < 5"),
+				new ExampleScript("Symbolic usage, false condition", "5 < 4"),
+			};
+		}
 	}
 
 	@api
@@ -888,6 +994,15 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "gt(5, 4)"),
+				new ExampleScript("Symbolic usage, true condition", "5 > 4"),
+				new ExampleScript("Symbolic usage, false condition", "4 > 5"),
+			};
 		}
 	}
 
@@ -937,6 +1052,16 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "lte(4, 5)"),
+				new ExampleScript("Symbolic usage, true condition", "4 <= 5"),
+				new ExampleScript("Symbolic usage, true condition", "5 <= 5"),
+				new ExampleScript("Symbolic usage, false condition", "5 <= 4"),
+			};
+		}
 	}
 
 	@api
@@ -984,6 +1109,15 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "gt(5, 4)"),
+				new ExampleScript("Symbolic usage, true condition", "5 > 4"),
+				new ExampleScript("Symbolic usage, false condition", "4 > 5"),
+			};
 		}
 	}
 
@@ -1039,6 +1173,16 @@ public class BasicLogic {
 		public boolean useSpecialExec() {
 			return true;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "and(true, true)"),
+				new ExampleScript("Symbolic usage, true condition", "true && true"),
+				new ExampleScript("Symbolic usage, false condition", "true && false"),
+				new ExampleScript("Short circuit", "false && msg('This will not show')"),
+			};
+		}
 	}
 
 	@api
@@ -1092,6 +1236,16 @@ public class BasicLogic {
 		public boolean useSpecialExec() {
 			return true;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "or(false, true)"),
+				new ExampleScript("Symbolic usage, true condition", "true || false"),
+				new ExampleScript("Symbolic usage, false condition", "false || false"),
+				new ExampleScript("Short circuit", "true || msg('This will not show')"),
+			};
+		}
 	}
 
 	@api
@@ -1137,6 +1291,15 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Functional usage", "not(false)"),
+				new ExampleScript("Symbolic usage, true condition", "!false"),
+				new ExampleScript("Symbolic usage, false condition", "!true"),				
+			};
 		}
 	}
 
@@ -1186,6 +1349,13 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "xor(true, false)"),
+			};
+		}
 	}
 
 	@api
@@ -1233,6 +1403,13 @@ public class BasicLogic {
 		@Override
 		public boolean useSpecialExec() {
 			return true;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "nand(true, true)"),
+			};
 		}
 	}
 
@@ -1282,6 +1459,13 @@ public class BasicLogic {
 		public boolean useSpecialExec() {
 			return true;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "nor(true, false)"),
+			};
+		}
 	}
 
 	@api
@@ -1329,6 +1513,12 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "xnor(true, true)"),
+			};
 		}
 	}
 
@@ -1383,6 +1573,15 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "bit_and(1, 2, 4)"),
+				new ExampleScript("Usage in masking applications. Note that 5 in binary is 101 and 4 is 100. (See bit_or for a more complete example.)", 
+					"assign(@var, 5)\nif(bit_and(@var, 4),\n\tmsg('Third bit set')\n)"),
+			};
+		}
 	}
 
 	@api
@@ -1436,6 +1635,17 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "bit_or(1, 2, 4)"),
+				new ExampleScript("Usage in masking applications. (Used to create a mask)", "assign(@flag1, 1)\nassign(@flag2, 2)\nassign(@flag3, 4)\n"
+					+ "assign(@flags, bit_or(@flag1, @flag3))\n"
+					+ "if(bit_and(@flags, @flag1),\n\tmsg('Contains flag 1')\n)\n"
+					+ "if(!bit_and(@flags, @flag2),\n\tmsg('Does not contain flag 2')\n)"),
+			};
+		}
 	}
 
 	@api
@@ -1481,6 +1691,13 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "bit_not(1)"),
+			};
 		}
 	}
 
@@ -1530,6 +1747,13 @@ public class BasicLogic {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "lshift(1, 1)"),
+			};
+		}
 	}
 
 	@api
@@ -1577,6 +1801,14 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "rshift(2, 1)"),
+				new ExampleScript("Basic usage", "rshift(-2, 1)"),
+			};
 		}
 	}
 
@@ -1626,6 +1858,14 @@ public class BasicLogic {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "urshift(2, 1)"),
+				new ExampleScript("Basic usage", "urshift(-2, 1)"),
+			};
 		}
 	}
 

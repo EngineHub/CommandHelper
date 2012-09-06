@@ -7,8 +7,11 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Env;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
 /**
  * The compiler environment provides compilation settings, or other controller
@@ -20,9 +23,24 @@ import java.util.Map;
  * @author lsmith
  */
 public class CompilerEnvironment implements Env.EnvImpl{	
+	/**
+	 * A constant is a construct that is defined in source like ${this}. The value
+	 * must be passed in at compile time.
+	 */
 	private Map<String, Construct> constants = new HashMap<String, Construct>();
+	
+	/**
+	 * A list of included parse trees. These likely will have come from other files, but
+	 * the compilation result should have been cached.
+	 */
 	private List<ParseTree> includes = new ArrayList<ParseTree>();
-	private List<String> knownProcs = new ArrayList<String>();
+
+	/**
+	 * A list of assigned vars are kept here, so when in strict mode, if a
+	 * variable hasn't been declared yet, it will be a compiler error.
+	 */
+	private Stack<Set<String>> knownVars = new Stack<Set<String>>();
+	//TODO: Need to figure out how to do known procs.
 	public void setConstant(String name, Construct value){
 		constants.put(name, value);
 	}
@@ -31,6 +49,23 @@ public class CompilerEnvironment implements Env.EnvImpl{
 	}
 	public Construct getConstant(String name){		
 		return constants.get(name);
+	}
+	public void pushVariableStack(){
+		knownVars.push(new HashSet<String>());
+	}
+	public void popVariableStack(){
+		knownVars.pop();
+	}
+	public void addKnownVar(String name){
+		knownVars.peek().add(name);
+	}
+	public boolean isVarKnown(String name){
+		for(Set<String> scope : knownVars){
+			if(scope.contains(name)){
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	public void addInclude(ParseTree tree){
@@ -41,11 +76,4 @@ public class CompilerEnvironment implements Env.EnvImpl{
 		return new ArrayList<ParseTree>(includes);
 	}
 	
-	public void addKnownProcName(String name){
-		knownProcs.add(name);
-	}
-	
-	public boolean isProcKnown(String name){
-		return knownProcs.contains(name);
-	}
 }

@@ -500,7 +500,7 @@ public class CArray extends Construct implements ArrayAccess{
         /**
          * All values are considered strings, but the comparison is case-insensitive.
          */
-        STRING_CI
+        STRING_IC
     }
     public void sort(final SortType sort){
         List<Construct> list = array;
@@ -557,7 +557,7 @@ public class CArray extends Construct implements ArrayAccess{
                         return compareNumeric(o1, o2);                        
                     case STRING:
                         return compareString(o1.val(), o2.val());                        
-                    case STRING_CI:
+                    case STRING_IC:
                         return compareString(o1.val().toLowerCase(), o2.val().toLowerCase());  
                 }
                 throw new ConfigRuntimeException("Missing implementation for " + sort.name(), Target.UNKNOWN);
