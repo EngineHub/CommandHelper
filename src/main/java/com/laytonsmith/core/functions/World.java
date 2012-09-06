@@ -66,7 +66,11 @@ public class World {
             } else {
                 world = environment.GetPlayer().getWorld().getName();
             }
-            return ObjectGenerator.GetGenerator().location(Static.getServer().getWorld(world).getSpawnLocation());
+			MCWorld w = Static.getServer().getWorld(world);
+			if(w == null){
+				throw new ConfigRuntimeException("The specified world \"" + world + "\" is not a valid world.", ExceptionType.InvalidWorldException, t);
+			}
+            return ObjectGenerator.GetGenerator().location(w.getSpawnLocation());
         }
     }
 
