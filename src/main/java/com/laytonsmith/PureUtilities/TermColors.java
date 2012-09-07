@@ -31,7 +31,7 @@ public final class TermColors {
             SYSTEM = SYS.WINDOWS;
         } else {
             SYSTEM = SYS.UNIX;
-        }
+        }		
     }
 
     
@@ -248,4 +248,13 @@ public final class TermColors {
     public static void pl(CharSequence c) {
         System.out.println(c + WHITE);
     }
+	
+	/**
+	 * THIS BLOCK MUST REMAIN AT THE BOTTOM
+	 */
+	static{
+		if(SYSTEM == SYS.WINDOWS){
+			DisableColors();
+		}
+	}
 }

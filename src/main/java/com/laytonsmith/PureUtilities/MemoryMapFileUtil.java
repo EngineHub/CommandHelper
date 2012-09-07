@@ -54,29 +54,36 @@ public class MemoryMapFileUtil {
 				running = true;
 			}
 			while(true){
+				
+				File temp = null;
 				try {
 					synchronized(this){
 						if(!dirty){
 							return;
 						}
 					}
-					File temp = File.createTempFile("MemoryMapFile", ".tmp");
+					temp = File.createTempFile("MemoryMapFile", ".tmp");
 					File permanent = new File(file);
 					FileUtility.write(grabber.getData(), temp, FileUtility.OVERWRITE, true);
-					if(!FileUtility.move(temp, permanent)){
-						throw new IOException("Unable to move file! (from " + temp + " to " + permanent + ")");
+					if(FileUtility.move(temp, permanent)){
+						//If and only if the file was moved, do we want to clear the dirty flag.
+						synchronized(this){
+							dirty = false;
+						}
 					}
-					temp.delete();
 				} catch (IOException ex) {
 					Logger.getLogger(MemoryMapFileUtil.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
-					//At least only spam the logs each time this gets called,
-					//instead of all over the place.
-					dirty = false;
+					if(temp != null){
+						temp.delete();
+						temp.deleteOnExit();
+					}
 				}
 			}
 		} finally{
-			running = false;
+			synchronized(this){
+				running = false;
+			}
 		}
 	}
 	

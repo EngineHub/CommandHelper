@@ -1325,4 +1325,53 @@ public class ArrayHandling {
 		}
 		
 	}
+	
+	@api
+	public static class array_reverse extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			if(args[0] instanceof CArray){
+				((CArray)args[0]).reverse();
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "array_reverse";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {array} Reverses an array in place. However, if the array is associative, throws a CastException, since associative"
+					+ " arrays are more like a map.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)\narray_reverse(@array)\nmsg(@array)"),
+				new ExampleScript("Failure", "assign(@array, array(one: 1, two: 2))\narray_reverse(@array)")
+			};
+		}				
+		
+	}
 }

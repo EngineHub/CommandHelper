@@ -108,6 +108,19 @@ public class CArray extends Construct implements ArrayAccess{
     private void regenValue() {
         valueDirty = true;
     }
+	
+	/**
+	 * Reverses the array in place, if it is a normal array, otherwise, if associative, it throws
+	 * an exception.
+	 */
+	public void reverse(){
+		if(!associative_mode){
+			Collections.reverse(array);
+			regenValue();
+		} else {
+			throw new ConfigRuntimeException("Cannot reverse an associative array.", ExceptionType.CastException, getTarget());
+		}
+	}
 
     /**
      * Pushes a new Construct onto the array

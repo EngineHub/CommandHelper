@@ -2,8 +2,6 @@ package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.UIUtils;
 import com.laytonsmith.core.Prefs;
-import com.sun.awt.AWTUtilities;
-import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
