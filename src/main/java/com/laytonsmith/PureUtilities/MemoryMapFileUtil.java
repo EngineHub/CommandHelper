@@ -22,7 +22,7 @@ public class MemoryMapFileUtil {
 	private static Map<String, MemoryMapFileUtil> instances = new HashMap<String, MemoryMapFileUtil>();
 	
 	public static MemoryMapFileUtil getInstance(File f, DataGrabber grabber) throws IOException{
-		String s = f.getCanonicalPath();
+		String s = f.getCanonicalPath().intern();
 		MemoryMapFileUtil mem;
 		if(!instances.containsKey(s)){
 			mem = new MemoryMapFileUtil(f, grabber);
@@ -65,9 +65,9 @@ public class MemoryMapFileUtil {
 					temp = File.createTempFile("MemoryMapFile", ".tmp");
 					File permanent = new File(file);
 					FileUtility.write(grabber.getData(), temp, FileUtility.OVERWRITE, true);
-					if(FileUtility.move(temp, permanent)){
-						//If and only if the file was moved, do we want to clear the dirty flag.
-						synchronized(this){
+					synchronized(this){
+						if(FileUtility.move(temp, permanent)){
+							//If and only if the file was moved, do we want to clear the dirty flag.
 							dirty = false;
 						}
 					}

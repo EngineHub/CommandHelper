@@ -6,6 +6,7 @@ import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.WeakHashMap;
 
 /**
  *
@@ -18,7 +19,8 @@ public class FileUtility {
 	public static final int OVERWRITE = 0;
 	public static final int APPEND = 1;
 	
-	private static final Map<String, Object> fileLocks = new HashMap<String, Object>();
+	//TODO: Replace this with an internal locking mechanism.
+	private static final WeakHashMap<String, Object> fileLocks = new WeakHashMap<String, Object>();
 	/**
 	 * A more complicated mechanism is required to ensure global access across the JVM
 	 * is synchronized, so file system accesses do not throw OverlappingFileLockExceptions.
@@ -272,9 +274,6 @@ public class FileUtility {
 	 */
 	public static boolean move(File from, File to) throws IOException {
 		synchronized(getLock(to)){
-			if(to.exists()){
-				to.delete();
-			}
 			return from.renameTo(to);
 		}
 	}

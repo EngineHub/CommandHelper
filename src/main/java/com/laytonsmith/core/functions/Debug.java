@@ -4,15 +4,18 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
+import java.util.Set;
 
 /**
- * TODO: Remove bukkit references
+ * 
  * @author Layton
  */
 public class Debug {
@@ -409,4 +412,47 @@ public class Debug {
 //            return new CVoid(t);
 //        }
 //    }
+	
+	@api
+	public static class dump_threads extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			Set<Thread> threadSet = Thread.getAllStackTraces().keySet();
+			CArray carray = new CArray(t);
+			for(Thread thread : threadSet){
+				carray.push(new CString(thread.getName(), t));
+			}
+			return carray;
+		}
+
+		public String getName() {
+			return "dump_threads";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns an array of all thread names that are currently running in the JVM."
+					+ " This is a debugging tool for your server, and less of a CommandHelper specific thing.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }
