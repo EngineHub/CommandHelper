@@ -85,6 +85,16 @@ public class Crypto {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "rot13('string')"),
+				new ExampleScript("Basic usage", "rot13('fgevat')"),
+			};
+		}
+		
+		
     }
 
     @api
@@ -139,6 +149,14 @@ public class Crypto {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "md5('string')"),
+				new ExampleScript("Basic usage", "md5('String')"),
+			};
+		}
     }
 
     @api
@@ -192,6 +210,14 @@ public class Crypto {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "sha1('string')"),
+				new ExampleScript("Basic usage", "sha1('String')"),
+			};
+		}
     }
     
     @api public static class sha256 extends AbstractFunction{
@@ -244,6 +270,14 @@ public class Crypto {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "sha256('string')"),
+				new ExampleScript("Basic usage", "sha256('String')"),
+			};
+		}
 	    
     }
     
@@ -288,6 +322,14 @@ public class Crypto {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "bcrypt('string')"),
+				new ExampleScript("Basic usage", "bcrypt('String')"),
+			};
+		}
         
     }
     
@@ -326,6 +368,15 @@ public class Crypto {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@plain, 'plaintext')\nassign(@hash, bcrypt(@plain))\n"
+					+ "msg(if(check_bcrypt(@plain, @hash), 'They match!', 'They do not match!'))\n"
+					+ "msg(if(check_bcrypt('notTheRightPassword', @hash), 'They match!', 'They do not match!'))"),
+			};
+		}
         
     }
 

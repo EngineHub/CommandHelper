@@ -464,7 +464,7 @@ public class DocGenUIHandler {
 				try{
 					f.examples();
 				} catch(ConfigCompileException e){
-					throw new RuntimeException("Compilation error while compiling examples for " + f.getName());
+					throw new RuntimeException("Compilation error while compiling examples for " + f.getName(), e);
 				}
 			}
 		}

@@ -70,6 +70,14 @@ public class DataHandling {
 //        public Construct optimize(Target t, Construct... args) {
 //            return exec(t, null, args);
 //        }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)"),
+				new ExampleScript("Associative array creation", "assign(@array, array(one: 'apple', two: 'banana'))\nmsg(@array)"),
+			};
+		}
 	}
 
 	@api
@@ -187,6 +195,14 @@ public class DataHandling {
 			}
 			return null;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@variable, 5)\nmsg(@variable)"),
+				new ExampleScript("Array assignment", "assign(@variable['associative'], 5) #This creates the array for us\nmsg(@variable)"),
+			};
+		}
 	}
 
 	@api
@@ -278,6 +294,18 @@ public class DataHandling {
 		@Override
 		public boolean allowBraces() {
 			return true;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 5, @i++,\n\tmsg(@i)\n)"),
+				new ExampleScript("With braces", "for(assign(@i, 0), @i < 2, @i++){\n\tmsg(@i)\n}"),
+				new ExampleScript("With continue. (See continue() for more examples)", "for(assign(@i, 0), @i < 2, @i++){\n"
+					+ "\tif(@i == 1, continue())\n"
+					+ "\tmsg(@i)\n"
+					+ "}"),
+			};
 		}
 	}
 
@@ -394,6 +422,15 @@ public class DataHandling {
 		public boolean allowBraces() {
 			return true;
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nforeach(@array, @i,\n\tmsg(@i)\n)"),
+				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
+				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),				
+			};
+		}
 	}
 
 	@api
@@ -455,6 +492,21 @@ public class DataHandling {
 
 		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull();
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "assign(@i, 5)\nwhile(@i > 0,\n"
+					+ "\tmsg(@i)\n"
+					+ "\t@i--\n"
+					+ ")"),
+				new ExampleScript("With a break", "assign(@i, 0)\nwhile(true,\n"
+					+ "\tmsg(@i)\n"
+					+ "\t@i++\n"
+					+ "\tif(@i > 5, break())\n"
+					+ ")"),
+			};
 		}
 	}
 
@@ -519,6 +571,16 @@ public class DataHandling {
 			}
 			return new CVoid(t);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "dowhile(\n"
+					+ "\tmsg('This will only run once')\n"
+					+ ", #while\n"
+					+ "false)"),
+			};
+		}
 	}
 
 	@api
@@ -562,6 +624,23 @@ public class DataHandling {
 			}
 			throw new LoopBreakException(num);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 1000, @i++,\n"
+					+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
+					+ "\t\tmsg('This will only display once')\n"
+					+ "\t\tbreak(2)\n"
+					+ "\t)"
+					+ ")"),
+				new ExampleScript("Invalid number", "for(assign(@i, 0), @i < 1000, @i++,\n"
+					+ "\tfor(assign(@j, 0), @j < 1000, @j++,\n"
+					+ "\t\tbreak(3) #There are only 2 loops to break out of\n"
+					+ "\t)"
+					+ ")"),
+			};
+		}
 	}
 
 	@api
@@ -604,13 +683,27 @@ public class DataHandling {
 			}
 			throw new LoopContinueException(num);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "for(assign(@i, 0), @i < 5, @i++){\n"
+					+ "\tif(@i == 2, continue())\n"
+					+ "\tmsg(@i)\n"
+					+ "}"),
+				new ExampleScript("Argument specified", "for(assign(@i, 0), @i < 5, @i++){\n"
+					+ "\tif(@i == 2, continue(2))\n"
+					+ "\tmsg(@i)\n"
+					+ "}"),
+			};
+		}
 	}
 
 	@api
-	public static class is_string extends AbstractFunction {
+	public static class is_stringable extends AbstractFunction {
 
 		public String getName() {
-			return "is_string";
+			return "is_stringable";
 		}
 
 		public Integer[] numArgs() {
@@ -618,7 +711,7 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns whether or not the item is a string. Everything but arrays can be used as strings.";
+			return "boolean {item} Returns whether or not the item is convertable to a string. Everything but arrays can be used as strings.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -630,7 +723,7 @@ public class DataHandling {
 		}
 
 		public CHVersion since() {
-			return CHVersion.V3_1_2;
+			return CHVersion.V3_3_1;
 		}
 
 		public Boolean runAsync() {
@@ -649,6 +742,70 @@ public class DataHandling {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_stringable('yes')"),
+				new ExampleScript("True condition", "is_stringable(1) #This can be used as a string, yes"),
+				new ExampleScript("False condition", "is_stringable(array(1))"),
+			};
+		}
+	}
+	
+	@api
+	public static class is_string extends AbstractFunction {
+
+		public String getName() {
+			return "is_stringable";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "boolean {item} Returns whether or not the item is actually a string datatype. If you just care if some data can be used as a string,"
+					+ " use is_stringable().";
+		}
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+			return new CBoolean((args[0] instanceof CString), t);
+		}
+
+		@Override
+		public boolean canOptimize() {
+			return true;
+		}
+
+		@Override
+		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_string('yes')"),
+				new ExampleScript("False condition", "is_string(1) #is_stringable() would return true here"),
+			};
 		}
 	}
 
@@ -695,6 +852,15 @@ public class DataHandling {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_array(array(1))"),
+				new ExampleScript("True condition", "is_array(array(one: 1))"),
+				new ExampleScript("False condition", "is_array('no')"),
+			};
 		}
 	}
 
@@ -744,6 +910,14 @@ public class DataHandling {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_double(1.0)"),
+				new ExampleScript("False condition", "is_double(1)"),
+			};
+		}
 	}
 
 	@api
@@ -792,6 +966,14 @@ public class DataHandling {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_integer(1)"),
+				new ExampleScript("False condition", "is_integer(1.0)"),
+			};
+		}
 	}
 
 	@api
@@ -839,6 +1021,14 @@ public class DataHandling {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_boolean(false)"),
+				new ExampleScript("False condition", "is_boolean(0)"),
+			};
+		}
 	}
 
 	@api
@@ -884,6 +1074,14 @@ public class DataHandling {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_null(null)"),
+				new ExampleScript("False condition", "is_null(0)"),
+			};
 		}
 	}
 
@@ -937,6 +1135,16 @@ public class DataHandling {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_numeric('1.0')"),
+				new ExampleScript("True condition", "is_numeric('1')"),
+				new ExampleScript("True condition", "is_numeric(1)"),
+				new ExampleScript("False condition", "is_numeric('string')"),
+			};
 		}
 	}
 
@@ -994,6 +1202,17 @@ public class DataHandling {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_integral(1.0)"),
+				new ExampleScript("True condition", "is_integral(1)"),
+				new ExampleScript("True condition", "is_integral('5.0')"),
+				new ExampleScript("True condition", "is_integral('6')"),
+				new ExampleScript("False condition", "is_integral(1.5)"),
+			};
 		}
 	}
 
@@ -1414,6 +1633,14 @@ public class DataHandling {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_associative(array(one: 1, two: 2))"),
+				new ExampleScript("False condition", "is_associative(array(1, 2, 3))"),
+			};
+		}
 	}
 
 	@api
@@ -1450,6 +1677,14 @@ public class DataHandling {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("True condition", "is_closure(closure(msg('code')))"),
+				new ExampleScript("False condition", "is_closure('a string')"),
+			};
 		}
 	}
 
@@ -1748,6 +1983,19 @@ public class DataHandling {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "boolean(1)"),
+				new ExampleScript("Basic usage", "boolean(0)"),
+				new ExampleScript("Basic usage", "boolean(array(1))"),
+				new ExampleScript("Basic usage", "boolean(array())"),
+				new ExampleScript("Basic usage", "boolean(null)"),
+				new ExampleScript("Basic usage", "boolean('string')"),
+				new ExampleScript("Basic usage", "boolean('')"),
+			};
+		}
 	}
 
 	@api
@@ -1799,6 +2047,15 @@ public class DataHandling {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "integer(1.0)"),
+				new ExampleScript("Basic usage", "integer(1.5)"),
+				new ExampleScript("Failure", "assign(@var, 'string')\ninteger(@var)"),
+			};
+		}
 	}
 
 	@api
@@ -1847,6 +2104,14 @@ public class DataHandling {
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
 		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "double(1)"),
+				new ExampleScript("Failure", "assign(@var, 'string')\ndouble(@var)"),
+			};
+		}
 	}
 
 	@api
@@ -1863,7 +2128,7 @@ public class DataHandling {
 		public String docs() {
 			return "string {item} Creates a new construct that is the \"toString\" of an item."
 					+ " For arrays, an human readable version is returned; this should not be"
-					+ " used directly, as the format is not guaranteed. Booleans return \"true\""
+					+ " used directly, as the format is not guaranteed to remain consistent. Booleans return \"true\""
 					+ " or \"false\" and null returns \"null\".";
 		}
 
@@ -1895,6 +2160,18 @@ public class DataHandling {
 		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			return exec(t, null, args);
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "string(1)"),
+				new ExampleScript("Basic usage", "string(true)"),
+				new ExampleScript("Basic usage", "string(false)"),
+				new ExampleScript("Basic usage", "string(null)"),
+				new ExampleScript("Basic usage", "string(array(1, 2))"),
+				new ExampleScript("Basic usage", "string(array(one: 'one', two: 'two'))"),
+			};
 		}
 	}
 

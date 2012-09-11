@@ -47,8 +47,9 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		Object [] newArray = new Object[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
 			int counter = 0;
@@ -73,12 +74,14 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		char [] newArray = new char[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
-			for(int i = finish; i >= start; i++){
-				newArray[i] = array[i];
+			int counter = 0;
+			for(int i = start; i >= finish; i--){
+				newArray[counter++] = array[i];
 			}
 		}
 		return newArray;
@@ -97,12 +100,14 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		byte [] newArray = new byte[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
-			for(int i = finish; i >= start; i++){
-				newArray[i] = array[i];
+			int counter = 0;
+			for(int i = start; i >= finish; i--){
+				newArray[counter++] = array[i];
 			}
 		}
 		return newArray;
@@ -121,12 +126,14 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		short [] newArray = new short[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
-			for(int i = finish; i >= start; i++){
-				newArray[i] = array[i];
+			int counter = 0;
+			for(int i = start; i >= finish; i--){
+				newArray[counter++] = array[i];
 			}
 		}
 		return newArray;
@@ -145,12 +152,14 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		int [] newArray = new int[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
-			for(int i = finish; i >= start; i++){
-				newArray[i] = array[i];
+			int counter = 0;
+			for(int i = start; i >= finish; i--){
+				newArray[counter++] = array[i];
 			}
 		}
 		return newArray;
@@ -169,12 +178,14 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		long [] newArray = new long[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
-			for(int i = finish; i >= start; i++){
-				newArray[i] = array[i];
+			int counter = 0;
+			for(int i = start; i >= finish; i--){
+				newArray[counter++] = array[i];
 			}
 		}
 		return newArray;
@@ -193,12 +204,14 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		float [] newArray = new float[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
-			for(int i = finish; i >= start; i++){
-				newArray[i] = array[i];
+			int counter = 0;
+			for(int i = start; i >= finish; i--){
+				newArray[counter++] = array[i];
 			}
 		}
 		return newArray;
@@ -217,12 +230,14 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		double [] newArray = new double[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
-			for(int i = finish; i >= start; i++){
-				newArray[i] = array[i];
+			int counter = 0;
+			for(int i = start; i >= finish; i--){
+				newArray[counter++] = array[i];
 			}
 		}
 		return newArray;
@@ -241,12 +256,14 @@ public class ArrayUtils {
 		int size = Math.abs(start - finish) + 1;
 		boolean [] newArray = new boolean[size];
 		if(start <= finish){
+			int counter = 0;
 			for(int i = start; i <= finish; i++){
-				newArray[i] = array[i];
+				newArray[counter++] = array[i];
 			}
 		} else {
-			for(int i = finish; i >= start; i++){
-				newArray[i] = array[i];
+			int counter = 0;
+			for(int i = start; i >= finish; i--){
+				newArray[counter++] = array[i];
 			}
 		}
 		return newArray;

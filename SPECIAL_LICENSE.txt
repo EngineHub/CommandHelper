@@ -9,9 +9,10 @@ this means that you cannot submit code that adds Objects, for instance, and keep
 the copyright on it, you must release that to me. 
 
 This is because I intend for MethodScript to live past Minecraft, and I do not
-want to be burdened by license restrictions. In all likelyhood, I will always
+want to be burdened by license restrictions. In all likelihood, I will always
 release the core under MIT, however, I am not willing to make any promises,
 so please keep that in mind, and if me selling the software without crediting
 you in the future makes you uncomfortable, please do not submit code to the core.
 
-Code that relates to Minecraft itself will always be MIT licensed, 
+Code that relates to Minecraft itself will always be MIT licensed, and your
+Minecraft related submissions are always released under MIT.

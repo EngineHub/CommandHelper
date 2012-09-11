@@ -196,4 +196,18 @@ public final class StringUtils {
 		str = str.substring(0, len);
 		return str;
 	}
+	
+	/**
+	 * Works like String.split(), but trims each of the entries also.
+	 * @param string
+	 * @param regex
+	 * @return 
+	 */
+	public static String [] trimSplit(String string, String regex){
+		String [] split = string.split(regex);
+		for(int i = 0; i < split.length; i++){
+			split[i] = split[i].trim();
+		}
+		return split;
+	}
 }
