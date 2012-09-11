@@ -13,6 +13,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.lang.reflect.Field;
@@ -75,6 +76,15 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "#Note, this is guaranteed to print to standard out\nsys_out('Hello World!')", ":Hello World!")
+			};
+		}
+		
+		
     }
 
     @api
@@ -121,6 +131,13 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "#Note this is guaranteed to print to standard err\nsys_out('Hello World!')", ":Hello World!")
+			};
+		}
     }
 
     @api
@@ -166,6 +183,14 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "#Causes the JVM to exit with an exit code of 0\nexit(0)", ""),
+				new ExampleScript("Basic usage", "#Causes the JVM to exit with an exit code of 1\nexit(1)", ""),
+			};
+		}
     }
 
     @api
@@ -216,6 +241,14 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Gets all properties", "array_size(sys_properties())"),
+				new ExampleScript("Gets a single property", "sys_properties('java.specification.vendor')"),
+			};
+		}
     }
 
     @api

@@ -11,7 +11,11 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -1372,6 +1376,88 @@ public class ArrayHandling {
 				new ExampleScript("Failure", "assign(@array, array(one: 1, two: 2))\narray_reverse(@array)")
 			};
 		}				
+		
+	}
+	
+	@api public static class array_rand extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+			long number = 1;
+			boolean getKeys = true;
+			CArray array = Static.getArray(args[0], t);
+			if(args.length > 1){
+				number = Static.getInt(args[1]);
+			}
+			if(number < 1){
+				throw new ConfigRuntimeException("number may not be less than 1.", ExceptionType.RangeException, t);
+			}
+			if(number > Integer.MAX_VALUE){
+				throw new ConfigRuntimeException("Overflow detected. Number cannot be larger than " + Integer.MAX_VALUE, ExceptionType.RangeException, t);
+			}
+			if(args.length > 2){
+				getKeys = Static.getBoolean(args[2]);
+			}
+			
+			Set<Integer> randoms = new HashSet<Integer>();
+			Random r = new Random(System.currentTimeMillis());
+			while(randoms.size() < number){
+				randoms.add(r.nextInt() % (int)number);
+			}
+			CArray newArray = new CArray(t);
+			List<String> keySet = new ArrayList<String>(array.keySet());
+			for(Integer i : randoms){
+				if(getKeys){
+					newArray.push(new CString(keySet.get(i), t));
+				} else {
+					newArray.push(array.get(keySet.get(i), t));
+				}
+			}
+			return newArray;
+		}
+
+		public String getName() {
+			return "array_rand";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		public String docs() {
+			return "array {array, [number, [getKeys]]} Returns a random selection of keys or values from an array. The array may be"
+					+ " either normal or associative. Number defaults to 1, and getKey defaults to true. If number is greater than"
+					+ " the size of the array, a RangeException is thrown. No value will be returned twice from the array however, one it"
+					+ " is \"drawn\" from the array, it is not placed back in.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Usage with a normal array", "assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))"),
+				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results", 
+					"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array), 2, false)"),
+				new ExampleScript("Usage with an associative array", 
+					"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))"),
+			};
+		}
+		
+		
 		
 	}
 }

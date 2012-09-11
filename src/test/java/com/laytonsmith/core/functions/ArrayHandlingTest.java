@@ -17,6 +17,7 @@ import static com.laytonsmith.testing.StaticTest.*;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runners.JUnit4;
 import static org.mockito.Mockito.*;
 
 /**
@@ -269,5 +270,13 @@ public class ArrayHandlingTest {
 	@Test public void testArrayIndexesMissing() throws ConfigCompileException{
 		Run("assign(@array, array(1, 3)) msg(array_indexes(@array, 2))", fakePlayer);
 		verify(fakePlayer).sendMessage("{}");
+	}
+	
+	@Test public void testArrayRand() throws Exception{
+		assertEquals("{1}", SRun("array_rand(array(1, 1, 1), 1, false)", null));
+		String output = SRun("array_rand(array('a', 'b', 'c'))", null);
+		if(!"{0}".equals(output) && !"{1}".equals(output) && !"{2}".equals(output)){
+			throw new Exception("Did not return the expected value");
+		}
 	}
 }
