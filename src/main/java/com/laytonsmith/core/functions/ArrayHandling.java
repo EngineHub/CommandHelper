@@ -1379,7 +1379,7 @@ public class ArrayHandling {
 		
 	}
 	
-	@api public static class array_rand extends AbstractFunction{
+	public static class array_rand extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
