@@ -278,5 +278,9 @@ public class ArrayHandlingTest {
 		if(!"{0}".equals(output) && !"{1}".equals(output) && !"{2}".equals(output)){
 			throw new Exception("Did not return the expected value");
 		}
+		output = SRun("array_rand(array('a', 'b'), 2)", null);
+		if(!"{0, 1}".equals(output) && !"{1, 0}".equals(output)){
+			throw new Exception("Did not return the expected value");
+		}
 	}
 }

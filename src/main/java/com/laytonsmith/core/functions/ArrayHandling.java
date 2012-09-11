@@ -1413,7 +1413,7 @@ public class ArrayHandling {
 			Set<Integer> randoms = new HashSet<Integer>();
 			Random r = new Random(System.currentTimeMillis());
 			while(randoms.size() < number){
-				randoms.add(r.nextInt() % (int)number);
+				randoms.add(java.lang.Math.abs(r.nextInt() % (int)number));
 			}
 			CArray newArray = new CArray(t);
 			List<String> keySet = new ArrayList<String>(array.keySet());
@@ -1451,7 +1451,7 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Usage with a normal array", "assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))"),
 				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results", 
-					"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array), 2, false)"),
+					"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))"),
 				new ExampleScript("Usage with an associative array", 
 					"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))"),
 			};
