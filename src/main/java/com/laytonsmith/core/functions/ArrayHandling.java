@@ -13,6 +13,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -1379,7 +1380,7 @@ public class ArrayHandling {
 		
 	}
 	
-	public static class array_rand extends AbstractFunction{
+	@api public static class array_rand extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
@@ -1393,6 +1394,7 @@ public class ArrayHandling {
 			return null;
 		}
 
+		Random r = new Random(System.currentTimeMillis());
 		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
 			long number = 1;
 			boolean getKeys = true;
@@ -1410,10 +1412,9 @@ public class ArrayHandling {
 				getKeys = Static.getBoolean(args[2]);
 			}
 			
-			Set<Integer> randoms = new HashSet<Integer>();
-			Random r = new Random(System.currentTimeMillis());
+			LinkedHashSet<Integer> randoms = new LinkedHashSet<Integer>();
 			while(randoms.size() < number){
-				randoms.add(java.lang.Math.abs(r.nextInt() % (int)number));
+				randoms.add(java.lang.Math.abs(r.nextInt() % (int)array.size()));
 			}
 			CArray newArray = new CArray(t);
 			List<String> keySet = new ArrayList<String>(array.keySet());
