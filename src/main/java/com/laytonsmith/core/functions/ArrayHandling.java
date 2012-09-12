@@ -1440,7 +1440,8 @@ public class ArrayHandling {
 			return "array {array, [number, [getKeys]]} Returns a random selection of keys or values from an array. The array may be"
 					+ " either normal or associative. Number defaults to 1, and getKey defaults to true. If number is greater than"
 					+ " the size of the array, a RangeException is thrown. No value will be returned twice from the array however, one it"
-					+ " is \"drawn\" from the array, it is not placed back in.";
+					+ " is \"drawn\" from the array, it is not placed back in. The order of the elements in the array will also be random,"
+					+ " if order is important, use array_sort().";
 		}
 
 		public CHVersion since() {
