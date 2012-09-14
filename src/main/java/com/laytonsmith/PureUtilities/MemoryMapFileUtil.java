@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.PureUtilities;
 
 import java.io.File;
@@ -20,8 +17,12 @@ import java.util.logging.Logger;
  */
 public class MemoryMapFileUtil {
 	private static Map<String, MemoryMapFileUtil> instances = new HashMap<String, MemoryMapFileUtil>();
+	/**
+	 * The minimum delay between FS writes. In milliseconds.
+	 */
+	private static final int WRITE_DELAY = 250;
 	
-	public static MemoryMapFileUtil getInstance(File f, DataGrabber grabber) throws IOException{
+	public static synchronized MemoryMapFileUtil getInstance(File f, DataGrabber grabber) throws IOException{
 		String s = f.getCanonicalPath().intern();
 		MemoryMapFileUtil mem;
 		if(!instances.containsKey(s)){
@@ -40,8 +41,10 @@ public class MemoryMapFileUtil {
 	
 	private String file;
 	private DataGrabber grabber;
-	private boolean dirty = false;
+	private boolean modelDirty = false;
+	private boolean fileDirty = false;
 	private boolean running = false;
+	private long lastWrite = 0;
 	private ExecutorService service;
 	private MemoryMapFileUtil(File file, DataGrabber grabber) throws IOException{
 		this.file = file.getCanonicalPath();
@@ -54,21 +57,36 @@ public class MemoryMapFileUtil {
 				running = true;
 			}
 			while(true){
-				
+				//We don't want to write out files too frequently, so we want to check when our last write action was,
+				//and delay some if it was too recent.
+				long lastWriteDelta = System.currentTimeMillis() - lastWrite;
+				if(lastWriteDelta < WRITE_DELAY){
+					try {
+						Thread.sleep(lastWriteDelta);
+					} catch (InterruptedException ex) {}
+				}
 				File temp = null;
 				try {
 					synchronized(this){
-						if(!dirty){
+						if(!modelDirty && !fileDirty){
 							return;
 						}
 					}
 					temp = File.createTempFile("MemoryMapFile", ".tmp");
 					File permanent = new File(file);
-					FileUtility.write(grabber.getData(), temp, FileUtility.OVERWRITE, true);
+					byte [] data; 
+					synchronized(this){
+						data = grabber.getData();
+						fileDirty = true;
+					}
+					
+					FileUtility.write(data, temp, FileUtility.OVERWRITE, true);
 					synchronized(this){
 						if(FileUtility.move(temp, permanent)){
 							//If and only if the file was moved, do we want to clear the dirty flag.
-							dirty = false;
+							fileDirty = false;
+							modelDirty = false;
+							lastWrite = System.currentTimeMillis();
 						}
 					}
 				} catch (IOException ex) {
@@ -94,7 +112,7 @@ public class MemoryMapFileUtil {
 	 */
 	public void mark(){
 		synchronized(this){
-			dirty = true;
+			modelDirty = fileDirty = true;
 			if(!running){
 				getService().submit(new Runnable() {
 
@@ -106,12 +124,14 @@ public class MemoryMapFileUtil {
 		}
 	}
 	
-	private ExecutorService getService(){
+	private synchronized ExecutorService getService(){
 		if(service == null){
 			service = Executors.newSingleThreadExecutor(new ThreadFactory() {
 
 				public Thread newThread(Runnable r) {
-					return new Thread(r, "MemoryMapWriter-" + file);
+					Thread t = new Thread(r, "MemoryMapWriter-" + file);
+					t.setPriority(Thread.MIN_PRIORITY);
+					return t;
 				}
 			});
 		}
