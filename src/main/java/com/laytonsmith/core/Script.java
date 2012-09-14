@@ -135,7 +135,7 @@ public class Script {
                             throw new ConfigRuntimeException("$variables may not be used in this context. Only @variables may be.", null, tempNode.getTarget());
                         }
                         ((Variable) tempNode).setVal(
-                                Static.resolveConstruct(
+                                new CString(
                                 Static.resolveDollarVar(left_vars.get(((Variable) tempNode).getName()), vars).toString(), tempNode.getTarget()));
                     }
                 }                

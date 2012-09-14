@@ -386,7 +386,7 @@ public final class Static {
             return new CBoolean(false, t);
         } else {
             try {
-                return new CInt(Integer.parseInt(val), t);
+                return new CInt(Long.parseLong(val), t);
             } catch (NumberFormatException e) {
                 try {
                     if (val.contains(" ") || val.contains("\t")) {
