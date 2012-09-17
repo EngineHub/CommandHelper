@@ -23,7 +23,7 @@ public class MemoryMapFileUtil {
 	private static final int WRITE_DELAY = 250;
 	
 	public static synchronized MemoryMapFileUtil getInstance(File f, DataGrabber grabber) throws IOException{
-		String s = f.getCanonicalPath().intern();
+		String s = f.getCanonicalPath();
 		MemoryMapFileUtil mem;
 		if(!instances.containsKey(s)){
 			mem = new MemoryMapFileUtil(f, grabber);
