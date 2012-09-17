@@ -7,7 +7,10 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -65,37 +68,43 @@ public class MemoryMapFileUtil {
 						Thread.sleep(lastWriteDelta);
 					} catch (InterruptedException ex) {}
 				}
-				File temp = null;
+//				File temp = null;
 				try {
 					synchronized(this){
 						if(!modelDirty && !fileDirty){
 							return;
 						}
 					}
-					temp = File.createTempFile("MemoryMapFile", ".tmp");
+//					temp = File.createTempFile("MemoryMapFile", ".tmp");
 					File permanent = new File(file);
 					byte [] data; 
 					synchronized(this){
 						data = grabber.getData();
+						modelDirty = false;
 						fileDirty = true;
 					}
 					
-					FileUtility.write(data, temp, FileUtility.OVERWRITE, true);
 					synchronized(this){
-						if(FileUtility.move(temp, permanent)){
-							//If and only if the file was moved, do we want to clear the dirty flag.
-							fileDirty = false;
-							modelDirty = false;
-							lastWrite = System.currentTimeMillis();
-						}
+						FileUtility.write(data, permanent, FileUtility.OVERWRITE, true);
+						fileDirty = false;
 					}
+//					synchronized(this){
+//						if(FileUtility.move(temp, permanent)){
+//							//If and only if the file was moved, do we want to clear the dirty flag.
+//							fileDirty = false;
+//							modelDirty = false;
+//							lastWrite = System.currentTimeMillis();
+//						} else {
+//							System.out.println("Could not move tmp file.");
+//						}
+//					}
 				} catch (IOException ex) {
 					Logger.getLogger(MemoryMapFileUtil.class.getName()).log(Level.SEVERE, null, ex);
 				} finally {
-					if(temp != null){
-						temp.delete();
-						temp.deleteOnExit();
-					}
+//					if(temp != null){
+//						temp.delete();
+//						temp.deleteOnExit();
+//					}
 				}
 			}
 		} finally{
@@ -126,14 +135,24 @@ public class MemoryMapFileUtil {
 	
 	private synchronized ExecutorService getService(){
 		if(service == null){
-			service = Executors.newSingleThreadExecutor(new ThreadFactory() {
-
-				public Thread newThread(Runnable r) {
-					Thread t = new Thread(r, "MemoryMapWriter-" + file);
-					t.setPriority(Thread.MIN_PRIORITY);
-					return t;
-				}
-			});
+			service = new ThreadPoolExecutor(1, 1,
+										60L, TimeUnit.MILLISECONDS,
+										new LinkedBlockingQueue<Runnable>(),
+										new ThreadFactory() {
+											public Thread newThread(Runnable r) {
+												Thread t = new Thread(r, "MemoryMapWriter-" + file);
+												t.setPriority(Thread.MIN_PRIORITY);
+												return t;
+											}
+										});
+//			service = Executors.newSingleThreadExecutor(new ThreadFactory() {
+//
+//				public Thread newThread(Runnable r) {
+//					Thread t = new Thread(r, "MemoryMapWriter-" + file);
+//					t.setPriority(Thread.MIN_PRIORITY);
+//					return t;
+//				}
+//			});
 		}
 		return service;
 	}

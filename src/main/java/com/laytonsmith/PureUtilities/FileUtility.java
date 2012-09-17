@@ -2,6 +2,8 @@ package com.laytonsmith.PureUtilities;
 
 import java.io.*;
 import java.nio.ByteBuffer;
+import java.nio.MappedByteBuffer;
+import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.Map;
@@ -130,8 +132,11 @@ public class FileUtility {
 				} else {
 					raf.seek(raf.length());
 				}
-				//Write out the data
-				raf.getChannel().write(ByteBuffer.wrap(data));
+				//Write out the data				
+				MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.PRIVATE, 0, data.length);
+				buf.put(data);
+				buf.force();
+				//raf.getChannel().write(ByteBuffer.wrap(data));
 			} finally {
 				if (lock != null) {
 					lock.release();

@@ -75,6 +75,10 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 * @throws Exception
 	 */
 	public void load() throws Exception {
+		if(true){
+			throw new Error("Persistance is currently broken. Instead of possibly corrupting your persistance file, it is currently completely disabled."
+					+ " This will of course be fixed ASAP, but until then, try an earlier build.");
+		}
 		try {
 			if (!isLoaded) {
 				FileInputStream fis = null;
@@ -83,11 +87,16 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 					if(!storageLocation.exists()){
 						storageLocation.createNewFile();
 					}
-					fis = new FileInputStream(storageLocation);
-					in = new ObjectInputStream(fis);
-					data = (HashMap<String, String>) in.readObject();
-					in.close();
+					if(storageLocation.length() == 0){
+						data = new HashMap<String, String>();
+					} else {
+						fis = new FileInputStream(storageLocation);
+						in = new ObjectInputStream(fis);
+						data = (HashMap<String, String>) in.readObject();					
+					}
 					isLoaded = true;
+				} catch(Throwable t){
+					t.printStackTrace();
 				} finally {
 					if(fis != null){
 						fis.close();
@@ -118,6 +127,10 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 * @throws IOException
 	 */
 	public void save() throws IOException{
+		if(true){
+			throw new Error("Persistance is currently broken. Instead of possibly corrupting your persistance file, it is currently completely disabled."
+					+ " This will of course be fixed ASAP, but until then, try an earlier build.");
+		}
 		if(writer == null){
 			writer = MemoryMapFileUtil.getInstance(storageLocation, grabber);
 		}
