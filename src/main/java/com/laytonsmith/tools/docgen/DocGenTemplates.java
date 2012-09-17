@@ -1,4 +1,4 @@
-package com.laytonsmith.tools;
+package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.StreamUtils;
@@ -8,6 +8,8 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -21,12 +23,20 @@ public class DocGenTemplates {
 	}
 	
 	public static String Generate(String forPage){
+		return Generate(forPage, new HashMap<String, String>());
+	}
+	public static String Generate(String forPage, Map<String, String> customTemplates){
 		//Grab the template from the resources
 		String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/docs/" + forPage));
 		//Find all the %%templates%% in the template
 		Matcher m = Pattern.compile("%%(.*?)%%").matcher(template);
 		while(m.find()){
 			String name = m.group(1);
+			for(String templateName : customTemplates.keySet()){
+				if(templateName.equals(name)){
+					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", customTemplates.get(name));
+				}
+			}
 			try{
 				Field f = DocGenTemplates.class.getDeclaredField(name);
 				f.setAccessible(true);

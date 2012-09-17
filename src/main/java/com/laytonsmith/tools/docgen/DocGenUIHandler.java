@@ -1,4 +1,4 @@
-package com.laytonsmith.tools;
+package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.WebUtility;
 import com.laytonsmith.PureUtilities.XMLDocument;
@@ -163,7 +163,7 @@ public class DocGenUIHandler {
 			}
 		}
 		for(String name : names){			
-			String docs = DocGen.examples(name);
+			String docs = DocGen.examples(name, isStaged);
 			doUpload(docs, "/API/" + name, true);
 		}
 	}
@@ -184,7 +184,7 @@ public class DocGenUIHandler {
 					q.addAll(Arrays.asList(r.listFiles()));
 				} else {
 					String articleName = "/" + r.getFile().getName();
-					doUpload(DocGen.Template(r.getFile().getName()), articleName, true);
+					doUpload(DocGen.Template(r.getFile().getName(), isStaged), articleName, true);
 				}
 			}
 		} catch (URISyntaxException ex) {

@@ -1,4 +1,4 @@
-package com.laytonsmith.tools;
+package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.UIUtils;
 import com.laytonsmith.core.Prefs;

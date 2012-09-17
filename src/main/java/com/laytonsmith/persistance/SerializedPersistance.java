@@ -80,6 +80,9 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 				FileInputStream fis = null;
 				ObjectInputStream in = null;
 				try{
+					if(!storageLocation.exists()){
+						storageLocation.createNewFile();
+					}
 					fis = new FileInputStream(storageLocation);
 					in = new ObjectInputStream(fis);
 					data = (HashMap<String, String>) in.readObject();

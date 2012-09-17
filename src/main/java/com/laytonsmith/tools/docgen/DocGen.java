@@ -1,6 +1,6 @@
 
 
-package com.laytonsmith.tools;
+package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.StreamUtils;
@@ -36,7 +36,7 @@ public class DocGen {
 //	    //System.out.println(Template("persistance_network"));
 //    }
 	
-	public static String examples(String function) throws ConfigCompileException{
+	public static String examples(String function, boolean staged) throws ConfigCompileException{
 		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
 		if(fb instanceof Function){
 			Function f = (Function)fb;
@@ -92,6 +92,7 @@ public class DocGen {
 			templateFields.put("description", di.extendedDesc==null?di.desc:di.topDesc + "\n\n" + di.extendedDesc);
 			templateFields.put("usages", usageBuilder.toString());
 			templateFields.put("examples", exampleBuilder.toString());
+			templateFields.put("staged", staged?"Staged/":"");
 					
 					
 			String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/templates/example_templates"));
@@ -313,8 +314,10 @@ public class DocGen {
 		return out.toString();
     }
     
-    public static String Template(String template){
-	    return DocGenTemplates.Generate(template);
+    public static String Template(String template, boolean staged){
+		Map<String, String> customTemplates = new HashMap<String, String>();
+		customTemplates.put("staged", staged?"Staged/":"");
+	    return DocGenTemplates.Generate(template, customTemplates);
     }
 
     public static String events(String type) {

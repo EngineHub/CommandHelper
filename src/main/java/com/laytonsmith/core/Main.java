@@ -2,6 +2,8 @@
 
 package com.laytonsmith.core;
 
+import com.laytonsmith.tools.docgen.DocGenUI;
+import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.Util;
 import com.laytonsmith.annotations.api;
