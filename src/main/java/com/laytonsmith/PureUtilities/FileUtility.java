@@ -133,7 +133,7 @@ public class FileUtility {
 					raf.seek(raf.length());
 				}
 				//Write out the data				
-				MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.PRIVATE, 0, data.length);
+				MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
 				buf.put(data);
 				buf.force();
 				//raf.getChannel().write(ByteBuffer.wrap(data));
