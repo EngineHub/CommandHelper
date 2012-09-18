@@ -7,8 +7,6 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Scanner;
-import java.util.WeakHashMap;
 
 /**
  *
@@ -20,9 +18,9 @@ public class FileUtility {
 	}
 	public static final int OVERWRITE = 0;
 	public static final int APPEND = 1;
-	
-	//TODO: Replace this with an internal locking mechanism.
-	private static final WeakHashMap<String, Object> fileLocks = new WeakHashMap<String, Object>();
+		
+	private static final Map<String, Object> fileLocks = new HashMap<String, Object>();
+	private static final Map<String, Integer> fileLockCounter = new HashMap<String, Integer>();
 	/**
 	 * A more complicated mechanism is required to ensure global access across the JVM
 	 * is synchronized, so file system accesses do not throw OverlappingFileLockExceptions.
@@ -31,12 +29,23 @@ public class FileUtility {
 	 * @return
 	 * @throws IOException 
 	 */
-	private static Object getLock(File file) throws IOException{
+	private static synchronized Object getLock(File file) throws IOException{
 		String canonical = file.getAbsoluteFile().getCanonicalPath();
 		if(!fileLocks.containsKey(canonical)){
 			fileLocks.put(canonical, new Object());
+			fileLockCounter.put(canonical, 0);
 		}
+		fileLockCounter.put(canonical, fileLockCounter.get(canonical) + 1);
 		return fileLocks.get(canonical);
+	}
+	
+	private static synchronized void freeLock(File file) throws IOException{
+		String canonical = file.getAbsoluteFile().getCanonicalPath();
+		fileLockCounter.put(canonical, fileLockCounter.get(canonical) - 1);
+		if(fileLockCounter.get(canonical) == 0){
+			fileLockCounter.remove(canonical);
+			fileLocks.remove(canonical);
+		}
 	}
 
 	public static String read(File f) throws IOException {
@@ -59,20 +68,24 @@ public class FileUtility {
 	 * @throws FileNotFoundException
 	 */
 	public static InputStream readAsStream(File file) throws IOException {
-		synchronized (getLock(file)) {
-			RandomAccessFile raf = new RandomAccessFile(file, "rw");
-			FileLock lock = null;
-			try {
-				lock = raf.getChannel().lock();
-				ByteBuffer buffer = ByteBuffer.allocate((int) raf.length());
-				raf.getChannel().read(buffer);
-				return new ByteArrayInputStream(buffer.array());
-			} finally {
-				if (lock != null) {
-					lock.release();
+		try{
+			synchronized (getLock(file)) {
+				RandomAccessFile raf = new RandomAccessFile(file, "rw");
+				FileLock lock = null;
+				try {
+					lock = raf.getChannel().lock();
+					ByteBuffer buffer = ByteBuffer.allocate((int) raf.length());
+					raf.getChannel().read(buffer);
+					return new ByteArrayInputStream(buffer.array());
+				} finally {
+					if (lock != null) {
+						lock.release();
+					}
+					raf.close();
 				}
-				raf.close();
 			}
+		} finally {
+			freeLock(file);			
 		}
 //	    FileInputStream fis = new FileInputStream(f);
 //	    try{
@@ -121,28 +134,34 @@ public class FileUtility {
 			}
 			file.getAbsoluteFile().createNewFile();
 		}
-		synchronized (getLock(file)) {
-			RandomAccessFile raf = new RandomAccessFile(file, "rw");
-			FileLock lock = null;
-			try {
-				lock = raf.getChannel().lock();
-				//Clear out the file
-				if (!append) {
-					raf.getChannel().truncate(0);
-				} else {
-					raf.seek(raf.length());
+		try{
+			synchronized (getLock(file)) {
+				RandomAccessFile raf = new RandomAccessFile(file, "rw");
+				FileLock lock = null;
+				try {
+					lock = raf.getChannel().lock();
+					//Clear out the file
+					if (!append) {
+						raf.getChannel().truncate(0);
+					} else {
+						raf.seek(raf.length());
+					}
+					//Write out the data				
+					MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
+					buf.put(data);
+					buf.force();
+					//raf.getChannel().write(ByteBuffer.wrap(data));
+				} finally {
+					if (lock != null) {
+						lock.release();
+					}
+					raf.close();
+					raf = null;
+					System.gc();
 				}
-				//Write out the data				
-				MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
-				buf.put(data);
-				buf.force();
-				//raf.getChannel().write(ByteBuffer.wrap(data));
-			} finally {
-				if (lock != null) {
-					lock.release();
-				}
-				raf.close();
 			}
+		} finally {
+			freeLock(file);
 		}
 //        FileWriter fw = new FileWriter(f, append);
 //        fw.write(s);
@@ -278,8 +297,12 @@ public class FileUtility {
 	 * @param to
 	 */
 	public static boolean move(File from, File to) throws IOException {
-		synchronized(getLock(to)){
-			return from.renameTo(to);
+		try{
+			synchronized(getLock(to)){
+				return from.renameTo(to);
+			}
+		} finally{
+			freeLock(to);
 		}
 	}
 
