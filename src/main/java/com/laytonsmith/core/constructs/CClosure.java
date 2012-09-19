@@ -1,7 +1,6 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.core.Env;
-import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -48,7 +47,7 @@ public class CClosure extends Construct {
             b.append(( (CFunction) node.getData() ).val()).append("(");
             for (int i = 0; i < node.numberOfChildren(); i++) {
                 condense(node.getChildAt(i), b);
-                if (i > 0 && !( (CFunction) node.getData() ).val().equals("__autoconcat__")) {
+                if (i != node.numberOfChildren() - 1 && !( (CFunction) node.getData() ).val().equals("__autoconcat__")) {
                     b.append(",");
                 }
             }
@@ -57,6 +56,8 @@ public class CClosure extends Construct {
             CString data = (CString) node.getData();
             // Convert: \ -> \\ and ' -> \'
             b.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
+		} else if(node.getData() instanceof IVariable){
+			b.append(((IVariable)node.getData()).getName());
         } else {
             b.append(node.getData().val());
         }

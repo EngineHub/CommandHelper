@@ -113,7 +113,7 @@ public class EventBinding {
             }
             try {
                 BoundEvent be = new BoundEvent(name.val(), (CArray)options, (CArray)prefilter, 
-                        ((IVariable)event_obj).getName(), env, tree, t);
+                        ((IVariable)event_obj).getName(), newEnv, tree, t);
                 EventUtils.RegisterEvent(be);
                 id = new CString(be.getId(), t);
             } catch (EventException ex) {

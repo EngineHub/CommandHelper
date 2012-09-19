@@ -6,7 +6,9 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.CFunction;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
@@ -318,8 +320,8 @@ public class ParseTree implements Cloneable{
 	
 	public String toStringVerbose(){
 		StringBuilder stringRepresentation = new StringBuilder();
-		stringRepresentation.append(data.toString());
 		if(data instanceof CFunction){
+			stringRepresentation.append(data.toString());
 			stringRepresentation.append("(");
 			boolean first = true;
 			for(ParseTree child : children){
@@ -330,7 +332,14 @@ public class ParseTree implements Cloneable{
 				stringRepresentation.append(child.toStringVerbose());
 			}
 			stringRepresentation.append(")");
-		}
+		} else if (data instanceof CString) {
+            // Convert: \ -> \\ and ' -> \'
+            stringRepresentation.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
+		} else if(data instanceof IVariable){
+			stringRepresentation.append(((IVariable)data).getName());
+        } else {
+            stringRepresentation.append(data.val());
+        }
         return stringRepresentation.toString();
 	}
 	

@@ -10,7 +10,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Used to tag functions that should not be profilable.
+ * Used to tag functions that should not be profile-able.
  * @author Layton
  */
 @Retention(RetentionPolicy.RUNTIME)

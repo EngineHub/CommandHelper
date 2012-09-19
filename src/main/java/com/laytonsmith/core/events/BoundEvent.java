@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.profiler.ProfilePoint;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -246,7 +247,9 @@ public class BoundEvent implements Comparable<BoundEvent> {
 			env.SetProfiler(originalEnv.GetProfiler());
             activeEvent.addHistory("Triggering bound event: " + this);
             try{
+				ProfilePoint p = env.GetProfiler().start("Executing event handler for " + this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
                 this.execute(env, activeEvent);
+				p.stop();
             } catch(ConfigRuntimeException e){
                 //We don't know how to handle this, but we need to set the env,
                 //then pass it up the chain

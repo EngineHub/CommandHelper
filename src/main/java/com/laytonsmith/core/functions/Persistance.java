@@ -89,6 +89,11 @@ public class Persistance {
             //Because we do IO
             return true;
         }
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.DEBUG;
+		}
         
     }
     
@@ -144,6 +149,11 @@ public class Persistance {
             //Because we do IO
             return true;
         }
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.DEBUG;
+		}
         
     }
     
@@ -203,6 +213,11 @@ public class Persistance {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.DEBUG;
+		}
         
     }
     
@@ -240,6 +255,11 @@ public class Persistance {
         public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
             return new CBoolean(Static.getPersistance().isKeySet(new String[]{"storage", GetNamespace(args, null, getName(), t)}), t);
         }
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.DEBUG;
+		}
         
     }
     
@@ -278,6 +298,11 @@ public class Persistance {
             Static.getPersistance().setValue(new String[]{"storage", namespace}, null);
             return new CVoid(t);
         }
+
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.DEBUG;
+		}				
         
     }
     

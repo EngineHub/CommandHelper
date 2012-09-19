@@ -8,6 +8,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Env;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
@@ -95,6 +96,11 @@ public class FileHandling {
 		public Boolean runAsync() {
 			//Because we do disk IO
 			return true;
+		}
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.DEBUG;
 		}
 	}
 	

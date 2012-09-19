@@ -307,6 +307,19 @@ public class DataHandling {
 					+ "}"),
 			};
 		}
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.WARNING;
+		}
+
+		@Override
+		public String profileMessageS(List<ParseTree> args) {
+			return "Executing function: " + this.getName() + "(" 
+					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
+					+ ", " + args.get(2).toStringVerbose() + ", <code>)";
+		}
+				
 	}
 
 	@api
@@ -431,6 +444,18 @@ public class DataHandling {
 				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),				
 			};
 		}
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.WARNING;
+		}
+
+		@Override
+		public String profileMessageS(List<ParseTree> args) {
+			return "Executing function: " + this.getName() + "(" 
+					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
+					+ ", <code>)";
+		}
 	}
 
 	@api
@@ -508,6 +533,17 @@ public class DataHandling {
 					+ ")"),
 			};
 		}
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.WARNING;
+		}
+
+		@Override
+		public String profileMessageS(List<ParseTree> args) {
+			return "Executing function: " + this.getName() + "(" 
+					+ args.get(0).toStringVerbose() + ", <code>)";
+		}
 	}
 
 	@api
@@ -580,6 +616,17 @@ public class DataHandling {
 					+ ", #while\n"
 					+ "false)"),
 			};
+		}
+		
+		@Override
+		public LogLevel profileAt() {
+			return LogLevel.WARNING;
+		}
+
+		@Override
+		public String profileMessageS(List<ParseTree> args) {
+			return "Executing function: " + this.getName() + "(<code>, " 
+					+ args.get(1).toStringVerbose() + ")";
 		}
 	}
 

@@ -1,5 +1,7 @@
 package com.laytonsmith.core.profiler;
 
+import com.laytonsmith.core.LogLevel;
+
 /**
  *
  * @author Layton
@@ -8,6 +10,7 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 	private String name;
 	boolean GCRun;
 	private Profiler parent;
+	private LogLevel granularity;
 
 	public ProfilePoint(String name, Profiler parent) {
 		this.name = name;
@@ -40,6 +43,22 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 	 */
 	public int compareTo(ProfilePoint o) {
 		return o.name.compareTo(name);
+	}
+
+	/**
+	 * Package private.
+	 * @param granularity 
+	 */
+	void setGranularity(LogLevel granularity) {
+		this.granularity = granularity;
+	}
+	
+	/**
+	 * Returns the log level at which this profile point was registered.
+	 * @return 
+	 */
+	public LogLevel getGranularity(){
+		return this.granularity;
 	}
     
 }

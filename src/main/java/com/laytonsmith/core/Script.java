@@ -234,7 +234,15 @@ public class Script {
                 }
                 
                 if(f.useSpecialExec()){
-                    return f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
+					ProfilePoint p = null;
+					if(f.shouldProfile() && env.GetProfiler() != null && env.GetProfiler().isLoggable(f.profileAt())){
+						p = env.GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
+					}
+                    Construct ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
+					if(p != null){
+						p.stop();
+					}
+					return ret;
                 }
 
                 ArrayList<Construct> args = new ArrayList<Construct>();
@@ -271,36 +279,19 @@ public class Script {
                     }
                 }
 
-				//It takes a moment to generate the toString of some things, so lets not do it
-				//if we actually aren't going to profile
-				ProfilePoint p = null;				
-				if(f.shouldProfile() && env.GetProfiler() != null && env.GetProfiler().isLoggable(LogLevel.VERBOSE)){					
-					StringBuilder b = new StringBuilder();
-					boolean first = true;
-					for(Construct ccc : ca){
-						if(!first){
-							b.append(", ");
-						}
-						first = false;
-						if(ccc instanceof CArray){
-							//Arrays take too long to toString, so we don't want to actually toString them here if
-							//we don't need to.
-							b.append("<arrayNotShown>");
-						} else if(ccc instanceof CString){
-							b.append("'").append(ccc.val().replace("\\", "\\\\").replace("'", "\\'")).append("'");
-						} else if(ccc instanceof IVariable){
-							b.append(((IVariable)ccc).getName());
-						} else{
-							b.append(ccc.val());
-						}			
+				{ 
+					//It takes a moment to generate the toString of some things, so lets not do it
+					//if we actually aren't going to profile
+					ProfilePoint p = null;				
+					if(f.shouldProfile() && env.GetProfiler() != null && env.GetProfiler().isLoggable(f.profileAt())){						
+						p = env.GetProfiler().start(f.profileMessage(ca), f.profileAt());
 					}
-					p = env.GetProfiler().start("Executing function: " + f.getName() + "(" + b.toString() + ")", LogLevel.OFF);
+					Construct ret = f.exec(m.getTarget(), env, ca);
+					if(p != null){
+						p.stop();
+					}
+					return ret;
 				}
-                Construct ret = f.exec(m.getTarget(), env, ca);
-				if(p != null){
-					p.stop();
-				}
-                return ret;
 
         } else if (m.getCType() == ConstructType.VARIABLE) {            
             return Static.resolveConstruct(m.val(), m.getTarget());

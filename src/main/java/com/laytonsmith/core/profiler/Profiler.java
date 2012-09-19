@@ -14,25 +14,12 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * TODO: The following points need profile hooks: 
- * 1 - Alias run times 1 - Event run times 
  * 1 - Execution Queue task run times 
- * 1 - set_timeout() closure run times 
- * 1 - set_interval() closure run times 
- * 2 - for() run times (with parameters) 
- * 2 - foreach() run times (with parameters) 
- * 2 - while() run times (with parameters) 
- * 2 - dowhile() run times (with parameters) 
  * 3 - Procedure execution run times (with parameters) 
- * 4 - read() run times 
- * 4 - get_value() run times 
- * 4 - get_values() run times 
- * 4 - store_value() run times 
- * 4 - clear_value() run times 
- * 4 - has_value() run times 
- * 5 - Compilation run time
  */
 /**
  *
@@ -156,11 +143,32 @@ public final class Profiler {
 			throw new RuntimeException("Cannot queue the same profile point multiple times!");
 		}
 		queuedProfilePoints++;
+		operationName.setGranularity(granularity);
+		
+		//This line should ALWAYS be last in the function
 		operations.put(operationName, System.nanoTime());
 	}
 
+	private final static Map<Long, String> indents = new TreeMap<Long, String>();
+	static{
+		//Let's just warm it up some
+		for(int i = 0; i < 10; i++){
+			getIndent(i);
+		}
+	}
+	private static String getIndent(long count){
+		if(!indents.containsKey(count)){
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < count; i++){
+				b.append(" ");
+			}
+			indents.put(count, b.toString());
+		}
+		return indents.get(count);
+	}
 	private final static String gcString = " (however, the garbage collector was run during this profile point)";
 	public void stop(ProfilePoint operationName) {
+		//This line should ALWAYS be first in the function
 		long stop = System.nanoTime();
 		if (operationName == NULL_OP) {
 			return;
@@ -173,7 +181,18 @@ public final class Profiler {
 		//voila, significant figure to the 3rd degree.
 		double time = (total / 1000) / 1000.0;
 		if(time >= logThreshold){
-			doLog(operationName.toString() + " took a total of " + time + "ms" + (operationName.wasGCd()?gcString:""));
+			String stringTime = Double.toString(time);
+			if(stringTime.length() < 6 && stringTime.contains(".")){
+				while(stringTime.length() < 6){
+					stringTime += "0";
+				}
+			}
+			stringTime += "ms";
+			if(time > 1000){
+				//Let's change this to seconds, actually.
+				stringTime = Double.toString(((long)time) / 1000.0) + "sec";
+			}
+			doLog("[" + stringTime + "][Lvl:" + (operationName.getGranularity().getLevel()) + "]:" + getIndent(queuedProfilePoints) + operationName.toString() + (operationName.wasGCd()?gcString:""));
 		}
 		queuedProfilePoints--;
 	}

@@ -4,12 +4,14 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.profiler.ProfilePoint;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -185,7 +187,7 @@ public class Scheduling {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(final Target t, final Env environment, Construct... args) throws ConfigRuntimeException {
             long time = Static.getInt(args[0]);
             int offset = 0;
             long delay = time;
@@ -203,7 +205,9 @@ public class Scheduling {
                public void run(){
                    c.getEnv().SetCustom("timeout-id", ret.get());
                    try{
+					   ProfilePoint p = environment.GetProfiler().start("Executing timeout with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
                        c.execute(null);
+					   p.stop();
                    } catch(ConfigRuntimeException e){
                        ConfigRuntimeException.React(e);
                    } catch(CancelCommandException e){
@@ -222,7 +226,8 @@ public class Scheduling {
         
     }
     
-    @api public static class set_timeout extends AbstractFunction{
+    @api 
+	public static class set_timeout extends AbstractFunction{
 
         public String getName() {
             return "set_timeout";
@@ -250,7 +255,7 @@ public class Scheduling {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(final Target t, final Env environment, Construct... args) throws ConfigRuntimeException {
             long time = Static.getInt(args[0]);
             if(!(args[1] instanceof CClosure)){
                 throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
@@ -261,7 +266,9 @@ public class Scheduling {
                public void run(){
                    c.getEnv().SetCustom("timeout-id", ret.get());
                    try{
+					   ProfilePoint p = environment.GetProfiler().start("Executing timeout with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
                        c.execute(null);
+					   p.stop();
                    } catch(ConfigRuntimeException e){
                        ConfigRuntimeException.React(e);
                    } catch(CancelCommandException e){

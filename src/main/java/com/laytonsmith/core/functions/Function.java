@@ -4,7 +4,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Env;
-import com.laytonsmith.core.GenericTreeNode;
+import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.Construct;
@@ -166,6 +166,27 @@ public interface Function extends FunctionBase, Documentation {
 	 * @return 
 	 */
 	public boolean shouldProfile();	
+	
+	/**
+	 * Returns the minimum level at which this function should be profiled at.
+	 * @return 
+	 */
+	public LogLevel profileAt();
+	
+	/**
+	 * Returns the message to use when this function gets profiled, if
+	 * useSpecialExec returns false.
+	 * @return 
+	 */
+	public String profileMessage(Construct ... args);
+	
+	/**
+	 * Returns the message to use when this function gets profiled, if
+	 * useSpecialExec returns true.
+	 * @param args
+	 * @return 
+	 */
+	public String profileMessageS(List<ParseTree> args);
     
     
     
