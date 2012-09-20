@@ -75,6 +75,10 @@ public class OptimizationTest {
         //The proc stays there, but the call to it should be consolidated
         assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)", optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
     }
+	
+	@Test public void testProcOptimizationRecursion() throws Exception{
+		assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))", optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
+	}
     
     @Test(expected=ConfigCompileException.class) 
     public void testProcOptimization2() throws ConfigCompileException{

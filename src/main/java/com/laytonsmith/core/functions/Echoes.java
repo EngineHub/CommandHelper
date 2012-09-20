@@ -72,6 +72,11 @@ public class Echoes {
         public Boolean runAsync(){
             return false;
         }
+
+		@Override
+		public boolean isTerminal() {
+			return true;
+		}				
     }
     
     @api @noboilerplate public static class msg extends AbstractFunction{

@@ -263,6 +263,11 @@ public class Exceptions {
             return null;
         }
 
+		@Override
+		public boolean isTerminal() {
+			return true;
+		}				
+
         public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try{
                 ExceptionType c = null;

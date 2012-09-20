@@ -29,12 +29,13 @@ import java.util.regex.Pattern;
  */
 public class DocGen {
 
-//    public static void main(String[] args) throws Exception {
-//        //System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
-//		//System.out.println(examples("array_get"));
-//        //events("wiki");
-//	    //System.out.println(Template("persistance_network"));
-//    }
+    public static void main(String[] args) throws Exception {
+        //System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
+		System.out.println(examples("simple_date", true));
+		System.exit(0);
+        //events("wiki");
+	    //System.out.println(Template("persistance_network"));
+    }
 	
 	public static String examples(String function, boolean staged) throws ConfigCompileException{
 		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
@@ -102,7 +103,7 @@ public class DocGen {
 				while(m.find()){
 					String name = m.group(1);
 					String templateValue = templateFields.get(name);
-					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue.replace("$", "\\$"));
+					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue.replace("$", "\\$").replaceAll("\\'", "\\\\'"));
 				}
 				return template;
 			} catch(RuntimeException e){
@@ -540,7 +541,7 @@ public class DocGen {
 		public String topDesc = null;
 		public String extendedDesc = null;
 		public DocInfo(String doc){
-			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
+			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
 			Matcher m = p.matcher(doc);
 			if (m.find()) {
 				ret = m.group(1);
