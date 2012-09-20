@@ -102,6 +102,11 @@ public class OptimizationTest {
         assertEquals("sconcat(proc('_proc',return(array(1))),array_get(_proc(),0))", 
                 optimize("proc(_proc, return(array(1))) _proc()[0]"));
     }
+	
+	@Test public void testUnreachableCode() throws ConfigCompileException{
+		assertEquals("sconcat(assign(@a,0),ifelse(@a,die(),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
+		assertEquals("die()", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
+	}
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{
