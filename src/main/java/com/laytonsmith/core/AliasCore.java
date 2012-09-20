@@ -482,8 +482,14 @@ public class AliasCore {
 			}
 			if (errors > 0) {
 				System.out.println(TermColors.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
+				if (player != null){
+					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + MCChatColor.RED + "with " + errors + " aliases with compile errors.");
+				}
 			} else {
 				System.out.println(TermColors.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined." + TermColors.reset());
+				if (player != null){
+					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined.");
+				}
 			}
 		}
 
@@ -510,6 +516,9 @@ public class AliasCore {
 				}
 			}
 			logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: MethodScript files processed" + TermColors.reset());
+			if (player != null){
+				player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: MethodScript files processed");
+			}
 		}
 	}
 
