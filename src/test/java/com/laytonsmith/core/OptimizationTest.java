@@ -77,7 +77,8 @@ public class OptimizationTest {
     }
 	
 	@Test public void testProcOptimizationRecursion() throws Exception{
-		assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))", optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
+		assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))", 
+				optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
 	}
     
     @Test(expected=ConfigCompileException.class) 
