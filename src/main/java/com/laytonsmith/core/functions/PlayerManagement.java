@@ -2410,58 +2410,61 @@ public class PlayerManagement {
             return CHVersion.V3_3_1;
         }
     }
-    //Disabled until bukkit fixes their bug
-//    @api public static class pvelocity extends AbstractFunction{
-//
-//        public String getName() {
-//            return "pvelocity";
-//        }
-//
-//        public Integer[] numArgs() {
-//            return new Integer[]{0, 1};
-//        }
-//
-//        public String docs() {
-//            return "array {[player]} Returns an associative array that represents the player's velocity."
-//                    + " The array contains the following items: magnitude, x, y, z. These represent a"
-//                    + " 3 dimensional Vector. The important part is x, y, z, however, the magnitude is provided"
-//                    + " for you as a convenience. (It should equal sqrt(add(exp(x, 2), exp(y, 2), exp(z, 2))))";
-//        }
-//
-//        public ExceptionType[] thrown() {
-//            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
-//        }
-//
-//        public boolean isRestricted() {
-//            return true;
-//        }
-//
-//        public boolean preResolveVariables() {
-//            return true;
-//        }
-//
-//        public Boolean runAsync() {
-//            return false;
-//        }
-//
-//        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-//            MCPlayer p = environment.GetPlayer();
-//            if(args.length == 1){
-//                p = Static.GetPlayer(args[0]);
-//            }
-//            CArray vector = new CArray(t);
-//            vector.forceAssociativeMode();
-//            MCPlayer.Velocity velocity = p.getVelocity();
-//            vector.set("magnitude", new CDouble(velocity.magnitute, t));
-//            vector.set("x", new CDouble(velocity.x, t));
-//            vector.set("y", new CDouble(velocity.y, t));
-//            vector.set("z", new CDouble(velocity.z, t));
-//            return vector;
-//        }
-//
-//        public CHVersion since() {
-//            return CHVersion.V3_3_0;
-//        }
-//        
-//    }
+
+    @api public static class pvelocity extends AbstractFunction{
+
+        public String getName() {
+            return "pvelocity";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "array {[player]} Returns an associative array that represents the player's velocity."
+                    + " The array contains the following items: magnitude, x, y, z. These represent a"
+                    + " 3 dimensional Vector. The important part is x, y, z, however, the magnitude is provided"
+                    + " for you as a convenience. (It should equal sqrt(x ** 2 + y ** 2 + z ** 2))";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.GetPlayer();
+            if(args.length == 1){
+                p = Static.GetPlayer(args[0]);
+            }
+            CArray vector = new CArray(t);
+            vector.forceAssociativeMode();
+            MCPlayer.Velocity velocity = p.getVelocity();
+            vector.set("magnitude", new CDouble(velocity.magnitude, t));
+            vector.set("x", new CDouble(velocity.x, t));
+            vector.set("y", new CDouble(velocity.y, t));
+            vector.set("z", new CDouble(velocity.z, t));
+            return vector;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_0;
+        }
+
+		@Override
+		public boolean appearInDocumentation() {
+			return false;
+		}
+		
+		
+        
+    }
 }

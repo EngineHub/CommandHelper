@@ -75,6 +75,11 @@ public class OptimizationTest {
         //The proc stays there, but the call to it should be consolidated
         assertEquals("sconcat(proc('_add',@a,@b,return(add(@a,@b))),4)", optimize("proc(_add, @a, @b, return(@a + @b)) _add(2, 2)"));
     }
+	
+	@Test public void testProcOptimizationRecursion() throws Exception{
+		assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))", 
+				optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
+	}
     
     @Test(expected=ConfigCompileException.class) 
     public void testProcOptimization2() throws ConfigCompileException{
@@ -98,6 +103,11 @@ public class OptimizationTest {
         assertEquals("sconcat(proc('_proc',return(array(1))),array_get(_proc(),0))", 
                 optimize("proc(_proc, return(array(1))) _proc()[0]"));
     }
+	
+	@Test public void testUnreachableCode() throws ConfigCompileException{
+		assertEquals("sconcat(assign(@a,0),ifelse(@a,die(),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
+		assertEquals("die()", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
+	}
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{

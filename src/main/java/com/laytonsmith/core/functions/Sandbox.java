@@ -420,42 +420,5 @@ public class Sandbox {
         }
     }
 
-    @api public static class simple_date extends AbstractFunction{
-
-        public String getName() {
-            return "simple_date";
-        }
-
-        public Integer[] numArgs() {
-            return new Integer[]{1};
-        }
-
-        public String docs() {
-            return "mixed {format} Returns a date of the current time in the format you give."
-                    + "This will be implemented in a other way later, so for now it's just here.";
-        }
-
-        public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
-        }
-
-        public boolean isRestricted() {
-            return false;
-        }
-
-        
-        public CHVersion since() {
-            return CHVersion.V3_3_1;
-        }
-
-        public Boolean runAsync() {
-            return null;
-        }
-
-        public Construct exec(Target t, Env env, Construct... args) {
-            Date now = new Date();
-            SimpleDateFormat dateFormat = new SimpleDateFormat(args[0].toString());
-            return new CString(dateFormat.format(now), t);
-        }
-    }
+    
 }

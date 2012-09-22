@@ -162,7 +162,9 @@ public class BasicLogic {
 		public String docs() {
 			return "mixed {value, [equals, code]..., [defaultCode]} Provides a switch statement. If none of the conditions"
 					+ " match, and no default is provided, void is returned."
-					+ " See the documentation on [[CommandHelper/Logic|Logic]] for more information.";
+					+ " See the documentation on [[CommandHelper/Logic|Logic]] for more information. ----"
+					+ " In addition, slices may be used to indicate ranges of integers that should trigger the specified"
+					+ " case. Slices embedded in an array are fine as well.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -201,9 +203,37 @@ public class BasicLogic {
 				if (evalStatement instanceof CArray) {
 					for (String index : ((CArray) evalStatement).keySet()) {
 						Construct inner = ((CArray) evalStatement).get(index);
-						if (((CBoolean) equals.exec(t, env, value, inner)).getBoolean()) {
+						if(inner instanceof CSlice){
+							long rangeLeft = ((CSlice)inner).getStart();
+							long rangeRight = ((CSlice)inner).getFinish();
+							if(value instanceof CInt){
+								long v = Static.getInt(value);
+								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight) 
+									|| (rangeLeft > rangeRight &&  v >= rangeRight && v <= rangeLeft) 
+									|| (rangeLeft == rangeRight && v == rangeLeft)){
+									return parent.seval(code, env);
+								}
+							} else {
+								throw new ConfigRuntimeException("When using slice notation in a switch case, the value being switched on must be an integer, but instead, " + value.val() + " was found.", ExceptionType.CastException, t);
+							}
+						} else {
+							if (((CBoolean) equals.exec(t, env, value, inner)).getBoolean()) {
+								return parent.seval(code, env);
+							}
+						}
+					}
+				} else if(evalStatement instanceof CSlice){
+					long rangeLeft = ((CSlice)evalStatement).getStart();
+					long rangeRight = ((CSlice)evalStatement).getFinish();
+					if(value instanceof CInt){
+						long v = Static.getInt(value);
+						if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight) 
+							|| (rangeLeft > rangeRight &&  v >= rangeRight && v <= rangeLeft) 
+							|| (rangeLeft == rangeRight && v == rangeLeft)){
 							return parent.seval(code, env);
 						}
+					} else {
+						throw new ConfigRuntimeException("When using slice notation in a switch case, the value being switched on must be an integer, but instead, " + value.val() + " was found.", ExceptionType.CastException, t);
 					}
 				} else {
 					if (((CBoolean) equals.exec(t, env, value, evalStatement)).getBoolean()) {
@@ -250,6 +280,26 @@ public class BasicLogic {
 					+ "\t, #Default:\n"
 					+ "\t\tmsg('Success')\n"
 					+ ")"),
+				new ExampleScript("With multiple matches using an array", "switch('string'){\n"
+					+ "\tarray('value1', 'value2', 'string'),\n"
+					+ "\t\tmsg('Match'),\n"
+					+ "\t'value3',\n"
+					+ "\t\tmsg('No match')\n"
+					+ "}"),
+				new ExampleScript("With slices", "switch(5){\n"
+					+ "\t1..2,\n"
+					+ "\t\tmsg('First'),\n"
+					+ "\t3..5,\n"
+					+ "\t\tmsg('Second'),\n"
+					+ "\t6..8,\n"
+					+ "\t\tmsg('Third')\n"
+					+ "}"),
+				new ExampleScript("With slices in an array", "switch(5){\n"
+					+ "\tarray(1..2, 3..5),\n"
+					+ "\t\tmsg('First'),\n"
+					+ "\t6..8,\n"
+					+ "\t\tmsg('Second')\n"
+					+ "}"),
 			};
 		}
 	}

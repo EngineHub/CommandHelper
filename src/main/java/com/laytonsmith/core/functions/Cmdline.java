@@ -183,6 +183,11 @@ public class Cmdline {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
+
+		@Override
+		public boolean isTerminal() {
+			return true;
+		}				
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {

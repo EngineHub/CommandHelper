@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.Env;
 import com.laytonsmith.core.LogLevel;
@@ -126,6 +127,14 @@ public abstract class AbstractFunction implements Function {
 		return true;
 	}
 
+	/**
+	 * Most functions aren't terminal.
+	 * @return 
+	 */
+	public boolean isTerminal() {
+		return false;
+	}		
+
 	public ExampleScript[] examples() throws ConfigCompileException {
 		return null;
 	}
@@ -162,6 +171,10 @@ public abstract class AbstractFunction implements Function {
 			}
 		}
 		return "Executing function: " + this.getName() + "(" + b.toString() + ")";
+	}
+	
+	protected String getBundledDocs(){
+		return StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
 	}
 
 	public String profileMessageS(List<ParseTree> args) {

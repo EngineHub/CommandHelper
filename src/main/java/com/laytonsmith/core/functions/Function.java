@@ -187,6 +187,14 @@ public interface Function extends FunctionBase, Documentation {
 	 * @return 
 	 */
 	public String profileMessageS(List<ParseTree> args);
+	
+	/**
+	 * Returns true if this function is terminal, that is, it will ALWAYS interrupt
+	 * program flow. For instance, return() is an example. This is used during optimization,
+	 * and to give compiler warnings.
+	 * @return 
+	 */
+	public boolean isTerminal();
     
     
     

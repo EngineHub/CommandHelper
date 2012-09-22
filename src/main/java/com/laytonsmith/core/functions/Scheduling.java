@@ -8,10 +8,13 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.ProfilePoint;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -332,5 +335,64 @@ public class Scheduling {
             return CHVersion.V3_3_1;
         }
         
+    }
+	
+	@api public static class simple_date extends AbstractFunction{
+
+        public String getName() {
+            return "simple_date";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return getBundledDocs();
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+
+        
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Env env, Construct... args) {
+            Date now = new Date();
+			if(args.length == 2){
+				now = new Date(Static.getInt(args[1]));
+			}
+            SimpleDateFormat dateFormat = new SimpleDateFormat(args[0].toString());
+            return new CString(dateFormat.format(now), t);
+        }
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "simple_date('h:mm a')"),
+				new ExampleScript("Usage with quoted letters", "simple_date('yyyy.MM.dd G \\'at\\' HH:mm:ss z')"),
+				new ExampleScript("Adding a single quote", "simple_date('EEE, MMM d, \\'\\'yy')"),
+				new ExampleScript("Specifying alternate time", "simple_date('EEE, MMM d, \\'\\'yy', 0)"),				
+				new ExampleScript("With timezone", "simple_date('hh \\'o\\'\\'clock\\' a, zzzz')"),
+				new ExampleScript("With simple timezone", "simple_date('hh \\'o\\'\\'clock\\' a, zzzz')"),
+				new ExampleScript("With timezone", "simple_date('K:mm a, z')"),
+				new ExampleScript("With 5 digit year", "simple_date('yyyyy.MMMMM.dd GGG hh:mm aaa')"),
+				new ExampleScript("Long format", "simple_date('EEE, d MMM yyyy HH:mm:ss Z')"),
+				new ExampleScript("Computer readable format", "simple_date('yyMMddHHmmssZ')"),
+				new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')"),
+			};
+		}
+				
     }
 }

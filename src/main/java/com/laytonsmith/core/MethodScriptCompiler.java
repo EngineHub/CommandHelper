@@ -1140,6 +1140,53 @@ public final class MethodScriptCompiler {
 			procs.push(new ArrayList<Procedure>());
 		}
 		List<ParseTree> children = tree.getChildren();
+		//Loop through the children, and if any of them are functions that are terminal, truncate.
+		//To explain this further, consider the following:
+		//For the code: concat(die(), msg('')), this diagram shows the abstract syntax tree:
+		//         (concat)
+		//        /        \
+		//       /          \
+		//     (die)       (msg)
+		//By looking at the code, we can tell that msg() will never be called, because die() will run first,
+		//and since it is a "terminal" function, any code after it will NEVER run. However, consider a more complex condition:
+		// if(@input){ die() msg('1') } else { msg('2') msg('3') }
+		//              if(@input)
+		//        [true]/         \[false]
+		//             /           \
+		//         (sconcat)     (sconcat)
+		//           /   \         /    \
+		//          /     \       /      \
+		//       (die) (msg[1])(msg[2]) (msg[3])
+		//In this case, only msg('1') is guaranteed not to run, msg('2') and msg('3') will still run in some cases.
+		//So, we can optimize out msg('1') in this case, which would cause the tree to become much simpler, therefore a worthwile optimization:
+		//              if(@input)
+		//        [true]/        \[false]
+		//             /          \
+		//          (die)      (sconcat)
+		//                      /    \
+		//                     /      \
+		//                 (msg[2]) (msg[3])
+		
+		outer: for(int i = 0; i < children.size(); i++){
+			ParseTree t = children.get(i);			
+			if(t.getData() instanceof CFunction){
+				if(t.getData().val().startsWith("_")){
+					continue outer;
+				}
+				Function f = (Function)FunctionList.getFunction(t.getData());
+				if(f.isTerminal()){
+					if(children.size() > i + 1){
+						//First, a compiler warning
+						CHLog.Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
+						//Now, truncate the children
+						for(int j = i + 1; j < children.size(); j++){
+							children.remove(j);							
+						}
+						break outer;
+					}
+				}
+			}
+		}
 		boolean fullyStatic = true;
 		boolean hasIVars = false;
 		for (int i = 0; i < children.size(); i++) {

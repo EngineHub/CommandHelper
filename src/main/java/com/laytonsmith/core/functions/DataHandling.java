@@ -1456,6 +1456,11 @@ public class DataHandling {
 			return null;
 		}
 
+		@Override
+		public boolean isTerminal() {
+			return true;
+		}				
+
 		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
 			Construct ret = (args.length == 1 ? args[0] : new CVoid(t));
 			throw new FunctionReturnException(ret);

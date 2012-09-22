@@ -141,6 +141,10 @@ public class BukkitConvertor implements Convertor {
 			return new BukkitMCItem((Item)be);
 		}
 		
+		if(be instanceof ExperienceOrb){
+			return new BukkitMCExperienceOrb((ExperienceOrb)be);
+		}
+		
 		if(be instanceof EnderCrystal){
 			return new BukkitMCEnderCrystal((EnderCrystal)be);
 		}

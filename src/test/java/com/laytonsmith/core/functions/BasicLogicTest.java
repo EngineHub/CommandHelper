@@ -381,4 +381,22 @@ public class BasicLogicTest {
                 + "if(@true, msg('Hello World!'))", fakePlayer);
         verify(fakePlayer).sendMessage("Hello World!");
     }
+	
+	@Test
+	public void testSwitchWithRange() throws Exception{
+		SRun("switch(dyn(1)){"
+				+ "0..5, msg('yes'),"
+				+ "6..10, msg('no')"
+				+ "}"
+				+ "switch(dyn(1)){"
+				+ "1..5, msg('yes')"
+				+ "}"
+				+ "switch(dyn(1)){"
+				+ "5..0, msg('yes')"
+				+ "}"
+				+ "switch(dyn(1)){"
+				+ "array(1..2, 3..4), msg('yes')"
+				+ "}", fakePlayer);
+		verify(fakePlayer, times(4)).sendMessage("yes");
+	}
 }
