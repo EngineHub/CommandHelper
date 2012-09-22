@@ -3,15 +3,14 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCProjectile;
-import org.bukkit.entity.Entity;
 import org.bukkit.entity.Projectile;
 
 public class BukkitMCProjectile extends BukkitMCEntity implements MCProjectile {
 	
 	Projectile proj;
-	public BukkitMCProjectile(Entity e) {
+	public BukkitMCProjectile(Projectile e) {
 		super(e);
-		this.proj = (Projectile)e;
+		this.proj = e;
 	}
 	
 	public boolean doesBounce() {

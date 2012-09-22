@@ -149,8 +149,12 @@ public class BukkitConvertor implements Convertor {
 			return new BukkitMCEnderCrystal((EnderCrystal)be);
 		}
 		
+		if(be instanceof TNTPrimed){
+			return new BukkitMCTNT((TNTPrimed)be);
+		}
+		
     	if(be instanceof Projectile){
-            return new BukkitMCProjectile(be);
+            return new BukkitMCProjectile((Projectile)be);
         }
     	
     	if(be instanceof Tameable){
