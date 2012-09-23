@@ -79,8 +79,8 @@ public class EntityEvents {
                 	
                 	if(shooter instanceof MCPlayer) {
                 		data = ((MCPlayer)shooter).getName();
-                	} else {
-                		data = ((MCProjectile)shooter).getType().name().toUpperCase();
+                	} else if(shooter instanceof MCEntity) {
+                		data = ((MCEntity)shooter).getType().name().toUpperCase();
                 	}
                 }
                 map.put("data",  new CString(data, Target.UNKNOWN));
