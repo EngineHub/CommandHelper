@@ -111,6 +111,9 @@ public class DataSourceFilter {
 			}
 			if (key.matches("\\$[a-zA-Z_][a-zA-Z0-9_]*")) {
 				//It's an alias
+				if(aliases.containsKey(key)){
+					throw new DataSourceException("Duplicate aliases defined: " + key);
+				}
 				aliases.put(key, p.getProperty(key));
 			}
 			if(key.equals("**")){

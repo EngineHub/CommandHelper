@@ -4,11 +4,12 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
@@ -34,9 +35,10 @@ public class BasicLogicTest {
     CInt argn2_1;
     CBoolean _true;
     CBoolean _false;
-    Env env = new Env();
+    com.laytonsmith.core.environments.Environment env;
 
-    public BasicLogicTest() {
+    public BasicLogicTest() throws Exception{
+		env = Static.GenerateStandaloneEnvironment();
     }
 
     @BeforeClass
@@ -59,7 +61,7 @@ public class BasicLogicTest {
         _false = C.Boolean(false);
         fakeServer = GetFakeServer();
         fakePlayer = GetOnlinePlayer(fakeServer);
-        env.SetPlayer(fakePlayer);
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After

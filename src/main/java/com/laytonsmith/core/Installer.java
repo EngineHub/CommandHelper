@@ -4,6 +4,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.PureUtilities.FileUtility;
+import com.laytonsmith.PureUtilities.StreamUtils;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
@@ -42,6 +43,14 @@ public final class Installer {
 			Profiler.Install(new File("plugins/CommandHelper/profiler.config"));
 		} catch (IOException ex) {
 			Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		File persistanceNetwork = new File("plugins/CommandHelper/persistance.config");
+		if(!persistanceNetwork.exists()){
+			try {
+				FileUtility.write(StreamUtils.GetString(Installer.class.getResourceAsStream("/samp_persistance_network.txt"), "UTF-8"), persistanceNetwork, true);
+			} catch (IOException ex) {
+				Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
+			}
 		}
     }
 

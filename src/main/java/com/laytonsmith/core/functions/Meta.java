@@ -339,7 +339,7 @@ public class Meta {
 	public static class is_alias extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.IOException};
 		}
 
 		public boolean isRestricted() {

@@ -9,6 +9,7 @@ import com.laytonsmith.core.functions.Crypto;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.persistance.DataSourceException;
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -152,7 +153,7 @@ public class DocGenUIHandler {
 		doUpload(DocGen.functions("wiki", api.Platforms.INTERPRETER_JAVA, isStaged), "/API", true);
 	}
 	
-	private void doExamples() throws ConfigCompileException, XPathExpressionException{
+	private void doExamples() throws ConfigCompileException, XPathExpressionException, IOException, DataSourceException, Exception{
 		//So they are alphabetical, so we always have a consistent upload order, to
 		//facilitate tracing problems.
 		SortedSet<String> names = new TreeSet<String>();

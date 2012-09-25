@@ -18,13 +18,13 @@ import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
-import com.laytonsmith.tools.Interpreter;
-import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -805,14 +805,22 @@ public final class Static {
 		}
 	}
 	
-	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException{
-		File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException{
+		return GenerateStandaloneEnvironment(new PermissionsResolver.PermissiveResolver());
+	}
+	public static Environment GenerateStandaloneEnvironment(PermissionsResolver permissionsResolver) throws IOException, DataSourceException, URISyntaxException{
+		File jarLocation;
+		if(Static.class.getProtectionDomain().getCodeSource().getLocation() != null){
+			jarLocation = new File(Static.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+		} else {
+			jarLocation = new File(".");
+		}
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		options.setWorkingDirectory(new File(jarLocation, "CommandHelper/"));
 		PersistanceNetwork persistanceNetwork = new PersistanceNetwork(new File(jarLocation, "CommandHelper/persistance.config"), 
-				new File(jarLocation, "CommandHelper/persistance.db").toURI(), options);
+				new URI("sqlite://" + new File(jarLocation, "CommandHelper/persistance.db").getCanonicalPath().replace("\\", "/")), options);
 		GlobalEnv gEnv = new GlobalEnv(new ExecutionQueue("MethodScript", "default"), 
-				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, new PermissionsResolver.PermissiveResolver());
+				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, permissionsResolver);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
 }

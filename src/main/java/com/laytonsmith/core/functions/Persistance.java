@@ -53,7 +53,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.IOException};
 		}
 
 		public boolean isRestricted() {
@@ -124,7 +124,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.IOException};
 		}
 
 		public boolean isRestricted() {
@@ -193,7 +193,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.IOException};
 		}
 
 		public boolean isRestricted() {
@@ -257,7 +257,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return null;
+			return new ExceptionType[]{ExceptionType.IOException};
 		}
 
 		public boolean isRestricted() {
@@ -302,7 +302,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.IOException};
 		}
 
 		public boolean isRestricted() {

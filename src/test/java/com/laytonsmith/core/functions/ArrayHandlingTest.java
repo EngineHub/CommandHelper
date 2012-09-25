@@ -3,17 +3,19 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
+import java.io.IOException;
 import static org.junit.Assert.assertEquals;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,16 +30,17 @@ public class ArrayHandlingTest {
 
     MCPlayer fakePlayer;
     CArray commonArray;
-    Env env = new Env();
+    com.laytonsmith.core.environments.Environment env;
 
-    public ArrayHandlingTest() {
+    public ArrayHandlingTest() throws Exception {
+		env = Static.GenerateStandaloneEnvironment();
     }
 
     @Before
     public void setUp() {
         fakePlayer = StaticTest.GetOnlinePlayer();
         commonArray = new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN), new CInt(2, Target.UNKNOWN), new CInt(3, Target.UNKNOWN));
-        env.SetPlayer(fakePlayer);
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     /**

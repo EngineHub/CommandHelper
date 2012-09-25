@@ -39,7 +39,7 @@ public class DocGen {
 	    //System.out.println(Template("persistance_network"));
     }
 	
-	public static String examples(String function, boolean staged) throws ConfigCompileException, IOException, DataSourceException{
+	public static String examples(String function, boolean staged) throws Exception {
 		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
 		if(fb instanceof Function){
 			Function f = (Function)fb;

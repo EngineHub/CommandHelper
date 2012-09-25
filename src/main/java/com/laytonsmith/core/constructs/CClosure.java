@@ -31,7 +31,7 @@ public class CClosure extends Construct {
             this.env = env.clone();
         }
         catch (CloneNotSupportedException ex) {
-            throw new ConfigRuntimeException("A failure occured while trying to clone the environment.", t);
+            throw new ConfigRuntimeException("A failure occured while trying to clone the environment. " + ex.getMessage(), t);
         }
         this.names = names;
         this.defaults = defaults;

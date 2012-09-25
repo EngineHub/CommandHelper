@@ -5,12 +5,13 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.*;
 import com.sk89q.wepif.PermissionsResolverManager;
+import java.io.IOException;
 import org.junit.*;
 import static org.mockito.Mockito.*;
 
@@ -22,7 +23,7 @@ public class MetaTest {
 
     MCServer fakeServer;
     MCPlayer fakePlayer;
-    Env env = new Env();
+    com.laytonsmith.core.environments.Environment env;
 
     public MetaTest() {
     }
@@ -36,12 +37,12 @@ public class MetaTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         fakePlayer = GetOnlinePlayer();
         fakeServer = GetFakeServer();
-        Static.perms = mock(PermissionsResolverManager.class);
         CommandHelperPlugin.myServer = fakeServer;
-        env.SetPlayer(fakePlayer);
+		env = Static.GenerateStandaloneEnvironment();
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After

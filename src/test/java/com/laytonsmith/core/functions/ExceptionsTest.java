@@ -5,14 +5,15 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
+import java.io.IOException;
 import org.junit.*;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.*;
@@ -25,7 +26,7 @@ public class ExceptionsTest {
 
     MCServer fakeServer;
     MCPlayer fakePlayer;
-    Env env = new Env();
+    com.laytonsmith.core.environments.Environment env;
 
     public ExceptionsTest() {
     }
@@ -39,12 +40,12 @@ public class ExceptionsTest {
     }
 
     @Before
-    public void setUp() {
-        Static.perms = mock(PermissionsResolverManager.class);
+    public void setUp() throws Exception {
         CommandHelperPlugin.myServer = fakeServer;
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
-        env.SetPlayer(fakePlayer);
+		env = Static.GenerateStandaloneEnvironment();
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After
@@ -69,7 +70,7 @@ public class ExceptionsTest {
         verify(fakePlayer).sendMessage("2");
     }
 
-    @Test(timeout = 10000)
+    @Test
     public void testTryCatch2() throws ConfigCompileException {
         String script =
                 "try(\n"

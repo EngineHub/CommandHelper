@@ -85,55 +85,25 @@ public class TestPersistance {
 	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public void testFilterExceptions() throws URISyntaxException {
 		try {
-			new DataSourceFilter("$1alias=yml://blah$1.yml\na.*.(**)=$1alias\n", new URI(""));
+			new DataSourceFilter("$1alias=yml://blah.yml\na.*=$1alias\n", new URI(""));
 			fail("Expected an exception when defining numeric alias");
 		} catch (DataSourceException e) {
 			//Pass
 		}
 		try {
-			new DataSourceFilter("$alias!=yml://blah$1.yml\na.*.(**)=$alias\n", new URI(""));
+			new DataSourceFilter("$alias!=yml://blah.yml\na.*.(**)=$alias\n", new URI(""));
 			fail("Expected an exception when putting bad characters in a filter");
 		} catch (DataSourceException e) {
 			//Pass
 		}
 		try {
-			new DataSourceFilter("$alias=yml://blah$1.yml\na.*.(**(=$alias\n", new URI(""));
-			fail("Expected an exception when having two left parenthesis");
-		} catch (DataSourceException e) {
-			//Pass
-		}
-		try {
-			new DataSourceFilter("$alias=yml://blah$1.yml\na.*.(**))=$alias\n", new URI(""));
-			fail("Expected an exception when having two right parenthesis");
-		} catch (DataSourceException e) {
-			//Pass
-		}
-		try {
-			new DataSourceFilter("$alias=yml://blah$1.yml\na.*.(**=$alias\n", new URI(""));
-			fail("Expected an exception when having no end parenthesis");
-		} catch (DataSourceException e) {
-			//Pass
-		}
-		try {
-			new DataSourceFilter("$alias=yml://blah$1.yml\na.*.(**)=$aliasnope\n", new URI(""));
+			new DataSourceFilter("$alias=yml://blah.yml\na.*.**=$aliasnope\n", new URI(""));
 			fail("Expected an exception when using undefined alias");
 		} catch (DataSourceException e) {
 			//Pass
 		}
 		try {
-			new DataSourceFilter("$alias=yml://blah$2.yml\na.*.(**)=$alias\n", new URI(""));
-			fail("Expected an exception when using too high a capture group");
-		} catch (DataSourceException e) {
-			//Pass
-		}
-		try {
-			new DataSourceFilter("$alias=yml://blah$1.yml\na.*=$alias\na.*=$alias\n", new URI(""));
-			fail("Expected an exception when defining the same key twice");
-		} catch (DataSourceException e) {
-			//Pass
-		}
-		try {
-			new DataSourceFilter("$alias=!@#$%^&*()blah$1.yml\na.*.(**)=$alias\n", new URI(""));
+			new DataSourceFilter("$alias=!@#$%^&*()blah$1.yml\na.*.**=$alias\n", new URI(""));
 			fail("Expected an exception when having an invalid uri");
 		} catch (DataSourceException e) {
 			//Pass
@@ -154,12 +124,6 @@ public class TestPersistance {
 	public void testMatch3() throws Exception {
 		assertEquals("yml://yes.yml", getConnection("a.b.c.d", "a.b.**=yml://no.yml", "a.b.c.*=yml://yes.yml"));
 		assertEquals("yml://yes.yml", getConnection("a.b.c.d", "a.b.c.*=yml://yes.yml", "a.b.**=yml://no.yml"));
-		assertEquals("yml://yes.yml", getConnection("a.b.c.d", "a.b.(c).(*)=yml://yes.yml", "a.b.**=yml://no.yml"));
-	}
-
-	@Test
-	public void testMatchCapture1() throws Exception {
-		assertEquals("yml://yes.yml", getConnection("a.b.yes", "a.b.(*)=yml://$1.yml"));
 	}
 
 	@Test
@@ -170,27 +134,6 @@ public class TestPersistance {
 	@Test
 	public void testMultimatch2() throws Exception {
 		assertEquals(getSet("default", "yml://yes1.yml", "yml://yes2.yml"), getConnections("a.b.c", "a.**=yml://yes1.yml", "a.b.**=yml://yes2.yml", "b.**=yml://no.yml"));
-	}
-
-	@Test(expected = UnresolvedCaptureException.class)
-	public void testCaptureGetNamespaceException() throws Exception {
-		PersistanceNetwork network = new PersistanceNetwork("**=yml://folder/default.yml\nsubset.(*)=yml://folder/$1.yml", new URI(""), options);
-		network.set(new String[]{"subset", "file1"}, "value");
-		network.set(new String[]{"subset", "file2"}, "value");
-		network.getNamespace(new String[]{"subset"});
-		deleteFiles("folder/");
-	}
-
-	@Test
-	public void testCaptureGetNamespace() throws Exception {
-		PersistanceNetwork network = new PersistanceNetwork("**=yml://folder/default.yml\nsubset.(*)=yml://folder/$1.yml", new URI(""), options);
-		network.set(new String[]{"subset", "subset", "file1"}, "value");
-		network.set(new String[]{"subset", "subset", "file2"}, "value");
-		Map<String[], String> namespace = new HashMap<String[], String>();
-		namespace.put(new String[]{"subset", "subset", "file1"}, "value");
-		namespace.put(new String[]{"subset", "subset", "file2"}, "value");
-		assertEquals(stringifyMap(namespace), stringifyMap(network.getNamespace(new String[]{"subset", "subset"})));
-		deleteFiles("folder/");
 	}
 
 	@Test
@@ -229,9 +172,11 @@ public class TestPersistance {
 	public void testTransient() throws Exception{
 		PersistanceNetwork network = new PersistanceNetwork("**=transient:json://folder/default.json", new URI("default"), options);
 		network.set(new String[]{"key"}, "value1");
+		Thread.sleep(100);
 		assertEquals("value1", network.get(new String[]{"key"}));
 		FileUtility.write("{\"key\":\"value2\"}", new File("folder/default.json"));
 		//This should not be cached in memory
+		Thread.sleep(100);
 		assertEquals("value2", network.get(new String[]{"key"}));
 		deleteFiles("folder/");
 	}
@@ -242,6 +187,7 @@ public class TestPersistance {
 		//contains the key and value somewhere in the data
 		PersistanceNetwork network = new PersistanceNetwork("**=ser://folder/default.ser", new URI("default"), options);
 		network.set(new String[]{"key"}, "value");
+		Thread.sleep(100);
 		String contents = FileUtility.read(new File("folder/default.ser"));
 		assertTrue(contents.contains("value") && contents.contains("key") && contents.contains("java.util.HashMap"));
 		deleteFiles("folder/");

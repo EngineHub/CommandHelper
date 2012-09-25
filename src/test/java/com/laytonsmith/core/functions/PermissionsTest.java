@@ -4,15 +4,17 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Env;
+import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
+import java.io.IOException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -37,8 +39,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class PermissionsTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;
-    PermissionsResolverManager fakePerms;
-    Env env = new Env();
+	PermissionsResolver fakePerms;
+    com.laytonsmith.core.environments.Environment env;
 
     public PermissionsTest() {
     }
@@ -53,19 +55,15 @@ public class PermissionsTest {
     }
 
     @Before
-    public void setUp() {        
+    public void setUp() throws Exception {        
         fakePlayer = StaticTest.GetOnlinePlayer();
         MCWorld fakeWorld = mock(MCWorld.class);
         when(fakeWorld.getName()).thenReturn("world");
         when(fakePlayer.getWorld()).thenReturn(fakeWorld);
         fakeServer = StaticTest.GetFakeServer();
-        fakePerms = mock(PermissionsResolverManager.class);
-        Static.perms = fakePerms;
-        env.SetPlayer(fakePlayer);        
-        spy(Static.class);      
-        doReturn(fakePerms).when(Static.class);
-        Static.getPermissionsResolverManager();
-        //when(Static.getPermissionsResolverManager()).thenReturn(fakePerms);
+		fakePerms = mock(PermissionsResolver.class);
+        env = Static.GenerateStandaloneEnvironment(fakePerms);
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);        
     }
 
     @After
@@ -77,7 +75,7 @@ public class PermissionsTest {
         when(fakePerms.hasPermission(fakePlayer.getName(), "this.is.a.test")).thenReturn(true);
         when(fakePerms.hasPermission(fakePlayer.getName(), "does.not.have")).thenReturn(false);
         SRun("if(has_permission('this.is.a.test'), msg('success1'))\n"
-                + "if(not(has_permission('does.not.have')), msg('success2'))", fakePlayer);
+                + "if(!has_permission('does.not.have'), msg('success2'))", fakePlayer, env);
         verify(fakePlayer).sendMessage("success1");
         verify(fakePlayer).sendMessage("success2");
     }
@@ -90,7 +88,7 @@ public class PermissionsTest {
         String world = fakePlayer.getWorld().getName();
         String name = fakePlayer.getName();
         when(fakePerms.hasPermission(world, name, "commandhelper.alias.simple")).thenReturn(true);
-        StaticTest.RunCommand("simple:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
+        StaticTest.RunCommand("simple:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd", env);
         verify(fakePerms, atLeastOnce()).hasPermission(world, name, "commandhelper.alias.simple");
     }
     
@@ -115,7 +113,7 @@ public class PermissionsTest {
         Static.InjectPlayer(fakePlayer);
         when(fakePerms.inGroup(fakePlayer.getName(), "group1")).thenReturn(false);
         when(fakePerms.inGroup(fakePlayer.getName(), "group2")).thenReturn(true);
-        StaticTest.RunCommand("~group1/group2:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
+        StaticTest.RunCommand("~group1/group2:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd", env);
         verify(fakePerms, atLeastOnce()).inGroup(fakePlayer.getName(), "group1");
         verify(fakePerms, atLeastOnce()).inGroup(fakePlayer.getName(), "group2");
     }
@@ -127,7 +125,7 @@ public class PermissionsTest {
         Static.InjectPlayer(fakePlayer);
         when(fakePerms.inGroup(fakePlayer.getName(), "group1")).thenReturn(false);
         when(fakePerms.inGroup(fakePlayer.getName(), "group2")).thenReturn(true);
-        StaticTest.RunCommand("~group1/-group2:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd");
+        StaticTest.RunCommand("~group1/-group2:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd", env);
         //We expect this to fail; we don't have permission.
     }
 }

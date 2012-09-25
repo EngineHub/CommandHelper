@@ -4,17 +4,18 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Math;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
+import java.io.IOException;
 import org.junit.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;
@@ -28,7 +29,7 @@ public class MathTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;
     IVariableList varList;
-    Env env = new Env();
+    com.laytonsmith.core.environments.Environment env;
 
     public MathTest() {
     }
@@ -42,15 +43,16 @@ public class MathTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         fakePlayer = GetOnlinePlayer();
         fakeServer = GetFakeServer();
 
         varList = new IVariableList();
         varList.set(new IVariable("var", C.onstruct(1), Target.UNKNOWN));
         varList.set(new IVariable("var2", C.onstruct(2.5), Target.UNKNOWN));
-        env.SetVarList(varList);
-        env.SetPlayer(fakePlayer);
+		env = Static.GenerateStandaloneEnvironment();
+        env.getEnv(CommandHelperEnvironment.class).SetVarList(varList);
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After

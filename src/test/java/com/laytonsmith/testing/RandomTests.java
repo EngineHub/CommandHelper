@@ -37,8 +37,8 @@ import org.powermock.modules.junit4.PowerMockRunner;
  *
  * @author Layton
  */
-@RunWith(PowerMockRunner.class)
-@PrepareForTest(Static.class)
+//@RunWith(PowerMockRunner.class)
+//@PrepareForTest(Static.class)
 public class RandomTests {
     MCPlayer fakePlayer;
     

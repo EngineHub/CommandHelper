@@ -5,8 +5,9 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
@@ -24,9 +25,10 @@ public class DataHandlingTest {
 
     MCServer fakeServer;
     MCPlayer fakePlayer;
-    Env env = new Env();
+    com.laytonsmith.core.environments.Environment env;
 
-    public DataHandlingTest() {
+    public DataHandlingTest() throws Exception{
+		env = Static.GenerateStandaloneEnvironment();
     }
 
     @BeforeClass
@@ -41,7 +43,7 @@ public class DataHandlingTest {
     public void setUp() {
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
-        env.SetPlayer(fakePlayer);
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After

@@ -73,7 +73,7 @@ public class Interpreter {
 	static String script;
 	private static Environment env;
 
-	public static void start(List<String> args) throws IOException, DataSourceException {
+	public static void start(List<String> args) throws IOException, DataSourceException, URISyntaxException {
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
 		//Next, we need to get the "installation location", so we won't spew config files everywhere

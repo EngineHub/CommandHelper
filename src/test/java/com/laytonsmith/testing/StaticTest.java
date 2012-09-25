@@ -12,6 +12,8 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.AbstractEvent;
 import com.laytonsmith.core.events.BindableEvent;
 import com.laytonsmith.core.events.EventMixinInterface;
@@ -20,6 +22,7 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.persistance.DataSourceException;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
 import java.io.IOException;
@@ -45,12 +48,21 @@ import org.powermock.modules.junit4.PowerMockRunner;
 @RunWith(PowerMockRunner.class)
 
 public class StaticTest {
+	static com.laytonsmith.core.environments.Environment env;
+	
+	static{
+		try {
+			env = Static.GenerateStandaloneEnvironment();
+		} catch (Exception ex) {
+			throw new RuntimeException(ex);
+		}
+	}
     /**
      * Tests the boilerplate functions in a Function. While all functions should conform to
      * at least this, it is useful to also use the more strict TestBoilerplate function.
      * @param f 
      */
-    public static void TestBoilerplate(FunctionBase ff, String name) {
+    public static void TestBoilerplate(FunctionBase ff, String name) throws Exception {
         if(!(ff instanceof Function)){
             return;
         }
@@ -95,7 +107,6 @@ public class StaticTest {
         //with random data to see if it fails in expected ways (to simulate how a user could run the scripts)
         //If we are interested in tests that are specific to the functions however, we shouldn't run this.
         if (!runQualityTestsOnly && f.getClass().getAnnotation(noboilerplate.class) == null) {
-		System.out.println("Now testing " + f.getName());
             TestExec(f, fakePlayer, "fake player");
             TestExec(f, null, "null command sender");
             TestExec(f, StaticTest.GetFakeConsoleCommandSender(), "fake console command sender");
@@ -133,13 +144,12 @@ public class StaticTest {
     }
 
     private static ArrayList<String> tested = new ArrayList<String>();
-    public static void TestExec(Function f, MCCommandSender p, String commandType) {
+    public static void TestExec(Function f, MCCommandSender p, String commandType) throws Exception {
         if(tested.contains(f.getName() + String.valueOf(p))){
             return;
         }
         tested.add(f.getName() + String.valueOf(p));
-        Env env = new Env();
-        env.SetCommandSender(p);
+        env.getEnv(CommandHelperEnvironment.class).SetCommandSender(p);
         //See if the function throws something other than a ConfigRuntimeException or CancelCommandException if we send it bad arguments,
         //keeping in mind of course, that it isn't supposed to be able to accept the wrong number of arguments. Specifically, we want to try
         //strings, numbers, arrays, and nulls
@@ -153,8 +163,8 @@ public class StaticTest {
             //ok is if it throws an unexpected type of exception. It should only ever
             //throw a ConfigRuntimeException, or a CancelCommandException. Further,
             //if it throws a ConfigRuntimeException, the documentation should state so.
-            for (int z = 0; z < 10; z++) {
-                for (int a = 0; a < i; a++) {
+			for (int z = 0; z < 10; z++) {
+				for (int a = 0; a < i; a++) {
                     switch (z) {
                         case 0:
                             con[a] = C.onstruct("hi");
@@ -222,7 +232,7 @@ public class StaticTest {
             }
         }
     }
-    static ArrayList<String> brokenJunk = new ArrayList<String>();
+    static Set<String> brokenJunk = new TreeSet<String>();
 
     public static void TestClassDocs(String docs, Class container) {
         if (docs.length() <= 0) {
@@ -414,34 +424,27 @@ public class StaticTest {
      * @throws ConfigCompileException 
      */
     public static void Run(String script, MCCommandSender player) throws ConfigCompileException{
-        Run(script, player, null);
+        Run(script, player, null, null);
     }
     
-    public static void Run(String script, MCCommandSender player, MethodScriptComplete done) throws ConfigCompileException{
-        Env env = new Env();
-		File file = new File("profiler.config");
-		file.deleteOnExit();
-		try {
-			env.SetProfiler(new Profiler(file));
-		} catch (IOException ex) {
-			throw new RuntimeException(ex);
+    public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws ConfigCompileException{
+		if(env == null){
+			env = StaticTest.env;
 		}
-        env.SetCommandSender(player);
+        env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, done, null);
     }
     
     public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws ConfigCompileException{
+		RunCommand(combinedScript, player, command, env);
+	}
+    public static void RunCommand(String combinedScript, MCCommandSender player, String command, Environment env) throws ConfigCompileException{
         InstallFakeServerFrontend();
-        Env env = new Env();
-		File file = new File("profiler.config");
-		file.deleteOnExit();
-		try {
-			env.SetProfiler(new Profiler(file));
-		} catch (IOException ex) {
-			throw new RuntimeException(ex);
+		if(env == null){
+			env = StaticTest.env;
 		}
-        env.SetCommandSender(player);
-        List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null), env);
+        env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
+        List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null));
         for(Script s : scripts){
             s.compile();
             if(s.match(command)){
@@ -450,15 +453,18 @@ public class StaticTest {
         }
     }
     
-    public static String SRun(String script, MCCommandSender player) throws ConfigCompileException{
+	public static String SRun(String script, MCCommandSender player, Environment env) throws ConfigCompileException{
         final StringBuffer b = new StringBuffer();
         Run(script, player, new MethodScriptComplete() {
 
             public void done(String output) {
                 b.append(output);
             }
-        });
-        return b.toString();
+        }, env);
+        return b.toString();		
+	}
+    public static String SRun(String script, MCCommandSender player) throws ConfigCompileException{
+		return SRun(script, player, env);
     }
     //TODO: Fix this
 //    public static void RunVars(List<Variable> vars, String script, MCCommandSender player) throws ConfigCompileException{
@@ -502,7 +508,6 @@ public class StaticTest {
         }
         when(fakeServer.getOnlinePlayers()).thenReturn(pps.toArray(new MCPlayer[]{}));  
         CommandHelperPlugin.myServer = fakeServer;  
-        Static.perms = mock(PermissionsResolverManager.class);
         return fakeServer;
     }
     
@@ -517,13 +522,7 @@ public class StaticTest {
         }                
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();
-        PowerMockito.spy(Static.class);
-        try{
-            PowerMockito.doReturn(fakeCore).when(Static.class);
-            Static.getAliasCore();        
-        } catch(MissingMethodInvocationException e){
-            throw new Error("Could not mock Static. Did you forget to put @PrepareForTest(Static.class) at the top of your file?");
-        }
+		SetPrivate(CommandHelperPlugin.class, "ac", fakeCore, AliasCore.class);       
        frontendInstalled = true;
     }
     
@@ -662,7 +661,7 @@ public class StaticTest {
     /**
      * Returns the value of a private (or any other variable for that matter) data member contained in the object provided.
      * If the value isn't there, the test fails automatically.
-     * @param in The object to look in.
+     * @param in The object to look in, or the Class object for static varibles.
      * @param name The name of the variable to get.
      * @return 
      */
@@ -670,6 +669,13 @@ public class StaticTest {
         return GetSetPrivate(in, name, null, false, expected);
     }
     
+	/**
+	 * Sets the value of a private (or any other variable for that matter) data member contained in the object provided.
+	 * @param in Either the class of the object (for static variables) or an instance of the object.
+	 * @param name
+	 * @param value
+	 * @param expected S
+	 */
     public static void SetPrivate(Object in, String name, Object value, Class expected){
         GetSetPrivate(in, name, value, true, expected);
     }
@@ -679,6 +685,9 @@ public class StaticTest {
         try {
             Field f = null;
             Class search = in.getClass();
+			if(in instanceof Class){
+				search = (Class)in;
+			}
             while(search != null){
                 try{
                     f = search.getDeclaredField(name);

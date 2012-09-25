@@ -30,12 +30,7 @@ public class ArrayTest {
 
     @BeforeClass
     public static void setUpClass(){      
-        try {
-            Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
-        }
-        catch (DataSourceException ex) {
-            Logger.getLogger(ArrayTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
     }
     @Before
     public void setUp() {

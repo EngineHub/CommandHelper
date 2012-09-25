@@ -4,11 +4,12 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
+import java.io.IOException;
 import org.junit.*;
 import org.junit.runner.RunWith;
 import static org.mockito.Mockito.verify;
@@ -23,9 +24,10 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class EnchantmentsTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;
-    Env env = new Env();
+	com.laytonsmith.core.environments.Environment env;
 
-    public EnchantmentsTest() {
+    public EnchantmentsTest() throws Exception {
+		env = Static.GenerateStandaloneEnvironment();
     }
 
     @BeforeClass
@@ -40,7 +42,7 @@ public class EnchantmentsTest {
     public void setUp() throws Exception {
         fakeServer = GetFakeServer();
         fakePlayer = GetOnlinePlayer(fakeServer);
-        env.SetPlayer(fakePlayer);
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
         StaticTest.InstallFakeConvertor(fakePlayer);
         Static.InjectPlayer(fakePlayer);
     }

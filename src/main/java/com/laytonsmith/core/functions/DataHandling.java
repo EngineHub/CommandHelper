@@ -1590,6 +1590,7 @@ public class DataHandling {
 				try {
 					newEnv = env.clone();
 				} catch (CloneNotSupportedException ex) {
+					throw new RuntimeException(ex);
 				}
 				return proc.execute(vars, newEnv);
 			}

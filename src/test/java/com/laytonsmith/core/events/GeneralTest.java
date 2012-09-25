@@ -35,13 +35,7 @@ public class GeneralTest {
 
     @BeforeClass
     public static void setUpClass(){
-        try {
-            //StaticTest.StartServer();     
-            Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
-        }
-        catch (DataSourceException ex) {
-            Logger.getLogger(GeneralTest.class.getName()).log(Level.SEVERE, null, ex);
-        }
+
     }
     @Before
     public void setUp() throws Exception {        

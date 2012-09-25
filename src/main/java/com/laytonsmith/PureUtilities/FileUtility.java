@@ -7,6 +7,8 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -57,7 +59,7 @@ public class FileUtility {
 	}
 
 	public static String read(File file, String charset) throws IOException{
-		return StreamUtils.GetString(readAsStream(file), charset);
+			return StreamUtils.GetString(readAsStream(file), charset);
 	}
 	
 	/**
@@ -136,28 +138,53 @@ public class FileUtility {
 		}
 		try{
 			synchronized (getLock(file)) {
-				RandomAccessFile raf = new RandomAccessFile(file, "rw");
-				FileLock lock = null;
-				try {
-					lock = raf.getChannel().lock();
-					//Clear out the file
-					if (!append) {
-						raf.getChannel().truncate(0);
-					} else {
-						raf.seek(raf.length());
+				int sleepTime = 0;
+				int sleepTimes = 0;
+				loop: while(true){
+					try {
+						Thread.sleep(sleepTime);
+						sleepTime += 10;
+						sleepTimes++;						
+					} catch (InterruptedException ex) {
+						//
 					}
-					//Write out the data				
-					MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
-					buf.put(data);
-					buf.force();
-					//raf.getChannel().write(ByteBuffer.wrap(data));
-				} finally {
-					if (lock != null) {
-						lock.release();
+					RandomAccessFile raf = new RandomAccessFile(file, "rw");
+					FileLock lock = null;
+					try {
+						lock = raf.getChannel().lock();
+						//Clear out the file
+						if (!append) {
+							raf.getChannel().truncate(0);
+						} else {
+							raf.seek(raf.length());
+						}
+						//Write out the data				
+						MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
+						buf.put(data);
+						buf.force();
+						//We assume it worked at this point, so let's break;
+						break loop;
+						//raf.getChannel().write(ByteBuffer.wrap(data));
+					} catch(IOException e){
+						//If we get this dumb message, we're on windows. We'll try again here shortly,
+						//but we don't want to bother the user with this exception if we can help it.
+						//http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
+						if(!"The requested operation cannot be performed on a file with a user-mapped section open"
+								.equals(e.getMessage())){
+							throw e;
+						}
+						if(sleepTimes > 10){
+							//Eh. Gotta give up some time.
+							throw e;
+						}
+					} finally {
+						if (lock != null) {
+							lock.release();
+						}
+						raf.close();
+						raf = null;
+						System.gc();
 					}
-					raf.close();
-					raf = null;
-					System.gc();
 				}
 			}
 		} finally {

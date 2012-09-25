@@ -37,8 +37,18 @@ public class PersistanceNetwork {
      * @param defaultURI 
      */
     public PersistanceNetwork(File configuration, URI defaultURI, ConnectionMixinFactory.ConnectionMixinOptions options) throws IOException, DataSourceException{
-        this(FileUtility.read(configuration), defaultURI, options);
+        this(FileUtility.read(ensureCreated(configuration)), defaultURI, options);
     }
+	
+	private static File ensureCreated(File f) throws IOException{
+		if(!f.exists()){
+			if(f.getParentFile() != null){
+				f.getParentFile().mkdirs();
+			}
+			f.createNewFile();
+		}
+		return f;
+	}
     /**
      * Given a configuration and a default URI, constructs a new
      * persistance network. The defaultURI is used in the event that the

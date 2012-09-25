@@ -279,10 +279,13 @@ public class Exceptions {
 			return null;
 		}
 
-		@Override
-		public boolean isTerminal() {
-			return true;
-		}
+		//The code: try(throw(...), @ex, ...) doesn't work,
+		//because it sees throw, then kills the other children to try.
+		//Blah.
+//		@Override
+//		public boolean isTerminal() {
+//			return true;
+//		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			try {

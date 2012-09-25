@@ -10,22 +10,20 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
-import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
@@ -188,7 +186,7 @@ public class ExampleScript {
 		return originalScript;
 	}
 	
-	public String getOutput() throws IOException, DataSourceException{
+	public String getOutput() throws IOException, DataSourceException, URISyntaxException{
 		if(output != null){
 			return output;
 		}

@@ -22,6 +22,7 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.sk89q.util.StringUtil;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.*;
+import java.net.URI;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -236,10 +237,11 @@ public class AliasCore {
 	public final void reload(MCPlayer player) {
 		try {
 			CHLog.Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
-			parent.profiler = new Profiler(new File("CommandHelper/profiler.config"));
+			parent.profiler = new Profiler(new File("plugins/CommandHelper/profiler.config"));
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-			options.setWorkingDirectory(new File("CommandHelper/"));
-			parent.persistanceNetwork = new PersistanceNetwork(new File("CommandHelper/persistance.config"), new File("CommandHelper/persistance.db").toURI(), options);
+			options.setWorkingDirectory(new File("plugins/CommandHelper/"));
+			parent.persistanceNetwork = new PersistanceNetwork(new File("plugins/CommandHelper/persistance.config"), 
+					new URI("sqlite://" + new File("plugins/CommandHelper/persistance.db").getCanonicalPath().replace("\\", "/")), options);
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver);
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 			cEnv.SetCommandSender(player);

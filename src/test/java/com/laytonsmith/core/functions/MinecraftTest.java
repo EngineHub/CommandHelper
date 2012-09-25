@@ -1,11 +1,11 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
-import com.sk89q.wepif.PermissionsResolverManager;
+import java.io.IOException;
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
@@ -28,8 +28,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 public class MinecraftTest {
     MCServer fakeServer;
     MCPlayer fakePlayer;
-    PermissionsResolverManager fakePerms;
-    Env env = new Env();
+    com.laytonsmith.core.environments.Environment env;
 
     public MinecraftTest() {
     }
@@ -43,13 +42,11 @@ public class MinecraftTest {
     }
 
     @Before
-    public void setUp() {        
+    public void setUp() throws Exception {        
         fakePlayer = StaticTest.GetOnlinePlayer();
         fakeServer = StaticTest.GetFakeServer();
-        fakePerms = mock(PermissionsResolverManager.class);
-        env.SetPlayer(fakePlayer);
-        mockStatic(Static.class);
-        when(Static.getPermissionsResolverManager()).thenReturn(null);
+		env = Static.GenerateStandaloneEnvironment();
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After

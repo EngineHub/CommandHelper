@@ -23,6 +23,7 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.logging.Level;
@@ -38,7 +39,7 @@ public class Manager {
 	private static Profiler profiler;
 	private static GlobalEnv gEnv;
 
-    public static void start() throws IOException, DataSourceException {
+    public static void start() throws IOException, DataSourceException, URISyntaxException {
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 		File jarLocation = new File(Manager.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
 		options.setWorkingDirectory(new File(jarLocation, "CommandHelper/"));

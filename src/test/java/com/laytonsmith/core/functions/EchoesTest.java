@@ -5,12 +5,14 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Env;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import static com.laytonsmith.testing.StaticTest.*;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import org.junit.*;
 import static org.junit.Assert.*;
@@ -27,7 +29,7 @@ public class EchoesTest {
 
     MCServer fakeServer;
     MCPlayer fakePlayer;
-    Env env = new Env();
+    com.laytonsmith.core.environments.Environment env;
 
     public EchoesTest() {
     }
@@ -41,10 +43,11 @@ public class EchoesTest {
     }
 
     @Before
-    public void setUp() {
+    public void setUp() throws Exception {
         fakeServer = GetFakeServer();
         fakePlayer = GetOnlinePlayer(fakeServer);
-        env.SetPlayer(fakePlayer);
+		env = Static.GenerateStandaloneEnvironment();
+        env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 
     @After

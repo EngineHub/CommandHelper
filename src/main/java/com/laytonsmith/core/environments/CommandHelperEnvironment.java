@@ -13,7 +13,7 @@ import java.util.Map;
  *
  * @author lsmith
  */
-public class CommandHelperEnvironment implements Environment.EnvironmentImpl {
+public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cloneable {
 	  
     
     private MCCommandSender commandSender = null;
