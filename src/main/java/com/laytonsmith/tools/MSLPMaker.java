@@ -4,7 +4,6 @@ package com.laytonsmith.tools;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.PureUtilities.ZipMaker;
 import com.laytonsmith.core.AliasCore;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -49,7 +48,7 @@ public class MSLPMaker {
         for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSAFiles()){
             List<Script> tempScripts;
             try{
-                tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents(), fi.file()), new Env());
+                tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents(), fi.file()));
                 for (Script s : tempScripts) {
                     try {
                         s.compile();

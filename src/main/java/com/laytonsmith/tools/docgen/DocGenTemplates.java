@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.net.URI;
@@ -76,8 +77,15 @@ public class DocGenTemplates {
 			for(Class c : classes){
 				if(DataSource.class.isAssignableFrom(c)){
 					try{
-						DataSource ds = (DataSource)c.getConstructor(URI.class, ConnectionMixinFactory.ConnectionMixinOptions.class)
-							.newInstance(new URI(""), new ConnectionMixinFactory.ConnectionMixinOptions());
+						Constructor constructor;
+						try{
+							constructor = c.getDeclaredConstructor();
+							constructor.setAccessible(true);
+						} catch(NoSuchMethodException e){
+							throw new RuntimeException("No no-argument constructor was found for " + c.getName() + ". A no-arg constructor must be provided, even if it is"
+									+ " private, so that the documentation functions can be accessed.", e);
+						}
+						DataSource ds = (DataSource)constructor.newInstance();
 						String docs = ds.docs();
 						Matcher m = p.matcher(docs);
 						String name = null;

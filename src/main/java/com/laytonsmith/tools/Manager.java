@@ -2,19 +2,24 @@
 
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.Persistance;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.PureUtilities.TermColors.SYS;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.SerializedPersistance;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
@@ -30,10 +35,16 @@ import java.util.regex.Pattern;
  */
 public class Manager {
 
-    private static Scanner scanner;
 	private static Profiler profiler;
+	private static GlobalEnv gEnv;
 
-    public static void start() throws IOException {
+    public static void start() throws IOException, DataSourceException {
+		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+		File jarLocation = new File(Manager.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+		options.setWorkingDirectory(new File(jarLocation, "CommandHelper/"));
+		PersistanceNetwork persistanceNetwork;
+		persistanceNetwork = new PersistanceNetwork(new File(jarLocation, "CommandHelper/persistance.config"), new File(jarLocation, "CommandHelper/persistance.db").toURI(), options);
+		gEnv = new GlobalEnv(new ExecutionQueue("Manager", "default"), profiler, persistanceNetwork, new PermissionsResolver.PermissiveResolver());
         cls();
         pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
@@ -41,8 +52,7 @@ public class Manager {
         
         pl("Starting the Data Manager...");
         try {
-			Env env = new Env();
-			env.SetProfiler(profiler);
+			Environment env = Environment.createEnvironment(gEnv);
             MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), env, null, null);
         } catch (ConfigCompileException ex) {}
         pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
@@ -266,8 +276,7 @@ public class Manager {
     
     public static boolean doAddEdit(String key, String valueScript){
         try {
-			Env env = new Env();
-			env.SetProfiler(profiler);
+			Environment env = Environment.createEnvironment(gEnv);
             Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null)), env, null, null);
             String value = Construct.json_encode(c, Target.UNKNOWN);
             pl(CYAN + "Adding: " + WHITE + value);

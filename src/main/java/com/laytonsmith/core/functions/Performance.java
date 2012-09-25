@@ -7,6 +7,7 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
@@ -67,7 +68,7 @@ public class Performance {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if(!Prefs.AllowProfiling()){
                 throw new ConfigRuntimeException("allow-profiling is currently off, you must set it to true in your preferences.", ExceptionType.SecurityException, t);
             }

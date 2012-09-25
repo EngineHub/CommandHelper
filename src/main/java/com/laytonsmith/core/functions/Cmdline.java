@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -13,6 +12,8 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -48,7 +49,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             System.out.print(args[0].val());
             if (args[0].val().matches("(?m).*\033.*")) {
                 //We have color codes in it, we need to reset them
@@ -103,7 +104,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             System.err.print(args[0].val());
             if (args[0].val().matches("(?m).*\033.*")) {
                 //We have color codes in it, we need to reset them
@@ -140,7 +141,7 @@ public class Cmdline {
 		}
     }
 
-    @api
+    @api(environments={GlobalEnv.class})
     @noboilerplate
     public static class exit extends AbstractFunction {
 
@@ -156,12 +157,13 @@ public class Cmdline {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             int exit_code = 0;
             if (args.length == 1) {
                 exit_code = (int) Static.getInt(args[0]);
             }
-            if (environment.GetCustom("cmdline") instanceof Boolean && (Boolean) environment.GetCustom("cmdline")) {
+            if (environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
+					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline")) {
                 System.exit(exit_code);
             }
             return new Echoes.die().exec(t, environment, args);
@@ -213,7 +215,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if (args.length == 1) {
                 String propName = args[0].val();
                 String prop = System.getProperty(propName);
@@ -271,7 +273,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if (args.length == 1) {
                 return new CString(System.getenv(args[0].val()), t);
             } else {
@@ -316,7 +318,7 @@ public class Cmdline {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             //TODO: Make this more robust by having a local cache of the environment which we modify, and get_env returns from.
             Map<String, String> newenv = new HashMap<String, String>(System.getenv());
             newenv.put(args[0].val(), args[1].val());

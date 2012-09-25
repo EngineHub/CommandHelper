@@ -4,6 +4,8 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -59,7 +61,7 @@ public class Sandbox {
 //            return false;
 //        }
 //
-//        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 //            Object o = AliasCore.parent.getServer().getPluginManager();
 //            if (o instanceof SimplePluginManager) {
 //                SimplePluginManager spm = (SimplePluginManager) o;
@@ -107,7 +109,7 @@ public class Sandbox {
 //            return new CVoid(t);
 //        }
 //    }
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class item_drop extends AbstractFunction {
 
         public String getName() {
@@ -140,14 +142,14 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 
             MCLocation l = null;
             int qty = 1;
             MCItemStack is = null;
             boolean natural = false;
-            if (env.GetCommandSender() instanceof MCPlayer) {
-                l = env.GetPlayer().getLocation();
+            if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getLocation();
             }
             if (args.length == 1) {
                 //It is just the item
@@ -197,7 +199,7 @@ public class Sandbox {
         }
     }    
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class super_cancel extends AbstractFunction {
 
         public String getName() {
@@ -232,8 +234,8 @@ public class Sandbox {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            BoundEvent.ActiveEvent original = environment.GetEvent();
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            BoundEvent.ActiveEvent original = environment.getEnv(CommandHelperEnvironment.class).GetEvent();
             if (original == null) {
                 throw new ConfigRuntimeException("is_cancelled cannot be called outside an event handler", ExceptionType.BindException, t);
             }
@@ -242,12 +244,12 @@ public class Sandbox {
                 ( (Cancellable) original.getUnderlyingEvent() ).setCancelled(true);
                 BukkitDirtyRegisteredListener.setCancelled((org.bukkit.event.Event) original.getUnderlyingEvent());
             }
-            environment.GetEvent().setCancelled(true);
+            environment.getEnv(CommandHelperEnvironment.class).GetEvent().setCancelled(true);
             return new CVoid(t);
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class enchant_inv_unsafe extends AbstractFunction {
 
         public String getName() {
@@ -280,8 +282,8 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer m = environment.GetPlayer();
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             int offset = 1;
             if (args.length == 4) {
                 m = Static.GetPlayer(args[0].val(), t);
@@ -320,7 +322,7 @@ public class Sandbox {
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class raw_set_pvanish extends AbstractFunction {
 
         public String getName() {
@@ -350,12 +352,12 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer me;
             boolean isVanished;
             MCPlayer other;
             if (args.length == 2) {
-                me = environment.GetPlayer();
+                me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
                 isVanished = Static.getBoolean(args[0]);
                 other = Static.GetPlayer(args[1]);
             } else {
@@ -374,7 +376,7 @@ public class Sandbox {
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class raw_pcan_see extends AbstractFunction {
 
         public String getName() {
@@ -402,11 +404,11 @@ public class Sandbox {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer me;
             MCPlayer other;
             if (args.length == 1) {
-                me = environment.GetPlayer();
+                me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
                 other = Static.GetPlayer(args[0]);
             } else {
                 me = Static.GetPlayer(args[0]);

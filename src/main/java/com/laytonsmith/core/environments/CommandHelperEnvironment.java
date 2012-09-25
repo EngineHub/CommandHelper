@@ -1,101 +1,32 @@
+package com.laytonsmith.core.environments;
 
-
-package com.laytonsmith.core;
-
-import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.core.Procedure;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.events.BoundEvent;
-import com.laytonsmith.core.profiler.Profiler;
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * The Env class contains the operating environment for a particular function.
- * @author Layton
+ *
+ * @author lsmith
  */
-public final class Env implements Cloneable{
+public class CommandHelperEnvironment implements Environment.EnvironmentImpl {
+	  
     
-    /**
-     * This is the underlying map of variables
-     */
-    private Map<String, Object> custom = new HashMap<String, Object>();   
-    private Map<String, Boolean> flags = new HashMap<String, Boolean>();
     private MCCommandSender commandSender = null;
     private IVariableList iVariableList = null;
     private Map<String, Procedure> procs = null;
     private String label = null;
-    private Script script = null;
+    
     private BoundEvent.ActiveEvent event = null;
-    private String command = null;
-    private ExecutionQueue executionQueue = null;
-	private Profiler profiler = null;
+    private String command = null;		
     
-    /*
-     * The constructor has relatively little to do, most things are lazy
-     * initialized, but sometimes it's more convenient to pre-initialize
-     * certain things
-     */
-    public Env(){
-       
-    }
     
-    /**
-     * Sets the value of a flag
-     * @param name
-     * @param value 
-     */
-    public void SetFlag(String name, boolean value){
-        flags.put(name, value);
-    }
     
-    /**
-     * Returns the value of a flag. Null if unset.
-     * @param name
-     * @return 
-     */
-    public Boolean GetFlag(String name){
-        if(!flags.containsKey(name)){
-            return null;
-        } else {
-            return flags.get(name);
-        }
-    }
     
-    /**
-     * Clears the value of a flag from the flag list, causing further calls to GetFlag(name) to return null.
-     * @param name 
-     */
-    public void ClearFlag(String name){
-        flags.remove(name);
-    }
-    
-    /**
-     * Use this if you would like to stick a custom variable in the environment.
-     * It should be discouraged to use this for more than one shot transfers. Typically,
-     * an setter and getter should be made to wrap the element.
-     * @param name
-     * @param var 
-     */
-    public void SetCustom(String name, Object var){
-        if(!custom.containsKey("custom")){
-            custom.put("custom", new HashMap<String, Object>());
-        }
-        ((Map<String, Object>)custom.get("custom")).put(name, var);        
-    }
-    
-    /**
-     * Returns the custom value to which the specified key is mapped, or null if this map contains no mapping for the key.
-     * @param name
-     * @return 
-     */
-    public Object GetCustom(String name){
-        if(!custom.containsKey("custom")){
-            custom.put("custom", new HashMap<String, Object>());
-        }
-        return ((Map<String, Object>)custom.get("custom")).get(name);
-    }
     /**
      * Given the environment, this function returns the CommandSender in the
      * environment, which can possibly be null.
@@ -180,15 +111,7 @@ public final class Env implements Cloneable{
     
     public void SetLabel(String label){
         this.label = label;
-    }
-    
-    public void SetScript(Script s){
-        this.script = s;
-    }
-    
-    public Script GetScript(){
-        return script;
-    }        
+    }       
     
     public void SetEvent(BoundEvent.ActiveEvent e){
         event = e;
@@ -201,24 +124,10 @@ public final class Env implements Cloneable{
     public BoundEvent.ActiveEvent GetEvent(){
         return event;
     }
-	
-	public void SetProfiler(Profiler profiler){
-		this.profiler = profiler;
-	}
-	
-	public Profiler GetProfiler(){
-		return this.profiler;
-	}
     
     @Override
-    public Env clone() throws CloneNotSupportedException{	    
-        Env clone = (Env)super.clone();
-        clone.custom = new HashMap<String, Object>(this.custom);
-        if(flags != null){
-            clone.flags = new HashMap<String, Boolean>(flags);
-        } else {
-            clone.flags = new HashMap<String, Boolean>();
-        }
+    public CommandHelperEnvironment clone() throws CloneNotSupportedException{	    
+        CommandHelperEnvironment clone = (CommandHelperEnvironment)super.clone();
         if(procs != null){
             clone.procs = new HashMap<String, Procedure>(procs);
         } else {
@@ -236,13 +145,5 @@ public final class Env implements Cloneable{
     
     public String GetCommand(){
         return this.command;
-    }
-    
-    public void SetExecutionQueue(ExecutionQueue ex){
-	    this.executionQueue = ex;
-    }
-    
-    public ExecutionQueue GetExecutionQueue(){
-	    return this.executionQueue;
     }
 }

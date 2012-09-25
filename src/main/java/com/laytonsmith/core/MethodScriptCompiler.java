@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Token.TType;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Compiler;
@@ -632,7 +633,7 @@ public final class MethodScriptCompiler {
 	 * @return
 	 * @throws ConfigCompileException
 	 */
-	public static List<Script> preprocess(List<Token> tokenStream, Env env) throws ConfigCompileException {
+	public static List<Script> preprocess(List<Token> tokenStream) throws ConfigCompileException {
 		//First, pull out the duplicate newlines
 		ArrayList<Token> temp = new ArrayList<Token>();
 		for (int i = 0; i < tokenStream.size(); i++) {
@@ -1250,8 +1251,7 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), fileOptions);
 				Script fakeScript = Script.GenerateScript(root, "*");
-				Env env = new Env();
-				Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, env, fakeScript, children.toArray(new ParseTree[children.size()]));
+				Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, null, fakeScript, children.toArray(new ParseTree[children.size()]));
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
 			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere
@@ -1322,7 +1322,7 @@ public final class MethodScriptCompiler {
 	 * @param done
 	 * @param script
 	 */
-	public static Construct execute(ParseTree root, Env env, MethodScriptComplete done, Script script) {
+	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script) {
 		return execute(root, env, done, script, null);
 	}
 
@@ -1338,7 +1338,7 @@ public final class MethodScriptCompiler {
 	 * @param vars
 	 * @return
 	 */
-	public static Construct execute(ParseTree root, Env env, MethodScriptComplete done, Script script, List<Variable> vars) {
+	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
 		if (script == null) {
 			script = new Script(null, null);
 		}
@@ -1376,7 +1376,7 @@ public final class MethodScriptCompiler {
 		return Static.resolveConstruct(b.toString().trim(), Target.UNKNOWN);
 	}
 
-	public static void registerAutoIncludes(Env env, Script s) {
+	public static void registerAutoIncludes(Environment env, Script s) {
 		File auto_include = new File("plugins/CommandHelper/auto_include.ms");
 		if (auto_include.exists()) {
 			MethodScriptCompiler.execute(IncludeCache.get(auto_include, new Target(0, auto_include, 0)), env, null, s);

@@ -27,7 +27,9 @@ import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
-import com.laytonsmith.persistance.SerializedPersistance;
+import com.laytonsmith.persistance.PersistanceNetwork;
+import com.laytonsmith.persistance.ReadOnlyException;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import java.io.File;
@@ -63,7 +65,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static MCServer myServer;
 	public static Version version;
 	public static CommandHelperPlugin self;
-	public Profiler profiler;
 	public static WorldEditPlugin wep;
 	public static ExecutorService hostnameLookupThreadPool;
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
@@ -74,7 +75,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 			e.printStackTrace(System.err);
 		}
 	};
+	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new ExecutionQueue("CommandHelper", "default", uncaughtExceptionHandler);
+	public PermissionsResolver permissionsResolver;
+	public PersistanceNetwork persistanceNetwork;
 	/**
 	 * Listener for the plugin system.
 	 */
@@ -84,7 +88,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 * Interpreter listener
 	 */
 	public final CommandHelperInterpreterListener interpreterListener =
-		new CommandHelperInterpreterListener(profiler);
+		new CommandHelperInterpreterListener(this);
 	/**
 	 * Server Command Listener, for console commands
 	 */
@@ -106,14 +110,18 @@ public class CommandHelperPlugin extends JavaPlugin {
 		self = this;
 		myServer = StaticLayer.GetServer();
 		try {
-			Static.persist = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
+			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+			options.setWorkingDirectory(new File("CommandHelper/"));
+			persistanceNetwork = new PersistanceNetwork(new File("CommandHelper/persistance.config"), new File("CommandHelper/persistance.db").toURI(), options);
+		} catch (IOException ex) {
+			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (DataSourceException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		}
 		Static.getLogger().info("CommandHelper/CommandHelper " + getDescription().getVersion() + " enabled");
 		version = new Version(getDescription().getVersion());
 		PermissionsResolverManager.initialize(this);
-		Static.perms = PermissionsResolverManager.getInstance();
+		permissionsResolver = new CommandHelperPermissionsResolver(PermissionsResolverManager.getInstance());
 		Plugin pwep = getServer().getPluginManager().getPlugin("WorldEdit");
 		if (pwep != null && pwep.isEnabled() && pwep instanceof WorldEditPlugin) {
 			wep = (WorldEditPlugin) pwep;
@@ -136,7 +144,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 				//System.out.flush();
 				System.out.println("\n\n\n" + Static.Logo());
 			}
-			ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), new File("plugins/CommandHelper/LocalPackages"), prefsFile, new File("plugins/CommandHelper/" + main_file), Static.perms, this);
+			ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), new File("plugins/CommandHelper/LocalPackages"), 
+					prefsFile, new File("plugins/CommandHelper/" + main_file), permissionsResolver, this);
 			ac.reload(null);
 		} catch (IOException ex) {
 			Static.getLogger().log(Level.SEVERE, null, ex);
@@ -209,8 +218,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 */
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
-		if ((sender.isOp() || (sender instanceof Player && (Static.perms.hasPermission(((Player) sender).getName(), "commandhelper.reloadaliases")
-			|| Static.perms.hasPermission(((Player) sender).getName(), "ch.reloadaliases"))))
+		if ((sender.isOp() || (sender instanceof Player && (permissionsResolver.hasPermission(((Player) sender).getName(), "commandhelper.reloadaliases")
+			|| permissionsResolver.hasPermission(((Player) sender).getName(), "ch.reloadaliases"))))
 			&& (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias") || cmd.getName().equals("recompile"))) {
 			MCPlayer player = null;
 			if (sender instanceof Player) {
@@ -246,7 +255,16 @@ public class CommandHelperPlugin extends JavaPlugin {
 			}
 			return true;
 		} else if (sender instanceof Player) {
-			return runCommand(new BukkitMCPlayer((Player) sender), cmd.getName(), args);
+			try {
+				return runCommand(new BukkitMCPlayer((Player) sender), cmd.getName(), args);
+			} catch (DataSourceException ex) {
+				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (ReadOnlyException ex) {
+				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+			} catch (IOException ex) {
+				Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+			}
+			return true;
 		} else {
 			return false;
 		}
@@ -259,7 +277,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 * @param split
 	 * @return
 	 */
-	private boolean runCommand(final MCPlayer player, String cmd, String[] args) {
+	private boolean runCommand(final MCPlayer player, String cmd, String[] args) throws DataSourceException, ReadOnlyException, IOException {
 		if (commandRunning.contains(player)) {
 			return true;
 		}
@@ -268,8 +286,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 		UserManager um = UserManager.GetUserManager(player.getName());
 		// Repeat command
 		if (cmd.equals("repeat")) {
-			if (player.isOp() || Static.perms.hasPermission(player.getName(), "commandhelper.repeat")
-				|| Static.perms.hasPermission(player.getName(), "ch.repeat")) {
+			if (player.isOp() || permissionsResolver.hasPermission(player.getName(), "commandhelper.repeat")
+				|| permissionsResolver.hasPermission(player.getName(), "ch.repeat")) {
 				//Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
 				//an infinite loop though, because the preprocessor won't try to fire off a repeat command
 				commandRunning.remove(player);
@@ -288,7 +306,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 			// Save alias
 		} else if (cmd.equalsIgnoreCase("alias") || cmd.equalsIgnoreCase("commandhelper") /*&& player.canUseCommand("/alias")*/) {
-			if (!Static.perms.hasPermission(player.getName(), "commandhelper.useralias") && !Static.perms.hasPermission(player.getName(), "ch.useralias")) {
+			if (!permissionsResolver.hasPermission(player.getName(), "commandhelper.useralias") && !permissionsResolver.hasPermission(player.getName(), "ch.useralias")) {
 				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the alias command");
 				commandRunning.remove(player);
 				return true;
@@ -297,7 +315,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 
 				String alias = CommandHelperPlugin.joinString(args, " ");
 				try {
-					int id = um.addAlias(alias);
+					int id = um.addAlias(alias, persistanceNetwork);
 					if (id > -1) {
 						Static.SendMessage(player, MCChatColor.YELLOW + "Alias added with id '" + id + "'");
 					}
@@ -316,7 +334,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			return true;
 			//View all aliases for this user
 		} else if (cmd.equalsIgnoreCase("viewalias")) {
-			if (!Static.perms.hasPermission(player.getName(), "commandhelper.useralias") && !Static.perms.hasPermission(player.getName(), "ch.useralias")) {
+			if (!permissionsResolver.hasPermission(player.getName(), "commandhelper.useralias") && !permissionsResolver.hasPermission(player.getName(), "ch.useralias")) {
 				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the viewalias command");
 				commandRunning.remove(player);
 				return true;
@@ -327,12 +345,12 @@ public class CommandHelperPlugin extends JavaPlugin {
 			} catch (Exception e) {
 				//Meh. Index out of bounds, or number format exception. Whatever, show page 1
 			}
-			Static.SendMessage(player, um.getAllAliases(page));
+			Static.SendMessage(player, um.getAllAliases(page, persistanceNetwork));
 			commandRunning.remove(player);
 			return true;
 			// Delete alias
 		} else if (cmd.equalsIgnoreCase("delalias")) {
-			if (!Static.perms.hasPermission(player.getName(), "commandhelper.useralias") && !Static.perms.hasPermission(player.getName(), "ch.useralias")) {
+			if (!permissionsResolver.hasPermission(player.getName(), "commandhelper.useralias") && !permissionsResolver.hasPermission(player.getName(), "ch.useralias")) {
 				Static.SendMessage(player, MCChatColor.RED + "You do not have permission to access the delalias command");
 				commandRunning.remove(player);
 				return true;
@@ -340,7 +358,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			try {
 				ArrayList<String> deleted = new ArrayList<String>();
 				for (int i = 0; i < args.length; i++) {
-					um.delAlias(Integer.parseInt(args[i]));
+					um.delAlias(Integer.parseInt(args[i]), persistanceNetwork);
 					deleted.add("#" + args[i]);
 				}
 				if (args.length > 1) {
@@ -359,7 +377,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 			return true;
 
 		} else if (cmd.equalsIgnoreCase("interpreter")) {
-			if (Static.perms.hasPermission(player.getName(), "commandhelper.interpreter")) {
+			if (permissionsResolver.hasPermission(player.getName(), "commandhelper.interpreter")) {
 				if (Prefs.EnableInterpreter()) {
 					interpreterListener.startInterpret(player.getName());
 					Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"

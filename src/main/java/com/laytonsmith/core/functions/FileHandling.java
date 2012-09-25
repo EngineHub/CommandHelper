@@ -7,7 +7,6 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Security;
@@ -19,11 +18,11 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.logging.Level;
 
@@ -54,7 +53,7 @@ public class FileHandling {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			String location = args[0].val();
 			location = new File(t.file().getParentFile(), location).getAbsolutePath();
 			//Verify this file is not above the craftbukkit directory (or whatever directory the user specified
@@ -120,7 +119,7 @@ public class FileHandling {
 			return null;
 		}
 
-		public Construct exec(final Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			final String file = args[0].val();
 			final CClosure callback;
 			if(!(args[1] instanceof CClosure)){

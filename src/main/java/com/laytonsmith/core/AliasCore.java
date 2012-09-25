@@ -7,6 +7,9 @@ import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -14,6 +17,8 @@ import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.profiler.ProfilePoint;
+import com.laytonsmith.persistance.PersistanceNetwork;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.sk89q.util.StringUtil;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.*;
@@ -41,7 +46,7 @@ public class AliasCore {
 	private List<Script> scripts;
 	static final Logger logger = Logger.getLogger("Minecraft");
 	private Set<String> echoCommand = new HashSet<String>();
-	private PermissionsResolverManager perms;
+	private PermissionsResolver perms;
 	public List<File> autoIncludes;
 	public static CommandHelperPlugin parent;
 
@@ -57,7 +62,7 @@ public class AliasCore {
 	 * aliases can be used like a macro, this can help prevent command
 	 * spamming.
 	 */
-	public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, PermissionsResolverManager perms, CommandHelperPlugin parent) {
+	public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, PermissionsResolver perms, CommandHelperPlugin parent) {
 		this.aliasConfig = aliasConfig;
 		this.auxAliases = auxAliases;
 		this.prefFile = prefFile;
@@ -82,11 +87,11 @@ public class AliasCore {
 	 * @return
 	 */
 	public boolean alias(String command, final MCCommandSender player, List<Script> playerCommands) {
-
-		Env env = new Env();
-		env.SetProfiler(parent.profiler);
-		env.SetCommandSender(player);
-		env.SetExecutionQueue(parent.executionQueue);
+		
+		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver);
+		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
+		cEnv.SetCommandSender(player);
+		Environment env = Environment.createEnvironment(gEnv, cEnv);
 
 		if (scripts == null) {
 			throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", Target.UNKNOWN);
@@ -117,8 +122,8 @@ public class AliasCore {
 							Static.getLogger().log(Level.INFO, b.toString());
 						}
 						try {
-							env.SetCommand(command);
-							ProfilePoint alias = env.GetProfiler().start("Global Alias - \"" + command + "\"", LogLevel.ERROR);
+							env.getEnv(CommandHelperEnvironment.class).SetCommand(command);
+							ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("Global Alias - \"" + command + "\"", LogLevel.ERROR);
 							s.run(s.getVariables(command), env, new MethodScriptComplete() {
 								public void done(String output) {
 									try {
@@ -179,7 +184,7 @@ public class AliasCore {
 
 							if (ac.match(command)) {
 								Static.getAliasCore().addPlayerReference(player);
-								ProfilePoint alias = env.GetProfiler().start("User Alias (" + player.getName() + ") - \"" + command + "\"", LogLevel.ERROR);
+								ProfilePoint alias = env.getEnv(GlobalEnv.class).GetProfiler().start("User Alias (" + player.getName() + ") - \"" + command + "\"", LogLevel.ERROR);
 								ac.run(ac.getVariables(command), env, new MethodScriptComplete() {
 									public void done(String output) {
 										if (output != null) {
@@ -199,10 +204,7 @@ public class AliasCore {
 							}
 						} catch (ConfigRuntimeException e) {
 							//Unlike system scripts, this should just report the problem to the player
-							if (e.getEnv() == null) {
-								e.setEnv(new Env());
-							}
-							e.getEnv().SetCommandSender(player);
+							e.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 							Static.getAliasCore().removePlayerReference(player);
 							ConfigRuntimeException.React(e);
 						} catch (ConfigCompileException e) {
@@ -234,7 +236,14 @@ public class AliasCore {
 	public final void reload(MCPlayer player) {
 		try {
 			CHLog.Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
-			parent.profiler = new Profiler(new File("plugins/CommandHelper/profiler.config"));
+			parent.profiler = new Profiler(new File("CommandHelper/profiler.config"));
+			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+			options.setWorkingDirectory(new File("CommandHelper/"));
+			parent.persistanceNetwork = new PersistanceNetwork(new File("CommandHelper/persistance.config"), new File("CommandHelper/persistance.db").toURI(), options);
+			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver);
+			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
+			cEnv.SetCommandSender(player);
+			Environment env = Environment.createEnvironment(gEnv, cEnv);
 			Globals.clear();
 			Scheduling.ClearScheduledRunners();
 			EventUtils.UnregisterAll();
@@ -285,7 +294,7 @@ public class AliasCore {
 			autoIncludes = localPackages.getAutoIncludes();
 
 			ProfilePoint compilerMS = parent.profiler.start("Compilation of MS files in Local Packages", LogLevel.VERBOSE);
-			localPackages.compileMS(player);
+			localPackages.compileMS(player, env);
 			compilerMS.stop();
 			ProfilePoint compilerMSA = parent.profiler.start("Compilation of MSA files in Local Packages", LogLevel.VERBOSE);
 			localPackages.compileMSA(scripts, player);
@@ -459,7 +468,7 @@ public class AliasCore {
 			for (FileInfo fi : msa) {
 				List<Script> tempScripts;
 				try {
-					tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file), new Env());
+					tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file));
 					for (Script s : tempScripts) {
 						try {
 							s.compile();
@@ -493,12 +502,10 @@ public class AliasCore {
 			}
 		}
 
-		public void compileMS(MCPlayer player) {
+		public void compileMS(MCPlayer player, Environment env) {
 			for (FileInfo fi : ms) {
 				boolean exception = false;
 				try {
-					Env env = new Env();
-					env.SetProfiler(parent.profiler);
 					MethodScriptCompiler.registerAutoIncludes(env, null);
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), env, null, null);
 				} catch (ConfigCompileException e) {

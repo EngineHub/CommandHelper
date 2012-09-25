@@ -2,12 +2,13 @@
 
 package com.laytonsmith.core.events;
 
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.profiler.ProfilePoint;
@@ -57,15 +58,15 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * @param s
      * @param b 
      */
-    public final void execute(Script s, BoundEvent b, Env env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
+    public final void execute(Script s, BoundEvent b, Environment env, BoundEvent.ActiveEvent activeEvent) throws ConfigRuntimeException{          
         try{
             preExecution(env, activeEvent);
         } catch(UnsupportedOperationException e){
             //Ignore. This particular event doesn't need to customize
         }
 		ProfilePoint event = null;
-		if(env.GetProfiler() != null){
-			env.GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
+		if(env.getEnv(GlobalEnv.class).GetProfiler() != null){
+			env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
 		}
         s.run(null, env, null);
 		if(event != null){
@@ -78,11 +79,11 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         }
     }
     
-    public void preExecution(Env env, BoundEvent.ActiveEvent activeEvent){
+    public void preExecution(Environment env, BoundEvent.ActiveEvent activeEvent){
         throw new UnsupportedOperationException();
     }
     
-    public void postExecution(Env env, BoundEvent.ActiveEvent activeEvent){
+    public void postExecution(Environment env, BoundEvent.ActiveEvent activeEvent){
         throw new UnsupportedOperationException();
     }
 

@@ -256,6 +256,14 @@ public class TestPersistance {
 		assertEquals("value1", network.get(new String[]{"key", "key"}));
 		deleteFiles("folder/");
 	}
+	
+	@Test
+	public void testSQLiteBasic() throws Exception{
+		PersistanceNetwork network = new PersistanceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
+		network.set(new String[]{"key", "key"}, "value");
+		assertEquals("value", network.get(new String[]{"key", "key"}));
+		deleteFiles("folder/");
+	}
 
 	public String doOutput(String uri, Map<String[], String> data) {
 		try {

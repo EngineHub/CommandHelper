@@ -8,10 +8,17 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlugin;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Debug;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.persistance.SerializedPersistance;
+import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistance.PersistanceNetwork;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import com.laytonsmith.tools.Interpreter;
 import com.sk89q.wepif.PermissionsResolverManager;
 import com.sk89q.worldedit.bukkit.WorldEditPlugin;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
@@ -39,14 +46,6 @@ public final class Static {
     private Static(){}
     
     private static final Logger logger = Logger.getLogger("CommandHelper");
-    /**
-     * This is the SerializedPersistance database. Note that this will go away in lieu of a more
-     * robust solution once the database stuff is all set up.
-     * @deprecated
-     */
-    public static SerializedPersistance persist;
-    
-    public static PermissionsResolverManager perms;
     
     private static Map<String, String> hostCache = new HashMap<String, String>();
 	
@@ -243,28 +242,6 @@ public final class Static {
             throw new NotInitializedYetException("The core has not been initialized yet");
         }
         return ac;
-    }
-
-    /**
-     * Gets the persistance object for this plugin
-     * @return
-     * @throws NotInitializedYetException 
-     */
-    public static SerializedPersistance getPersistance() throws NotInitializedYetException {
-        SerializedPersistance p = persist;
-        if (p == null) {
-            throw new NotInitializedYetException("The persistance framework has not been initialized yet");
-        }
-        return p;
-    }
-
-    /**
-     * Gets the permissions resolver manager this plugin uses
-     * @return
-     * @throws NotInitializedYetException 
-     */
-    public static PermissionsResolverManager getPermissionsResolverManager() throws NotInitializedYetException {
-        return perms;
     }
 
     /**
@@ -672,50 +649,53 @@ public final class Static {
         } //else play nice :(
     }
 
-    public static boolean hasCHPermission(String functionName, Env env) {
+    public static boolean hasCHPermission(String functionName, Environment env) {
         //The * label completely overrides everything
-        if("*".equals(env.GetLabel())){
+        if("*".equals(env.getEnv(CommandHelperEnvironment.class).GetLabel())){
             return true;
         }
+		MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+		MCCommandSender commandSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+		String label = env.getEnv(CommandHelperEnvironment.class).GetLabel();
         boolean perm = false;
-        PermissionsResolverManager perms = Static.getPermissionsResolverManager();
+        PermissionsResolver perms = env.getEnv(GlobalEnv.class).GetPermissionsResolver();
         if (perms != null) {
-            if (env.GetCommandSender() instanceof MCPlayer) {
-                perm = perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), "ch.func.use." + functionName)
-                        || perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), "commandhelper.func.use." + functionName);
-                if (env.GetLabel() != null && env.GetLabel().startsWith("~")) {
-                    String[] groups = env.GetLabel().substring(1).split("/");
+            if (commandSender instanceof MCPlayer) {
+                perm = perms.hasPermission(player.getWorld().getName(), player.getName(), "ch.func.use." + functionName)
+                        || perms.hasPermission(player.getWorld().getName(), player.getName(), "commandhelper.func.use." + functionName);
+                if (label != null && label.startsWith("~")) {
+                    String[] groups = env.getEnv(CommandHelperEnvironment.class).GetLabel().substring(1).split("/");
                     for (String group : groups) {
-                        if (perms.inGroup(env.GetPlayer().getName(), group)) {
+                        if (perms.inGroup(env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName(), group)) {
                             perm = true;
                             break;
                         }
                     }
                 } else {
-                    if (env.GetLabel() != null){
-                        if(env.GetLabel().contains(".")){
+                    if (env.getEnv(CommandHelperEnvironment.class).GetLabel() != null){
+                        if(env.getEnv(CommandHelperEnvironment.class).GetLabel().contains(".")){
                             //We are using a non-standard permission. Don't automatically
                             //add CH's prefix
-                            if(perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), env.GetLabel())){
+                            if(perms.hasPermission(player.getWorld().getName(), player.getName(), label)){
                                 perm = true;
                             }
-                        } else if((perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), "ch.alias." + env.GetLabel()))
-                            || perms.hasPermission(env.GetPlayer().getWorld().getName(), env.GetPlayer().getName(), "commandhelper.alias." + env.GetLabel())) {
+                        } else if((perms.hasPermission(player.getWorld().getName(), player.getName(), "ch.alias." + label))
+                            || perms.hasPermission(player.getWorld().getName(), player.getName(), "commandhelper.alias." + label)) {
                             perm = true;
                         }
                     }
                 }
-            } else if (env.GetCommandSender() instanceof MCConsoleCommandSender) {
+            } else if (commandSender instanceof MCConsoleCommandSender) {
                 perm = true;
             }
         } else {
             perm = true;
         }
-        if (env.GetLabel() != null && env.GetLabel().equals("*")) {
+        if (label != null && label.equals("*")) {
             perm = true;
         }
-        if (env.GetCommandSender() == null
-                || env.GetCommandSender().isOp()) {
+        if (commandSender == null
+                || commandSender.isOp()) {
             perm = true;
         }
         return perm;
@@ -817,5 +797,22 @@ public final class Static {
 	
 	public static int msToTicks(int ms){
 		return ms / 50;
+	}
+	
+	public static void AssertNonNull(Object var, String message){
+		if(var == null){
+			throw new NullPointerException(message);
+		}
+	}
+	
+	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException{
+		File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
+		options.setWorkingDirectory(new File(jarLocation, "CommandHelper/"));
+		PersistanceNetwork persistanceNetwork = new PersistanceNetwork(new File(jarLocation, "CommandHelper/persistance.config"), 
+				new File(jarLocation, "CommandHelper/persistance.db").toURI(), options);
+		GlobalEnv gEnv = new GlobalEnv(new ExecutionQueue("MethodScript", "default"), 
+				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, new PermissionsResolver.PermissiveResolver());
+		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
 }

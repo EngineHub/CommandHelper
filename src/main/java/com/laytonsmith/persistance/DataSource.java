@@ -19,7 +19,7 @@ public interface DataSource extends Documentation {
 	 *
 	 * @return
 	 */
-	public List<String[]> keySet();
+	public List<String[]> keySet() throws DataSourceException;
 
 	/**
 	 * Returns a list of keys, pre-concatenated into dot notation. This may
@@ -29,7 +29,7 @@ public interface DataSource extends Documentation {
 	 *
 	 * @return
 	 */
-	public List<String> stringKeySet();
+	public List<String> stringKeySet() throws DataSourceException;
 
 	/**
 	 * Given a namespace, returns all the keys in this data source that are

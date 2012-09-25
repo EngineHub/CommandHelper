@@ -1,8 +1,10 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,11 +20,11 @@ public class CClosure extends Construct {
 
     public static final long serialVersionUID = 1L;
     ParseTree node;
-    Env env;
+    Environment env;
     String[] names;
     Construct[] defaults;
 
-    public CClosure(ParseTree node, Env env, String[] names, Construct[] defaults, Target t) {
+    public CClosure(ParseTree node, Environment env, String[] names, Construct[] defaults, Target t) {
         super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
         this.node = node;
         try {
@@ -84,7 +86,7 @@ public class CClosure extends Construct {
      *
      * @return
      */
-    public synchronized Env getEnv() {
+    public synchronized Environment getEnv() {
         return env;
     }
 
@@ -96,7 +98,7 @@ public class CClosure extends Construct {
      */
     public void execute(Construct[] values) {
         try {
-            Env environment;
+            Environment environment;
             synchronized (this) {
                 environment = env.clone();
             }
@@ -110,7 +112,7 @@ public class CClosure extends Construct {
                     catch (Exception e) {
                         value = defaults[i].clone();
                     }
-                    environment.GetVarList().set(new IVariable(name, value, getTarget()));
+                    environment.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(name, value, getTarget()));
                 }
             }
             CArray arguments = new CArray(node.getData().getTarget());
@@ -119,13 +121,13 @@ public class CClosure extends Construct {
                     arguments.push(value);
                 }
             }
-            environment.GetVarList().set(new IVariable("@arguments", arguments, node.getData().getTarget()));
+            environment.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable("@arguments", arguments, node.getData().getTarget()));
             ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
             List<ParseTree> children = new ArrayList<ParseTree>();
             children.add(node);
             newNode.setChildren(children);
             try {
-                MethodScriptCompiler.execute(newNode, environment, null, environment.GetScript());
+                MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
             }
             catch (ConfigRuntimeException e) {
                 ConfigRuntimeException.React(e);

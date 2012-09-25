@@ -16,6 +16,10 @@ public abstract class StringDataSource extends AbstractDataSource {
 	 * A reference to the DataSourceModel used by the set and get methods.
 	 */
 	protected DataSourceModel model;
+	
+	protected StringDataSource(){
+		
+	}
 
 	protected StringDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);

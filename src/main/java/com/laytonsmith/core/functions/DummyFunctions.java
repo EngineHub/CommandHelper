@@ -6,7 +6,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -23,7 +22,7 @@ public class DummyFunctions {
 
 //	@api public static class test_pgroup extends DummyFunction {
 //
-//		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //			MCPlayer p = environment.GetPlayer();
 //			if(args.length >= 1){
 //				p = Static.GetPlayer(args[0]);

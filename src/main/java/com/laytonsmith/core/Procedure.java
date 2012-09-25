@@ -1,6 +1,9 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
@@ -122,10 +125,10 @@ public class Procedure implements Cloneable {
      * @param env
      * @return
      */
-    public Construct cexecute(List<ParseTree> args, Env env) {
+    public Construct cexecute(List<ParseTree> args, Environment env) {
         List<Construct> list = new ArrayList<Construct>();
         for (ParseTree arg : args) {
-            list.add(env.GetScript().seval(arg, env));
+            list.add(env.getEnv(GlobalEnv.class).GetScript().seval(arg, env));
         }
         return execute(list, env);
     }
@@ -137,24 +140,24 @@ public class Procedure implements Cloneable {
      * @param env
      * @return
      */
-    public Construct execute(List<Construct> args, Env env) {
-        env.SetVarList(new IVariableList());
+    public Construct execute(List<Construct> args, Environment env) {
+        env.getEnv(CommandHelperEnvironment.class).SetVarList(new IVariableList());
         CArray array = new CArray(Target.UNKNOWN);
         for (String key : originals.keySet()) {
             Construct c = originals.get(key);
-            env.GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
+            env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
             array.push(c);
         }
-        Script fakeScript = Script.GenerateScript(tree, env.GetLabel());//new Script(null, null);        
+        Script fakeScript = Script.GenerateScript(tree, env.getEnv(CommandHelperEnvironment.class).GetLabel());//new Script(null, null);        
         for (int i = 0; i < args.size(); i++) {
             Construct c = args.get(i);
             array.set(i, c);
             if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getName();
-                env.GetVarList().set(new IVariable(varname, c, c.getTarget()));
+                env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(varname, c, c.getTarget()));
             }
         }
-        env.GetVarList().set(new IVariable("@arguments", array, Target.UNKNOWN));
+        env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable("@arguments", array, Target.UNKNOWN));
 
         try {
             fakeScript.eval(tree, env);

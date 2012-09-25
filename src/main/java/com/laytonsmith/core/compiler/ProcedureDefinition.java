@@ -8,7 +8,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.DocComment;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.Env;
+import com.laytonsmith.core.environments.Environment;
 import java.util.List;
 
 /**
@@ -18,7 +18,7 @@ import java.util.List;
 public class ProcedureDefinition extends Construct{
 	String name;
 	DocComment comment;
-	Env env;
+	Environment env;
 	List<String> varNames;
 	List<ParseTree> varDefaults;
 	ParseTree code;	

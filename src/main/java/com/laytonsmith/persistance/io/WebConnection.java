@@ -23,4 +23,8 @@ public class WebConnection implements ConnectionMixin{
 	public void writeData(String data) throws IOException, UnsupportedOperationException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
+
+	public String getPath() throws UnsupportedOperationException {
+		return source.toString();
+	}
 }

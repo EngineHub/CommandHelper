@@ -17,6 +17,10 @@ import org.json.simple.JSONValue;
  */
 @datasource("json")
 public class JSONDataSource extends StringDataSource {
+	
+	private JSONDataSource() {
+		
+	}
 
 	public JSONDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
@@ -61,7 +65,8 @@ public class JSONDataSource extends StringDataSource {
 			+ " = 'value' would be stored as such:"
 			+ " {\"name\":{\"of\":{\"key\":\"value\"}}}. Due to lack of"
 			+ " support for pretty printing in the json library currently used,"
-			+ " prettyprint is unsupported.";
+			+ " prettyprint is unsupported, however it is intended to be"
+			+ " supported in the future.";
 	}
 
 	@Override

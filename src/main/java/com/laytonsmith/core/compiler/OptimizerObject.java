@@ -3,7 +3,7 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.NewIVariable;
-import com.laytonsmith.core.environments.Env;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionList;
 import java.util.ArrayList;
@@ -17,7 +17,7 @@ class OptimizerObject {
 	private ParseTree root;
 	private CompilerEnvironment env;
 	
-	public OptimizerObject(ParseTree root, Env compilerEnvironment){
+	public OptimizerObject(ParseTree root, Environment compilerEnvironment){
 		this.root = root;
 		env = compilerEnvironment.getEnv(CompilerEnvironment.class);
 	}

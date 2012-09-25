@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -41,14 +42,14 @@ public class Compiler {
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {			
+        public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {			
             if(nodes.length == 1){
                 return parent.eval(nodes[0], env);
             } else {
                 return new __autoconcat__().execs(t, env, parent, nodes);
             }
         }
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             return new CVoid(t);
         }               
     }
@@ -62,7 +63,7 @@ public class Compiler {
                     + "compiler.";
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             return new CEntry(args[0], args[1], t);
         }
 
@@ -82,7 +83,7 @@ public class Compiler {
 	@noprofile
     public static class __autoconcat__ extends DummyFunction {
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             throw new Error("Should not have gotten here");
         }
 
@@ -351,7 +352,7 @@ public class Compiler {
             return true;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Object o = null;
             o.toString();
             return new CVoid(t);
@@ -369,7 +370,7 @@ public class Compiler {
                     + " It simply returns the argument provided, or void if none.";
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if(args.length == 0){
                 return new CVoid(t);
             }
@@ -380,7 +381,7 @@ public class Compiler {
 	
 	@api public static class __cbracket__ extends DummyFunction{
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
@@ -414,7 +415,7 @@ public class Compiler {
 	
 	@api public static class __cbrace__ extends DummyFunction{
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 

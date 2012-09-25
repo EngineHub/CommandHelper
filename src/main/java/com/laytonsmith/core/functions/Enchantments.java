@@ -6,9 +6,10 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
@@ -158,7 +159,7 @@ public class Enchantments {
 		return 0;
 	}
 
-	@api
+	@api(environments={CommandHelperEnvironment.class})
 	public static class enchant_inv extends AbstractFunction {
 
 		public String getName() {
@@ -194,8 +195,8 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.GetPlayer();
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
 			if (args.length == 4) {
 				m = Static.GetPlayer(args[0].val(), t);
@@ -241,7 +242,7 @@ public class Enchantments {
 		}
 	}
 
-	@api
+	@api(environments={CommandHelperEnvironment.class})
 	public static class enchant_rm_inv extends AbstractFunction {
 
 		public String getName() {
@@ -275,8 +276,8 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.GetPlayer();
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 1;
 			if (args.length == 3) {
 				m = Static.GetPlayer(args[0].val(), t);
@@ -309,7 +310,7 @@ public class Enchantments {
 		}
 	}
 
-	@api
+	@api(environments={CommandHelperEnvironment.class})
 	public static class get_enchant_inv extends AbstractFunction {
 
 		public String getName() {
@@ -341,8 +342,8 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = environment.GetPlayer();
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Construct slot;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
@@ -404,7 +405,7 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				String name = Enchantments.ConvertName(args[0].val().toUpperCase());
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
@@ -448,7 +449,7 @@ public class Enchantments {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String name = Enchantments.ConvertName(args[0].val().toUpperCase());
 			MCEnchantment e = StaticLayer.GetEnchantmentByName(name);
 			return new CInt(e.getMaxLevel(), t);
@@ -489,7 +490,7 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCItemStack is = Static.ParseItemNotation(this.getName(), args[0].val(), 1, t);
 			/**
 			 * Because enchantment types won't change from run to run, we can
@@ -549,7 +550,7 @@ public class Enchantments {
 			return false;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			try {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(args[0].val());
 				return new CBoolean(true, t);

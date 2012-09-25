@@ -4,6 +4,8 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
 /**
@@ -15,7 +17,7 @@ public class InventoryManagement {
         return "Provides methods for managing inventory related tasks.";
     }
     
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class pinv extends AbstractFunction {
 
         public String getName() {
@@ -55,8 +57,8 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
-            MCCommandSender p = env.GetCommandSender();
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+            MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
             Integer index = -1;
             boolean all = false;
             MCPlayer m = null;
@@ -128,7 +130,7 @@ public class InventoryManagement {
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class set_pinv extends AbstractFunction {
 
         public String getName() {
@@ -172,8 +174,8 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
-            MCCommandSender p = env.GetCommandSender();
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+            MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
             MCPlayer m = null;
             if (p instanceof MCPlayer) {
                 m = (MCPlayer) p;
@@ -231,7 +233,8 @@ public class InventoryManagement {
         }
     }
     
-    @api public static class phas_item extends AbstractFunction{
+    @api(environments={CommandHelperEnvironment.class})
+	public static class phas_item extends AbstractFunction{
 
         public String getName() {
             return "phas_item";
@@ -263,8 +266,8 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.GetPlayer();
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             String item;
             if(args.length == 1){
                 item = args[0].val();
@@ -304,7 +307,8 @@ public class InventoryManagement {
         
     }
     
-    @api public static class pitem_slot extends AbstractFunction{
+    @api(environments={CommandHelperEnvironment.class})
+	public static class pitem_slot extends AbstractFunction{
 
         public String getName() {
             return "pitem_slot";
@@ -331,8 +335,8 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.GetPlayer();
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             String item;
             if(args.length == 1){
                 item = args[0].val();
@@ -373,7 +377,8 @@ public class InventoryManagement {
         
     }
     
-    @api public static class pgive_item extends AbstractFunction{
+    @api(environments={CommandHelperEnvironment.class})
+	public static class pgive_item extends AbstractFunction{
 
         public String getName() {
             return "pgive_item";
@@ -406,8 +411,8 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.GetPlayer();
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
             if(args.length == 2){
                 is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
@@ -464,7 +469,8 @@ public class InventoryManagement {
         
     }
     
-    @api public static class ptake_item extends AbstractFunction{
+    @api(environments={CommandHelperEnvironment.class})
+	public static class ptake_item extends AbstractFunction{
 
         public String getName() {
             return "ptake_item";
@@ -492,8 +498,8 @@ public class InventoryManagement {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCPlayer p = environment.GetPlayer();
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
             if(args.length == 2){
                 is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
@@ -573,7 +579,7 @@ public class InventoryManagement {
 //            return false;
 //        }
 //        
-//        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+//        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            MCPlayer p = environment.GetPlayer();
 //            if(args.length == 1){
 //                p = Static.GetPlayer(args[0]);

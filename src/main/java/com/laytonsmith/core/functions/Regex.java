@@ -5,6 +5,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -61,7 +62,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             CArray ret = new CArray(t);
@@ -137,7 +138,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             CArray fret = new CArray(t);
@@ -211,7 +212,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String replacement = args[1].val();
             String subject = args[2].val();
@@ -284,7 +285,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             String [] rsplit = pattern.split(subject);
@@ -351,7 +352,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Pattern pattern = getPattern(args[0], t);
             String subject = args[1].val();
             long ret = 0;
@@ -402,7 +403,7 @@ public class Regex {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             return new CString(Pattern.quote(args[0].val()), t);
         }
 

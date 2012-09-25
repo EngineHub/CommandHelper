@@ -2,12 +2,16 @@
 
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.profiler.Profiler;
@@ -27,15 +31,15 @@ import org.bukkit.event.player.PlayerQuitEvent;
 public class CommandHelperInterpreterListener implements Listener {
 
     private Set<String> interpreterMode = Collections.synchronizedSet(new HashSet<String>());
-	private Profiler profiler;
+	private CommandHelperPlugin plugin;
     Map<String, String> multilineMode = new HashMap<String, String>();
     
     public boolean isInInterpreterMode(MCPlayer p){
         return (interpreterMode.contains(p.getName()));
     }
 	
-	public CommandHelperInterpreterListener(Profiler profiler){
-		this.profiler = profiler;
+	public CommandHelperInterpreterListener(CommandHelperPlugin plugin){
+		this.plugin = plugin;
 	}
 
     @EventHandler(priority= EventPriority.LOWEST)
@@ -115,9 +119,10 @@ public class CommandHelperInterpreterListener implements Listener {
         List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
         ParseTree tree = MethodScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
-        Env env = new Env();
-		env.SetProfiler(profiler);
-        env.SetPlayer(p);
+		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistanceNetwork, plugin.permissionsResolver);
+		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
+        cEnv.SetPlayer(p);
+		Environment env = Environment.createEnvironment(gEnv, cEnv);
         try {
             MethodScriptCompiler.registerAutoIncludes(env, null);
             MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {

@@ -1,5 +1,6 @@
 package com.laytonsmith.tools;
 
+import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
@@ -13,13 +14,12 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
@@ -29,15 +29,21 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.SerializedPersistance;
+import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.util.ArrayList;
@@ -65,27 +71,15 @@ public class Interpreter {
 	private static final String INTERPRETER_INSTALLATION_LOCATION = "/usr/local/bin/mscript";
 	static boolean multilineMode = false;
 	static String script;
-	private static File jarLocation;
-	private static Profiler profiler;
+	private static Environment env;
 
-	public static void start(List<String> args) throws IOException {
+	public static void start(List<String> args) throws IOException, DataSourceException {
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
 		//Next, we need to get the "installation location", so we won't spew config files everywhere
-		jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+		File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
 		Prefs.init(new File(jarLocation, "CommandHelper/preferences.txt"));
-		profiler = new Profiler(new File(jarLocation, "CommandHelper/profiler.config"));
-//		try {
-//			Env env = new Env();
-//			env.SetProfiler(profiler);
-//			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), env, null, null);
-//		} catch (ConfigCompileException ex) {
-//		}
-		try {
-			Static.persist = new SerializedPersistance(new File(jarLocation, "CommandHelper/persistance.ser"));
-		} catch (DataSourceException ex) {
-			Logger.getLogger(Interpreter.class.getName()).log(Level.SEVERE, null, ex);
-		}
+		env = Static.GenerateStandaloneEnvironment();
 		if (TermColors.SYSTEM == TermColors.SYS.WINDOWS) {
 			TermColors.DisableColors();
 		}
@@ -170,15 +164,14 @@ public class Interpreter {
 	}
 
 	public static void execute(String script, List<String> args) throws ConfigCompileException, IOException {
-		ProfilePoint compile = profiler.start("Compilation", LogLevel.VERBOSE);
+		ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
 		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
 		ParseTree tree = MethodScriptCompiler.compile(stream);
 		compile.stop();
-		Env env = new Env();
-		env.SetPlayer(null);
-		env.SetLabel("*");
-		env.SetProfiler(profiler);
-		env.SetCustom("cmdline", true);
+		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
+		cEnv.SetPlayer(null);
+		cEnv.SetLabel("*");
+		Environment env = Environment.createEnvironment(Interpreter.env.getEnv(GlobalEnv.class), cEnv);
 		List<Variable> vars = null;
 		if (args != null) {
 			vars = new ArrayList<Variable>();
@@ -204,10 +197,10 @@ public class Interpreter {
 			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));
 			vars.add(v);
-			env.GetVarList().set(new IVariable("@arguments", arguments, Target.UNKNOWN));
+			env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable("@arguments", arguments, Target.UNKNOWN));
 		}
 		try {
-			ProfilePoint p = profiler.start("Interpreter Script", LogLevel.ERROR);
+			ProfilePoint p = Interpreter.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);
 			MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 				public void done(String output) {
 					output = output.trim();

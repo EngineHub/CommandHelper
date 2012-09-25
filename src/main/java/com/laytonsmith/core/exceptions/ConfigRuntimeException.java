@@ -7,11 +7,12 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.Stack;
@@ -32,7 +33,7 @@ public class ConfigRuntimeException extends RuntimeException {
     protected ConfigRuntimeException() {
     }
 
-    public void setEnv(Env env) {
+    public void setEnv(Environment env) {
         this.env = env;
     }
     
@@ -41,7 +42,7 @@ public class ConfigRuntimeException extends RuntimeException {
      * It may be null, though that's due to an incomplete swapover, and should be
      * fixed.
      */
-    public Env getEnv(){
+    public Environment getEnv(){
         return this.env;
     }
 
@@ -201,8 +202,8 @@ public class ConfigRuntimeException extends RuntimeException {
     
     public static void DoReport(ConfigRuntimeException e, String optionalMessage){
         MCPlayer p = null;
-        if(e.getEnv() != null && e.getEnv().GetPlayer() != null){
-            p = e.getEnv().GetPlayer();
+        if(e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
+            p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
         }        
         DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, p);
     }
@@ -268,7 +269,7 @@ public class ConfigRuntimeException extends RuntimeException {
     private int line_num = -1;
     private File file;
     private int column = -1;
-    private Env env;
+    private Environment env;
     private Target target;
     /**
      * Creates a new ConfigRuntimeException. If ex is not null, this exception can be caught

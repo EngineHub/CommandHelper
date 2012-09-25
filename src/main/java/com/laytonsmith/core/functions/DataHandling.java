@@ -5,6 +5,9 @@ import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
@@ -36,7 +39,7 @@ public class DataHandling {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CArray(t, args);
 		}
 
@@ -80,7 +83,7 @@ public class DataHandling {
 		}
 	}
 
-	@api
+	@api(environments=CommandHelperEnvironment.class)
 	public static class assign extends AbstractFunction {
 
 		public String getName() {
@@ -91,15 +94,15 @@ public class DataHandling {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			Construct c = args[1];
 			while (c instanceof IVariable) {
 				IVariable cur = (IVariable) c;
-				c = env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
+				c = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable v = new IVariable(((IVariable) args[0]).getName(), c, t);
-				env.GetVarList().set(v);
+				env.getEnv(CommandHelperEnvironment.class).GetVarList().set(v);
 				return v;
 			}
 			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
@@ -119,11 +122,11 @@ public class DataHandling {
 			}
 		}
 
-		public Construct array_assign(Target t, Env env, Construct arrayAndIndex, Construct toSet) {
+		public Construct array_assign(Target t, Environment env, Construct arrayAndIndex, Construct toSet) {
 			Construct ival = toSet;
 			while (ival instanceof IVariable) {
 				IVariable cur = (IVariable) ival;
-				ival = env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
+				ival = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
 			}
 			Chain c = new Chain();
 			prepare((CArrayReference) arrayAndIndex, c);
@@ -152,7 +155,7 @@ public class DataHandling {
 				}
 			}
 			String name = ((CArrayReference) arrayAndIndex).name.getName();
-			env.GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
+			env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
 			return new IVariable("=anon", ival, t);
 		}
 
@@ -217,7 +220,7 @@ public class DataHandling {
 			return new Integer[]{4};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) {
+		public Construct exec(Target t, Environment env, Construct... args) {
 			return new CVoid(t);
 		}
 
@@ -227,7 +230,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree assign = nodes[0];
 			ParseTree condition = nodes[1];
 			ParseTree expression = nodes[2];
@@ -322,7 +325,7 @@ public class DataHandling {
 				
 	}
 
-	@api
+	@api(environments=CommandHelperEnvironment.class)
 	public static class foreach extends AbstractFunction {
 
 		public String getName() {
@@ -333,12 +336,12 @@ public class DataHandling {
 			return new Integer[]{3};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script that, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script that, ParseTree... nodes) {
 			ParseTree array = nodes[0];
 			ParseTree ivar = nodes[1];
 			ParseTree code = nodes[2];
@@ -359,7 +362,7 @@ public class DataHandling {
 					IVariable two = (IVariable) iv;
 					if (!one.inAssociativeMode()) {
 						for (int i = 0; i < one.size(); i++) {
-							env.GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
+							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
 							try {
 								that.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -377,7 +380,7 @@ public class DataHandling {
 					} else {
 						for (int i = 0; i < one.size(); i++) {
 							String index = one.keySet().toArray(new String[]{})[i];
-							env.GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
+							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
 							try {
 								that.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -493,7 +496,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
 				while (Static.getBoolean(parent.seval(nodes[0], env))) {
 					try {
@@ -515,7 +518,7 @@ public class DataHandling {
 			return true;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull();
 		}
 		
@@ -562,7 +565,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull();
 		}
 
@@ -591,7 +594,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
 				do {
 					try {
@@ -664,7 +667,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
 				num = (int) Static.getInt(args[0]);
@@ -723,7 +726,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
 				num = (int) Static.getInt(args[0]);
@@ -777,7 +780,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(!(args[0] instanceof CArray), t);
 		}
 
@@ -833,7 +836,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean((args[0] instanceof CString), t);
 		}
 
@@ -887,7 +890,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CArray, t);
 		}
 
@@ -944,7 +947,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CDouble, t);
 		}
 
@@ -1000,7 +1003,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CInt, t);
 		}
 
@@ -1055,7 +1058,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CBoolean, t);
 		}
 
@@ -1109,7 +1112,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CNull, t);
 		}
 
@@ -1160,7 +1163,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
 				Static.getNumber(args[0]);
@@ -1227,7 +1230,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double d;
 			try {
 				d = Static.getDouble(args[0]);
@@ -1301,13 +1304,13 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			Procedure myProc = getProcedure(t, env, parent, nodes);
-			env.GetProcs().put(myProc.getName(), myProc);
+			env.getEnv(CommandHelperEnvironment.class).GetProcs().put(myProc.getName(), myProc);
 			return new CVoid(t);
 		}
 
-		public static Procedure getProcedure(Target t, Env env, Script parent, ParseTree... nodes) {
+		public static Procedure getProcedure(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String name = "";
 			List<IVariable> vars = new ArrayList<IVariable>();
 			ParseTree tree = null;
@@ -1337,7 +1340,7 @@ public class DataHandling {
 								try {
 									Construct c = cons;
 									while (c instanceof IVariable) {
-										c = env.GetVarList().get(((IVariable) c).getName(), t).ival();
+										c = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(((IVariable) c).getName(), t).ival();
 									}
 									ivar = new IVariable(((IVariable) cons).getName(), c.clone(), t);
 								} catch (CloneNotSupportedException ex) {
@@ -1356,7 +1359,7 @@ public class DataHandling {
 			return myProc;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -1387,8 +1390,8 @@ public class DataHandling {
 					}
 					ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), options);
 					Script fakeScript = Script.GenerateScript(root, "*");
-					Env env = new Env();
-					env.SetScript(fakeScript);
+					Environment env = Static.GenerateStandaloneEnvironment();
+					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
 					Construct c = myProc.cexecute(children, env);
 					//Yup! It worked. It's a const proc.
 					return c;
@@ -1461,7 +1464,7 @@ public class DataHandling {
 			return true;
 		}				
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			Construct ret = (args.length == 1 ? args[0] : new CVoid(t));
 			throw new FunctionReturnException(ret);
 		}
@@ -1498,12 +1501,12 @@ public class DataHandling {
 			return true;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree tree = nodes[0];
 			Construct arg = parent.seval(tree, env);
 			String location = arg.val();
@@ -1532,7 +1535,7 @@ public class DataHandling {
 		}
 	}
 
-	@api
+	@api(environments=CommandHelperEnvironment.class)
 	public static class call_proc extends AbstractFunction {
 
 		public String getName() {
@@ -1565,12 +1568,12 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if (nodes.length < 1) {
 				throw new ConfigRuntimeException("Expecting at least one argument to call_proc", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -1579,11 +1582,11 @@ public class DataHandling {
 				args[i] = parent.seval(nodes[i], env);
 			}
 
-			Procedure proc = env.GetProcs().get(args[0].val());
+			Procedure proc = env.getEnv(CommandHelperEnvironment.class).GetProcs().get(args[0].val());
 			if (proc != null) {
 				List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
 				vars.remove(0);
-				Env newEnv = null;
+				Environment newEnv = null;
 				try {
 					newEnv = env.clone();
 				} catch (CloneNotSupportedException ex) {
@@ -1600,7 +1603,7 @@ public class DataHandling {
 		}
 	}
 
-	@api
+	@api(environments=CommandHelperEnvironment.class)
 	public static class is_proc extends AbstractFunction {
 
 		public String getName() {
@@ -1632,8 +1635,8 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) {
-			return new CBoolean(env.GetProcs().get(args[0].val()) == null ? false : true, t);
+		public Construct exec(Target t, Environment env, Construct... args) {
+			return new CBoolean(env.getEnv(CommandHelperEnvironment.class).GetProcs().get(args[0].val()) == null ? false : true, t);
 		}
 	}
 
@@ -1668,7 +1671,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				return new CBoolean(((CArray) args[0]).inAssociativeMode(), t);
 			} else {
@@ -1723,7 +1726,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(args[0] instanceof CClosure, t);
 		}
 
@@ -1784,11 +1787,11 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof IVariable) {
 				//Mode 1     
 				IVariable var = (IVariable) args[0];
-				environment.GetVarList().set(Globals.GetGlobalIVar(var));
+				environment.getEnv(CommandHelperEnvironment.class).GetVarList().set(Globals.GetGlobalIVar(var));
 				return new CVoid(t);
 			} else {
 				//Mode 2
@@ -1798,7 +1801,7 @@ public class DataHandling {
 		}
 	}
 
-	@api
+	@api(environments=CommandHelperEnvironment.class)
 	public static class _export extends AbstractFunction {
 
 		public String getName() {
@@ -1839,11 +1842,11 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length == 1) {
 				if (args[0] instanceof IVariable) {
 					IVariable cur = (IVariable) args[0];
-					Globals.SetGlobal(environment.GetVarList().get(cur.getName(), cur.getTarget()));
+					Globals.SetGlobal(environment.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()));
 				} else {
 					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
 				}
@@ -1852,7 +1855,7 @@ public class DataHandling {
 				Construct c = args[args.length - 1];
 				//We want to store the value contained, not the ivar itself
 				while (c instanceof IVariable) {
-					c = environment.GetVarList().get(((IVariable) c).getName(), t).ival();
+					c = environment.getEnv(CommandHelperEnvironment.class).GetVarList().get(((IVariable) c).getName(), t).ival();
 				}
 				Globals.SetGlobal(key, c);
 			}
@@ -1860,7 +1863,7 @@ public class DataHandling {
 		}
 	}
 
-	@api
+	@api(environments=CommandHelperEnvironment.class)
 	public static class closure extends AbstractFunction {
 
 		public String getName() {
@@ -1903,12 +1906,12 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			String[] names = new String[nodes.length - 1];
 			Construct[] defaults = new Construct[nodes.length - 1];
 			for (int i = 0; i < nodes.length - 1; i++) {
@@ -1917,7 +1920,7 @@ public class DataHandling {
 				List<ParseTree> children = new ArrayList<ParseTree>();
 				children.add(node);
 				newNode.setChildren(children);
-				Script fakeScript = Script.GenerateScript(newNode, env.GetLabel());
+				Script fakeScript = Script.GenerateScript(newNode, env.getEnv(CommandHelperEnvironment.class).GetLabel());
 				Construct ret = MethodScriptCompiler.execute(newNode, env, null, fakeScript);
 				if (!(ret instanceof IVariable)) {
 					throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, t);
@@ -1972,7 +1975,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[args.length - 1] instanceof CClosure) {
 				Construct[] vals = new Construct[args.length - 1];
 				System.arraycopy(args, 0, vals, 0, args.length - 1);
@@ -2018,7 +2021,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(Static.getBoolean(args[0]), t);
 		}
 
@@ -2082,7 +2085,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt((long) Static.getDouble(args[0]), t);
 		}
 
@@ -2139,7 +2142,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CDouble(Static.getDouble(args[0]), t);
 		}
 
@@ -2196,7 +2199,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CString(args[0].val(), t);
 		}
 

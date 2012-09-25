@@ -122,7 +122,7 @@ public class PersistanceNetwork {
      * @param namespace
      * @return 
      */
-    public synchronized Map<String[], String> getNamespace(String [] namespace) throws DataSourceException, UnresolvedCaptureException{
+    public synchronized Map<String[], String> getNamespace(String [] namespace) throws DataSourceException{
         List<URI> uris = filter.getAllConnections(namespace);
         //First we have to get the namespaces. We can get a list of all the connections
         //we need to search, then grab all the data in them, but then we need to use

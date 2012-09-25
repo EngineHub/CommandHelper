@@ -9,6 +9,8 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -39,7 +41,7 @@ public class WorldEdit {
         return "Provides various methods for programmatically hooking into WorldEdit";
     }
 
-    @api
+    @api(environments=CommandHelperEnvironment.class)
     public static class sk_pos1 extends SKFunction {
 
         public String getName() {
@@ -59,14 +61,14 @@ public class WorldEdit {
                     + " the location is returned, it is returned as a 4 index array:(x, y, z, world)";
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l = null;
             boolean setter = false;
             Static.checkPlugin("WorldEdit", t);
 
-            if (env.GetCommandSender() instanceof MCPlayer) {
-                m = env.GetPlayer();
+            if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             }
             if (args.length == 2) {
                 m = Static.GetPlayer(args[0].val(), t);
@@ -106,7 +108,7 @@ public class WorldEdit {
         }
     }
 
-    @api
+    @api(environments=CommandHelperEnvironment.class)
     public static class sk_pos2 extends SKFunction {
 
         public String getName() {
@@ -125,14 +127,14 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
             MCLocation l = null;
             boolean setter = false;
             Static.checkPlugin("WorldEdit", t);
 
-            if (env.GetCommandSender() instanceof MCPlayer) {
-                m = env.GetPlayer();
+            if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             }
             if (args.length == 2) {
                 m = Static.GetPlayer(args[0].val(), t);
@@ -192,7 +194,7 @@ public class WorldEdit {
 //            return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 //        }
 //
-//        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+//        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 //            Static.checkPlugin("WorldEdit", t);
 //            return new CVoid(t);
 //        }
@@ -225,7 +227,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
                 String regionName = args[0].val();
                 String worldName = args[1].val();
@@ -326,7 +328,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String region1 = args[1].val();
             List<ProtectedRegion> checkRegions = new ArrayList<ProtectedRegion>();
             Static.checkPlugin("WorldGuard", t);
@@ -387,7 +389,7 @@ public class WorldEdit {
             return new ExceptionType[]{};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             List<World> checkWorlds = null;
             CArray arr = new CArray(t);
@@ -411,7 +413,7 @@ public class WorldEdit {
         }
     }
 
-    @api
+    @api(environments=CommandHelperEnvironment.class)
     public static class sk_current_regions extends SKFunction {
 
         public String getName() {
@@ -431,14 +433,14 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
 
             MCPlayer m = null;
 
-            if (env.GetCommandSender() instanceof MCPlayer) {
-                m = env.GetPlayer();
+            if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             }
             if (args.length == 1) {
                 m = Static.GetPlayer(args[0].val(), t);
@@ -484,7 +486,7 @@ public class WorldEdit {
         }
     }
 
-    @api
+    @api(environments=CommandHelperEnvironment.class)
     public static class sk_regions_at extends SKFunction {
 
         public String getName() {
@@ -504,7 +506,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException, ExceptionType.InsufficientArgumentsException};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
 
@@ -514,8 +516,8 @@ public class WorldEdit {
 
             MCWorld w = null;
             
-            if (!( env.GetCommandSender() instanceof MCPlayer)) {
-                w = env.GetPlayer().getWorld();
+            if (!( env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
+                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
             }
             
             MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
@@ -579,7 +581,7 @@ public class WorldEdit {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
             World world;
 

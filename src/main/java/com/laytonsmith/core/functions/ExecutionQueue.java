@@ -4,17 +4,16 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -31,7 +30,8 @@ public class ExecutionQueue {
 			+ " for more information.";
 	}
 	
-	@api public static class queue_push extends AbstractFunction{
+	@api(environments={GlobalEnv.class})
+	public static class queue_push extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -45,7 +45,7 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
@@ -56,7 +56,7 @@ public class ExecutionQueue {
 				queue = args[1].nval();
 			}
 			
-			environment.GetExecutionQueue().push(queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(queue, new Runnable() {
 
 				public void run() {
 					StaticLayer.SetFutureRunnable(0, new Runnable() {
@@ -89,7 +89,8 @@ public class ExecutionQueue {
 		
 	}
 	
-	@api public static class queue_push_front extends AbstractFunction{
+	@api(environments={GlobalEnv.class})
+	public static class queue_push_front extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -103,7 +104,7 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			final CClosure c;
 			String queue = null;
 			if(!(args[0] instanceof CClosure)){
@@ -114,7 +115,7 @@ public class ExecutionQueue {
 				queue = args[1].nval();
 			}
 			
-			environment.GetExecutionQueue().pushFront(queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(queue, new Runnable() {
 
 				public void run() {
 					StaticLayer.SetFutureRunnable(0, new Runnable() {
@@ -147,7 +148,8 @@ public class ExecutionQueue {
 		
 	}
 	
-	@api public static class queue_remove extends AbstractFunction{
+	@api(environments={GlobalEnv.class})
+	public static class queue_remove extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -161,12 +163,12 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1){
 				queue = args[0].nval();
 			}
-			environment.GetExecutionQueue().remove(queue);
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().remove(queue);
 			return new CVoid(t);
 		}
 
@@ -188,7 +190,8 @@ public class ExecutionQueue {
 		
 	}
 	
-	@api public static class queue_remove_front extends AbstractFunction{
+	@api(environments={GlobalEnv.class})
+	public static class queue_remove_front extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -202,12 +205,12 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1){
 				queue = args[0].nval();
 			}
-			environment.GetExecutionQueue().removeFront(queue);
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().removeFront(queue);
 			return new CVoid(t);
 		}
 
@@ -230,7 +233,8 @@ public class ExecutionQueue {
 		
 	}
 	
-	@api public static class queue_clear extends AbstractFunction{
+	@api(environments={GlobalEnv.class})
+	public static class queue_clear extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -244,12 +248,12 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1){
 				queue = args[0].nval();
 			}
-			environment.GetExecutionQueue().clear(queue);
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().clear(queue);
 			return new CVoid(t);
 		}
 
@@ -272,7 +276,8 @@ public class ExecutionQueue {
 		
 	}
 	
-	@api public static class queue_running extends AbstractFunction{
+	@api(environments={GlobalEnv.class})
+	public static class queue_running extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return null;
@@ -286,12 +291,12 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 1){
 				queue = args[0].nval();
 			}
-			return new CBoolean(environment.GetExecutionQueue().isRunning(queue), t);
+			return new CBoolean(environment.getEnv(GlobalEnv.class).GetExecutionQueue().isRunning(queue), t);
 		}
 
 		public String getName() {
@@ -312,7 +317,8 @@ public class ExecutionQueue {
 		
 	}
 	
-	@api public static class queue_delay extends AbstractFunction{
+	@api(environments={GlobalEnv.class})
+	public static class queue_delay extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -326,13 +332,13 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2){
 				queue = args[1].nval();
 			}
 			final long delay = Static.getInt(args[0]);
-			environment.GetExecutionQueue().push(queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(queue, new Runnable() {
 
 				public void run() {
 					try {
@@ -364,7 +370,8 @@ public class ExecutionQueue {
 		
 	}
 	
-	@api public static class queue_delay_front extends AbstractFunction{
+	@api(environments={GlobalEnv.class})
+	public static class queue_delay_front extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -378,13 +385,13 @@ public class ExecutionQueue {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String queue = null;
 			if(args.length == 2){
 				queue = args[1].nval();
 			}
 			final long delay = Static.getInt(args[0]);
-			environment.GetExecutionQueue().pushFront(queue, new Runnable() {
+			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(queue, new Runnable() {
 
 				public void run() {
 					try {

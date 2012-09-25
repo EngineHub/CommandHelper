@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -12,11 +14,9 @@ import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 
 /**
  *
@@ -40,7 +40,7 @@ public class ArrayHandling {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				return new CInt(((CArray) args[0]).size(), t);
 			}
@@ -76,7 +76,7 @@ public class ArrayHandling {
 				
 	}
 
-	@api
+	@api(environments={GlobalEnv.class})
 	public static class array_get extends AbstractFunction {
 
 		public String getName() {
@@ -87,7 +87,7 @@ public class ArrayHandling {
 			return new Integer[]{1, 2, 3};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			Construct index = new CSlice(0, -1, t);
 			Construct defaultConstruct = null;
 			if (args.length >= 2) {
@@ -97,7 +97,7 @@ public class ArrayHandling {
 				defaultConstruct = args[2];
 			}
 
-			if (env.GetFlag("array_get_alt_mode") == Boolean.TRUE) {
+			if (env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE) {
 				return new CArrayReference(args[0], args[1], env);
 			}
 
@@ -286,7 +286,7 @@ public class ArrayHandling {
 			return new Integer[]{3};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				try {
 					((CArray) args[0]).set(args[1], args[2]);
@@ -339,7 +339,7 @@ public class ArrayHandling {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				if (args.length < 2) {
 					throw new ConfigRuntimeException("At least 2 arguments must be provided to array_push", ExceptionType.InsufficientArgumentsException, t);
@@ -392,7 +392,7 @@ public class ArrayHandling {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			equals e = new equals();
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
@@ -469,7 +469,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			equals_ic e = new equals_ic();
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
@@ -525,7 +525,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				if (!((CArray) args[0]).inAssociativeMode()) {
 					try {
@@ -590,7 +590,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray && args[1] instanceof CInt) {
 				CArray original = (CArray) args[0];
 				int size = (int) ((CInt) args[1]).getInt();
@@ -649,7 +649,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			long start = 0;
 			long finish = 0;
 			long increment = 1;
@@ -719,7 +719,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				CArray ca2 = new CArray(t);
@@ -773,7 +773,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				CArray ca2 = new CArray(t);
@@ -828,7 +828,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray newArray = new CArray(t);
 			if (args.length < 2) {
 				throw new ConfigRuntimeException("array_merge must be called with at least two parameters", ExceptionType.InsufficientArgumentsException, t);
@@ -896,7 +896,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				return ca.remove(args[1]);
@@ -943,7 +943,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (!(args[0] instanceof CArray)) {
 				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
 			}
@@ -1009,7 +1009,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CSlice(Static.getInt(args[0]), Static.getInt(args[1]), t);
 		}
 
@@ -1041,7 +1041,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (!(args[0] instanceof CArray)) {
 				throw new ConfigRuntimeException("The first parameter to array_sort must be an array", ExceptionType.CastException, t);
 			}
@@ -1146,7 +1146,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			final CArray array = Static.getArray(args[0], t);
 			final CString sortType = new CString(args.length > 2?args[1].val():CArray.SortType.REGULAR.name(), t);
 			final CClosure callback = Static.getObject((args.length==2?args[1]:args[2]), t, "closure", CClosure.class);
@@ -1194,7 +1194,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)){
 				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
 			}
@@ -1244,7 +1244,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(!(args[0] instanceof CArray)){
 				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
 			}
@@ -1294,7 +1294,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = (CArray)new array_indexes().exec(t, environment, args);
 			if(ca.isEmpty()){
 				return new CNull(t);
@@ -1346,7 +1346,7 @@ public class ArrayHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if(args[0] instanceof CArray){
 				((CArray)args[0]).reverse();
 			}
@@ -1395,7 +1395,7 @@ public class ArrayHandling {
 		}
 
 		Random r = new Random(System.currentTimeMillis());
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			long number = 1;
 			boolean getKeys = true;
 			CArray array = Static.getArray(args[0], t);

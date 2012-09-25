@@ -5,10 +5,6 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**

@@ -8,6 +8,9 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.constructs.Token.TType;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.DataHandling.assign;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -43,7 +46,7 @@ public class Script {
     boolean hasBeenCompiled = false;
     boolean compilerError = false;
     private String label;
-    private Env CurrentEnv;
+    private Environment CurrentEnv;
 
     @Override
     public String toString() {
@@ -56,10 +59,10 @@ public class Script {
     }
 
     private Procedure getProc(String name) {
-        return CurrentEnv.GetProcs().get(name);
+        return CurrentEnv.getEnv(CommandHelperEnvironment.class).GetProcs().get(name);
     }
     
-    public Env getCurrentEnv(){
+    public Environment getCurrentEnv(){
         return CurrentEnv;
     }
     
@@ -92,11 +95,11 @@ public class Script {
         return compilerError;
     }
 
-    public void run(final List<Variable> vars, Env myEnv, final MethodScriptComplete done) {
+    public void run(final List<Variable> vars, Environment myEnv, final MethodScriptComplete done) {
         //Some things, such as the label are determined at compile time
         this.CurrentEnv = myEnv;
-        this.CurrentEnv.SetLabel(this.label);
-        MCCommandSender p = myEnv.GetCommandSender();
+        this.CurrentEnv.getEnv(CommandHelperEnvironment.class).SetLabel(this.label);
+        MCCommandSender p = myEnv.getEnv(CommandHelperEnvironment.class).GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
             Target target = Target.UNKNOWN;
             if (left.size() >= 1) {
@@ -111,9 +114,9 @@ public class Script {
                     null, target);
         }
         if (p instanceof MCPlayer) {
-            if (CurrentEnv.GetLabel() != null) {
-                PermissionsResolverManager perms = Static.getPermissionsResolverManager();
-                String[] groups = CurrentEnv.GetLabel().substring(1).split("/");
+            if (CurrentEnv.getEnv(CommandHelperEnvironment.class).GetLabel() != null) {
+                PermissionsResolver perms = CurrentEnv.getEnv(GlobalEnv.class).GetPermissionsResolver();
+                String[] groups = CurrentEnv.getEnv(CommandHelperEnvironment.class).GetLabel().substring(1).split("/");
                 for (String group : groups) {
                     if (group.startsWith("-") && perms.inGroup(((MCPlayer)p).getName(), group.substring(1))) {
                         //negative permission
@@ -160,7 +163,7 @@ public class Script {
             }
             System.out.println("The continue() function must be used inside a for() or foreach() loop");
         } catch (FunctionReturnException e) {
-            if(myEnv.GetEvent() != null){
+            if(myEnv.getEnv(CommandHelperEnvironment.class).GetEvent() != null){
                 //Oh, we're running in an event handler. Those know how to catch it too.
                 throw e;
             }
@@ -186,28 +189,28 @@ public class Script {
      * @param env
      * @return 
      */
-    public Construct seval(ParseTree c, final Env env){
+    public Construct seval(ParseTree c, final Environment env){
         Construct ret = eval(c, env);
         if(ret instanceof IVariable){
             IVariable cur = (IVariable)ret;
-            return env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
+            return env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
         }
         return ret;
     }
 
-    public Construct eval(ParseTree c, final Env env) throws CancelCommandException {
+    public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
         final Construct m = c.getData();
         CurrentEnv = env;
-        CurrentEnv.SetLabel(this.label);
+        CurrentEnv.getEnv(CommandHelperEnvironment.class).SetLabel(this.label);
         if (m.getCType() == ConstructType.FUNCTION) {
-                env.SetScript(this);
+                env.getEnv(GlobalEnv.class).SetScript(this);
                 if (m.val().matches("^_[^_].*")) {
                     //Not really a function, so we can't put it in Function.
                     Procedure p = getProc(m.val());
                     if (p == null) {
                         throw new ConfigRuntimeException("Unknown procedure \"" + m.val() + "\"", ExceptionType.InvalidProcedureException, m.getTarget());
                     }
-                    Env newEnv = env;
+                    Environment newEnv = env;
                     try{
                         newEnv = env.clone();
                     } catch(Exception e){}
@@ -225,9 +228,9 @@ public class Script {
                     if(c.getChildAt(0).getData() instanceof CFunction){
                         CFunction test = (CFunction)c.getChildAt(0).getData();
                         if(test.val().equals("array_get")){
-                            env.SetFlag("array_get_alt_mode", true);
+                            env.getEnv(GlobalEnv.class).SetFlag("array_get_alt_mode", true);
                             Construct arrayAndIndex = eval(c.getChildAt(0), env);
-                            env.ClearFlag("array_get_alt_mode");
+                            env.getEnv(GlobalEnv.class).ClearFlag("array_get_alt_mode");
                             return ((assign)f).array_assign(m.getTarget(), env, arrayAndIndex, eval(c.getChildAt(1), env));
                         }
                     }
@@ -235,8 +238,8 @@ public class Script {
                 
                 if(f.useSpecialExec()){
 					ProfilePoint p = null;
-					if(f.shouldProfile() && env.GetProfiler() != null && env.GetProfiler().isLoggable(f.profileAt())){
-						p = env.GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
+					if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){
+						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessageS(c.getChildren()), f.profileAt());
 					}
                     Construct ret = f.execs(m.getTarget(), env, this, c.getChildren().toArray(new ParseTree[]{}));
 					if(p != null){
@@ -270,12 +273,12 @@ public class Script {
                                 + ca[i].getClass() + ") being passed as an argument to a function (" 
                                 + f.getName() + ")", null, m.getTarget());
                     }
-                    if(env.GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
+                    if(env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
                         continue;
                     }
                     if(f.preResolveVariables() && ca[i] instanceof IVariable){
                         IVariable cur = (IVariable)ca[i];
-                        ca[i] = env.GetVarList().get(cur.getName(), cur.getTarget()).ival();
+                        ca[i] = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
                     }
                 }
 
@@ -283,8 +286,8 @@ public class Script {
 					//It takes a moment to generate the toString of some things, so lets not do it
 					//if we actually aren't going to profile
 					ProfilePoint p = null;				
-					if(f.shouldProfile() && env.GetProfiler() != null && env.GetProfiler().isLoggable(f.profileAt())){						
-						p = env.GetProfiler().start(f.profileMessage(ca), f.profileAt());
+					if(f.shouldProfile() && env.getEnv(GlobalEnv.class).GetProfiler() != null && env.getEnv(GlobalEnv.class).GetProfiler().isLoggable(f.profileAt())){						
+						p = env.getEnv(GlobalEnv.class).GetProfiler().start(f.profileMessage(ca), f.profileAt());
 					}
 					Construct ret = f.exec(m.getTarget(), env, ca);
 					if(p != null){

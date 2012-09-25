@@ -12,7 +12,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
-import com.laytonsmith.core.environments.Env;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionList;
 import java.io.File;
@@ -44,7 +44,7 @@ public class NewMethodScriptCompiler {
 		return lo.lex();
 	}
 
-	public static List<NewScript> preprocess(TokenStream tokenStream, Env compilerEnvironment) throws ConfigCompileException {
+	public static List<NewScript> preprocess(TokenStream tokenStream, Environment compilerEnvironment) throws ConfigCompileException {
 		List<NewScript> scripts = new ArrayList<NewScript>();
 		//We need to split the command definition and the pure mscript parts. First,
 		//we split on newlines, those are each going to be our alias definitions
@@ -168,14 +168,14 @@ public class NewMethodScriptCompiler {
 	 * @return
 	 * @throws ConfigCompileException 
 	 */
-	public static ParseTree compile(TokenStream tokenStream, Env compilerEnvironment) throws ConfigCompileException {
+	public static ParseTree compile(TokenStream tokenStream, Environment compilerEnvironment) throws ConfigCompileException {
 		ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), tokenStream.getFileOptions());
 		new CompilerObject(tokenStream).compile(root, compilerEnvironment);
 		link(root, compilerEnvironment);
 		return root;
 	}
 
-	private static void link(ParseTree root, Env compilerEnvirontment) throws ConfigCompileException {
+	private static void link(ParseTree root, Environment compilerEnvirontment) throws ConfigCompileException {
 		//Before we actually link, we need to optimize our branch functions, that is,
 		//currently just if. However, at this point, we also need to optimize __autoconcat__ and cc.
 		//so we know what the tree actually looks like. Also, we want to first group all our auto includes
@@ -214,7 +214,7 @@ public class NewMethodScriptCompiler {
 		TokenStream stream = lex("<! strict; > @var", null, true);
 		System.out.println(stream + "\n");
 //		System.out.println(preprocess(stream).toString());
-		ParseTree tree = compile(stream, Env.createEnvironment(env));
+		ParseTree tree = compile(stream, Environment.createEnvironment(env));
 		System.out.println(tree.toStringVerbose());
 	}
 }

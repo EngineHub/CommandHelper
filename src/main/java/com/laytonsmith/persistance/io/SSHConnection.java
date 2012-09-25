@@ -23,4 +23,8 @@ public class SSHConnection implements ConnectionMixin{
 	public void writeData(String data) throws IOException, UnsupportedOperationException {
 		SSHWrapper.SCPWrite(data, connection);
 	}
+
+	public String getPath() throws UnsupportedOperationException {
+		return connection;
+	}
 }

@@ -8,13 +8,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
-import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
-import java.util.concurrent.ThreadFactory;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.apache.log4j.lf5.util.StreamUtils;
 
 /**
@@ -83,5 +76,9 @@ public class ReadWriteFileConnection implements ConnectionMixin{
 		}
 		this.data = data.getBytes("UTF-8");
 		writer.mark();
+	}
+
+	public String getPath() throws IOException {
+		return file.getCanonicalPath();
 	}
 }

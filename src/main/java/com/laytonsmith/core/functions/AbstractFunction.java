@@ -2,11 +2,11 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.annotations.noprofile;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.List;
@@ -32,7 +32,7 @@ public abstract class AbstractFunction implements Function {
 	 * @param nodes
 	 * @return
 	 */
-	public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+	public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 		return new CVoid(t);
 	}
 

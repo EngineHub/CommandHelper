@@ -4,25 +4,27 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.AliasCore;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptComplete;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.persistance.DataSourceException;
 import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.plugin.Plugin;
@@ -49,7 +51,6 @@ public class ExampleScript {
 	
 	MCPlayer fakePlayer;
 	static MCServer fakeServer;
-	static PermissionsResolverManager fakePermissions;
 	static Plugin fakePlugin;
 	static AliasCore fakeCore;
 	static boolean init = false;
@@ -129,7 +130,6 @@ public class ExampleScript {
 					return genericReturn(method.getReturnType());
 				}
 			});
-			fakePermissions = new FakePermissions(null);
 			fakeCore = new FakeCore();
 			try {
 				Field f = CommandHelperPlugin.class.getDeclaredField("ac");
@@ -152,44 +152,9 @@ public class ExampleScript {
 	
 	private class FakeCore extends AliasCore{
 		public FakeCore(){
-			super(null, null, null, null, fakePermissions, null);
+			super(null, null, null, null, new PermissionsResolver.PermissiveResolver(), null);
 			this.autoIncludes = new ArrayList<File>();
 		}
-	}
-	private class FakePermissions extends PermissionsResolverManager{
-		public FakePermissions(Plugin p){
-			super(fakePlugin);
-		}
-
-		@Override
-		public boolean inGroup(String player, String group) {
-			return true;
-		}
-
-		@Override
-		public boolean inGroup(OfflinePlayer player, String group) {
-			return true;
-		}		
-
-		@Override
-		public boolean hasPermission(OfflinePlayer player, String permission) {
-			return true;
-		}
-
-		@Override
-		public boolean hasPermission(String name, String permission) {
-			return true;
-		}
-
-		@Override
-		public boolean hasPermission(String worldName, OfflinePlayer player, String permission) {
-			return true;
-		}
-
-		@Override
-		public boolean hasPermission(String worldName, String name, String permission) {
-			return true;
-		}		
 	}
 	
 	private Object genericReturn(Class r){
@@ -223,16 +188,14 @@ public class ExampleScript {
 		return originalScript;
 	}
 	
-	public String getOutput(){
+	public String getOutput() throws IOException, DataSourceException{
 		if(output != null){
 			return output;
 		}
 		Script s = Script.GenerateScript(script, "*");
-		Env env = new Env();
-		env.SetProfiler(Profiler.FakeProfiler());
-		env.SetPlayer(fakePlayer);
+		Environment env = Static.GenerateStandaloneEnvironment();
+		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 		final StringBuilder finalOutput = new StringBuilder();
-		Static.perms = fakePermissions;
 		String thrown = null;
 		try{
 			s.run(new ArrayList<Variable>(), env, new MethodScriptComplete() {

@@ -15,6 +15,8 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.persistance.DataSourceException;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -37,7 +39,7 @@ public class DocGen {
 	    //System.out.println(Template("persistance_network"));
     }
 	
-	public static String examples(String function, boolean staged) throws ConfigCompileException{
+	public static String examples(String function, boolean staged) throws ConfigCompileException, IOException, DataSourceException{
 		FunctionBase fb = FunctionList.getFunction(new CFunction(function, Target.UNKNOWN));
 		if(fb instanceof Function){
 			Function f = (Function)fb;

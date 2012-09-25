@@ -1,51 +1,150 @@
 package com.laytonsmith.persistance;
 
+import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.persistance.io.ConnectionMixin;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
  *
  * @author lsmith
  */
-//@datasource("sqlite")
+@datasource("sqlite")
 public class SQLiteDataSource extends AbstractDataSource{
+	
+	/* These values may not be changed without creating an upgrade routine */
+	private static final String KEY_COLUMN = "key";
+	private static final String VALUE_COLUMN = "value";
+	private static final String TABLE_NAME = "persistance";
+	Connection connection;
+	String path;
+	ConnectionMixin mixin;
+	
+	private SQLiteDataSource(){
+		
+	}
 	public SQLiteDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
-		super(uri, options);
+		super(uri, options);		
+		mixin = getConnectionMixin();		
+		try {
+			try{
+				Class.forName("org.sqlite.JDBC");
+				path = mixin.getPath();
+				connect();
+				Statement statement = connection.createStatement();
+				statement.executeUpdate("CREATE TABLE IF NOT EXISTS `" + TABLE_NAME + "` (`" + KEY_COLUMN + "` TEXT PRIMARY KEY,"
+						+ " `" + VALUE_COLUMN + "` TEXT)");
+			}finally {
+				disconnect();
+			}
+		} catch (Exception ex) {
+			throw new DataSourceException("An error occured while setting up a connection to the SQLite database", ex);
+		} 
+	}
+	
+	/**
+	 * All calls to connect must have a corresponding call to disconnect() in
+	 * a finally block.
+	 */
+	private void connect() throws IOException, SQLException{
+		connection = DriverManager.getConnection("jdbc:sqlite:" + mixin.getPath());		
+	}
+	
+	private void disconnect() throws SQLException{
+		if(connection != null){
+			connection.close();
+		}
 	}
 
-	public List<String[]> keySet() {
-		throw new UnsupportedOperationException("Not supported yet.");
+	public List<String[]> keySet() throws DataSourceException{
+		try{
+			try {
+				connect();
+				Statement statement = connection.createStatement();
+				ResultSet rs = statement.executeQuery("SELECT `" + KEY_COLUMN + "` FROM `" + TABLE_NAME + "`");
+				List<String[]> list = new ArrayList<String[]>();
+				while(rs.next()){
+					list.add(rs.getString(KEY_COLUMN).split("\\."));
+				}
+				return list;
+			} finally{
+				disconnect();
+			}
+		} catch (Exception ex) {
+			throw new DataSourceException("Could not retrieve key set from SQLite connection " + path, ex);
+		}
 	}
 
 	public String get(String[] key, boolean bypassTransient) throws DataSourceException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		checkGet();
+		try{
+			try{
+				connect();
+				PreparedStatement statement = connection.prepareStatement("SELECT `" + VALUE_COLUMN + "` FROM `" + TABLE_NAME + "` WHERE `" + KEY_COLUMN + "`=?");
+				statement.setString(1, StringUtils.Join(key, "."));
+				ResultSet rs = statement.executeQuery();
+				if(rs.next()){
+					return rs.getString(VALUE_COLUMN);
+				} else {
+					return null;
+				}
+			} finally {
+				disconnect();
+			}
+		} catch(Exception e){
+			throw new DataSourceException("Could not get key from SQLite connection " + path, e);
+		}
 	}
 
 	public boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		checkSet();
+		try{
+			try{
+				connect();
+				PreparedStatement statement = connection.prepareStatement("INSERT OR REPLACE INTO `" + TABLE_NAME + "` (`" + KEY_COLUMN + "`, `" + VALUE_COLUMN + "`) VALUES (?, ?)");
+				statement.setString(1, StringUtils.Join(key, "."));
+				statement.setString(2, value);
+				return statement.executeUpdate() > 0;
+			} finally {
+				disconnect();
+			}
+		} catch(Exception e){
+			throw new DataSourceException("Could not set key in SQLite connection " + path, e);			
+		}
 	}
 
 	public void populate() throws DataSourceException {
-		throw new UnsupportedOperationException("Not supported yet.");
+		//All data is transient
 	}
 
 	public DataSourceModifier[] implicitModifiers() {
-		return null;
+		return new DataSourceModifier[]{DataSourceModifier.TRANSIENT};
 	}
 
 	public DataSourceModifier[] invalidModifiers() {
-		return null;
+		return new DataSourceModifier[]{DataSourceModifier.HTTP, DataSourceModifier.HTTPS, DataSourceModifier.SSH,
+			DataSourceModifier.PRETTYPRINT
+		};
 	}
 
 	public String docs() {
-		return "SQLite {sqlite:// TODO} This type store data in a SQLite database."
-			+ " All the pros and cons of MySQL apply here.";
+		return "SQLite {sqlite://path/to/db/file.db} This type store data in a SQLite database."
+			+ " All the pros and cons of MySQL apply here. The database will contain a lone table"
+				+ " named " + TABLE_NAME + ", with two columns, " + KEY_COLUMN + " and " + VALUE_COLUMN;
 	}
 
 	public CHVersion since() {
-		return CHVersion.V0_0_0;
+		return CHVersion.V3_3_1;
 	}
 }

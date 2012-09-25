@@ -6,11 +6,14 @@ import com.laytonsmith.persistance.io.ConnectionMixin;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -24,6 +27,14 @@ public abstract class AbstractDataSource implements DataSource {
 	private ConnectionMixin connectionMixin;
 	private ConnectionMixinFactory.ConnectionMixinOptions mixinOptions;
 			
+	
+	protected AbstractDataSource() {
+		try {
+			uri = new URI("");
+		} catch (URISyntaxException ex) {
+			throw new RuntimeException(ex);
+		}
+	}
 
 	protected AbstractDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions mixinOptions) throws DataSourceException {
 		this.uri = uri;
@@ -51,7 +62,7 @@ public abstract class AbstractDataSource implements DataSource {
 	 *
 	 * @return
 	 */
-	public List<String> stringKeySet() {
+	public List<String> stringKeySet() throws DataSourceException {
 		List<String> keys = new ArrayList<String>();
 		for (String[] key : keySet()) {
 			keys.add(StringUtils.Join(key, "."));

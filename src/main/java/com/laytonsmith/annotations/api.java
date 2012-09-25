@@ -3,6 +3,7 @@
 package com.laytonsmith.annotations;
 
 import com.laytonsmith.core.PlatformResolver;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.functions.bash.BashPlatformResolver;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -44,7 +45,7 @@ public @interface api {
     }
     
     Platforms [] platform() default {api.Platforms.INTERPRETER_JAVA};
-    
+    Class<? extends Environment.EnvironmentImpl> [] environments() default {};
     
     /**
      * This is a list of valid classes that are valid to be tagged with this annotation.

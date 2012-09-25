@@ -41,10 +41,6 @@ public class DataSourceFilter {
 	 */
 	private Map<String[], String> namespaced = new HashMap<String[], String>();
 	/**
-	 * A cache of the regex needed to find a capture usage in a string.
-	 */
-	private static Pattern captureUsage = Pattern.compile("\\$(\\d+)");
-	/**
 	 * Since data lookups are expensive, cache them.
 	 */
 	private Map<String, URI> cache = new TreeMap<String, URI>();
@@ -126,7 +122,7 @@ public class DataSourceFilter {
 		//Ok, now let's load up the actual connections.
 		for (String key : p.stringPropertyNames()) {
 			if (!key.matches("\\$.*")) {
-				if (key.matches("[^a-zA-Z0-9_\\(\\)\\*]")) {
+				if (key.matches("[^a-zA-Z0-9_\\*]")) {
 					//Bad character in the filter. Bail.
 					throw new DataSourceException("Invalid character in filter. Only"
 						+ " the following characters are allowed: a-zA-Z0-9_()*"
@@ -134,42 +130,7 @@ public class DataSourceFilter {
 				}
 				
 				String regexKey = toRegex(key);
-
-				//This is the number of expected capture usages to be found in the
-				//associated value
-				int expected = 0;
-
-				//Now, we need to look to make sure that parenthesis are correct.
-				boolean inParenthesis = false;
-				for (Character c : key.toCharArray()) {
-					//Periods are not allowed inside captures.
-					if(inParenthesis && c.equals('.')){
-						throw new DataSourceException("Captures are not allowed across namespaces (do you have a dot"
-							+ " somewhere inside parenthesis?) in: " + key);
-					}
-					if (c.equals('(')) {
-						if (inParenthesis) {
-							//Nope.
-							throw new DataSourceException("Invalid filter, new"
-								+ " capture started before closing the previous one (do"
-								+ " you have two left parenthesis in a row?) in: " + key);
-						}
-						expected++;
-						inParenthesis = true;
-					}
-					if (c.equals(')')) {
-						if (!inParenthesis) {
-							throw new DataSourceException("Invalid filter, capture"
-								+ " group ended, but one had not been started (do you have"
-								+ " an extra right parenthesis without a matching left?) in: " + key);
-						}
-						inParenthesis = false;
-					}
-				}
-				if (inParenthesis) {
-					throw new DataSourceException("Invalid filter, capture group not ended (did you"
-						+ " forget to close a left parenthesis?) in: " + key);
-				}
+				
 				Pattern pattern = Pattern.compile(regexKey + "$");
 
 				//Ok, have the pattern, now lets see if the value is an alias
@@ -187,19 +148,6 @@ public class DataSourceFilter {
 						isAlias = true;
 					}
 				}
-				//Now, let's check to make sure that any captures are valid
-				Matcher m = captureUsage.matcher(value);
-				while (m.find()) {
-					int i = Integer.parseInt(m.group(1));
-					if (i < 1 || i > expected) {
-						//Show a very detailed error message.
-						throw new DataSourceException("Invalid capture group \"$" + i + "\". "
-							+ (expected == 0 ? "No capture usages were expected" : "Only"
-							+ " " + expected + " capture" + (expected != 1 ? "s" : "") + " were"
-							+ " expected") + " for the connection: " + value
-							+ (isAlias ? "(Defined as alias " + originalValue + ")" : ""));
-					}
-				}
 
 				//Is this pattern already in the mapping? If so, we need to throw an error.
 				if (mappings.containsKey(pattern)) {
@@ -211,7 +159,7 @@ public class DataSourceFilter {
 				//valid capture usages.
 				URI uriValue;
 				try {
-					uriValue = new URI(value.replaceAll("\\$\\d*", "_"));
+					uriValue = new URI(value);
 				} catch (URISyntaxException e) {
 					throw new DataSourceException("Invalid URI for " + value
 						+ (isAlias ? "(Defined for alias " + originalValue + ")" : "") + ".");
@@ -273,7 +221,7 @@ public class DataSourceFilter {
 	 * @param key
 	 * @return
 	 */
-	public List<URI> getAllConnections(String[] key) throws UnresolvedCaptureException {
+	public List<URI> getAllConnections(String[] key) {
 		return getAllConnections(StringUtils.Join(key, "."));
 	}
 
@@ -284,7 +232,7 @@ public class DataSourceFilter {
 	 * @param key
 	 * @return
 	 */
-	public List<URI> getAllConnections(String key) throws UnresolvedCaptureException {
+	public List<URI> getAllConnections(String key) {
 		if(namespaceCache.containsKey(key)){
 			return new ArrayList<URI>(namespaceCache.get(key));
 		}
@@ -323,37 +271,10 @@ public class DataSourceFilter {
 				}
 			}
 		}	
-		//Ok, so we have our list of matches, but we have to replace captures.
-		//This isn't particularly straightforward, because we have to do two things,
-		//check each namespace for captures to get our results, then verify that
-		//there are no unresolved captures, and if so, throw an exception.
-		//First, for simplicity sake, let's check for bad captures.
-		for(String[] match : matches.keySet()){
-			if(arrayContains(match, "(", split.length, match.length - 1)){
-				throw new UnresolvedCaptureException("Could not fully resolve the capture \"" + StringUtils.Join(split, ".")
-					 + "\" given the namespace \"" + key + "\"");
-			}
-		}
+		
 		List<URI> list = new ArrayList<URI>();
-		//Ok, so at this point, all captures will match, so let's fill them in.
 		for(String [] match : matches.keySet()){
 			String uri = matches.get(match);
-			int captureGroup = 0;
-			for(int i = 0; i < split.length; i++){
-				if(match.length > i && match[i].contains("(")){
-					//It is a namespace that has a capture, so we need to extract it.
-					//We can piggyback off of the toRegex function to get it. Note
-					//that it could potentially have multiple captures, so we have
-					//to walk through it entirely.
-					Matcher m = Pattern.compile(toRegex(match[i]) + "$").matcher(split[i]);
-					if(m.find()){
-						for(int g = 1; g <= m.groupCount(); g++){
-							uri = uri.replaceAll("\\$" + (g + captureGroup), m.group(g));
-							captureGroup++;
-						}
-					}
-				}
-			}
 			try {
 				list.add(new URI(uri));
 			} catch (URISyntaxException ex) {
@@ -406,7 +327,7 @@ public class DataSourceFilter {
 			for (Pattern p : matches) {
 				//The closest match is defined as a filter that, minus wild cards, matches more characters.
 				//So, for instance, if the key is a.b.c.d, then this matches a.*.c.d better than a.*.*.d
-				//The easiest way to detect this is to simply remove *() characters, and do a Levenshtein distance on the strings, and
+				//The easiest way to detect this is to simply remove * characters, and do a Levenshtein distance on the strings, and
 				//whichever one is lowest, is the closest.
 				String originalKey = original.get(p);
 				int dist = StringUtils.LevenshteinDistance(key, originalKey.replaceAll("\\*", "").replaceAll("[\\(\\)]", ""));
@@ -431,13 +352,6 @@ public class DataSourceFilter {
 				return null;
 			}
 			String uri = mappings.get(closest);
-			Matcher m = closest.matcher(key);
-			while (m.find()) {
-				//We need to replace the captures
-				for (int i = 1; i <= m.groupCount(); i++) {
-					uri = uri.replaceAll("\\$" + i, m.group(i));
-				}
-			}
 			URI u = new URI(uri);
 			//Store it in our cache
 			cache.put(key, u);
@@ -446,9 +360,5 @@ public class DataSourceFilter {
 			//We already verified that this won't happen, so yeah.
 			return null;
 		}
-	}
-
-	private boolean hasCapture(String connection) {
-		return connection.matches("\\$\\d+");
 	}
 }

@@ -13,6 +13,7 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -31,7 +32,7 @@ public class Environment {
         return "Allows you to manipulate the environment around the player";
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class get_block_at extends AbstractFunction {
 
         public String getName() {
@@ -62,14 +63,14 @@ public class Environment {
             return CHVersion.V3_0_2;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
             MCWorld w = null;
             String world = null;
-            if (env.GetPlayer() instanceof MCPlayer) {
-                w = env.GetPlayer().getWorld();
+            if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() instanceof MCPlayer) {
+                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
             }
             if (args.length == 1 || args.length == 2) {
                 if (args[0] instanceof CArray) {
@@ -110,7 +111,7 @@ public class Environment {
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class set_block_at extends AbstractFunction {
 
         public String getName() {
@@ -140,18 +141,18 @@ public class Environment {
             return CHVersion.V3_0_2;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
             String id = null;
             String world = null;
             MCWorld w = null;
-            if (env.GetPlayer() instanceof MCPlayer) {
-                w = env.GetPlayer().getWorld();
+            if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() instanceof MCPlayer) {
+                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
             }
             if ((args.length == 2 || args.length == 3) && args[0] instanceof CArray) {
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], env.GetPlayer().getWorld(), t);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
                 x = l.getBlockX();
                 y = l.getBlockY();
                 z = l.getBlockZ();
@@ -219,7 +220,7 @@ public class Environment {
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     @noboilerplate //This function seems to cause a OutOfMemoryError for some reason?
     public static class set_sign_text extends AbstractFunction {
 
@@ -253,8 +254,10 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), t);
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null ?
+					null :
+					environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
             if (l.getBlock().isSign()) {
                 String line1 = "";
                 String line2 = "";
@@ -301,7 +304,7 @@ public class Environment {
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class get_sign_text extends AbstractFunction {
 
         public String getName() {
@@ -332,8 +335,10 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), t);
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null ?
+					null :
+					environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
             if (l.getBlock().isSign()) {
                 MCSign s = l.getBlock().getSign();
                 CString line1 = new CString(s.getLine(0), t);
@@ -347,7 +352,7 @@ public class Environment {
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class is_sign_at extends AbstractFunction {
 
         public String getName() {
@@ -377,13 +382,15 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.GetPlayer() == null ? null : environment.GetPlayer().getWorld(), t);
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null ? 
+					null :
+					environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
             return new CBoolean(l.getBlock().isSign(), t);
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class break_block extends AbstractFunction {
 
         public String getName() {
@@ -414,10 +421,10 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
             MCLocation l;
             MCPlayer p;
-            p = environment.GetPlayer();
+            p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCWorld w = (p != null ? p.getWorld() : null);
             l = ObjectGenerator.GetGenerator().location(args[0], w, t);
             if (l.getWorld() instanceof CraftWorld) {
@@ -431,7 +438,8 @@ public class Environment {
         }
     }
     
-    @api public static class set_biome extends AbstractFunction{
+    @api(environments={CommandHelperEnvironment.class})
+	public static class set_biome extends AbstractFunction{
 
         public String getName() {
             return "set_biome";
@@ -458,12 +466,14 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
             int x;
             int z;
             MCWorld w;
             if(args.length == 2){
-                MCWorld defaultWorld = environment.GetPlayer()==null?null:environment.GetPlayer().getWorld();
+                MCWorld defaultWorld = environment.getEnv(CommandHelperEnvironment.class).GetPlayer()==null?
+						null:
+						environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
                 MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
                 x = l.getBlockX();
                 z = l.getBlockZ();
@@ -472,7 +482,7 @@ public class Environment {
                 x = (int) Static.getInt(args[0]);
                 z = (int) Static.getInt(args[1]);
                 if(args.length == 3){
-                    w = environment.GetPlayer().getWorld();
+                    w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
                 } else {
                     w = Static.getServer().getWorld(args[2].val());
                 }
@@ -493,7 +503,8 @@ public class Environment {
         
     }
     
-    @api public static class get_biome extends AbstractFunction{
+    @api(environments={CommandHelperEnvironment.class})
+	public static class get_biome extends AbstractFunction{
 
         public String getName() {
             return "get_biome";
@@ -520,12 +531,14 @@ public class Environment {
             return false;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
             int x;
             int z;
             MCWorld w;
             if(args.length == 1){
-                MCWorld defaultWorld = environment.GetPlayer()==null?null:environment.GetPlayer().getWorld();
+                MCWorld defaultWorld = environment.getEnv(CommandHelperEnvironment.class).GetPlayer()==null?
+						null:
+						environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
                 MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
                 x = l.getBlockX();
                 z = l.getBlockZ();
@@ -534,7 +547,7 @@ public class Environment {
                 x = (int) Static.getInt(args[0]);
                 z = (int) Static.getInt(args[1]);
                 if(args.length == 2){
-                    w = environment.GetPlayer().getWorld();
+                    w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
                 } else {
                     w = Static.getServer().getWorld(args[2].val());
                 }
@@ -549,7 +562,7 @@ public class Environment {
         
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class get_highest_block_at extends AbstractFunction {
 
         public String getName() {
@@ -577,14 +590,14 @@ public class Environment {
             return CHVersion.V3_3_1;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
             MCWorld w = null;
             String world = null;
-            if (env.GetPlayer() instanceof MCPlayer) {
-                w = env.GetPlayer().getWorld();
+            if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() instanceof MCPlayer) {
+                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
             }
 
             if (args[0] instanceof CArray && !(args.length == 3)) {
@@ -626,7 +639,7 @@ public class Environment {
         }
     }
 
-    @api
+    @api(environments={CommandHelperEnvironment.class})
     public static class explosion extends AbstractFunction {
 
         public String getName() {
@@ -653,7 +666,7 @@ public class Environment {
             return CHVersion.V3_3_1;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, com.laytonsmith.core.environments.Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             double x = 0;
             double y = 0;
             double z = 0;
@@ -683,11 +696,11 @@ public class Environment {
             y = loc.getY();
             
             if(w == null) {
-                if (!(env.GetCommandSender() instanceof MCPlayer)) {
+                if (!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
                     throw new ConfigRuntimeException(this.getName() + " needs a world in the location array, or a player so it can take the current world of that player.", ExceptionType.PlayerOfflineException, t);
                 }
 
-                m = env.GetPlayer();
+                m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
                 w = m.getWorld();
             }
 

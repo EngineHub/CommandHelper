@@ -22,6 +22,10 @@ import java.util.logging.Logger;
  */
 @datasource("ser")
 public class SerializedPersistance extends AbstractDataSource implements Persistance {
+	
+	private SerializedPersistance(){
+		
+	}
 
 	/**
 	 * This is the data structure that the registry is stored in. It is a

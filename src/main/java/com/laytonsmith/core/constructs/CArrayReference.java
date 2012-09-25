@@ -2,7 +2,8 @@
 
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.Env;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 
 /**
  *
@@ -12,7 +13,7 @@ public class CArrayReference extends Construct{
     public Construct array;
     public Construct index;
     public IVariable name = null;
-    public CArrayReference(Construct array, Construct index, Env env){
+    public CArrayReference(Construct array, Construct index, Environment env){
         super("", ConstructType.ARRAY, Target.UNKNOWN);
         this.array = array;
         if(array instanceof CArrayReference){
@@ -21,7 +22,7 @@ public class CArrayReference extends Construct{
         if(!(array instanceof CArray) && !(array instanceof CArrayReference)){
             if(array instanceof IVariable){
                 name = (IVariable)array;
-                Construct ival = env.GetVarList().get(name.getName(), name.getTarget()).ival();
+                Construct ival = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(name.getName(), name.getTarget()).ival();
                 if(ival instanceof CArray){
                     this.array = ival;
                 } else {

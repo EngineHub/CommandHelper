@@ -13,6 +13,10 @@ import java.util.List;
 //@datasource("mysql")
 public class MySQLDataSource extends AbstractDataSource{
 	
+	private MySQLDataSource(){
+		
+	}
+	
 	public MySQLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
 		super(uri, options);
 	}

@@ -13,8 +13,8 @@ A connection is a read/write or read-only data source, to which persistance data
 There are several supported formats, and there is the potential to add more in the future.
 In your configuration file, a connection can be aliased, to make re-specifying a connection 
 easier, but the actual connection specification is a URI that maps to a specific data source. 
-For instance, the default serialized persistance format is simply a pointer to a file:
-<pre>ser:///home/data/persistance.ser</pre>
+For instance, the default SQLite format is simply a pointer to a file:
+<pre>sqlite:///home/data/persistance.db</pre>
 
 There are several different connection types supported, and each has a slightly different requirement:
 
@@ -29,7 +29,7 @@ There are several different connection types supported, and each has a slightly 
 
 In addition, several modifier types can be specified, which modify the connection type. 
 They are specified as extra protocols at the start of the URI.
-<pre>transient:readonly:file://persistance.ser</pre>
+<pre>transient:readonly:yml://persistance.yml</pre>
 
 In the above example, the <code>transient</code> and <code>read-only</code> flags have been 
 added to the connection. The specific meaning of each flag is as follows, and they aren't always 
@@ -47,7 +47,10 @@ Invalid modifiers will cause a warning to be raised during startup, but will oth
 A note on file based URIs: The file path is specified after two forward slashes, so an absolute 
 path on unix looks like this: yml:///path/to/file, and an absolute path on windows looks like 
 this: yml://C:/path/to/file (alternatively yml://C:\path\to\file will also work). On all 
-platforms, a relative path would look like this: yml://path/to/file.
+platforms, a relative path would look like this: yml://path/to/file. Additionally, file based
+connections are '''always''' going to be much slower, and much less reliable than SQL based
+connections, so it is HIGHLY recommended that you use SQL connections, if nothing else, using
+the zero config SQLite (which is the default).
 
 There are special implementation considerations you must take into account if you are writing 
 an external system that integrates with the persistance network, (including if you edit the 
@@ -87,8 +90,6 @@ following wildcards are supported:
 | ** || Any value in this namespace, and cross namespace boundries
 |}
 
-Additionally, captures are also supported using parenthesis.
-
 If we are attempting to store a value in "storage.key.name", and we have the following 
 two filters defined:
 <pre>
@@ -101,59 +102,6 @@ filter competition allows for very specific control over what data goes where, w
 having to worry about providing specific filters for all possible namespaces. If not otherwise 
 specified, or if the connection is invalid, The filter ** is ALWAYS defined to be a connection 
 to the default serialized persistance file, so all otherwise unmatched keys will go there.
-
-=== Captures ===
-
-Captures can be used to use a portion of the key name to determine where the file is stored. 
-This is useful for automatically delimiting your output files based on a namespace, for instance, 
-if you wanted to have a separate file for each player, this becomes trivial to map. To capture, 
-use parenthesis. To use a value, use $1, $2, $3, etc. For example, let's say we want to have a 
-separate file for the data of each player, and assume that if we store player data, we will 
-always use <code>store_value('player.playername.key', 'value')</code>. In this case, the 
-following mapping would work:
-
-<pre>
-storage.players.(*).**=yml://players/$1.yml
-</pre>
-
-Now, if we run <code>store_value('players.wraithguard01.key', 'value')</code>, this will 
-create a file at players/wraithguard01.yml, with the value "value" stored at "storage.players.wraithguard01.key". 
-This works because files (and parent folders) are created automatically as needed.
-
-One limitation of captures: If you try to use get_values() on a namespace that retains an unresolved 
-capture, the call will fail. For instance, assume the following configuration:
-
-<pre>
-a.b.(*)=yml://folder/$1.yml
-a.z.y.x=yml://file1.yml
-a.z.a=yml://file2.yml
-a.b.c.(*)=yml://folder2/$1.yml
-z.(*).m=yml://file-$1.yml
-</pre>
-
-In this case, the key "a.b.c" will map to "yml://folder/c.yml" and "a.b.c.d" will map to 
-"yml://folder2/d.yml". If we call <code>get_value('a.b.c')</code>, it is known that it 
-should map to the first entry in configuration, because we have a complete match. The 
-capture will be filled in with "c" in this case, so the resulting connection would be 
-"yml://folder/c.yml". For single keys, this will always work, because matches will be 
-always fully resolved. However, in the case of get_values(), we must enumerate all the 
-data sources that all the namespaces could be in. Lets look at a case with no issue: 
-<code>get_values('a.z')</code>. When we look at all the possible connections, the only 
-two that could possibly match are the "a.z.y.x" and "a.z.a" connections. This will work, 
-because we can see that all connections will be resolved, we know we need to look in 
-"yml://file1.yml" and "yml://file2.yml", and those are the only connections that could 
-possibly contain those keys. However, let's consider the case where we look for 
-<code>get_values('a.b')</code>. Just at a glance, we know we want to look in the 
-first and fourth connections, but wait! Both of them still have wildcards! If we 
-try to match up the connections, we get connections that still have wildcards in them. 
-We can't enumerate through these connections' values, because we don't have a full 
-connection path. What if there are files littered all in folder/*? We cannot reasonably 
-connect to all these possible files in the folder, to see if it is a valid connection or 
-not. Further, assuming you had something with infinite possibilities, this becomes an 
-impossible problem.
-
-If you ask for a namespace, and it ends up not resolving all the possible connections, 
-the call to get_values will throw an UnresolvedCaptureException.
 
 ==Controls==
 

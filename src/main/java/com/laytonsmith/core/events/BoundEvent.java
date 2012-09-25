@@ -7,6 +7,9 @@ import com.laytonsmith.PureUtilities.Pair;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -31,7 +34,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
     private final Priority priority;
     private final Map<String, Construct> prefilter;
     private final String eventObjName;
-    private Env originalEnv;
+    private Environment originalEnv;
     private final ParseTree tree; //The code closure for this event
     private final Driver driver; //For efficiency sake, cache it here
     private static int EventID = 0;
@@ -114,7 +117,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
      * @throws EventException If the priority or id are improperly specified
      */
     public BoundEvent(String name, CArray options, CArray prefilter, String eventObjName,
-            Env env, ParseTree tree, Target t) throws EventException {
+            Environment env, ParseTree tree, Target t) throws EventException {
         this.eventName = name;
 
         if (options != null && options.containsKey("id")) {
@@ -223,7 +226,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         try {
     //        GenericTree<Construct> root = new GenericTree<Construct>();
     //        root.setRoot(tree);
-            Env env = originalEnv.clone();
+            Environment env = originalEnv.clone();
             CArray ca = new CArray(Target.UNKNOWN);
             for (String key : activeEvent.parsedEvent.keySet()) {
                 ca.set(new CString(key, Target.UNKNOWN), activeEvent.parsedEvent.get(key));
@@ -232,7 +235,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
                 try{
                     MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player"));
                     if(p != null && p.isOnline()){
-                        env.SetPlayer(p);                                        
+                        env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);                                        
                     }                    
                 } catch(ConfigRuntimeException e){
                     if(!e.getExceptionType().equals(Exceptions.ExceptionType.PlayerOfflineException)){
@@ -242,12 +245,11 @@ public class BoundEvent implements Comparable<BoundEvent> {
                     //or the event will add it later, manually.
                 }
             }
-            env.GetVarList().set(new IVariable(eventObjName, ca, Target.UNKNOWN));
-            env.SetEvent(activeEvent);
-			env.SetProfiler(originalEnv.GetProfiler());
+            env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(eventObjName, ca, Target.UNKNOWN));
+            env.getEnv(CommandHelperEnvironment.class).SetEvent(activeEvent);
             activeEvent.addHistory("Triggering bound event: " + this);
             try{
-				ProfilePoint p = env.GetProfiler().start("Executing event handler for " + this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
+				ProfilePoint p = env.getEnv(GlobalEnv.class).GetProfiler().start("Executing event handler for " + this.getEventName() + " defined at " + this.getTarget(), LogLevel.ERROR);
                 this.execute(env, activeEvent);
 				p.stop();
             } catch(ConfigRuntimeException e){
@@ -268,8 +270,8 @@ public class BoundEvent implements Comparable<BoundEvent> {
      */
     public void manual_trigger(CArray event) throws EventException{
         try {
-            Env env = originalEnv.clone();
-            env.GetVarList().set(new IVariable(eventObjName, event, Target.UNKNOWN));
+            Environment env = originalEnv.clone();
+            env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(eventObjName, event, Target.UNKNOWN));
             Map<String, Construct> map = new HashMap<String, Construct>();
             for(String key : event.keySet()){
                 map.put(key, event.get(key, Target.UNKNOWN));
@@ -277,14 +279,14 @@ public class BoundEvent implements Comparable<BoundEvent> {
             ActiveEvent activeEvent = new ActiveEvent(null);
             activeEvent.setParsedEvent(map);
             activeEvent.setBoundEvent(this);
-            env.SetEvent(activeEvent);
+            env.getEnv(CommandHelperEnvironment.class).SetEvent(activeEvent);
             this.execute(env, activeEvent);
         } catch (CloneNotSupportedException ex) {
             Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
         }
     }
     
-    private void execute(Env env, ActiveEvent activeEvent) throws EventException{
+    private void execute(Environment env, ActiveEvent activeEvent) throws EventException{
         ParseTree superRoot = new ParseTree(null);
         superRoot.addChild(tree);
         Script s = Script.GenerateScript(superRoot, "*");        
@@ -336,16 +338,16 @@ public class BoundEvent implements Comparable<BoundEvent> {
         private Boolean cancelled;
         private BoundEvent consumedAt;
         private final Map<String, BoundEvent> lockedAt;
-        private final List<Pair<CClosure, Env>> whenCancelled;
-        private final List<Pair<CClosure, Env>> whenTriggered;
+        private final List<Pair<CClosure, Environment>> whenCancelled;
+        private final List<Pair<CClosure, Environment>> whenTriggered;
         
         private final List<String> history;
         
         public ActiveEvent(BindableEvent underlyingEvent){
             this.underlyingEvent = underlyingEvent;
             this.cancelled = null;
-            whenCancelled = new ArrayList<Pair<CClosure, Env>>();
-            whenTriggered = new ArrayList<Pair<CClosure, Env>>();
+            whenCancelled = new ArrayList<Pair<CClosure, Environment>>();
+            whenTriggered = new ArrayList<Pair<CClosure, Environment>>();
             lockedAt = new HashMap<String, BoundEvent>();
             history = new ArrayList<String>();
         }
@@ -489,7 +491,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         public void addWhenTriggered(CClosure tree){
             this.addHistory("Adding a whenTriggered callback. " + boundEvent);
             try {
-                whenTriggered.add(new Pair<CClosure, Env>(tree, boundEvent.originalEnv.clone()));
+                whenTriggered.add(new Pair<CClosure, Environment>(tree, boundEvent.originalEnv.clone()));
             } catch (CloneNotSupportedException ex) {
                 Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
             }
@@ -498,7 +500,7 @@ public class BoundEvent implements Comparable<BoundEvent> {
         public void addWhenCancelled(CClosure tree){
             this.addHistory("Adding a whenCancelled callback. " + boundEvent);
             try {
-                whenCancelled.add(new Pair<CClosure, Env>(tree, boundEvent.originalEnv.clone()));
+                whenCancelled.add(new Pair<CClosure, Environment>(tree, boundEvent.originalEnv.clone()));
             } catch (CloneNotSupportedException ex) {
                 Logger.getLogger(BoundEvent.class.getName()).log(Level.SEVERE, null, ex);
             }

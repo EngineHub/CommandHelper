@@ -10,6 +10,8 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.*;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.Prefilters.PrefilterType;
@@ -197,18 +199,18 @@ public class PlayerEvents {
 		}
 		
         @Override
-        public void preExecution(Env env, ActiveEvent activeEvent) {
+        public void preExecution(Environment env, ActiveEvent activeEvent) {
             if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent){
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerLoginEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.SetPlayer(player);
+                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
 
         @Override
-        public void postExecution(Env env, ActiveEvent activeEvent) {
+        public void postExecution(Environment env, ActiveEvent activeEvent) {
             if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent){
                 MCPlayer player = ((MCPlayerLoginEvent)activeEvent.getUnderlyingEvent()).getPlayer();
                 Static.UninjectPlayer(player);
@@ -477,18 +479,18 @@ public class PlayerEvents {
         }        
 
         @Override
-        public void preExecution(Env env, ActiveEvent activeEvent) {
+        public void preExecution(Environment env, ActiveEvent activeEvent) {
             if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent){
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerRespawnEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.SetPlayer(player);
+                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
 
         @Override
-        public void postExecution(Env env, ActiveEvent activeEvent) {
+        public void postExecution(Environment env, ActiveEvent activeEvent) {
             if(activeEvent.getUnderlyingEvent() instanceof MCPlayerRespawnEvent){
                 MCPlayer player = ((MCPlayerRespawnEvent)activeEvent.getUnderlyingEvent()).getPlayer();
                 Static.UninjectPlayer(player);
@@ -679,18 +681,18 @@ public class PlayerEvents {
         }
 	
 	@Override
-        public void preExecution(Env env, ActiveEvent activeEvent) {
+        public void preExecution(Environment env, ActiveEvent activeEvent) {
             if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
-                env.SetPlayer(player);
+                env.getEnv(CommandHelperEnvironment.class).SetPlayer(player);
                 Static.InjectPlayer(player);
             }
         }
 
         @Override
-        public void postExecution(Env env, ActiveEvent activeEvent) {
+        public void postExecution(Environment env, ActiveEvent activeEvent) {
             if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
                 MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
                 Static.UninjectPlayer(player);

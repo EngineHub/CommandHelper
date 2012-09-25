@@ -4,7 +4,8 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.environments.Env;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -22,7 +23,7 @@ import java.util.Stack;
  * but you can use the various factory methods to create an environment from other sources.
  * @author lsmith
  */
-public class CompilerEnvironment implements Env.EnvImpl{	
+public class CompilerEnvironment implements Environment.EnvironmentImpl{	
 	/**
 	 * A constant is a construct that is defined in source like ${this}. The value
 	 * must be passed in at compile time.
@@ -74,6 +75,10 @@ public class CompilerEnvironment implements Env.EnvImpl{
 	
 	public List<ParseTree> getIncludes(){
 		return new ArrayList<ParseTree>(includes);
+	}
+
+	public EnvironmentImpl clone() throws CloneNotSupportedException {
+		throw new UnsupportedOperationException("Not supported yet.");
 	}
 	
 }

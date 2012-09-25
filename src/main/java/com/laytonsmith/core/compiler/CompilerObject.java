@@ -19,7 +19,7 @@ import com.laytonsmith.core.constructs.NewIVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
-import com.laytonsmith.core.environments.Env;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.Arrays;
 import java.util.EmptyStackException;
@@ -58,7 +58,7 @@ class CompilerObject {
 		return stream.remove(0);
 	}
 
-	void compile(ParseTree root, Env compilerEnv) throws ConfigCompileException {
+	void compile(ParseTree root, Environment compilerEnv) throws ConfigCompileException {
 		this.root = root;
 		nodes.push(root);
 		pointer = root;

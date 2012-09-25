@@ -11,6 +11,10 @@ import java.net.URI;
 //@datasource("csv")
 public class CSVDataSource extends StringDataSource {
 	
+	private CSVDataSource() {
+		
+	}
+	
 	public CSVDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
 		super(uri, options);
 	}

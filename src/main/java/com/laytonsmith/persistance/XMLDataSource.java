@@ -14,6 +14,10 @@ import java.net.URI;
  */
 //@datasource("xml")
 public class XMLDataSource extends StringDataSource{
+	private XMLDataSource(){
+		
+	}
+	
     public XMLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
         super(uri, options);
     }

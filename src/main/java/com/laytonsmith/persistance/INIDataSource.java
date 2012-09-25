@@ -18,6 +18,10 @@ import java.util.Properties;
  */
 @datasource("ini")
 public class INIDataSource extends StringDataSource {
+	
+	private INIDataSource() {
+		
+	}
 
     public INIDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
         super(uri, options);

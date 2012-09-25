@@ -6,8 +6,14 @@ import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.persistance.DataSourceException;
+import com.laytonsmith.persistance.PersistanceNetwork;
+import com.laytonsmith.persistance.ReadOnlyException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,35 +56,31 @@ public class UserManager {
         return lastCommand;
     }
     
-    public int addAlias(String alias) throws ConfigCompileException {
+    public int addAlias(String alias, PersistanceNetwork persist) throws ConfigCompileException, DataSourceException, ReadOnlyException, IOException {
         try{
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias")), new Env()).get(0).compile();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(alias, new File("User Alias"))).get(0).compile();
         } catch(IndexOutOfBoundsException e){
             throw new ConfigCompileException("Improperly formatted alias", new Target(0, new File("User Alias"), 0));
         }
-        Persistance persist = Static.getPersistance();
-        List<Map.Entry<String, Object>> list = persist.getNamespaceValues(new String[]{"user", name, "aliases"});
+        Map<String[], String> list = persist.getNamespace(new String[]{"user", name, "aliases"});
         Integer nextValue = 0;
-        for (Map.Entry e : list) {
-            String[] x = e.getKey().toString().split("\\.");
+        for (String[] x : list.keySet()) {
             Integer thisX = Integer.parseInt(x[x.length - 1]);
             nextValue = Math.max(thisX + 1, nextValue + 1);
         }
-        persist.setValue(new String[]{"user", name, "aliases", nextValue.toString()}, alias);
+        persist.set(new String[]{"user", name, "aliases", nextValue.toString()}, alias);
         return nextValue;
     }
     
-    public Script getAlias(int id) throws ConfigCompileException{
-        String alias = (String)Static.getPersistance().getValue(new String[]{"user", name, "aliases", Integer.toString(id)});
+    public Script getAlias(int id, Environment env) throws ConfigCompileException, DataSourceException{
+        String alias = env.getEnv(GlobalEnv.class).GetPersistanceNetwork().get(new String[]{"user", name, "aliases", Integer.toString(id)});
         if(alias == null){
             return null;
         }
         return getAlias(alias);
     }
     
-    private Script getAlias(String alias) throws ConfigCompileException{
-        Env env = new Env();
-        env.SetPlayer(Static.GetPlayer(name, Target.UNKNOWN));            
+    private Script getAlias(String alias) throws ConfigCompileException{           
         List<Token> tokens;
         if(script_cache.containsKey(alias)){
             tokens = script_cache.get(alias);
@@ -86,27 +88,27 @@ public class UserManager {
             tokens = MethodScriptCompiler.lex(alias, new File("User Alias"));
             script_cache.put(alias, tokens);
         }
-        return MethodScriptCompiler.preprocess(tokens, env).get(0);
+        return MethodScriptCompiler.preprocess(tokens).get(0);
     }
     
-    public void delAlias(int id){
-        Static.getPersistance().setValue(new String[]{"user", name, "aliases", Integer.toString(id)}, null);
+    public void delAlias(int id, PersistanceNetwork persist) throws DataSourceException, ReadOnlyException, IOException{
+        persist.set(new String[]{"user", name, "aliases", Integer.toString(id)}, null);
     }
     
-    public String getAllAliases(int page){
+    public String getAllAliases(int page, PersistanceNetwork persist) throws DataSourceException{
         if(page < 1){
             page = 1;
         }
-        List<Map.Entry<String, Object>> al = Static.getPersistance().getNamespaceValues(new String[]{"user", name, "aliases"});
+        Map<String[], String> al = persist.getNamespace(new String[]{"user", name, "aliases"});
         StringBuilder b = new StringBuilder();
 
-        for(Map.Entry e : al){
-            String [] key = e.getKey().toString().split("\\.");
+        for(String [] key : al.keySet()){
+			String value = persist.get(key);
             b.append(MCChatColor.AQUA)
                     .append(key[key.length - 1])
                     .append(":")
-                    .append(e.getValue().toString().substring(0, Math.min(e.getValue().toString().length(), 45)))
-                    .append(e.getValue().toString().length() > 45?"...":"")
+                    .append(value.substring(0, Math.min(value.toString().length(), 45)))
+                    .append(value.toString().length() > 45?"...":"")
                     .append("\n");
         }
         if(al.isEmpty()){
@@ -115,12 +117,12 @@ public class UserManager {
         return b.toString();
     }
     
-    public List<Script> getAllScripts(){
-        List<Map.Entry<String, Object>> scripts = Static.getPersistance().getNamespaceValues(new String[]{"user", name, "aliases"});
+    public List<Script> getAllScripts(PersistanceNetwork persist) throws DataSourceException{
+        Map<String[], String> scripts = persist.getNamespace(new String[]{"user", name, "aliases"});
         List<Script> list = new ArrayList<Script>();
-        for(Map.Entry<String, Object> entry : scripts){
+        for(String[] entry : scripts.keySet()){
             try{
-                list.add(getAlias((String)entry.getValue()));
+                list.add(getAlias((String)scripts.get(entry)));
             } catch(ConfigCompileException e){
                 //Ignore this one
             }

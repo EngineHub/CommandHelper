@@ -7,6 +7,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -61,12 +62,12 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             return new CVoid(t);
         }
 
         @Override
-        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+        public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
             //if any of the nodes are sconcat, move their children up a level
             List<ParseTree> list = new ArrayList<ParseTree>();
             for(ParseTree node : nodes){
@@ -114,7 +115,7 @@ public class StringHandling {
             return new ExceptionType[]{};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < args.length; i++) {
                 b.append(args[i].val());
@@ -173,7 +174,7 @@ public class StringHandling {
             return new Integer[]{Integer.MAX_VALUE};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             StringBuilder b = new StringBuilder();
             for(int i = 0; i < args.length; i++){
                 if(i > 0){
@@ -185,7 +186,7 @@ public class StringHandling {
         }        
 
 //        @Override
-//        public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+//        public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 //            StringBuilder b = new StringBuilder();
 //            boolean centry = false;
 //            Construct key = null;
@@ -281,7 +282,7 @@ public class StringHandling {
             return new Integer[]{3};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String thing = args[0].val();
             String what = args[1].val();
             String that = args[2].val();
@@ -329,7 +330,7 @@ public class StringHandling {
             return new Integer[]{1};
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             String[] sa = args[0].val().split(" ");
             ArrayList<Construct> a = new ArrayList<Construct>();
             for (String s : sa) {
@@ -411,7 +412,7 @@ public class StringHandling {
             return CHVersion.V3_0_1;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().trim(), args[0].getTarget());
         }
 
@@ -460,7 +461,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if (args[0] instanceof CArray) {
                 return new CInt(((CArray) args[0]).size(), t);
             } else {
@@ -509,7 +510,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().toUpperCase(), t);
         }
         
@@ -554,7 +555,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().toLowerCase(), t);
         }
         
@@ -602,7 +603,7 @@ public class StringHandling {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             try {
                 String s = args[0].val();
                 int begin = (int) Static.getInt(args[1]);

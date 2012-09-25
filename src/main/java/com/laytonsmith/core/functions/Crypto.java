@@ -4,12 +4,12 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -57,7 +57,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             String s = args[0].val();
             StringBuilder b = new StringBuilder();
             for (int i = 0; i < s.length(); i++) {
@@ -129,7 +129,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
                 digest.update(args[0].val().getBytes());
@@ -190,7 +190,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA1");
                 digest.update(args[0].val().getBytes());
@@ -250,7 +250,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             try {
                 MessageDigest digest = java.security.MessageDigest.getInstance("SHA-256");
                 digest.update(args[0].val().getBytes());
@@ -295,7 +295,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             int log_rounds = 5;
             if(args.length == 2){
                 log_rounds = (int)Static.getInt(args[1]);
@@ -347,7 +347,7 @@ public class Crypto {
             return null;
         }
 
-        public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             boolean match = BCrypt.checkpw(args[0].val(), args[1].val());
             return new CBoolean(match, t);
         }

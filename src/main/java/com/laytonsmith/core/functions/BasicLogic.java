@@ -4,6 +4,9 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -34,7 +37,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree node : nodes) {
 				if (node.getData() instanceof CIdentifier) {
 					return new ifelse().execs(t, env, parent, nodes);
@@ -57,7 +60,7 @@ public class BasicLogic {
 			}
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CVoid(t);
 		}
 
@@ -188,12 +191,12 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			Construct value = parent.seval(nodes[0], env);
 			equals equals = new equals();
 			for (int i = 1; i <= nodes.length - 2; i += 2) {
@@ -304,7 +307,7 @@ public class BasicLogic {
 		}
 	}
 
-	@api
+	@api(environments={GlobalEnv.class})
 	public static class ifelse extends AbstractFunction {
 
 		public String getName() {
@@ -342,12 +345,12 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			if (nodes.length < 2) {
 				throw new ConfigRuntimeException("ifelse expects at least 2 arguments", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -359,12 +362,12 @@ public class BasicLogic {
 					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
 				}
 				if (Static.getBoolean(evalStatement)) {
-					Construct ret = env.GetScript().eval(code, env);
+					Construct ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
 					return ret;
 				}
 			}
 			if (nodes.length % 2 == 1) {
-				Construct ret = env.GetScript().seval(nodes[nodes.length - 1], env);
+				Construct ret = env.getEnv(GlobalEnv.class).GetScript().seval(nodes[nodes.length - 1], env);
 				if (ret instanceof CIdentifier) {
 					return parent.seval(((CIdentifier) ret).contained(), env);
 				} else {
@@ -519,7 +522,7 @@ public class BasicLogic {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args.length <= 1) {
 				throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -649,7 +652,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			equals equals = new equals();
 			if (args[1].getClass().equals(args[0].getClass())
 					&& ((CBoolean) equals.exec(t, environment, args)).getBoolean()) {
@@ -706,7 +709,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CBoolean(!((CBoolean) new sequals().exec(t, environment, args)).getBoolean(), t);
 		}
 
@@ -765,7 +768,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			equals e = new equals();
 			CBoolean b = (CBoolean) e.exec(t, env, args);
 			return new CBoolean(!b.getBoolean(), t);
@@ -822,7 +825,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length <= 1) {
 				throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -918,7 +921,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			equals_ic e = new equals_ic();
 			return new CBoolean(!((CBoolean) e.exec(t, environment, args)).getBoolean(), t);
 		}
@@ -953,7 +956,7 @@ public class BasicLogic {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0]);
 			double arg2 = Static.getNumber(args[1]);
 			return new CBoolean(arg1 < arg2, t);
@@ -1010,7 +1013,7 @@ public class BasicLogic {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0]);
 			double arg2 = Static.getNumber(args[1]);
 			return new CBoolean(arg1 > arg2, t);
@@ -1067,7 +1070,7 @@ public class BasicLogic {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0]);
 			double arg2 = Static.getNumber(args[1]);
 			return new CBoolean(arg1 <= arg2, t);
@@ -1125,7 +1128,7 @@ public class BasicLogic {
 			return new Integer[]{2};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			double arg1 = Static.getNumber(args[0]);
 			double arg2 = Static.getNumber(args[1]);
 			return new CBoolean(arg1 >= arg2, t);
@@ -1171,7 +1174,7 @@ public class BasicLogic {
 		}
 	}
 
-	@api
+	@api(environments={GlobalEnv.class})
 	public static class and extends AbstractFunction {
 
 		public String getName() {
@@ -1182,14 +1185,14 @@ public class BasicLogic {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) {
+		public Construct exec(Target t, Environment env, Construct... args) {
 			return new CNull(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
-				Construct c = env.GetScript().seval(tree, env);
+				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
 				boolean b = Static.getBoolean(c);
 				if (b == false) {
 					return new CBoolean(false, t);
@@ -1235,7 +1238,7 @@ public class BasicLogic {
 		}
 	}
 
-	@api
+	@api(environments={GlobalEnv.class})
 	public static class or extends AbstractFunction {
 
 		public String getName() {
@@ -1246,14 +1249,14 @@ public class BasicLogic {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) {
+		public Construct exec(Target t, Environment env, Construct... args) {
 			return new CNull(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
-				Construct c = env.GetScript().eval(tree, env);
+				Construct c = env.getEnv(GlobalEnv.class).GetScript().eval(tree, env);
 				if (Static.getBoolean(c)) {
 					return new CBoolean(true, t);
 				}
@@ -1309,7 +1312,7 @@ public class BasicLogic {
 			return new Integer[]{1};
 		}
 
-		public Construct exec(Target t, Env env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			return new CBoolean(!Static.getBoolean(args[0]), t);
 		}
 
@@ -1384,7 +1387,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean val1 = Static.getBoolean(args[0]);
 			boolean val2 = Static.getBoolean(args[1]);
 			return new CBoolean(val1 ^ val2, t);
@@ -1439,12 +1442,12 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) {
+		public Construct exec(Target t, Environment environment, Construct... args) {
 			return new CNull(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			and and = new and();
 			boolean val = ((CBoolean) and.execs(t, env, parent, nodes)).getBoolean();
 			return new CBoolean(!val, t);
@@ -1494,12 +1497,12 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) {
+		public Construct exec(Target t, Environment environment, Construct... args) {
 			return new CNull(t);
 		}
 
 		@Override
-		public Construct execs(Target t, Env environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
+		public Construct execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
 			or or = new or();
 			boolean val = ((CBoolean) or.execs(t, environment, parent, args)).getBoolean();
 			return new CBoolean(!val, t);
@@ -1549,7 +1552,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			xor xor = new xor();
 			boolean val = ((CBoolean) xor.exec(t, environment, args)).getBoolean();
 			return new CBoolean(!val, t);
@@ -1603,7 +1606,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_and requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -1665,7 +1668,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_or requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -1729,7 +1732,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CInt(~Static.getInt(args[0]), t);
 		}
 
@@ -1782,7 +1785,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			long value = Static.getInt(args[0]);
 			long toShift = Static.getInt(args[1]);
 			return new CInt(value << toShift, t);
@@ -1837,7 +1840,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			long value = Static.getInt(args[0]);
 			long toShift = Static.getInt(args[1]);
 			return new CInt(value >> toShift, t);
@@ -1894,7 +1897,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			long value = Static.getInt(args[0]);
 			long toShift = Static.getInt(args[1]);
 			return new CInt(value >>> toShift, t);
@@ -1948,7 +1951,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return new CIdentifier("elseif", nodes[0], t);
 		}
 
@@ -1957,7 +1960,7 @@ public class BasicLogic {
 			return true;
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull(t);
 		}
 
@@ -2015,11 +2018,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Env env, Script parent, ParseTree... nodes) {
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			return new CIdentifier("else", nodes[0], t);
 		}
 
-		public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			return new CNull(t);
 		}
 

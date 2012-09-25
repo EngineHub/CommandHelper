@@ -29,6 +29,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Driver;
 import com.laytonsmith.core.events.EventUtils;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.persistance.DataSourceException;
 import com.sk89q.worldguard.bukkit.WorldGuardPlayerListener;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import java.util.List;
@@ -78,9 +79,9 @@ public class CommandHelperListener implements Listener {
      * @param command
      * @return
      */
-    public boolean runAlias(String command, MCPlayer player) {
+    public boolean runAlias(String command, MCPlayer player) throws DataSourceException {
         UserManager um = UserManager.GetUserManager(player.getName());
-        List<Script> scripts = um.getAllScripts();
+        List<Script> scripts = um.getAllScripts(plugin.persistanceNetwork);
 
         return CommandHelperPlugin.getCore().alias(command, player, scripts);
     }

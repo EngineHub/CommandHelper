@@ -3,7 +3,6 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCEntityType;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;

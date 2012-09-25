@@ -14,6 +14,10 @@ import org.yaml.snakeyaml.Yaml;
  */
 @datasource("yml")
 public class YMLDataSource extends StringDataSource{
+	
+	private YMLDataSource(){
+		
+	}
     
     public YMLDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
         super(uri, options);

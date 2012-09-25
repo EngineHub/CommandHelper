@@ -4,9 +4,9 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
@@ -179,7 +179,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             Account ma = GetAccount(this.getName(), t, args);
             return new CDouble(ma.balance(), t);
         }
@@ -216,7 +216,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).set(Static.getNumber(args[1]))){
                 return new CVoid(t);
             } else {
@@ -256,7 +256,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).add(Static.getNumber(args[1]))){
                 return new CVoid(t);
             } else {
@@ -296,7 +296,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).subtract(Static.getNumber(args[1]))){
                 return new CVoid(t);
             } else {
@@ -336,7 +336,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).multiply(Static.getNumber(args[1]))){
                 return new CVoid(t);
             } else {
@@ -376,7 +376,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetAccount(this.getName(), t, args).divide(Static.getNumber(args[1]))){
                 return new CVoid(t);
             } else {
@@ -417,7 +417,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             throw new ConfigRuntimeException("An error occured while trying to remove the player's account, due to"
                     + " this operation being unsupported in Vault. If you want to see this feature supported, "
                     + " contact the authors of Vault!", ExceptionType.PluginInternalException, t);
@@ -460,7 +460,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             return new CDouble(GetBankAccount(this.getName(), t, args).balance(), t);
         }
         
@@ -496,7 +496,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).set(Static.getNumber(args[2]))){
                 return new CVoid(t);
             } else {
@@ -536,7 +536,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).add(Static.getNumber(args[2]))){
                 return new CVoid(t);
             } else {
@@ -576,7 +576,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).subtract(Static.getNumber(args[2]))){
                 return new CVoid(t);
             } else {
@@ -616,7 +616,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).multiply(Static.getNumber(args[2]))){
                 return new CVoid(t);
             } else {
@@ -656,7 +656,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).divide(Static.getNumber(args[2]))){
                 return new CVoid(t);
             } else {
@@ -696,7 +696,7 @@ public class Economy {
             return null;
         }
 
-        public Construct exec(Target t, Env env, Construct... args) throws ConfigRuntimeException {
+        public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
             if(GetBankAccount(this.getName(), t, args).remove()){
                 return new CVoid(t);
             } else {

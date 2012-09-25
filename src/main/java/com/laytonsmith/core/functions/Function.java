@@ -3,12 +3,12 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.Documentation;
-import com.laytonsmith.core.Env;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -37,13 +37,6 @@ public interface Function extends FunctionBase, Documentation {
      */
     public boolean isRestricted();
 
-    /**
-     * Most functions don't care that a construct is a variable, they simply care about the value stored in the variable.
-     * If the function is concerned with the variable listing however, then it has direct access to the variable list for
-     * this command.
-     * @param varList 
-     */
-    //public void varList(IVariableList varList);
     /**
      * If a function doesn't want to have to deal with a variable as a variable, but instead wants to recieve it as
      * an atomic, resolved value, the function can return true from this function. This will signal the interpreter
@@ -79,7 +72,7 @@ public interface Function extends FunctionBase, Documentation {
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(Target t, Env environment, Construct... args) throws ConfigRuntimeException;
+    public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException;
     
     /**
      * If a function needs a code tree instead of a resolved construct, it should return true here. Most
@@ -96,7 +89,7 @@ public interface Function extends FunctionBase, Documentation {
      * @param nodes
      * @return 
      */
-    public Construct execs(Target t, Env env, Script parent, ParseTree ... nodes);    
+    public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
     
     /**
      * If a function can possibly optimize during compilation, this should return true. This is only
