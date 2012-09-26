@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.constructs.*;
@@ -17,7 +16,6 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.profiler.ProfilePoint;
-import com.sk89q.wepif.PermissionsResolverManager;
 import java.util.*;
 
 /**

@@ -10,8 +10,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import static com.laytonsmith.testing.StaticTest.*;
-import com.sk89q.wepif.PermissionsResolverManager;
-import java.io.IOException;
 import org.junit.*;
 import static org.mockito.Mockito.*;
 

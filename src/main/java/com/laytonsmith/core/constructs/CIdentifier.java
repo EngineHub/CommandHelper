@@ -1,6 +1,5 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.ParseTree;
 
 /**

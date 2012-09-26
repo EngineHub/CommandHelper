@@ -2,9 +2,9 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StreamUtils;
+import com.laytonsmith.core.profiler.Profiler;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;

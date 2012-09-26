@@ -1,6 +1,5 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -17,10 +16,10 @@ import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.profiler.ProfilePoint;
+import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.sk89q.util.StringUtil;
-import com.sk89q.wepif.PermissionsResolverManager;
 import java.io.*;
 import java.net.URI;
 import java.util.*;

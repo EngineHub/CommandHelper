@@ -2,7 +2,6 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.NewIVariable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionList;

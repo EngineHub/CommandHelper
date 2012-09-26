@@ -3,7 +3,6 @@ package com.laytonsmith.persistance;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;

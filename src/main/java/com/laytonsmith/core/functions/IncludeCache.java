@@ -4,12 +4,10 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.GenericTreeNode;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Security;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;

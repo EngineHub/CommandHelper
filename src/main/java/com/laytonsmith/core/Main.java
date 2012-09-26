@@ -2,8 +2,6 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.tools.docgen.DocGenUI;
-import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.Util;
 import com.laytonsmith.annotations.api;
@@ -12,6 +10,8 @@ import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.persistance.YMLDataSource;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
+import com.laytonsmith.tools.docgen.DocGen;
+import com.laytonsmith.tools.docgen.DocGenUI;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

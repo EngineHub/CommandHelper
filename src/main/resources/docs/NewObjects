@@ -26,11 +26,11 @@ class A {
         @c++
     }
     
-    public static int function1(int @a){
+    public static int method1(int @a){
         return(@a + 1)
     }
 
-    public function2(int @b){
+    public method2(int @b){
         return(@b + this->@b)
     }
 
@@ -47,12 +47,12 @@ This example will be used in the explanation below.
 An object contains any number of '''members''' and '''methods'''. A member is a 
 variable, and a method is a function. Both members and variables can have various 
 '''modifiers''', which affect behavior in various ways. In the example, you can 
-see that we are defining @b as a member variable, and function1 and function2 
+see that we are defining @b as a member variable, and method1 and method2 
 are methods. The modifiers in use include '''public''', '''static''', '''final''', 
 '''int''', '''protected''' and '''private''' though there are others too. Members 
 are defined in the '''member block''', <code>members{ }</code>. The member block 
 may appear anywhere in the class, but there may be only one block. The rest of 
-the class definition should be function definitions.
+the class definition should be method definitions.
 
 === Basic Type Manipulation ===
 Before moving on to using objects, it is important to understand the type system 
@@ -61,7 +61,7 @@ object type. All objects extend from mixed, and all user defined objects extend
 from Object. "Primitives" are in fact objects, though they are somewhat special, 
 in that they are handled differently internally, but in code, they behave exactly 
 like user defined objects, meaning you can dereference them to access their 
-methods. If a type isn't explicitely specified when defining a variable, it is 
+methods. If a type isn't explicitly specified when defining a variable, it is 
 considered to be mixed, and any value can be put in it. Other than this caveat 
 which makes MethodScript different from other strongly typed languages, it is 
 otherwise a full strongly typed language, meaning types are checked at compile 
@@ -76,23 +76,23 @@ instantiated. To instantiate our object that we defined above, we would use
 the following code:
 
 <pre>
-@A = new A();
+@A = new A()
 </pre>
 
 Now, we can use the '''dereference operator''' to access members or methods in 
 the object, for instance,
 
 <pre>
-msg(@A->function2(2))
+msg(@A->method2(2))
 </pre>
 
-would output 2, since we called the function that returns our input plus @b, 
+would output 2, since we called the method that returns our input plus @b, 
 which in this case is 0.
 
 We can only have one constructor per object, but we can use default parameters, 
-and static methods can be created to fake multiple constructors, which is made 
-easier with the instantiate_unsafe() function (an advanced topic discussed later). 
-The constructor is simply a function that is defined with the same name of the 
+and static methods can be created to fake multiple constructors, or we can use
+type unions. 
+The constructor is simply a method that is defined with the same name of the 
 class, and no return type.
 
 === Inheritance ===
@@ -105,19 +105,19 @@ class B extends A {
     public B(){
         super()
     }
-    public function2(int @b){
+    public method2(int @b){
         return(@b + 3)
     }
 }
 </pre>
 
-In this case, we are extending A, and '''overriding''' function2. In order to 
-override a function, you simply name it the same as the function in the parent 
-class. However, it is important to note that the function signatures must be 
+In this case, we are extending A, and '''overriding''' method2. In order to 
+override a method, you simply name it the same as the method in the parent 
+class. However, it is important to note that the method signatures must be 
 '''type compatible''', that is, it cannot completely redefine the types of the 
 variables that are passed in, but it can use ''more specificity''. For instance, 
-if class A defined the function <code>public f(Object @o)</code> it would be 
-invalid to define in class B the function <code>public f(int @i)</code>, however, 
+if class A defined the method <code>public f(Object @o)</code> it would be 
+invalid to define in class B the method <code>public f(int @i)</code>, however, 
 if class A instead defined f as <code>public f(mixed @o)</code>, it would be 
 valid for B to '''narrow''' the type required. 
 
@@ -157,7 +157,7 @@ class B{
 }
 </pre>
 
- In this example, we have a compile error, because the call to getA() could 
+In this example, we have a compile error, because the call to getA() could 
 potentially call initA(), which manipulates @a, which is a member variable. 
 The reason for this is so that the object is never in an ''inconsistent state'' 
 which could occur if a subclass manipulates members of the parent before it is 
@@ -217,9 +217,12 @@ A::init()
 You do not need to instantiate a class before using a static method. Since a static
 method is essentially a convenient way to namespace a method, or otherwise
 associate it with similar non-static code and it isn't ''really'' part of the class,
-it is not possible to call a static method from an instance. If you are creating
+it is not possible to call a static method by dereferencing an instance. If you are creating
 a pure utility class, that only has methods (no members), then consider using
 a namespace instead.
+
+==== <code>self</code> keyword ====
+The <code>self</code> keyword is 
 
 === Access Modifiers ===
 '''public''', '''private''', and '''protected''' are the three modifiers that 
@@ -238,19 +241,21 @@ class B extends A {
     public B(){
         A::super()
     }
-    public function2(int @b){
-        return(A::super->function2(@b))
+    public method2(int @b){
+        return(A::super->method2(@b))
     }
 }
 </pre>
 
 Note that we are explicitely calling A's constructor with the call to super, 
-and A's function2. If there had been several parents, this could be used to 
+and A's method2. If there had been several parents, this could be used to 
 "un-override" a call, or otherwise explicitely selected a method that had been 
-overriden by multiple children. This is useful outside of diamond inheretance, 
+overriden by multiple children. This is useful outside of diamond inheritance, 
 but is more often used when dealing with multiple inheritance. Note that in the 
 case of super() constructors, it is always an error to cause a child's 
-constructor to be invoked before the parent's constructor.
+constructor to be invoked before the parent's constructor. Calling a parent's
+method is only valid inside the class, an overridden method is not callable
+from outside of the instance.
 
 === Reflection ===
 Using reflection, you are able to access all members and methods reflectively, 
@@ -272,19 +277,24 @@ We can access both the protected and private static variables in the class by
 using the following code:
 
 <pre>
-msg(@a['b'])
+msg(@a['A::b'])
 msg(@a['c'])
 </pre>
+
+If you do not fully qualify a variable name, it is automatically qualified with
+that instance's actual runtime type. So unless you want to actually get a type's
+method without caring precisely which method it will be, consider always fully
+qualifying the variable name. (@a['A::b'] vs @a['b'])
 
 We can change existing variables (or add new ones) with:
 
 <pre>
 @a['A::b'] = 5
 @a['A::c'] = 10
-@a['A::d'] = proc(@a, @b){ return(@a + @b) } #Add a new function
+@a['A::d'] = proc(@a, @b){ return(@a + @b) } #Add a new method
 </pre>
 
-If a function or variable is added with reflection, it will obviously only be 
+If a variable is added with reflection, it will obviously only be 
 accessible through reflection, and it only becomes part of that instance. 
 Changes to static variables or methods are not possible, because static variables
 are not actually a part of that instance. You must use the class reflection methods
@@ -314,26 +324,26 @@ you can use the functions that are provided in the reflection namespace.
 
 Though default inheritance would work in singly inherited classes, it is really
 only useful when dealing with multiple inheritance. In the case where multiple
-objects are inherited from, and each defines their own version of a function,
-it may be useful to inherit the function's behavior from the non-primary inherited
-class. One way to do this would be to override the function yourself, and simply
-delegate behavior to the correct super class's function, for instance:
+objects are inherited from, and each defines their own version of a method,
+it may be useful to inherit the method's behavior from the non-primary inherited
+class. One way to do this would be to override the method yourself, and simply
+delegate behavior to the correct super class's method, for instance:
 
 <pre>
 class A {
-	public mixed function(){
+	public mixed method(){
 		return(1)
 	}
 }
 
 class B {
-	public mixed function(){
+	public mixed method(){
 		return(2)
 	}
 }
 class C extends A, B {
-	public mixed function(){
-		return(B::function())
+	public mixed method(){
+		return(B::method())
 	}
 }
 </pre>
@@ -345,13 +355,13 @@ defining it as such:
 
 <pre>
 class C extends A, B {
-	inherit B::function()
+	inherit B::method()
 }
 </pre>
 
-By default, functions with multiple overrides in parent classes inherit from the
+By default, methods with multiple overrides in parent classes inherit from the
 primary parent, in this case, A, though you can also be explicit and inherit a
-function individually.
+method individually.
 
 === Type Unions ===
 

@@ -15,7 +15,6 @@ import com.laytonsmith.core.functions.Math;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
-import java.io.IOException;
 import org.junit.*;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.verify;

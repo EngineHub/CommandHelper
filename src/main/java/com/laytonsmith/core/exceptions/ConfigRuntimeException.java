@@ -16,7 +16,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.Stack;
-import java.util.logging.Level;
 
 
 /**

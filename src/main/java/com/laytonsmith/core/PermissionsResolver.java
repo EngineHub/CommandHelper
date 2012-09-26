@@ -1,7 +1,5 @@
 package com.laytonsmith.core;
 
-import org.bukkit.material.Tree;
-
 /**
  * A permissions resolver resolves whether a particular user (stored as a string) has
  * various permissions to do certain things, as well as polling for information

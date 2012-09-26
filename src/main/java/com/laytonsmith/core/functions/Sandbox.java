@@ -9,8 +9,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import org.bukkit.event.Cancellable;
 
 /**
@@ -421,6 +419,32 @@ public class Sandbox {
             return CHVersion.V3_3_0;
         }
     }
+	
+	@api public static class moo extends DummyFunction{
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String saying = args[0].val();
+			String divider = "";
+			for(int i = 0; i < saying.length() + 4; i++){
+				divider += "-";
+			}
+			return new CString(divider + "\n"
+				+ "/ " + saying + " /\n" 
+				+ divider + "\n"
+				+ " \\   ^__^\n"
+				+ "  \\  (oo)\\_______\n"
+				+ "     (__)\\       )\\/\\\n"
+				+ "         ||----w |\n"
+				+ "         ||     ||\n", t);
+		}
+		
+	}
 
     
 }

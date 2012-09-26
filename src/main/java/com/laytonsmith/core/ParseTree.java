@@ -19,8 +19,6 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * A parse tree wraps a generic tree node, but provides functions that are commonly used to discover

@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core;
 
-import com.laytonsmith.PureUtilities.Persistance;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;

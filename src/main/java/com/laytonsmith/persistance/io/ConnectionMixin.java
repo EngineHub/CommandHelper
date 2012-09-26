@@ -1,6 +1,5 @@
 package com.laytonsmith.persistance.io;
 
-import com.laytonsmith.PureUtilities.ZipReader;
 import com.laytonsmith.persistance.DataSourceException;
 import com.laytonsmith.persistance.ReadOnlyException;
 import java.io.IOException;

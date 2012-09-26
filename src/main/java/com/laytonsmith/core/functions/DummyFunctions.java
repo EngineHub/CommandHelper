@@ -4,16 +4,6 @@
  */
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.MCPlayer;
-import com.laytonsmith.annotations.api;
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CVoid;
-import com.laytonsmith.core.constructs.Construct;
-import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.sk89q.wepif.PermissionsResolverManager;
-import java.util.Arrays;
-
 /**
  *
  * @author Layton

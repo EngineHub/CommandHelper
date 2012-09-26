@@ -1,6 +1,5 @@
 package com.laytonsmith.core.compiler;
 
-import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Variable;

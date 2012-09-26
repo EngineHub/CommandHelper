@@ -12,7 +12,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
 import static com.laytonsmith.testing.StaticTest.*;
-import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import org.junit.*;
 import static org.junit.Assert.*;

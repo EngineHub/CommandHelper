@@ -3,7 +3,6 @@ package com.laytonsmith.core.environments;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.Procedure;
-import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.events.BoundEvent;
 import java.util.HashMap;
