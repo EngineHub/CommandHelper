@@ -52,6 +52,12 @@ public class StreamUtils {
 	 * @throws UnsupportedEncodingException 
 	 */
 	public static String GetString(InputStream in, String encoding) throws UnsupportedEncodingException{
+		if(encoding == null){
+			encoding = "UTF-8";
+		}
+		if(in == null){
+			throw new NullPointerException();
+		}
 		InputStreamReader input;
 		input = new InputStreamReader(in, encoding);
 		final int CHARS_PER_PAGE = 5000; //counting spaces

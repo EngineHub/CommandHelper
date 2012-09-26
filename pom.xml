@@ -230,6 +230,13 @@
 			<artifactId>snakeyaml</artifactId>
 			<version>1.10</version>
 		</dependency>
+
+		<!-- Apache commons IO -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.4</version>
+		</dependency>
         
 		<!-- Evil-y things (currently not used) -->
 		<!--<dependency>
@@ -400,9 +407,16 @@
 									<include>com.googlecode.json-simple:json-simple:jar:*</include>
 									<include>org.mindrot:jBCrypt:jar:*</include>
 									<include>com.jcraft:jsch:jar:*</include>
+									<include>org.apache.commons:commons-io:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
+								<filter>
+									<artifact>org.apache.commons:commons-io:jar:*</artifact>
+									<includes>
+										<include>org/apache/commons/io/**</include>
+									</includes>
+								</filter>
 								<filter>
 									<artifact>com.sk89q:worldedit:jar:*</artifact>
 									<includes>
@@ -412,7 +426,7 @@
 										<include>com/sk89q/util/**</include>
 										<include>com/sk89q/worldedit/Vector.*</include>
 										<!-- Expression Parser -->
-										<include>com/sk89q/worldedit/expression/**</include>										
+										<include>com/sk89q/worldedit/expression/**</include>
 									</includes>
 									<excludes>
 										<exclude>com/sk89q/jchronic/**</exclude>

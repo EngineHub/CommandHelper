@@ -1,14 +1,9 @@
 package com.laytonsmith.PureUtilities;
 
 import java.io.*;
-import java.nio.ByteBuffer;
-import java.nio.MappedByteBuffer;
-import java.nio.channels.FileChannel;
-import java.nio.channels.FileLock;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 
 /**
  *
@@ -51,11 +46,12 @@ public class FileUtility {
 	}
 
 	public static String read(File f) throws IOException {
-		try {
-			return read(f, "UTF-8");
-		} catch (UnsupportedEncodingException ex) {
-			throw new Error(ex);
-		}
+		return org.apache.commons.io.FileUtils.readFileToString(f, "UTF-8");
+//		try {
+//			return read(f, "UTF-8");
+//		} catch (UnsupportedEncodingException ex) {
+//			throw new Error(ex);
+//		}
 	}
 
 	public static String read(File file, String charset) throws IOException{
@@ -70,25 +66,27 @@ public class FileUtility {
 	 * @throws FileNotFoundException
 	 */
 	public static InputStream readAsStream(File file) throws IOException {
-		try{
-			synchronized (getLock(file)) {
-				RandomAccessFile raf = new RandomAccessFile(file, "rw");
-				FileLock lock = null;
-				try {
-					lock = raf.getChannel().lock();
-					ByteBuffer buffer = ByteBuffer.allocate((int) raf.length());
-					raf.getChannel().read(buffer);
-					return new ByteArrayInputStream(buffer.array());
-				} finally {
-					if (lock != null) {
-						lock.release();
-					}
-					raf.close();
-				}
-			}
-		} finally {
-			freeLock(file);			
-		}
+		byte[] bytes = org.apache.commons.io.FileUtils.readFileToByteArray(file);
+		return new ByteArrayInputStream(bytes);
+//		try{
+//			synchronized (getLock(file)) {
+//				RandomAccessFile raf = new RandomAccessFile(file, "rw");
+//				FileLock lock = null;
+//				try {
+//					lock = raf.getChannel().lock();
+//					ByteBuffer buffer = ByteBuffer.allocate((int) raf.length());
+//					raf.getChannel().read(buffer);
+//					return new ByteArrayInputStream(buffer.array());
+//				} finally {
+//					if (lock != null) {
+//						lock.release();
+//					}
+//					raf.close();
+//				}
+//			}
+//		} finally {
+//			freeLock(file);			
+//		}
 //	    FileInputStream fis = new FileInputStream(f);
 //	    try{
 //		return StreamUtils.GetString(fis, charset);
@@ -136,60 +134,61 @@ public class FileUtility {
 			}
 			file.getAbsoluteFile().createNewFile();
 		}
-		try{
-			synchronized (getLock(file)) {
-				int sleepTime = 0;
-				int sleepTimes = 0;
-				loop: while(true){
-					try {
-						Thread.sleep(sleepTime);
-						sleepTime += 10;
-						sleepTimes++;						
-					} catch (InterruptedException ex) {
-						//
-					}
-					RandomAccessFile raf = new RandomAccessFile(file, "rw");
-					FileLock lock = null;
-					try {
-						lock = raf.getChannel().lock();
-						//Clear out the file
-						if (!append) {
-							raf.getChannel().truncate(0);
-						} else {
-							raf.seek(raf.length());
-						}
-						//Write out the data				
-						MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
-						buf.put(data);
-						buf.force();
-						//We assume it worked at this point, so let's break;
-						break loop;
-						//raf.getChannel().write(ByteBuffer.wrap(data));
-					} catch(IOException e){
-						//If we get this dumb message, we're on windows. We'll try again here shortly,
-						//but we don't want to bother the user with this exception if we can help it.
-						//http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
-						if(!"The requested operation cannot be performed on a file with a user-mapped section open"
-								.equals(e.getMessage())){
-							throw e;
-						}
-						if(sleepTimes > 10){
-							//Eh. Gotta give up some time.
-							throw e;
-						}
-					} finally {
-						if (lock != null) {
-							lock.release();
-						}
-						raf.close();
-						raf = null;
-						System.gc();
-					}
-				}
-			}
-		} finally {
-			freeLock(file);
-		}
+		FileUtils.writeByteArrayToFile(file, data, append);
+//		try{
+//			synchronized (getLock(file)) {
+//				int sleepTime = 0;
+//				int sleepTimes = 0;
+//				loop: while(true){
+//					try {
+//						Thread.sleep(sleepTime);
+//						sleepTime += 10;
+//						sleepTimes++;						
+//					} catch (InterruptedException ex) {
+//						//
+//					}
+//					RandomAccessFile raf = new RandomAccessFile(file, "rw");
+//					FileLock lock = null;
+//					try {
+//						lock = raf.getChannel().lock();
+//						//Clear out the file
+//						if (!append) {
+//							raf.getChannel().truncate(0);
+//						} else {
+//							raf.seek(raf.length());
+//						}
+//						//Write out the data				
+//						MappedByteBuffer buf = raf.getChannel().map(FileChannel.MapMode.READ_WRITE, 0, data.length);
+//						buf.put(data);
+//						buf.force();
+//						//We assume it worked at this point, so let's break;
+//						break loop;
+//						//raf.getChannel().write(ByteBuffer.wrap(data));
+//					} catch(IOException e){
+//						//If we get this dumb message, we're on windows. We'll try again here shortly,
+//						//but we don't want to bother the user with this exception if we can help it.
+//						//http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6354433
+//						if(!"The requested operation cannot be performed on a file with a user-mapped section open"
+//								.equals(e.getMessage())){
+//							throw e;
+//						}
+//						if(sleepTimes > 10){
+//							//Eh. Gotta give up some time.
+//							throw e;
+//						}
+//					} finally {
+//						if (lock != null) {
+//							lock.release();
+//						}
+//						raf.close();
+//						raf = null;
+//						System.gc();
+//					}
+//				}
+//			}
+//		} finally {
+//			freeLock(file);
+//		}
 //        FileWriter fw = new FileWriter(f, append);
 //        fw.write(s);
 //        fw.close();
@@ -286,51 +285,53 @@ public class FileUtility {
 			}
 		}
 
-		FileInputStream from = null;
-		FileOutputStream to = null;
-		try {
-			from = new FileInputStream(fromFile);
-			to = new FileOutputStream(toFile);
-			byte[] buffer = new byte[4096];
-			int bytesRead;
-
-			while ((bytesRead = from.read(buffer)) != -1) {
-				to.write(buffer, 0, bytesRead); // write
-			}
-		} finally {
-			if (from != null) {
-				try {
-					from.close();
-				} catch (IOException e) {
-					;
-				}
-			}
-			if (to != null) {
-				try {
-					to.close();
-				} catch (IOException e) {
-					;
-				}
-			}
-		}
+		FileUtils.copyFile(fromFile, toFile);
+//		FileInputStream from = null;
+//		FileOutputStream to = null;
+//		try {
+//			from = new FileInputStream(fromFile);
+//			to = new FileOutputStream(toFile);
+//			byte[] buffer = new byte[4096];
+//			int bytesRead;
+//
+//			while ((bytesRead = from.read(buffer)) != -1) {
+//				to.write(buffer, 0, bytesRead); // write
+//			}
+//		} finally {
+//			if (from != null) {
+//				try {
+//					from.close();
+//				} catch (IOException e) {
+//					;
+//				}
+//			}
+//			if (to != null) {
+//				try {
+//					to.close();
+//				} catch (IOException e) {
+//					;
+//				}
+//			}
+//		}
 	}
 
 	/**
-	 * Moves a file from one location to another. This is a simple wrapper
-	 * around File.renameTo, but checks for a few conditions that could cause
-	 * the move operation to fail (and hopefully works around them).
+	 * Moves a file from one location to another. Assuming no exception is
+	 * thrown, always returns true.
 	 *
 	 * @param from
 	 * @param to
 	 */
 	public static boolean move(File from, File to) throws IOException {
-		try{
-			synchronized(getLock(to)){
-				return from.renameTo(to);
-			}
-		} finally{
-			freeLock(to);
-		}
+		FileUtils.moveFile(from, to);
+		return true;
+//		try{
+//			synchronized(getLock(to)){
+//				return from.renameTo(to);
+//			}
+//		} finally{
+//			freeLock(to);
+//		}
 	}
 
 	/**
