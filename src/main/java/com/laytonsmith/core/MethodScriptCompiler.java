@@ -1140,6 +1140,13 @@ public final class MethodScriptCompiler {
 		if (tree.getData().val().equals("proc")) {
 			procs.push(new ArrayList<Procedure>());
 		}
+		CFunction cFunction = (CFunction) tree.getData();
+		Function func;
+		try {
+			func = (Function) FunctionList.getFunction(cFunction);
+		} catch (ConfigCompileException e) {
+			func = null;
+		}
 		List<ParseTree> children = tree.getChildren();
 		//Loop through the children, and if any of them are functions that are terminal, truncate.
 		//To explain this further, consider the following:
@@ -1167,11 +1174,21 @@ public final class MethodScriptCompiler {
 		//                      /    \
 		//                     /      \
 		//                 (msg[2]) (msg[3])
+		//We do have to be careful though, because of functions like if, which actually work like this:
+		//if(@var){ die() } else { msg('') }
+		//                (if)
+		//              /  |  \
+		//             /   |   \
+		//          @var (die) (msg)
+		//We can't git rid of the msg() here, because it is actually in another branch.
+		//For the time being, we will simply say that if a function uses execs, it
+		//is a branch (branches always use execs, though using execs doesn't strictly
+		//mean you are a branch type function).
 		
 		outer: for(int i = 0; i < children.size(); i++){
 			ParseTree t = children.get(i);			
 			if(t.getData() instanceof CFunction){
-				if(t.getData().val().startsWith("_")){
+				if(t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())){
 					continue outer;
 				}
 				Function f = (Function)FunctionList.getFunction(t.getData());
@@ -1206,12 +1223,8 @@ public final class MethodScriptCompiler {
 		//In all cases, at this point, we are either unable to optimize, or we will
 		//optimize, so set our optimized variable at this point.
 		tree.setOptimized(true);
-
-		CFunction cFunction = (CFunction) tree.getData();
-		Function func;
-		try {
-			func = (Function) FunctionList.getFunction(cFunction);
-		} catch (ConfigCompileException e) {
+		
+		if(func == null) {
 			//It's a proc call. Let's see if we can optimize it
 			Procedure p = null;
 			//Did you know about this feature in java? I didn't until recently.

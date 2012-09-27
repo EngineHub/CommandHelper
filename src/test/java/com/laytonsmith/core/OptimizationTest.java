@@ -108,6 +108,10 @@ public class OptimizationTest {
 		assertEquals("sconcat(assign(@a,0),ifelse(@a,die(),sconcat(msg('2'),msg('3'))))", optimize("assign(@a, 0) if(@a){ die() msg('1') } else { msg('2') msg('3') }"));
 		assertEquals("die()", optimize("if(true){ die() msg('1') } else { msg('2') msg('3') }"));
 	}
+	
+	@Test public void testUnreachableCodeWithBranchTypeFunction() throws ConfigCompileException{
+		assertEquals("ifelse(@var,die(),msg(''))", optimize("if(@var){ die() } else { msg('') }"));
+	}
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{

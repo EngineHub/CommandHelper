@@ -178,6 +178,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return 
      */
     public static Construct json_decode(String s, Target t) throws MarshalException {
+		if(s == null){
+			return new CNull(t);
+		}
         if (s.startsWith("{")) {
             //Object
             JSONObject obj = (JSONObject) JSONValue.parse(s);
