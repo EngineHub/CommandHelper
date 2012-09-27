@@ -10,6 +10,7 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.*;
 import java.net.URI;
 import java.util.*;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,7 +50,12 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 
 	public SerializedPersistance(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
-		String file = (uri.getHost() == null ? "" : uri.getHost()) + uri.getPath();
+		String file;
+		try {
+			file = getConnectionMixin().getPath();
+		} catch (IOException ex) {
+			throw new DataSourceException(ex.getMessage(), ex);
+		}
 		storageLocation = new File(file);
 		finishedInitializing = true;
 	}
@@ -79,38 +85,44 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	 * @throws Exception
 	 */
 	public void load() throws Exception {
-		try {
 			if (!isLoaded) {
-				FileInputStream fis = null;
-				ObjectInputStream in = null;
-				try{
-					if(!storageLocation.exists()){
-						storageLocation.createNewFile();
+				queue.invokeAndWait(new Callable<Object>(){
+
+					public Object call() throws Exception {
+						try {
+							FileInputStream fis = null;
+							ObjectInputStream in = null;
+							try{
+								if(!storageLocation.exists()){
+									storageLocation.createNewFile();
+								}
+								if(storageLocation.length() == 0){
+									data = new HashMap<String, String>();
+								} else {
+									fis = new FileInputStream(storageLocation);
+									in = new ObjectInputStream(fis);
+									data = (HashMap<String, String>) in.readObject();					
+								}
+								isLoaded = true;
+							} catch(Throwable t){
+								t.printStackTrace();
+							} finally {
+								if(fis != null){
+									fis.close();
+								}
+								if(in != null){
+									in.close();
+								}
+							}
+						} catch (FileNotFoundException ex) {
+							//ignore this one
+						} catch (Exception ex) {
+							throw ex;
+						}
+						return null;
 					}
-					if(storageLocation.length() == 0){
-						data = new HashMap<String, String>();
-					} else {
-						fis = new FileInputStream(storageLocation);
-						in = new ObjectInputStream(fis);
-						data = (HashMap<String, String>) in.readObject();					
-					}
-					isLoaded = true;
-				} catch(Throwable t){
-					t.printStackTrace();
-				} finally {
-					if(fis != null){
-						fis.close();
-					}
-					if(in != null){
-						in.close();
-					}
-				}
+				});
 			}
-		} catch (FileNotFoundException ex) {
-			//ignore this one
-		} catch (Exception ex) {
-			throw ex;
-		}
 	}
 
 	private byte[] byteData = new byte[0];
