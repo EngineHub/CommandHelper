@@ -88,7 +88,7 @@ public class AliasCore {
 	 */
 	public boolean alias(String command, final MCCommandSender player, List<Script> playerCommands) {
 		
-		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver);
+		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver, parent.chDirectory);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(player);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
@@ -235,13 +235,14 @@ public class AliasCore {
 	 */
 	public final void reload(MCPlayer player) {
 		try {
-			CHLog.Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
-			parent.profiler = new Profiler(new File("plugins/CommandHelper/profiler.config"));
+			CHLog.initialize(parent.chDirectory);
+			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
+			parent.profiler = new Profiler(new File(parent.chDirectory, "profiler.config"));
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-			options.setWorkingDirectory(new File("plugins/CommandHelper/"));
-			parent.persistanceNetwork = new PersistanceNetwork(new File("plugins/CommandHelper/persistance.config"), 
-					new URI("sqlite://" + new File("plugins/CommandHelper/persistance.db").getCanonicalPath().replace("\\", "/")), options);
-			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver);
+			options.setWorkingDirectory(parent.chDirectory);
+			parent.persistanceNetwork = new PersistanceNetwork(new File(parent.chDirectory, "persistance.config"), 
+					new URI("sqlite://" + new File(parent.chDirectory, "persistance.db").getCanonicalPath().replace("\\", "/")), options);
+			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver, parent.chDirectory);
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 			cEnv.SetCommandSender(player);
 			Environment env = Environment.createEnvironment(gEnv, cEnv);

@@ -3,6 +3,7 @@ package com.laytonsmith.persistance;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
@@ -16,10 +17,31 @@ import java.util.Map;
  */
 public class DataSourceFactory {
     
+	/**
+	 * Given a connection uri and the connection options, creates and returns
+	 * a new DataSource object, which can be used to do direct operations on
+	 * the data source. Generally, you should go through the PersistanceNetwork class
+	 * to perform operations on the network as a whole, however.
+	 * @param uri The full connection uri
+	 * @param options The connection mixin options
+	 * @return A new DataSource object
+	 * @throws DataSourceException If there is a problem connecting to the data source
+	 * @throws URISyntaxException If the URI is invalid
+	 */
     public static DataSource GetDataSource(String uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException, URISyntaxException{
         return GetDataSource(new URI(uri), options);
     }
     
+	/**
+	 * Given a connection uri and the connection options, creates and returns
+	 * a new DataSource object, which can be used to do direct operations on
+	 * the data source. Generally, you should go through the PersistanceNetwork class
+	 * to perform operations on the network as a whole, however.
+	 * @param uri The full connection uri
+	 * @param options The connection mixin options
+	 * @return A new DataSource object
+	 * @throws DataSourceException If there is a problem connecting to the data source
+	 */
     public static DataSource GetDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException{
         init();
         List<DataSource.DataSourceModifier> modifiers = new ArrayList<DataSource.DataSourceModifier>();
@@ -60,6 +82,13 @@ public class DataSourceFactory {
         }        
     }
     
+	/**
+	 * Given a data source, gets a value from it.
+	 * @param ds
+	 * @param key
+	 * @return
+	 * @throws DataSourceException 
+	 */
     public static String Get(DataSource ds, String [] key) throws DataSourceException{
         if(ds.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)){
             ds.populate();
@@ -67,8 +96,17 @@ public class DataSourceFactory {
         return ds.get(key, false);
     }
     
-    public static void Set(DataSource ds, String [] key, String value){
-        
+	/**
+	 * Given a data source, sets a value in it
+	 * @param ds
+	 * @param key
+	 * @param value
+	 * @throws ReadOnlyException
+	 * @throws DataSourceException
+	 * @throws IOException 
+	 */
+    public static void Set(DataSource ds, String [] key, String value) throws ReadOnlyException, DataSourceException, IOException{
+        ds.set(key, value);
     }
     
     private static Map<String, Class> protocolHandlers;

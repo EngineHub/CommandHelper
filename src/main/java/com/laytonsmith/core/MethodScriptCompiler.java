@@ -4,6 +4,7 @@ import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Compiler;
@@ -1195,7 +1196,7 @@ public final class MethodScriptCompiler {
 				if(f.isTerminal()){
 					if(children.size() > i + 1){
 						//First, a compiler warning
-						CHLog.Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
+						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
 						//Now, truncate the children
 						for(int j = i + 1; j < children.size(); j++){
 							children.remove(j);							
@@ -1390,7 +1391,8 @@ public final class MethodScriptCompiler {
 	}
 
 	public static void registerAutoIncludes(Environment env, Script s) {
-		File auto_include = new File("plugins/CommandHelper/auto_include.ms");
+		File root = env.getEnv(GlobalEnv.class).GetRootFolder();
+		File auto_include = new File(root, "auto_include.ms");
 		if (auto_include.exists()) {
 			MethodScriptCompiler.execute(IncludeCache.get(auto_include, new Target(0, auto_include, 0)), env, null, s);
 		}

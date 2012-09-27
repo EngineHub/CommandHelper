@@ -13,6 +13,8 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Main;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -65,13 +67,16 @@ public class Interpreter {
 	static boolean multilineMode = false;
 	static String script;
 	private static Environment env;
+	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+	private static final File chDirectory = new File(jarLocation, "CommandHelper/");
 
 	public static void start(List<String> args) throws IOException, DataSourceException, URISyntaxException {
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
+		Installer.Install(chDirectory);
+		CHLog.initialize(chDirectory);
+		Prefs.init(new File(chDirectory, "preferences.txt"));
 		//Next, we need to get the "installation location", so we won't spew config files everywhere
-		File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
-		Prefs.init(new File(jarLocation, "CommandHelper/preferences.txt"));
 		env = Static.GenerateStandaloneEnvironment();
 		if (TermColors.SYSTEM == TermColors.SYS.WINDOWS) {
 			TermColors.DisableColors();

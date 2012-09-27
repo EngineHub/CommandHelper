@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -26,9 +27,9 @@ public class Performance {
                 + " allow-profiling option set to true in your preferences file.";
     }
 
-    public static void DoLog(StopWatch stopWatch) {
+    public static void DoLog(File root, StopWatch stopWatch) {
         try {            
-            Static.QuickAppend(Static.profilingLogFile(), "start[" + stopWatch.getStartTime() + "] time[" + stopWatch.getElapsedTime() + "] " 
+            Static.QuickAppend(Static.profilingLogFile(root), "start[" + stopWatch.getStartTime() + "] time[" + stopWatch.getElapsedTime() + "] " 
                     + "tag[" + stopWatch.getTag() + "]\n");
         } catch (IOException ex) {
             Logger.getLogger(Performance.class.getName()).log(Level.SEVERE, null, ex);

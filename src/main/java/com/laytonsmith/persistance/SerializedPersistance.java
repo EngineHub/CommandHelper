@@ -385,16 +385,6 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		}
 	}
 
-	public static void main(String[] args) throws Exception {
-		SerializedPersistance p = new SerializedPersistance(new File("plugins/CommandHelper/persistance.ser"));
-		p.setValue(new String[]{"player", "wraithguard01", "name"}, "wraithguard01");
-		p.setValue(new String[]{"player", "wraithguard01", "age"}, "24");
-		p.setValue(new String[]{"player", "other", "name"}, "other");
-		System.out.println(p.getNamespaceValues(new String[]{"player", "wraithguard01", "age"}));
-		System.out.println();
-		p.save();
-	}
-
 	public List<String[]> keySet() {
 		List<String[]> list = new ArrayList<String[]>();
 		for (String key : data.keySet()) {

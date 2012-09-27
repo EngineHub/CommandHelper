@@ -337,7 +337,7 @@ public class DataSourceFilter {
 				//if there is a tie, it is undefined what will happen. Instead of letting this happen
 				//without a warning, we want to issue a warning, though we will arbitrarily select one.
 				if (dist == lowest) {
-					CHLog.Log(CHLog.Tags.PERSISTANCE, "Two keys equally match for the key \"" + key
+					CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, "Two keys equally match for the key \"" + key
 						+ "\". Both " + original.get(closest) + " and " + original.get(p)
 						+ " match just as well. For the time being, this is an undefined result, but"
 						+ " for this time, " + original.get(closest) + " is being selected.", Target.UNKNOWN);

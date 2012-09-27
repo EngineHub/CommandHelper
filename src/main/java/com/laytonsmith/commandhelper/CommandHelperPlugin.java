@@ -79,6 +79,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public final ExecutionQueue executionQueue = new ExecutionQueue("CommandHelper", "default", uncaughtExceptionHandler);
 	public PermissionsResolver permissionsResolver;
 	public PersistanceNetwork persistanceNetwork;
+	public File chDirectory = new File("plugins/CommandHelper");
 	/**
 	 * Listener for the plugin system.
 	 */
@@ -99,7 +100,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onLoad() {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
-		Installer.Install();
+		Installer.Install(chDirectory);
 	}
 
 	/**
@@ -109,10 +110,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onEnable() {
 		self = this;
 		myServer = StaticLayer.GetServer();
+		CHLog.initialize(chDirectory);
 		try {
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-			options.setWorkingDirectory(new File("CommandHelper/"));
-			persistanceNetwork = new PersistanceNetwork(new File("CommandHelper/persistance.config"), new File("CommandHelper/persistance.db").toURI(), options);
+			options.setWorkingDirectory(chDirectory);
+			persistanceNetwork = new PersistanceNetwork(new File(chDirectory, "persistance.config"), new File(chDirectory, "persistance.db").toURI(), options);
 		} catch (IOException ex) {
 			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
 		} catch (DataSourceException ex) {
@@ -129,7 +131,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		try {
 			//Though the core will reload the preferences for us, we need them now, so we can gather
 			//some information from them.
-			File prefsFile = new File("plugins/CommandHelper/preferences.txt");
+			File prefsFile = new File(chDirectory, "preferences.txt");
 			Prefs.init(prefsFile);
 			if (Prefs.UseColors()) {
 				TermColors.EnableColors();
@@ -144,8 +146,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 				//System.out.flush();
 				System.out.println("\n\n\n" + Static.Logo());
 			}
-			ac = new AliasCore(new File("plugins/CommandHelper/" + script_name), new File("plugins/CommandHelper/LocalPackages"), 
-					prefsFile, new File("plugins/CommandHelper/" + main_file), permissionsResolver, this);
+			ac = new AliasCore(new File(chDirectory, script_name), new File(chDirectory, "LocalPackages"), 
+					prefsFile, new File(chDirectory, main_file), permissionsResolver, this);
 			ac.reload(null);
 		} catch (IOException ex) {
 			Static.getLogger().log(Level.SEVERE, null, ex);

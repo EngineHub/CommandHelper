@@ -522,7 +522,7 @@ public class CArray extends Construct implements ArrayAccess{
             this.associative_array.clear();
             this.associative_array = null;
             this.associative_mode = false;
-            CHLog.Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Attempting to sort an associative array; key values will be lost.", this.getTarget());
+            CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Attempting to sort an associative array; key values will be lost.", this.getTarget());
         }
         Collections.sort(array, new Comparator<Construct>() {
             public int compare(Construct o1, Construct o2) {

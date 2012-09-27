@@ -10,6 +10,7 @@ import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
@@ -184,7 +185,7 @@ public class Debug {
 //        }
 //    }
 
-    @api
+    @api(environments={GlobalEnv.class})
     public static class debug extends AbstractFunction {
 
         public String getName() {
@@ -217,7 +218,7 @@ public class Debug {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             if (Prefs.DebugMode()) {
                 try {
-                    Static.LogDebug(args[0].val());
+                    Static.LogDebug(environment.getEnv(GlobalEnv.class).GetRootFolder(), args[0].val());
                 } catch (IOException ex) {
                     throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
                 }

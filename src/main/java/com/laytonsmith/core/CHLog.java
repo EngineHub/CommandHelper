@@ -65,18 +65,34 @@ public final class CHLog {
         }
     }
     
-    static{
-        initialize();
-    }
+	private static File root = null;
+	private static CHLog instance = null;
     
-    private static void initialize(){
+	public static CHLog GetLogger(){
+		if(root == null){
+			throw new RuntimeException("Logger is not initialized! Call CHLog.initialize before using the logger.");
+		}
+		if(instance == null){
+			instance = new CHLog();
+		}
+		return instance;
+	}
+	
+	/**
+	 * Initializes the logger. This should be called once per JVM invocation.
+	 * Eventually, a new instance of the logger should be created, but until then,
+	 * the static approach is in use.
+	 * @param root 
+	 */
+    public static void initialize(File root){
+		CHLog.root = root;
         List<Preference> prefs = new ArrayList<Preference>();
         for(Tags t : Tags.values()){
             prefs.add(new Preference(t.name, t.level.name(), Preferences.Type.STRING, t.description));
         }
         CHLog.prefs = new Preferences("CommandHelper", Static.getLogger(), prefs, header);
         try{
-            File file = new File(new File("plugins" + File.separator + "CommandHelper" + File.separator + Prefs.DebugLogFile()).getParentFile(), "loggerPreferences.txt");
+            File file = new File(new File(root, Prefs.DebugLogFile()).getParentFile(), "loggerPreferences.txt");
             CHLog.prefs.init(file);
         } catch(IOException e){
             Static.getLogger().log(java.util.logging.Level.SEVERE, "Could not create logger preferences", e);
@@ -108,7 +124,7 @@ public final class CHLog {
      * @param l
      * @return 
      */
-    public static boolean WillLog(Tags tag, LogLevel l){
+    public boolean WillLog(Tags tag, LogLevel l){
         LogLevel level = GetLevel(tag);
         if(level == LogLevel.OFF){
             return false;
@@ -128,7 +144,7 @@ public final class CHLog {
      * would show. If the level was set to VERBOSE, only "An error occured, and here is why" would show.
      * @param messages 
      */
-    public static void LogOne(Tags tag, Target t, MsgBundle ... messages){
+    public void LogOne(Tags tag, Target t, MsgBundle ... messages){
         if(GetLevel(tag) == LogLevel.OFF){
             return; //Bail!
         }
@@ -151,7 +167,7 @@ public final class CHLog {
      * @param tag
      * @param messages 
      */
-    public static void LogAll(Tags tag, Target t, MsgBundle ... messages){
+    public void LogAll(Tags tag, Target t, MsgBundle ... messages){
         if(GetLevel(tag) == LogLevel.OFF){
             return; //For efficiency sake, go ahead and bail.
         }
@@ -165,7 +181,7 @@ public final class CHLog {
      * @param module
      * @param message 
      */
-    public static void Log(Tags module, String message, Target t){
+    public void Log(Tags module, String message, Target t){
         Log(module, LogLevel.ERROR, message, t);
     }
     
@@ -175,7 +191,7 @@ public final class CHLog {
      * @param level
      * @param message 
      */
-    public static void Log(Tags modules, LogLevel level, String message, Target t){
+    public void Log(Tags modules, LogLevel level, String message, Target t){
         LogLevel moduleLevel = GetLevel(modules);
         if(moduleLevel == LogLevel.OFF){
             return; //Bail as quick as we can!
@@ -183,7 +199,7 @@ public final class CHLog {
         if(moduleLevel.level <= level.level){
             //We want to do the log
             try{
-                Static.LogDebug(message + (t!=Target.UNKNOWN?" "+t.toString():""));
+                Static.LogDebug(root, message + (t!=Target.UNKNOWN?" "+t.toString():""));
             } catch(IOException e){
                 //Well, shoot.
                 if(level.level <= 1){

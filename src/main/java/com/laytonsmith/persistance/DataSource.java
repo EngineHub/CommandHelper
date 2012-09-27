@@ -42,6 +42,14 @@ public interface DataSource extends Documentation {
 	public List<String[]> getNamespace(String[] namespace) throws DataSourceException;
 
 	/**
+	 * Retrieves a value from the data source. This should be the same
+	 * as get(key, false), which is generally the default usage.
+	 * @param key
+	 * @return 
+	 */
+	public String get(String[] key) throws DataSourceException;
+	
+	/**
 	 * Retrieves a value from the data source. If bypassTransient is true,
 	 * then this should not re-populate the data (if transient isn't
 	 * inherently an option, that is). This indicates that it is being used
@@ -129,6 +137,7 @@ public interface DataSource extends Documentation {
 	 * @throws DataSourceException 
 	 */
 	public void clearKey(String [] key) throws DataSourceException, ReadOnlyException, IOException;
+
 
 	/**
 	 * These are the valid modifiers for a generic connection. Not all data

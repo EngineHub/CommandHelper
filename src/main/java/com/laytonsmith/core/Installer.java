@@ -20,13 +20,13 @@ public final class Installer {
     
     private Installer(){}
 
-    public static void Install() {
+    public static void Install(File root) {
 		//Make the main folder
-		new File("plugins/CommandHelper").mkdirs();
+		root.mkdirs();
 		//Create the includes folder
-        new File("plugins/CommandHelper/includes").mkdirs();
+        new File(root, "includes").mkdirs();
         //Check to see if the auto_include file exists. If not, include it now
-        File auto_include = new File("plugins/CommandHelper/auto_include.ms");
+        File auto_include = new File(root, "auto_include.ms");
         if(!auto_include.exists()){
             String sample = parseISToString(Installer.class.getResourceAsStream("/samp_auto_include.txt"));
             sample = sample.replaceAll("\n|\r\n", System.getProperty("line.separator"));
@@ -37,14 +37,14 @@ public final class Installer {
             }
         }
 		//Create the local packages folder
-        new File("plugins/CommandHelper/LocalPackages").mkdirs();
+        new File(root, "LocalPackages").mkdirs();
 		try {
 			//Let the profiler get set up
-			Profiler.Install(new File("plugins/CommandHelper/profiler.config"));
+			Profiler.Install(new File(root, "profiler.config"));
 		} catch (IOException ex) {
 			Logger.getLogger(Installer.class.getName()).log(Level.SEVERE, null, ex);
 		}
-		File persistanceNetwork = new File("plugins/CommandHelper/persistance.config");
+		File persistanceNetwork = new File(root, "persistance.config");
 		if(!persistanceNetwork.exists()){
 			try {
 				FileUtility.write(StreamUtils.GetString(Installer.class.getResourceAsStream("/samp_persistance_network.txt"), "UTF-8"), persistanceNetwork, true);

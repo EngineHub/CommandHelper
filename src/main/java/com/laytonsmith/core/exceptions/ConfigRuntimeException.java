@@ -139,7 +139,7 @@ public class ConfigRuntimeException extends RuntimeException {
     private static void React(ConfigRuntimeException e, Reaction r, String optionalMessage){        
         if(r == Reaction.IGNORE){
             //Welp, you heard the man.
-            CHLog.Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
+            CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
         } else if(r == ConfigRuntimeException.Reaction.REPORT){
             ConfigRuntimeException.DoReport(e, optionalMessage);
         } else if(r == ConfigRuntimeException.Reaction.FATAL){
@@ -184,7 +184,7 @@ public class ConfigRuntimeException extends RuntimeException {
         } else {
             t = new Target(ll, ff, cc);
         }        
-        CHLog.Log(exceptionType.equals("COMPILE ERROR")?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, LogLevel.ERROR, plain, t);
+        CHLog.GetLogger().Log(exceptionType.equals("COMPILE ERROR")?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, LogLevel.ERROR, plain, t);
         System.out.println(TermColors.RED + message + formatted 
                 + TermColors.WHITE + " :: " + TermColors.GREEN 
                 + type + TermColors.WHITE + ":" 
@@ -258,7 +258,7 @@ public class ConfigRuntimeException extends RuntimeException {
                 exceptionMessage = MCChatColor.YELLOW + e.getMessage();
             }
             String message = exceptionMessage + MCChatColor.WHITE + optionalMessage;
-            CHLog.Log(CHLog.Tags.GENERAL, LogLevel.WARNING, Static.MCToANSIColors(message) + TermColors.reset(), t);
+            CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, Static.MCToANSIColors(message) + TermColors.reset(), t);
             //Warnings are not shown to players ever
         }
     }

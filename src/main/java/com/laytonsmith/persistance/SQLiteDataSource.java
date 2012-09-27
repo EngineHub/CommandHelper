@@ -124,6 +124,24 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}
 
+	@Override
+	public void clearKey(String[] key) throws ReadOnlyException, DataSourceException, IOException {
+		if(hasKey(key)){
+			try{
+				try{
+					connect();				
+					PreparedStatement statement = connection.prepareStatement("DELETE FROM `" + TABLE_NAME + "` WHERE `" + KEY_COLUMN + "`=?");
+					statement.setString(1, StringUtils.Join(key, "."));
+					statement.executeUpdate();
+				} finally{
+					disconnect();
+				}
+			} catch(Exception e){
+				throw new DataSourceException("Could not clear key in SQLite connection " + path, e);
+			}
+		}
+	}		
+
 	public void populate() throws DataSourceException {
 		//All data is transient
 	}

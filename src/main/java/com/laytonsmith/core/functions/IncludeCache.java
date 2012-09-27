@@ -28,16 +28,16 @@ public class IncludeCache {
     }
     
     public static ParseTree get(File file, Target t){
-        CHLog.Log(TAG, LogLevel.DEBUG, "Loading " + file.getAbsolutePath(), t);
+        CHLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file.getAbsolutePath(), t);
         if(!cache.containsKey(file)){
-            CHLog.Log(TAG, LogLevel.VERBOSE, "Cache does not already contain include file, compiling, then caching.", t);
+            CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Cache does not already contain include file, compiling, then caching.", t);
             //We have to pull the file from the FS, and compile it.
             if(Security.CheckSecurity(file.getAbsolutePath())){
-                CHLog.Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
+                CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
                 try {
                     String s = new ZipReader(file).getFileContents();
                     ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex("g(\n" + s + "\n)", file));
-                    CHLog.Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
+                    CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
                     IncludeCache.add(file, tree);
                 } catch (ConfigCompileException ex) {
                     throw new ConfigRuntimeException("There was a compile error when trying to include the script at " + file
@@ -52,12 +52,12 @@ public class IncludeCache {
                         Exceptions.ExceptionType.SecurityException, t);
             }
         }
-        CHLog.Log(TAG, LogLevel.INFO, "Returning " + file.getAbsolutePath() + " from cache", t);
+        CHLog.GetLogger().Log(TAG, LogLevel.INFO, "Returning " + file.getAbsolutePath() + " from cache", t);
         return cache.get(file);
     }
     
     public static void clearCache(){
-        CHLog.Log(TAG, LogLevel.INFO, "Clearing include cache", Target.UNKNOWN);
+        CHLog.GetLogger().Log(TAG, LogLevel.INFO, "Clearing include cache", Target.UNKNOWN);
         cache.clear();
     }
 }

@@ -54,43 +54,45 @@ public abstract class DB {
         }
 
         private static CConnection ConnectionLookup(String name) throws SQLException {
-            ZipReader zr = new ZipReader(new File("plugins/CommandHelper/Connections/" + name));
-            Properties p = new Properties();
-            try {
-                p.load(zr.getInputStream());
-            }
-            catch (IOException ex) {
-                throw new SQLException(ex.getMessage());
-            }
-            String filePath = zr.getFile().getAbsolutePath();
-            String hostname = p.getProperty("hostname");
-            Integer port;
-            try {
-                String sport = p.getProperty("port", "");
-                if (sport.isEmpty()) {
-                    port = null;
-                } else {
-                    port = Integer.parseInt(sport);
-                    if (port < 1 || port > 65535) {
-                        throw new NumberFormatException();
-                    }
-                }
-            }
-            catch (NumberFormatException e) {
-                throw new SQLException("Could not convert port in " + filePath + " to a number, or the number was less than 1 or greater than 65535");
-            }
-            String username = p.getProperty("username", "");
-            String password = p.getProperty("password", "");
-            if (hostname == null) {
-                throw new SQLException("No hostname provided in " + filePath);
-            }
-            try {
-                SupportedDBConnectors type = SupportedDBConnectors.valueOf(p.getProperty("type").toUpperCase());
-                return new CConnection(type, hostname, port, username, password);
-            }
-            catch (IllegalArgumentException e) {
-                throw new SQLException("Unsupported type " + p.getProperty("type"));
-            }
+			return null;
+			//Don't use the file path directly.
+//            ZipReader zr = new ZipReader(new File("plugins/CommandHelper/Connections/" + name));
+//            Properties p = new Properties();
+//            try {
+//                p.load(zr.getInputStream());
+//            }
+//            catch (IOException ex) {
+//                throw new SQLException(ex.getMessage());
+//            }
+//            String filePath = zr.getFile().getAbsolutePath();
+//            String hostname = p.getProperty("hostname");
+//            Integer port;
+//            try {
+//                String sport = p.getProperty("port", "");
+//                if (sport.isEmpty()) {
+//                    port = null;
+//                } else {
+//                    port = Integer.parseInt(sport);
+//                    if (port < 1 || port > 65535) {
+//                        throw new NumberFormatException();
+//                    }
+//                }
+//            }
+//            catch (NumberFormatException e) {
+//                throw new SQLException("Could not convert port in " + filePath + " to a number, or the number was less than 1 or greater than 65535");
+//            }
+//            String username = p.getProperty("username", "");
+//            String password = p.getProperty("password", "");
+//            if (hostname == null) {
+//                throw new SQLException("No hostname provided in " + filePath);
+//            }
+//            try {
+//                SupportedDBConnectors type = SupportedDBConnectors.valueOf(p.getProperty("type").toUpperCase());
+//                return new CConnection(type, hostname, port, username, password);
+//            }
+//            catch (IllegalArgumentException e) {
+//                throw new SQLException("Unsupported type " + p.getProperty("type"));
+//            }
         }
         SupportedDBConnectors type;
         String hostname;

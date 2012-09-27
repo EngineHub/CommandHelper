@@ -265,8 +265,8 @@ public final class Static {
      * are all created.
      * @return 
      */
-    public static FileWriter debugLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation(Prefs.DebugLogFile());
+    public static FileWriter debugLogFile(File root) throws IOException {
+        String currentFileName = root.getPath() + DateUtil.ParseCalendarNotation(Prefs.DebugLogFile());
         if (!currentFileName.equals(debugLogFileCurrent)) {
             if (debugLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -281,8 +281,8 @@ public final class Static {
     private static String standardLogFileCurrent = null;
     private static FileWriter standardLogFileHandle = null;
 
-    public static FileWriter standardLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation(Prefs.StandardLogFile());
+    public static FileWriter standardLogFile(File root) throws IOException {
+        String currentFileName = root.getPath() + DateUtil.ParseCalendarNotation(Prefs.StandardLogFile());
         if (!currentFileName.equals(standardLogFileCurrent)) {
             if (standardLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -297,8 +297,8 @@ public final class Static {
     private static String profilingLogFileCurrent = null;
     private static FileWriter profilingLogFileHandle = null;
 
-    public static FileWriter profilingLogFile() throws IOException {
-        String currentFileName = "plugins" + File.separator + "CommandHelper" + File.separator + DateUtil.ParseCalendarNotation(Prefs.ProfilingFile());
+    public static FileWriter profilingLogFile(File root) throws IOException {
+        String currentFileName = root.getPath() + DateUtil.ParseCalendarNotation(Prefs.ProfilingFile());
         if (!currentFileName.equals(profilingLogFileCurrent)) {
             if (profilingLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -614,12 +614,12 @@ public final class Static {
         return System.getProperty("line.separator");
     }
 
-    public static synchronized void LogDebug(String message) throws IOException {
+    public static synchronized void LogDebug(File root, String message) throws IOException {
         if (Debug.LOG_TO_SCREEN) {
             Static.getLogger().log(Level.INFO, message);
         }
         String timestamp = DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
-        QuickAppend(Static.debugLogFile(), timestamp + message + Static.LF());
+        QuickAppend(Static.debugLogFile(root), timestamp + message + Static.LF());
     }
 
     public static void QuickAppend(FileWriter f, String message) throws IOException {
@@ -805,9 +805,27 @@ public final class Static {
 		}
 	}
 	
+	/**
+	 * Generates a new environment, assuming that the jar has a folder next to it named CommandHelper, and that
+	 * folder is the root.
+	 * @return
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException 
+	 */
 	public static Environment GenerateStandaloneEnvironment() throws IOException, DataSourceException, URISyntaxException{
 		return GenerateStandaloneEnvironment(new PermissionsResolver.PermissiveResolver());
 	}
+	
+	/**
+	 * Generates a new environment, using the permissions resolver given. It is assumed that the jar has a folder
+	 * next to it named CommandHelper, and that folder is the root.
+	 * @param permissionsResolver
+	 * @return
+	 * @throws IOException
+	 * @throws DataSourceException
+	 * @throws URISyntaxException 
+	 */
 	public static Environment GenerateStandaloneEnvironment(PermissionsResolver permissionsResolver) throws IOException, DataSourceException, URISyntaxException{
 		File jarLocation;
 		if(Static.class.getProtectionDomain().getCodeSource().getLocation() != null){
@@ -820,7 +838,7 @@ public final class Static {
 		PersistanceNetwork persistanceNetwork = new PersistanceNetwork(new File(jarLocation, "CommandHelper/persistance.config"), 
 				new URI("sqlite://" + new File(jarLocation, "CommandHelper/persistance.db").getCanonicalPath().replace("\\", "/")), options);
 		GlobalEnv gEnv = new GlobalEnv(new ExecutionQueue("MethodScript", "default"), 
-				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, permissionsResolver);
+				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, permissionsResolver, new File(jarLocation, "CommandHelper/"));
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
 }

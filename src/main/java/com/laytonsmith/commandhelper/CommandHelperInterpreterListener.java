@@ -117,7 +117,7 @@ public class CommandHelperInterpreterListener implements Listener {
         List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
         ParseTree tree = MethodScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
-		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistanceNetwork, plugin.permissionsResolver);
+		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistanceNetwork, plugin.permissionsResolver, plugin.chDirectory);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
         cEnv.SetPlayer(p);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);

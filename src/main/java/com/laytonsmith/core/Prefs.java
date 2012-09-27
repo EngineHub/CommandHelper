@@ -16,13 +16,8 @@ public final class Prefs {
     
     private static Object pref(PNames name){
         if(prefs == null){
-            //Uh oh. Default!
-            try {
-                Prefs.init(new File("plugins/CommandHelper/preferences.txt"));
-            } catch (IOException ex) {
-                //Well. We tried.
-                Logger.getLogger(Prefs.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            //Uh oh.
+            throw new Error("Preferences have not been initialized!");
         }
         return prefs.getPreference(name.config());
     }

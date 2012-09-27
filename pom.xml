@@ -408,9 +408,18 @@
 									<include>org.mindrot:jBCrypt:jar:*</include>
 									<include>com.jcraft:jsch:jar:*</include>
 									<include>org.apache.commons:commons-io:jar:*</include>
+									<include>org.xerial:sqlite-jdbc:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
+								<filter>
+									<artifact>org.xerial:sqlite-jdbc:jar:*</artifact>
+									<includes>
+										<include>native/**</include>
+										<include>org/ibex/**</include>
+										<include>org/sqlite/**</include>
+									</includes>
+								</filter>
 								<filter>
 									<artifact>org.apache.commons:commons-io:jar:*</artifact>
 									<includes>

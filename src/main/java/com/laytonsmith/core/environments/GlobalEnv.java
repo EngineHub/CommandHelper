@@ -7,6 +7,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.PersistanceNetwork;
+import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -25,12 +26,14 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private Map<String, Boolean> flags = new HashMap<String, Boolean>();
 	private Map<String, Object> custom = new HashMap<String, Object>();
 	private Script script = null;
+	private File root;
 
-	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistanceNetwork network, PermissionsResolver resolver) {
+	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistanceNetwork network, PermissionsResolver resolver, File root) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
 		Static.AssertNonNull(profiler, "Profiler cannot be null");
 		Static.AssertNonNull(network, "PersistanceNetwork cannot be null");
 		Static.AssertNonNull(resolver, "PermissionsResolver cannot be null");
+		Static.AssertNonNull(root, "Root file cannot be null");
 		this.executionQueue = queue;
 		this.profiler = profiler;
 		this.persistanceNetwork = network;
@@ -128,5 +131,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public EnvironmentImpl clone() throws CloneNotSupportedException {
 		GlobalEnv clone = (GlobalEnv)super.clone();
 		return clone;
+	}
+
+	public File GetRootFolder() {
+		return root;
 	}
 }

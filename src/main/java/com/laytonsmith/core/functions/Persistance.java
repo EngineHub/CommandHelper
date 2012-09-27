@@ -86,7 +86,7 @@ public class Persistance {
 							ExceptionType.FormatException, t);
 				}
 			}
-			CHLog.Log(CHLog.Tags.PERSISTANCE, "Storing: " + key + " -> " + value, t);
+			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, "Storing: " + key + " -> " + value, t);
 			try {
 				env.getEnv(GlobalEnv.class).GetPersistanceNetwork().set(new String[]{"storage", key}, value);
 			} catch (Exception ex) {
@@ -138,7 +138,7 @@ public class Persistance {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			Object o;
 			String namespace = GetNamespace(args, null, getName(), t);
-			CHLog.Log(CHLog.Tags.PERSISTANCE, "Getting value: " + namespace, t);
+			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, "Getting value: " + namespace, t);
 			try {
 				Object obj;
 				try {
@@ -209,7 +209,7 @@ public class Persistance {
 			List<String> keyChain = new ArrayList<String>();
 			keyChain.add("storage");
 			String namespace = GetNamespace(args, null, getName(), t);
-			CHLog.Log(CHLog.Tags.PERSISTANCE, "Getting all values from " + namespace, t);
+			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, "Getting all values from " + namespace, t);
 			keyChain.addAll(Arrays.asList(namespace.split("\\.")));
 			Map<String[], String> list;
 			try {
@@ -218,7 +218,7 @@ public class Persistance {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 			}
 			CArray ca = new CArray(t);
-			CHLog.Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
+			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
 			for (String[] e : list.keySet()) {
 				try {
 					String key = StringUtils.Join(e, ".").replaceFirst("storage\\.", ""); //Get that junk out of here
@@ -319,7 +319,7 @@ public class Persistance {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String namespace = GetNamespace(args, null, getName(), t);
-			CHLog.Log(CHLog.Tags.PERSISTANCE, "Clearing value: " + namespace, t);
+			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, "Clearing value: " + namespace, t);
 			try {
 				environment.getEnv(GlobalEnv.class).GetPersistanceNetwork().set(new String[]{"storage", namespace}, null);
 			} catch (DataSourceException ex) {

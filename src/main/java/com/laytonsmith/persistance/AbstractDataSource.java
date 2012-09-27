@@ -53,6 +53,10 @@ public abstract class AbstractDataSource implements DataSource {
 		return connectionMixin;
 	}
 
+	public String get(String[] key) throws DataSourceException {
+		return get(key, false);
+	}		
+
 	/**
 	 * The default implementation of string simply walks through keySet, and
 	 * manually joins the keys together. If an implementation can provide a
