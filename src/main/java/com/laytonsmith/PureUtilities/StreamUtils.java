@@ -1,11 +1,14 @@
 package com.laytonsmith.PureUtilities;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Streams are hard sometimes. This class abstracts most of the functionality
@@ -59,7 +62,7 @@ public class StreamUtils {
 			throw new NullPointerException();
 		}
 		InputStreamReader input;
-		input = new InputStreamReader(in, encoding);
+		input = new InputStreamReader(new BufferedInputStream(in), encoding);
 		final int CHARS_PER_PAGE = 5000; //counting spaces
 		final char[] buffer = new char[CHARS_PER_PAGE];
 		StringBuilder output = new StringBuilder(CHARS_PER_PAGE);
@@ -73,6 +76,16 @@ public class StreamUtils {
 
 		return output.toString();
 
+	}
+	
+	public static byte[] GetBytes(InputStream in) throws IOException {
+		BufferedInputStream bis = new BufferedInputStream(in);
+		List<Byte> bytes = new ArrayList<Byte>();
+		int i;
+		while((i = bis.read()) != -1){
+			bytes.add(((byte)i));
+		}
+		return ArrayUtils.unbox(bytes.toArray(new Byte[bytes.size()]));
 	}
 	
 	/**
