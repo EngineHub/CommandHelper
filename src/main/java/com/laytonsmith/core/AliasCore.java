@@ -242,7 +242,8 @@ public class AliasCore {
 			options.setWorkingDirectory(parent.chDirectory);
 			parent.persistanceNetwork = new PersistanceNetwork(new File(parent.chDirectory, "persistance.config"), 
 					new URI("sqlite://" + new File(parent.chDirectory, "persistance.db").getCanonicalPath().replace("\\", "/")), options);
-			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver, parent.chDirectory);
+			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver, 
+					parent.chDirectory);
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 			cEnv.SetCommandSender(player);
 			Environment env = Environment.createEnvironment(gEnv, cEnv);

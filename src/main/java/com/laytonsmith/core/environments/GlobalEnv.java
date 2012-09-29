@@ -38,6 +38,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		this.profiler = profiler;
 		this.persistanceNetwork = network;
 		this.permissionsResolver = resolver;
+		this.root = root;
 	}
 
 	public ExecutionQueue GetExecutionQueue() {
