@@ -110,6 +110,11 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onEnable() {
 		self = this;
 		myServer = StaticLayer.GetServer();
+		try {
+			Prefs.init(new File(chDirectory, "preferences.txt"));
+		} catch (IOException ex) {
+			Logger.getLogger(CommandHelperPlugin.class.getName()).log(Level.SEVERE, null, ex);
+		}
 		CHLog.initialize(chDirectory);
 		try {
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();

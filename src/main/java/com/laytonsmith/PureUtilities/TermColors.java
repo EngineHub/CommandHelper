@@ -106,6 +106,8 @@ public final class TermColors {
     @color public static String STRIKE = special("strike");
     @color public static String UNDERLINE = special("underline");
     @color public static String ITALIC = special("italic");
+	
+	@color public static String RESET = special("reset");
     
     private static Map<String, String> defaults = new HashMap<String, String>();
     private static List<Field> fields = null;
@@ -174,14 +176,18 @@ public final class TermColors {
                 return "\033[3m";
             }
         }
+		if(type.equals("reset")){
+			return "\033[0m";
+		}
         return "";
     }
     
     public static String reset(){
-        if(SYSTEM.equals(SYS.WINDOWS)){
-            return ""; //lol, it's already reset
-        }
-        return "\033[0m";
+		return RESET;
+//        if(SYSTEM.equals(SYS.WINDOWS)){
+//            return ""; //lol, it's already reset
+//        }
+//        return "\033[0m";
     }
     /**
      * Returns the specified color code, foreground, and dark.
@@ -255,6 +261,8 @@ public final class TermColors {
 	static{
 		if(SYSTEM == SYS.WINDOWS){
 			DisableColors();
+		} else {
+			EnableColors();
 		}
 	}
 }

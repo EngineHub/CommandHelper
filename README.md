@@ -14,7 +14,10 @@ simply run:
     mvn clean package install
     
 Maven will automatically download dependencies for you. Note: For that to work,
-be sure to add Maven to your "PATH".
+be sure to add Maven to your "PATH". If you get a message about tests failing,
+try running:
+	
+	mvn -Pprovisional-build clean package install
 
 Contributing
 ------------
