@@ -28,6 +28,7 @@ public class DataHandlingTest {
     com.laytonsmith.core.environments.Environment env;
 
     public DataHandlingTest() throws Exception{
+		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
     }
 

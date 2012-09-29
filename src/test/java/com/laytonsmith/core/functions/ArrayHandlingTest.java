@@ -31,6 +31,7 @@ public class ArrayHandlingTest {
     com.laytonsmith.core.environments.Environment env;
 
     public ArrayHandlingTest() throws Exception {
+		StaticTest.InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
     }
 

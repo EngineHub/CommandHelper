@@ -82,7 +82,7 @@ public final class CHLog {
 	 * Initializes the logger. This should be called once per JVM invocation.
 	 * Eventually, a new instance of the logger should be created, but until then,
 	 * the static approach is in use.
-	 * @param root 
+	 * @param root The root 
 	 */
     public static void initialize(File root){
 		CHLog.root = root;

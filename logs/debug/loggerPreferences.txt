@@ -1,0 +1,41 @@
+#This file is generated automatically. Changes made to the values of this file
+#will persist, but changes to comments will not.
+
+#  The logger preferences allow you to granularly define what information
+#  is written out to file, to assist you in debugging or general logging.
+#  You may set the granularity of all the tags individually, to any one of
+#  the following values:
+#  OFF - Turns off all logging for this module.
+#  ON - Synonym for ERRORS
+#  
+#  ERROR - Logs errors, or other high importance messages.
+#  WARNING - Logs warnings and above.
+#  INFO - Logs informational notices, and above.
+#  DEBUG - Logs useful debugging information, and above.
+#  VERBOSE - Logs every little detail.
+#  
+#  
+#  In many cases, components will only use the ERROR level, therefore, ON is a synonym.
+#  However, in some cases, a component may give you more information if you set it lower.
+
+#Logs when any persistance actions occur.
+persistance=OFF
+
+#Shows deprecation warnings
+deprecation=WARNING
+
+#Logs runtime errors, (exceptions that bubble all the way to the top)
+runtime=ERROR
+
+#Logs compiler errors (but not runtime errors)
+compiler=ERROR
+
+#Logs what file is requested when include() is used
+includes=OFF
+
+#Functions in the meta class use this tag
+meta=OFF
+
+#Anything that doesn't fit in a more specific category is logged here.
+general=ERROR
+

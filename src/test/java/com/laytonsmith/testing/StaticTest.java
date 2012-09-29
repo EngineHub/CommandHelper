@@ -22,10 +22,13 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.MalformedURLException;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -516,6 +519,12 @@ public class StaticTest {
         fakeCore.autoIncludes = new ArrayList<File>();
 		SetPrivate(CommandHelperPlugin.class, "ac", fakeCore, AliasCore.class);       
        frontendInstalled = true;
+		try {
+			Prefs.init(new File("preferences.txt"));
+		} catch (IOException ex) {
+			Logger.getLogger(StaticTest.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		CHLog.initialize(new File("."));
     }
     
     /**

@@ -39,6 +39,7 @@ public class MethodScriptCompilerTest {
     com.laytonsmith.core.environments.Environment env;
 
     public MethodScriptCompilerTest() {
+		StaticTest.InstallFakeServerFrontend();
     }
 
     @BeforeClass
