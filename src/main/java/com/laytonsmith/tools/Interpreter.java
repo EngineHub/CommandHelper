@@ -75,8 +75,8 @@ public class Interpreter {
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
 		Installer.Install(chDirectory);
-		CHLog.initialize(chDirectory);
 		Prefs.init(new File(chDirectory, "preferences.txt"));
+		CHLog.initialize(chDirectory);
 		//Next, we need to get the "installation location", so we won't spew config files everywhere
 		env = Static.GenerateStandaloneEnvironment();
 		if (TermColors.SYSTEM == TermColors.SYS.WINDOWS) {
