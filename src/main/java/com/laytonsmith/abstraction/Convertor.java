@@ -48,5 +48,21 @@ public interface Convertor {
     public int SetFutureRepeater(long ms, long initialDelay, Runnable r);
 
     public MCEntity GetCorrectEntity(MCEntity e);
+	
+	/**
+	 * Gets the inventory of the specified entity, or null if the entity id
+	 * is invalid
+	 * @param entityID
+	 * @return 
+	 */
+	public MCInventory GetEntityInventory(int entityID);
+	
+	/**
+	 * Returns the inventory of the block at the specified location, if it is
+	 * an inventory type block, or null if otherwise invalid.
+	 * @param location
+	 * @return 
+	 */
+	public MCInventory GetLocationInventory(MCLocation location);
     
 }

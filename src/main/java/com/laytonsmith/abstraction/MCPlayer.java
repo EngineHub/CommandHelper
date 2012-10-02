@@ -28,7 +28,7 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     
     public int getFoodLevel();
     
-    public MCInventory getInventory();
+    public MCPlayerInventory getInventory();
     
     public MCItemStack getItemAt(Construct construct);
     

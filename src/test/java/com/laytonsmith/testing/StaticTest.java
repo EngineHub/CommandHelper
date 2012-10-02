@@ -621,6 +621,14 @@ public class StaticTest {
         public MCEntity GetCorrectEntity(MCEntity e) {
             return e;
         }
+
+		public MCInventory GetEntityInventory(int entityID) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public MCInventory GetLocationInventory(MCLocation location) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
         
     }
     
