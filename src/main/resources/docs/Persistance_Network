@@ -144,7 +144,7 @@ paths are relative to the configuration file itself.
 #Lines starting with # are considered comments
 
 #These are our aliases
-$mysql=mysql://root:password@localhost/database/table
+$sqlite=sqlite://persistance.db
 $sp=ser://persistance.ser
 $remote=transient:readonly:http:yml://www.example.com/data.yml
 
@@ -152,12 +152,35 @@ $remote=transient:readonly:http:yml://www.example.com/data.yml
 **=$sp
 
 #User based settings should be stored in the database
-storage.players.**=$mysql
+storage.players.**=$sqlite
 
 #Assuming the page at www.example.com/data.yml was serving a yml file
 #that got server information, we might map that accordingly
 storage.server_info.**=$remote
 
 </pre>
+
+So, now, let's go over what would happen when we run our code.
+
+<pre>
+#First call
+store_value('server_info.start_time', time())
+...
+#Second call
+store_value('players.' . player() . 'info', pinfo())
+...
+#Third call
+store_value('other.data', 12345)
+</pre>
+
+The first call would fail, because we are trying to write to a readonly connection.
+
+The second call would store the data in the SQLite database, stored in the file persistance.db.
+The key will be the full key 'players.player.info' though, it does not presume that the file is
+inherently aware of the key prefix, even if it is unique to this file.
+
+The third call will store the data in persistance.ser, in the Serialized Persistance format.
+Notice that our code doesn't care at all where data is actually being stored, or in what format,
+it is a transparent routing layer on top of the global key=>value storage system.
 
 {{LearningTrail}}

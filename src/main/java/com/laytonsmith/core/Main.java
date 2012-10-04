@@ -3,8 +3,13 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionBase;
+import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistance.DataSource;
 import com.laytonsmith.persistance.SerializedPersistance;
 import com.laytonsmith.persistance.YMLDataSource;
@@ -51,6 +56,7 @@ public class Main {
                     .addArgument("syntax", ArgumentParser.Type.ARRAY_OF_STRINGS, "Generates the syntax highlighter for the specified editor (if available).\n"
                     + "Don't specify a type to see the available options.", "type", false)
 					.addFlag("docgen", "Starts the automatic wiki uploader.")
+					.addArgument("api", ArgumentParser.Type.STRING, "Prints documentation for the function specified, then exits.", "function", false)
             ;
             ArgumentParser.ArgumentParserResults switches = argParser.match(args);            
             
@@ -161,6 +167,32 @@ public class Main {
 //                    
 //                    return;
             }
+			String function = switches.getStringArgument("api");
+			if(function != null){
+				if("".equals(function)){
+					System.err.println("Usage: java -jar CommandHelper.jar --api <function name>");
+					System.exit(1);
+				}
+				FunctionBase f;
+				try{
+					f = FunctionList.getFunction(function);
+				} catch(ConfigCompileException e){					
+					System.err.println("The function '" + function + "' was not found.");
+					System.exit(1);
+					throw new Error();
+				}
+				DocGen.DocInfo di = new DocGen.DocInfo(f.docs());
+				String ret = di.ret.replaceAll("</?[a-z].*?>", "");
+				String args2 = di.args.replaceAll("</?[a-z].*?>", "");
+				String desc = (di.desc + (di.extendedDesc!=null?"\n\n"+di.extendedDesc:"")).replaceAll("</?[a-z].*?>", "");
+				System.out.println(StringUtils.Join(new String[]{
+					function, 
+					"Returns " + ret,
+					"Expects " + args2,
+					desc
+				}, " // "));
+				System.exit(0);
+			}
             List<String> syntax = switches.getStringListArgument("syntax");
             if(syntax != null){
                 String type = (syntax.size()>=1?syntax.get(0):null);

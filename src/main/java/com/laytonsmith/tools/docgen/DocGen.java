@@ -114,6 +114,14 @@ public class DocGen {
 		}
 	}
 
+	/**
+	 * Returns the documentation for a single function.
+	 * @param type The type of output to use. May be one of: html, wiki, text
+	 * @param platform The platform we're using
+	 * @param staged Is this for the staged wiki?
+	 * @return
+	 * @throws ConfigCompileException 
+	 */
     public static String functions(String type, api.Platforms platform, boolean staged) throws ConfigCompileException {
         List<FunctionBase> functions = FunctionList.getFunctionList(platform);
         HashMap<Class, ArrayList<FunctionBase>> functionlist = new HashMap<Class, ArrayList<FunctionBase>>();
