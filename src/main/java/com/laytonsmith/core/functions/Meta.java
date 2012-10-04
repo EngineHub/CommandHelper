@@ -14,6 +14,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistance.DataSourceException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -557,5 +558,71 @@ public class Meta {
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
+	}
+	
+	private static class CommandSenderIntercepter implements InvocationHandler{
+		MCCommandSender sender;
+		StringBuilder buffer;
+		public CommandSenderIntercepter(MCCommandSender sender){
+			this.sender = sender;
+			buffer = new StringBuilder();
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {	
+			if("sendMessage".equals(method.getName())){
+				buffer.append(args[0].toString());
+				return Void.TYPE;
+			} else {
+				return method.invoke(sender, args);
+			}
+		}
+		
+		public String getBuffer(){
+			return buffer.toString();
+		}
+	}
+	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
+	public static class capture_runas extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCCommandSender oldCommandSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(oldCommandSender);
+			MCCommandSender newCommandSender = (MCCommandSender) Proxy.newProxyInstance(Meta.class.getClassLoader(), new Class[]{MCCommandSender.class}, intercepter);
+			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(newCommandSender);
+			new runas().exec(t, environment, args);
+			return new CString(intercepter.getBuffer(), t);
+		}
+
+		public String getName() {
+			return "capture_runas";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "string {[player], command} Works like runas, except any messages sent to the command sender during command execution are attempted to be"
+					+ " intercepted, and are then returned as a string, instead of being sent to the command sender. Note that this is VERY easy"
+					+ " for plugins to get around in such a way that this function will not work, this is NOT a bug in CommandHelper, nor is it necessarily"
+					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }
