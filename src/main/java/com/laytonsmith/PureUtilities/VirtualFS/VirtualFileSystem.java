@@ -13,7 +13,7 @@ import org.apache.commons.io.FileUtils;
  * <p>
  * A virtual file system allows for strict control over a corresponding
  * real file system. Reads and writes from the file system can be granularly controlled
- * by a configuration, and things like file quotas, file creation, and things can
+ * by a configuration, and things like file system quotas, file creation, and things can
  * be restricted. All files in the virtual file system map to a real file, but where
  * exactly on the real file system that is, is not exposed to the API user. Reads
  * and writes will not be allowed outside of the root file system, so to delete a
@@ -24,11 +24,10 @@ import org.apache.commons.io.FileUtils;
  * 
  * <p>
  * All accesses can be controlled on a per file or per directory basis, and limits
- * can be placed on individual file sizes, folder sizes, folder depth, or total file
- * system size.
+ * can be placed on folder depth, or total file system size.
  * 
  * <p>
- * The file system (or parts of it) can also be <em>cordoned off</em>, meaning that the
+ * The file system as a whole can also be <em>cordoned off</em>, meaning that the
  * files that are created by outside processes don't appear as part of the virtual
  * file system. In this case, a virtual manifest will used to determine which files are actually
  * in the virtual file system. Reads and writes to files not in this manifest will

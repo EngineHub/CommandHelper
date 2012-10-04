@@ -8,12 +8,14 @@ import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
+import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import java.util.ArrayList;
 import java.util.Collection;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
+import org.bukkit.block.CreatureSpawner;
 import org.bukkit.block.Sign;
 import org.bukkit.inventory.ItemStack;
 
@@ -50,6 +52,9 @@ public class BukkitMCBlock implements MCBlock{
         if(b.getState() == null){
             return null;
         }
+		if(b.getState() instanceof CreatureSpawner){
+			return new BukkitMCCreatureSpawner((CreatureSpawner)b.getState());
+		}
         return new BukkitMCBlockState(b.getState());
     }
 
@@ -99,6 +104,12 @@ public class BukkitMCBlock implements MCBlock{
         }
         return collection;
     }
+
+	@Override
+	public String toString() {
+		return b.toString();
+	}
     
+	
     
 }

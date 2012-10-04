@@ -878,4 +878,104 @@ public class Minecraft {
 			return co;
 		}
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_spawner_type extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null){
+				w = p.getWorld();
+			}
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			
+			if(location.getBlock().getState() instanceof MCCreatureSpawner){
+				String type = ((MCCreatureSpawner)location.getBlock().getState()).getSpawnedType().name();
+				return new CString(type, t);
+			} else {
+				throw new Exceptions.FormatException("The block at " + location.toString() + " is not a spawner block", t);
+			}
+		}
+
+		public String getName() {
+			return "get_spawner_type";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "string {locationArray} Gets the spawner type of the specified mob spawner. ----"
+					+ " Valid types will be one of the mob types.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class set_spawner_type extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null){
+				w = p.getWorld();
+			}
+			MCLocation location = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			MCEntityType type = MCEntityType.valueOf(args[1].val().toUpperCase());
+			if(location.getBlock().getState() instanceof MCCreatureSpawner){
+				((MCCreatureSpawner)location.getBlock().getState()).setSpawnedType(type);
+				return new CVoid(t);
+			} else {
+				throw new Exceptions.FormatException("The block at " + location.toString() + " is not a spawner block", t);
+			}
+		}
+
+		public String getName() {
+			return "set_spawner_type";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "void {locationArray, type} Sets the mod spawner type at the location specified. If the location is not a mob spawner,"
+					+ " or if the type is invalid, a FormatException is thrown.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }

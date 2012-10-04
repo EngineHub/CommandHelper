@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
@@ -7,6 +8,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
@@ -99,7 +101,7 @@ public class InventoryManagement {
             if(slot == null){
                 return ObjectGenerator.GetGenerator().item(m.getItemInHand(), t);
             }
-            MCInventory inv = m.getInventory();
+            MCPlayerInventory inv = m.getInventory();
             if(slot.equals(36)){
                 slot = 100;
             }
@@ -276,7 +278,7 @@ public class InventoryManagement {
                 item = args[1].val();
             }
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
-            MCInventory inv = p.getInventory();
+            MCPlayerInventory inv = p.getInventory();
             int total = 0;
             for(int i = 0; i < 36; i++){
                 MCItemStack iis = inv.getItem(i);
@@ -345,7 +347,7 @@ public class InventoryManagement {
                 item = args[1].val();
             }
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
-            MCInventory inv = p.getInventory();
+            MCPlayerInventory inv = p.getInventory();
             CArray ca = new CArray(t);
             for(int i = 0; i < 36; i++){
                 if(match(is, inv.getItem(i))){
@@ -422,7 +424,7 @@ public class InventoryManagement {
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
-            MCInventory inv = p.getInventory();
+            MCPlayerInventory inv = p.getInventory();
             for(int i = 0; i < 36; i++){
                 MCItemStack iis = inv.getItem(i);
                 if(remaining <= 0){
@@ -509,7 +511,7 @@ public class InventoryManagement {
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
-            MCInventory inv = p.getInventory();
+            MCPlayerInventory inv = p.getInventory();
             for(int i = 35; i >= 0; i--){
                 MCItemStack iis = inv.getItem(i);
                 if(remaining <= 0){
@@ -540,6 +542,218 @@ public class InventoryManagement {
         }
         
     }
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_inventory_item extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null){
+				w = p.getWorld();
+			}
+			
+			MCInventory inv = GetInventory(args[0], w, t);			
+			int slot = (int)Static.getInt(args[1]);
+			try{
+				MCItemStack is = inv.getItem(slot);
+				return ObjectGenerator.GetGenerator().item(is, t);
+			} catch(ArrayIndexOutOfBoundsException e){
+				throw new Exceptions.RangeException("Index out of bounds for the inventory type.", t);
+			}
+		}
+
+		public String getName() {
+			return "get_inventory_item";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "array {entityID, slotNumber | locationArray, slotNumber} If a number is provided, it is assumed to be an entity, and if the entity supports"
+					+ " inventories, it will be valid. Otherwise, if a location array is provided, it is assumed to be a block (chest, brewer, etc)"
+					+ " and interpreted thusly. Depending on the inventory type, the max index will vary. If the index is too large, a RangeException is thrown,"
+					+ " otherwise, the item at that location is returned as an item array, or null, if no item is there. You can determine the inventory type"
+					+ " (and thus the max index count) with get_inventory_type()";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class set_inventory_item extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null){
+				w = p.getWorld();
+			}
+			
+			MCInventory inv = GetInventory(args[0], w, t);			
+			int slot = (int)Static.getInt(args[1]);
+			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
+			try{
+				inv.setItem(slot, is);
+				return new CVoid(t);
+			} catch(ArrayIndexOutOfBoundsException e){
+				throw new Exceptions.RangeException("Index out of bounds for the inventory type.", t);
+			}
+		}
+
+		public String getName() {
+			return "set_inventory_item";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{3};
+		}
+
+		public String docs() {
+			return "void {entityID, index, itemArray | locationArray, index, itemArray} Sets the specified item in the specified slot given either an entityID or a location array of a container"
+					+ " object. See get_inventory_type for more information.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_inventory_type extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(p != null){
+				w = p.getWorld();
+			}
+			
+			MCInventory inv = GetInventory(args[0], w, t);
+			return new CString(inv.getType().name(), t);
+		}
+
+		public String getName() {
+			return "get_inventory_type";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "string {entityID | locationArray} Returns the inventory type at the location specified, or of the entity specified. If the"
+					+ " entity or location specified is not capable of having an inventory, a FormatException is thrown."
+					+ " ---- Note that not all valid inventory types are actually returnable at this time, due to lack of support in the server, but"
+					+ " the valid return types are: " + StringUtils.Join(MCInventoryType.values(), ", ");
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_inventory_size extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			if(environment.getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
+				w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			}
+			MCInventory inventory = InventoryManagement.GetInventory(args[0], w, t);
+			return new CInt(inventory.getSize(), t);
+		}
+
+		public String getName() {
+			return "get_inventory_size";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "int {entityID | locationArray} Returns the max size of the inventory specified. If the block or entity can't have an inventory,"
+					+ " a FormatException is thrown.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	private static MCInventory GetInventory(Construct specifier, MCWorld w, Target t){
+		MCInventory inv;
+		if(specifier instanceof CArray){
+			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
+			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
+		} else {
+			int entityID = (int)Static.getInt(specifier);
+			inv = StaticLayer.GetConvertor().GetEntityInventory(entityID);
+		}
+		if(inv == null){
+			throw new Exceptions.FormatException("The entity or location specified is not capable of having an inventory.", t);
+		} else {
+			return inv;
+		}
+	}
     
 //    @api
 //    public static class pinv_consolidate extends AbstractFunction {

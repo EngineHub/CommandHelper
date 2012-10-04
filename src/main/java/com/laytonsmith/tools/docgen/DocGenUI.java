@@ -1,7 +1,12 @@
 package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.UIUtils;
+import com.laytonsmith.core.CHLog;
+import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.tools.Interpreter;
+import java.io.File;
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -19,6 +24,8 @@ import org.pushingpixels.substance.api.skin.SubstanceGraphiteGlassLookAndFeel;
  */
 public class DocGenUI extends javax.swing.JFrame {
 
+	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
+	private static final File chDirectory = new File(jarLocation, "CommandHelper/");
 	DocGenUIHandler handler;
 	DocGenUIHandler.ProgressManager manager = new DocGenUIHandler.ProgressManager() {
 
@@ -256,6 +263,13 @@ public class DocGenUI extends javax.swing.JFrame {
 			new Thread(new Runnable() {
 
 				public void run() {
+					Installer.Install(chDirectory);
+					try {
+						Prefs.init(new File(chDirectory, "preferences.txt"));
+						CHLog.initialize(chDirectory);
+					} catch (IOException ex) {
+						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
+					}
 					doUpload();
 				}
 			}, "UploadThread").start();

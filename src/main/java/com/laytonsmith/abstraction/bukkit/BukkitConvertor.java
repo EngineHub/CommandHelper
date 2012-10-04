@@ -14,9 +14,12 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
+import org.bukkit.block.Block;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.material.MaterialData;
 
@@ -182,5 +185,43 @@ public class BukkitConvertor implements Convertor {
         Entity be = ((BukkitMCEntity)e).asEntity();
         return BukkitConvertor.BukkitGetCorrectEntity(be);
     }
+
+	public MCInventory GetEntityInventory(int entityID) {
+		Entity entity = null;
+		outer: for(World w : Bukkit.getWorlds()){
+			for(Entity e : w.getEntities()){
+				if(e.getEntityId() == entityID){
+					entity = e;
+					break outer;
+				}
+			}
+		}
+		if(entity == null){
+			return null;
+		}
+		if(entity instanceof InventoryHolder){
+			if(entity instanceof Player){
+				return new BukkitMCPlayerInventory(((Player)entity).getInventory());
+			} else {
+				return new BukkitMCInventory(((InventoryHolder)entity).getInventory());
+			}
+		} else {
+			return null;
+		}
+	}
+
+	public MCInventory GetLocationInventory(MCLocation location) {
+		Block b = ((Location)(location.getHandle())).getBlock();
+		if(b.getState() instanceof InventoryHolder){
+			if(b.getState() instanceof DoubleChest){
+				DoubleChest dc = (DoubleChest)(b.getState());
+				return new BukkitMCDoubleChest(dc.getLeftSide().getInventory(), dc.getRightSide().getInventory());
+			} else {
+				return new BukkitMCInventory(((InventoryHolder)b.getState()).getInventory());
+			}
+		} else {
+			return null;
+		}
+	}
 
 }

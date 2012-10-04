@@ -98,4 +98,11 @@ public class BukkitMCLocation implements MCLocation{
     public Location asLocation() {
         return l;
     }
+
+	@Override
+	public String toString() {
+		return l.toString();
+	}
+	
+	
 }

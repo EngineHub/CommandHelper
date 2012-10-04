@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.Convertor;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCServer;
@@ -74,8 +75,8 @@ public class Interpreter {
 		//First, we need to initialize the convertor
 		Implementation.setServerType(Implementation.Type.SHELL);
 		Installer.Install(chDirectory);
-		CHLog.initialize(chDirectory);
 		Prefs.init(new File(chDirectory, "preferences.txt"));
+		CHLog.initialize(chDirectory);
 		//Next, we need to get the "installation location", so we won't spew config files everywhere
 		env = Static.GenerateStandaloneEnvironment();
 		if (TermColors.SYSTEM == TermColors.SYS.WINDOWS) {
@@ -387,6 +388,14 @@ public class Interpreter {
 		}
 
 		public MCEntity GetCorrectEntity(MCEntity e) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCInventory GetEntityInventory(int entityID) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCInventory GetLocationInventory(MCLocation location) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 		

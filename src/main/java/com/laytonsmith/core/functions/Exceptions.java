@@ -19,6 +19,43 @@ public class Exceptions {
 	public static String docs() {
 		return "This class contains functions related to Exception handling in MethodScript";
 	}
+	
+	public static class CastException extends ConfigRuntimeException{
+
+		public CastException(String msg, Target t) {
+			super(msg, ExceptionType.CastException, t);
+		}
+
+		public CastException(String msg, Target t, Throwable cause) {
+			super(msg, ExceptionType.CastException, t, cause);
+		}				
+	}
+	
+	public static class FormatException extends ConfigRuntimeException{
+
+		public FormatException(String msg, Target t) {
+			super(msg, ExceptionType.FormatException, t);
+		}
+
+		public FormatException(String msg, Target t, Throwable cause) {
+			super(msg, ExceptionType.FormatException, t, cause);
+		}
+		
+		
+	}
+	
+	public static class RangeException extends ConfigRuntimeException{
+
+		public RangeException(String msg, Target t) {
+			super(msg, ExceptionType.RangeException, t);
+		}
+
+		public RangeException(String msg, Target t, Throwable cause) {
+			super(msg, ExceptionType.RangeException, t, cause);
+		}
+		
+		
+	}
 
 	public enum ExceptionType {
 
@@ -115,7 +152,9 @@ public class Exceptions {
 		 * If an untameable mob is attempted to be tamed, this exception is
 		 * thrown
 		 */
-		UntameableMobException,}
+		UntameableMobException,
+	
+	}
 
 	@api(environments=CommandHelperEnvironment.class)
 	public static class _try extends AbstractFunction {

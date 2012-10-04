@@ -77,11 +77,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return p.getFoodLevel();
     }
 
-    public MCInventory getInventory() {
+    public MCPlayerInventory getInventory() {
         if (p == null || p.getInventory() == null) {
             return null;
         }
-        return new BukkitMCInventory(p.getInventory());
+        return new BukkitMCPlayerInventory(p.getInventory());
     }
 
     public MCItemStack getItemAt(Construct construct) {

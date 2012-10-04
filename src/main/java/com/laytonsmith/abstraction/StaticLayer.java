@@ -141,5 +141,9 @@ public final class StaticLayer {
     public static MCEntity GetCorrectEntity(MCEntity e) {
         return convertor.GetCorrectEntity(e);
     }
+	
+	public static Convertor GetConvertor(){
+		return convertor;
+	}
     
 }
