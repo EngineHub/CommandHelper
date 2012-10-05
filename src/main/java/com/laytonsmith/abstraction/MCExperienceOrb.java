@@ -10,4 +10,6 @@ package com.laytonsmith.abstraction;
  */
 public interface MCExperienceOrb extends MCEntity{
 
+	public int getExperience();
+	public void setExperience(int amount);
 }
