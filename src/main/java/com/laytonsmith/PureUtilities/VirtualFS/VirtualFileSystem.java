@@ -2,11 +2,15 @@ package com.laytonsmith.PureUtilities.VirtualFS;
 
 import com.laytonsmith.PureUtilities.StreamUtils;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import org.apache.commons.io.FileUtils;
 
 /**
@@ -120,8 +124,37 @@ public class VirtualFileSystem {
 		
 	}
 	
+	private void assertReadPermission(VirtualFile file){
+		//TODO: Finish
+		throw new PermissionException(file.getPath() + " cannot be read.");
+	}
+	
+	private void assertWritePermission(VirtualFile file){
+		//TODO: Finish
+		throw new PermissionException(file.getPath() + " cannot be written to.");
+	}
+	
+	private File normalize(VirtualFile virtual) throws IOException{
+		File real = new File(root, virtual.getPath());
+		if(!real.getCanonicalPath().startsWith(root.getCanonicalPath())){
+			throw new PermissionException(virtual.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
+		} else {
+			return real;
+		}
+	}
+	
+	private VirtualFile normalize(File real) throws IOException{
+		String path = real.getCanonicalPath().replaceFirst(Pattern.quote(root.getCanonicalPath()), "");
+		path = path.replace("\\", "/");
+		if(!path.startsWith("/")){
+			path = "/" + path;
+		}
+		return new VirtualFile(path);
+	}
+	
 	/**
 	 * Reads bytes from a file.
+	 * Requires read permission.
 	 * @param file
 	 * @return 
 	 */
@@ -135,6 +168,7 @@ public class VirtualFileSystem {
 	
 	/**
 	 * Writes an InputStream to a file.
+	 * Requires write permission.
 	 * @param file
 	 * @param data 
 	 */
@@ -147,33 +181,50 @@ public class VirtualFileSystem {
 	}
 	
 	/**
-	 * Reads a file as a stream
+	 * Reads a file as a stream.
+	 * Requires read permission.
 	 * @param file
 	 * @return 
 	 */
-	public InputStream readAsStream(VirtualFile file){
-		throw new UnsupportedOperationException("Not supported yet.");
+	public InputStream readAsStream(VirtualFile file) throws IOException{
+		assertReadPermission(file);
+		File real = normalize(file);
+		return new FileInputStream(real);
 	}
 	
 	/**
 	 * Writes the bytes out to a file.
+	 * Requires write permission.
 	 * @param file
 	 * @param bytes 
 	 */
-	public void write(VirtualFile file, byte[] bytes){
-		throw new UnsupportedOperationException("Not supported yet.");
+	public void write(VirtualFile file, byte[] bytes) throws IOException{
+		assertWritePermission(file);
+		File real = normalize(file);
+		FileUtils.writeByteArrayToFile(real, bytes);
 	}
 	
 	/**
 	 * Lists the files and folders in this directory. Note that the
-	 * . and .. directory normally present in file listings will not be
+	 * . and .. directory will not be
 	 * present. If this is cordoned off, it will be the virtual file
 	 * listing.
+	 * Requires read permission.
 	 * @param directory
 	 * @return 
 	 */
-	public VirtualFile [] list(VirtualFile directory){
-		throw new UnsupportedOperationException("Not supported yet.");
+	public VirtualFile [] list(VirtualFile directory) throws IOException{
+		assertReadPermission(directory);
+		if(settings.isCordonedOff()){
+			throw new UnsupportedOperationException("Not yet implemented.");
+		} else {
+			File real = normalize(directory);
+			List<VirtualFile> virtuals = new ArrayList<VirtualFile>();
+			for(File sub : real.listFiles()){
+				virtuals.add(normalize(sub));
+			}
+			return virtuals.toArray(new VirtualFile[virtuals.size()]);
+		}
 	}
 	
 	/**
@@ -182,58 +233,77 @@ public class VirtualFileSystem {
 	 * to {@see #list}, but it won't be deleted if other files are actually
 	 * living in it, but regardless, the entry will be removed from the manifest,
 	 * and further calls to list will show it having been deleted.
+	 * Requires write permission.
 	 * @param file
 	 * @return 
 	 */
-	public boolean delete(VirtualFile file){
-		throw new UnsupportedOperationException("Not supported yet.");
+	public boolean delete(VirtualFile file) throws IOException{
+		assertWritePermission(file);
+		if(settings.isCordonedOff()){
+			throw new UnsupportedOperationException("Not implemented yet.");
+		} else {
+			return normalize(file).delete();
+		}
 	}
 	
 	/**
 	 * Works the same as {@see #delete}, but the file will be
 	 * deleted upon exit of the JVM.
+	 * Requires write permission.
 	 * @param file
-	 * @return 
 	 */
-	public boolean deleteOnExit(VirtualFile file){
-		throw new UnsupportedOperationException("Not supported yet.");
+	public void deleteOnExit(VirtualFile file) throws IOException{
+		assertWritePermission(file);
+		if(settings.isCordonedOff()){
+			throw new UnsupportedOperationException("Not implemented yet.");
+		} else {
+			normalize(file).deleteOnExit();
+		}
 	}
 	
 	/**
 	 * Returns true if the file represented by this VirtualFile
 	 * actually exists on the file system.
+	 * Requires read permission.
 	 * @param file
 	 * @return 
 	 */
-	public boolean exists(VirtualFile file){
-		throw new UnsupportedOperationException("Not supported yet.");
+	public boolean exists(VirtualFile file) throws IOException{
+		assertReadPermission(file);
+		return normalize(file).exists();
 	}
 	
 	/**
 	 * Returns true if this file can be read. If the file doesn't
 	 * exist, returns false.
+	 * Requires read permission.
 	 * @param file
 	 * @return 
 	 */
-	public boolean canRead(VirtualFile file){
+	public boolean canRead(VirtualFile file) throws IOException{
+		assertReadPermission(file);
 		if(!exists(file)){
 			return false;
 		}
-		throw new UnsupportedOperationException("Not supported yet.");
+		return normalize(file).canRead();
 	}
 	
 	/**
 	 * Returns true if this file can be written to. 
+	 * Requires read permission.
 	 * @param file
 	 * @return 
 	 */
-	public boolean canWrite(VirtualFile file){
-		throw new UnsupportedOperationException("Not supported yet.");
+	public boolean canWrite(VirtualFile file) throws IOException{
+		assertReadPermission(file);
+		return normalize(file).canWrite();
 	}
 	
 	/**
 	 * Returns true if the abstract path represented by this file
 	 * is absolute, that is, if it starts with a forward slash.
+	 * Does not require any permissions, because it simply deals with
+	 * the virtual file path.
 	 * @param file
 	 * @return 
 	 */
@@ -244,48 +314,56 @@ public class VirtualFileSystem {
 	/**
 	 * Returns true if this path represented by the VirtualFile path is a directory.
 	 * If no file or folder exists, false is returned.
+	 * Requires read permissions.
 	 * @param fileOrFolder
 	 * @return 
 	 */
-	public boolean isDirectory(VirtualFile fileOrFolder){
+	public boolean isDirectory(VirtualFile fileOrFolder) throws IOException{
+		assertReadPermission(fileOrFolder);
 		if(!exists(fileOrFolder)){
 			return false;
 		}
-		throw new UnsupportedOperationException("Not supported yet.");
+		return normalize(fileOrFolder).isDirectory();
 	}
 	
 	/**
 	 * Returns true if this path represented by the VirtualFile path is
 	 * a file. If no file or folder exists, false is returned.
+	 * Requires read permissions.
 	 * @param fileOrFolder
 	 * @return 
 	 */
-	public boolean isFile(VirtualFile fileOrFolder){
+	public boolean isFile(VirtualFile fileOrFolder) throws IOException{
+		assertReadPermission(fileOrFolder);
 		if(!exists(fileOrFolder)){
 			return false;
 		}
-		throw new UnsupportedOperationException("Not supported yet.");
+		return normalize(fileOrFolder).isFile();
 	}
 	
 	/**
 	 * Creates the directory specified by the VirtualFile path, and any
 	 * parent directories as needed.
+	 * Requires write permissions.
 	 * @param directory 
 	 */
-	public void mkdirs(VirtualFile directory){
-		throw new UnsupportedOperationException("Not supported yet.");
+	public void mkdirs(VirtualFile directory) throws IOException{
+		assertWritePermission(directory);
+		normalize(directory).mkdirs();
 	}
 	
 	/**
 	 * Creates a new, empty file at this location, if no file already
 	 * exists at this location.
+	 * Requires write permissions.
 	 * @param file 
 	 */
-	public void createEmptyFile(VirtualFile file){
+	public void createEmptyFile(VirtualFile file) throws IOException{
+		assertWritePermission(file);
 		if(exists(file)){
 			return;
 		}
-		throw new UnsupportedOperationException("Not supported yet.");
+		normalize(file).createNewFile();
 	}
 					
 }
