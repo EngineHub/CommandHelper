@@ -600,11 +600,14 @@ public class Meta {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			System.out.println("---------------> Executing capture_runas(" + args[0].val() + ", " + args[1].val() + ")");
 			MCCommandSender oldCommandSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCCommandSender operator;
 			if("~op".equals(args[0].val()) || "~console".equals(args[0].val())){
+				System.out.println("---------------> Using ~op or ~console, so retrieving operator from environment");
 				operator = oldCommandSender;
 			} else {
+				System.out.println("---------------> Using player, so retrieving operator from args: " + args[0].val());
 				operator = Static.GetPlayer(args[0]);
 			}
 			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(operator);
