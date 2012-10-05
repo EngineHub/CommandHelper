@@ -241,7 +241,7 @@ public class AliasCore {
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(parent.chDirectory);
 			parent.persistanceNetwork = new PersistanceNetwork(new File(parent.chDirectory, "persistance.config"), 
-					new URI("sqlite:" + new File(parent.chDirectory, "persistance.db").getCanonicalFile().toURI().getSchemeSpecificPart().replace("\\", "/")), options);
+					new URI("sqlite:/" + new File(parent.chDirectory, "persistance.db").getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver, 
 					parent.chDirectory);
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
