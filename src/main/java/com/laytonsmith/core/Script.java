@@ -212,7 +212,10 @@ public class Script {
                     try{
                         newEnv = env.clone();
                     } catch(Exception e){}
-                    return p.cexecute(c.getChildren(), newEnv);
+					ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
+                    Construct ret = p.cexecute(c.getChildren(), newEnv);
+					pp.stop();					
+					return ret;
                 }
                 final Function f;
                 try{
