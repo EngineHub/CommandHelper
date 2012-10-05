@@ -560,7 +560,7 @@ public class Meta {
 		}
 	}
 	
-	private static class CommandSenderIntercepter implements InvocationHandler{
+	public static class CommandSenderIntercepter implements InvocationHandler{
 		MCCommandSender sender;
 		StringBuilder buffer;
 		public CommandSenderIntercepter(MCCommandSender sender){
