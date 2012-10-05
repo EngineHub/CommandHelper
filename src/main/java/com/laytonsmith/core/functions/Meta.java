@@ -569,10 +569,13 @@ public class Meta {
 		}
 
 		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {	
+			System.out.println("---------------> Invoking proxy");
 			if("sendMessage".equals(method.getName())){
+				System.out.println("---------------> Intercepting sendMessage()");
 				buffer.append(args[0].toString());
 				return Void.TYPE;
 			} else {
+				System.out.println("---------------> Bypassing intercepter, and calling real's " + method.getName());
 				return method.invoke(sender, args);
 			}
 		}
