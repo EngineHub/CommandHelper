@@ -601,10 +601,17 @@ public class Meta {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCCommandSender oldCommandSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(oldCommandSender);
+			MCCommandSender operator;
+			if("~op".equals(args[0].val()) || "~console".equals(args[0].val())){
+				operator = oldCommandSender;
+			} else {
+				operator = Static.GetPlayer(args[0]);
+			}
+			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(operator);
 			MCCommandSender newCommandSender = (MCCommandSender) Proxy.newProxyInstance(Meta.class.getClassLoader(), new Class[]{MCCommandSender.class}, intercepter);
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(newCommandSender);
 			new runas().exec(t, environment, args);
+			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(oldCommandSender);
 			return new CString(intercepter.getBuffer(), t);
 		}
 
@@ -613,11 +620,11 @@ public class Meta {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{2};
 		}
 
 		public String docs() {
-			return "string {[player], command} Works like runas, except any messages sent to the command sender during command execution are attempted to be"
+			return "string {player, command} Works like runas, except any messages sent to the command sender during command execution are attempted to be"
 					+ " intercepted, and are then returned as a string, instead of being sent to the command sender. Note that this is VERY easy"
 					+ " for plugins to get around in such a way that this function will not work, this is NOT a bug in CommandHelper, nor is it necessarily"
 					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly.";
