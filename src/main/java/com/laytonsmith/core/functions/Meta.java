@@ -614,7 +614,7 @@ public class Meta {
 				Static.UninjectPlayer(((MCPlayer)operator));
 			}
 			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(operator);
-			MCCommandSender newCommandSender = (MCCommandSender) Proxy.newProxyInstance(Meta.class.getClassLoader(), new Class[]{MCCommandSender.class}, intercepter);
+			MCCommandSender newCommandSender = (MCCommandSender) Proxy.newProxyInstance(Meta.class.getClassLoader(), new Class[]{MCCommandSender.class, MCPlayer.class}, intercepter);
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(newCommandSender);
 			if(operator instanceof MCPlayer){
 				Static.InjectPlayer(((MCPlayer)newCommandSender));
