@@ -610,11 +610,21 @@ public class Meta {
 				System.out.println("---------------> Using player, so retrieving operator from args: " + args[0].val());
 				operator = Static.GetPlayer(args[0]);
 			}
+			if(operator instanceof MCPlayer){
+				Static.UninjectPlayer(((MCPlayer)operator));
+			}
 			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(operator);
 			MCCommandSender newCommandSender = (MCCommandSender) Proxy.newProxyInstance(Meta.class.getClassLoader(), new Class[]{MCCommandSender.class}, intercepter);
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(newCommandSender);
+			if(operator instanceof MCPlayer){
+				Static.InjectPlayer(((MCPlayer)newCommandSender));
+			}
 			new runas().exec(t, environment, args);
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(oldCommandSender);
+			if(operator instanceof MCPlayer){
+				Static.UninjectPlayer(((MCPlayer)newCommandSender));
+				Static.InjectPlayer(((MCPlayer)operator));
+			}
 			return new CString(intercepter.getBuffer(), t);
 		}
 
