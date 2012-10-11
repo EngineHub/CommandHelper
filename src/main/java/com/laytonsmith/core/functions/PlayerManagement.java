@@ -482,11 +482,11 @@ public class PlayerManagement {
 			MCPlayer p = Static.GetPlayer(player, t);
 
 			Static.AssertPlayerNonNull(p, t);
-			if (index < -1 || index > 11) {
+			int maxIndex = 12;
+			if (index < -1 || index > maxIndex) {
 				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 11",
 						ExceptionType.RangeException, t);
 			}
-			assert index >= -1 && index <= 11;
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 			if (index == 0 || index == -1) {
 				//MCPlayer name 
