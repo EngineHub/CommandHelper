@@ -1,5 +1,9 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.functions.Regex;
+import com.laytonsmith.core.functions.StringHandling;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
 import java.io.File;
@@ -12,6 +16,7 @@ import java.io.File;
 public class MainSandbox {
 
 	public static void main(String[] argv) throws Exception {
+		//URI information
 //		String[] uris = new String[]{"yml:user@remote:22:abcd:path/to/remote/file"
 //		,"yml:user@remote:22:/path/to/remote/file", "yml:user@remote:/path/to/remote/file"};
 //		for (String s : uris) {
@@ -28,6 +33,8 @@ public class MainSandbox {
 //			System.out.println("Fragment: " + uri.getFragment());
 //			System.out.println("\n\n***********************************\n\n");
 //		}
+		
+		//Execution queue usage
 //		final ExecutionQueue queue = new ExecutionQueue("Test", "default");
 //		for(int i = 0; i < 3; i++){
 //			final int j = i;
@@ -52,19 +59,49 @@ public class MainSandbox {
 //				}
 //			}, "Thread-" + i).start();
 //		}
-		Profiler p = new Profiler(new File("profiler.config"));
-		p.doLog("Starting profiling");
-		ProfilePoint ProfilerTop = p.start("Profiler Top", LogLevel.ERROR);
-		ProfilePoint ProfilerMiddle = p.start("Profiler Middle", LogLevel.WARNING);
-		ProfilePoint ProfilerBottom = p.start("Profiler Bottom", LogLevel.INFO);
-		ProfilePoint InnerMost1 = p.start("InnerMost1", LogLevel.DEBUG);
-		ProfilePoint InnerMost2 = p.start("InnerMost2", LogLevel.VERBOSE);
-//		System.gc();
-		p.stop(InnerMost2);
-		p.stop(InnerMost1);
-		p.stop(ProfilerBottom);
-		p.stop(ProfilerMiddle);
-		p.stop(ProfilerTop);
+		
+		//Profiler usage
+//		Profiler p = new Profiler(new File("profiler.config"));
+//		p.doLog("Starting profiling");
+//		ProfilePoint ProfilerTop = p.start("Profiler Top", LogLevel.ERROR);
+//		ProfilePoint ProfilerMiddle = p.start("Profiler Middle", LogLevel.WARNING);
+//		ProfilePoint ProfilerBottom = p.start("Profiler Bottom", LogLevel.INFO);
+//		ProfilePoint InnerMost1 = p.start("InnerMost1", LogLevel.DEBUG);
+//		ProfilePoint InnerMost2 = p.start("InnerMost2", LogLevel.VERBOSE);
+////		System.gc();
+//		p.stop(InnerMost2);
+//		p.stop(InnerMost1);
+//		p.stop(ProfilerBottom);
+//		p.stop(ProfilerMiddle);
+//		p.stop(ProfilerTop);
+		
+		//Profiling reg_split vs split
+		String toSplit = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z";
+		Regex.reg_split regSplitFunction = new Regex.reg_split();
+		StringHandling.split splitFunction = new StringHandling.split();
+		Target t = Target.UNKNOWN;
+		int times = 1000000;
+		
+		CString subject = new CString(toSplit, t);
+		CString pattern = new CString(",", t);
+		
+		long startRegSplit = System.currentTimeMillis();
+		{
+			for(int i = 0; i < times; i++){
+				regSplitFunction.exec(t, null, pattern, subject);
+			}
+		}
+		long stopRegSplit = System.currentTimeMillis();
+		long startSplit = System.currentTimeMillis();
+		{
+			for(int i = 0; i < times; i++){
+				splitFunction.exec(t, null, subject, pattern);
+			}
+		}
+		long stopSplit = System.currentTimeMillis();
+		
+		System.out.println("reg_split took " + (stopRegSplit - startRegSplit) + "ms under " + times + " iterations.");
+		System.out.println("split took " + (stopSplit - startSplit) + "ms under " + times + " iterations.");
 	}
 	
 	

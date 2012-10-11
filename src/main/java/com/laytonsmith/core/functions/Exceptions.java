@@ -153,7 +153,10 @@ public class Exceptions {
 		 * thrown
 		 */
 		UntameableMobException,
-	
+		/**
+		 * If a null is sent, but not expected, this exception is thrown.
+		 */
+		NullPointerException,	
 	}
 
 	@api(environments=CommandHelperEnvironment.class)

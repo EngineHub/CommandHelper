@@ -2,10 +2,13 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
+import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import org.junit.*;
 import static org.junit.Assert.assertEquals;
@@ -21,6 +24,7 @@ public class StringHandlingTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+		StaticTest.InstallFakeServerFrontend();
     }
 
     @AfterClass
@@ -108,4 +112,9 @@ public class StringHandlingTest {
     public void testCC() throws ConfigCompileException{
         assertEquals("Thisshouldbeamess", SRun("cc(This should be a mess)", null));
     }
+	
+	@Test
+	public void testSplit() throws ConfigCompileException{
+		assertEquals("{a, b}", SRun("split('a,b', ',')", null));
+	}
 }
