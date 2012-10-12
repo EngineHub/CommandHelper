@@ -147,7 +147,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements
 	}
 
 	public void addEffect(int potionID, int strength, int seconds) {
-		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), Static.msToTicks(seconds * 1000), strength);
+		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000), strength);
 		try{
 			if(le != null){
 				le.addPotionEffect(pe, true);

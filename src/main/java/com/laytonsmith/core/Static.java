@@ -795,7 +795,7 @@ public final class Static {
         }
     }
 	
-	public static int msToTicks(int ms){
+	public static long msToTicks(long ms){
 		return ms / 50;
 	}
 	
