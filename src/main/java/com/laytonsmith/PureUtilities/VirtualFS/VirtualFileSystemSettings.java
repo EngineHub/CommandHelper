@@ -86,6 +86,7 @@ public class VirtualFileSystemSettings {
 	
 	private Map<VirtualGlob, SettingGroup> settings;
 	private boolean hasQuota = false;
+	private boolean cordonedOff = false;
 	
 	public VirtualFileSystemSettings(String unparsedSettings){
 		settings = new HashMap<VirtualGlob, SettingGroup>();
@@ -105,6 +106,17 @@ public class VirtualFileSystemSettings {
 					} else {
 						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING, "The \"quota\" setting can only be applied to the root of the "
 								+ "file system at this time. The quota setting for " + g.toString() + " is being ignored.");
+					}
+				}
+			}
+			
+			if(s.settingGroup.keySet().contains(VirtualFileSystemSetting.CORDONED_OFF)){
+				if((Boolean)s.settingGroup.get(VirtualFileSystemSetting.CORDONED_OFF) == true){
+					if(g.matches(new VirtualFile("/"))){
+						cordonedOff = true;
+					} else {
+						Logger.getLogger(VirtualFileSystemSettings.class.getName()).log(Level.WARNING, "The \"cordoned-off\" setting can only be applied to the root"
+								+ " of the file system at this time. The setting for " + g.toString() + " is being ignored."); 
 					}
 				}
 			}
@@ -140,5 +152,9 @@ public class VirtualFileSystemSettings {
 	public boolean hasQuota() {
 		return hasQuota;
 	}		
+	
+	public boolean isCordonedOff(){
+		return cordonedOff;
+	}
 	
 }

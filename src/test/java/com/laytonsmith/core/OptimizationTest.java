@@ -4,6 +4,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.testing.StaticTest;
 import org.junit.*;
 import static org.junit.Assert.*;
 
@@ -13,6 +14,11 @@ import static org.junit.Assert.*;
  * @author layton
  */
 public class OptimizationTest {
+	
+	@BeforeClass
+	public static void setUpClass(){
+		StaticTest.InstallFakeServerFrontend();
+	}
     
     public String optimize(String script) throws ConfigCompileException{
         ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));        
@@ -111,6 +117,14 @@ public class OptimizationTest {
 	
 	@Test public void testUnreachableCodeWithBranchTypeFunction() throws ConfigCompileException{
 		assertEquals("ifelse(@var,die(),msg(''))", optimize("if(@var){ die() } else { msg('') }"));
+	}
+	
+	@Test public void testRegSplitOptimization1() throws Exception{
+		assertEquals("split(dyn('subject'),'pattern')", optimize("reg_split('pattern', dyn('subject'))"));
+	}
+	
+	@Test public void testRegSplitOptimization2() throws Exception{
+		assertEquals("split(dyn('subject'),'.')", optimize("reg_split(reg_escape('.'), dyn('subject'))"));
 	}
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.

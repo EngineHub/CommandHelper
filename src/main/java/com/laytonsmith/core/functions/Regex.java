@@ -313,8 +313,19 @@ public class Regex {
 
         @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-            if(!children.get(0).getData().isDynamic()){
-                getPattern(children.get(0).getData(), t);
+            ParseTree data = children.get(0);
+            if(!data.getData().isDynamic()){
+				String pattern = data.getData().val();
+				if(isLiteralRegex(pattern)){
+					//We want to replace this with split()
+					ParseTree split = new ParseTree(new CFunction("split", t), data.getFileOptions());
+					//Note that the arguments are reversed in split()
+					split.addChildAt(0, children.get(1));
+					split.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), split.getFileOptions()));
+					return split;
+				} else {
+					getPattern(data.getData(), t);
+				}
             }
             return null;
         } 
@@ -465,4 +476,40 @@ public class Regex {
             throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
         }
     }
+	
+	private static boolean isLiteralRegex(String regex){
+		//These are the special characters in a regex. If a regex does not contain any of these
+		//characters, we can use a faster method in many cases, though the extra overhead of doing
+		//this check only makes sense during optimization, not runtime.
+		
+		//We also are going to check for the special case where the whole regex starts with \Q and ends with \E, which
+		//indicates that they did something like: reg_split(reg_escape('literal string'), '') which is an easily
+		//optimizable case, but we will have to transform the regex to get the actual split index, but that's up
+		//to the function to call getLiteralRegex. If the internal of the regex further contains more \Q or \E identifiers,
+		//they are doing something more complex, so we're just gonna forgo optimizing that.
+		if(regex.startsWith("\\Q") && regex.endsWith("\\E") 
+				&& !regex.substring(2, regex.length() - 2).contains("\\Q") 
+				&& !regex.substring(2, regex.length() - 2).contains("\\E")
+				){
+			return true;
+		}
+		String chars = "[\\^$.|?*+()";
+		for(int i = 0; i < chars.length(); i++){
+			if(regex.contains(Character.toString(chars.charAt(i)))){
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private static String getLiteralRegex(String regex){
+		if(regex.startsWith("\\Q") && regex.endsWith("\\E") 
+				&& !regex.substring(2, regex.length() - 2).contains("\\Q") 
+				&& !regex.substring(2, regex.length() - 2).contains("\\E")
+				){
+			return regex.substring(2, regex.length() - 2);
+		} else {
+			return regex;
+		}		
+	}
 }

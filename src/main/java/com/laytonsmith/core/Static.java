@@ -42,7 +42,7 @@ import java.util.logging.Logger;
  * @author Layton
  */
 public final class Static {
-    
+
     private Static(){}
     
     private static final Logger logger = Logger.getLogger("CommandHelper");
@@ -841,4 +841,19 @@ public final class Static {
 				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, permissionsResolver, new File(jarLocation, "CommandHelper/"));
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
+	
+	/**
+	 * Asserts that all the args are not CNulls. If so, throws a ConfigRuntimeNullPointerException
+	 * @param t
+	 * @param args
+	 * @throws ConfigRuntimeException 
+	 */
+	public static void AssertNonCNull(Target t, Construct ... args) throws ConfigRuntimeException {
+		for(Construct arg : args){
+			if(arg instanceof CNull){
+				throw new ConfigRuntimeException("Argument was null, and nulls are not allowed.", ExceptionType.NullPointerException, t);
+			}
+		}
+	}
+    
 }

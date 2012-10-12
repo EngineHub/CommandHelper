@@ -14,6 +14,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistance.DataSourceException;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Method;
 import java.lang.reflect.Proxy;
@@ -557,5 +558,94 @@ public class Meta {
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
+	}
+	
+	public static class CommandSenderIntercepter implements InvocationHandler{
+		MCCommandSender sender;
+		StringBuilder buffer;
+		public CommandSenderIntercepter(MCCommandSender sender){
+			this.sender = sender;
+			buffer = new StringBuilder();
+		}
+
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {	
+			System.out.println("---------------> Invoking proxy");
+			if("sendMessage".equals(method.getName())){
+				System.out.println("---------------> Intercepting sendMessage()");
+				buffer.append(args[0].toString());
+				return Void.TYPE;
+			} else {
+				System.out.println("---------------> Bypassing intercepter, and calling real's " + method.getName());
+				return method.invoke(sender, args);
+			}
+		}
+		
+		public String getBuffer(){
+			return buffer.toString();
+		}
+	}
+	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
+	public static class capture_runas extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			System.out.println("---------------> Executing capture_runas(" + args[0].val() + ", " + args[1].val() + ")");
+			MCCommandSender oldCommandSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCCommandSender operator;
+			if("~op".equals(args[0].val()) || "~console".equals(args[0].val())){
+				System.out.println("---------------> Using ~op or ~console, so retrieving operator from environment");
+				operator = oldCommandSender;
+			} else {
+				System.out.println("---------------> Using player, so retrieving operator from args: " + args[0].val());
+				operator = Static.GetPlayer(args[0]);
+			}
+			if(operator instanceof MCPlayer){
+				Static.UninjectPlayer(((MCPlayer)operator));
+			}
+			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(operator);
+			MCCommandSender newCommandSender = (MCCommandSender) Proxy.newProxyInstance(Meta.class.getClassLoader(), new Class[]{MCCommandSender.class, MCPlayer.class}, intercepter);
+			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(newCommandSender);
+			if(operator instanceof MCPlayer){
+				Static.InjectPlayer(((MCPlayer)newCommandSender));
+			}
+			new runas().exec(t, environment, args);
+			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(oldCommandSender);
+			if(operator instanceof MCPlayer){
+				Static.UninjectPlayer(((MCPlayer)newCommandSender));
+				Static.InjectPlayer(((MCPlayer)operator));
+			}
+			return new CString(intercepter.getBuffer(), t);
+		}
+
+		public String getName() {
+			return "capture_runas";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "string {player, command} Works like runas, except any messages sent to the command sender during command execution are attempted to be"
+					+ " intercepted, and are then returned as a string, instead of being sent to the command sender. Note that this is VERY easy"
+					+ " for plugins to get around in such a way that this function will not work, this is NOT a bug in CommandHelper, nor is it necessarily"
+					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

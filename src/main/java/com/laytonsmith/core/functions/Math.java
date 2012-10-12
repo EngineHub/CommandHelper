@@ -1627,15 +1627,17 @@ public class Math {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1};
+			return new Integer[]{1, 2};
 		}
 
 		public String docs() {
-			return "int {number} Unlike floor and ceil, rounds the number to the nearest integer.";
+			return "mixed {number, [precision]} Unlike floor and ceil, rounds the number to the nearest integer. Precision defaults to 0, but if set to 1 or more, rounds decimal places."
+					+ " For instance, round(2.29, 1) would return 2.3. If precision is < 0, a RangeException is thrown. If precision is set to 0, an integer is always"
+					+ " returned, and if precision is > 0, a double is always returned.";
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
 		}
 
 		public boolean isRestricted() {
@@ -1651,7 +1653,22 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CInt(java.lang.Math.round(Static.getNumber(args[0])), t);
+			double number = Static.getNumber(args[0]);
+			int precision = 0;
+			if(args.length > 1){
+				precision = (int)Static.getInt(args[1]);
+			}
+			if(precision < 0){
+				throw new Exceptions.RangeException("precision cannot be less than 0, was " + precision, t);
+			}
+			number = number * java.lang.Math.pow(10, precision);
+			number = java.lang.Math.round(number);
+			number = number / java.lang.Math.pow(10, precision);
+			if(precision == 0){
+				return new CInt((long)number, t);
+			} else {
+				return new CDouble(number, t);
+			}
 		}
 
 		@Override
@@ -1663,6 +1680,17 @@ public class Math {
 		public Construct optimize(Target t, Construct... args) {
 			return exec(t, null, args);
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Rounding up", "round(2.5)"),
+				new ExampleScript("Rounding down", "round(2.229)"),
+				new ExampleScript("Higher precision round", "round(2.229, 2)"),
+			};
+		}
+		
+		
 	}
 
 	@api

@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
@@ -14,6 +15,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringTokenizer;
 
 /**
  *
@@ -430,6 +432,94 @@ public class StringHandling {
             return exec(t, null, args);
         }
     }
+    @api
+    public static class trimr extends AbstractFunction {
+
+        public String getName() {
+            return "trimr";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {s} Returns the string s with trailing whitespace cut off";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(StringUtils.trimRight(args[0].val()), args[0].getTarget());
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+    }
+    @api
+    public static class triml extends AbstractFunction {
+
+        public String getName() {
+            return "triml";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1};
+        }
+
+        public String docs() {
+            return "string {s} Returns the string s with leading whitespace cut off";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            return new CString(StringUtils.trimLeft(args[0].val()), t);
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+    }
 
     @api
     public static class length extends AbstractFunction {
@@ -630,4 +720,117 @@ public class StringHandling {
             return exec(t, null, args);
         }
     }
+	
+    @api
+    public static class string_position extends AbstractFunction {
+
+        public String getName() {
+            return "string_position";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "int {haystack, needle} Finds the numeric position of the first occurence of needle in haystack. haystack is the string"
+					+ " to search in, and needle is the string to search with. Returns the position of the needle (starting with 0) or -1 if"
+					+ " the string is not found at all.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            String haystack = args[0].nval();
+			String needle = args[1].nval();
+			Static.AssertNonCNull(t, args);
+			return new CInt(haystack.indexOf(needle), t);
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+    }
+	
+    @api
+    public static class split extends AbstractFunction {
+
+        public String getName() {
+            return "split";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2};
+        }
+
+        public String docs() {
+            return "array {string, split} Splits a string into parts, using the split as the index. Though it can be used in every single case"
+					+ " you would use reg_split, this does not use regex,"
+					+ " and therefore can take a literal split expression instead of needing an escaped regex, and *may* perform better than the"
+					+ " regex versions, as it uses an optimized tokenizer split, instead of Java regex.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{};
+        }
+
+        public boolean isRestricted() {
+            return false;
+        }
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Boolean runAsync() {
+            return null;
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
+			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
+			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent. In that case,
+			//we are going to use the StringTokenizer class instead of a string split, which, in testing, does appear to be faster, at
+			//least in the trivial case.
+            CArray array = new CArray(t);
+			String string = args[0].val();
+			String split = args[1].val();
+			StringTokenizer st = new StringTokenizer(string, split);
+			while(st.hasMoreElements()){
+				String item = st.nextToken();
+				array.push(new CString(item, t));
+			}
+			return array;
+        }
+        
+        @Override
+        public boolean canOptimize() {
+            return true;
+        }
+
+        @Override
+        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+            return exec(t, null, args);
+        }
+    }
+	
+	
 }
