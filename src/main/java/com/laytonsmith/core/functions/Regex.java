@@ -313,14 +313,13 @@ public class Regex {
 
         @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-            ParseTree data = children.get(0);
+            ParseTree data = children.get(1);
             if(!data.getData().isDynamic()){
 				String pattern = data.getData().val();
 				if(isLiteralRegex(pattern)){
 					//We want to replace this with split()
 					ParseTree split = new ParseTree(new CFunction("split", t), data.getFileOptions());
-					//Note that the arguments are reversed in split()
-					split.addChildAt(0, children.get(1));
+					split.addChildAt(0, children.get(0));
 					split.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), split.getFileOptions()));
 					return split;
 				} else {
