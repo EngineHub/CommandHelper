@@ -113,19 +113,25 @@ public class BukkitConvertor implements Convertor {
     private static Set<Integer> validIDs = new TreeSet<Integer>();
 
     public int SetFutureRunnable(long ms, Runnable r) {
-        int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, (long)(ms / 50));
+        int id = Bukkit.getServer().getScheduler().scheduleSyncDelayedTask(CommandHelperPlugin.self, r, Static.msToTicks(ms));
         validIDs.add(id);
         return id;
     }
     
     public int SetFutureRepeater(long ms, long initialDelay, Runnable r){
-        int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, (long)(initialDelay / 50), (long)(ms / 50));
+        int id = Bukkit.getServer().getScheduler().scheduleSyncRepeatingTask(CommandHelperPlugin.self, r, Static.msToTicks(initialDelay), Static.msToTicks(ms));
         validIDs.add(id);
         return id;        
     }
 
     public void ClearAllRunnables() {
-        ((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
+		//Doing cancelTasks apparently does not work, so let's just manually cancel each task, which does appear to work.
+		//Anyways, it's better that way anyhow, because we actually remove IDs from validIDs that way.
+        //((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
+		Set<Integer> ids = new TreeSet<Integer>(validIDs);
+		for(int id : ids){
+			ClearFutureRunnable(id);
+		}
     }
 
     public void ClearFutureRunnable(int id) {
