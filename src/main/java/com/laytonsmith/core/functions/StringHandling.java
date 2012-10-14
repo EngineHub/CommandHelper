@@ -98,6 +98,13 @@ public class StringHandling {
         public ParseTree optimizeSpecial(Target target, List<ParseTree> children) {
             throw new UnsupportedOperationException("Not yet implemented");
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "cc('These' 'normally' 'have' 'spaces' 'between' 'them')"),
+			};
+		}
                 
         
     }
@@ -159,6 +166,14 @@ public class StringHandling {
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("Functional usage", "concat('1', '2', '3', '4')"),
+						new ExampleScript("Symbolic usage", "'1' . '2' . '3' . '4'"),
+			};
 		}
 		
 		
@@ -270,6 +285,14 @@ public class StringHandling {
 			return null;
 		}
 		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("Functional usage", "sconcat('1', '2', '3', '4')"),
+						new ExampleScript("Implied usage, do to no operators", "'1' '2' '3' '4'"),
+			};
+		}
+		
 		
     }    
 
@@ -319,6 +342,14 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "replace('Where in the world is Carmen Sandiego?', 'Carmen Sandiego', 'Waldo')"),
+						new ExampleScript("No match found", "replace('The same thing', 'not found', '404')"),
+			};
+		}
     }
 
     @api
@@ -431,6 +462,13 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "'->' . trim('    <- spaces ->    ') . '<-'"),
+			};
+		}
     }
     @api
     public static class trimr extends AbstractFunction {
@@ -475,6 +513,13 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "'->' . trimr('    <- spaces ->    ') . '<-'"),
+			};
+		}
     }
     @api
     public static class triml extends AbstractFunction {
@@ -519,6 +564,13 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "'->' . triml('    <- spaces ->    ') . '<-'"),
+			};
+		}
     }
 
     @api
@@ -568,6 +620,14 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("Strings", "length('this is a string')"),
+						new ExampleScript("Arrays", "length(array('1', 2, '3', 4))"),
+			};
+		}
     }
 
     @api
@@ -613,6 +673,15 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "to_upper('uppercase')"),
+						new ExampleScript("", "to_upper('MiXeD cAsE')"),
+						new ExampleScript("", "to_upper('Numbers (and SYMBOLS: 25)')"),
+			};
+		}
     }
 
     @api
@@ -658,6 +727,15 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "to_lower('LOWERCASE')"),
+						new ExampleScript("", "to_lower('MiXeD cAsE')"),
+						new ExampleScript("", "to_lower('Numbers (and SYMBOLS: 25)')"),
+			};
+		}
     }
 
     @api
@@ -719,6 +797,16 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+						new ExampleScript("", "substr('hamburger', 4, 8)"),
+						new ExampleScript("", "substr('smiles', 1, 5)"),
+						new ExampleScript("", "substr('lightning', 5)"),
+						new ExampleScript("If the indexes are too large", "assign(@big, 25)\nsubstr('small', @big)"),
+			};
+		}
     }
 	
     @api
@@ -769,6 +857,14 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "string_position('this is the string', 'string')"),
+				new ExampleScript("String not found", "string_position('Where\\'s Waldo?', 'Dunno.')"),
+			};
+		}
     }
 	
     @api
@@ -783,7 +879,7 @@ public class StringHandling {
         }
 
         public String docs() {
-            return "array {string, split} Splits a string into parts, using the split as the index. Though it can be used in every single case"
+            return "array {split, string} Splits a string into parts, using the split as the index. Though it can be used in every single case"
 					+ " you would use reg_split, this does not use regex,"
 					+ " and therefore can take a literal split expression instead of needing an escaped regex, and *may* perform better than the"
 					+ " regex versions, as it uses an optimized tokenizer split, instead of Java regex.";
@@ -811,8 +907,8 @@ public class StringHandling {
 			//we are going to use the StringTokenizer class instead of a string split, which, in testing, does appear to be faster, at
 			//least in the trivial case.
             CArray array = new CArray(t);
-			String string = args[0].val();
-			String split = args[1].val();
+			String split = args[0].val();
+			String string = args[1].val();
 			StringTokenizer st = new StringTokenizer(string, split);
 			while(st.hasMoreElements()){
 				String item = st.nextToken();
@@ -830,6 +926,16 @@ public class StringHandling {
         public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
             return exec(t, null, args);
         }
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Simple split on one character. Note that unlike reg_split, no escaping is needed on the period.", "split('.', '1.2.3.4.5')"),
+				new ExampleScript("Split with multiple characters", "split('ab', 'aaabaaabaaabaa')"),
+			};
+		}
+		
+		
     }
 	
 	
