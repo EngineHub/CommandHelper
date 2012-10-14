@@ -79,4 +79,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
     public boolean isNewPlayer();
     
     public String getHost();
+	
+	public void sendBlockChange(MCLocation loc, int material, byte data);
 }

@@ -2460,4 +2460,50 @@ public class PlayerManagement {
 			return false;
 		}
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class psend_block_change extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			int offset = 0;
+			if(args.length == 3){
+				p = Static.GetPlayer(args[0]);
+				offset = 1;
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);
+			MCItemStack item = ObjectGenerator.GetGenerator().item(args[1 + offset], t);
+			p.sendBlockChange(loc, item.getTypeId(), (byte)item.getData().getData());
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "psend_block_change";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "void {[player], locationArray, itemArray} ";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }

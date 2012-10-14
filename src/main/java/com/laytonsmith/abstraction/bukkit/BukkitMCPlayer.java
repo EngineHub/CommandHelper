@@ -18,6 +18,7 @@ import net.minecraft.server.MobEffect;
 import net.minecraft.server.ServerConfigurationManager;
 import net.minecraft.server.ServerConfigurationManagerAbstract;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -338,4 +339,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public String getHost(){
         return Static.GetHost(this);
     }
+
+	public void sendBlockChange(MCLocation loc, int material, byte data) {
+		p.sendBlockChange(((Location)loc.getHandle()), material, data);
+	}
 }
