@@ -1290,9 +1290,9 @@ public final class MethodScriptCompiler {
 				tree.setData(tempNode.getData());
 				tree.setOptimized(tempNode.isOptimized());
 				tree.setChildren(tempNode.getChildren());
+				tree.setOptimized(true);
 			} //else it wasn't an optimization, but a compile check
 			optimize(tree, procs);
-			tree.setOptimized(true);
 		}
 		if (!fullyStatic) {
 			return;
@@ -1304,7 +1304,9 @@ public final class MethodScriptCompiler {
 			//Well, this function isn't equipped to deal with IVariables.
 			return;
 		}
-		if (func.canOptimize()) {
+		//It could have already been optimized by the dynamic optimization, in that case, we
+		//don't want to run this now
+		if (!tree.isOptimized() && func.canOptimize()) {
 			Construct[] constructs = new Construct[tree.getChildren().size()];
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				constructs[i] = tree.getChildAt(i).getData();

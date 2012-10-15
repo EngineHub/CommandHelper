@@ -903,16 +903,21 @@ public class StringHandling {
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			//http://stackoverflow.com/questions/2667015/is-regex-too-slow-real-life-examples-where-simple-non-regex-alternative-is-bett
 			//According to this, regex isn't necessarily slower, but we do want to escape the pattern either way, since the main advantage
-			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent. In that case,
-			//we are going to use the StringTokenizer class instead of a string split, which, in testing, does appear to be faster, at
-			//least in the trivial case.
+			//of this function is convenience (not speed) however, if we can eek out a little extra speed too, excellent.
             CArray array = new CArray(t);
 			String split = args[0].val();
 			String string = args[1].val();
-			StringTokenizer st = new StringTokenizer(string, split);
-			while(st.hasMoreElements()){
-				String item = st.nextToken();
-				array.push(new CString(item, t));
+			int sp = 0;
+			for(int i = 0; i < string.length() - split.length(); i++){				
+				if(string.substring(i, i + split.length()).equals(split)){
+					//Split point found
+					array.push(new CString(string.substring(sp, i), t));
+					sp = i + split.length();
+					i += split.length();
+				}
+			}
+			if(sp != 0){
+				array.push(new CString(string.substring(sp, string.length()), t));
 			}
 			return array;
         }
