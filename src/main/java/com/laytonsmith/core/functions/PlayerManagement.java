@@ -2484,8 +2484,8 @@ public class PlayerManagement {
 				offset = 1;
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);
-			MCItemStack item = ObjectGenerator.GetGenerator().item(args[1 + offset], t);
-			p.sendBlockChange(loc, item.getTypeId(), (byte)item.getData().getData());
+			MCItemStack item = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t);
+			p.sendBlockChange(loc, item.getType().getType(), (byte)item.getData().getData());
 			return new CVoid(t);
 		}
 
@@ -2498,7 +2498,8 @@ public class PlayerManagement {
 		}
 
 		public String docs() {
-			return "void {[player], locationArray, itemArray} ";
+			return "void {[player], locationArray, itemID} Changes a block, but only temporarily, and only for the specified player."
+					+ " This can be used to \"fake\" blocks for a player. ItemID is in the 1[:1] data format.";
 		}
 
 		public CHVersion since() {
