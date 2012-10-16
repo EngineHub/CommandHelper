@@ -1291,9 +1291,9 @@ public final class MethodScriptCompiler {
 				tree.setData(tempNode.getData());
 				tree.setOptimized(tempNode.isOptimized());
 				tree.setChildren(tempNode.getChildren());
+				optimize(tree, procs);
 				tree.setOptimized(true);
 			} //else it wasn't an optimization, but a compile check
-			optimize(tree, procs);
 		}
 		if (!fullyStatic) {
 			return;
