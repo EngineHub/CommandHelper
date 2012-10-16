@@ -84,7 +84,7 @@ public class Compiler {
     public static class __autoconcat__ extends DummyFunction {
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            throw new Error("Should not have gotten here");
+            throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
         }
 
         public String docs() {

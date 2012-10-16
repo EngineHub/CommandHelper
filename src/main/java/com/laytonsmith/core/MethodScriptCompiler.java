@@ -1278,6 +1278,7 @@ public final class MethodScriptCompiler {
 
 		//the compiler trick functions know how to deal with it specially, even if everything isn't
 		//static, so do this first.
+		String oldFunctionName = func.getName();
 		if (func.canOptimizeDynamic()) {
 			ParseTree tempNode;
 			try {
@@ -1304,9 +1305,9 @@ public final class MethodScriptCompiler {
 			//Well, this function isn't equipped to deal with IVariables.
 			return;
 		}
-		//It could have already been optimized by the dynamic optimization, in that case, we
+		//It could have optimized by changing the name, in that case, we
 		//don't want to run this now
-		if (!tree.isOptimized() && func.canOptimize()) {
+		if (tree.getData().getValue().equals(oldFunctionName) && func.canOptimize()) {
 			Construct[] constructs = new Construct[tree.getChildren().size()];
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				constructs[i] = tree.getChildAt(i).getData();
