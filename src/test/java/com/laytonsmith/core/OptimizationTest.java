@@ -126,6 +126,10 @@ public class OptimizationTest {
 	@Test public void testRegSplitOptimization2() throws Exception{
 		assertEquals("split(dyn('subject'),'.')", optimize("reg_split(reg_escape('.'), dyn('subject'))"));
 	}
+	
+	@Test public void testRegReplaceOptimization1() throws Exception{
+		assertEquals("replace('this is a thing','thing','hi')", optimize("reg_replace('thing', 'hi', 'this is a thing')"));
+	}
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{

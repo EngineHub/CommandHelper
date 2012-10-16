@@ -245,10 +245,26 @@ public class Regex {
 
         @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-            if(!children.get(0).getData().isDynamic()){
-                getPattern(children.get(0).getData(), t);
+			ParseTree data = children.get(1);
+            if(!data.getData().isDynamic()){
+				String pattern = data.getData().val();
+				if(isLiteralRegex(pattern)){
+					//We want to replace this with replace()
+					//Note the alternative order of arguments
+					ParseTree replace = new ParseTree(new CFunction("replace", t), data.getFileOptions());
+					replace.addChildAt(0, children.get(2)); //subject -> main
+					replace.addChildAt(1, children.get(0)); //replacement -> that
+					replace.addChildAt(2, new ParseTree(new CString(getLiteralRegex(pattern), t), replace.getFileOptions())); //pattern -> what
+					return replace;
+				} else {
+					getPattern(data.getData(), t);
+				}
             }
             return null;
+//            if(!children.get(0).getData().isDynamic()){
+//                getPattern(children.get(0).getData(), t);
+//            }
+//            return null;
         } 
         
     }
