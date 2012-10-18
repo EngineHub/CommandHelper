@@ -202,7 +202,7 @@ public class DocGenUIHandler {
 	 * @param protect
 	 * @throws XPathExpressionException 
 	 */
-	private void doUpload(String wikiMarkup, String page, Boolean protect) throws XPathExpressionException{
+	void doUpload(String wikiMarkup, String page, Boolean protect) throws XPathExpressionException{
 		checkStop();
 		if(page.startsWith("/")){
 			//The prefix already has this

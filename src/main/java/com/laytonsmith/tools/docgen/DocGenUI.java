@@ -12,6 +12,7 @@ import java.net.URL;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JDialog;
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -123,6 +124,7 @@ public class DocGenUI extends javax.swing.JFrame {
         events = new javax.swing.JCheckBox();
         templates = new javax.swing.JCheckBox();
         jLabel4 = new javax.swing.JLabel();
+        singleFunctionUploadButton = new javax.swing.JButton();
         uploadButton = new javax.swing.JButton();
         progress = new javax.swing.JProgressBar();
         infoLabel = new javax.swing.JLabel();
@@ -156,6 +158,13 @@ public class DocGenUI extends javax.swing.JFrame {
 
         jLabel4.setText("Upload what?");
 
+        singleFunctionUploadButton.setText("Single Function...");
+        singleFunctionUploadButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                singleFunctionUploadButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
@@ -164,11 +173,14 @@ public class DocGenUI extends javax.swing.JFrame {
                 .addContainerGap()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(functions)
-                    .addComponent(examples)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(examples)
+                        .addGap(18, 18, 18)
+                        .addComponent(singleFunctionUploadButton))
                     .addComponent(events)
                     .addComponent(templates)
                     .addComponent(jLabel4))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(171, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -178,7 +190,9 @@ public class DocGenUI extends javax.swing.JFrame {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(functions)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(examples)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(examples)
+                    .addComponent(singleFunctionUploadButton))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(events)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -249,7 +263,7 @@ public class DocGenUI extends javax.swing.JFrame {
                     .addComponent(progress, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(infoLabel)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
 
         pack();
@@ -275,6 +289,10 @@ public class DocGenUI extends javax.swing.JFrame {
 			}, "UploadThread").start();
 		}
     }//GEN-LAST:event_uploadButtonActionPerformed
+
+    private void singleFunctionUploadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_singleFunctionUploadButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_singleFunctionUploadButtonActionPerformed
 	
 	/**
 	 * @param args the command line arguments
@@ -288,6 +306,7 @@ public class DocGenUI extends javax.swing.JFrame {
 					try {
 						UIManager.setLookAndFeel(new SubstanceGraphiteGlassLookAndFeel());
 						JFrame.setDefaultLookAndFeelDecorated(true);
+						JDialog.setDefaultLookAndFeelDecorated(true);
 					} catch (UnsupportedLookAndFeelException ex) {
 						Logger.getLogger(DocGenUI.class.getName()).log(Level.SEVERE, null, ex);
 					} 
@@ -323,6 +342,7 @@ public class DocGenUI extends javax.swing.JFrame {
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPasswordField password;
     private javax.swing.JProgressBar progress;
+    private javax.swing.JButton singleFunctionUploadButton;
     private javax.swing.JCheckBox staged;
     private javax.swing.JCheckBox templates;
     private javax.swing.JButton uploadButton;

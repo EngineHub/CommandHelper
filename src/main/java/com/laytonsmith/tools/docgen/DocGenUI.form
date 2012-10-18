@@ -85,7 +85,7 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="infoLabel" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <EmptySpace pref="14" max="32767" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -137,12 +137,16 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Component id="functions" alignment="0" min="-2" max="-2" attributes="0"/>
-                      <Component id="examples" alignment="0" min="-2" max="-2" attributes="0"/>
+                      <Group type="102" alignment="0" attributes="0">
+                          <Component id="examples" min="-2" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="singleFunctionUploadButton" min="-2" max="-2" attributes="0"/>
+                      </Group>
                       <Component id="events" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="templates" alignment="0" min="-2" max="-2" attributes="0"/>
                       <Component id="jLabel4" alignment="0" min="-2" max="-2" attributes="0"/>
                   </Group>
-                  <EmptySpace max="32767" attributes="0"/>
+                  <EmptySpace pref="171" max="32767" attributes="0"/>
               </Group>
           </Group>
         </DimensionLayout>
@@ -154,7 +158,10 @@
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="functions" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
-                  <Component id="examples" min="-2" max="-2" attributes="0"/>
+                  <Group type="103" groupAlignment="3" attributes="0">
+                      <Component id="examples" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="singleFunctionUploadButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                  </Group>
                   <EmptySpace max="-2" attributes="0"/>
                   <Component id="events" min="-2" max="-2" attributes="0"/>
                   <EmptySpace max="-2" attributes="0"/>
@@ -193,6 +200,14 @@
           <Properties>
             <Property name="text" type="java.lang.String" value="Upload what?"/>
           </Properties>
+        </Component>
+        <Component class="javax.swing.JButton" name="singleFunctionUploadButton">
+          <Properties>
+            <Property name="text" type="java.lang.String" value="Single Function..."/>
+          </Properties>
+          <Events>
+            <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="singleFunctionUploadButtonActionPerformed"/>
+          </Events>
         </Component>
       </SubComponents>
     </Container>

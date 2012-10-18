@@ -82,6 +82,59 @@ public class DataHandling {
 			};
 		}
 	}
+	
+	@api
+	public static class associative_array extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray array = new CArray(t, args);
+			array.forceAssociativeMode();
+			return array;
+		}
+
+		public String getName() {
+			return "associative_array";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{Integer.MAX_VALUE};
+		}
+
+		public String docs() {
+			return "array {[args...]} Works exactly like array(), except the array created will be an associative array, even"
+					+ " if the array has been created with no elements. This is the only use case where this is neccessary, vs"
+					+ " using the normal array() function, or in the case where you assign sequential keys anyways, and the same"
+					+ " array could have been created using array().";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Usage with an empty array", "assign(@array, associative_array())\nmsg(is_associative(@array))"),
+				new ExampleScript("Usage with an array with sequential keys", "assign(@array, array(0: '0', 1: '1'))\nmsg(is_associative(@array))\n"
+					+ "assign(@array, associative_array(0: '0', 1: '1'))\nmsg(is_associative(@array))"),
+			};
+		}
+		
+		
+		
+	}
 
 	@api(environments=CommandHelperEnvironment.class)
 	public static class assign extends AbstractFunction {

@@ -202,20 +202,21 @@ public class Interpreter {
 			ProfilePoint p = Interpreter.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);
 			MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {
 				public void done(String output) {
-					output = output.trim();
-					if (output.isEmpty()) {
-						if (System.console() != null) {
-							pl(":");
-						}
-					} else {
-						if (output.startsWith("/")) {
-							//Run the command
-							pl((System.console() != null ? ":" + YELLOW : "") + output);
-						} else {
-							//output the results
-							pl((System.console() != null ? ":" + GREEN : "") + output);
-						}
-					}
+					//Do nothing
+//					output = output.trim();
+//					if (output.isEmpty()) {
+//						if (System.console() != null) {
+//							pl(":");
+//						}
+//					} else {
+//						if (output.startsWith("/")) {
+//							//Run the command
+//							pl((System.console() != null ? ":" + YELLOW : "") + output);
+//						} else {
+//							//output the results
+//							pl((System.console() != null ? ":" + GREEN : "") + output);
+//						}
+//					}
 				}
 			}, null, vars);
 			p.stop();
