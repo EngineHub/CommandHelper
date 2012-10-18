@@ -661,8 +661,8 @@ public final class Static {
         PermissionsResolver perms = env.getEnv(GlobalEnv.class).GetPermissionsResolver();
         if (perms != null) {
             if (commandSender instanceof MCPlayer) {
-                perm = perms.hasPermission(player.getWorld().getName(), player.getName(), "ch.func.use." + functionName)
-                        || perms.hasPermission(player.getWorld().getName(), player.getName(), "commandhelper.func.use." + functionName);
+                perm = perms.hasPermission(player.getName(), "ch.func.use." + functionName, player.getWorld().getName())
+                        || perms.hasPermission(player.getName(), "commandhelper.func.use." + functionName, player.getWorld().getName());
                 if (label != null && label.startsWith("~")) {
                     String[] groups = env.getEnv(CommandHelperEnvironment.class).GetLabel().substring(1).split("/");
                     for (String group : groups) {
@@ -676,11 +676,11 @@ public final class Static {
                         if(env.getEnv(CommandHelperEnvironment.class).GetLabel().contains(".")){
                             //We are using a non-standard permission. Don't automatically
                             //add CH's prefix
-                            if(perms.hasPermission(player.getWorld().getName(), player.getName(), label)){
+                            if(perms.hasPermission(player.getName(), label, player.getWorld().getName())){
                                 perm = true;
                             }
-                        } else if((perms.hasPermission(player.getWorld().getName(), player.getName(), "ch.alias." + label))
-                            || perms.hasPermission(player.getWorld().getName(), player.getName(), "commandhelper.alias." + label)) {
+                        } else if((perms.hasPermission(player.getName(), "ch.alias." + label, player.getWorld().getName()))
+                            || perms.hasPermission(player.getName(), "commandhelper.alias." + label, player.getWorld().getName())) {
                             perm = true;
                         }
                     }

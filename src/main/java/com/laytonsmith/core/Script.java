@@ -114,7 +114,7 @@ public class Script {
         if (p instanceof MCPlayer) {
             if (CurrentEnv.getEnv(CommandHelperEnvironment.class).GetLabel() != null) {
                 PermissionsResolver perms = CurrentEnv.getEnv(GlobalEnv.class).GetPermissionsResolver();
-                String[] groups = CurrentEnv.getEnv(CommandHelperEnvironment.class).GetLabel().substring(1).split("/");
+                String[] groups = CurrentEnv.getEnv(CommandHelperEnvironment.class).GetLabel().split("/");
                 for (String group : groups) {
                     if (group.startsWith("-") && perms.inGroup(((MCPlayer)p).getName(), group.substring(1))) {
                         //negative permission
