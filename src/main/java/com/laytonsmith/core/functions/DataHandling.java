@@ -13,8 +13,10 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -137,7 +139,7 @@ public class DataHandling {
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class assign extends AbstractFunction {
+	public static class assign extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "assign";
@@ -238,8 +240,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_CONSTANT,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
 		}
 
 		@Override
@@ -251,6 +256,20 @@ public class DataHandling {
 			}
 			return null;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.get(0).getData() instanceof IVariable
+					&& children.get(1).getData() instanceof IVariable){
+				if(((IVariable)children.get(0).getData()).getName().equals(
+						((IVariable)children.get(1).getData()).getName())){
+					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
+				}
+			}
+			return null;
+		}
+		
+		
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -803,7 +822,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_stringable extends AbstractFunction {
+	public static class is_stringable extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_stringable";
@@ -838,13 +857,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -858,7 +875,7 @@ public class DataHandling {
 	}
 	
 	@api
-	public static class is_string extends AbstractFunction {
+	public static class is_string extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_stringable";
@@ -894,13 +911,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -913,7 +928,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_array extends AbstractFunction {
+	public static class is_array extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_array";
@@ -948,13 +963,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -968,7 +981,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_double extends AbstractFunction {
+	public static class is_double extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_double";
@@ -1005,13 +1018,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1024,7 +1035,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_integer extends AbstractFunction {
+	public static class is_integer extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_integer";
@@ -1061,13 +1072,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1080,7 +1089,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_boolean extends AbstractFunction {
+	public static class is_boolean extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_boolean";
@@ -1116,13 +1125,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1135,7 +1142,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_null extends AbstractFunction {
+	public static class is_null extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_null";
@@ -1170,13 +1177,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1189,7 +1194,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_numeric extends AbstractFunction {
+	public static class is_numeric extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_numeric";
@@ -1231,13 +1236,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1252,7 +1255,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_integral extends AbstractFunction {
+	public static class is_integral extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_integral";
@@ -1298,13 +1301,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1482,7 +1483,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class _return extends AbstractFunction {
+	public static class _return extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "return";
@@ -1513,8 +1514,10 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean isTerminal() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.TERMINAL
+			);
 		}				
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
@@ -1524,7 +1527,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class include extends AbstractFunction {
+	public static class include extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "include";
@@ -1574,8 +1577,10 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_CONSTANT
+			);
 		}
 
 		@Override
@@ -1695,7 +1700,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class is_associative extends AbstractFunction {
+	public static class is_associative extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "is_associative";
@@ -1734,13 +1739,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -2047,7 +2050,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class _boolean extends AbstractFunction {
+	public static class _boolean extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "boolean";
@@ -2084,13 +2087,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -2108,7 +2109,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class _integer extends AbstractFunction {
+	public static class _integer extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "integer";
@@ -2148,13 +2149,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -2168,7 +2167,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class _double extends AbstractFunction {
+	public static class _double extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "double";
@@ -2205,13 +2204,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -2224,7 +2221,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class _string extends AbstractFunction {
+	public static class _string extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "string";
@@ -2262,13 +2259,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override

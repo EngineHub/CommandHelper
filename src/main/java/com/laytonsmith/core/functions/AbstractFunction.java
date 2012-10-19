@@ -55,15 +55,6 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * Most functions can't optimize.
-	 *
-	 * @return
-	 */
-	public boolean canOptimize() {
-		return false;
-	}
-
-	/**
 	 * Just return null by default. Most functions won't get to this anyways,
 	 * since canOptimize is returning false.
 	 *
@@ -73,16 +64,6 @@ public abstract class AbstractFunction implements Function {
 	 */
 	public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 		return null;
-	}
-
-	/**
-	 * Most functions (even the ones that can optimize) cannot optimize dynamic
-	 * things.
-	 *
-	 * @return
-	 */
-	public boolean canOptimizeDynamic() {
-		return false;
 	}
 
 	/**
@@ -125,15 +106,7 @@ public abstract class AbstractFunction implements Function {
 	@Override
 	public boolean preResolveVariables() {
 		return true;
-	}
-
-	/**
-	 * Most functions aren't terminal.
-	 * @return 
-	 */
-	public boolean isTerminal() {
-		return false;
-	}		
+	}	
 
 	public ExampleScript[] examples() throws ConfigCompileException {
 		return null;

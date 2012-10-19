@@ -14,9 +14,11 @@ import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
 import com.sk89q.util.StringUtil;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -80,7 +82,12 @@ public class Procedure implements Cloneable {
                     }
                     //If it's optimizable, it's possible. If it's restricted, it doesn't matter, because
                     //we can't optimize it out anyways, because we need to do the permission check
-                    if (!( ( f.canOptimizeDynamic() || f.canOptimize() ) && !f.isRestricted() )) {
+					Set<Optimizable.OptimizationOption> o = EnumSet.noneOf(Optimizable.OptimizationOption.class);
+					if(f instanceof Optimizable){
+						o = ((Optimizable)f).optimizationOptions();
+					}
+                    if (!( ( o != null && (o.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)
+							|| o.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT))) && !f.isRestricted() )) {
                         return false; //Nope. Doesn't matter if the children are or not
                     }
                 } else {

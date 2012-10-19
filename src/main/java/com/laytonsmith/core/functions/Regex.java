@@ -9,7 +9,9 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
@@ -28,7 +30,7 @@ public class Regex {
                 + " Alternatively, using the embedded flag system that Java provides is also valid.";
     }
     
-    @api public static class reg_match extends AbstractFunction{
+    @api public static class reg_match extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "reg_match";
@@ -79,22 +81,7 @@ public class Regex {
                 }
             }
             return ret;
-        }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
-        
-        @Override
-        public boolean canOptimizeDynamic() {
-            return true;
-        }                
+        }             
 
         @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
@@ -103,10 +90,19 @@ public class Regex {
             }
             return null;
         } 
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
         
     }
     
-    @api public static class reg_match_all extends AbstractFunction{
+    @api public static class reg_match_all extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "reg_match_all";
@@ -153,22 +149,7 @@ public class Regex {
                 fret.push(ret);
             }
             return fret;
-        }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
-        
-        @Override
-        public boolean canOptimizeDynamic() {
-            return true;
-        }                
+        }              
 
         @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
@@ -176,11 +157,20 @@ public class Regex {
                 getPattern(children.get(0).getData(), t);
             }
             return null;
-        } 
+        }
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
         
     }
     
-    @api public static class reg_replace extends AbstractFunction{
+    @api public static class reg_replace extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "reg_replace";
@@ -226,22 +216,7 @@ public class Regex {
             }
             
             return new CString(ret, t);
-        }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
-        
-        @Override
-        public boolean canOptimizeDynamic() {
-            return true;
-        }                
+        }           
 
         @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
@@ -266,10 +241,19 @@ public class Regex {
 //            }
 //            return null;
         } 
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
         
     }
     
-    @api public static class reg_split extends AbstractFunction{
+    @api public static class reg_split extends AbstractFunction implements Optimizable{
 
         public String getName() {
             return "reg_split";
@@ -313,21 +297,6 @@ public class Regex {
         }
         
         @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
-        
-        @Override
-        public boolean canOptimizeDynamic() {
-            return true;
-        }                
-
-        @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             ParseTree data = children.get(0);
             if(!data.getData().isDynamic()){
@@ -344,10 +313,19 @@ public class Regex {
             }
             return null;
         } 
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
         
     }  
     
-    @api public static class reg_count extends AbstractFunction{
+    @api public static class reg_count extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "reg_count";
@@ -387,22 +365,7 @@ public class Regex {
                 ret++;
             }
             return new CInt(ret, t);
-        }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }                
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
-        
-        @Override
-        public boolean canOptimizeDynamic() {
-            return true;
-        }                
+        }               
 
         @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
@@ -410,12 +373,21 @@ public class Regex {
                 getPattern(children.get(0).getData(), t);
             }
             return null;
-        }                
+        }
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
         
     }
     
     @api
-    public static class reg_escape extends AbstractFunction{
+    public static class reg_escape extends AbstractFunction implements Optimizable{
 
         public ExceptionType[] thrown() {
             return null;
@@ -451,15 +423,13 @@ public class Regex {
             return CHVersion.V3_3_1;
         }
 
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }                
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
         
     }
     

@@ -90,54 +90,6 @@ public interface Function extends FunctionBase, Documentation {
      * @return 
      */
     public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
-    
-    /**
-     * If a function can possibly optimize during compilation, this should return true. This is only
-     * relevant for functions that do NOT useSpecialExec, as if it takes a code tree, it is assumed that
-     * there is no way to optimize. If a function CAN optimize, and the arguments being sent to the
-     * function are constants, then the function will go ahead and run during compile time. Only functions
-     * that are true functions in the mathematical sense should return true, that is, if there is ANY
-     * case where the function might return differently, even given the same arguments, it CANNOT be
-     * optimized. A function that returns false for preResolveVariables will be sent the arguments even
-     * if they are variables, which may allow for errors to be caught at compile time if a function is
-     * expecting an ivariable to be passed in (such as assign). Functions that can't optimize, but
-     * can check argument types can also return true here.
-     * 
-     * If this returns true, optimize() will be called during compile time, which should return the construct
-     * to replace this function, if possible. It may also return {@code null}, in which case no changes will
-     * be made; this is useful for simple type checking however.
-     * @return 
-     */
-    public boolean canOptimize();   
-    
-    /**
-     * This is called during compile time, if canOptimize returns true. It should return the construct
-     * to replace this function, if possible. If only type checking is being done, it may return null, in
-     * which case no changes will be made to the parse tree. During the optimization, it is also possible
-     * for a function to throw a ConfigCompileException. It may also throw a ConfigRuntimeException, which
-     * will be caught, and changed into a ConfigCompileException.
-     * @param t
-     * @param args
-     * @return 
-     */
-    public Construct optimize(Target t, Construct... args) throws ConfigRuntimeException, ConfigCompileException;
-    
-    /**
-     * If a function knows how to optimize, even if portions are dynamic, it can return true here.
-     * If this returns true, the value of canOptimize is ignored, and optimize will never get called.
-     * @return 
-     */
-    public boolean canOptimizeDynamic();
-    
-    /**
-     * If the function indicates it can optimize dynamic values, this method is called. It may
-     * also throw a compile exception should the parameters be unacceptable. It may return null
-     * if no changes should be made (which is likely the default).
-     * @param t
-     * @param children
-     * @return 
-     */
-    public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException;
 
     /**
      * If a function's syntax allows { braces }, then this method should return true. Exceedingly few functions
@@ -180,16 +132,6 @@ public interface Function extends FunctionBase, Documentation {
 	 * @return 
 	 */
 	public String profileMessageS(List<ParseTree> args);
-	
-	/**
-	 * Returns true if this function is terminal, that is, it will ALWAYS interrupt
-	 * program flow. For instance, return() is an example. This is used during optimization,
-	 * and to give compiler warnings.
-	 * @return 
-	 */
-	public boolean isTerminal();
-    
-    
     
     /**
      * In addition to being a function, an object may also be a code branch, that is,

@@ -4,6 +4,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
@@ -19,8 +20,10 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.lang.reflect.Field;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 /**
  *
@@ -143,7 +146,7 @@ public class Cmdline {
 
     @api(environments={GlobalEnv.class})
     @noboilerplate
-    public static class exit extends AbstractFunction {
+    public static class exit extends AbstractFunction implements Optimizable {
 
         public Exceptions.ExceptionType[] thrown() {
             return null;
@@ -187,9 +190,11 @@ public class Cmdline {
         }
 
 		@Override
-		public boolean isTerminal() {
-			return true;
-		}				
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.TERMINAL
+			);
+		}			
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {

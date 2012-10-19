@@ -23,6 +23,9 @@ __NOTOC__
 |-
 ! scope="row" | Restricted
 | %%restricted%%
+|-
+! scope="row" | Optimizations
+| %%optimizationMessage%%
 |}
 
 ===Description===

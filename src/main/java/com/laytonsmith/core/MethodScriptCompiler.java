@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -22,6 +23,8 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Layton
  */
 public final class MethodScriptCompiler {
+	
+	private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
 
 	private final static FileOptions fileOptions = new FileOptions(new HashMap<String, String>());
 
@@ -1193,7 +1196,11 @@ public final class MethodScriptCompiler {
 					continue outer;
 				}
 				Function f = (Function)FunctionList.getFunction(t.getData());
-				if(f.isTerminal()){
+				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
+				if(f instanceof Optimizable){
+					options = ((Optimizable)f).optimizationOptions();
+				}
+				if(options.contains(OptimizationOption.TERMINAL)){
 					if(children.size() > i + 1){
 						//First, a compiler warning
 						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
@@ -1279,10 +1286,14 @@ public final class MethodScriptCompiler {
 		//the compiler trick functions know how to deal with it specially, even if everything isn't
 		//static, so do this first.
 		String oldFunctionName = func.getName();
-		if (func.canOptimizeDynamic()) {
+		Set<OptimizationOption> options = NO_OPTIMIZATIONS;
+		if(func instanceof Optimizable){
+			options = ((Optimizable)func).optimizationOptions();
+		}
+		if (options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
 			ParseTree tempNode;
 			try {
-				tempNode = func.optimizeDynamic(tree.getData().getTarget(), tree.getChildren());
+				tempNode = ((Optimizable)func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren());
 			} catch (ConfigRuntimeException e) {
 				//Turn it into a compile exception, then rethrow
 				throw new ConfigCompileException(e);
@@ -1307,13 +1318,18 @@ public final class MethodScriptCompiler {
 		}
 		//It could have optimized by changing the name, in that case, we
 		//don't want to run this now
-		if (tree.getData().getValue().equals(oldFunctionName) && func.canOptimize()) {
+		if (tree.getData().getValue().equals(oldFunctionName) && options.contains(OptimizationOption.OPTIMIZE_CONSTANT)) {
 			Construct[] constructs = new Construct[tree.getChildren().size()];
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				constructs[i] = tree.getChildAt(i).getData();
 			}
 			try {
-				Construct result = func.optimize(tree.getData().getTarget(), constructs);
+				Construct result;
+				if(options.contains(OptimizationOption.CONSTANT_OFFLINE)){
+					result = func.exec(tree.getData().getTarget(), null, constructs);
+				} else {
+					result = ((Optimizable)func).optimize(tree.getData().getTarget(), constructs);
+				}
 
 				//If the result is null, it was just a check, it can't optimize further.
 				if (result != null) {

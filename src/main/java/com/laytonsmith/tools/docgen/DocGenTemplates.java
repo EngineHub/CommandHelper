@@ -3,6 +3,7 @@ package com.laytonsmith.tools.docgen;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.annotations.datasource;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.persistance.DataSource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -105,6 +106,20 @@ public class DocGenTemplates {
 				} else {
 					throw new Error("@datasource implementations must implement DataSource.");
 				}
+			}
+			return b.toString();
+		}
+		
+	};
+	
+	public static Generator optimization_explanations = new Generator(){
+
+		public String generate() {
+			StringBuilder b = new StringBuilder();
+			for(Optimizable.OptimizationOption option : Optimizable.OptimizationOption.values()){
+				b.append("=== ").append(option.getName()).append(" ===\n");
+				b.append(option.docs()).append("\n\n");
+				b.append("Since ").append(option.since()).append("\n\n");
 			}
 			return b.toString();
 		}

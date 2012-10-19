@@ -4,8 +4,10 @@ package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.StreamUtils;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;
@@ -43,6 +45,15 @@ public class DocGen {
 			Function f = (Function)fb;
 			String restricted = (f instanceof Function && ((Function)f).isRestricted()) ? "<div style=\"background-color: red; font-weight: bold; text-align: center;\">Yes</div>"
                         : "<div style=\"background-color: green; font-weight: bold; text-align: center;\">No</div>";
+			String optimizationMessage = "None";
+			if(f instanceof Optimizable){
+				Set<Optimizable.OptimizationOption> options = ((Optimizable)f).optimizationOptions();
+				List<String> list = new ArrayList<String>();
+				for(Optimizable.OptimizationOption option : options){
+					list.add("[[CommandHelper/" + (staged?"Staged/":"") + "Optimizer#" + option.name() + "|" + option.name() + "]]");
+				}
+				optimizationMessage = StringUtils.Join(list, "<br />");
+			}
 			DocInfo di = new DocInfo(f.docs());
 			StringBuilder thrown = new StringBuilder();
 			if (f instanceof Function && ((Function)f).thrown() != null) {
@@ -90,6 +101,7 @@ public class DocGen {
 			templateFields.put("throws", thrown.toString());
 			templateFields.put("since", f.since().toString());
 			templateFields.put("restricted", restricted);
+			templateFields.put("optimizationMessage", optimizationMessage);
 			templateFields.put("description", di.extendedDesc==null?di.desc:di.topDesc + "\n\n" + di.extendedDesc);
 			templateFields.put("usages", usageBuilder.toString());
 			templateFields.put("examples", exampleBuilder.toString());

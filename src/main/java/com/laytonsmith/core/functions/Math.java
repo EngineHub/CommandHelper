@@ -2,6 +2,8 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
@@ -16,8 +18,10 @@ import com.laytonsmith.core.functions.Math;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -32,7 +36,7 @@ public class Math {
 	}
 
 	@api
-	public static class add extends AbstractFunction {
+	public static class add extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "add";
@@ -75,16 +79,6 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Demonstrates adding two numbers together", "msg(add(2, 2))"),
@@ -95,19 +89,22 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
-		}
-
-		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 	}
 
 	@api
-	public static class subtract extends AbstractFunction {
+	public static class subtract extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "subtract";
@@ -150,21 +147,6 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
-		}
-
-		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
-		}
-
-		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
@@ -176,10 +158,18 @@ public class Math {
 						new ExampleScript("Demonstrates basic usage", "subtract(4 - 3)"),
 						new ExampleScript("Demonstrates symbolic usage", "12 - 5"),};
 		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 	}
 
 	@api
-	public static class multiply extends AbstractFunction {
+	public static class multiply extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "multiply";
@@ -222,21 +212,6 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
-		}
-
-		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
-		}
-
-		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
@@ -248,10 +223,18 @@ public class Math {
 						new ExampleScript("Demonstrates basic usage", "multiply(8, 8)"),
 						new ExampleScript("Demonstrates symbolic usage", "8 * 8"),};
 		}
+		
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 	}
 
 	@api
-	public static class divide extends AbstractFunction {
+	public static class divide extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "divide";
@@ -299,21 +282,6 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
-		}
-
-		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
-		}
-
-		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
@@ -327,10 +295,18 @@ public class Math {
 						new ExampleScript("Demonstrates symbolic usage", "2 / 4"),
 						new ExampleScript("Demonstrates divide by zero error", "assign(@zero, 0)\nmsg(1 / @zero)"),};
 		}
+		
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_DYNAMIC,
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 	}
 
 	@api
-	public static class mod extends AbstractFunction {
+	public static class mod extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "mod";
@@ -367,25 +343,23 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Demonstrates basic usage", "mod(2, 2)"),
 						new ExampleScript("Demonstrates symbolic usage", "2 % 2"),};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 	}
 
 	@api
-	public static class pow extends AbstractFunction {
+	public static class pow extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "pow";
@@ -422,25 +396,23 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Demonstrates basic usage", "pow(2, 4)"),
 						new ExampleScript("Demonstrates symbolic usage", "2 ** 4"),};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class inc extends AbstractFunction {
+	public static class inc extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "inc";
@@ -508,28 +480,23 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			if (args[0] instanceof IVariable) {
-				return null; //Can't optimize this
-			}
-			return exec(t, null, args);
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Demonstrates basic usage", "assign(@x, 0)\nmsg(@x)\ninc(@x)\nmsg(@x)"),
 						new ExampleScript("Demonstrates symbolic usage", "assign(@x, 0)\nmsg(@x)\n++@x\nmsg(@x)"),};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class postinc extends AbstractFunction {
+	public static class postinc extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "postinc";
@@ -602,21 +569,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			if (args[0] instanceof IVariable) {
-				return null; //Can't optimize this
-			}
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class dec extends AbstractFunction {
+	public static class dec extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "dec";
@@ -683,21 +645,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			if (args[0] instanceof IVariable) {
-				return null; //Can't optimize this
-			}
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class postdec extends AbstractFunction {
+	public static class postdec extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "postdec";
@@ -770,16 +727,11 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			if (args[0] instanceof IVariable) {
-				return null; //Can't optimize this
-			}
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
@@ -845,7 +797,7 @@ public class Math {
 	}
 
 	@api
-	public static class abs extends AbstractFunction {
+	public static class abs extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "abs";
@@ -881,26 +833,24 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 						new ExampleScript("Demonstrates a positive number", "abs(5)"),
 						new ExampleScript("Demonstrates a negative number", "abs(-5)")
 					};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 	}
 
 	@api
-	public static class floor extends AbstractFunction {
+	public static class floor extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "floor";
@@ -935,18 +885,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class ceil extends AbstractFunction {
+	public static class ceil extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "ceil";
@@ -981,18 +929,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class sqrt extends AbstractFunction {
+	public static class sqrt extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "sqrt";
@@ -1037,18 +983,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class min extends AbstractFunction {
+	public static class min extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "min";
@@ -1114,18 +1058,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class max extends AbstractFunction {
+	public static class max extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "max";
@@ -1191,18 +1133,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class sin extends AbstractFunction {
+	public static class sin extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "sin";
@@ -1237,18 +1177,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class cos extends AbstractFunction {
+	public static class cos extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "cos";
@@ -1283,18 +1221,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class tan extends AbstractFunction {
+	public static class tan extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "tan";
@@ -1329,18 +1265,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class asin extends AbstractFunction {
+	public static class asin extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "asin";
@@ -1375,18 +1309,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class acos extends AbstractFunction {
+	public static class acos extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "acos";
@@ -1421,18 +1353,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class atan extends AbstractFunction {
+	public static class atan extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "atan";
@@ -1467,18 +1397,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class to_radians extends AbstractFunction {
+	public static class to_radians extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "to_radians";
@@ -1513,18 +1441,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class to_degrees extends AbstractFunction {
+	public static class to_degrees extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "to_degrees";
@@ -1559,18 +1485,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class atan2 extends AbstractFunction {
+	public static class atan2 extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "atan2";
@@ -1609,18 +1533,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class round extends AbstractFunction {
+	public static class round extends AbstractFunction implements Optimizable{
 
 		public String getName() {
 			return "round";
@@ -1672,16 +1594,6 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
-		}
-
-		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 				new ExampleScript("Rounding up", "round(2.5)"),
@@ -1690,11 +1602,18 @@ public class Math {
 			};
 		}
 		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 		
 	}
 
 	@api
-	public static class expr extends AbstractFunction {
+	public static class expr extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "expr";
@@ -1764,18 +1683,16 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 
 	@api
-	public static class neg extends AbstractFunction {
+	public static class neg extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "neg";
@@ -1814,13 +1731,11 @@ public class Math {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 	}
 }

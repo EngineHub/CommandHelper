@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -9,7 +10,9 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -114,7 +117,7 @@ public class Reflection {
 	}
 
 	@api(environments={CommandHelperEnvironment.class})
-	public static class reflect_docs extends AbstractFunction {
+	public static class reflect_docs extends AbstractFunction implements Optimizable {
 
 		public static enum DocField {
 
@@ -211,20 +214,13 @@ public class Reflection {
 			}
 			return null;
 		}
-
+		
 		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
-		}
-
-		@Override
-		public boolean canOptimize() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
 		}
 
 		public String getName() {

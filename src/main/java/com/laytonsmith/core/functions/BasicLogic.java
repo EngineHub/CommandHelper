@@ -11,8 +11,10 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -25,7 +27,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class _if extends AbstractFunction {
+	public static class _if extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "if";
@@ -94,10 +96,12 @@ public class BasicLogic {
 		public boolean useSpecialExec() {
 			return true;
 		}
-
+		
 		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+				OptimizationOption.OPTIMIZE_DYNAMIC
+			);
 		}
 
 		@Override
@@ -307,7 +311,7 @@ public class BasicLogic {
 	}
 
 	@api(environments={GlobalEnv.class})
-	public static class ifelse extends AbstractFunction {
+	public static class ifelse extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "ifelse";
@@ -382,8 +386,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+				OptimizationOption.OPTIMIZE_DYNAMIC
+			);
 		}
 
 		@Override
@@ -495,7 +501,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class equals extends AbstractFunction {
+	public static class equals extends AbstractFunction implements Optimizable {
 
 		private static equals self = new equals();
 
@@ -597,13 +603,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -617,7 +621,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class sequals extends AbstractFunction {
+	public static class sequals extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "sequals";
@@ -662,13 +666,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -682,7 +684,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class snequals extends AbstractFunction {
+	public static class snequals extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "snequals";
@@ -717,13 +719,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -736,7 +736,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class nequals extends AbstractFunction {
+	public static class nequals extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "nequals";
@@ -774,13 +774,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -793,7 +791,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class equals_ic extends AbstractFunction {
+	public static class equals_ic extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "equals_ic";
@@ -870,13 +868,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -889,7 +885,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class nequals_ic extends AbstractFunction {
+	public static class nequals_ic extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "nequals_ic";
@@ -926,13 +922,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -945,7 +939,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class lt extends AbstractFunction {
+	public static class lt extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "lt";
@@ -982,13 +976,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1002,7 +994,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class gt extends AbstractFunction {
+	public static class gt extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "gt";
@@ -1039,13 +1031,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1059,7 +1049,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class lte extends AbstractFunction {
+	public static class lte extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "lte";
@@ -1096,13 +1086,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1117,7 +1105,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class gte extends AbstractFunction {
+	public static class gte extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "gte";
@@ -1154,13 +1142,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1301,7 +1287,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class not extends AbstractFunction {
+	public static class not extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "not";
@@ -1336,13 +1322,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1356,7 +1340,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class xor extends AbstractFunction {
+	public static class xor extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "xor";
@@ -1393,13 +1377,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1521,7 +1503,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class xnor extends AbstractFunction {
+	public static class xnor extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "xnor";
@@ -1558,14 +1540,13 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
-		}
+		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -1575,7 +1556,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class bit_and extends AbstractFunction {
+	public static class bit_and extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "bit_and";
@@ -1617,13 +1598,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1637,7 +1616,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class bit_or extends AbstractFunction {
+	public static class bit_or extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "bit_or";
@@ -1679,13 +1658,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1701,7 +1678,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class bit_not extends AbstractFunction {
+	public static class bit_not extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "bit_not";
@@ -1736,13 +1713,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1754,7 +1729,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class lshift extends AbstractFunction {
+	public static class lshift extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "lshift";
@@ -1791,13 +1766,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1809,7 +1782,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class rshift extends AbstractFunction {
+	public static class rshift extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "rshift";
@@ -1846,13 +1819,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1865,7 +1836,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class urshift extends AbstractFunction {
+	public static class urshift extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "urshift";
@@ -1903,13 +1874,11 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 		
 		@Override
@@ -1922,7 +1891,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class _elseif extends AbstractFunction {
+	public static class _elseif extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "elseif";
@@ -1968,8 +1937,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+				OptimizationOption.OPTIMIZE_CONSTANT
+			);
 		}
 
 		@Override
@@ -2027,16 +1998,6 @@ public class BasicLogic {
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			return super.optimizeDynamic(t, children);
-		}
-
-		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
 		}
 
 		@Override

@@ -653,7 +653,7 @@ public class InventoryManagement {
 	public static class get_inventory_type extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return null;
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -700,7 +700,7 @@ public class InventoryManagement {
 	public static class get_inventory_size extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {

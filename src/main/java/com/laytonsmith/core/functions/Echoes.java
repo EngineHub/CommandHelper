@@ -12,6 +12,7 @@ import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -21,7 +22,9 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.util.StringUtil;
+import java.util.EnumSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.logging.Level;
 
@@ -35,7 +38,7 @@ public class Echoes {
     }
     @api(environments={CommandHelperEnvironment.class})
 	@noboilerplate 
-	public static class die extends AbstractFunction{
+	public static class die extends AbstractFunction implements Optimizable {
         public Integer []numArgs() {
             return new Integer[]{Integer.MAX_VALUE};
         }
@@ -76,8 +79,10 @@ public class Echoes {
         }
 
 		@Override
-		public boolean isTerminal() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+				OptimizationOption.TERMINAL
+			);
 		}				
     }
     
@@ -183,7 +188,7 @@ public class Echoes {
         }
     }
     
-    @api public static class color extends AbstractFunction{
+    @api public static class color extends AbstractFunction implements Optimizable {
 		
 		private Map<String, CString> colors = new TreeMap<String, CString>();
 
@@ -282,13 +287,11 @@ public class Echoes {
         }
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {			
-			return this.exec(t, null, args);
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
 		}
 				
     }

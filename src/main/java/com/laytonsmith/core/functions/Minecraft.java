@@ -933,7 +933,7 @@ public class Minecraft {
 	public static class set_spawner_type extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {

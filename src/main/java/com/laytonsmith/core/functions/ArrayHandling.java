@@ -14,9 +14,11 @@ import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
+import java.util.Set;
 
 /**
  *
@@ -77,7 +79,7 @@ public class ArrayHandling {
 	}
 
 	@api(environments={GlobalEnv.class})
-	public static class array_get extends AbstractFunction {
+	public static class array_get extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "array_get";
@@ -244,11 +246,6 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public boolean canOptimize() {
-			return true;
-		}
-
-		@Override
 		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
 			if (args[0] instanceof ArrayAccess) {
 				ArrayAccess aa = (ArrayAccess) args[0];
@@ -272,6 +269,13 @@ public class ArrayHandling {
 				new ExampleScript("Demonstrates default", "array_get(array(), 1, 'default')"),
 				new ExampleScript("Demonstrates bracket notation", "array(0, 1, 2)[2]"),
 			};
+		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+				OptimizationOption.OPTIMIZE_CONSTANT
+			);
 		}
 	}
 
@@ -1027,7 +1031,7 @@ public class ArrayHandling {
 	}
 
 	@api
-	public static class array_sort extends AbstractFunction {
+	public static class array_sort extends AbstractFunction implements Optimizable {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
@@ -1089,10 +1093,12 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-
+		
 		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+				OptimizationOption.OPTIMIZE_DYNAMIC
+			);
 		}
 
 		@Override

@@ -2465,7 +2465,7 @@ public class PlayerManagement {
 	public static class psend_block_change extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {

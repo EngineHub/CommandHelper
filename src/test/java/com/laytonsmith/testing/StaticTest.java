@@ -109,22 +109,32 @@ public class StaticTest {
         
         //Let's make sure that if execs is defined in the class, useSpecialExec returns true.
         //Same thing for optimize/canOptimize and optimizeDynamic/canOptimizeDynamic
+		if(f instanceof Optimizable){
+			Set<Optimizable.OptimizationOption> options = ((Optimizable)f).optimizationOptions();
+			if(options.contains(Optimizable.OptimizationOption.CONSTANT_OFFLINE) && options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)){
+				fail(f.getName() + " declares both CONSTANT_OFFLINE and OPTIMIZE_CONSTANT, which are mutually exclusive.");
+			}
+		}
         for(Method method : f.getClass().getDeclaredMethods()){
             if(method.getName().equals("execs")){
                 if(!f.useSpecialExec()){
                     fail(f.getName() + " declares execs, but returns false for useSpecialExec.");
                 }
             }
-            if(method.getName().equals("optimize")){
-                if(!f.canOptimize()){
-                    fail(f.getName() + " declares optimize, but returns false for canOptimize");
-                }
-            }
-            if(method.getName().equals("optimizeDynamic")){
-                if(!f.canOptimizeDynamic()){
-                    fail(f.getName() + " declares optimizeDynamic, but returns false for canOptimizeDynamic");
-                }
-            }
+			
+			if(f instanceof Optimizable){
+				Set<Optimizable.OptimizationOption> options = ((Optimizable)f).optimizationOptions();
+				if(method.getName().equals("optimize")){
+					if(!options.contains(Optimizable.OptimizationOption.OPTIMIZE_CONSTANT)){
+						fail(f.getName() + " declares optimize, but does not declare that it can OPTIMIZE_CONSTANT");
+					}
+				}
+				if(method.getName().equals("optimizeDynamic")){
+					if(!options.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)){
+						fail(f.getName() + " declares optimizeDynamic, but does not declare that it can OPTIMIZE_DYNAMIC");
+					}
+				}
+			}
         }
         
 

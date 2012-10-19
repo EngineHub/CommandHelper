@@ -9,8 +9,10 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -56,8 +58,7 @@ public class Compiler {
     
     @api 
 	@noprofile
-	public static class centry extends DummyFunction{
-
+	public static class centry extends DummyFunction {
         public String docs() {
             return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
                     + "compiler.";
@@ -66,22 +67,13 @@ public class Compiler {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             return new CEntry(args[0], args[1], t);
         }
-
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }                
+		
     }
     
     
     @api
 	@noprofile
-    public static class __autoconcat__ extends DummyFunction {
+    public static class __autoconcat__ extends DummyFunction implements Optimizable {
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
@@ -93,9 +85,11 @@ public class Compiler {
         }
 
         @Override
-        public boolean canOptimizeDynamic() {
-            return true;
-        }
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
 
         @Override
         public ParseTree optimizeDynamic(Target t, List<ParseTree> list) throws ConfigCompileException {
@@ -379,15 +373,17 @@ public class Compiler {
                        
     }
 	
-	@api public static class __cbracket__ extends DummyFunction{
+	@api public static class __cbracket__ extends DummyFunction implements Optimizable {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
 		}
 
 		@Override
@@ -413,15 +409,17 @@ public class Compiler {
 		
 	}
 	
-	@api public static class __cbrace__ extends DummyFunction{
+	@api public static class __cbrace__ extends DummyFunction implements Optimizable {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
 
 		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
 		}
 
 		@Override

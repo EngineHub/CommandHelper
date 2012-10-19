@@ -14,7 +14,9 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 /**
@@ -110,7 +112,7 @@ public class StringHandling {
     }
 
     @api
-    public static class concat extends AbstractFunction {
+    public static class concat extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "concat";
@@ -147,21 +149,6 @@ public class StringHandling {
             return null;
         }
 
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) {
-            return exec(t, null, args);
-        }        
-
-		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
-		}
-
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
@@ -176,12 +163,20 @@ public class StringHandling {
 			};
 		}
 		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
 		
     }
 
     @api
 	@noprofile
-    public static class sconcat extends AbstractFunction {
+    public static class sconcat extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "sconcat";
@@ -263,21 +258,6 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }      
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) {
-            return exec(t, null, args);
-        }
-
-		@Override
-		public boolean canOptimizeDynamic() {
-			return true;
-		}
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
@@ -293,11 +273,18 @@ public class StringHandling {
 			};
 		}
 		
-		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN,
+						OptimizationOption.OPTIMIZE_DYNAMIC
+			);
+		}
     }    
 
     @api
-    public static class replace extends AbstractFunction {
+    public static class replace extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "replace";
@@ -332,16 +319,6 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -350,10 +327,18 @@ public class StringHandling {
 						new ExampleScript("No match found", "replace('The same thing', 'not found', '404')"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
 
     @api
-    public static class parse_args extends AbstractFunction {
+    public static class parse_args extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "parse_args";
@@ -398,16 +383,6 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -416,11 +391,19 @@ public class StringHandling {
 				new ExampleScript("Demonstrates usage with extra spaces", "parse_args('This   trims   extra   spaces')")
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 				
     }
 
     @api
-    public static class trim extends AbstractFunction {
+    public static class trim extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "trim";
@@ -452,16 +435,6 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -469,9 +442,17 @@ public class StringHandling {
 						new ExampleScript("", "'->' . trim('    <- spaces ->    ') . '<-'"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
     @api
-    public static class trimr extends AbstractFunction {
+    public static class trimr extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "trimr";
@@ -503,16 +484,6 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -520,9 +491,17 @@ public class StringHandling {
 						new ExampleScript("", "'->' . trimr('    <- spaces ->    ') . '<-'"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
     @api
-    public static class triml extends AbstractFunction {
+    public static class triml extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "triml";
@@ -554,16 +533,6 @@ public class StringHandling {
         public Boolean runAsync() {
             return null;
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -571,10 +540,18 @@ public class StringHandling {
 						new ExampleScript("", "'->' . triml('    <- spaces ->    ') . '<-'"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
 
     @api
-    public static class length extends AbstractFunction {
+    public static class length extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "length";
@@ -610,16 +587,6 @@ public class StringHandling {
                 return new CInt(args[0].val().length(), t);
             }
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -628,10 +595,18 @@ public class StringHandling {
 						new ExampleScript("Arrays", "length(array('1', 2, '3', 4))"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
 
     @api
-    public static class to_upper extends AbstractFunction {
+    public static class to_upper extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "to_upper";
@@ -663,16 +638,6 @@ public class StringHandling {
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().toUpperCase(), t);
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -682,10 +647,18 @@ public class StringHandling {
 						new ExampleScript("", "to_upper('Numbers (and SYMBOLS: 25)')"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
 
     @api
-    public static class to_lower extends AbstractFunction {
+    public static class to_lower extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "to_lower";
@@ -717,16 +690,6 @@ public class StringHandling {
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             return new CString(args[0].val().toLowerCase(), t);
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -736,10 +699,18 @@ public class StringHandling {
 						new ExampleScript("", "to_lower('Numbers (and SYMBOLS: 25)')"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
 
     @api
-    public static class substr extends AbstractFunction {
+    public static class substr extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "substr";
@@ -787,16 +758,6 @@ public class StringHandling {
                         ExceptionType.RangeException, t);
             }
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -807,10 +768,18 @@ public class StringHandling {
 						new ExampleScript("If the indexes are too large", "assign(@big, 25)\nsubstr('small', @big)"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
 	
     @api
-    public static class string_position extends AbstractFunction {
+    public static class string_position extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "string_position";
@@ -827,7 +796,7 @@ public class StringHandling {
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{};
+            return new ExceptionType[]{ExceptionType.NullPointerException};
         }
 
         public boolean isRestricted() {
@@ -847,16 +816,6 @@ public class StringHandling {
 			Static.AssertNonCNull(t, args);
 			return new CInt(haystack.indexOf(needle), t);
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -865,10 +824,18 @@ public class StringHandling {
 				new ExampleScript("String not found", "string_position('Where\\'s Waldo?', 'Dunno.')"),
 			};
 		}
+		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
     }
 	
     @api
-    public static class split extends AbstractFunction {
+    public static class split extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "split";
@@ -921,16 +888,6 @@ public class StringHandling {
 			}
 			return array;
         }
-        
-        @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -940,6 +897,13 @@ public class StringHandling {
 			};
 		}
 		
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 		
     }
 	

@@ -4,6 +4,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
@@ -16,6 +17,8 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.EnumSet;
+import java.util.Set;
 import org.mindrot.jbcrypt.BCrypt;
 
 /**
@@ -28,7 +31,7 @@ public class Crypto {
     }
 
     @api
-    public static class rot13 extends AbstractFunction {
+    public static class rot13 extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "rot13";
@@ -77,14 +80,12 @@ public class Crypto {
         }
         
         @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -98,7 +99,7 @@ public class Crypto {
     }
 
     @api
-    public static class md5 extends AbstractFunction {
+    public static class md5 extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "md5";
@@ -141,14 +142,12 @@ public class Crypto {
         }
         
         @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -160,7 +159,7 @@ public class Crypto {
     }
 
     @api
-    public static class sha1 extends AbstractFunction {
+    public static class sha1 extends AbstractFunction implements Optimizable {
 
         public String getName() {
             return "sha1";
@@ -202,14 +201,12 @@ public class Crypto {
         }
         
         @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -220,7 +217,7 @@ public class Crypto {
 		}
     }
     
-    @api public static class sha256 extends AbstractFunction{
+    @api public static class sha256 extends AbstractFunction implements Optimizable {
 
 	public String getName() {
             return "sha256";
@@ -262,14 +259,12 @@ public class Crypto {
         }
         
         @Override
-        public boolean canOptimize() {
-            return true;
-        }
-
-        @Override
-        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-            return exec(t, null, args);
-        }
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+						OptimizationOption.CONSTANT_OFFLINE,
+						OptimizationOption.CACHE_RETURN
+			);
+		}
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
