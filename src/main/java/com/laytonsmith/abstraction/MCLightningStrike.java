@@ -8,8 +8,7 @@ package com.laytonsmith.abstraction;
  *
  * @author Jim
  */
-public interface MCExperienceOrb extends MCEntity{
+public interface MCLightningStrike extends MCEntity{
 
-	public int getExperience();
-	public void setExperience(int amount);
+	public boolean isEffect();
 }
