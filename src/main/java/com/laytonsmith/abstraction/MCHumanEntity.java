@@ -16,7 +16,7 @@ public interface MCHumanEntity extends MCLivingEntity, MCAnimalTamer{
 	public boolean isBlocking();
 	public boolean isSleeping();
 	//public MCInventoryView openEnchanting(MCLocation location, boolean force);
-	//public MCInventoryView openInventory(MCInventory inventory);
+	public MCInventoryView openInventory(MCInventory inventory);
 	//public void openInventory(MCInventoryView inventory);
 	//public MCInventoryView	openWorkbench(MCLocation location, boolean force);
 	void	setGameMode(MCGameMode mode);
