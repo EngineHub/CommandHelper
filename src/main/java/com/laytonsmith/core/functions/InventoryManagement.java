@@ -771,11 +771,16 @@ public class InventoryManagement {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length == 1){
-				p = Static.GetPlayer(args[0]);
+			MCPlayer p1 = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p2;
+			if(args.length == 2){
+				p1 = Static.GetPlayer(args[0]);
+				p2 = Static.GetPlayer(args[1]);
+			} else {
+				p2 = Static.GetPlayer(args[0]);
 			}
-			p.openInventory(p.getInventory());
+			
+			p1.openInventory(p2.getInventory());
 			return new CVoid(t);
 		}
 
@@ -784,11 +789,11 @@ public class InventoryManagement {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{0, 1};
+			return new Integer[]{1, 2};
 		}
 
 		public String docs() {
-			return "void {[player]} Opens a player's inventory on their screen.";
+			return "void {[playerToShow,] playerInventory} Opens a player's inventory, shown to the player specified's screen.";
 		}
 
 		public CHVersion since() {
