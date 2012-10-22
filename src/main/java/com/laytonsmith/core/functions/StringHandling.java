@@ -885,6 +885,9 @@ public class StringHandling {
 			}
 			if(sp != 0){
 				array.push(new CString(string.substring(sp, string.length()), t));
+			} else {
+				//It was not found anywhere, so put the whole string in
+				array.push(args[1]);
 			}
 			return array;
         }
