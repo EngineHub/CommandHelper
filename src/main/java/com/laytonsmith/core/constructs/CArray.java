@@ -105,7 +105,7 @@ public class CArray extends Construct implements ArrayAccess{
 	 * sets the toString value to dirty, which means that the value will be regenerated
 	 * next time it is requested.
 	 */
-    private void regenValue() {
+    private void regenValue() {		
         valueDirty = true;
     }
 	
@@ -316,7 +316,7 @@ public class CArray extends Construct implements ArrayAccess{
 			}
 		}
 		return ret;
-	}
+	}		
 
     @Override
     public String val() {

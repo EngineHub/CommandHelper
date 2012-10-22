@@ -900,7 +900,6 @@ public class StringHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN
 			);
 		}
