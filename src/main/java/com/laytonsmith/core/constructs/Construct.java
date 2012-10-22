@@ -43,8 +43,8 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         this.target = target;
     }
     
-    public String getValue() {
-        return value;
+    public final String getValue() {
+        return val();
     }
 
     public int getLineNum() {

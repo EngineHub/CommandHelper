@@ -754,6 +754,53 @@ public class InventoryManagement {
 			return inv;
 		}
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class pinv_open extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p1 = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCPlayer p2;
+			if(args.length == 2){
+				p1 = Static.GetPlayer(args[0]);
+				p2 = Static.GetPlayer(args[1]);
+			} else {
+				p2 = Static.GetPlayer(args[0]);
+			}
+			
+			p1.openInventory(p2.getInventory());
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "pinv_open";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[playerToShow,] playerInventory} Opens a player's inventory, shown to the player specified's screen.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
     
 //    @api
 //    public static class pinv_consolidate extends AbstractFunction {

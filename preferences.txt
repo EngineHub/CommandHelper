@@ -22,11 +22,11 @@ debug-mode=false
 #The path the standard log files that the log() function writes to. Six variables are available, %Y, %M, and %D, %h, %m, %s, which are replaced with the current year, month, day, hour, minute and second respectively. It is highly recommended that you use at least year, month, and day if you are actively logging things, otherwise the file size would get excessively large. The path is relative to the CommandHelper directory and is not bound by the base-dir restriction.
 standard-log-file=logs/%Y-%M-%D-commandhelper.log
 
-#If set to false, the Profiling class of functions will do nothing.
-allow-profiling=false
-
 #The path to the main file, relative to the CommandHelper folder
 main-file=main.ms
+
+#If set to false, the Profiling class of functions will do nothing.
+allow-profiling=false
 
 #Whether or not to show the splash screen at server startup
 show-splash-screen=true

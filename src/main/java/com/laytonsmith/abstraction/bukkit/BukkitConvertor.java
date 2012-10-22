@@ -150,6 +150,10 @@ public class BukkitConvertor implements Convertor {
 			return new BukkitMCItem((Item)be);
 		}
 		
+		if(be instanceof LightningStrike){
+			return new BukkitMCLightningStrike((LightningStrike)be);
+		}
+		
 		if(be instanceof ExperienceOrb){
 			return new BukkitMCExperienceOrb((ExperienceOrb)be);
 		}

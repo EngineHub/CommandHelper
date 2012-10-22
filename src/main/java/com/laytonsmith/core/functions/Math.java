@@ -485,12 +485,20 @@ public class Math {
 						new ExampleScript("Demonstrates basic usage", "assign(@x, 0)\nmsg(@x)\ninc(@x)\nmsg(@x)"),
 						new ExampleScript("Demonstrates symbolic usage", "assign(@x, 0)\nmsg(@x)\n++@x\nmsg(@x)"),};
 		}
+
+		@Override
+		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+			if(args[0] instanceof IVariable){
+				return null;
+			} else {
+				return exec(t, null, args);
+			}
+		}				
 		
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+						OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
 	}
@@ -569,10 +577,18 @@ public class Math {
 		}
 
 		@Override
+		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+			if(args[0] instanceof IVariable){
+				return null;
+			} else {
+				return exec(t, null, args);
+			}
+		}				
+		
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+						OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
 	}
@@ -645,10 +661,18 @@ public class Math {
 		}
 
 		@Override
+		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+			if(args[0] instanceof IVariable){
+				return null;
+			} else {
+				return exec(t, null, args);
+			}
+		}				
+		
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+						OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
 	}
@@ -727,10 +751,18 @@ public class Math {
 		}
 
 		@Override
+		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+			if(args[0] instanceof IVariable){
+				return null;
+			} else {
+				return exec(t, null, args);
+			}
+		}				
+		
+		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
-						OptimizationOption.CACHE_RETURN
+						OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
 	}

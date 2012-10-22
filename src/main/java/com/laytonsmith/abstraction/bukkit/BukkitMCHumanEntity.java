@@ -2,8 +2,11 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCGameMode;
 import com.laytonsmith.abstraction.MCHumanEntity;
+import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCInventoryView;
 import com.laytonsmith.abstraction.MCItemStack;
 import org.bukkit.entity.HumanEntity;
+import org.bukkit.inventory.Inventory;
 
 /**
  *
@@ -64,5 +67,9 @@ public class BukkitMCHumanEntity extends BukkitMCLivingEntity implements MCHuman
 
 	public void setItemOnCursor(MCItemStack item) {
 		he.setItemOnCursor(((BukkitMCItemStack)item).asItemStack());
+	}
+
+	public MCInventoryView openInventory(MCInventory inventory) {
+		return new BukkitMCInventoryView(he.openInventory((Inventory)inventory.getHandle()));
 	}
 }

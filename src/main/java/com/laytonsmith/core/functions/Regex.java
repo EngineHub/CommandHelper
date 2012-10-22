@@ -304,8 +304,8 @@ public class Regex {
 				if(isLiteralRegex(pattern)){
 					//We want to replace this with split()
 					ParseTree split = new ParseTree(new CFunction("split", t), data.getFileOptions());
-					split.addChildAt(0, children.get(1));
-					split.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), split.getFileOptions()));
+					split.addChildAt(0, new ParseTree(new CString(getLiteralRegex(pattern), t), split.getFileOptions()));
+					split.addChildAt(1, children.get(1));
 					return split;
 				} else {
 					getPattern(data.getData(), t);
@@ -317,7 +317,6 @@ public class Regex {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.CONSTANT_OFFLINE,
 						OptimizationOption.CACHE_RETURN,
 						OptimizationOption.OPTIMIZE_DYNAMIC
 			);
