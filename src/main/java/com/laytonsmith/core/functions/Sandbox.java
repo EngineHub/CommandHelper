@@ -145,6 +145,7 @@ public class Sandbox {
             MCLocation l = null;
             int qty = 1;
             MCItemStack is = null;
+			MCItem item = null;
             boolean natural = false;
             if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
                 l = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getLocation();
@@ -185,14 +186,17 @@ public class Sandbox {
             }
             if (l.getWorld() != null) {
                 if (natural) {
-                    l.getWorld().dropItemNaturally(l, is);
+                    item = l.getWorld().dropItemNaturally(l, is);
                 } else {
-                    l.getWorld().dropItem(l, is);
+                    item = l.getWorld().dropItem(l, is);
                 }
             } else {
                 throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
             }
 
+			if(item != null){
+				return new CInt(item.getEntityId(), t);
+			}
             return new CVoid(t);
         }
     }    

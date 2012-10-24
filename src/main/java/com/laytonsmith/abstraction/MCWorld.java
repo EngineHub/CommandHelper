@@ -20,9 +20,9 @@ public interface MCWorld extends AbstractionObject{
 
     public void playEffect(MCLocation l, MCEffect mCEffect, int e, int data);
 
-    public void dropItemNaturally(MCLocation l, MCItemStack is);
+    public MCItem dropItemNaturally(MCLocation l, MCItemStack is);
 
-    public void dropItem(MCLocation l, MCItemStack is);
+    public MCItem dropItem(MCLocation l, MCItemStack is);
 
     public void strikeLightning(MCLocation GetLocation);
 
