@@ -15,6 +15,7 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
+import sun.text.normalizer.Replaceable;
 
 /**
  *
@@ -227,9 +228,9 @@ public class Regex {
 					//We want to replace this with replace()
 					//Note the alternative order of arguments
 					ParseTree replace = new ParseTree(new CFunction("replace", t), data.getFileOptions());
-					replace.addChildAt(2, new ParseTree(new CString(getLiteralRegex(pattern), t), replace.getFileOptions())); //pattern -> what
 					replace.addChildAt(0, children.get(2)); //subject -> main
 					replace.addChildAt(1, children.get(1)); //replacement -> that
+					replace.addChildAt(2, new ParseTree(new CString(getLiteralRegex(pattern), t), replace.getFileOptions())); //pattern -> what
 					return replace;
 				} else {
 					getPattern(data.getData(), t);
