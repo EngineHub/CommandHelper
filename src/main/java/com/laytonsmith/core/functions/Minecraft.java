@@ -277,7 +277,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			List<MCWorld> worlds = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer().getWorlds();
+			List<MCWorld> worlds = StaticLayer.GetServer().getWorlds();
 			CArray c = new CArray(t);
 			for (MCWorld w : worlds) {
 				c.push(new CString(w.getName(), t));
