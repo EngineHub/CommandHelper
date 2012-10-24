@@ -13,8 +13,11 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -1468,4 +1471,61 @@ public class ArrayHandling {
 		
 		
 	}
+	
+//	@api
+//	public static class array_unique extends AbstractFunction{
+//
+//		public ExceptionType[] thrown() {
+//			return new ExceptionType[]{ExceptionType.CastException};
+//		}
+//
+//		public boolean isRestricted() {
+//			return false;
+//		}
+//
+//		public Boolean runAsync() {
+//			return null;
+//		}
+//
+//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//			CArray array = Static.getArray(args[0], t);
+//			boolean compareTypes = true;
+//			if(args.length == 2){
+//				compareTypes = Static.getBoolean(args[1]);
+//			}
+//
+//					
+//			
+//		}
+//
+//		public String getName() {
+//			return "array_unique";
+//		}
+//
+//		public Integer[] numArgs() {
+//			return new Integer[]{1, 2};
+//		}
+//
+//		public String docs() {
+//			return "array {array, [compareTypes]} Removes all non-unique values from an array. ---- compareTypes is true by default, which means that in the array"
+//					+ " array(1, '1'), nothing would be removed from the array, since both values are different data types. However, if compareTypes is true,"
+//					+ " then the first value would remain, but the second value would be removed. A reference to the array is returned, however, note that the removals"
+//					+ " are in-place, so the reference will be to the same array passed in. After values are removed, (if a normal array) the array will be resized"
+//					+ " down to fit the new size.";
+//		}
+//
+//		public CHVersion since() {
+//			return CHVersion.V3_3_1;
+//		}
+//
+//		@Override
+//		public ExampleScript[] examples() throws ConfigCompileException {
+//			return new ExampleScript[]{
+//				new ExampleScript("Basic usage", "array_unique(array(1, 2, 2, 3, 4))"),
+//				new ExampleScript("No removal of different datatypes", "array_unique(array(1, '1'))"),
+//				new ExampleScript("Removal of different datatypes, by setting compareTypes to false", "array_unique(array(1, '1'), false)"),
+//			};
+//		}				
+//		
+//	}
 }

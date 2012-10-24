@@ -302,7 +302,7 @@ public class StringHandling {
         }
 
         public String docs() {
-            return "string {main, what, that} Replaces all instances of 'what' with 'that' in 'main'";
+            return "string {subject, search, replacement} Replaces all instances of 'search' with 'replacement' in 'subject'";
         }
 
         public ExceptionType[] thrown() {

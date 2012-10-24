@@ -228,8 +228,8 @@ public class Regex {
 					//Note the alternative order of arguments
 					ParseTree replace = new ParseTree(new CFunction("replace", t), data.getFileOptions());
 					replace.addChildAt(0, children.get(2)); //subject -> main
-					replace.addChildAt(1, children.get(1)); //replacement -> that
-					replace.addChildAt(2, new ParseTree(new CString(getLiteralRegex(pattern), t), replace.getFileOptions())); //pattern -> what
+					replace.addChildAt(1, new ParseTree(new CString(getLiteralRegex(pattern), t), replace.getFileOptions())); //pattern -> what
+					replace.addChildAt(2, children.get(1)); //replacement -> that
 					return replace;
 				} else {
 					getPattern(data.getData(), t);
