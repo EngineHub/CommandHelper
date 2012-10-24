@@ -54,10 +54,10 @@ public final class ZipMaker {
 
             // Compress the files
             for (File f : files) {
-                FileInputStream in = new FileInputStream(new File(base, f.getPath()));
+                FileInputStream in = new FileInputStream(f);
 
                 // Add ZIP entry to output stream.                
-                out.putNextEntry(new ZipEntry(f.getPath()));
+                out.putNextEntry(new ZipEntry(GetUnabsoluteFile(base, f).getPath()));
 
                 // Transfer bytes from the file to the ZIP file
                 int len;
@@ -76,4 +76,9 @@ public final class ZipMaker {
             Logger.getLogger(ZipMaker.class.getName()).log(Level.SEVERE, null, e);
         }
     }
+	
+	private static File GetUnabsoluteFile(File base, File child){
+		String path = child.getAbsolutePath().replaceFirst(Pattern.quote(base.getAbsolutePath() + File.separatorChar), "");
+		return new File(path);
+	}
 }
