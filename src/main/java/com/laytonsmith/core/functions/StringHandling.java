@@ -880,7 +880,7 @@ public class StringHandling {
 					//Split point found
 					array.push(new CString(string.substring(sp, i), t));
 					sp = i + split.length();
-					i += split.length();
+					i += split.length() - 1;
 				}
 			}
 			if(sp != 0){

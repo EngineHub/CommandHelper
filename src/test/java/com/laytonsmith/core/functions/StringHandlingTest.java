@@ -114,8 +114,13 @@ public class StringHandlingTest {
     }
 	
 	@Test
-	public void testSplit() throws ConfigCompileException{
-		assertEquals("{a, b}", SRun("split('a,b', ',')", null));
+	public void testSplit1() throws ConfigCompileException{
+		assertEquals("{a, b}", SRun("split(',', 'a,b')", null));
+	}
+	
+	@Test
+	public void testSplit2() throws ConfigCompileException{
+		assertEquals("{a, , b}", SRun("split('.', 'a..b')", null));
 	}
 	
 	@Test public void testMulticharacterSplit() throws Exception{
