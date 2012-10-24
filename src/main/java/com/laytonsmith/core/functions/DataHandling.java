@@ -303,43 +303,7 @@ public class DataHandling {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			ParseTree assign = nodes[0];
-			ParseTree condition = nodes[1];
-			ParseTree expression = nodes[2];
-			ParseTree runnable = nodes[3];
-
-			Construct counter = parent.eval(assign, env);
-			if (!(counter instanceof IVariable)) {
-				throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, t);
-			}
-			int _continue = 0;
-			while (true) {
-				boolean cond = Static.getBoolean(parent.seval(condition, env));
-				if (cond == false) {
-					break;
-				}
-				if (_continue >= 1) {
-					--_continue;
-					parent.eval(expression, env);
-					continue;
-				}
-				try {
-					parent.eval(runnable, env);
-				} catch (LoopBreakException e) {
-					int num = e.getTimes();
-					if (num > 1) {
-						e.setTimes(--num);
-						throw e;
-					}
-					return new CVoid(t);
-				} catch (LoopContinueException e) {
-					_continue = e.getTimes() - 1;
-					parent.eval(expression, env);
-					continue;
-				}
-				parent.eval(expression, env);
-			}
-			return new CVoid(t);
+			return new forelse(true).execs(t, env, parent, nodes);
 		}
 
 		public ExceptionType[] thrown() {
@@ -396,6 +360,108 @@ public class DataHandling {
 		}
 				
 	}
+	
+	@api
+	@noboilerplate
+	public static class forelse extends AbstractFunction{
+		
+		public forelse(){ }
+		
+		boolean runAsFor = false;
+		forelse(boolean runAsFor){
+			this.runAsFor = runAsFor;
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+		
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return null;
+		}				
+
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) throws ConfigRuntimeException {
+			ParseTree assign = nodes[0];
+			ParseTree condition = nodes[1];
+			ParseTree expression = nodes[2];
+			ParseTree runnable = nodes[3];
+			ParseTree elseCode = null;
+			if(!runAsFor){
+				elseCode = nodes[4];
+			}
+			boolean hasRunOnce = false;
+
+			Construct counter = parent.eval(assign, env);
+			if (!(counter instanceof IVariable)) {
+				throw new ConfigRuntimeException("First parameter of for must be an ivariable", ExceptionType.CastException, t);
+			}
+			int _continue = 0;
+			while (true) {
+				boolean cond = Static.getBoolean(parent.seval(condition, env));
+				if (cond == false) {
+					break;
+				}
+				hasRunOnce = true;
+				if (_continue >= 1) {
+					--_continue;
+					parent.eval(expression, env);
+					continue;
+				}
+				try {
+					parent.eval(runnable, env);
+				} catch (LoopBreakException e) {
+					int num = e.getTimes();
+					if (num > 1) {
+						e.setTimes(--num);
+						throw e;
+					}
+					return new CVoid(t);
+				} catch (LoopContinueException e) {
+					_continue = e.getTimes() - 1;
+					parent.eval(expression, env);
+					continue;
+				}
+				parent.eval(expression, env);
+			}
+			if(!hasRunOnce && !runAsFor && elseCode != null){
+				parent.eval(elseCode, env);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "forelse";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{5};
+		}
+
+		public String docs() {
+			return "void {assign, condition, expression1, expression2, else} Works like a normal for, but if upon checking the condition the first time,"
+					+ " it is determined that it is false (that is, NO code loops are going to be run) the else code is run instead. If the loop runs,"
+					+ " even once, it will NOT run the else branch.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 
 	@api(environments=CommandHelperEnvironment.class)
 	public static class foreach extends AbstractFunction {
@@ -413,69 +479,8 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script that, ParseTree... nodes) {
-			ParseTree array = nodes[0];
-			ParseTree ivar = nodes[1];
-			ParseTree code = nodes[2];
-
-			Construct arr = that.seval(array, env);
-			Construct iv = that.eval(ivar, env);
-			if (arr instanceof CSlice) {
-				long start = ((CSlice) arr).getStart();
-				long finish = ((CSlice) arr).getFinish();
-				if (finish < start) {
-					throw new ConfigRuntimeException("When using the .. notation, the left number may not be greater than the right number. Recieved " + start + " and " + finish, ExceptionType.RangeException, t);
-				}
-				arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
-			}
-			if (arr instanceof CArray) {
-				if (iv instanceof IVariable) {
-					CArray one = (CArray) arr;
-					IVariable two = (IVariable) iv;
-					if (!one.inAssociativeMode()) {
-						for (int i = 0; i < one.size(); i++) {
-							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
-							try {
-								that.eval(code, env);
-							} catch (LoopBreakException e) {
-								int num = e.getTimes();
-								if (num > 1) {
-									e.setTimes(--num);
-									throw e;
-								}
-								return new CVoid(t);
-							} catch (LoopContinueException e) {
-								i += e.getTimes() - 1;
-								continue;
-							}
-						}
-					} else {
-						for (int i = 0; i < one.size(); i++) {
-							String index = one.keySet().toArray(new String[]{})[i];
-							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
-							try {
-								that.eval(code, env);
-							} catch (LoopBreakException e) {
-								int num = e.getTimes();
-								if (num > 1) {
-									e.setTimes(--num);
-									throw e;
-								}
-								return new CVoid(t);
-							} catch (LoopContinueException e) {
-								i += e.getTimes() - 1;
-								continue;
-							}
-						}
-					}
-				} else {
-					throw new ConfigRuntimeException("Parameter 2 of foreach must be an ivariable", ExceptionType.CastException, t);
-				}
-			} else {
-				throw new ConfigRuntimeException("Parameter 1 of foreach must be an array", ExceptionType.CastException, t);
-			}
-
-			return new CVoid(t);
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return new foreachelse(true).execs(t, env, parent, nodes);
 		}
 
 		public ExceptionType[] thrown() {
@@ -531,6 +536,135 @@ public class DataHandling {
 					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
 					+ ", <code>)";
 		}
+	}
+	
+	@api
+	@noboilerplate
+	public static class foreachelse extends AbstractFunction{
+		
+		boolean runAsForeach = false;
+		public foreachelse(){ }
+		public foreachelse(boolean runAsForeach){
+			this.runAsForeach = runAsForeach;
+		}
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return null;
+		}
+
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			ParseTree array = nodes[0];
+			ParseTree ivar = nodes[1];
+			ParseTree code = nodes[2];
+			ParseTree elseCode = null;
+			if(!runAsForeach){
+				elseCode = nodes[3];
+			}
+			boolean hasRunOnce = false;
+
+			Construct arr = parent.seval(array, env);
+			Construct iv = parent.eval(ivar, env);
+			if (arr instanceof CSlice) {
+				long start = ((CSlice) arr).getStart();
+				long finish = ((CSlice) arr).getFinish();
+				if (finish < start) {
+					throw new ConfigRuntimeException("When using the .. notation, the left number may not be greater than the right number. Recieved " + start + " and " + finish, ExceptionType.RangeException, t);
+				}
+				arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
+			}
+			if (arr instanceof CArray) {
+				if (iv instanceof IVariable) {
+					CArray one = (CArray) arr;
+					IVariable two = (IVariable) iv;
+					if (!one.inAssociativeMode()) {
+						for (int i = 0; i < one.size(); i++) {
+							hasRunOnce = true;
+							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
+							try {
+								parent.eval(code, env);
+							} catch (LoopBreakException e) {
+								int num = e.getTimes();
+								if (num > 1) {
+									e.setTimes(--num);
+									throw e;
+								}
+								return new CVoid(t);
+							} catch (LoopContinueException e) {
+								i += e.getTimes() - 1;
+								continue;
+							}
+						}
+					} else {
+						for (int i = 0; i < one.size(); i++) {
+							hasRunOnce = true;
+							String index = one.keySet().toArray(new String[]{})[i];
+							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
+							try {
+								parent.eval(code, env);
+							} catch (LoopBreakException e) {
+								int num = e.getTimes();
+								if (num > 1) {
+									e.setTimes(--num);
+									throw e;
+								}
+								return new CVoid(t);
+							} catch (LoopContinueException e) {
+								i += e.getTimes() - 1;
+								continue;
+							}
+						}
+					}
+				} else {
+					throw new ConfigRuntimeException("Parameter 2 of foreach must be an ivariable", ExceptionType.CastException, t);
+				}
+			} else {
+				throw new ConfigRuntimeException("Parameter 1 of foreach must be an array", ExceptionType.CastException, t);
+			}
+			
+			if(!hasRunOnce && !runAsForeach && elseCode != null){
+				parent.eval(elseCode, env);
+			}
+
+			return new CVoid(t);
+		}
+		
+		
+
+		public String getName() {
+			return "foreachelse";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{4};
+		}
+
+		public String docs() {
+			return "void {array, ivar, code, else} Works like a foreach, except if the array is empty, the else code runs instead. That is, if the code"
+					+ " would not run at all, the else condition would.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 
 	@api
