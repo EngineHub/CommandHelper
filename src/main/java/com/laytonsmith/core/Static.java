@@ -429,9 +429,10 @@ public final class Static {
      * @param msg 
      */
     public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
-        SendMessage(new LineCallback() {
-
-            public void run(String line) {
+//        SendMessage(new LineCallback() {
+//
+//            public void run(String line) {
+				String line = msg;
                 if (m instanceof MCPlayer) {
                     MCPlayer p = (MCPlayer) m;
                     if (p == null) {
@@ -445,15 +446,16 @@ public final class Static {
                         System.out.println(line);
                     }
                 }
-            }
-        }, msg);
+//            }
+//        }, msg);
     }
 
     public static void SendMessage(final MCCommandSender m, String msg) {
-        SendMessage(new LineCallback() {
-
-            public void run(String line) {
-                MCPlayer p = null;
+//        SendMessage(new LineCallback() {
+//
+//            public void run(String line) {
+				String line = msg;
+                MCPlayer p;
                 if (m instanceof MCPlayer) {
                     p = (MCPlayer) m;
                     if (p != null && p.isOnline()) {
@@ -466,8 +468,8 @@ public final class Static {
                         System.out.println(line);
                     }
                 }
-            }
-        }, msg);
+//            }
+//        }, msg);
     }
 
     
