@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCConsoleCommandSender;
+import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.PermissionsResolver;
@@ -69,7 +70,11 @@ public class Permissions {
 					return new CBoolean(true, t);
 				}
 
-				player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getName();
+				MCPlayer mcp = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				if(mcp == null){
+					throw new ConfigRuntimeException("No player was specified", Exceptions.ExceptionType.PlayerOfflineException, t);
+				}
+				player = mcp.getName();
 				permission = args[0].val();
 			} else {
 				player = args[0].val();

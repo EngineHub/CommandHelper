@@ -129,6 +129,20 @@ public class DataHandlingTest {
         verify(fakePlayer).sendMessage("1");
         verify(fakePlayer).sendMessage("2");
     }
+	
+	@Test
+	public void testForelse() throws Exception{
+		SRun("forelse(assign(@i, 0), @i < 0, @i++, msg('fail'), msg('pass'))", fakePlayer);
+		verify(fakePlayer).sendMessage("pass");
+		verify(fakePlayer, times(0)).sendMessage("fail");
+	}
+	
+	@Test
+	public void testForeachelse() throws Exception{
+		SRun("foreachelse(array(), @val, msg('fail'), msg('pass'))", fakePlayer);
+		verify(fakePlayer).sendMessage("pass");
+		verify(fakePlayer, times(0)).sendMessage("fail");
+	}
 
     @Test(timeout = 10000)
     public void testCallProcIsProc() throws ConfigCompileException {

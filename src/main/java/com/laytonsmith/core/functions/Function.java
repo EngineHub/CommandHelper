@@ -142,6 +142,14 @@ public interface Function extends FunctionBase, Documentation {
      * branch anyways, but some optimizations require knowledge about code branches.
      */
     public interface CodeBranch{
-        public List<ParseTree> getBranches();
+		/**
+		 * Returns a list of all the child nodes that are considered separate code branches.
+		 * Likely this is all of them, but not necessarily, especially if the optimization routine could
+		 * eliminate some of the branches, due to const conditions. The current "self" ParseTree is passed
+		 * in, which is the function's ParseTree wrapper, and from there, the children can be selected. The
+		 * list of children returned should reference equal (==, not just .equals()) the children passed in.
+		 * @return
+		 */
+        public List<ParseTree> getBranches(ParseTree self);
     }
 }
