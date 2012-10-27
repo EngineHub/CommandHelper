@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit.events;
 
+import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockFace;
@@ -10,6 +11,7 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCAction;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import java.util.ArrayList;
@@ -230,12 +232,12 @@ public class BukkitPlayerEvents {
         public static BukkitMCPlayerInteractEvent _instantiate(MCPlayer player, MCAction action, MCItemStack itemstack,
                 MCBlock clickedBlock, MCBlockFace clickedFace){
             return new BukkitMCPlayerInteractEvent(new PlayerInteractEvent(((BukkitMCPlayer)player)._Player(), 
-                    Action.valueOf(action.name()), ((BukkitMCItemStack)itemstack).__ItemStack(),
+                    BukkitMCAction.getConvertor().getConcreteEnum(action), ((BukkitMCItemStack)itemstack).__ItemStack(),
                     ((BukkitMCBlock)clickedBlock).__Block(), BlockFace.valueOf(clickedFace.name())));
         }
         
         public MCAction getAction() {
-            return MCAction.valueOf(pie.getAction().name());
+            return BukkitMCAction.getConvertor().getAbstractedEnum(pie.getAction());
         }
 
         public MCPlayer getPlayer() {

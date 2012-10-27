@@ -1,7 +1,7 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;

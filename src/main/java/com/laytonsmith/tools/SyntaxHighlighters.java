@@ -3,7 +3,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Static;

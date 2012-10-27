@@ -2,7 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.MCBiomeType;
+import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;

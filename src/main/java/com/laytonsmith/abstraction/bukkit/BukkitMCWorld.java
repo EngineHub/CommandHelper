@@ -2,9 +2,12 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.enums.MCBiomeType;
+import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -115,7 +118,7 @@ public class BukkitMCWorld implements MCWorld {
     }
 
     public MCBiomeType getBiome(int x, int z) {
-        return MCBiomeType.valueOf(w.getBiome(x, z).name());
+		return BukkitMCBiomeType.getConvertor().getAbstractedEnum(w.getBiome(x, z));
     }
 
     public void setBiome(int x, int z, MCBiomeType type) {

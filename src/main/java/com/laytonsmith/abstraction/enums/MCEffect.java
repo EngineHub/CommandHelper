@@ -1,5 +1,5 @@
 
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.enums;
 
 /**
  *
@@ -19,6 +19,18 @@ public enum MCEffect {
     STEP_SOUND(2001),
     POTION_BREAK(2002),
     ENDER_SIGNAL(2003),
+	/**
+     * Sound of zombies chewing on wooden doors.
+     */
+    ZOMBIE_CHEW_WOODEN_DOOR(1010),
+    /**
+     * Sound of zombies chewing on iron doors.
+     */
+    ZOMBIE_CHEW_IRON_DOOR(1011),
+    /**
+     * Sound of zombies destroying a door.
+     */
+    ZOMBIE_DESTROY_DOOR(1012),
     MOBSPAWNER_FLAMES(2004);
 
     private final int id;

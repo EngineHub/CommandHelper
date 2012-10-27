@@ -3,7 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
-import com.laytonsmith.abstraction.MCInventoryType;
+import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayerInventory;
 import org.bukkit.entity.Player;

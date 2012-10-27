@@ -1,4 +1,4 @@
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.enums;
 
 /**
  *
@@ -6,22 +6,16 @@ package com.laytonsmith.abstraction;
  */
 public enum MCBiomeType {
 
-        RAINFOREST,
-        SWAMPLAND,
-        SEASONAL_FOREST,
-        FOREST,
-        SAVANNA,
-        SHRUBLAND,
-        TAIGA,
-        DESERT,
+        OCEAN,
         PLAINS,
-        ICE_DESERT,
-        TUNDRA,
+        DESERT,
+        EXTREME_HILLS,
+        FOREST,
+        TAIGA,
+        SWAMPLAND,
+        RIVER,
         HELL,
         SKY,
-        OCEAN,
-        RIVER,
-        EXTREME_HILLS,
         FROZEN_OCEAN,
         FROZEN_RIVER,
         ICE_PLAINS,

@@ -18,6 +18,7 @@
  */
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;

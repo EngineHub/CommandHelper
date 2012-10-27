@@ -1,5 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
@@ -533,9 +536,26 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
-					+ " the radius (or 64 by default). The effect can be one of the following:"
-					+ " BOW_FIRE, CLICK1, CLICK2, DOOR_TOGGLE, EXTINGUISH, GHAST_SHOOT, POTION_BREAK, MOBSPAWNER_FLAMES.";
+			String docs = "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
+					+ " the radius (or 64 by default). The effect can be one of the following:";
+			
+			List<String> values = new ArrayList<String>();
+			for(MCEffect effect : MCEffect.values()){
+				switch(effect){
+					case RECORD_PLAY:
+					case SMOKE:
+					case STEP_SOUND:
+					case BLAZE_SHOOT:
+					case ENDER_SIGNAL:
+						continue;
+					default:
+						values.add(effect.name());
+				}
+			}
+			
+			docs += StringUtils.Join(values, ", ");
+			
+			return docs;
 		}
 
 		public ExceptionType[] thrown() {

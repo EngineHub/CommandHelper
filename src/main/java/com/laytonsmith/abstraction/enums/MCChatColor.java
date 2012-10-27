@@ -1,4 +1,4 @@
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.enums;
 
 import java.util.HashMap;
 import java.util.Map;

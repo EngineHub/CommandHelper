@@ -2,7 +2,7 @@
 
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;

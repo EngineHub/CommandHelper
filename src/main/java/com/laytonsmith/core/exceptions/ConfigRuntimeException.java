@@ -4,7 +4,7 @@
 package com.laytonsmith.core.exceptions;
 
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;

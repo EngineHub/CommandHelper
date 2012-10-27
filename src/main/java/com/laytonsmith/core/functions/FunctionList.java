@@ -3,6 +3,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.core.Prefs;
@@ -33,6 +34,7 @@ public class FunctionList {
     private static void initFunctions() {
         //Register internal classes first, so they can't be overridden
         Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
+		StringBuilder message = new StringBuilder();
         for(Class c : classes){
             String apiClass = (c.getEnclosingClass() != null
                     ? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
@@ -47,7 +49,7 @@ public class FunctionList {
                     }
                     supportedPlatforms.get(f.getName()).addAll(Arrays.asList(platforms));
                     for(Platforms p : platforms){
-                        registerFunction(f, apiClass, p);
+                        registerFunction(f, apiClass, p, message);
                     }
                     //System.out.println("Loaded " + apiClass + "." + f.getName());
                 } catch (InstantiationException ex) {
@@ -72,7 +74,12 @@ public class FunctionList {
         }
         
         if(Prefs.DebugMode()){
-            System.out.println("CommandHelper: Loaded " + functions.size() + " function" + (functions.size()==1?"":"s"));
+			System.out.println(Implementation.GetServerType().getBranding() + ": Loaded the following functions: " + message.toString().trim());
+			int size = 0;
+			for(Map m : functions.values()){
+				size += m.size();
+			}
+            System.out.println(Implementation.GetServerType().getBranding() + ": Loaded " + size + " function" + (functions.size()==1?"":"s"));
         }
         
         
@@ -105,10 +112,10 @@ public class FunctionList {
     }
 
     
-    public static void registerFunction(FunctionBase f, String apiClass, api.Platforms platform) {
+    public static void registerFunction(FunctionBase f, String apiClass, api.Platforms platform, StringBuilder message) {
         if(!apiClass.equals("Sandbox")){
             if(Prefs.DebugMode()){
-                System.out.println("CommandHelper: Loaded function \"" + f.getName() + "\"");
+                message.append(" \"").append(f.getName()).append("\"");
             }
         }
         try{

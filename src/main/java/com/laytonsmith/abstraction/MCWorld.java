@@ -2,6 +2,8 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCBiomeType;
+import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;

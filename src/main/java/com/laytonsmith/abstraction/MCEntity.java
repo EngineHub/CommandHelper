@@ -1,6 +1,10 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCTeleportCause;
+import com.laytonsmith.abstraction.enums.MCEntityEffect;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import java.util.List;
 import java.util.UUID;
