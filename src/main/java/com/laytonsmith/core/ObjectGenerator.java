@@ -126,6 +126,10 @@ public class ObjectGenerator {
         if (array.containsKey("pitch")) {
             pitch = (float) Static.getDouble(array.get("pitch"));
         }
+		//If world is still null at this point, it's an error
+		if (world == null) {
+			throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
+		}
         return StaticLayer.GetLocation(world, x, y, z, yaw, pitch);
     }
 
