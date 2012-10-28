@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -148,11 +149,12 @@ public class Environment {
             String id = null;
             String world = null;
             MCWorld w = null;
-            if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() instanceof MCPlayer) {
-                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+            if (sender instanceof MCPlayer) {
+                w = ((MCPlayer)sender).getWorld();
             }
             if ((args.length == 2 || args.length == 3) && args[0] instanceof CArray) {
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
                 x = l.getBlockX();
                 y = l.getBlockY();
                 z = l.getBlockZ();
