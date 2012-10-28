@@ -69,9 +69,10 @@ public class Environment {
             double y = 0;
             double z = 0;
             MCWorld w = null;
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             String world = null;
-            if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() instanceof MCPlayer) {
-                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+            if (sender instanceof MCPlayer) {
+                w = ((MCPlayer) sender).getWorld();
             }
             if (args.length == 1 || args.length == 2) {
                 if (args[0] instanceof CArray) {
