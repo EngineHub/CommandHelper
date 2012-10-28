@@ -109,6 +109,7 @@ public enum MCDamageCause {
         MAGIC,
 		
 		MELTING,
+		WITHER,
         /**
          * Custom damage.
          * <p />

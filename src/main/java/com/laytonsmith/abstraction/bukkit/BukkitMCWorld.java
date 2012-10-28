@@ -2,12 +2,15 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -137,19 +140,11 @@ public class BukkitMCWorld implements MCWorld {
         w.setSpawnLocation(x, y, z);
     }
 
-    private enum MOBS {
-
-        CHICKEN, COW, CREEPER, GHAST, PIG, PIGZOMBIE, SHEEP, SKELETON, SLIME,
-        SPIDER, SQUID, WOLF, ZOMBIE, CAVESPIDER, ENDERMAN, SILVERFISH, VILLAGER,
-        BLAZE, ENDERDRAGON, MAGMACUBE, MOOSHROOM, SPIDERJOCKEY, GIANT, SNOWGOLEM,
-        OCELOT, CAT, IRONGOLEM;
-    }
-
-    public CArray spawnMob(String name, String subClass, int qty, MCLocation l, Target t) {
+    public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation l, Target t) {
         Class mobType = null;
         CArray ids = new CArray(Target.UNKNOWN);
         try {
-            switch (MOBS.valueOf(name.toUpperCase().replaceAll(" ", ""))) {
+            switch (name) {
                 case CHICKEN:
                     mobType = Chicken.class;
                     break;
@@ -235,6 +230,18 @@ public class BukkitMCWorld implements MCWorld {
                 case IRONGOLEM:
                     mobType = IronGolem.class;
                     break;
+				case BAT:
+					mobType = Witch.class;
+					break;
+				case WITHER:
+					mobType = Wither.class;
+					break;
+				case WITHER_SKULL:
+					mobType = WitherSkull.class;
+					break;
+				case WITCH:
+					mobType = Witch.class;
+					break;
             }
         } catch (IllegalArgumentException e) {
             throw new ConfigRuntimeException("No mob of type " + name + " exists",
@@ -242,18 +249,19 @@ public class BukkitMCWorld implements MCWorld {
         }
         for (int i = 0; i < qty; i++) {
             MCEntity e = l.getWorld().spawn(l, mobType);
-            if (MOBS.valueOf(name.toUpperCase()) == MOBS.SPIDERJOCKEY) {
+            if (name == MCMobs.SPIDERJOCKEY) {
                 Spider s = (Spider) e;
                 Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
                 s.setPassenger(sk);
             }
             if (((BukkitMCEntity)e).asEntity() instanceof Sheep) {
                 Sheep s = (Sheep) ((BukkitMCEntity)e).asEntity();
-                if("".equals(subClass)){
-                    subClass = DyeColor.WHITE.name();
+				MCDyeColor color = MCDyeColor.WHITE;
+                if(!"".equals(subClass)){
+                    color = MCDyeColor.valueOf(subClass.toUpperCase());
                 }
                 try {
-                    s.setColor(DyeColor.valueOf(subClass.toUpperCase()));
+                    s.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
                 } catch (IllegalArgumentException ex) {
                     throw new ConfigRuntimeException(subClass.toUpperCase() + " is not a valid color",
                             ExceptionType.FormatException, t);
