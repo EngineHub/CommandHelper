@@ -3,6 +3,8 @@ package com.laytonsmith.PureUtilities;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -209,5 +211,38 @@ public final class StringUtils {
 			split[i] = split[i].trim();
 		}
 		return split;
+	}
+	
+	/**
+	 * Works like String.replaceFirst, but replaces the last instance instead.
+	 * @param string
+	 * @param regex
+	 * @param replacement
+	 * @return 
+	 */
+	public static String replaceLast(String string, String regex, String replacement){
+		if(regex == null){
+			return string;
+		}
+		if(string == null){
+			return null;
+		}
+		if(regex.length() > string.length()){
+			//It can't be contained in here
+			return string;
+		}
+		Matcher m = Pattern.compile(regex).matcher(string);
+		int start = -1;
+		int end = -1;
+		while(m.find()){
+			start = m.start();
+			end = m.end();
+		}
+		if(start == -1 || end == -1){
+		//Didn't find it, return the whole string
+			return string;
+		} else {
+			return string.substring(0, start) + replacement + string.substring(end, string.length());
+		}
 	}
 }

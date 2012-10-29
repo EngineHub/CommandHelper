@@ -1499,12 +1499,7 @@ public class PlayerManagement {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
 			int effect = (int) Static.getInt(args[1]);
-			//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
-			//otherwise the client crashes, and requires deletion of
-			//player data to fix.
-			if (effect < 1 || effect > 19) {
-				throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-19", ExceptionType.RangeException, t);
-			}
+			
 			int strength = (int) Static.getInt(args[2]);
 			int seconds = 30;
 			if (args.length == 4) {
@@ -1514,7 +1509,7 @@ public class PlayerManagement {
 			if (seconds == 0 || strength == 0) {
 				return new CBoolean(m.removeEffect(effect), t);
 			} else {
-				m.addEffect(effect, strength, seconds);
+				m.addEffect(effect, strength, seconds, t);
 				return new CBoolean(true, t);
 			}
 		}

@@ -8,23 +8,103 @@ import java.util.List;
  */
 public class ArrayUtils {
 	
-	private static final char[] EMPTY_CHAR_ARRAY = new char[0];
-	private static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
-	private static final short[] EMPTY_SHORT_ARRAY = new short[0];
-	private static final int[] EMPTY_INT_ARRAY = new int[0];
-	private static final long[] EMPTY_LONG_ARRAY = new long[0];
-	private static final float[] EMPTY_FLOAT_ARRAY = new float[0];
-	private static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
-	private static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final char[] EMPTY_CHAR_ARRAY = new char[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final byte[] EMPTY_BYTE_ARRAY = new byte[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final short[] EMPTY_SHORT_ARRAY = new short[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final int[] EMPTY_INT_ARRAY = new int[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final long[] EMPTY_LONG_ARRAY = new long[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final float[] EMPTY_FLOAT_ARRAY = new float[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final double[] EMPTY_DOUBLE_ARRAY = new double[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final boolean[] EMPTY_BOOLEAN_ARRAY = new boolean[0];
 	
-	private static final Character[] EMPTY_CHAR_OBJ_ARRAY = new Character[0];
-	private static final Byte[] EMPTY_BYTE_OBJ_ARRAY = new Byte[0];
-	private static final Short[] EMPTY_SHORT_OBJ_ARRAY = new Short[0];
-	private static final Integer[] EMPTY_INT_OBJ_ARRAY = new Integer[0];
-	private static final Long[] EMPTY_LONG_OBJ_ARRAY = new Long[0];
-	private static final Float[] EMPTY_FLOAT_OBJ_ARRAY = new Float[0];
-	private static final Double[] EMPTY_DOUBLE_OBJ_ARRAY = new Double[0];
-	private static final Boolean[] EMPTY_BOOLEAN_OBJ_ARRAY = new Boolean[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final Character[] EMPTY_CHAR_OBJ_ARRAY = new Character[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final Byte[] EMPTY_BYTE_OBJ_ARRAY = new Byte[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final Short[] EMPTY_SHORT_OBJ_ARRAY = new Short[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final Integer[] EMPTY_INT_OBJ_ARRAY = new Integer[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final Long[] EMPTY_LONG_OBJ_ARRAY = new Long[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final Float[] EMPTY_FLOAT_OBJ_ARRAY = new Float[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final Double[] EMPTY_DOUBLE_OBJ_ARRAY = new Double[0];
+	/**
+	 * Instantiating a new 0 length array is *usually* inefficient, unless you
+	 * are doing reference comparisons later. If you are generating it simply to use
+	 * as a "default" value for an array, consider using this instead to increase performance.
+	 */
+	public static final Boolean[] EMPTY_BOOLEAN_OBJ_ARRAY = new Boolean[0];
 	
 	
 	/***************************************************************************

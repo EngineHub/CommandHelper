@@ -2,6 +2,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.core.constructs.Target;
 import java.util.HashSet;
 import java.util.List;
 
@@ -11,7 +12,7 @@ import java.util.List;
  */
 public interface MCLivingEntity extends MCEntity {
 
-	public void addEffect(int potionID, int strength, int seconds);
+	public void addEffect(int potionID, int strength, int seconds, Target t);
     public void damage(int amount);
     public void damage(int amount, MCEntity source);
     public double getEyeHeight();

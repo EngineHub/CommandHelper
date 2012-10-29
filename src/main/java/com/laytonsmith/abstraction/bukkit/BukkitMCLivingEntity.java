@@ -8,6 +8,9 @@ import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -145,7 +148,13 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		return blocks;
 	}
 
-	public void addEffect(int potionID, int strength, int seconds) {
+	public void addEffect(int potionID, int strength, int seconds, Target t) {
+		//To work around a bug in bukkit/vanilla, if the effect is invalid, throw an exception
+		//otherwise the client crashes, and requires deletion of
+		//player data to fix.
+		if (potionID < 1 || potionID > 20) {
+			throw new ConfigRuntimeException("Invalid effect ID recieved, must be from 1-20", Exceptions.ExceptionType.RangeException, t);
+		}
 		PotionEffect pe = new PotionEffect(PotionEffectType.getById(potionID), (int)Static.msToTicks(seconds * 1000), strength);
 		try{
 			if(le != null){
