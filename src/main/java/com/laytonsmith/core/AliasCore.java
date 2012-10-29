@@ -1,12 +1,10 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.Convertor;
-import com.laytonsmith.abstraction.Implementation;
-import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
