@@ -1,6 +1,11 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
+import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -299,10 +304,11 @@ public class Minecraft {
 
 		public String docs() {
 			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
-					+ " to the location of the player. ---- mobType can be one of: BLAZE, CAVESPIDER, CHICKEN, COW, CREEPER, ENDERDRAGON, ENDERMAN, GHAST,"
-					+ " IRONGOLEM, MAGMACUBE, MOOSHROOM, OCELOT, PIG, PIGZOMBIE, SHEEP, SILVERFISH, SKELETON, SLIME, SPIDER, SPIDERJOCKEY, SQUID, VILLAGER, WOLF, ZOMBIE. Spelling matters, but capitalization doesn't. At this"
+					+ " to the location of the player. ---- mobType can be one of: "
+					+ StringUtils.Join(MCMobs.values(), ", ") + ". Spelling matters, but capitalization doesn't. At this"
 					+ " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
-					+ " SHEEP:COLOR, where COLOR is any of the dye colors: BLACK RED GREEN BROWN BLUE PURPLE CYAN SILVER GRAY PINK LIME YELLOW LIGHT_BLUE MAGENTA ORANGE WHITE. COLOR defaults to white if not"
+					+ " SHEEP:COLOR, where COLOR is any of the dye colors: "
+					+ StringUtils.Join(MCDyeColor.values(), ", ") + ". COLOR defaults to white if not"
 					+ " specified. An array of the entity IDs spawned is returned. OCELOT can also take a subtype, like sheep, and may be one of: WILD_OCELOT, BLACK_CAT, RED_CAT, or SIAMESE_CAT"
 					+ " <small>GIANTs can also be spawned, if you are running craftbukkit. This is an experimental feature. Only one GIANT can be spawned at a time</small>";
 		}
@@ -352,7 +358,11 @@ public class Minecraft {
 				}
 			}
 			if (l.getWorld() != null) {
-				return l.getWorld().spawnMob(mob, secondary, qty, l, t);
+				try{
+					return l.getWorld().spawnMob(MCMobs.valueOf(mob.toUpperCase().replaceAll(" ", "")), secondary, qty, l, t);
+				} catch(IllegalArgumentException e){
+					throw new ConfigRuntimeException("Invalid mob name: " + mob, ExceptionType.FormatException, t);
+				}
 			} else {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
@@ -533,9 +543,26 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
-					+ " the radius (or 64 by default). The effect can be one of the following:"
-					+ " BOW_FIRE, CLICK1, CLICK2, DOOR_TOGGLE, EXTINGUISH, GHAST_SHOOT, POTION_BREAK, MOBSPAWNER_FLAMES.";
+			String docs = "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
+					+ " the radius (or 64 by default). The effect can be one of the following:";
+			
+			List<String> values = new ArrayList<String>();
+			for(MCEffect effect : MCEffect.values()){
+				switch(effect){
+					case RECORD_PLAY:
+					case SMOKE:
+					case STEP_SOUND:
+					case BLAZE_SHOOT:
+					case ENDER_SIGNAL:
+						continue;
+					default:
+						values.add(effect.name());
+				}
+			}
+			
+			docs += StringUtils.Join(values, ", ");
+			
+			return docs;
 		}
 
 		public ExceptionType[] thrown() {

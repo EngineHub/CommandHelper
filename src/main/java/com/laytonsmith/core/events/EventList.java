@@ -3,6 +3,7 @@
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -82,13 +83,14 @@ public final class EventList {
         //Register internal classes first, so they can't be overridden
         Class[] classes = ClassDiscovery.GetClassesWithAnnotation(api.class);
         int total = 0;
+		StringBuilder message = new StringBuilder();
         for(Class c : classes){
             String apiClass = (c.getEnclosingClass() != null
                     ? c.getEnclosingClass().getName().split("\\.")[c.getEnclosingClass().getName().split("\\.").length - 1]
                     : "<global>");
             if (Event.class.isAssignableFrom(c)) {
                 try {
-                    registerEvent(c, apiClass);
+                    registerEvent(c, apiClass, message);
                     total++;
                 } catch (InstantiationException ex) {
                     Logger.getLogger(EventList.class.getName()).log(Level.SEVERE, null, ex);
@@ -102,11 +104,12 @@ public final class EventList {
         }
         
         if(Prefs.DebugMode()){
-            System.out.println("CommandHelper: Loaded " + total + " event" + (total==1?"":"s"));
+			System.out.println(Implementation.GetServerType().getBranding() + ": Loaded the following events: " + message.toString().trim());
+            System.out.println(Implementation.GetServerType().getBranding() + ": Loaded " + total + " event" + (total==1?"":"s"));
         }
     }
     
-    public static void registerEvent(Class<Event> c, String apiClass) throws InstantiationException, IllegalAccessException {
+    public static void registerEvent(Class<Event> c, String apiClass, StringBuilder message) throws InstantiationException, IllegalAccessException {
         //First, we need to instantiate the class
         
         Event e = c.newInstance();
@@ -141,7 +144,7 @@ public final class EventList {
         } catch(UnsupportedOperationException ex){}
         
         if(Prefs.DebugMode()){
-            System.out.println("CommandHelper: Loaded event \"" + e.getName() + "\"");
+            message.append(" \"").append(e.getName()).append("\"");
         }
     }
     

@@ -4,6 +4,7 @@
  */
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
 
 /**

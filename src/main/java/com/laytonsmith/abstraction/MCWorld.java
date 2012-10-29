@@ -2,7 +2,10 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCBiomeType;
+import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
 import java.util.List;
@@ -39,7 +42,7 @@ public interface MCWorld extends AbstractionObject{
     
     public long getTime();
     
-    public CArray spawnMob(String name, String subClass, int qty, MCLocation location, Target t);
+    public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
 
     public MCBiomeType getBiome(int x, int z);
     

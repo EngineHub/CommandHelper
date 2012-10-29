@@ -4,6 +4,8 @@
  */
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCInventoryType;
+
 /**
  *
  * @author Layton

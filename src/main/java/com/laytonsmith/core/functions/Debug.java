@@ -26,7 +26,7 @@ public class Debug {
 //    public static int EVENT_LOGGING_LEVEL = 1;
 //    public static final Set<Event.Type> EVENT_LOGGING_FILTER = new HashSet<Event.Type>();
 //    public static final Set<String> EVENT_PLUGIN_FILTER = new HashSet<String>();
-    public static boolean LOG_TO_SCREEN = false;
+    //public static boolean LOG_TO_SCREEN = false;
 
 //    public static void DoLog(Event.Type filter, int verbosity, String message) {
 //        synchronized (EVENT_LOGGING_FILTER) {

@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.constructs.Target;
 import java.io.File;
 import java.io.IOException;
@@ -196,10 +197,10 @@ public final class CHLog {
         if(moduleLevel == LogLevel.OFF){
             return; //Bail as quick as we can!
         }
-        if(moduleLevel.level <= level.level){
+        if(moduleLevel.level >= level.level){
             //We want to do the log
             try{
-                Static.LogDebug(root, message + (t!=Target.UNKNOWN?" "+t.toString():""));
+                Static.LogDebug(root, "[" + Implementation.GetServerType().getBranding() + "][" + level.name() + "][" + modules.name() + "] " + message + (t!=Target.UNKNOWN?" "+t.toString():""), level);
             } catch(IOException e){
                 //Well, shoot.
                 if(level.level <= 1){

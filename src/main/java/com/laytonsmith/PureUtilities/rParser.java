@@ -1,6 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
-import com.laytonsmith.abstraction.MCChatColor;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import java.util.ArrayList;
 import java.util.Arrays;
 

@@ -1,5 +1,5 @@
 
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.enums;
 
 /**
  *
@@ -11,8 +11,13 @@ public enum MCEntityType {
     PAINTING,
     ARROW,
     SNOWBALL,
-    FIREBALL,
     SMALL_FIREBALL,
+	LARGE_FIREBALL,
+	ITEM_FRAME,
+	WITHER_SKULL,
+	WITHER,
+	BAT,
+	WITCH,
     ENDER_PEARL,
     ENDER_SIGNAL,
     THROWN_EXP_BOTTLE,

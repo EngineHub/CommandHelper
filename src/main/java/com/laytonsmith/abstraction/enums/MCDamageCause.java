@@ -1,4 +1,4 @@
-package com.laytonsmith.abstraction;
+package com.laytonsmith.abstraction.enums;
 
 /**
  *
@@ -107,6 +107,9 @@ public enum MCDamageCause {
          * Damage: variable
          */
         MAGIC,
+		
+		MELTING,
+		WITHER,
         /**
          * Custom damage.
          * <p />

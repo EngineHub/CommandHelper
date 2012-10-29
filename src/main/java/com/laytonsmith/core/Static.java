@@ -266,7 +266,7 @@ public final class Static {
      * @return 
      */
     public static FileWriter debugLogFile(File root) throws IOException {
-        String currentFileName = root.getPath() + DateUtil.ParseCalendarNotation(Prefs.DebugLogFile());
+        String currentFileName = root.getPath() + "/" + DateUtil.ParseCalendarNotation(Prefs.DebugLogFile());
         if (!currentFileName.equals(debugLogFileCurrent)) {
             if (debugLogFileHandle != null) {
                 //We're done with the old one, close it.
@@ -274,6 +274,9 @@ public final class Static {
             }
             debugLogFileCurrent = currentFileName;
             new File(debugLogFileCurrent).getParentFile().mkdirs();
+			if(!new File(debugLogFileCurrent).exists()){
+				new File(debugLogFileCurrent).createNewFile();
+			}
             debugLogFileHandle = new FileWriter(currentFileName);
         }
         return debugLogFileHandle;
@@ -616,9 +619,53 @@ public final class Static {
         return System.getProperty("line.separator");
     }
 
-    public static synchronized void LogDebug(File root, String message) throws IOException {
-        if (Debug.LOG_TO_SCREEN) {
-            Static.getLogger().log(Level.INFO, message);
+    public static void LogDebug(File root, String message) throws IOException {
+		LogDebug(root, message, LogLevel.OFF);
+	}
+    public static synchronized void LogDebug(File root, String message, LogLevel level) throws IOException {
+		//If debug mode is on in the prefs, we want to log this to the screen too
+        if (Prefs.DebugMode() || Prefs.ShowWarnings() || level == LogLevel.ERROR) {
+			String color = "";
+			Level lev = Level.INFO;
+			boolean show = false;
+			switch(level){
+				case ERROR:
+					color = TermColors.RED;
+					lev = Level.SEVERE;
+					show = true;
+					break;
+				case WARNING:
+					color = TermColors.YELLOW;
+					lev = Level.WARNING;
+					if(Prefs.DebugMode() || Prefs.ShowWarnings()){
+						show = true;
+					}
+					break;
+				case INFO:
+					color = TermColors.GREEN;
+					lev = Level.INFO;
+					if(Prefs.DebugMode()){
+						show = true;
+					}
+					break;
+				case DEBUG:
+					color = TermColors.BRIGHT_BLUE;
+					lev = Level.INFO;
+					if(Prefs.DebugMode()){
+						show = true;
+					}
+					break;
+				case VERBOSE:
+					color = "";
+					lev = Level.INFO;
+					if(Prefs.DebugMode()){
+						show = true;
+					}
+					break;
+			}
+			if(show){
+				Static.getLogger().log(lev, color + message + TermColors.reset());
+			}
         }
         String timestamp = DateUtil.ParseCalendarNotation("%Y-%M-%D %h:%m.%s - ");
         QuickAppend(Static.debugLogFile(root), timestamp + message + Static.LF());

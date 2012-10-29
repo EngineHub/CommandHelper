@@ -2,7 +2,8 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.MCBiomeType;
+import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
@@ -68,9 +69,10 @@ public class Environment {
             double y = 0;
             double z = 0;
             MCWorld w = null;
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
             String world = null;
-            if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() instanceof MCPlayer) {
-                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+            if (sender instanceof MCPlayer) {
+                w = ((MCPlayer) sender).getWorld();
             }
             if (args.length == 1 || args.length == 2) {
                 if (args[0] instanceof CArray) {
@@ -148,11 +150,12 @@ public class Environment {
             String id = null;
             String world = null;
             MCWorld w = null;
-            if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() instanceof MCPlayer) {
-                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+			MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+            if (sender instanceof MCPlayer) {
+                w = ((MCPlayer)sender).getWorld();
             }
             if ((args.length == 2 || args.length == 3) && args[0] instanceof CArray) {
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
+                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
                 x = l.getBlockX();
                 y = l.getBlockY();
                 z = l.getBlockZ();
@@ -255,9 +258,12 @@ public class Environment {
         }
 
         public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null ?
-					null :
-					environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
+			MCWorld w = null;
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			if(sender instanceof MCPlayer){
+				w = ((MCPlayer)sender).getWorld();
+			}
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
             if (l.getBlock().isSign()) {
                 String line1 = "";
                 String line2 = "";
@@ -336,9 +342,12 @@ public class Environment {
         }
 
         public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null ?
-					null :
-					environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
+			MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer){
+				w = ((MCPlayer)sender).getWorld();
+			}
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
             if (l.getBlock().isSign()) {
                 MCSign s = l.getBlock().getSign();
                 CString line1 = new CString(s.getLine(0), t);
@@ -383,9 +392,12 @@ public class Environment {
         }
 
         public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
-            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], environment.getEnv(CommandHelperEnvironment.class).GetPlayer() == null ? 
-					null :
-					environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld(), t);
+            MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer){
+				w = ((MCPlayer)sender).getWorld();
+			}
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
             return new CBoolean(l.getBlock().isSign(), t);
         }
     }
@@ -428,6 +440,9 @@ public class Environment {
             MCWorld w = (p != null ? p.getWorld() : null);
             l = ObjectGenerator.GetGenerator().location(args[0], w, t);
             if (l.getWorld() instanceof CraftWorld) {
+				if (l.getWorld() == null) {
+					throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
+				}
                 CraftWorld cw = (CraftWorld) l.getWorld();
                 net.minecraft.server.Block.byId[l.getBlock().getTypeId()].dropNaturally(cw.getHandle(), l.getBlockX(), l.getBlockY(), l.getBlockZ(), l.getBlock().getData(), 1.0f, 0);
             }
@@ -469,21 +484,20 @@ public class Environment {
         public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
             int x;
             int z;
-            MCWorld w;
+            MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer){
+				w = ((MCPlayer)sender).getWorld();
+			}
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
             if(args.length == 2){
-                MCWorld defaultWorld = environment.getEnv(CommandHelperEnvironment.class).GetPlayer()==null?
-						null:
-						environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
                 x = l.getBlockX();
                 z = l.getBlockZ();
                 w = l.getWorld();
             } else {
                 x = (int) Static.getInt(args[0]);
                 z = (int) Static.getInt(args[1]);
-                if(args.length == 3){
-                    w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
-                } else {
+                if(args.length != 3){
                     w = Static.getServer().getWorld(args[2].val());
                 }
             }
@@ -492,6 +506,9 @@ public class Environment {
                 bt = MCBiomeType.valueOf(args[args.length - 1].val());
             } catch(IllegalArgumentException e){
                 throw new ConfigRuntimeException("The biome type \"" + args[1].val() + "\" does not exist.", ExceptionType.FormatException, t);
+            }
+			if (w == null) {
+                throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
             }
             w.setBiome(x, z, bt);
             return new CVoid(t);
@@ -534,23 +551,25 @@ public class Environment {
         public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
             int x;
             int z;
-            MCWorld w;
+            MCCommandSender sender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCWorld w = null;
+			if(sender instanceof MCPlayer){
+				w = ((MCPlayer)sender).getWorld();
+			}
+            MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
             if(args.length == 1){
-                MCWorld defaultWorld = environment.getEnv(CommandHelperEnvironment.class).GetPlayer()==null?
-						null:
-						environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
-                MCLocation l = ObjectGenerator.GetGenerator().location(args[0], defaultWorld, t);
                 x = l.getBlockX();
                 z = l.getBlockZ();
                 w = l.getWorld();
             } else {
                 x = (int) Static.getInt(args[0]);
                 z = (int) Static.getInt(args[1]);
-                if(args.length == 2){
-                    w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
-                } else {
+                if(args.length != 2){
                     w = Static.getServer().getWorld(args[2].val());
                 }
+            }
+			if (w == null) {
+                throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
             }
             MCBiomeType bt = w.getBiome(x, z);
             return new CString(bt.name(), t);
@@ -596,9 +615,10 @@ public class Environment {
             double z = 0;
             MCWorld w = null;
             String world = null;
-            if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() instanceof MCPlayer) {
-                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
-            }
+            MCCommandSender sender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			if(sender instanceof MCPlayer){
+				w = ((MCPlayer)sender).getWorld();
+			}
 
             if (args[0] instanceof CArray && !(args.length == 3)) {
                 MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);

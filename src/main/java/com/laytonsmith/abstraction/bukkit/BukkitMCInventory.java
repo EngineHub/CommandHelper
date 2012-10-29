@@ -5,7 +5,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCInventory;
-import com.laytonsmith.abstraction.MCInventoryType;
+import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.abstraction.MCItemStack;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;

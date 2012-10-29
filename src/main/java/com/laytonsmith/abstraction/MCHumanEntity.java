@@ -1,5 +1,7 @@
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCGameMode;
+
 /**
  *
  * @author layton
