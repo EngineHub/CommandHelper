@@ -8,6 +8,8 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 import org.bukkit.Bukkit;
@@ -28,7 +30,7 @@ import org.bukkit.material.MaterialData;
  * @author layton
  */
 @convert(type=Implementation.Type.BUKKIT)
-public class BukkitConvertor implements Convertor {
+public class BukkitConvertor extends AbstractConvertor {
 
     public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
         World w2 = null;

@@ -198,6 +198,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public void onDisable() {
 		//free up some memory
+		StaticLayer.GetConvertor().runShutdownHooks();
 		stopExecutionQueue();
 		ac = null;
 		wep = null;

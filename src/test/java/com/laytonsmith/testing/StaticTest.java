@@ -562,7 +562,7 @@ public class StaticTest {
     }
     
     @convert(type=Implementation.Type.TEST)
-    public static class TestConvertor implements Convertor{
+    public static class TestConvertor extends AbstractConvertor{
         
         private static MCServer fakeServer;
 

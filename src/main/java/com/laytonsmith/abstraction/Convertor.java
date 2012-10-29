@@ -64,5 +64,20 @@ public interface Convertor {
 	 * @return 
 	 */
 	public MCInventory GetLocationInventory(MCLocation location);
+	
+	/**
+	 * Run whenever the server is shutting down (or restarting). There is no
+	 * guarantee provided as to what thread the runnables actually run on, so you should
+	 * ensure that the runnable executes it's actions on the appropriate thread
+	 * yourself.
+	 * @param r 
+	 */
+	public void addShutdownHook(Runnable r);
+	
+	/**
+	 * Runs all the registered shutdown hooks. This should only be called by the shutdown mechanism.
+	 * After running, each Runnable will be removed from the queue.
+	 */
+	public void runShutdownHooks();
     
 }

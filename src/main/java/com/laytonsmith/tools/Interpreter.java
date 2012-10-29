@@ -3,6 +3,7 @@ package com.laytonsmith.tools;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
+import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Convertor;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCEnchantment;
@@ -289,7 +290,7 @@ public class Interpreter {
 	}
 	
 	@convert(type=Implementation.Type.SHELL)
-	public static class ShellConvertor implements Convertor{
+	public static class ShellConvertor extends AbstractConvertor{
 
 		public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");

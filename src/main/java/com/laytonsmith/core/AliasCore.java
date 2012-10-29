@@ -1,9 +1,12 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.Convertor;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -235,6 +238,7 @@ public class AliasCore {
 	 */
 	public final void reload(MCPlayer player) {
 		try {
+			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(parent.chDirectory);
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
 			parent.profiler = new Profiler(new File(parent.chDirectory, "profiler.config"));
