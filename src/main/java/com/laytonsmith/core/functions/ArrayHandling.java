@@ -195,7 +195,11 @@ public class ArrayHandling {
 						StringBuilder b = new StringBuilder();
 						String val = aa.val();
 						for (long i = start; i <= finish; i++) {
+							try{
 							b.append(val.charAt((int) i));
+							} catch(StringIndexOutOfBoundsException e){
+								throw new Exceptions.RangeException("String bounds out of range. Tried to get character at index " + i + ", but indicies only go up to " + (val.length() - 1), t);
+							}
 						}
 						return new CString(b.toString(), t);
 					} catch (NumberFormatException e) {

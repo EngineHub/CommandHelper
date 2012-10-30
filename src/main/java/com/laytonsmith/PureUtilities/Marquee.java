@@ -18,8 +18,8 @@ public final class Marquee {
 	private MarqueeCallback callback;
 
 	public Marquee(String string, int maxChars, int delay, MarqueeCallback callback) {
-		setText(string);
 		this.maxChars = maxChars;
+		setText(string);
 		this.delay = delay;
 		this.callback = callback;
 	}
@@ -30,6 +30,14 @@ public final class Marquee {
 		}
 		if (!text.endsWith(" ")) {
 			text = text + " ";
+		}
+		if(text.length() < maxChars){
+			//Pad with spaces, so we still get the marquee effect
+			StringBuilder b = new StringBuilder();
+			for(int i = 0; i < maxChars - text.length(); i++){
+				b.append(" ");
+			}
+			text += b.toString();
 		}
 		this.text = text;
 	}
@@ -49,16 +57,8 @@ public final class Marquee {
 				try {
 					while (run) {
 						final String composite;
-						if (loopPointer + maxChars > text.length()) {
-							//We want to grab from loop pointer to string max length, then from 0 to the number
-							//of characters left to show.
-							String s = text.substring(loopPointer);
-							s += text.substring(0, maxChars - (text.length() - loopPointer));
-							composite = s;
-						} else {
-							//Else the entire string in one run
-							composite = text.substring(loopPointer, maxChars + loopPointer);
-						}
+						String psuedoText = text + text + text;
+						composite = psuedoText.substring(loopPointer, maxChars + loopPointer);
 						loopPointer++;
 						if (loopPointer > text.length()) {
 							//reset it once we go over the length

@@ -41,7 +41,7 @@ public class Marquee {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			String marqueeName = null;
 			final String text;
 			final int stringWidth;
@@ -62,10 +62,16 @@ public class Marquee {
 			}
 			final com.laytonsmith.PureUtilities.Marquee m = new com.laytonsmith.PureUtilities.Marquee(text, stringWidth, delayTime, new com.laytonsmith.PureUtilities.Marquee.MarqueeCallback() {
 
-				public void stringPortion(String portion) {
-					callback.execute(new Construct[]{new CString(portion, Target.UNKNOWN)});
+				public void stringPortion(final String portion) {
+					StaticLayer.SetFutureRunnable(0, new Runnable(){
+
+						public void run() {
+							callback.execute(new Construct[]{new CString(portion, t)});
+						}
+					});
 				}
 			});
+			m.start();
 			StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
 				public void run() {
