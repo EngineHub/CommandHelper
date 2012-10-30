@@ -43,6 +43,7 @@ public class MathTest {
 
     @Before
     public void setUp() throws Exception {
+		StaticTest.InstallFakeServerFrontend();
         fakePlayer = GetOnlinePlayer();
         fakeServer = GetFakeServer();
 
@@ -132,7 +133,7 @@ public class MathTest {
     }
 
     @Test(timeout = 10000)
-    public void testRand() {
+    public void testRand1() {
         Math.rand a = new Math.rand();
         for (int i = 0; i < 1000; i++) {
             long j = Static.getInt(a.exec(Target.UNKNOWN, env, C.onstruct(10)));
@@ -160,6 +161,12 @@ public class MathTest {
         } catch (ConfigRuntimeException e) {
         }
     }
+	
+	@Test
+	public void testRand2() throws Exception{
+		SRun("assign(@rand, rand()) if(@rand >= 0 && @rand <= 1, msg('pass'), msg('fail'))", fakePlayer);
+		verify(fakePlayer).sendMessage("pass");
+	}
 
     @Test(timeout = 10000)
     public void testSubtract() {

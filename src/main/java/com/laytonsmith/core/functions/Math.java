@@ -14,7 +14,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.core.functions.Math;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.ArrayList;
@@ -831,6 +830,16 @@ public class Math {
 		public Boolean runAsync() {
 			return null;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage, with one paramter", "rand(10)"),
+				new ExampleScript("Basic usage, with a range", "rand(50, 100)"),
+				new ExampleScript("Usage with no parameters", "rand()")
+			};
+		}
+				
 	}
 
 	@api
