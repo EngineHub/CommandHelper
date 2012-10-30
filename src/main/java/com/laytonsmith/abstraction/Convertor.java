@@ -2,6 +2,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import java.util.concurrent.Callable;
 
 /**
  * This should be implemented once for each server type. It mostly wraps
@@ -79,5 +80,20 @@ public interface Convertor {
 	 * After running, each Runnable will be removed from the queue.
 	 */
 	public void runShutdownHooks();
+	
+	/**
+	 * Runs some task on the "main" thread, possibly now, possibly in the future, and
+	 * possibly even on this thread. However, if the platform needs some critical action
+	 * to happen on one thread, (for instance, UI updates on the UI thread) those actions
+	 * will occur here.
+	 * @param r 
+	 */
+	public void runOnMainThreadLater(Runnable r);
+	
+	/**
+	 * Works like runOnMainThreadLater, but waits for the task to finish.
+	 * @param r 
+	 */
+	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws Exception;
     
 }

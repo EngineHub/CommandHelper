@@ -8,8 +8,13 @@ package com.laytonsmith.PureUtilities;
 public final class Marquee {
 
 	public interface MarqueeCallback {
-
-		void stringPortion(String portion);
+		/**
+		 * Sends the correct portion of the string, as well as a reference to this Marquee object,
+		 * in case it needs to be stopped or otherwise changed.
+		 * @param portion
+		 * @param self 
+		 */
+		void stringPortion(String portion, Marquee self);
 	}
 	private String text;
 	private int maxChars;
@@ -65,7 +70,7 @@ public final class Marquee {
 							loopPointer = 0;
 						}
 						
-						callback.stringPortion(composite);
+						callback.stringPortion(composite, Marquee.this);
 						
 						Thread.sleep(delay);
 					}

@@ -14,6 +14,9 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -42,7 +45,7 @@ public class Marquee {
 		}
 
 		public Construct exec(final Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String marqueeName = null;
+			final String marqueeName;
 			final String text;
 			final int stringWidth;
 			final int delayTime;
@@ -51,6 +54,8 @@ public class Marquee {
 			if(args.length == 5){
 				offset = 0;
 				marqueeName = args[0].val();
+			} else {
+				marqueeName = null;
 			}
 			text = args[1 + offset].val();
 			stringWidth = (int)Static.getInt(args[2 + offset]);
@@ -62,13 +67,23 @@ public class Marquee {
 			}
 			final com.laytonsmith.PureUtilities.Marquee m = new com.laytonsmith.PureUtilities.Marquee(text, stringWidth, delayTime, new com.laytonsmith.PureUtilities.Marquee.MarqueeCallback() {
 
-				public void stringPortion(final String portion) {
-					StaticLayer.SetFutureRunnable(0, new Runnable(){
+				public void stringPortion(final String portion, com.laytonsmith.PureUtilities.Marquee m) {
+					try{
+						StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>(){
 
-						public void run() {
-							callback.execute(new Construct[]{new CString(portion, t)});
-						}
-					});
+							public Object call() throws Exception {
+									callback.execute(new Construct[]{new CString(portion, t)});
+									return null;
+							}
+						});
+					} catch(Exception e){
+						//We don't want this to affect our code, so just log it,
+						//but we also want to stop this marquee
+						String message = "An error occured while running " + (marqueeName==null?"an unnamed marquee":"the " + marqueeName + " marquee")
+								+ ". To prevent further errors, it has been temporarily stopped.";
+						Logger.getLogger(Marquee.class.getName()).log(Level.SEVERE, "", e);
+						m.stop();
+					}
 				}
 			});
 			m.start();

@@ -10,6 +10,7 @@ import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
@@ -239,6 +240,22 @@ public class BukkitConvertor extends AbstractConvertor {
 		} else {
 			return null;
 		}
+	}
+
+	@Override
+	public void runOnMainThreadLater(final Runnable r) {
+		Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable<Object>() {
+
+			public Object call() throws Exception {
+				r.run();
+				return null;
+			}
+		});
+	}
+
+	@Override
+	public <T> T runOnMainThreadAndWait(Callable<T> callable) {
+		return (T)Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable);
 	}
 
 }
