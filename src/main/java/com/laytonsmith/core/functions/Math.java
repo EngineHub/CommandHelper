@@ -777,12 +777,13 @@ public class Math {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{0, 1, 2};
 		}
 
 		public String docs() {
-			return "int {min/max, [max]} Returns a random number from 0 to max, or min to max, depending on usage. Max is exclusive. Min must"
-					+ " be less than max, and both numbers must be >= 0";
+			return "mixed {[] | min/max, [max]} Returns a random number from 0 to max, or min to max, depending on usage. Max is exclusive. Min must"
+					+ " be less than max, and both numbers must be >= 0. This will return an integer. Alternatively, you can pass no arguments, and a random"
+					+ " double, from 0 to 1 will be returned.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -798,29 +799,33 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			long min = 0;
-			long max = 0;
-			if (args.length == 1) {
-				max = Static.getInt(args[0]);
+			if(args.length == 0){
+				return new CDouble(java.lang.Math.random(), t);
 			} else {
-				min = Static.getInt(args[0]);
-				max = Static.getInt(args[1]);
-			}
-			if (max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
-				throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
-						ExceptionType.RangeException,
-						t);
-			}
+				long min = 0;
+				long max = 0;
+				if (args.length == 1) {
+					max = Static.getInt(args[0]);
+				} else {
+					min = Static.getInt(args[0]);
+					max = Static.getInt(args[1]);
+				}
+				if (max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
+					throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
+							ExceptionType.RangeException,
+							t);
+				}
 
-			long range = max - min;
-			if (range <= 0) {
-				throw new ConfigRuntimeException("max - min must be greater than 0",
-						ExceptionType.RangeException, t);
-			}
-			long rand = java.lang.Math.abs(r.nextLong());
-			long i = (rand % (range)) + min;
+				long range = max - min;
+				if (range <= 0) {
+					throw new ConfigRuntimeException("max - min must be greater than 0",
+							ExceptionType.RangeException, t);
+				}
+				long rand = java.lang.Math.abs(r.nextLong());
+				long i = (rand % (range)) + min;
 
-			return new CInt(i, t);
+				return new CInt(i, t);
+			}
 		}
 
 		public Boolean runAsync() {
