@@ -81,7 +81,7 @@ public class Marquee {
 						//but we also want to stop this marquee
 						String message = "An error occured while running " + (marqueeName==null?"an unnamed marquee":"the " + marqueeName + " marquee")
 								+ ". To prevent further errors, it has been temporarily stopped.";
-						Logger.getLogger(Marquee.class.getName()).log(Level.SEVERE, "", e);
+						Logger.getLogger(Marquee.class.getName()).log(Level.SEVERE, message, e);
 						m.stop();
 					}
 				}
