@@ -32,7 +32,7 @@ import java.util.List;
 public class Main {
 
     static List<String> doctypes = new ArrayList<String>(Arrays.asList(new String[]{"html", "wiki", "text"}));
-	private static File jarFolder = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();;
+	private static File jarFolder = new File(Main.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
 
     public static void main(String[] args) throws Exception {
         try {
@@ -57,6 +57,8 @@ public class Main {
                     + "Don't specify a type to see the available options.", "type", false)
 					.addFlag("docgen", "Starts the automatic wiki uploader.")
 					.addArgument("api", ArgumentParser.Type.STRING, "Prints documentation for the function specified, then exits.", "function", false)
+					.addArgument("examples", ArgumentParser.Type.STRING, "Installs one of the built in LocalPackage examples, which may in and of itself be useful."
+					+ " Omit the package name for a list of packages.", "[packageName]", false)
             ;
             ArgumentParser.ArgumentParserResults switches = argParser.match(args);            
             
@@ -148,6 +150,9 @@ public class Main {
                 System.err.println("Done.");
                 System.exit(0);
             } 
+			if(switches.getStringArgument("examples") != null){
+				ExampleLocalPackageInstaller.run(jarFolder, switches.getStringArgument("examples"));
+			}
             if (switches.isFlagSet("verify")) {
                 System.out.println("This functionality is not currently implemented!");
 //                    File f = new File(".");

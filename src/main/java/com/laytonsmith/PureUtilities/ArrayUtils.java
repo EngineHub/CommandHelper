@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import java.lang.reflect.Array;
 import java.util.List;
 
 /**
@@ -670,8 +671,12 @@ public class ArrayUtils {
 	 * @param list
 	 * @return 
 	 */
-	public static <T> T[] asArray(List<T> list){
-		return (T[]) list.toArray();
+	public static <T> T[] asArray(Class<T> clazz, List list){
+		Object[] obj = (Object[]) Array.newInstance(clazz, list.size());
+		for(int i = 0; i < list.size(); i++){
+			obj[i] = list.get(i);
+		}
+		return (T[])obj;
 	}
 	
 }
