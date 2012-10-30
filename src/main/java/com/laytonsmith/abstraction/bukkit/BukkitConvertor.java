@@ -8,10 +8,10 @@ import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.logging.Level;
+import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Material;
@@ -132,7 +132,12 @@ public class BukkitConvertor extends AbstractConvertor {
         //((BukkitMCServer)Static.getServer()).__Server().getScheduler().cancelTasks(CommandHelperPlugin.self);
 		Set<Integer> ids = new TreeSet<Integer>(validIDs);
 		for(int id : ids){
-			ClearFutureRunnable(id);
+			try{
+				//If this doesn't work, it shouldn't kill everything.
+				ClearFutureRunnable(id);
+			} catch(Exception e){
+				Logger.getLogger(BukkitConvertor.class.getName()).log(null, Level.SEVERE, e);
+			}
 		}
     }
 
