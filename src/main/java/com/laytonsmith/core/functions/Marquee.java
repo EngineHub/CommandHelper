@@ -93,7 +93,14 @@ public class Marquee {
 		}
 
 		public String docs() {
-			return "void {[marqueeName], text, stringWidth, delayTime, callback} ";
+			return "void {[marqueeName], text, stringWidth, delayTime, callback} Sets up a marquee, which will automatically"
+					+ " split up a given string for you, and call the callback. The split string will automatically wrap, handle"
+					+ " buffering spaces, and scroll through the text. ---- marqueeName is optional, but required if you wish"
+					+ " to stop the marquee at any point. text is the text that the marquee should scroll, stringWidth is the"
+					+ " width of the string you wish to recieve, delayTime is the"
+					+ " time between character scrolls, and callback is a closure that should recieve a string which will be exactly"
+					+ " stringWidth long. (The string will have been wrapped as needed if it is less than that size.)"
+					+ " This is usually used in combination with signs, but in theory could be used with anything that uses text.";
 		}
 
 		public CHVersion since() {
@@ -133,7 +140,7 @@ public class Marquee {
 		}
 
 		public String docs() {
-			return "void {marqueeName} ";
+			return "void {marqueeName} Stops a named marquee.";
 		}
 
 		public CHVersion since() {
