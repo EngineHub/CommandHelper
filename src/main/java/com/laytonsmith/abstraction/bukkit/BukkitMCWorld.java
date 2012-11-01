@@ -231,7 +231,7 @@ public class BukkitMCWorld implements MCWorld {
                     mobType = IronGolem.class;
                     break;
 				case BAT:
-					mobType = Witch.class;
+					mobType = Bat.class;
 					break;
 				case WITHER:
 					mobType = Wither.class;
