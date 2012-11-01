@@ -217,7 +217,7 @@ public class BukkitMCWorld implements MCWorld {
                     double z = l.getZ();
                     float pitch = l.getPitch();
                     float yaw = l.getYaw();
-                    net.minecraft.server.Entity giant = new net.minecraft.server.EntityGiantZombie(((CraftWorld) l.getWorld()).getHandle());
+                    net.minecraft.server.Entity giant = new net.minecraft.server.EntityGiantZombie(((CraftWorld) (l.getWorld().getHandle())).getHandle());
                     giant.setLocation(x, y, z, pitch, yaw);
                     ((CraftWorld) ((BukkitMCLocation)l)._Location().getWorld()).getHandle().addEntity(giant, SpawnReason.CUSTOM);
                     break;
