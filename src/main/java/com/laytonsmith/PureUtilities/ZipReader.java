@@ -1,10 +1,12 @@
 package com.laytonsmith.PureUtilities;
 
 import java.io.*;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
@@ -55,6 +57,14 @@ public class ZipReader {
 	 */
 	private List<File> zipDirectories = new ArrayList<File>();
 
+	/**
+	 * Convenience constructor, which allows for a URL to be passed in instead of a file,
+	 * which may be useful when working with resources.
+	 * @param url 
+	 */
+	public ZipReader(URL url){
+		this(new File(url.getFile()));
+	}
     /**
      * Creates a new ZipReader object, which can be used to read from a zip
      * file, as if the zip files were simple directories. All files are checked
@@ -71,10 +81,24 @@ public class ZipReader {
     public ZipReader(File file){
         chainedPath = new LinkedList<File>();
 
-        this.file = file;
 
+		//We need to remove jar style or uri style things from the file, so do that here
+		if(file.getPath().startsWith("file:")){
+			String newFile = file.getPath().substring(5);
+			//Replace all \ with /, to simply processing, but also replace ! with /, since jar addresses
+			//use that to denote the jar. We don't care, it's just a folder, so replace that with a slash.
+			newFile = newFile.replace("\\", "/").replace("!", "/");
+			while(newFile.startsWith("//")){
+				//We only want up to one slash here
+				newFile = newFile.substring(1);
+			}
+			file = new File(newFile);
+		}
+		
+		
         //make sure file is absolute
         file = file.getAbsoluteFile();
+        this.file = file;
 
         //We need to walk up the parents, putting those files onto the stack which are valid Zips
         File f = file;
@@ -192,6 +216,7 @@ public class ZipReader {
             }
         };
         boolean isZip = false;
+		List<String> recurseAttempts = new ArrayList<String>();
         while ((entry = zis.getNextEntry()) != null) {
             //This is at least a zip file
             isZip = true;
@@ -216,12 +241,23 @@ public class ZipReader {
             }
 
             //It's a single file, it's in the chain, and the chain isn't finished, so that
-            //must mean it's a container (or it's being used as one, anyways). Let's attempt to recurse.
-
-            ZipInputStream inner = new ZipInputStream(zipReader);
-            return getFile(fullChain, zipName + File.separator + entry.getName(), inner);
+            //must mean it's a container (or it's being used as one, anyways).
+			//It could be that either this is just a folder in the entry list, or it could
+			//mean that this is a zip. We will make note of this as one we need to attempt to
+			//recurse, but only if it doesn't pan out that this is a file.
+			recurseAttempts.add(zipName + File.separator + entry.getName());
 
         }
+		for(String recurseAttempt : recurseAttempts){
+			ZipInputStream inner = new ZipInputStream(zipReader);
+			try{
+				return getFile(fullChain, recurseAttempt, inner);			
+			} catch(IOException e){
+				//We don't care if this breaks, we'll throw out own top level exception
+				//in a moment if we got here. We still need to finish going through
+				//out recurse attempts.
+			}
+		}
         //If we get down here, it means either we recursed into not-a-zip file, or 
         //the file was otherwise not found
         if (isZip) {
@@ -289,6 +325,11 @@ public class ZipReader {
     public int hashCode() {
         return file.hashCode();
     }
+
+	@Override
+	public String toString() {
+		return file.toString();
+	}
     
     public File getFile(){
         return file;
@@ -322,20 +363,73 @@ public class ZipReader {
 		}
 	}
 	
+	public String getName(){
+		return file.getName();
+	}
+	
+	/**
+	 * Returns a list of File objects that are subfiles or directories in
+	 * this directory.
+	 * @return
+	 * @throws IOException 
+	 */
 	public File [] listFiles() throws IOException{
 		if(!isZipped){
 			return file.listFiles();
 		} else {
+			StringUtils.Join(new String[]{}, "");
 			initList();
 			List<File> files = new ArrayList<File>();
 			for(File f : zipEntries){
-				if(f.getName().startsWith(file.getName())){
+				//If the paths start with the same thing...
+				if(f.getPath().startsWith(file.getPath())){
+					//...and it's not the file we're looking from to begin with...
 					if(!file.equals(f)){
-						files.add(f);
+						//...and it's not in a sub-sub folder of this file...
+						if(!f.getPath().matches(Pattern.quote(file.getPath() + File.separatorChar) + "[^" + Pattern.quote(File.separator) + "]*" + Pattern.quote(File.separator) + ".*")){
+							//...add it to the list.
+							String root = f.getPath().replaceFirst(Pattern.quote(file.getPath() + File.separator), "");
+							f = new File(root);
+							files.add(f);			
+						}
 					}
 				}
 			}
-			return ArrayUtils.asArray(files);
+			return ArrayUtils.asArray(File.class, files);
+		}
+	}
+	
+	public ZipReader[] zipListFiles() throws IOException{
+		File[] ret = listFiles();
+		ZipReader[] zips = new ZipReader[ret.length];
+		for(int i = 0; i < ret.length; i++){
+			zips[i] = new ZipReader(new File(file, ret[i].getPath()));
+		}
+		return zips;
+	}
+	
+	/**
+	 * Copies all the files from this directory to the source directory.
+	 * If create is false, and the folder doesn't already exist, and IOException
+	 * will be thrown. This is similar to an "unzip" operation.
+	 * @param dstFolder 
+	 */
+	public void recursiveCopy(File dstFolder, boolean create) throws IOException{
+		if(create){
+			dstFolder.mkdirs();
+		}
+		if(!dstFolder.isDirectory()){
+			throw new IOException("Destination folder is not a directory!");
+		}
+		for(ZipReader r : zipListFiles()){
+			if(r.isDirectory()){
+				r.recursiveCopy(dstFolder, create);
+			} else {
+				File newFile = new File(dstFolder, r.file.getName());
+				newFile.getParentFile().mkdirs();
+				FileOutputStream fos = new FileOutputStream(newFile, false);
+				StreamUtils.Copy(r.getInputStream(), fos);
+			}
 		}
 	}
     

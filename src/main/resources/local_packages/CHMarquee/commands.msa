@@ -1,0 +1,117 @@
+#Usage:
+# First, you must initialize a marquee. Think of some name for the marquee, say, "test"
+# Place all of your signs that you want to be in the marquee. It doesn't matter where
+# they are. Look at the first sign, and type /marquee init test 1
+# Look at the next sign, and type /marquee init test 2
+# So forth and so on, until you have marked all the signs in the marquee.
+# Once all the signs are marked, you'll notice that it has prompted you to set
+# the text. Run /marquee set test <text>
+# Of course this part could be modified to be done programatically, perhaps dynamically.
+# Tada! It should be running!
+# To remove the marquee, run /marquee remove test
+# The marquees will each start themselves up across server restarts, and will remember
+# what you put in them.
+
+/**
+  * Initializes a sign as a marquee sign
+  */
+/marquee init $name $signNumber = >>>
+    _init_marquee($name)
+    if(is_sign_at(pcursor())){
+        store_value('chmarquee.' . $name . '.signloc.' . $signNumber, pcursor())
+        _start_marquee($name)
+    } else {
+        msg(color(red) . 'That is not a sign')
+    }
+<<<
+ 
+/**
+  * Permanently stops a marquee
+  */
+/marquee remove $name = >>>
+    if(_check_marquee($name)){
+        _remove_marquee($name)
+        msg(color(gold) . 'The marquee named' $name 'has been removed')
+    } else {
+        msg(color(red) . 'That marquee does not exist')
+    }
+<<<
+ 
+/**
+  * Sets the text of a given marquee
+  */
+/marquee set $name $ = >>>
+    store_value('chmarquee.' . $name . '.text', string($))
+    _start_marquee($name)
+<<<
+ 
+/**
+  * Temporarily stops a marquee (will auto-restart next reload)
+  */
+/marquee stop $name = >>>
+    _stop_marquee($name)
+<<<
+ 
+/**
+  * Restarts a marquee, if it somehow got stopped (for instance if one of the signs
+  * was broken out)
+  */
+/marquee restart $name = >>>
+    _stop_marquee($name)
+    _start_marquee($name)
+<<<
+ 
+/**
+  * Lists all the marquees currently in service, or is a marquee is specified, lists
+  * all the sign locations that are a part of this marquee
+  */
+/marquee list [$which] = >>>
+    if($which == ''){
+        msg('All currently functioning marquees:' array_implode(get_value('chmarquee.list'), ', '))
+    } else {
+        msg('Locations of marquee \'' $which '\':' array_implode(get_values('chmarquee.' . $which . '.signloc')))
+    }
+<<<
+ 
+/**
+  * Stops all marquees across the entire server
+  */
+/marquee 911 = >>>
+    msg(color(red).'Halting all marquees!')
+    foreach(get_value('chmarquee.list'), @name,
+        _stop_marquee(@name)
+    )
+<<<
+ 
+/**
+  * Permanently removes all marquees on the server
+  */
+/marquee 911 remove = >>>
+    msg(color(red).'Permanently removing all marquees!')
+    foreach(get_value('chmarquee.list'), @name,
+        _remove_marquee(@name)
+    )
+<<<
+ 
+/**
+  * When looking at a sign, can be used to check what marquee this is in
+  */
+/marquee check = >>>
+    if(is_sign_at(pcursor())){
+        assign(@found, false)
+        foreach(get_value('chmarquee.list'), @list,
+            foreach(get_values('chmarquee.'.@list.'.signloc'), @loc,
+                if(@loc == pcursor()){
+                    assign(@found, true)
+                    msg('That sign is a part of the \''.@list.'\' marquee')
+                    break(2)
+                }
+            )
+        )
+        if(!@found){
+            msg('That doesn\'t appear to be a part of any marquee')
+        }
+    } else {
+        msg('Well, that\'s not a sign, so it\'s not in a marquee.')
+    }
+<<<
