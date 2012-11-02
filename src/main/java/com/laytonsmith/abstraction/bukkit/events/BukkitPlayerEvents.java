@@ -415,7 +415,7 @@ public class BukkitPlayerEvents {
     }
 	
 	@abstraction(type=Implementation.Type.BUKKIT)
-    public static class BukkitMCPlayerMovedEvent implements MCPlayerMovedEvent{
+    public static class BukkitMCPlayerMovedEvent implements MCPlayerMoveEvent{
 		
 		BukkitMCLocation from;
 		BukkitMCLocation to;

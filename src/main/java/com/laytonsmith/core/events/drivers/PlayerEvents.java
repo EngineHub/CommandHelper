@@ -970,7 +970,7 @@ public class PlayerEvents {
     }
 	
 	@api
-	public static class player_moved extends AbstractEvent{
+	public static class player_move extends AbstractEvent{
 		
 		private boolean threadRunning = false;
 		private Set<Integer> thresholdList = new HashSet<Integer>();
@@ -1016,7 +1016,7 @@ public class PlayerEvents {
 											//we're gonna simulate a prefilter match now. We have to run this manually,
 											//because each bind could have a different threshold, and it will be expecting
 											//THIS from location. Other binds will be expecting other from locations.
-											final MCPlayerMovedEvent fakeEvent = new MCPlayerMovedEvent() {
+											final MCPlayerMoveEvent fakeEvent = new MCPlayerMoveEvent() {
 												boolean cancelled = false;
 												public MCPlayer getPlayer() {
 													return p;
@@ -1044,13 +1044,13 @@ public class PlayerEvents {
 											};
 											//We need to run the prefilters on this thread, so we have
 											//to do this all by hand.
-											final SortedSet<BoundEvent> toRun = EventUtils.GetMatchingEvents(Driver.PLAYER_MOVE, player_moved.this.getName(), fakeEvent, player_moved.this);
+											final SortedSet<BoundEvent> toRun = EventUtils.GetMatchingEvents(Driver.PLAYER_MOVE, player_move.this.getName(), fakeEvent, player_move.this);
 											//Ok, now the events to be run need to actually be run on the main server thread, so let's run that now.
 											try {
 												StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>(){
 
 													public Object call() throws Exception {
-														EventUtils.FireListeners(toRun, player_moved.this, fakeEvent);
+														EventUtils.FireListeners(toRun, player_move.this, fakeEvent);
 														return null;
 													}
 												});
@@ -1077,10 +1077,10 @@ public class PlayerEvents {
 										thresholds.get(i).put(p.getName(), p.asyncGetLocation());
 									}
 								}
-								synchronized(player_moved.this){
+								synchronized(player_move.this){
 									try {
 										//Throttle this thread just a little
-										player_moved.this.wait(10);
+										player_move.this.wait(10);
 									} catch (InterruptedException ex) {
 										//
 									}
@@ -1088,12 +1088,12 @@ public class PlayerEvents {
 							}
 						}
 					}
-				}, "CommandHelperPlayerMovedEventRunner").start();
+				}, "CommandHelperPlayerMoveEventRunner").start();
 			}
 		}
 
 		public String getName() {
-			return "player_moved";
+			return "player_move";
 		}
 
 		public String docs() {
@@ -1123,8 +1123,8 @@ public class PlayerEvents {
 
 		@Override
 		public void cancel(BindableEvent o, boolean state) {
-			if(o instanceof MCPlayerMovedEvent){
-				((MCPlayerMovedEvent)o).setCancelled(state);
+			if(o instanceof MCPlayerMoveEvent){
+				((MCPlayerMoveEvent)o).setCancelled(state);
 			}
 		}
 
@@ -1135,8 +1135,8 @@ public class PlayerEvents {
 
 		@Override
 		public boolean isCancelled(BindableEvent o) {
-			if(o instanceof MCPlayerMovedEvent){
-				return ((MCPlayerMovedEvent)o).isCancelled();
+			if(o instanceof MCPlayerMoveEvent){
+				return ((MCPlayerMoveEvent)o).isCancelled();
 			} else {
 				return false;
 			}
@@ -1145,8 +1145,8 @@ public class PlayerEvents {
 		
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerMovedEvent){
-				MCPlayerMovedEvent event = (MCPlayerMovedEvent)e;
+			if(e instanceof MCPlayerMoveEvent){
+				MCPlayerMoveEvent event = (MCPlayerMoveEvent)e;
 				if(!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())){
 					return false;
 				}
@@ -1183,13 +1183,13 @@ public class PlayerEvents {
 			MCPlayer p = Static.GetPlayer(manualObject.get("player"));
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), p.getWorld(), manualObject.getTarget());
 			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), p.getWorld(), manualObject.getTarget());
-			return EventBuilder.instantiate(MCPlayerMovedEvent.class, p, from, to);
+			return EventBuilder.instantiate(MCPlayerMoveEvent.class, p, from, to);
 		}
 
 		
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
-			if (e instanceof MCPlayerMovedEvent) {
-                MCPlayerMovedEvent event = (MCPlayerMovedEvent) e;
+			if (e instanceof MCPlayerMoveEvent) {
+                MCPlayerMoveEvent event = (MCPlayerMoveEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 //Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));

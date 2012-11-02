@@ -12,7 +12,7 @@ import com.laytonsmith.core.events.BindableEvent;
  *
  * @author Layton
  */
-public interface MCPlayerMovedEvent extends BindableEvent {
+public interface MCPlayerMoveEvent extends BindableEvent {
 	public MCPlayer getPlayer();
 	public MCLocation getFrom();
 	public MCLocation getTo();
