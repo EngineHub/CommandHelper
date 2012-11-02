@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -558,5 +559,50 @@ public class Enchantments {
 				return new CBoolean(false, t);
 			}
 		}
+	}
+	
+	@api
+	public static class enchantment_list extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEnchantment[] enchantments = StaticLayer.GetEnchantmentValues();
+			CArray ret = new CArray(t);
+			for(MCEnchantment e : enchantments){
+				ret.push(new CString(e.getName(), t));
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "enchantment_list";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns an informational list of all valid enchantment names. Note that this will"
+					+ " simply cover all enchantment types, but may not be a comprehensive list of names that"
+					+ " can be accepted, there may be more, however, the list returned here is \"comprehensive\""
+					+ " and \"official\". Additionally, this may vary from server type to server type.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

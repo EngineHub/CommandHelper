@@ -22,5 +22,6 @@ public enum Driver {
     BLOCK_BREAK,
     BLOCK_PLACE,
     TARGET_ENTITY, 
-    ENTITY_DAMAGE_PLAYER,  
+    ENTITY_DAMAGE_PLAYER, 
+	PLAYER_MOVE,  
 }

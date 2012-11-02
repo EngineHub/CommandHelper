@@ -40,7 +40,7 @@ public final class EventUtils {
         SortedSet<BoundEvent> set = event_handles.get(event.driver());
         set.add(b);
         try {
-            event.bind();
+            event.bind(b.getPrefilter());
         } catch (UnsupportedOperationException e) {
         }
     }
@@ -136,18 +136,16 @@ public final class EventUtils {
             }
         }
     }
-
-    /**
-     * Triggers an event by name. The event name is the primary filter for this event, but
-     * to increase event lookup efficiency, the driver is required. This will run in O(n),
-     * where n is the number of bound events driven by type <code>type</code>.
-     * @param type
-     * @param e 
-     */
-    public static void TriggerListener(Driver type, String eventName, BindableEvent e) {
-        SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
-        //This is the Event driver
-        Event driver = EventList.getEvent(type, eventName);
+	
+	/**
+	 * Returns a set of events that should be triggered by this event.
+	 * @param type
+	 * @param eventName
+	 * @param e
+	 * @return 
+	 */
+	public static SortedSet<BoundEvent> GetMatchingEvents(Driver type, String eventName, BindableEvent e, Event driver){
+		SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
         //This is the set of bounded events of this driver type. 
         //We must now look through the bound events to see if they are
         //the eventName, and if so, we will also run the prefilter.
@@ -163,11 +161,22 @@ public final class EventUtils {
                 }
             }
         }
+		return toRun;
+	}
 
-        FireListeners(toRun, driver, e);
+    /**
+     * Triggers an event by name. The event name is the primary filter for this event, but
+     * to increase event lookup efficiency, the driver is required. This will run in O(n),
+     * where n is the number of bound events driven by type <code>type</code>.
+     * @param type
+     * @param e 
+     */
+    public static void TriggerListener(Driver type, String eventName, BindableEvent e) {
+        Event driver = EventList.getEvent(type, eventName);
+        FireListeners(GetMatchingEvents(type, eventName, e, driver), driver, e);
     }
 
-    private static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, BindableEvent e) {
+    public static void FireListeners(SortedSet<BoundEvent> toRun, Event driver, BindableEvent e) {
         //Sort our event handlers by priorities
         BoundEvent.ActiveEvent activeEvent = new BoundEvent.ActiveEvent(e);
         for (BoundEvent b : toRun) {

@@ -39,7 +39,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
      * can be done here. By default, an UnsupportedOperationException is thrown,
      * but is caught and ignored.
      */
-    public void bind() {
+    public void bind(Map<String, Construct> prefilters) {
         throw new UnsupportedOperationException("Not supported yet.");
     }
 
@@ -66,7 +66,7 @@ public abstract class AbstractEvent implements Event, Comparable<Event> {
         }
 		ProfilePoint event = null;
 		if(env.getEnv(GlobalEnv.class).GetProfiler() != null){
-			env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
+			event = env.getEnv(GlobalEnv.class).GetProfiler().start("Event " + b.getEventName() + " (defined at " + b.getTarget().toString() + ")", LogLevel.ERROR);
 		}
         s.run(null, env, null);
 		if(event != null){

@@ -24,5 +24,6 @@ public interface MCHumanEntity extends MCLivingEntity, MCAnimalTamer{
 	void	setGameMode(MCGameMode mode);
 	void	setItemInHand(MCItemStack item);
 	void	setItemOnCursor(MCItemStack item);
+	
 	//public boolean setWindowProperty(MCInventoryView.Property prop, int value);
 }

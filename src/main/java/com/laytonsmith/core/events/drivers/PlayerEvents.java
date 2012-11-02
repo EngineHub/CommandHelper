@@ -2,6 +2,8 @@
 
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.PureUtilities.Geometry;
+import com.laytonsmith.PureUtilities.Geometry.Point3D;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.*;
@@ -24,8 +26,15 @@ import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.StringHandling;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.SortedSet;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -959,6 +968,253 @@ public class PlayerEvents {
         }
                         
     }
+	
+	@api
+	public static class player_moved extends AbstractEvent{
+		
+		private boolean threadRunning = false;
+		private Set<Integer> thresholdList = new HashSet<Integer>();
+		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
+		
+		@Override
+		public void bind(Map<String, Construct> prefilters) {
+			if(prefilters.containsKey("threshold")){
+				int i = (int)Static.getInt(prefilters.get("threshold"));
+				thresholdList.add(i);
+			}
+			if(!threadRunning){
+				thresholdList.add(1);
+				threadRunning = true;
+				new Thread(new Runnable() {
+
+					public void run() {
+						outerLoop: while(true){
+							MCPlayer players[] = Static.getServer().getOnlinePlayers();
+							for(final MCPlayer p : players){
+								//We need to loop through all the thresholds
+								//and see if any of the points meet them. If so,
+								//we know we need to fire the event. If none of them
+								//match, carry on with the next player. As soon as
+								//one matches though, we can't quit the loop, because
+								//we have to set all the thresholds.
+								thresholdLoop: for(Integer i : thresholdList){
+									if(thresholds.containsKey(i) && thresholds.get(i).containsKey(p.getName())){
+										final MCLocation last = thresholds.get(i).get(p.getName());
+										final MCLocation current = p.asyncGetLocation();
+										if(!p.getWorld().getName().equals(last.getWorld().getName())){
+											//They moved worlds. simply put their new location in here, then
+											//continue.
+											thresholds.get(i).put(p.getName(), p.getLocation());
+											continue thresholdLoop;
+										}
+										Point3D lastPoint = new Point3D(last.getX(), last.getY(), last.getZ());
+										Point3D currentPoint = new Point3D(current.getX(), current.getY(), current.getZ());
+										double distance = lastPoint.distance(currentPoint);
+										if(distance > i){
+											//We've met the threshold.
+											//Well, we're still not sure. To run the prefilters on this thread,
+											//we're gonna simulate a prefilter match now. We have to run this manually,
+											//because each bind could have a different threshold, and it will be expecting
+											//THIS from location. Other binds will be expecting other from locations.
+											final MCPlayerMovedEvent fakeEvent = new MCPlayerMovedEvent() {
+												boolean cancelled = false;
+												public MCPlayer getPlayer() {
+													return p;
+												}
+
+												public MCLocation getFrom() {
+													return last;
+												}
+
+												public MCLocation getTo() {
+													return current;
+												}
+
+												public Object _GetObject() {
+													return null;
+												}
+
+												public void setCancelled(boolean state) {
+													cancelled = state;
+												}
+
+												public boolean isCancelled() {
+													return cancelled;
+												}
+											};
+											//We need to run the prefilters on this thread, so we have
+											//to do this all by hand.
+											final SortedSet<BoundEvent> toRun = EventUtils.GetMatchingEvents(Driver.PLAYER_MOVE, player_moved.this.getName(), fakeEvent, player_moved.this);
+											//Ok, now the events to be run need to actually be run on the main server thread, so let's run that now.
+											try {
+												StaticLayer.GetConvertor().runOnMainThreadAndWait(new Callable<Object>(){
+
+													public Object call() throws Exception {
+														EventUtils.FireListeners(toRun, player_moved.this, fakeEvent);
+														return null;
+													}
+												});
+											} catch (Exception ex) {
+												if(ex instanceof ConfigRuntimeException){
+													ConfigRuntimeException.DoReport(((ConfigRuntimeException)ex));
+												} else {
+													Logger.getLogger(PlayerEvents.class.getName()).log(Level.SEVERE, null, ex);
+												}
+											}
+											if(fakeEvent.isCancelled()){
+												//Put them back at the from location
+												p.teleport(last);
+											} else {
+												thresholds.get(i).put(p.getName(), current);
+											}
+										}
+									} else {
+										//If there is no location here, just put the current location in there.
+										if(!thresholds.containsKey(i)){
+											Map<String, MCLocation> map = new HashMap<String, MCLocation>();
+											thresholds.put(i, map);
+										}
+										thresholds.get(i).put(p.getName(), p.asyncGetLocation());
+									}
+								}
+								synchronized(player_moved.this){
+									try {
+										//Throttle this thread just a little
+										player_moved.this.wait(10);
+									} catch (InterruptedException ex) {
+										//
+									}
+								}
+							}
+						}
+					}
+				}, "CommandHelperPlayerMovedEventRunner").start();
+			}
+		}
+
+		public String getName() {
+			return "player_moved";
+		}
+
+		public String docs() {
+			return "{player: <macro> The player that moved. Switching worlds does not trigger this event. "
+					+ "| from: <custom> This should be a location array (x, y, z, world)."
+					+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
+					+ "moved from 1.3, that parameter would match."
+                    + "| to: <custom> The location the player is now in. This should be a location array as well."
+					+ "| threshold: <custom> The minimum distance the player must have travelled before the event"
+					+ " will be triggered. This is based on the 3D distance, and is measured in block units.}"
+                    + " This event is fired off AFTER a player has moved. This is a read only event because of this,"
+					+ " however, the determination logic is run asynchronously from the main server thread, so general"
+					+ " detection of a movement will not cause any lag, beyond lag caused by any other thread. Prefilters"
+					+ " are extremely important to use however, because the prefilter code is also run asynchronously,"
+					+ " however your code is not, and therefore, is slower. It is also advisable to use a threshold,"
+					+ " so you are not firing an event every time a player moves. A threshold of 5 or 10 will likely"
+					+ " be sufficient for all use cases, and should considerably reduce server thread resources. Though this"
+					+ " event is read only, you can \"cancel\" the event by moving the player back to the from location,"
+					+ " or otherwise \"change\" the location by using set_ploc(). Note that on a server with"
+					+ " lots of players, this \"stride\" distance, that is, the distance a player will have moved"
+					+ " before the event picks it up will be greater. The movement detection thread is slightly"
+					+ " throttled."
+                    + "{player | from: The location the player is coming from | to: The location the player is now in}"
+                    + "{}"
+                    + "{}";
+		}
+
+		@Override
+		public void cancel(BindableEvent o, boolean state) {
+			if(o instanceof MCPlayerMovedEvent){
+				((MCPlayerMovedEvent)o).setCancelled(state);
+			}
+		}
+
+		@Override
+		public boolean isCancellable(BindableEvent o) {
+			return true;
+		}
+
+		@Override
+		public boolean isCancelled(BindableEvent o) {
+			if(o instanceof MCPlayerMovedEvent){
+				return ((MCPlayerMovedEvent)o).isCancelled();
+			} else {
+				return false;
+			}
+		}		
+		
+		
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerMovedEvent){
+				MCPlayerMovedEvent event = (MCPlayerMovedEvent)e;
+				if(!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())){
+					return false;
+				}
+				if(prefilter.containsKey("threshold")){
+					Point3D from = new Point3D(event.getFrom().getX(), event.getFrom().getY(), event.getFrom().getZ());
+					Point3D to = new Point3D(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ());
+					double distance = from.distance(to);
+					double pDistance = Static.getNumber(prefilter.get("threshold"));
+					if(pDistance > distance){
+						return false;
+					}
+				}
+				if(prefilter.containsKey("from")){
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getPlayer().getWorld(), Target.UNKNOWN);
+					MCLocation loc = event.getFrom();
+					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
+						return false;
+					}
+				}
+				if(prefilter.containsKey("to")){
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
+					MCLocation loc = event.getFrom();
+					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
+						return false;
+					}
+				}
+				return true;
+				
+			}
+			return false ;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			MCPlayer p = Static.GetPlayer(manualObject.get("player"));
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), p.getWorld(), manualObject.getTarget());
+			return EventBuilder.instantiate(MCPlayerMovedEvent.class, p, from, to);
+		}
+
+		
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCPlayerMovedEvent) {
+                MCPlayerMovedEvent event = (MCPlayerMovedEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                //Fill in the event parameters
+				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+                map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
+                map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerMovedEvent");
+            }
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_MOVE;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			//Nothing can be modified, so always return false
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
     
     
 }

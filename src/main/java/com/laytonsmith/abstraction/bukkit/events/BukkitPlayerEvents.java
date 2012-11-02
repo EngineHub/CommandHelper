@@ -19,9 +19,9 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import org.bukkit.Bukkit;
+import org.bukkit.Location;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
-import org.bukkit.event.block.Action;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.*;
@@ -413,5 +413,44 @@ public class BukkitPlayerEvents {
         }
         
     }
+	
+	@abstraction(type=Implementation.Type.BUKKIT)
+    public static class BukkitMCPlayerMovedEvent implements MCPlayerMovedEvent{
+		
+		BukkitMCLocation from;
+		BukkitMCLocation to;
+		BukkitMCPlayer player;
+		boolean cancelled = false;
+		public BukkitMCPlayerMovedEvent(Player p, Location from, Location to){
+			this.player = new BukkitMCPlayer(p);
+			this.from = new BukkitMCLocation(from);
+			this.to = new BukkitMCLocation(to);
+		}
+
+		public MCLocation getFrom() {
+			return from;
+		}
+
+		public MCLocation getTo() {
+			return to;
+		}
+
+		public MCPlayer getPlayer() {
+			return player;
+		}
+
+		public Object _GetObject() {
+			return null;
+		}
+
+		public void setCancelled(boolean state) {
+			cancelled = state;
+		}
+
+		public boolean isCancelled() {
+			return cancelled;
+		}
+		
+	}
    
 }

@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.EntityEffect;
+import org.bukkit.craftbukkit.entity.CraftEntity;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -207,6 +209,15 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 
 	public boolean teleport(MCLocation location, MCTeleportCause cause) {
 		return e.teleport(((BukkitMCLocation)location).asLocation(), TeleportCause.valueOf(cause.name()));
+	}
+	
+	/**
+	 * This only works with craftbukkit
+	 * @return 
+	 */
+	public MCLocation asyncGetLocation() {
+		CraftEntity ce = (CraftEntity)e;
+		return new BukkitMCLocation(ce.getLocation());
 	}
     
 }
