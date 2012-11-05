@@ -109,6 +109,10 @@ public class SQLiteDataSource extends AbstractDataSource{
 
 	public boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		checkSet();
+		if(value == null){
+			clearKey(key);
+			return true;
+		}
 		try{
 			try{
 				connect();

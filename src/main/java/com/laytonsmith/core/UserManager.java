@@ -106,9 +106,7 @@ public class UserManager {
             b.append(MCChatColor.AQUA)
                     .append(key[key.length - 1])
                     .append(":")
-                    .append(value.substring(0, Math.min(value.toString().length(), 45)))
-                    .append(value.toString().length() > 45?"...":"")
-                    .append("\n");
+                    .append(value.toString());
         }
         if(al.isEmpty()){
             b.append(MCChatColor.AQUA).append("You have no aliases defined");
@@ -121,7 +119,10 @@ public class UserManager {
         List<Script> list = new ArrayList<Script>();
         for(String[] entry : scripts.keySet()){
             try{
-                list.add(getAlias((String)scripts.get(entry)));
+				String script = scripts.get(entry);
+				if(script != null){ //Ignore this one, it somehow got set to null in the database.
+					list.add(getAlias(script));
+				}
             } catch(ConfigCompileException e){
                 //Ignore this one
             }
