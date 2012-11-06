@@ -1012,7 +1012,7 @@ public class DataHandling {
 	public static class is_string extends AbstractFunction implements Optimizable {
 
 		public String getName() {
-			return "is_stringable";
+			return "is_string";
 		}
 
 		public Integer[] numArgs() {
