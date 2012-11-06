@@ -125,7 +125,7 @@ public class Environment {
         }
 
         public String docs() {
-            return "void {x, y, z, id, [world] | xyzArray, id, [world]} Sets the id of the block at the x y z coordinates specified. If the"
+            return "void {x, y, z, id, [world] | locationArray, id} Sets the id of the block at the x y z coordinates specified. If the"
                     + " first argument passed is an array, it should be x y z coordinates. id must"
                     + " be a blocktype identifier similar to the type returned from get_block_at, except if the meta"
                     + " value is not specified, 0 is used. If world isn't specified, the current player's world"
