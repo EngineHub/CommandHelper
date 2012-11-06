@@ -212,7 +212,7 @@ public class Scheduling {
 						c.execute(null);
 						p.stop();
 					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.React(e);
+						ConfigRuntimeException.React(e, environment);
 					} catch (CancelCommandException e) {
 						//Ok
 					} catch (ProgramFlowManipulationException e) {
@@ -273,7 +273,7 @@ public class Scheduling {
 						c.execute(null);
 						p.stop();
 					} catch (ConfigRuntimeException e) {
-						ConfigRuntimeException.React(e);
+						ConfigRuntimeException.React(e, environment);
 					} catch (CancelCommandException e) {
 						//Ok
 					} catch (ProgramFlowManipulationException e) {

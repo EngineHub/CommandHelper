@@ -5,6 +5,7 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.util.ArrayList;
@@ -340,5 +341,53 @@ public class Exceptions {
 				throw new ConfigRuntimeException("Expected a valid exception type", ExceptionType.FormatException, t);
 			}
 		}
+	}
+	
+	@api
+	public static class set_uncaught_exception_handler extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args[0] instanceof CClosure){
+				environment.getEnv(GlobalEnv.class).SetExceptionHandler((CClosure)args[0]);
+				return new CVoid(t);
+			} else {
+				throw new CastException("Expecting arg 1 of " + getName() + " to be a Closure, but it was " + args[0].val(), t);
+			}
+		}
+
+		public String getName() {
+			return "set_uncaught_exception_handler";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {closure(@ex)} Sets the uncaught exception handler. If code throws an exception, instead of doing"
+					+ " the default (displaying the error to the user/console) it will run your code instead. The exception"
+					+ " that was thrown will be passed to the closure, and it is expected that the closure returns either null,"
+					+ " true, or false. If null is returned, the default handling will occur. If false is returned, it will"
+					+ " be \"escalated\" which in the current implementation is the same as returning null (this will be used"
+					+ " in the future). If true is returned, then default action will not occur, as it is assumed you have handled"
+					+ " it. Only one exception handler can be registered at this time.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

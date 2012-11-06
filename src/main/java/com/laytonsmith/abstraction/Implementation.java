@@ -3,17 +3,9 @@ package com.laytonsmith.abstraction;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
-import com.laytonsmith.abstraction.enums.MCBiomeType;
-import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.annotations.abstractionenum;
-import com.laytonsmith.core.CHLog;
-import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Prefs;
-import com.laytonsmith.core.constructs.Target;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * This class dynamically detects the server version being run, using various
@@ -54,10 +46,14 @@ public final class Implementation {
 				Class[] abstractionenums = ClassDiscovery.GetClassesWithAnnotation(abstractionenum.class);
 				for (Class c : abstractionenums) {
 					abstractionenum annotation = (abstractionenum) c.getAnnotation(abstractionenum.class);
-					//First verify usage of the annotation (it is an error if not used properly)
 					if (EnumConvertor.class.isAssignableFrom(c)) {
 						EnumConvertor<Enum, Enum> convertor;
 						try {
+							//Now, if this is not the current server type, skip it
+							if(annotation.implementation() != serverType){
+								continue;
+							}
+							//Next, verify usage of the annotation (it is an error if not used properly)
 							//All EnumConvertor subclasses should have public static getConvertor methods, let's grab it now
 							Method m = c.getDeclaredMethod("getConvertor");
 							convertor = (EnumConvertor<Enum, Enum>) m.invoke(null);

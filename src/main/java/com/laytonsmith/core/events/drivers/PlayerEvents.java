@@ -1067,11 +1067,7 @@ public class PlayerEvents {
 													}
 												});
 											} catch (Exception ex) {
-												if(ex instanceof ConfigRuntimeException){
-													ConfigRuntimeException.DoReport(((ConfigRuntimeException)ex));
-												} else {
-													Logger.getLogger(PlayerEvents.class.getName()).log(Level.SEVERE, null, ex);
-												}
+												Logger.getLogger(PlayerEvents.class.getName()).log(Level.SEVERE, null, ex);
 											}
 											if(fakeEvent.isCancelled()){
 												//Put them back at the from location

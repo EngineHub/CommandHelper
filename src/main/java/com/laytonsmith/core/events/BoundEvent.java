@@ -49,6 +49,14 @@ public class BoundEvent implements Comparable<BoundEvent> {
             return ++EventID;
         }
     }
+
+	public Environment getEnvironment() {
+		try {
+			return originalEnv.clone();
+		} catch (CloneNotSupportedException ex) {
+			throw new Error(ex);
+		}
+	}
     
 
     /**

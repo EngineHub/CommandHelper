@@ -8,11 +8,17 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CNull;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.Stack;
@@ -94,21 +100,56 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param e
      * @return 
      */
-    public static Reaction HandleUncaughtException(ConfigRuntimeException e){
-        //For now just return the default, but eventually, we will also see what the
-        //bound events do for it
-        return Reaction.REPORT;
+    public static Reaction HandleUncaughtException(ConfigRuntimeException e, Environment env){
+        //If there is an exception handler, call it to see what it says.
+		Reaction reaction = Reaction.REPORT;
+		if(e.getExceptionType() == null){
+			//Uncatchable, so return the default
+			return reaction;
+		}
+		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null){
+			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
+			CArray ex = ObjectGenerator.GetGenerator().exception(e, Target.UNKNOWN);
+			Construct ret = new CNull();
+			try{
+				c.execute(new Construct[]{ex});
+			} catch(FunctionReturnException retException){
+				ret = retException.getReturn();
+			}
+			if(ret instanceof CNull){
+				reaction = Reaction.REPORT;
+			} else {
+				if(Static.getBoolean(ret)){
+					reaction = Reaction.IGNORE;
+				} else {
+					reaction = Reaction.FATAL;
+				}
+			}
+		}
+        return reaction;
     }
     
     /**
      * If there's nothing special you want to do with the exception, you can send it
-     * here, and it will take the default action for an uncaught exception.
+     * here, and it will take the default action for an uncaught exception. This is
+	 * typically used by top level handlers.
      * @param e
      * @param r 
      */
-    public static void React(ConfigRuntimeException e){
-        React(e, HandleUncaughtException(e), null);
+    public static void React(ConfigRuntimeException e, Environment env){
+        React(e, HandleUncaughtException(e, env), null);
     }
+	
+	/**
+	 * Compile errors are always handled with the default mechanism, but
+	 * to standardize error handling, this method must be used.
+	 * @param e
+	 * @param optionalMessage
+	 * @param player 
+	 */
+	public static void React(ConfigCompileException e, String optionalMessage, MCPlayer player){
+		DoReport(e, optionalMessage, player);
+	}
     
 //    /**
 //     * If there's nothing special you want to do with the exception, you can send it
@@ -126,8 +167,8 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param e
      * @param r 
      */
-    public static void React(ConfigRuntimeException e, String optionalMessage){
-        React(e, HandleUncaughtException(e), optionalMessage);
+    public static void React(ConfigRuntimeException e, String optionalMessage, Environment env){
+        React(e, HandleUncaughtException(e, env), optionalMessage);
     }
     
     /**
@@ -152,22 +193,13 @@ public class ConfigRuntimeException extends RuntimeException {
     
     /**
      * If the Reaction returned by HandleUncaughtException is to report the exception,
-     * this function should be used to standardize the report format.
-     * @param e 
-     */
-    public static void DoReport(ConfigRuntimeException e){
-        DoReport(e, null);
-    }
-    
-    /**
-     * If the Reaction returned by HandleUncaughtException is to report the exception,
      * this function should be used to standardize the report format. If the error message
      * wouldn't be very useful by itself, or if a hint is desired, an optional message
-     * may be provided (null otherwise)
+     * may be provided (null otherwise).
      * @param e
      * @param optionalMessage 
      */
-    public static void DoReport(String message, String exceptionType, String file, String simpleFile, String line_num, String optionalMessage, MCPlayer player){
+    private static void DoReport(String message, String exceptionType, String file, String simpleFile, String line_num, String optionalMessage, MCPlayer player){
         String type = exceptionType;
         if(exceptionType == null){
             type = "FATAL";
@@ -199,7 +231,7 @@ public class ConfigRuntimeException extends RuntimeException {
         }
     }
     
-    public static void DoReport(ConfigRuntimeException e, String optionalMessage){
+    private static void DoReport(ConfigRuntimeException e, String optionalMessage){
         MCPlayer p = null;
         if(e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
             p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
@@ -207,7 +239,7 @@ public class ConfigRuntimeException extends RuntimeException {
         DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, p);
     }
     
-    public static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){
+    private static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){
         DoReport(e.getMessage(), "COMPILE ERROR", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), e.getLineNum(), optionalMessage, player);
     }
         
