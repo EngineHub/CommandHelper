@@ -379,10 +379,14 @@ public class Exceptions {
 			return "void {closure(@ex)} Sets the uncaught exception handler. If code throws an exception, instead of doing"
 					+ " the default (displaying the error to the user/console) it will run your code instead. The exception"
 					+ " that was thrown will be passed to the closure, and it is expected that the closure returns either null,"
-					+ " true, or false. If null is returned, the default handling will occur. If false is returned, it will"
+					+ " true, or false. ---- If null is returned, the default handling will occur. If false is returned, it will"
 					+ " be \"escalated\" which in the current implementation is the same as returning null (this will be used"
 					+ " in the future). If true is returned, then default action will not occur, as it is assumed you have handled"
-					+ " it. Only one exception handler can be registered at this time.";
+					+ " it. Only one exception handler can be registered at this time. If code inside the closure generates it's own"
+					+ " exception, this will be handled by displaying both exceptions. To prevent this, you could put a try() block"
+					+ " around the whole code block, but it is highly recommended you do not supress this. It is possible to completely"
+					+ " supress all runtime exceptions using this method, but it is highly recommended that you still have a generic"
+					+ " logging mechanism, perhaps to console, so you don't \"lose\" your exceptions, and fail to realize anything is wrong.";
 		}
 
 		public CHVersion since() {
