@@ -5,17 +5,20 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCEffect;
+import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCProfession;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
+
 import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
@@ -24,6 +27,8 @@ import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.*;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
+import org.bukkit.material.MaterialData;
+import org.bukkit.Material;
 
 /**
  *
@@ -231,7 +236,7 @@ public class BukkitMCWorld implements MCWorld {
                     mobType = IronGolem.class;
                     break;
 				case BAT:
-					mobType = Witch.class;
+					mobType = Bat.class;
 					break;
 				case WITHER:
 					mobType = Wither.class;
@@ -277,6 +282,57 @@ public class BukkitMCWorld implements MCWorld {
                 } catch (IllegalArgumentException ex){
                     throw new ConfigRuntimeException(subClass.toUpperCase() + " is not a ocelot type",
                             ExceptionType.FormatException, t);                    
+                }
+            }
+            if(((BukkitMCEntity)e).asEntity() instanceof Creeper){
+                Creeper c = (Creeper)((BukkitMCEntity)e).asEntity();
+                if("POWERED".equals(subClass.toUpperCase())){
+                    c.setPowered(true);
+                }
+            }
+            if(((BukkitMCEntity)e).asEntity() instanceof Wolf){
+                Wolf w = (Wolf)((BukkitMCEntity)e).asEntity();
+                if("ANGRY".equals(subClass.toUpperCase())){
+                    w.setAngry(true);
+                }
+            }
+            if(((BukkitMCEntity)e).asEntity() instanceof PigZombie){
+                PigZombie pz = (PigZombie)((BukkitMCEntity)e).asEntity();
+                if("".equals(subClass)){
+                    pz.setAngry(false);
+                }
+                else{
+                    try{
+                        pz.setAnger(java.lang.Integer.parseInt(subClass));
+                    } catch (IllegalArgumentException ex){
+                           throw new ConfigRuntimeException(subClass + " is not a valid anger level",
+                                   ExceptionType.FormatException, t);
+                    }
+                }
+            }
+            if (((BukkitMCEntity)e).asEntity() instanceof Villager) {
+                Villager v = (Villager) ((BukkitMCEntity)e).asEntity();
+                MCProfession job = MCProfession.FARMER;
+                if(!"".equals(subClass)){
+                    job = MCProfession.valueOf(subClass.toUpperCase());
+                }
+                try {
+                    v.setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
+                } catch (IllegalArgumentException ex) {
+                    throw new ConfigRuntimeException(subClass.toUpperCase() + " is not a valid profession",
+                        ExceptionType.FormatException, t);
+                }
+            }
+            if (((BukkitMCEntity)e).asEntity() instanceof Enderman) {
+                Enderman en = (Enderman) ((BukkitMCEntity)e).asEntity();
+                if(!"".equals(subClass)){
+                	MaterialData held = new MaterialData(Material.valueOf(subClass.toUpperCase()));
+                    try {
+                        en.setCarriedMaterial(held);
+                    } catch (IllegalArgumentException ex) {
+                        throw new ConfigRuntimeException(subClass.toUpperCase() + " cannot be held",
+                            ExceptionType.FormatException, t);
+                    }
                 }
             }
             ids.push(new CInt(e.getEntityId(), t));

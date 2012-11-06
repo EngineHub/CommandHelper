@@ -11,8 +11,9 @@ public enum MCEntityType {
     PAINTING,
     ARROW,
     SNOWBALL,
+    FIREBALL,
     SMALL_FIREBALL,
-	LARGE_FIREBALL,
+	LARGE_FIREBALL, //lets just leave this here since they will probably change their minds again
 	ITEM_FRAME,
 	WITHER_SKULL,
 	WITHER,

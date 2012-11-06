@@ -3,6 +3,7 @@
 /plugins/
 /com/
 /CommandHelper/
+/bin/
 .classpath
 .project
 nbactions-provisional-build.xml

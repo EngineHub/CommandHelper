@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -309,8 +310,12 @@ public class Minecraft {
 					+ " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
 					+ " SHEEP:COLOR, where COLOR is any of the dye colors: "
 					+ StringUtils.Join(MCDyeColor.values(), ", ") + ". COLOR defaults to white if not"
-					+ " specified. An array of the entity IDs spawned is returned. OCELOT can also take a subtype, like sheep, and may be one of: WILD_OCELOT, BLACK_CAT, RED_CAT, or SIAMESE_CAT"
-					+ " <small>GIANTs can also be spawned, if you are running craftbukkit. This is an experimental feature. Only one GIANT can be spawned at a time</small>";
+					+ " specified. OCELOT can also take a subtype, like sheep, and may be one of: "
+					+ "WILD_OCELOT, BLACK_CAT, RED_CAT, or SIAMESE_CAT. Villagers can have a profession as a subtype: "
+					+ StringUtils.Join(MCProfession.values(), ", ") + ", defaulting to farmer if not specified. PigZombies' subtype represents their anger,"
+					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked. Defaults to 0. If a material is specified"
+					+ " as the subtype for endermen, they will hold that material, otherwise they will hold nothing."
+					+ " Creepers can have the powered subtype, and wolves can be angry. An array of the entity IDs spawned is returned.";
 		}
 
 		public ExceptionType[] thrown() {
