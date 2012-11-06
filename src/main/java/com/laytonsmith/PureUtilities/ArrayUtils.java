@@ -660,7 +660,7 @@ public class ArrayUtils {
 		}
 		return newArray;
 	}
-	
+		
 	/***************************************************************************
 	 * Misc
 	 ***************************************************************************/
@@ -672,11 +672,59 @@ public class ArrayUtils {
 	 * @return 
 	 */
 	public static <T> T[] asArray(Class<T> clazz, List list){
-		Object[] obj = (Object[]) Array.newInstance(clazz, list.size());
+		T[] obj = (T[]) Array.newInstance(clazz, list.size());
 		for(int i = 0; i < list.size(); i++){
-			obj[i] = list.get(i);
+			obj[i] = (T)list.get(i);
 		}
-		return (T[])obj;
+		return obj;
+	}		
+	
+	/**
+	 * Returns a new array, where each item has been cast to the
+	 * specified class, and the returned array is an array type
+	 * based on that class.
+	 * @param <T>
+	 * @param array Despite being an Object, instead of an Object[], this will throw a ClassCastException
+	 * if it is not an array type.
+	 * @param toClass
+	 * @return 
+	 */
+	public static <T> T cast(Object array, Class<T> toArrayClass){
+		if(!array.getClass().isArray()){
+			throw new ClassCastException();
+		}
+		Object obj;
+		Class toClass = toArrayClass.getComponentType();
+
+		obj = toArrayClass.cast(Array.newInstance(toClass, Array.getLength(array)));
+		for(int i = 0; i < Array.getLength(array); i++){				
+			doSet(obj, i, Array.get(array, i));
+		}
+		return (T)obj;
 	}
 	
+	private static void doSet(Object array, int index, Object o){
+		Class componentType = array.getClass().getComponentType();
+		if(componentType.isPrimitive()){
+			if(componentType == char.class){
+				Array.setChar(array, index, ((Character)o).charValue());
+			} else if(componentType == byte.class){
+				Array.setByte(array, index, ((Number)o).byteValue());
+			} else if(componentType == short.class){
+				Array.setShort(array, index, ((Number)o).shortValue());
+			} else if(componentType == int.class){
+				Array.setInt(array, index, ((Number)o).intValue());
+			} else if(componentType == long.class){
+				Array.setLong(array, index, ((Number)o).longValue());
+			} else if(componentType == float.class){
+				Array.setFloat(array, index, ((Number)o).floatValue());
+			} else if(componentType == double.class){
+				Array.setDouble(array, index, ((Number)o).doubleValue());
+			} else if(componentType == boolean.class){
+				Array.setBoolean(array, index, ((Boolean)o).booleanValue());
+			}
+		} else {
+			Array.set(array, index, o);
+		}
+	}
 }
