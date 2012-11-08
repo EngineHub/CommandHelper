@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -50,18 +51,22 @@ import org.apache.commons.io.FileUtils;
  * Symlinks can be added, which map directories inside the virtual file system to
  * other directories on the real file system, and these links appear completely
  * transparent to the file system. This allows for non-continuous file systems
- * to appear continuous internally.
+ * to appear continuous internally. Additionally, remote file systems can be mounted
+ * via ssh, and they will appear continuous.
  * @author lsmith
  */
 public class VirtualFileSystem {
 	private static final String META_DIRECTORY_PATH = ".vfsmeta";
 	public static final VirtualFile META_DIRECTORY = new VirtualFile("/" + META_DIRECTORY_PATH);
+	private static final String TMP_DIRECTORY_PATH = META_DIRECTORY_PATH + "/tmp";
+	public static final VirtualFile TMP_DIRECTORY = new VirtualFile("/" + TMP_DIRECTORY_PATH);
 	
 	private final VirtualFileSystemSettings settings;
-	private final File root;
+	protected final File root;
 	private BigInteger quota = new BigInteger("-1");
 	private BigInteger FSSize = new BigInteger("0");
 	private Thread fsSizeThread;
+	private List<FileSystemLayer> currentTmpFiles = new ArrayList<FileSystemLayer>();
 	
 	
 	/**
@@ -97,6 +102,7 @@ public class VirtualFileSystem {
 			fsSizeThread.setPriority(Thread.MIN_PRIORITY);
 			fsSizeThread.start();
 		}
+		//TODO: Kick off the tmp file deleter thread
 	}
 	
 	private void install() throws IOException{
@@ -109,6 +115,7 @@ public class VirtualFileSystem {
 		File settingsFile = new File(meta, "settings.config");
 		File manifest = new File(meta, "manifest.txt");
 		File symlinks = new File(meta, "symlinks.txt");
+		File tmpDir = new File(meta, "tmp");
 		
 		if(!settingsFile.exists()){
 			settingsFile.createNewFile();
@@ -120,6 +127,10 @@ public class VirtualFileSystem {
 		
 		if(!symlinks.exists()){
 			symlinks.createNewFile();
+		}
+		
+		if(!tmpDir.exists()){
+			tmpDir.mkdirs();
 		}
 		
 	}
@@ -134,22 +145,16 @@ public class VirtualFileSystem {
 		throw new PermissionException(file.getPath() + " cannot be written to.");
 	}
 	
-	private File normalize(VirtualFile virtual) throws IOException{
-		File real = new File(root, virtual.getPath());
-		if(!real.getCanonicalPath().startsWith(root.getCanonicalPath())){
-			throw new PermissionException(virtual.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
-		} else {
-			return real;
-		}
-	}
-	
-	private VirtualFile normalize(File real) throws IOException{
-		String path = real.getCanonicalPath().replaceFirst(Pattern.quote(root.getCanonicalPath()), "");
-		path = path.replace("\\", "/");
-		if(!path.startsWith("/")){
-			path = "/" + path;
-		}
-		return new VirtualFile(path);
+	private FileSystemLayer normalize(VirtualFile virtual) throws IOException{
+		return null;
+		//TODO: See if thi points to a symlinked file. If so, we
+		//have to take that into account too.
+//		File real = new File(root, virtual.getPath());
+//		if(!real.getCanonicalPath().startsWith(root.getCanonicalPath())){
+//			throw new PermissionException(virtual.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
+//		} else {
+//			return real;
+//		}
 	}
 	
 	/**
@@ -188,8 +193,8 @@ public class VirtualFileSystem {
 	 */
 	public InputStream readAsStream(VirtualFile file) throws IOException{
 		assertReadPermission(file);
-		File real = normalize(file);
-		return new FileInputStream(real);
+		FileSystemLayer real = normalize(file);
+		return real.getInputStream();
 	}
 	
 	/**
@@ -200,8 +205,8 @@ public class VirtualFileSystem {
 	 */
 	public void write(VirtualFile file, byte[] bytes) throws IOException{
 		assertWritePermission(file);
-		File real = normalize(file);
-		FileUtils.writeByteArrayToFile(real, bytes);
+		FileSystemLayer real = normalize(file);
+		real.writeByteArray(bytes);
 	}
 	
 	/**
@@ -218,12 +223,8 @@ public class VirtualFileSystem {
 		if(settings.isCordonedOff()){
 			throw new UnsupportedOperationException("Not yet implemented.");
 		} else {
-			File real = normalize(directory);
-			List<VirtualFile> virtuals = new ArrayList<VirtualFile>();
-			for(File sub : real.listFiles()){
-				virtuals.add(normalize(sub));
-			}
-			return virtuals.toArray(new VirtualFile[virtuals.size()]);
+			FileSystemLayer real = normalize(directory);
+			return real.listFiles();
 		}
 	}
 	
@@ -237,12 +238,12 @@ public class VirtualFileSystem {
 	 * @param file
 	 * @return 
 	 */
-	public boolean delete(VirtualFile file) throws IOException{
+	public void delete(VirtualFile file) throws IOException{
 		assertWritePermission(file);
 		if(settings.isCordonedOff()){
 			throw new UnsupportedOperationException("Not implemented yet.");
 		} else {
-			return normalize(file).delete();
+			normalize(file).delete();
 		}
 	}
 	
@@ -364,6 +365,28 @@ public class VirtualFileSystem {
 			return;
 		}
 		normalize(file).createNewFile();
+	}
+	
+	/**
+	 * Creates a new temporary file, which is guaranteed to be unique, and
+	 * will definitely exist for this session. The file is likely to be deleted
+	 * at the start of the next session however, and so must not be relied on to
+	 * continue to exist. Temporary files do count towards the quota if enabled,
+	 * but will be deleted by the system automatically. You must have read and
+	 * write permissions to / to create a temp file.
+	 * @return
+	 * @throws IOException 
+	 */
+	public VirtualFile createTempFile() throws IOException{
+		assertWritePermission(new VirtualFile("/"));
+		assertReadPermission(new VirtualFile("/"));
+		String filename = "/" + TMP_DIRECTORY_PATH + "/" + UUID.randomUUID().toString() + ".tmp";
+		VirtualFile path = new VirtualFile(filename);
+		FileSystemLayer real = normalize(path);
+		//Add this to the current session's list, so it doesn't get hosed by the file deletion thread.
+		currentTmpFiles.add(real);
+		real.createNewFile();
+		return path;
 	}
 					
 }
