@@ -73,16 +73,17 @@ public class VirtualFileSystem {
 	 * Creates a new VirtualFileSystem, at the root specified. If the root
 	 * doesn't exist, it will automatically be created.
 	 * @param root
-	 * @param settings 
+	 * @param settings The settings object, which represents this file system's settings. If null,
+	 * it is assumed this is a fresh installation, and will be handled accordingly.
 	 * @throws IOException If the file system cannot be initialized at this location
 	 */
 	public VirtualFileSystem(final File root, VirtualFileSystemSettings settings) throws IOException{
-		this.settings = settings;
+		this.settings = settings==null?new VirtualFileSystemSettings(""):settings;
 		this.root = root;
 		install();
 		//TODO: If it is cordoned off, we don't need this thread either, we need a different
 		//thread, but it only needs to run once
-		if(settings.hasQuota()){
+		if(this.settings.hasQuota()){
 			//We need to kick off a thread to determine the current FS size.
 			fsSizeThread = new Thread(new Runnable() {
 
@@ -112,7 +113,7 @@ public class VirtualFileSystem {
 		File meta = new File(root, META_DIRECTORY_PATH);
 		meta.mkdir();
 		
-		File settingsFile = new File(meta, "settings.config");
+		File settingsFile = new File(meta, "settings.yml");
 		File manifest = new File(meta, "manifest.txt");
 		File symlinks = new File(meta, "symlinks.txt");
 		File tmpDir = new File(meta, "tmp");

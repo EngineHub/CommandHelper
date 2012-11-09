@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities.VirtualFS;
 
 import com.laytonsmith.PureUtilities.FileUtility;
 import java.io.File;
+import java.io.IOException;
 import org.junit.After;
 import org.junit.AfterClass;
 import static org.junit.Assert.*;
@@ -17,24 +18,33 @@ public class VirtualFSTest {
 	public VirtualFSTest() {
 	}
 	
-	File root = new File("./VirtualFS");
+	static final File root = new File("./VirtualFS");
+	static final File settingsFile = new File(root, ".vfsmeta/settings.yml");
 	@BeforeClass
 	public static void setUpClass() {
+		root.mkdirs();
 	}
 	
 	@AfterClass
 	public static void tearDownClass() {
+		FileUtility.recursiveDelete(root);
+		assertFalse(root.exists());
 	}
 	
 	@Before
 	public void setUp() {
-		root.mkdirs();
 	}
 	
 	@After
 	public void tearDown() {
-		FileUtility.recursiveDelete(root);
-		assertFalse(root.exists());
+	}
+	
+	/**
+	 * Convenience method to write the given settings to file.
+	 * @param settings 
+	 */
+	private void writeSettings(String settings) throws IOException{
+		FileUtility.write(settings, settingsFile);
 	}
 	
 	/**
@@ -44,8 +54,16 @@ public class VirtualFSTest {
 	 * @throws Exception 
 	 */
 	@Test
+	@SuppressWarnings("ResultOfObjectAllocationIgnored")
 	public void virtualFSSetup() throws Exception{
-		
+		String settingsString = "'**': {\n"
+				+ "  hidden: true,\n"
+				+ "  readonly: true\n"
+				+ "}\n";
+		writeSettings(settingsString);
+		new VirtualFileSystem(root, new VirtualFileSystemSettings(settingsFile));
+		assertTrue(FileUtility.read(settingsFile).contains(VirtualFileSystemSettings.getDefaultSettingsString()));
+		assertTrue(FileUtility.read(settingsFile).contains(settingsString));
 	}
 	
 	/**
