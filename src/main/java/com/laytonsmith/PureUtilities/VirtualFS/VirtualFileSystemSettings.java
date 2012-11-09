@@ -121,16 +121,18 @@ public class VirtualFileSystemSettings {
 		Yaml yaml = new Yaml();
 		Map<String, Map<String, Object>> unserialized = (Map)yaml.load(settings);
 		Map<VirtualGlob, SettingGroup> parsedSettings =  new HashMap<VirtualGlob, SettingGroup>();
-		for(String glob : unserialized.keySet()){
-			VirtualGlob vglob = new VirtualGlob(glob);
-			Map<String, Object> settingGroup = (Map)unserialized.get(glob);
-			SettingGroup group = new SettingGroup();
-			for(String settingName : settingGroup.keySet()){
-				VirtualFileSystemSetting s = VirtualFileSystemSetting.getSettingByName(settingName);
-				Object value = settingGroup.get(settingName);
-				group.set(s, value);
+		if(unserialized != null){
+			for(String glob : unserialized.keySet()){
+				VirtualGlob vglob = new VirtualGlob(glob);
+				Map<String, Object> settingGroup = (Map)unserialized.get(glob);
+				SettingGroup group = new SettingGroup();
+				for(String settingName : settingGroup.keySet()){
+					VirtualFileSystemSetting s = VirtualFileSystemSetting.getSettingByName(settingName);
+					Object value = settingGroup.get(settingName);
+					group.set(s, value);
+				}
+				parsedSettings.put(vglob, group);
 			}
-			parsedSettings.put(vglob, group);
 		}
 		return parsedSettings;
 	}

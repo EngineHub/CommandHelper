@@ -2,6 +2,10 @@ package com.laytonsmith.PureUtilities.VirtualFS;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * A file system layer is a layer between a VirtualFile and the real file
@@ -55,6 +59,8 @@ public abstract class FileSystemLayer {
 	/**
 	 * Used to denote a FileSystemLayer protocol
 	 */
+	@Retention(RetentionPolicy.RUNTIME)
+	@Target(ElementType.TYPE)
 	public static @interface fslayer {
 		/**
 		 * The protocol identifier, for instance, "file", which would

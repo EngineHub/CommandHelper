@@ -73,7 +73,14 @@ public class VirtualFSTest {
 	 */
 	@Test
 	public void testWriteReadWithNewFile() throws Exception{
-		
+		String fileText = "This is the text in the file";
+		VirtualFileSystem vfs = new VirtualFileSystem(root, null);
+		String fname = "testWriteReadWithNewFile.txt";
+		VirtualFile vf = new VirtualFile("/" + fname);
+		File realFile = new File(root, fname);
+		vfs.writeUTFString(vf, fileText);
+		assertEquals(fileText, FileUtility.read(realFile));
+		assertEquals(fileText, vfs.readUTFString(vf));
 	}
 	
 	/**
@@ -112,6 +119,16 @@ public class VirtualFSTest {
 	 */
 	@Test
 	public void testMetaFileReadWriteFails() throws Exception{
+		
+	}
+	
+	/**
+	 * This test verifies that reading and writing above the file
+	 * system will not work.
+	 * @throws Exception 
+	 */
+	@Test
+	public void testReadWriteAboveFSFails() throws Exception{
 		
 	}
 	
@@ -266,6 +283,38 @@ public class VirtualFSTest {
 	 */
 	@Test
 	public void testGlobMatching() throws Exception{
+		
+	}
+	
+	/**
+	 * Tests basic symlinking, map one file to another.
+	 * @throws Exception 
+	 */
+	@Test
+	public void testBasicSymlink() throws Exception{
+		
+	}
+	
+	/**
+	 * This test ensures that a symlink to deeper in the file system
+	 * works, and it also tests to make sure that it can in fact
+	 * go up past the "root" of the symlink, as long as ultimately
+	 * it stays inside the file system.
+	 * @throws Exception 
+	 */
+	@Test
+	public void testSymlinkDown() throws Exception{
+		
+	}
+	
+	/**
+	 * This test ensures that a symlink to a folder completely out
+	 * of the file system works, and also ensures that it can't
+	 * go up past the "root" of the symlink at all.
+	 * @throws Exception 
+	 */
+	@Test
+	public void testSymlinkOther() throws Exception{
 		
 	}
 

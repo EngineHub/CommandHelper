@@ -1,6 +1,5 @@
 package com.laytonsmith.PureUtilities.VirtualFS;
 
-import com.laytonsmith.PureUtilities.FileUtility;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -20,11 +19,24 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	protected final File real;
 
-	public RealFileSystemLayer(VirtualFile path, VirtualFileSystem fileSystem) throws IOException {
+	public RealFileSystemLayer(VirtualFile path, VirtualFileSystem fileSystem, String symlink) throws IOException {
 		super(path, fileSystem);
-		real = new File(fileSystem.root, path.getPath());
-		if (!real.getCanonicalPath().startsWith(fileSystem.root.getCanonicalPath())) {
-			throw new PermissionException(path.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
+		if (symlink == null) {
+			real = new File(fileSystem.root, path.getPath());
+			if (!real.getCanonicalPath().startsWith(fileSystem.root.getCanonicalPath())) {
+				throw new PermissionException(path.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
+			}
+		} else {
+			File symlinkRoot = new File(fileSystem.symlinkFile, symlink);
+			real = new File(symlinkRoot, path.getPath());
+			//If the path extends above the symlink, disallow it
+			if (!real.getCanonicalPath().startsWith(symlinkRoot.getCanonicalPath())) {
+				//Unless of course, the path is still within the full real path, then
+				//eh, we'll allow it.
+				if (!real.getCanonicalPath().startsWith(fileSystem.root.getCanonicalPath())) {
+					throw new PermissionException(path.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
+				}
+			}
 		}
 	}
 
@@ -58,7 +70,7 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	@Override
 	public void delete() throws IOException {
-		if(!real.delete()){
+		if (!real.delete()) {
 			throw new IOException("Could not delete the file");
 		}
 	}
@@ -95,14 +107,14 @@ public class RealFileSystemLayer extends FileSystemLayer {
 
 	@Override
 	public void mkdirs() throws IOException {
-		if(!real.mkdirs()){
+		if (!real.mkdirs()) {
 			throw new IOException("Directory structure could not be created");
 		}
 	}
 
 	@Override
 	public void createNewFile() throws IOException {
-		if(!real.createNewFile()){
+		if (!real.createNewFile()) {
 			throw new IOException("File already exists!");
 		}
 	}
