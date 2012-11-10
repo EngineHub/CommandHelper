@@ -671,7 +671,7 @@ public class Environment {
         }
 
         public String docs() {
-            return "void {Locationarray[, size]} Creates an explosion with the given size at the given location."
+            return "void {Locationarray, [size]} Creates an explosion with the given size at the given location."
                     + "Size defaults to size of a creeper (3).";
         }
 

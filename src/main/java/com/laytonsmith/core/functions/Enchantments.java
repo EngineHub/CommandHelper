@@ -69,6 +69,14 @@ public class Enchantments {
 			return "DURABILITY";
 		} else if (lc.equals("fortune")) {
 			return "LOOT_BONUS_BLOCKS";
+		} else if (lc.equals("power")){
+			return "ARROW_DAMAGE";
+		} else if(lc.equals("punch")){
+			return "ARROW_KNOCKBACK";
+		} else if(lc.equals("flame")){
+			return "ARROW_FIRE";
+		} else if(lc.equals("infinity")){
+			return "ARROW_INFINITE";
 		} else {
 			return wikiVersion;
 		}
