@@ -972,6 +972,18 @@ public class PlayerEvents {
 	@api
 	public static class player_move extends AbstractEvent{
 		
+		/*
+		 * TODO: 
+		 * 1. Add player prefilter
+		 * 2. See if the same event can be fired with different from fields, so that
+		 * one move only causes one "chain" of handlers to be fired.
+		 * 3. Add both region points and named WG region support in the prefilters.
+		 * (The sk_ functiosn can probably be used directly)
+		 * 4. Figure out why the cancel() isn't working.
+		 * 5. Tie this in to player teleport events. Probably set a prefilter that determines
+		 * whether or not a teleport should count as a movement or not.
+		 */
+		
 		private boolean threadRunning = false;
 		private Set<Integer> thresholdList = new HashSet<Integer>();
 		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
@@ -1055,11 +1067,7 @@ public class PlayerEvents {
 													}
 												});
 											} catch (Exception ex) {
-												if(ex instanceof ConfigRuntimeException){
-													ConfigRuntimeException.DoReport(((ConfigRuntimeException)ex));
-												} else {
-													Logger.getLogger(PlayerEvents.class.getName()).log(Level.SEVERE, null, ex);
-												}
+												Logger.getLogger(PlayerEvents.class.getName()).log(Level.SEVERE, null, ex);
 											}
 											if(fakeEvent.isCancelled()){
 												//Put them back at the from location

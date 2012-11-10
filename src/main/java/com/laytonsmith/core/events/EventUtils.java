@@ -110,7 +110,7 @@ public final class EventUtils {
                             try{
                                 convertedEvent = driver.convert(object);
                             } catch(ConfigRuntimeException e){
-                                ConfigRuntimeException.React(e, "Did you include all the event parameters?");
+                                ConfigRuntimeException.React(e, "Did you include all the event parameters?", b.getEnvironment());
                                 continue;
                             }
                             if (driver.matches(b.getPrefilter(), convertedEvent)) {
@@ -192,7 +192,7 @@ public final class EventUtils {
                     throw new ConfigRuntimeException(ex.getMessage(), null, Target.UNKNOWN);
                 } catch(ConfigRuntimeException ex){
                     //An exception has bubbled all the way up
-                    ConfigRuntimeException.React(ex);
+                    ConfigRuntimeException.React(ex, b.getEnvironment());
                 }
             }
         }

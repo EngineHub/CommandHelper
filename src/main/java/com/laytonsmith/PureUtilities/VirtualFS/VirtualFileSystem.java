@@ -1,13 +1,21 @@
 package com.laytonsmith.PureUtilities.VirtualFS;
 
+import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.StreamUtils;
+import com.laytonsmith.PureUtilities.VirtualFS.VirtualFileSystemSettings.VirtualFileSystemSetting;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.math.BigInteger;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
@@ -50,34 +58,63 @@ import org.apache.commons.io.FileUtils;
  * Symlinks can be added, which map directories inside the virtual file system to
  * other directories on the real file system, and these links appear completely
  * transparent to the file system. This allows for non-continuous file systems
- * to appear continuous internally.
+ * to appear continuous internally. Additionally, remote file systems can be mounted
+ * via ssh, and they will appear continuous.
  * @author lsmith
  */
 public class VirtualFileSystem {
 	private static final String META_DIRECTORY_PATH = ".vfsmeta";
 	public static final VirtualFile META_DIRECTORY = new VirtualFile("/" + META_DIRECTORY_PATH);
+	private static final String TMP_DIRECTORY_PATH = META_DIRECTORY_PATH + "/tmp";
+	public static final VirtualFile TMP_DIRECTORY = new VirtualFile("/" + TMP_DIRECTORY_PATH);
+	public static final String SYMLINK_FILE_NAME = "symlinks.txt";
+	public static final String MANIFEST_FILE_NAME = "manifest.txt";
+	public static final String SETTINGS_FILE_NAME = "settings.yml";
 	
 	private final VirtualFileSystemSettings settings;
-	private final File root;
+	protected final File root;
+	public final File symlinkFile;
 	private BigInteger quota = new BigInteger("-1");
 	private BigInteger FSSize = new BigInteger("0");
 	private Thread fsSizeThread;
+	private final List<FileSystemLayer> currentTmpFiles = new ArrayList<FileSystemLayer>();
+	private final Map<VirtualGlob, URI> symlinks = new HashMap<VirtualGlob, URI>();
+	
+	private static final Map<String, Constructor> FSLProviders = new HashMap<String, Constructor>();
+	static {
+		Class fslayerClasses [] = ClassDiscovery.GetClassesWithAnnotation(FileSystemLayer.fslayer.class);
+		for(Class<? extends FileSystemLayer> clazz : fslayerClasses){
+			try {
+				Constructor<? extends FileSystemLayer> constructor = clazz.getConstructor(VirtualFile.class, VirtualFileSystem.class, String.class);
+				FileSystemLayer.fslayer annotation = clazz.getAnnotation(FileSystemLayer.fslayer.class);
+				FSLProviders.put(annotation.value(), constructor);
+			} catch (NoSuchMethodException ex) {
+				throw new Error(clazz.getName() + " must implement a constructor with the signature: public " + clazz.getSimpleName() + "("
+						+ VirtualFile.class.getSimpleName() + ", " + VirtualFileSystem.class.getSimpleName() + ", " + String.class.getSimpleName() + ")");
+			} catch (SecurityException ex) {
+				Logger.getLogger(VirtualFileSystem.class.getName()).log(Level.SEVERE, "Security exception while loading a class. Symlinks may not work.", ex);
+			}
+		}
+	}
+	
 	
 	
 	/**
 	 * Creates a new VirtualFileSystem, at the root specified. If the root
 	 * doesn't exist, it will automatically be created.
 	 * @param root
-	 * @param settings 
+	 * @param settings The settings object, which represents this file system's settings. If null,
+	 * it is assumed this is a fresh installation, and will be handled accordingly.
 	 * @throws IOException If the file system cannot be initialized at this location
 	 */
 	public VirtualFileSystem(final File root, VirtualFileSystemSettings settings) throws IOException{
-		this.settings = settings;
+		this.settings = settings==null?new VirtualFileSystemSettings(""):settings;
 		this.root = root;
 		install();
+		symlinkFile = new File(root, META_DIRECTORY_PATH + "/" + SYMLINK_FILE_NAME);
 		//TODO: If it is cordoned off, we don't need this thread either, we need a different
 		//thread, but it only needs to run once
-		if(settings.hasQuota()){
+		if(this.settings.hasQuota()){
 			//We need to kick off a thread to determine the current FS size.
 			fsSizeThread = new Thread(new Runnable() {
 
@@ -97,6 +134,7 @@ public class VirtualFileSystem {
 			fsSizeThread.setPriority(Thread.MIN_PRIORITY);
 			fsSizeThread.start();
 		}
+		//TODO: Kick off the tmp file deleter thread
 	}
 	
 	private void install() throws IOException{
@@ -106,9 +144,10 @@ public class VirtualFileSystem {
 		File meta = new File(root, META_DIRECTORY_PATH);
 		meta.mkdir();
 		
-		File settingsFile = new File(meta, "settings.config");
-		File manifest = new File(meta, "manifest.txt");
-		File symlinks = new File(meta, "symlinks.txt");
+		File settingsFile = new File(meta, SETTINGS_FILE_NAME);
+		File manifest = new File(meta, MANIFEST_FILE_NAME);
+		File symlinks = new File(meta, SYMLINK_FILE_NAME);
+		File tmpDir = new File(meta, "tmp");
 		
 		if(!settingsFile.exists()){
 			settingsFile.createNewFile();
@@ -122,34 +161,59 @@ public class VirtualFileSystem {
 			symlinks.createNewFile();
 		}
 		
+		if(!tmpDir.exists()){
+			tmpDir.mkdirs();
+		}
+		
 	}
 	
 	private void assertReadPermission(VirtualFile file){
-		//TODO: Finish
-		throw new PermissionException(file.getPath() + " cannot be read.");
+		Boolean hidden = (Boolean)settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
+		if(hidden){
+			throw new PermissionException(file.getPath() + " cannot be read.");
+		}
 	}
 	
 	private void assertWritePermission(VirtualFile file){
-		//TODO: Finish
-		throw new PermissionException(file.getPath() + " cannot be written to.");
+		Boolean readOnly = (Boolean)settings.getSetting(file, VirtualFileSystemSetting.READONLY);
+		Boolean hidden = (Boolean)settings.getSetting(file, VirtualFileSystemSetting.HIDDEN);
+		if(readOnly || hidden){
+			throw new PermissionException(file.getPath() + " cannot be written to.");
+		}
 	}
 	
-	private File normalize(VirtualFile virtual) throws IOException{
-		File real = new File(root, virtual.getPath());
-		if(!real.getCanonicalPath().startsWith(root.getCanonicalPath())){
-			throw new PermissionException(virtual.getPath() + " extends above the root directory of this file system, and does not point to a valid file.");
+	private FileSystemLayer normalize(VirtualFile virtual) throws IOException{
+		URI uri = null;
+		for(VirtualGlob vg : symlinks.keySet()){
+			if(vg.matches(virtual)){
+				uri = symlinks.get(vg);
+				break;
+			}
+		}
+		String provider = "file";
+		String symlink = null;
+		//If there is a symlink provided, we will use it to determine
+		//both a) who we need to instantiate to provide the fslayer for
+		//us, and b) what the symlink actually is. Default to no
+		//symlink, with a file: provider.
+		if(uri != null){
+			provider = uri.getScheme();
+			symlink = uri.getSchemeSpecificPart();
+		}
+		if(FSLProviders.containsKey(provider)){
+			FileSystemLayer fsl;
+			try {
+				fsl = (FileSystemLayer) FSLProviders.get(provider).newInstance(virtual, this, symlink);
+			} catch (Exception ex) {
+				//This shouldn't happen ever, minus a programming mistake?
+				throw new Error(ex);
+			}
+			return fsl;
 		} else {
-			return real;
+			//This should be handled upon symlink file read-in, and so
+			//shouldn't happen here.
+			throw new Error("Unknown provider for " + provider);
 		}
-	}
-	
-	private VirtualFile normalize(File real) throws IOException{
-		String path = real.getCanonicalPath().replaceFirst(Pattern.quote(root.getCanonicalPath()), "");
-		path = path.replace("\\", "/");
-		if(!path.startsWith("/")){
-			path = "/" + path;
-		}
-		return new VirtualFile(path);
 	}
 	
 	/**
@@ -188,8 +252,8 @@ public class VirtualFileSystem {
 	 */
 	public InputStream readAsStream(VirtualFile file) throws IOException{
 		assertReadPermission(file);
-		File real = normalize(file);
-		return new FileInputStream(real);
+		FileSystemLayer real = normalize(file);
+		return real.getInputStream();
 	}
 	
 	/**
@@ -200,8 +264,28 @@ public class VirtualFileSystem {
 	 */
 	public void write(VirtualFile file, byte[] bytes) throws IOException{
 		assertWritePermission(file);
-		File real = normalize(file);
-		FileUtils.writeByteArrayToFile(real, bytes);
+		FileSystemLayer real = normalize(file);
+		real.writeByteArray(bytes);
+	}
+	
+	/**
+	 * Convenience method to write out a plain string.
+	 * @param file
+	 * @return
+	 * @throws IOException 
+	 */
+	public String readUTFString(VirtualFile file) throws IOException{
+		return new String(read(file), "UTF-8");
+	}
+	
+	/**
+	 * Convenience method to read in a plain string.
+	 * @param file
+	 * @param string
+	 * @throws IOException 
+	 */
+	public void writeUTFString(VirtualFile file, String string) throws IOException{
+		write(file, string.getBytes("UTF-8"));
 	}
 	
 	/**
@@ -218,12 +302,8 @@ public class VirtualFileSystem {
 		if(settings.isCordonedOff()){
 			throw new UnsupportedOperationException("Not yet implemented.");
 		} else {
-			File real = normalize(directory);
-			List<VirtualFile> virtuals = new ArrayList<VirtualFile>();
-			for(File sub : real.listFiles()){
-				virtuals.add(normalize(sub));
-			}
-			return virtuals.toArray(new VirtualFile[virtuals.size()]);
+			FileSystemLayer real = normalize(directory);
+			return real.listFiles();
 		}
 	}
 	
@@ -237,12 +317,12 @@ public class VirtualFileSystem {
 	 * @param file
 	 * @return 
 	 */
-	public boolean delete(VirtualFile file) throws IOException{
+	public void delete(VirtualFile file) throws IOException{
 		assertWritePermission(file);
 		if(settings.isCordonedOff()){
 			throw new UnsupportedOperationException("Not implemented yet.");
 		} else {
-			return normalize(file).delete();
+			normalize(file).delete();
 		}
 	}
 	
@@ -364,6 +444,28 @@ public class VirtualFileSystem {
 			return;
 		}
 		normalize(file).createNewFile();
+	}
+	
+	/**
+	 * Creates a new temporary file, which is guaranteed to be unique, and
+	 * will definitely exist for this session. The file is likely to be deleted
+	 * at the start of the next session however, and so must not be relied on to
+	 * continue to exist. Temporary files do count towards the quota if enabled,
+	 * but will be deleted by the system automatically. You must have read and
+	 * write permissions to / to create a temp file.
+	 * @return
+	 * @throws IOException 
+	 */
+	public VirtualFile createTempFile() throws IOException{
+		assertWritePermission(new VirtualFile("/"));
+		assertReadPermission(new VirtualFile("/"));
+		String filename = "/" + TMP_DIRECTORY_PATH + "/" + UUID.randomUUID().toString() + ".tmp";
+		VirtualFile path = new VirtualFile(filename);
+		FileSystemLayer real = normalize(path);
+		//Add this to the current session's list, so it doesn't get hosed by the file deletion thread.
+		currentTmpFiles.add(real);
+		real.createNewFile();
+		return path;
 	}
 					
 }

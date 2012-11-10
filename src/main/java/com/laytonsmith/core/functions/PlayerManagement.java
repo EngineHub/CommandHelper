@@ -1863,7 +1863,7 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer m = null;
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l;
 			if (args.length == 1) {
 				l = ObjectGenerator.GetGenerator().location(args[0], null, t);
