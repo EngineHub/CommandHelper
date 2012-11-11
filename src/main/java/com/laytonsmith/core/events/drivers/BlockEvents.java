@@ -186,7 +186,8 @@ public class BlockEvents {
                     + "placed | X: the X coordinate of the block | Y: the Y coordinate of the block | "
                     + "Z: the Z coordinate of the block| world: the world of the block | "
                     + "data: the data value for the block being placed | against: the block "
-                    + "being placed against | oldblock: the blocktype and blockdata being replaced} "
+                    + "being placed against | oldblock: the blocktype and blockdata being replaced"
+					+ " | location: A locationArray for this block} "
                     + "{type|data} "
                     + "{player|X|Y|Z|world|type|data|against|oldblock}";
         }
@@ -258,6 +259,10 @@ public class BlockEvents {
             map.put("Y", new CInt(blk.getY(), Target.UNKNOWN));
             map.put("Z", new CInt(blk.getZ(), Target.UNKNOWN));
             map.put("world", new CString(blk.getWorld().getName(), Target.UNKNOWN));
+			
+			CArray location = ObjectGenerator.GetGenerator()
+					.location(StaticLayer.GetLocation(blk.getWorld(), blk.getX(), blk.getY(), blk.getZ()));
+			map.put("location", location);
 
             int blktype = event.getBlock().getTypeId();
             map.put("type", new CInt(blktype, Target.UNKNOWN));
