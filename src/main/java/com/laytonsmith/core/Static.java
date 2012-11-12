@@ -848,6 +848,10 @@ public final class Static {
 		return ms / 50;
 	}
 	
+	public static long ticksToMs(long ticks){
+		return ticks * 50;
+	}
+	
 	public static void AssertNonNull(Object var, String message){
 		if(var == null){
 			throw new NullPointerException(message);

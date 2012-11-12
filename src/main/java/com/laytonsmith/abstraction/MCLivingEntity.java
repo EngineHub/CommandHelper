@@ -13,6 +13,7 @@ import java.util.List;
 public interface MCLivingEntity extends MCEntity {
 
 	public void addEffect(int potionID, int strength, int seconds, Target t);
+	public List<MCEffect> getEffects();
     public void damage(int amount);
     public void damage(int amount, MCEntity source);
     public double getEyeHeight();
@@ -36,4 +37,29 @@ public interface MCLivingEntity extends MCEntity {
     public void setMaximumNoDamageTicks(int ticks);
     public void setNoDamageTicks(int ticks);
     public void setRemainingAir(int ticks);
+	
+	public static class MCEffect{
+		
+		private int potionID;
+		private int strength;
+		private int secondsRemaining;
+		public MCEffect(int potionID, int strength, int secondsRemaining){
+			this.potionID = potionID;
+			this.strength = strength;
+			this.secondsRemaining = secondsRemaining;
+		}
+
+		public int getPotionID() {
+			return potionID;
+		}
+
+		public int getStrength() {
+			return strength;
+		}
+
+		public int getSecondsRemaining() {
+			return secondsRemaining;
+		}
+		
+	}
 }

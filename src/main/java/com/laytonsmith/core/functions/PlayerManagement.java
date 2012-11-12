@@ -1515,6 +1515,57 @@ public class PlayerManagement {
 			}
 		}
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_peffect extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(args.length > 0){
+				p = Static.GetPlayer(args[0]);
+			}
+			CArray ret = new CArray(t);
+			for(MCLivingEntity.MCEffect e : p.getEffects()){
+				CArray potion = new CArray(t);
+				potion.set("potionID", new CInt(e.getPotionID(), t));
+				potion.set("strength", new CInt(e.getStrength(), t));
+				potion.set("seconds", new CInt(e.getSecondsRemaining(), t));
+				ret.push(potion);
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_peffect";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "array {[player]} Returns an array of effects that are currently active on a given player."
+					+ " The array will be full of playerEffect objects, which contain three fields, \"potionID\","
+					+ " \"strength\", and \"seconds\" remaining.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_phealth extends AbstractFunction {
