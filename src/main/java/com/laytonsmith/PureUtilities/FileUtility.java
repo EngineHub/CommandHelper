@@ -343,6 +343,12 @@ public class FileUtility {
 	 * @return
 	 */
 	public static boolean recursiveDelete(File file) {
+		//Hopefully this works around JVM bugs.
+		//It seems that on windows machines, until garbage
+		//collection happens, the system will still
+		//have file locks on the file, even if the Streams
+		//were properly closed.
+		System.gc();
 		if (file.isDirectory()) {
 			boolean ret = true;
 			for (File f : file.listFiles()) {
