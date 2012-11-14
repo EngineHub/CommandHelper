@@ -298,7 +298,7 @@ public class Script {
 				}
 
         } else if (m.getCType() == ConstructType.VARIABLE) {            
-            return Static.resolveConstruct(m.val(), m.getTarget());
+            return new CString(m.val(), m.getTarget());
         } else {
             return m;
         }
