@@ -187,7 +187,7 @@ public class Interpreter {
 					finalArgument.append(" ");
 				}
 				Variable v = new Variable("$" + Integer.toString(i), "", Target.UNKNOWN);
-				v.setVal(Static.resolveConstruct(arg, Target.UNKNOWN));
+				v.setVal(new CString(arg, Target.UNKNOWN));
 				vars.add(v);
 				if (i != 0) {
 					finalArgument.append(arg);
