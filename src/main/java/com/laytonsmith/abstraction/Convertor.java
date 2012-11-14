@@ -20,6 +20,12 @@ public interface Convertor {
 
     public MCEnchantment[] GetEnchantmentValues();
 
+	/**
+	 * Returns the enchantment, given an enchantment name (or a string'd number).
+	 * Returns null if no such enchantment exists.
+	 * @param name
+	 * @return 
+	 */
     public MCEnchantment GetEnchantmentByName(String name);
 
     public MCServer GetServer();
