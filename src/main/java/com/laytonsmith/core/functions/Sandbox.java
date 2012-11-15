@@ -449,6 +449,46 @@ public class Sandbox {
 		}
 		
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class set_mob_rider extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCEntity horse = Static.getEntity((int)Static.getInt(args[0]));
+			MCEntity rider = Static.getEntity((int)Static.getInt(args[1]));
+			horse.setPassenger(rider);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_mob_rider";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "void {horse, rider} Sets the rider of a mob. horse and rider are mob ids.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 
     
 }

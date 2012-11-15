@@ -189,9 +189,9 @@ public class Script {
      */
     public Construct seval(ParseTree c, final Environment env){
         Construct ret = eval(c, env);
-        if(ret instanceof IVariable){
+        while(ret instanceof IVariable){
             IVariable cur = (IVariable)ret;
-            return env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+            ret = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
         }
         return ret;
     }
@@ -277,7 +277,7 @@ public class Script {
                     if(env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
                         continue;
                     }
-                    if(f.preResolveVariables() && ca[i] instanceof IVariable){
+                    while(f.preResolveVariables() && ca[i] instanceof IVariable){
                         IVariable cur = (IVariable)ca[i];
                         ca[i] = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
                     }

@@ -174,6 +174,7 @@ public class PlayerEvents {
                 
                 map.put("player", new CString(event.getName(), Target.UNKNOWN));
                 map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
+				//TODO: The event.getResult needs to be enum'd
                 map.put("result", new CString(event.getResult(), Target.UNKNOWN));
                 map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
                 
