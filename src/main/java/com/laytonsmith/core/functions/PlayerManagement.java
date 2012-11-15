@@ -446,7 +446,8 @@ public class PlayerManagement {
 					+ " from 0-20.</li><li>6 - Item in hand; The value returned by this will be similar to the value returned by get_block_at()</li><li>7 - "
 					+ "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - player groups;"
 					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
-					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</ul>";
+					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
+					+ " <li>13 - Player's current entity id</li></ul>";
 		}
 
 		public ExceptionType[] thrown() {
@@ -483,9 +484,9 @@ public class PlayerManagement {
 			MCPlayer p = Static.GetPlayer(player, t);
 
 			Static.AssertPlayerNonNull(p, t);
-			int maxIndex = 12;
+			int maxIndex = 13;
 			if (index < -1 || index > maxIndex) {
-				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and 11",
+				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
 			}
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
@@ -578,6 +579,9 @@ public class PlayerManagement {
 			}
 			if (index == 12 || index == -1) {
 				retVals.add(new CString(p.getHost(), t));
+			}
+			if(index == 13 || index == -1){
+				retVals.add(new CInt(p.getEntityId(), t));
 			}
 			if (retVals.size() == 1) {
 				return retVals.get(0);
