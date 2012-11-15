@@ -61,7 +61,11 @@ public class BukkitConvertor extends AbstractConvertor {
             int i = Integer.valueOf(name);
             return new BukkitMCEnchantment(Enchantment.getById(i));
         } catch(NumberFormatException e){
-            return new BukkitMCEnchantment(Enchantment.getByName(name));
+			try{
+				return new BukkitMCEnchantment(Enchantment.getByName(name));
+			} catch(NullPointerException ee){
+				return null;
+			}
         }
     }
 

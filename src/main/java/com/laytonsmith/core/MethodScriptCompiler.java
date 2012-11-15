@@ -1384,8 +1384,7 @@ public final class MethodScriptCompiler {
 			for (Construct tempNode : root.getAllData()) {
 				if (tempNode instanceof Variable) {
 					((Variable) tempNode).setVal(
-							Static.resolveConstruct(
-							Static.resolveDollarVar(varMap.get(((Variable) tempNode).getName()), vars).toString(), tempNode.getTarget()));
+							varMap.get(((Variable) tempNode).getName()).getDefault());
 				}
 			}
 		}
