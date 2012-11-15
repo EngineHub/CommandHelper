@@ -451,7 +451,7 @@ public class Sandbox {
 	}
 	
 	@api(environments={CommandHelperEnvironment.class})
-	public static class set_mob_rider extends AbstractFunction{
+	public static class set_entity_rider extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -473,7 +473,7 @@ public class Sandbox {
 		}
 
 		public String getName() {
-			return "set_mob_rider";
+			return "set_entity_rider";
 		}
 
 		public Integer[] numArgs() {
@@ -481,7 +481,7 @@ public class Sandbox {
 		}
 
 		public String docs() {
-			return "void {horse, rider} Sets the rider of a mob. horse and rider are mob ids.";
+			return "void {horse, rider} Sets the rider of an entity. horse and rider are entity ids.";
 		}
 
 		public CHVersion since() {
