@@ -157,7 +157,11 @@ public class Exceptions {
 		/**
 		 * If a null is sent, but not expected, this exception is thrown.
 		 */
-		NullPointerException,	
+		NullPointerException, 
+		/**
+		 * Thrown if an entity is looked up by id, but doesn't exist.
+		 */
+		BadEntityException,	
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
