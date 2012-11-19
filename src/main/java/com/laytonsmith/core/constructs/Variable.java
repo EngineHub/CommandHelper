@@ -18,7 +18,7 @@ public class Variable extends Construct {
     public Variable(String name, String def, boolean optional, boolean final_var, Target t) {
         super(name, ConstructType.VARIABLE, t);
         this.name = name;
-        this.def = def;
+        setDefault(def);
         this.final_var = final_var;
         this.optional = optional;
         this.var_value = new CString(def, t);
@@ -58,6 +58,9 @@ public class Variable extends Construct {
     }
 
     public void setDefault(String def) {
+		if(def == null){
+			def = "";
+		}
         this.def = def;
     }
 

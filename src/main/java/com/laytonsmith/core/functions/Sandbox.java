@@ -466,8 +466,8 @@ public class Sandbox {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity horse = Static.getEntity((int)Static.getInt(args[0]));
-			MCEntity rider = Static.getEntity((int)Static.getInt(args[1]));
+			MCEntity horse = Static.getEntity((int)Static.getInt(args[0]), t);
+			MCEntity rider = Static.getEntity((int)Static.getInt(args[1]), t);
 			horse.setPassenger(rider);
 			return new CVoid(t);
 		}

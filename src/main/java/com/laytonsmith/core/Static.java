@@ -579,11 +579,12 @@ public final class Static {
     }
 
     /**
-     * Returns the specified id, or null if it doesn't exist.
+     * Returns the specified id. If it doesn't exist, a ConfigRuntimeException
+	 * is thrown.
      * @param id
      * @return 
      */
-    public static MCEntity getEntity(int id) {
+    public static MCEntity getEntity(int id, Target t) {
         for (MCWorld w : Static.getServer().getWorlds()) {
             for (MCLivingEntity e : w.getLivingEntities()) {
                 if (e.getEntityId() == id) {                    
@@ -591,7 +592,7 @@ public final class Static {
                 }
             }
         }
-        return null;
+        throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
     }
 
     public static String strJoin(Collection c, String inner) {
