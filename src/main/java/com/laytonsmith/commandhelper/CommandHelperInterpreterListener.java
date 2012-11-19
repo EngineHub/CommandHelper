@@ -152,6 +152,7 @@ public class CommandHelperInterpreterListener implements Listener {
         } catch(ConfigRuntimeException e) {
             ConfigRuntimeException.React(e);
             Static.SendMessage(p, MCChatColor.RED + e.toString());
+            interpreterMode.add(p.getName());
         } catch(Exception e){
             Static.SendMessage(p, MCChatColor.RED + e.toString());
             Logger.getLogger(CommandHelperInterpreterListener.class.getName()).log(Level.SEVERE, null, e);
