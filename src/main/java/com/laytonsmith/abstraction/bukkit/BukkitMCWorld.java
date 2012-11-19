@@ -26,6 +26,7 @@ import org.bukkit.World;
 import org.bukkit.block.Biome;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.*;
+import org.bukkit.entity.Skeleton.SkeletonType;
 import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.material.MaterialData;
 import org.bukkit.Material;
@@ -344,6 +345,22 @@ public class BukkitMCWorld implements MCWorld {
             			throw new ConfigRuntimeException(subClass + " is not a valid size",
             					ExceptionType.FormatException, t);
             		}
+            	}
+            }
+            if (((BukkitMCEntity)e).asEntity() instanceof Zombie){
+            	Zombie z = (Zombie) ((BukkitMCEntity)e).asEntity();
+            	if(subClass.contains("baby")){
+            		z.setBaby(true);
+            	}
+            	if(subClass.contains("villager")){
+            		z.setVillager(true);
+            	}
+            }
+            if (((BukkitMCEntity)e).asEntity() instanceof Skeleton){
+            	Skeleton sk = (Skeleton) ((BukkitMCEntity)e).asEntity();
+            	sk.setSkeletonType(SkeletonType.NORMAL);
+            	if("WITHER".equals(subClass.toUpperCase())){
+            		sk.setSkeletonType(SkeletonType.WITHER);
             	}
             }
             ids.push(new CInt(e.getEntityId(), t));
