@@ -19,7 +19,6 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.bukkit.DyeColor;
 import org.bukkit.Effect;
 import org.bukkit.Location;
 import org.bukkit.World;
@@ -339,4 +338,14 @@ public class BukkitMCWorld implements MCWorld {
         }
         return ids;
     }
+
+	public boolean exists() {
+		//I dunno how well this will work, but it's worth a shot.
+		try{
+			w.getName();
+			return true;
+		} catch(Exception e){
+			return false;
+		}
+	}
 }

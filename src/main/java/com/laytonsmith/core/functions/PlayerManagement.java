@@ -262,6 +262,9 @@ public class PlayerManagement {
 				m = Static.GetPlayer(MCPlayer, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
+			if(!l.getWorld().exists()){
+				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
+			}
 			return new CBoolean(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), t);
 		}
 	}
@@ -913,6 +916,7 @@ public class PlayerManagement {
 				throw new ConfigRuntimeException("pitch must be between -90 and 90",
 						ExceptionType.RangeException, t);
 			}
+			Static.AssertPlayerNonNull(toSet, t);
 			MCLocation l = toSet.getLocation().clone();
 			l.setPitch(pitch);
 			l.setYaw(yaw);
