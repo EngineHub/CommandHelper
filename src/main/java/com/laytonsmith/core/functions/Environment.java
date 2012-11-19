@@ -154,16 +154,16 @@ public class Environment {
             if (sender instanceof MCPlayer) {
                 w = ((MCPlayer)sender).getWorld();
             }
-            if ((args.length == 2 || args.length == 3) && args[0] instanceof CArray) {
+            if (args.length == 2) {
+                if (!(args[0] instanceof CArray)) {
+                    throw new ConfigRuntimeException("set_block_at expects param 1 to be an array", ExceptionType.CastException, t);
+                }
                 MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
                 x = l.getBlockX();
                 y = l.getBlockY();
                 z = l.getBlockZ();
                 world = l.getWorld().getName();
                 id = args[1].val();
-                if (args.length == 3) {
-                    world = args[2].val();
-                }
 
             } else {
                 x = Static.getNumber(args[0]);
