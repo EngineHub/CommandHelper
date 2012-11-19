@@ -335,6 +335,17 @@ public class BukkitMCWorld implements MCWorld {
                     }
                 }
             }
+            if (((BukkitMCEntity)e).asEntity() instanceof Slime){
+            	Slime sl = (Slime) ((BukkitMCEntity)e).asEntity();
+            	if(!"".equals(subClass)){
+            		try {
+            			sl.setSize(java.lang.Integer.parseInt(subClass));
+            		} catch (IllegalArgumentException ex) {
+            			throw new ConfigRuntimeException(subClass + " is not a valid size",
+            					ExceptionType.FormatException, t);
+            		}
+            	}
+            }
             ids.push(new CInt(e.getEntityId(), t));
         }
         return ids;

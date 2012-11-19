@@ -315,7 +315,8 @@ public class Minecraft {
 					+ StringUtils.Join(MCProfession.values(), ", ") + ", defaulting to farmer if not specified. PigZombies' subtype represents their anger,"
 					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked. Defaults to 0. If a material is specified"
 					+ " as the subtype for endermen, they will hold that material, otherwise they will hold nothing."
-					+ " Creepers can have the powered subtype, and wolves can be angry. An array of the entity IDs spawned is returned.";
+					+ " Creepers can have the powered subtype, and wolves can be angry. Slime and MagmaCube size can be set by integer, otherwise will"
+					+ " be a random natural size. An array of the entity IDs spawned is returned.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1001,7 +1002,7 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {locationArray, type} Sets the mod spawner type at the location specified. If the location is not a mob spawner,"
+			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
 					+ " or if the type is invalid, a FormatException is thrown.";
 		}
 
