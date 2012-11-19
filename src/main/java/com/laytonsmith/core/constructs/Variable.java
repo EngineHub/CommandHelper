@@ -13,15 +13,15 @@ public class Variable extends Construct {
     private String def;
     private boolean optional;
     private boolean final_var;
-    private Construct var_value;
+    private CString var_value;
 
     public Variable(String name, String def, boolean optional, boolean final_var, Target t) {
         super(name, ConstructType.VARIABLE, t);
         this.name = name;
-        this.def = def;
+        setDefault(def);
         this.final_var = final_var;
         this.optional = optional;
-        this.var_value = Static.resolveConstruct(def, t);
+        this.var_value = new CString(def, t);
     }
 
     public Variable(String name, String def, Target t) {
@@ -58,6 +58,9 @@ public class Variable extends Construct {
     }
 
     public void setDefault(String def) {
+		if(def == null){
+			def = "";
+		}
         this.def = def;
     }
 
@@ -66,9 +69,13 @@ public class Variable extends Construct {
         return var_value.toString();
     }
 
-    public void setVal(Construct val) {
+    public void setVal(CString val) {
         this.var_value = val;
     }
+	
+	public void setVal(String val){
+		this.var_value = new CString(val, this.getTarget());
+	}
 
     @Override
     public Variable clone() throws CloneNotSupportedException {

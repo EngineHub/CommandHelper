@@ -400,7 +400,6 @@
 							<artifactSet>
 								<includes>
 									<include>com.sk89q:worldedit:jar:*</include>
-									<include>com.nijikokun:register:jar:*</include>
 									<include>org.perf4j:perf4j:jar:*</include>
 									<include>log4j:log4j:jar:*</include>
 									<include>org.yaml:snakeyaml:jar:*</include>
@@ -454,15 +453,7 @@
 									<includes>
 										<include>**</include>
 									</includes>
-								</filter>
-                                
-								<!-- Register -->
-								<filter>
-									<artifact>com.nijikokun:register:jar:*</artifact>
-									<includes>
-										<include>**</include>
-									</includes>
-								</filter>                                
+								</filter>                                                        
                                 
 							</filters>
 						</configuration>

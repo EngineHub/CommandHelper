@@ -107,6 +107,9 @@ public class CArray extends Construct implements ArrayAccess{
 	 */
     private void regenValue() {		
         valueDirty = true;
+		if(parent != null){
+			parent.regenValue();
+		}
     }
 	
 	/**

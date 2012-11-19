@@ -156,7 +156,7 @@ public class AliasCore {
 							alias.stop();
 						} catch (ConfigRuntimeException ex) {
 							ex.setEnv(env);
-							ConfigRuntimeException.React(ex);
+							ConfigRuntimeException.React(ex, env);
 						} catch (Throwable e) {
 							//This is not a simple user script error, this is a deeper problem, so we always handle this.
 							System.err.println("An unexpected exception occured: " + e.getClass().getSimpleName());
@@ -207,7 +207,7 @@ public class AliasCore {
 							//Unlike system scripts, this should just report the problem to the player
 							e.getEnv().getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
 							Static.getAliasCore().removePlayerReference(player);
-							ConfigRuntimeException.React(e);
+							ConfigRuntimeException.React(e, env);
 						} catch (ConfigCompileException e) {
 							//Something strange happened, and a bad alias was added
 							//to the database. Our best course of action is to just
@@ -480,11 +480,11 @@ public class AliasCore {
 							s.checkAmbiguous((ArrayList<Script>) scripts);
 							scripts.add(s);
 						} catch (ConfigCompileException e) {
-							ConfigRuntimeException.DoReport(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+							ConfigRuntimeException.React(e, "Compile error in script. Compilation will attempt to continue, however.", player);
 						}
 					}
 				} catch (ConfigCompileException e) {
-					ConfigRuntimeException.DoReport(e, "Could not compile file " + fi.file + " compilation will halt.", player);
+					ConfigRuntimeException.React(e, "Could not compile file " + fi.file + " compilation will halt.", player);
 					return;
 				}
 			}
@@ -515,10 +515,10 @@ public class AliasCore {
 					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), env, null, null);
 				} catch (ConfigCompileException e) {
 					exception = true;
-					ConfigRuntimeException.DoReport(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
+					ConfigRuntimeException.React(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
 				} catch (ConfigRuntimeException e) {
 					exception = true;
-					ConfigRuntimeException.React(e);
+					ConfigRuntimeException.React(e, env);
 				}
 				if (exception) {
 					if (Prefs.HaltOnFailure()) {

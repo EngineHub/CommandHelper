@@ -69,6 +69,14 @@ public class Enchantments {
 			return "DURABILITY";
 		} else if (lc.equals("fortune")) {
 			return "LOOT_BONUS_BLOCKS";
+		} else if (lc.equals("power")){
+			return "ARROW_DAMAGE";
+		} else if(lc.equals("punch")){
+			return "ARROW_KNOCKBACK";
+		} else if(lc.equals("flame")){
+			return "ARROW_FIRE";
+		} else if(lc.equals("infinity")){
+			return "ARROW_INFINITE";
 		} else {
 			return wikiVersion;
 		}
@@ -225,7 +233,7 @@ public class Enchantments {
 			}
 			for (String key : enchantArray.keySet()) {
 				MCEnchantment e = StaticLayer.GetEnchantmentByName(Enchantments.ConvertName(enchantArray.get(key, t).val()).toUpperCase());
-				if (e.getHandle() == null) {
+				if (e == null) {
 					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
 				}
 				if (e.canEnchantItem(is)) {

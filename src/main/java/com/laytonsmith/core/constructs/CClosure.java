@@ -130,7 +130,7 @@ public class CClosure extends Construct {
                 MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
             }
             catch (ConfigRuntimeException e) {
-                ConfigRuntimeException.React(e);
+                ConfigRuntimeException.React(e, environment);
             }
         }
         catch (CloneNotSupportedException ex) {

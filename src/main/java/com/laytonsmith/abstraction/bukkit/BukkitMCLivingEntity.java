@@ -187,6 +187,15 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 //            }
 //        }
 	}
+	
+	public List<MCEffect> getEffects(){
+		List<MCEffect> effects = new ArrayList<MCEffect>();
+		for(PotionEffect pe : le.getActivePotionEffects()){
+			MCEffect e = new MCEffect(pe.getType().getId(), pe.getAmplifier(), (int)(Static.ticksToMs(pe.getDuration()) / 1000));
+			effects.add(e);
+		}
+		return effects;
+	}
 
 	private Block getFirstTargetBlock(HashSet<Byte> transparent, int maxDistance) {
 		List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);

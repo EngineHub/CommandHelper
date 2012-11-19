@@ -4,6 +4,8 @@ import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.PersistanceNetwork;
@@ -27,6 +29,7 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private Map<String, Object> custom = new HashMap<String, Object>();
 	private Script script = null;
 	private File root;
+	private CClosure uncaughtExceptionHandler;
 
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistanceNetwork network, PermissionsResolver resolver, File root) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
@@ -136,5 +139,13 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	public File GetRootFolder() {
 		return root;
+	}
+
+	public void SetExceptionHandler(CClosure construct) {
+		uncaughtExceptionHandler = construct;
+	}
+	
+	public CClosure GetExceptionHandler(){
+		return uncaughtExceptionHandler;
 	}
 }

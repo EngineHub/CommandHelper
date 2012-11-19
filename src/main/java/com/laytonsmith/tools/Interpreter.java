@@ -106,7 +106,7 @@ public class Interpreter {
 				System.out.print(TermColors.reset());
 				System.exit(0);
 			} catch (ConfigCompileException ex) {
-				ConfigRuntimeException.DoReport(ex, null, null);
+				ConfigRuntimeException.React(ex, null, null);
 				System.out.print(TermColors.reset());
 				System.exit(1);
 			}
@@ -145,7 +145,7 @@ public class Interpreter {
 				execute(script, null);
 				script = "";
 			} catch (ConfigCompileException e) {
-				ConfigRuntimeException.DoReport(e, null, null);
+				ConfigRuntimeException.React(e, null, null);
 			}
 		} else {
 			if (multilineMode) {
@@ -156,7 +156,7 @@ public class Interpreter {
 					//Execute single line
 					execute(line, null);
 				} catch (ConfigCompileException ex) {
-					ConfigRuntimeException.DoReport(ex, null, null);
+					ConfigRuntimeException.React(ex, null, null);
 				}
 			}
 		}
@@ -187,7 +187,7 @@ public class Interpreter {
 					finalArgument.append(" ");
 				}
 				Variable v = new Variable("$" + Integer.toString(i), "", Target.UNKNOWN);
-				v.setVal(Static.resolveConstruct(arg, Target.UNKNOWN));
+				v.setVal(new CString(arg, Target.UNKNOWN));
 				vars.add(v);
 				if (i != 0) {
 					finalArgument.append(arg);
@@ -226,7 +226,7 @@ public class Interpreter {
 				pl(":");
 			}
 		} catch (ConfigRuntimeException e) {
-			ConfigRuntimeException.DoReport(e);
+			ConfigRuntimeException.React(e, env);
 			//No need for the full stack trace        
 		} catch (Exception e) {
 			pl(RED + e.toString());

@@ -33,9 +33,9 @@ public class DocGen {
 
     public static void main(String[] args) throws Exception {
         //System.out.println(functions("wiki", api.Platforms.INTERPRETER_JAVA, true));
-		System.out.println(examples("simple_date", true));
-		System.exit(0);
-        //events("wiki");
+		//System.out.println(examples("simple_date", true));
+		//System.exit(0);
+        events("wiki");
 	    //System.out.println(Template("persistance_network"));
     }
 	
@@ -433,6 +433,9 @@ public class DocGen {
         public static String Get(String[] data, String type) {
             StringBuilder b = new StringBuilder();
             boolean first = true;
+			if(data.length == 1 && "".equals(data[0].trim())){
+				return "";
+			}
             for (String d : data) {
                 int split = d.indexOf(':');
                 String name; 
@@ -491,6 +494,9 @@ public class DocGen {
         public static String Get(String[] data, String type) {
             StringBuilder b = new StringBuilder();
             boolean first = true;
+			if(data.length == 1 && "".equals(data[0].trim())){
+				return "";
+			}
             for (String d : data) {
                 int split = d.indexOf(':');
                 String name;
@@ -520,6 +526,9 @@ public class DocGen {
         public static String Get(String[] data, String type) {
             StringBuilder b = new StringBuilder();
             boolean first = true;
+			if(data.length == 1 && "".equals(data[0].trim())){
+				return "";
+			}
             for (String d : data) {
                 int split = d.indexOf(':');
                 if (split == -1) {

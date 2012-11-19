@@ -19,12 +19,17 @@ public class VirtualGlob implements Comparable<VirtualGlob> {
 	
 	private String glob;
 	
+	/**
+	 * Creates a new virtual glob object, that will match this glob
+	 * pattern.
+	 * @param glob 
+	 */
 	public VirtualGlob(String glob){
-		throw new UnsupportedOperationException("Not implemented yet.");
+		this.glob = glob;
 	}
 	
 	/**
-	 * Creates a glob that will match this file.
+	 * Creates a glob that will match only this file.
 	 * @param file 
 	 */
 	public VirtualGlob(VirtualFile file){

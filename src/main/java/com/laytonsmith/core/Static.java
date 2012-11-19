@@ -12,7 +12,6 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Debug;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
@@ -546,7 +545,14 @@ public final class Static {
 
     private static Map<String, MCPlayer> injectedPlayers = new HashMap<String, MCPlayer>();
     public static MCPlayer GetPlayer(String player, Target t) throws ConfigRuntimeException {        
-        MCPlayer m = Static.getServer().getPlayer(player);
+        MCPlayer m = null;
+		try{
+			m = Static.getServer().getPlayer(player);
+		} catch(Exception e){
+			//Apparently bukkit can occasionally throw exceptions here, so instead of rethrowing
+			//a NPE or whatever, we'll assume that the player just isn't online, and
+			//throw a CRE instead.
+		}
         if(injectedPlayers.containsKey(player)){
             m = injectedPlayers.get(player);
         }
@@ -573,11 +579,12 @@ public final class Static {
     }
 
     /**
-     * Returns the specified id, or null if it doesn't exist.
+     * Returns the specified id. If it doesn't exist, a ConfigRuntimeException
+	 * is thrown.
      * @param id
      * @return 
      */
-    public static MCEntity getEntity(int id) {
+    public static MCEntity getEntity(int id, Target t) {
         for (MCWorld w : Static.getServer().getWorlds()) {
             for (MCLivingEntity e : w.getLivingEntities()) {
                 if (e.getEntityId() == id) {                    
@@ -585,7 +592,7 @@ public final class Static {
                 }
             }
         }
-        return null;
+        throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
     }
 
     public static String strJoin(Collection c, String inner) {
@@ -846,6 +853,10 @@ public final class Static {
 	
 	public static long msToTicks(long ms){
 		return ms / 50;
+	}
+	
+	public static long ticksToMs(long ticks){
+		return ticks * 50;
 	}
 	
 	public static void AssertNonNull(Object var, String message){
