@@ -5,6 +5,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
@@ -14,6 +15,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import com.sk89q.worldedit.expression.Expression;
 import com.sk89q.worldedit.expression.ExpressionException;
 import java.util.ArrayList;
@@ -409,6 +411,76 @@ public class Math {
 			);
 		}
 	}
+	
+	/**
+	 * If we have the case {@code @array[0]++}, we have to increment it as
+	 * though it were a variable, so we have to do that with execs. This method
+	 * consolidates the code to do so.
+	 * @return 
+	 */
+	private static Construct doIncrementDecrement(ParseTree[] nodes, 
+			Script parent, Environment env, Target t, 
+			Function func, boolean pre, boolean inc){
+		if(nodes[0].getData() instanceof CFunction){
+				Function f = ((CFunction)nodes[0].getData()).getFunction();
+				if(f.getName().equals(new ArrayHandling.array_get().getName())){
+					//Ok, so, this is it, we're in charge here.
+					long temp;
+					long newVal;
+					//First, pull out the current value. We're gonna do this manually though, and we will actually
+					//skip the whole array_get execution.
+					ParseTree eval = nodes[0];
+					Construct array = parent.seval(eval.getChildAt(0), env);
+					Construct index = parent.seval(eval.getChildAt(1), env);
+					Construct cdelta = new CInt(1, t);
+					if(nodes.length == 2){
+						cdelta = parent.seval(nodes[1], env);
+					}
+					long delta = Static.getInt(cdelta);
+					//First, error check, then get the old value, and store it in temp.
+					if(!(array instanceof CArray) && !(array instanceof ArrayAccess)){
+						//Let's just evaluate this like normal with array_get, so it will
+						//throw the appropriate exception.
+						new ArrayHandling.array_get().exec(t, env, array, index);
+						throw new ConfigRuntimeException("Shouldn't have gotten here. Please report this error, and how you got here.", t);
+					} else if(!(array instanceof CArray)){
+						//It's an ArrayAccess type, but we can't use that here, so, throw our
+						//own exception.
+						throw new ConfigRuntimeException("Cannot increment/decrement a non-array array"
+								+ " accessed value. (The value passed in was \"" + array.val() + "\")", ExceptionType.CastException, t);
+					} else {
+						//Ok, we're good. Data types should all be correct.
+						CArray myArray = ((CArray)array);
+						Construct value = myArray.get(index, t);
+						if(value instanceof CInt || value instanceof CDouble){
+							temp = Static.getInt(value);
+							//Alright, now let's actually perform the increment, and store that in the array.
+							
+							if(inc){
+								newVal = temp + delta;
+							} else {
+								newVal = temp - delta;
+							}
+							new ArrayHandling.array_set().exec(t, env, array, index, new CInt(newVal, t));
+						} else {
+							throw new ConfigRuntimeException("Cannot increment/decrement a non numeric value.", ExceptionType.CastException, t);
+						}
+					}
+					long valueToReturn;
+					if(pre){
+						valueToReturn = newVal;
+					} else {
+						valueToReturn = temp;
+					}
+					return new CInt(valueToReturn, t);
+				}
+			}
+			Construct [] args = new Construct[nodes.length];
+			for(int i = 0; i < args.length; i++){
+				args[i] = parent.eval(nodes[i], env);
+			}
+			return func.exec(t, env, args);
+	}
 
 	@api(environments=CommandHelperEnvironment.class)
 	public static class inc extends AbstractFunction implements Optimizable{
@@ -421,6 +493,16 @@ public class Math {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+		
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return doIncrementDecrement(nodes, parent, env, t, this, true, true);
+		}
+		
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
@@ -513,6 +595,15 @@ public class Math {
 			return new Integer[]{1, 2};
 		}
 
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return doIncrementDecrement(nodes, parent, env, t, this, false, true);
+		}
+
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			long value = 1;
 			if (args.length == 2) {
@@ -548,6 +639,7 @@ public class Math {
 				}
 			}
 		}
+
 
 		public String docs() {
 			return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to var++ in other languages. Expects ivar to be a variable, then"
@@ -601,6 +693,16 @@ public class Math {
 
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
+		}
+		
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+		
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return doIncrementDecrement(nodes, parent, env, t, this, true, false);
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -685,6 +787,16 @@ public class Math {
 
 		public Integer[] numArgs() {
 			return new Integer[]{1, 2};
+		}
+		
+		@Override
+		public boolean useSpecialExec() {
+			return true;
+		}
+		
+		@Override
+		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+			return doIncrementDecrement(nodes, parent, env, t, this, false, false);
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {

@@ -932,7 +932,7 @@ public final class MethodScriptCompiler {
 				ParseTree myArray = tree.getChildAt(array);
 				ParseTree myIndex;
 				if (!emptyArray) {
-					myIndex = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
+					myIndex = new ParseTree(new CFunction("__autoconcat__", myArray.getTarget()), fileOptions);
 					for (int j = index; j < tree.numberOfChildren(); j++) {
 						myIndex.addChild(tree.getChildAt(j));
 					}
@@ -1025,7 +1025,7 @@ public final class MethodScriptCompiler {
 					//We need to autoconcat some stuff
 					int stacks = constructCount.peek().get();
 					int replaceAt = tree.getChildren().size() - stacks;
-					ParseTree c = new ParseTree(new CFunction("__autoconcat__", unknown), fileOptions);
+					ParseTree c = new ParseTree(new CFunction("__autoconcat__", tree.getTarget()), fileOptions);
 					List<ParseTree> subChildren = new ArrayList<ParseTree>();
 					for (int b = replaceAt; b < tree.numberOfChildren(); b++) {
 						subChildren.add(tree.getChildAt(b));
