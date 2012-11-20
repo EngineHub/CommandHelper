@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
@@ -515,9 +516,9 @@ public class WorldEdit {
             }
 
             MCWorld w = null;
-            
-            if (!( env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)) {
-                w = env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+            MCCommandSender c = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+            if (c != null && !( c instanceof MCPlayer)) {
+                w = ((MCPlayer)c).getWorld();
             }
             
             MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
