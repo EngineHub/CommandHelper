@@ -2,19 +2,14 @@
 
 package com.laytonsmith.core.exceptions;
 
+import com.laytonsmith.core.constructs.Target;
+
 /**
  *
  * @author Layton
  */
-public class LoopContinueException extends ProgramFlowManipulationException{
-    int number;
-    public LoopContinueException(int times){
-        number = times;
-    }
-    public int getTimes(){
-        return number;
-    }    
-    public void setTimes(int number){
-        this.number = number;
+public class LoopContinueException extends LoopManipulationException{
+    public LoopContinueException(int times, Target t){
+		super(times, "continue", t);
     }
 }

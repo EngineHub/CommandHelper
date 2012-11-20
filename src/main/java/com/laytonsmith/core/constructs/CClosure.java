@@ -6,6 +6,8 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.LoopManipulationException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -93,10 +95,15 @@ public class CClosure extends Construct {
     /**
      * Executes the closure, giving it the supplied arguments. {@code values}
      * may be null, which means that no arguments are being sent.
+	 * 
+	 * LoopManipulationExceptions will never bubble up past this point, but
+	 * other ProgramFlowManipulationExceptions will. ConfigRuntimeExceptions will
+	 * also bubble up past this, since an execution mechanism may need to do custom
+	 * handling.
      *
      * @param values
      */
-    public void execute(Construct[] values) {
+    public void execute(Construct[] values) throws ConfigRuntimeException, ProgramFlowManipulationException {
         try {
             Environment environment;
             synchronized (this) {
@@ -128,10 +135,13 @@ public class CClosure extends Construct {
             newNode.setChildren(children);
             try {
                 MethodScriptCompiler.execute(newNode, environment, null, environment.getEnv(GlobalEnv.class).GetScript());
-            }
-            catch (ConfigRuntimeException e) {
-                ConfigRuntimeException.React(e, environment);
-            }
+            } catch (LoopManipulationException e){
+				//This shouldn't ever happen.
+				LoopManipulationException lme = ((LoopManipulationException)e);
+				Target t = lme.getTarget();
+				ConfigRuntimeException.React(new ConfigRuntimeException("A " + lme.getName() + "() bubbled up to the top of"
+						+ " a closure, which is unexpected behavior.", t), environment);
+			}
         }
         catch (CloneNotSupportedException ex) {
             Logger.getLogger(CClosure.class.getName()).log(Level.SEVERE, null, ex);

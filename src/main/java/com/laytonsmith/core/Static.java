@@ -897,7 +897,7 @@ public final class Static {
 		options.setWorkingDirectory(new File(jarLocation, "CommandHelper/"));
 		PersistanceNetwork persistanceNetwork = new PersistanceNetwork(new File(jarLocation, "CommandHelper/persistance.config"), 
 				new URI("sqlite://" + new File(jarLocation, "CommandHelper/persistance.db").getCanonicalPath().replace("\\", "/")), options);
-		GlobalEnv gEnv = new GlobalEnv(new ExecutionQueue("MethodScript", "default"), 
+		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScript", "default"), 
 				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, permissionsResolver, new File(jarLocation, "CommandHelper/"));
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}

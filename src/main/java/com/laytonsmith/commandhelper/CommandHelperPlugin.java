@@ -70,14 +70,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static ExecutorService hostnameLookupThreadPool;
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
 	private static int hostnameThreadPoolID = 0;
-	private final static Thread.UncaughtExceptionHandler uncaughtExceptionHandler = new Thread.UncaughtExceptionHandler() {
-		public void uncaughtException(Thread t, Throwable e) {
-			System.err.println("While running a queued task, the following exception occured:");
-			e.printStackTrace(System.err);
-		}
-	};
+
 	public Profiler profiler;
-	public final ExecutionQueue executionQueue = new ExecutionQueue("CommandHelper", "default", uncaughtExceptionHandler);
+	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelper", "default");
 	public PermissionsResolver permissionsResolver;
 	public PersistanceNetwork persistanceNetwork;
 	public File chDirectory = new File("plugins/CommandHelper");

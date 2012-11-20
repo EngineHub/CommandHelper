@@ -44,7 +44,7 @@ public interface Optimizable extends Function {
 		/**
 		 * If a function can do some amount of optimization at compile time,
 		 * even if some of the parameters are dynamic, this can be selected,
-		 * which will cause the function's optimize() method to be called. This
+		 * which will cause the function's optimizeDynamic() method to be called. This
 		 * is a compile time optimization.
 		 */
 		OPTIMIZE_DYNAMIC("Some functions can do some amount of optimization or compilation checks, even if the function is sent dynamic"

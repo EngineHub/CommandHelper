@@ -45,7 +45,7 @@ public class Echoes {
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException{
             if(args.length == 0){
-                throw new CancelCommandException("");
+                throw new CancelCommandException("", t);
             }
             StringBuilder b = new StringBuilder();
             for(int i = 0; i < args.length; i++){
@@ -54,7 +54,7 @@ public class Echoes {
             try{
                 Static.SendMessage(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), b.toString(), t);
             } finally{
-                throw new CancelCommandException("");
+                throw new CancelCommandException("", t);
             }
         }
 

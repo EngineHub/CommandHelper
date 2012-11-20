@@ -9,6 +9,7 @@ import com.laytonsmith.PureUtilities.TermColors.SYS;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Construct;
@@ -56,7 +57,7 @@ public class Manager {
 		Installer.Install(chDirectory);
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(new File(chDirectory, "profiler.config"));
-		gEnv = new GlobalEnv(new ExecutionQueue("Manager", "default"), profiler, persistanceNetwork, new PermissionsResolver.PermissiveResolver(), chDirectory);
+		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistanceNetwork, new PermissionsResolver.PermissiveResolver(), chDirectory);
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
