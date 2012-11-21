@@ -713,7 +713,7 @@ public class DataHandling {
 				}
 			} catch (LoopBreakException e) {
 				if (e.getTimes() > 1) {
-					throw new LoopBreakException(e.getTimes() - 1);
+					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
 			}
 			return new CVoid(t);
@@ -811,7 +811,7 @@ public class DataHandling {
 				} while (Static.getBoolean(parent.seval(nodes[1], env)));
 			} catch (LoopBreakException e) {
 				if (e.getTimes() > 1) {
-					throw new LoopBreakException(e.getTimes() - 1);
+					throw new LoopBreakException(e.getTimes() - 1, t);
 				}
 			}
 			return new CVoid(t);
@@ -840,7 +840,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class _break extends AbstractFunction {
+	public static class _break extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "break";
@@ -878,7 +878,7 @@ public class DataHandling {
 			if (args.length == 1) {
 				num = (int) Static.getInt(args[0]);
 			}
-			throw new LoopBreakException(num);
+			throw new LoopBreakException(num, t);
 		}
 		
 		@Override
@@ -897,6 +897,31 @@ public class DataHandling {
 					+ ")"),
 			};
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() == 1){
+				if(children.get(0).isDynamic()){
+					//This is absolutely a bad design, if there is a variable here
+					//in the break, HOWEVER, it is not an error, we will simply
+					//issue a compiler warning. break() parameters should
+					//be hard coded.
+					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "The parameter sent to break() should"
+							+ " be hard coded, and should not be dynamically determinable, since this is always a sign"
+							+ " of loose code flow, which should be avoided. This may break optimizations and other"
+							+ " code analysis tools, and will most likely cause an error at runtime if not very carefully"
+							+ " regulated. Due to all these reasons, not hardcoding the break parameter should always"
+							+ " be avoided.", t);
+				}
+			}
+			return null;
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+		
+		
 	}
 
 	@api
@@ -937,7 +962,7 @@ public class DataHandling {
 			if (args.length == 1) {
 				num = (int) Static.getInt(args[0]);
 			}
-			throw new LoopContinueException(num);
+			throw new LoopContinueException(num, t);
 		}
 		
 		@Override
@@ -1656,7 +1681,7 @@ public class DataHandling {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			Construct ret = (args.length == 1 ? args[0] : new CVoid(t));
-			throw new FunctionReturnException(ret);
+			throw new FunctionReturnException(ret, t);
 		}
 	}
 

@@ -13,8 +13,13 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
 import java.io.File;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -144,9 +149,13 @@ public class CommandHelperInterpreterListener implements Listener {
             }, null);
         } catch (CancelCommandException e) {
             interpreterMode.add(p.getName());
+        } catch(ConfigRuntimeException e) {
+            ConfigRuntimeException.React(e, env);
+            Static.SendMessage(p, MCChatColor.RED + e.toString());
+            interpreterMode.add(p.getName());
         } catch(Exception e){
             Static.SendMessage(p, MCChatColor.RED + e.toString());
-            e.printStackTrace();
+            Logger.getLogger(CommandHelperInterpreterListener.class.getName()).log(Level.SEVERE, null, e);
             interpreterMode.add(p.getName());
         }
     }

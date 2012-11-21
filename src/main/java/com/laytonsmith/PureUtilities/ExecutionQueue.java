@@ -28,6 +28,7 @@ public class ExecutionQueue {
 	private final Map<String, Object> locks;
 	private Map<String, Boolean> runningQueues;
 	private String defaultQueueName;
+	private Thread.UncaughtExceptionHandler uncaughtExceptionHandler = null;
 	
 	public ExecutionQueue(String threadPrefix, String defaultQueueName){
 		this(threadPrefix, defaultQueueName, null);
@@ -44,22 +45,12 @@ public class ExecutionQueue {
 		if(threadPrefix == null || defaultQueueName == null){
 			throw new NullPointerException();
 		}
+		uncaughtExceptionHandler = exceptionHandler;
 		ThreadFactory threadFactory = new ThreadFactory() {
 
 			public Thread newThread(Runnable r) {
 				Thread t = new Thread(r, threadPrefix + "-" + (++threadCount));
-				t.setDaemon(false);
-				if(exceptionHandler != null){
-					t.setUncaughtExceptionHandler(exceptionHandler);
-				} else {
-					t.setUncaughtExceptionHandler(new Thread.UncaughtExceptionHandler() {
-
-						public void uncaughtException(Thread t, Throwable e) {
-							System.err.println("The thread " + t.getName() + " threw an exception, and it was not handled.");
-							e.printStackTrace(System.err);
-						}
-					});
-				}				
+				t.setDaemon(false);			
 				return t;
 			}
 		};
@@ -73,12 +64,16 @@ public class ExecutionQueue {
 		runningQueues = new HashMap<String, Boolean>();
 	}
 	
+	public final void setUncaughtExceptionHandler(Thread.UncaughtExceptionHandler exceptionHandler){
+		this.uncaughtExceptionHandler = exceptionHandler;
+	}
+	
 	/**
 	 * Pushes a new runnable onto the end of the specified queue
 	 * @param queue The named queue
 	 * @param r 
 	 */
-	public void push(String queue, Runnable r){
+	public final void push(String queue, Runnable r){
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
 			Deque<Runnable> q = prepareQueue(queue);
@@ -93,7 +88,7 @@ public class ExecutionQueue {
 	 * @param queue
 	 * @param r 
 	 */
-	public void pushFront(String queue, Runnable r){
+	public final void pushFront(String queue, Runnable r){
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
 			Deque<Runnable> q = prepareQueue(queue);
@@ -106,7 +101,7 @@ public class ExecutionQueue {
 	 * Removes the last element added to the back of the queue
 	 * @param queue 
 	 */
-	public void remove(String queue){
+	public final void remove(String queue){
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
 			Deque<Runnable> q = prepareQueue(queue);
@@ -123,7 +118,7 @@ public class ExecutionQueue {
 	 * Removes the front element from the queue
 	 * @param queue 
 	 */
-	public void removeFront(String queue){
+	public final void removeFront(String queue){
 		try{
 			pop(queue);
 		} catch(NoSuchElementException e){
@@ -135,10 +130,10 @@ public class ExecutionQueue {
 	 * Clears all elements from this queue
 	 * @param queue 
 	 */
-	public void clear(String queue){
+	public final void clear(String queue){
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
-			queues.get(queue).clear();
+			prepareQueue(queue).clear();
 		}
 	}
 	
@@ -148,7 +143,7 @@ public class ExecutionQueue {
 	 * @param queue
 	 * @return 
 	 */
-	public boolean isRunning(String queue){
+	public final boolean isRunning(String queue){
 		queue = prepareLock(queue);
 		synchronized(locks.get(queue)){
 			return runningQueues.containsKey(queue) && runningQueues.get(queue).equals(true);
@@ -160,7 +155,7 @@ public class ExecutionQueue {
 	 * return true for all these queues.
 	 * @return 
 	 */
-	public List<String> activeQueues(){
+	public final List<String> activeQueues(){
 		List<String> q = new ArrayList<String>();
 		for(String queue : queues.keySet()){
 			synchronized(locks.get(queue)){
@@ -233,7 +228,16 @@ public class ExecutionQueue {
 				service.submit(new Runnable() {
 
 					public void run() {
-						pumpQueue(queue);
+						try{
+							pumpQueue(queue);
+						} catch(RuntimeException t){
+							if(uncaughtExceptionHandler != null){
+								uncaughtExceptionHandler.uncaughtException(Thread.currentThread(), t);
+							} else {
+								System.err.println("The queue \"" + queue + "\" threw an exception, and it was not handled.");
+								t.printStackTrace(System.err);
+							}
+						}
 					}
 				});
 			}

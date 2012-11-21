@@ -6,6 +6,7 @@ import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.Static;
 import java.io.File;
 import java.io.IOException;
@@ -79,7 +80,7 @@ public final class Profiler {
 	private Profiler(){
 		//Private constructor for FakeProfiler
 		if (outputQueue == null) {
-			outputQueue = new ExecutionQueue("CommandHelper-Profiler", "default");
+			outputQueue = new MethodScriptExecutionQueue("CommandHelper-Profiler", "default");
 		}
 	}
 	

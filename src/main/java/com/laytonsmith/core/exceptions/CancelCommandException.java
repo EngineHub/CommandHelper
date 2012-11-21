@@ -3,13 +3,16 @@
 
 package com.laytonsmith.core.exceptions;
 
+import com.laytonsmith.core.constructs.Target;
+
 /**
  *
  * @author Layton
  */
 public class CancelCommandException extends ProgramFlowManipulationException{
     String message;
-    public CancelCommandException(String message){
+    public CancelCommandException(String message, Target t){
+		super(t);
         this.message = message;
     }
 

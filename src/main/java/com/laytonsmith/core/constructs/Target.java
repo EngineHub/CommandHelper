@@ -72,10 +72,10 @@ public class Target {
         return col;
     }
 
-    @Override
 	/**
 	 * Returns a string in the form: <code>absolute/path:0</code>
 	 */
+    @Override
     public String toString() {
         return ( file != null ? file.getAbsolutePath() : "Unknown File" ) + ":" + line;
     }

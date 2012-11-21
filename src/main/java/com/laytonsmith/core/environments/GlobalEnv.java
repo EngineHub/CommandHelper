@@ -1,6 +1,7 @@
 package com.laytonsmith.core.environments;
 
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
@@ -42,6 +43,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		this.persistanceNetwork = network;
 		this.permissionsResolver = resolver;
 		this.root = root;
+		if(this.executionQueue instanceof MethodScriptExecutionQueue){
+			((MethodScriptExecutionQueue)executionQueue).setEnvironment(this);
+		}
 	}
 
 	public ExecutionQueue GetExecutionQueue() {

@@ -110,7 +110,7 @@ public class Compiler {
          */
         public ParseTree optimizeSpecial(Target t, List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
             //If any of our nodes are CSymbols, we have different behavior
-            boolean inSymbolMode = false; //catching this can save Xn
+            boolean inSymbolMode = false; //caching this can save Xn
 
             //postfix
             for (int i = 0; i < list.size(); i++) {
@@ -119,7 +119,7 @@ public class Compiler {
                     inSymbolMode = true;
                 }
                 if (node.getData() instanceof CSymbol && ( (CSymbol) node.getData() ).isPostfix()) {
-                    if (i - 1 >= 0 && list.get(i - 1).getData() instanceof IVariable) {
+                    if (i - 1 >= 0){// && list.get(i - 1).getData() instanceof IVariable) {
                         CSymbol sy = (CSymbol) node.getData();
                         ParseTree conversion;
                         if (sy.val().equals("++")) {

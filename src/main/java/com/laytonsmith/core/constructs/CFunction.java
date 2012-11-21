@@ -2,8 +2,12 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
+import com.laytonsmith.core.functions.FunctionList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -38,6 +42,14 @@ public class CFunction extends Construct {
 	 * @return 
 	 */
 	public Function getFunction(){
+		if(function == null){
+			try {
+				function = (Function)FunctionList.getFunction(val());
+			} catch (ConfigCompileException ex) {
+				//Shouldn't ever get here?
+				throw new Error(ex);
+			}
+		}
 		return function;
 	}
 	
