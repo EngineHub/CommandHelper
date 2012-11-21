@@ -6,7 +6,10 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- *
+ * An ArgumentParser allows for programmatic registration of arguments,
+ * which will be automatically parsed and validated. Additionally,
+ * automatically generated help text can be retrieved and displayed, perhaps
+ * if a --help argument is present.
  * @author lsmith
  */
 public class ArgumentParser {
@@ -218,7 +221,7 @@ public class ArgumentParser {
 
     public static class ResultUseException extends RuntimeException {
 
-        private ResultUseException(String string) {
+        ResultUseException(String string) {
             super(string);
         }
     }
@@ -838,6 +841,9 @@ public class ArgumentParser {
                 first = false;
                 b.append(part);
             }
+			if(parts.isEmpty()){
+				usage.append("No arguments.");
+			}
             b.append(usage.toString());
         }
         b.append("\n\nOptions:\n\n");
@@ -855,6 +861,10 @@ public class ArgumentParser {
             b.append(flags.toString());
             b.append("\n");
         }
+		
+		if(flags.length() == 0){
+			b.append("\tNo options.\n");
+		}
 
         for (Character c : shortCodes) {
             if (!shortCodesDone.contains(c)) {
@@ -868,6 +878,15 @@ public class ArgumentParser {
         }
         return b.toString();
     }
+	
+	/**
+	 * Returns just the description that was registered with {@see #addDescription(String)}.
+	 * @return The description, or null, if one has not been set yet.
+	 * @see #getBuiltDescription()
+	 */
+	public String getDescription(){
+		return description;
+	}
 
     /**
      * This method takes a raw string, which represents the arguments as a
@@ -889,7 +908,13 @@ public class ArgumentParser {
         return parse(lex(args));
     }
 
-    private List<String> lex(String args) {
+	/**
+	 * Returns a simple List of the arguments, parsed into a proper argument list.
+	 * This will work essentially identically to how general shell arguments are parsed.
+	 * @param args
+	 * @return 
+	 */
+    static List<String> lex(String args) {
         //First, we have to tokenize the strings. Since we can have quoted arguments, we can't simply split on spaces.
         List<String> arguments = new ArrayList<String>();
         StringBuilder buf = new StringBuilder();
