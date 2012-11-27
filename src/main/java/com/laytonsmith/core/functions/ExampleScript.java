@@ -74,7 +74,7 @@ public class ExampleScript {
 	public ExampleScript(String description, String script, String output) throws ConfigCompileException{
 		this.description = description;		
 		this.originalScript = script;
-		this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples")));
+		this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples"), true));
 		this.output = output;
 		playerOutput = new StringBuilder();
 		

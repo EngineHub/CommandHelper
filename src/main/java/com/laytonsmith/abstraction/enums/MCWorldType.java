@@ -8,18 +8,9 @@ package com.laytonsmith.abstraction.enums;
  *
  * @author Layton
  */
-public enum MCInventoryType {
-	BREWING,
-	CHEST,
-	CRAFTING,
-	CREATIVE,
-	DISPENSER,
-	ENCHANTING,
-	ENDER_CHEST,
-	FURNACE,
-	MERCHANT,
-	PLAYER,
-	WORKBENCH,
-	ANVIL,
-	BEACON
+public enum MCWorldType {
+	NORMAL,
+    FLAT,
+    VERSION_1_1,
+    LARGE_BIOMES;
 }

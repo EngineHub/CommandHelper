@@ -21,7 +21,7 @@ public class OptimizationTest {
 	}
     
     public String optimize(String script) throws ConfigCompileException{
-        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null));        
+        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true));        
         StringBuilder b = new StringBuilder();
         //The root always contains null.
         for(ParseTree child : tree.getChildren()){

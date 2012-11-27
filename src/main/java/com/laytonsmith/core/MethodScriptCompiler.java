@@ -31,7 +31,7 @@ public final class MethodScriptCompiler {
 	private MethodScriptCompiler() {
 	}
 
-	public static List<Token> lex(String config, File file) throws ConfigCompileException {
+	public static List<Token> lex(String config, File file, boolean inPureMScript) throws ConfigCompileException {
 		config = config.replaceAll("\r\n", "\n");
 		config = config + "\n";
 		List<Token> token_list = new ArrayList<Token>();
@@ -44,6 +44,8 @@ public final class MethodScriptCompiler {
 		int commentLineNumberStart = 1;
 		boolean comment_is_block = false;
 		boolean in_opt_var = false;
+		boolean inCommand = (inPureMScript?false:true);
+		boolean inMultiline = false;
 		StringBuilder buf = new StringBuilder();
 		int line_num = 1;
 		int column = 1;
@@ -66,6 +68,9 @@ public final class MethodScriptCompiler {
 			if (c == '\n') {
 				line_num++;
 				column = 1;
+				if(!inMultiline && !inPureMScript){
+					inCommand = true;
+				}
 			}
 			target = new Target(line_num, file, column);
 
@@ -254,6 +259,7 @@ public final class MethodScriptCompiler {
 					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.MULTILINE_END, "<<<", target));
+				inMultiline = false;
 				i++;
 				i++;
 				continue;
@@ -264,6 +270,7 @@ public final class MethodScriptCompiler {
 					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.MULTILINE_START, ">>>", target));
+				inMultiline = true;
 				i++;
 				i++;
 				continue;
@@ -323,13 +330,6 @@ public final class MethodScriptCompiler {
 				i++;
 				i++;
 				continue;
-			}
-			if(c == '=' && !state_in_quote){
-				if(buf.length() > 0){
-					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuilder();
-				}
-				token_list.add(new Token(TType.ASSIGNMENT, "=", target));
 			}
 			if (c == '&' && c2 == '&' && !state_in_quote) {
 				if (buf.length() > 0) {
@@ -442,10 +442,15 @@ public final class MethodScriptCompiler {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
-				if (in_opt_var) {
-					token_list.add(new Token(TType.OPT_VAR_ASSIGN, "=", target));
+				if(inCommand){
+					if (in_opt_var) {
+						token_list.add(new Token(TType.OPT_VAR_ASSIGN, "=", target));
+					} else {
+						token_list.add(new Token(TType.ALIAS_END, "=", target));
+						inCommand = false;
+					}
 				} else {
-					token_list.add(new Token(TType.ALIAS_END, "=", target));
+					token_list.add(new Token(TType.ASSIGNMENT, "=", target));
 				}
 				continue;
 			}

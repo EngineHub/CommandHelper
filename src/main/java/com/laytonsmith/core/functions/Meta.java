@@ -301,7 +301,7 @@ public class Meta {
 			ParseTree node = nodes[0];
 			try {
 				Construct script = parent.seval(node, env);
-				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file()));
+				ParseTree root = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script.val(), t.file(), true));
 				StringBuilder b = new StringBuilder();
 				int count = 0;
 				for (ParseTree child : root.getChildren()) {

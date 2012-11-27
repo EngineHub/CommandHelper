@@ -2,7 +2,6 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
-import java.util.List;
 import java.util.concurrent.Callable;
 
 /**
@@ -102,5 +101,12 @@ public interface Convertor {
 	 * @param r 
 	 */
 	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws Exception;
+	
+	/**
+	 * Returns a MCWorldCreator object for the given world name.
+	 * @param worldName
+	 * @return 
+	 */
+	public MCWorldCreator getWorldCreator(String worldName);
     
 }

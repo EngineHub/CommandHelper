@@ -1,8 +1,13 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.MCWorldCreator;
+import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
+import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -367,5 +372,69 @@ public class World {
 			}
 			return new CInt(w.getTime(), t);
 		}
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class create_world extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			String name = args[0].val();
+			if(args.length == 4){
+				MCWorldType type;
+				MCWorldEnvironment environment;
+				long seed = Static.getInt(args[3]);
+				try{
+					type = MCWorldType.valueOf(args[1].val().toUpperCase());
+				} catch(IllegalArgumentException e){
+					throw new ConfigRuntimeException(args[1].val() + " is not a valid world type. Must be one of: "
+							+ StringUtils.Join(MCWorldType.values(), ", "), ExceptionType.FormatException, t);
+				}
+				try{
+					environment = MCWorldEnvironment.valueOf(args[2].val().toUpperCase());
+				} catch(IllegalArgumentException e){
+					throw new ConfigRuntimeException(args[2].val() + " is not a valid environment type. Must be one of: "
+							+ StringUtils.Join(MCWorldEnvironment.values(), ", "), ExceptionType.FormatException, t);
+				}
+				MCWorldCreator creator = StaticLayer.GetConvertor().getWorldCreator(name);
+				creator.type(type).environment(environment).seed(seed);
+				creator.createWorld();
+			} else {
+				StaticLayer.GetConvertor().getWorldCreator(name).createWorld();
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "create_world";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 4};
+		}
+
+		public String docs() {
+			return "void {name, [type, environment, seed]} Creates a new world with the specified options."
+					+ " If the world already exists, it will be loaded from disk, and the last 3 arguments may be"
+					+ " ignored. name is the name of the world, type is one of " 
+					+ StringUtils.Join(MCWorldType.values(), ", ") + ", environment is one of "
+					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ", and seed is an integer.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }

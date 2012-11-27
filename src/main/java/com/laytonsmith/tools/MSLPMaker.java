@@ -38,7 +38,7 @@ public class MSLPMaker {
         boolean error = false;
         for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSFiles()){
             try{
-                MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file()));
+                MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file(), true));
             } catch(ConfigCompileException e){
                 error = true;
                 ConfigRuntimeException.React(e, "Compile error in script. Compilation will attempt to continue, however.", null);
@@ -48,7 +48,7 @@ public class MSLPMaker {
         for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSAFiles()){
             List<Script> tempScripts;
             try{
-                tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents(), fi.file()));
+                tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents(), fi.file(), false));
                 for (Script s : tempScripts) {
                     try {
                         s.compile();

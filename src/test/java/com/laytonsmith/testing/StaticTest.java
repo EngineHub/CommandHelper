@@ -437,7 +437,7 @@ public class StaticTest {
 			env = StaticTest.env;
 		}
         env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, done, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, done, null);
     }
     
     public static void RunCommand(String combinedScript, MCCommandSender player, String command) throws ConfigCompileException{
@@ -449,7 +449,7 @@ public class StaticTest {
 			env = StaticTest.env;
 		}
         env.getEnv(CommandHelperEnvironment.class).SetCommandSender(player);
-        List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null));
+        List<Script> scripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(combinedScript, null, false));
         for(Script s : scripts){
             s.compile();
             if(s.match(command)){

@@ -31,7 +31,7 @@ public final class MethodScriptStaticCompiler {
     public static String compile(String script, api.Platforms platform, File file) throws ConfigCompileException{
         //First, we optimize. The "core" functions are always run through
         //the native interpreter's compiler for optimization.
-        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file));
+        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file, true));
         StringBuilder b = new StringBuilder();
         for(ParseTree node : tree.getChildren()){
             go(node, b, platform);

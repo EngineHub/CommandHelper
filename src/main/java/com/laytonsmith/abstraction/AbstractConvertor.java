@@ -4,8 +4,6 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -35,4 +33,8 @@ public abstract class AbstractConvertor implements Convertor{
 	public <T> T runOnMainThreadAndWait(Callable<T> callable) throws Exception{
 		return (T) callable.call();
 	}				
+
+	public MCWorldCreator getWorldCreator(String worldName) {
+		throw new UnsupportedOperationException("Not supported.");
+	}
 }
