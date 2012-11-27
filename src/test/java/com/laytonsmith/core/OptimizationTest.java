@@ -130,6 +130,17 @@ public class OptimizationTest {
 	@Test public void testRegReplaceOptimization1() throws Exception{
 		assertEquals("replace('this is a thing','thing',dyn('hi'))", optimize("reg_replace('thing', dyn('hi'), 'this is a thing')"));
 	}
+	
+	@Test public void testAssignWithEqualsSymbol() throws Exception {
+		assertEquals("sconcat(assign(@var,'ab'),'c')", optimize("@var = 'a'.'b' 'c'"));
+	}
+	
+	@Test public void testAssignWithOperators() throws Exception{
+		assertEquals("assign(@one,add(@one,1))", optimize("@one += 1"));
+		assertEquals("assign(@one,subtract(@one,1))", optimize("@one -= 1"));
+		assertEquals("assign(@one,multiply(@one,1))", optimize("@one *= 1"));
+		assertEquals("assign(@one,divide(@one,1))", optimize("@one /= 1"));
+	}
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{

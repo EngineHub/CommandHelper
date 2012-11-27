@@ -146,4 +146,23 @@ public class CSymbol extends Construct {
     public boolean isExponential() {
         return symbolType.isExponential();
     }
+
+	public boolean isAssignment() {
+		return symbolType.isAssignment();
+	}
+
+	public String convertAssignment() {
+		switch(symbolType){
+			case PLUS_ASSIGNMENT:
+				return "add";
+			case MINUS_ASSIGNMENT:
+				return "subtract";
+			case MULTIPLICATION_ASSIGNMENT:
+				return "multiply";
+			case DIVISION_ASSIGNMENT:
+				return "divide";
+			default:
+				return null;
+		}
+	}
 }

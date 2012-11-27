@@ -184,7 +184,8 @@ public class Compiler {
                     for (int i = 0; i < list.size() - 1; i++) {
                         ParseTree next = list.get(i + 1);
                         if (next.getData() instanceof CSymbol) {
-                            if (( (CSymbol) next.getData() ).isMultaplicative()) {
+							CSymbol nextData = (CSymbol)next.getData();
+                            if (nextData.isMultaplicative() && !nextData.isAssignment()) {
                                 ParseTree conversion = new ParseTree(new CFunction(( (CSymbol) next.getData() ).convert(), t), next.getFileOptions());
                                 conversion.addChild(list.get(i));
                                 conversion.addChild(list.get(i + 2));
@@ -198,7 +199,7 @@ public class Compiler {
                     //Additive
                     for (int i = 0; i < list.size() - 1; i++) {
                         ParseTree next = list.get(i + 1);
-                        if (next.getData() instanceof CSymbol && ( (CSymbol) next.getData() ).isAdditive()) {
+                        if (next.getData() instanceof CSymbol && ( (CSymbol) next.getData() ).isAdditive() && !((CSymbol)next.getData()).isAssignment()) {
                             ParseTree conversion = new ParseTree(new CFunction(( (CSymbol) next.getData() ).convert(), t), next.getFileOptions());
                             conversion.addChild(list.get(i));
                             conversion.addChild(list.get(i + 2));
@@ -264,6 +265,36 @@ public class Compiler {
                             i--;
                         }
                     }
+					//Assignment
+					for(int i = 0; i < list.size() - 1; i++){
+						ParseTree node = list.get(i + 1);
+						if(node.getData() instanceof CSymbol && ((CSymbol)node.getData()).isAssignment()){
+							CSymbol sy = (CSymbol) node.getData();
+							String conversionFunction = sy.convertAssignment();
+							ParseTree lhs = list.get(i);
+							if(conversionFunction != null){
+								ParseTree conversion = new ParseTree(new CFunction(conversionFunction, t), node.getFileOptions());
+								//grab the right side, and turn it into an operation with the left side
+								try{
+									ParseTree rhs = list.get(i + 2);
+									conversion.addChild(lhs);
+									conversion.addChild(rhs);
+									list.set(i + 2, conversion);
+								} catch(IndexOutOfBoundsException e){
+									throw new ConfigCompileException("Invalid symbol listed", t);
+								}
+							}
+							//Simple assignment now
+							ParseTree assign = new ParseTree(new CFunction("assign", t), node.getFileOptions());
+							ParseTree rhs = list.get(i + 2);
+							assign.addChild(lhs);
+							assign.addChild(rhs);
+							list.set(i, assign);
+							list.remove(i + 1);
+							list.remove(i + 1);
+							i--;
+						}
+					}
                 }
                 catch (IndexOutOfBoundsException e) {
                     throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", t);

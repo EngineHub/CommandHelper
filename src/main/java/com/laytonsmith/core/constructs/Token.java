@@ -22,7 +22,7 @@ public class Token {
 
 	private enum TokenVariant{
 		ADDITIVE, EQUALITY, EXPONENTIAL, IDENTIFIER, LOGICAL_AND, LOGICAL_OR, 
-		MULTIPLICATIVE, PLUS_MINUS, POSTFIX, RELATIONAL, SYMBOL, UNARY
+		MULTIPLICATIVE, PLUS_MINUS, POSTFIX, RELATIONAL, SYMBOL, UNARY, ASSIGNMENT
 	}
     public enum TType {
 
@@ -83,8 +83,12 @@ public class Token {
 		
 		DOUBLE(TokenVariant.IDENTIFIER),
 		INTEGER(TokenVariant.IDENTIFIER),
-		ASSIGNMENT(), 
-		CONST_START();
+		CONST_START(),
+		ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL), 
+		PLUS_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
+		MINUS_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.ADDITIVE, TokenVariant.PLUS_MINUS),
+		MULTIPLICATION_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE),
+		DIVISION_ASSIGNMENT(TokenVariant.ASSIGNMENT, TokenVariant.SYMBOL, TokenVariant.MULTIPLICATIVE);
 		
 		private Set<TokenVariant> variants = EnumSet.noneOf(TokenVariant.class);
 		private TType(TokenVariant ... variants){
@@ -147,9 +151,13 @@ public class Token {
             return this.variants.contains(TokenVariant.IDENTIFIER);
         }
 
-        boolean isExponential() {
+        public boolean isExponential() {
             return this.variants.contains(TokenVariant.EXPONENTIAL);
         }
+		
+		public boolean isAssignment(){
+			return this.variants.contains(TokenVariant.ASSIGNMENT);
+		}
         
     }
 

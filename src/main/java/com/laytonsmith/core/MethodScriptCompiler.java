@@ -44,7 +44,7 @@ public final class MethodScriptCompiler {
 		int commentLineNumberStart = 1;
 		boolean comment_is_block = false;
 		boolean in_opt_var = false;
-		StringBuffer buf = new StringBuffer();
+		StringBuilder buf = new StringBuilder();
 		int line_num = 1;
 		int column = 1;
 		int lastColumn = 0;
@@ -108,11 +108,48 @@ public final class MethodScriptCompiler {
 			if (in_comment) {
 				continue;
 			}
+			if(c == '+' && c2 == '=' && !state_in_quote){
+				if(buf.length() > 0){
+					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+					buf = new StringBuilder();
+				}
+				token_list.add(new Token(TType.PLUS_ASSIGNMENT, "+=", target));
+				i++;
+				continue;
+			}
+			if(c == '-' && c2 == '=' && !state_in_quote){
+				if(buf.length() > 0){
+					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+					buf = new StringBuilder();
+				}
+				token_list.add(new Token(TType.MINUS_ASSIGNMENT, "-=", target));
+				i++;
+				continue;
+			}
+			if(c == '*' && c2 == '=' && !state_in_quote){
+				if(buf.length() > 0){
+					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+					buf = new StringBuilder();
+				}
+				token_list.add(new Token(TType.MULTIPLICATION_ASSIGNMENT, "*=", target));
+				i++;
+				continue;
+			}
+			//This has to come before division and equals
+			if(c == '/' && c2 == '=' && !state_in_quote){
+				if(buf.length() > 0){
+					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+					buf = new StringBuilder();
+				}
+				token_list.add(new Token(TType.DIVISION_ASSIGNMENT, "/=", target));
+				i++;
+				continue;
+			}
 			//This has to come before subtraction and greater than
 			if (c == '-' && c2 == '>' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.DEREFERENCE, "->", target));
 				i++;
@@ -122,7 +159,7 @@ public final class MethodScriptCompiler {
 			if (c == '+' && c2 == '+' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.INCREMENT, "++", target));
 				i++;
@@ -131,7 +168,7 @@ public final class MethodScriptCompiler {
 			if (c == '-' && c2 == '-' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.DECREMENT, "--", target));
 				i++;
@@ -141,7 +178,7 @@ public final class MethodScriptCompiler {
 			if (c == '%' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.MODULO, "%", target));
 				continue;
@@ -152,7 +189,7 @@ public final class MethodScriptCompiler {
 			if (c == '*' && c2 == '*' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.EXPONENTIAL, "**", target));
 				i++;
@@ -161,7 +198,7 @@ public final class MethodScriptCompiler {
 			if (c == '*' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.MULTIPLICATION, "*", target));
 				continue;
@@ -169,7 +206,7 @@ public final class MethodScriptCompiler {
 			if (c == '+' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.PLUS, "+", target));
 				continue;
@@ -177,7 +214,7 @@ public final class MethodScriptCompiler {
 			if (c == '-' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.MINUS, "-", target));
 				continue;
@@ -186,7 +223,7 @@ public final class MethodScriptCompiler {
 			if (c == '/' && !Character.isLetter(c2) && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.DIVISION, "/", target));
 				continue;
@@ -195,7 +232,7 @@ public final class MethodScriptCompiler {
 			if (c == '>' && c2 == '=' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.GTE, ">=", target));
 				i++;
@@ -204,7 +241,7 @@ public final class MethodScriptCompiler {
 			if (c == '<' && c2 == '=' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.LTE, "<=", target));
 				i++;
@@ -214,7 +251,7 @@ public final class MethodScriptCompiler {
 			if (c == '<' && c2 == '<' && c3 == '<' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.MULTILINE_END, "<<<", target));
 				i++;
@@ -224,7 +261,7 @@ public final class MethodScriptCompiler {
 			if (c == '>' && c2 == '>' && c3 == '>' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.MULTILINE_START, ">>>", target));
 				i++;
@@ -234,7 +271,7 @@ public final class MethodScriptCompiler {
 			if (c == '<' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.LT, "<", target));
 				continue;
@@ -242,7 +279,7 @@ public final class MethodScriptCompiler {
 			if (c == '>' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.GT, ">", target));
 				continue;
@@ -250,7 +287,7 @@ public final class MethodScriptCompiler {
 			if (c == '=' && c2 == '=' && c3 == '=' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.STRICT_EQUALS, "===", target));
 				i++;
@@ -260,7 +297,7 @@ public final class MethodScriptCompiler {
 			if (c == '!' && c2 == '=' && c3 == '=' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.STRICT_NOT_EQUALS, "!==", target));
 				i++;
@@ -270,7 +307,7 @@ public final class MethodScriptCompiler {
 			if (c == '=' && c2 == '=' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.EQUALS, "==", target));
 				i++;
@@ -280,17 +317,24 @@ public final class MethodScriptCompiler {
 			if (c == '!' && c2 == '=' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.NOT_EQUALS, "!=", target));
 				i++;
 				i++;
 				continue;
 			}
+			if(c == '=' && !state_in_quote){
+				if(buf.length() > 0){
+					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+					buf = new StringBuilder();
+				}
+				token_list.add(new Token(TType.ASSIGNMENT, "=", target));
+			}
 			if (c == '&' && c2 == '&' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.LOGICAL_AND, "&&", target));
 				i++;
@@ -299,7 +343,7 @@ public final class MethodScriptCompiler {
 			if (c == '|' && c2 == '|' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.LOGICAL_OR, "||", target));
 				i++;
@@ -308,7 +352,7 @@ public final class MethodScriptCompiler {
 			if (c == '!' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.LOGICAL_NOT, "!", target));
 				continue;
@@ -316,7 +360,7 @@ public final class MethodScriptCompiler {
 			if (c == '{' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.LCURLY_BRACKET, "{", target));
 				continue;
@@ -324,7 +368,7 @@ public final class MethodScriptCompiler {
 			if (c == '}' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.RCURLY_BRACKET, "}", target));
 				continue;
@@ -333,7 +377,7 @@ public final class MethodScriptCompiler {
 //            if(c == '&' && !state_in_quote){
 //                if (buf.length() > 0) {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-//                    buf = new StringBuffer();
+//                    buf = new StringBuilder();
 //                }
 //                token_list.add(new Token(TType.BIT_AND, "&", target));  
 //                continue;
@@ -341,7 +385,7 @@ public final class MethodScriptCompiler {
 //            if(c == '|' && !state_in_quote){
 //                if (buf.length() > 0) {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-//                    buf = new StringBuffer();
+//                    buf = new StringBuilder();
 //                }
 //                token_list.add(new Token(TType.BIT_OR, "|", target));  
 //                continue;
@@ -349,7 +393,7 @@ public final class MethodScriptCompiler {
 //            if(c == '^' && !state_in_quote){
 //                if (buf.length() > 0) {
 //                    token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-//                    buf = new StringBuffer();
+//                    buf = new StringBuilder();
 //                }
 //                token_list.add(new Token(TType.BIT_XOR, "^", target));  
 //                continue;
@@ -359,7 +403,7 @@ public final class MethodScriptCompiler {
 				//This one has to come before plain .
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.SLICE, "..", target));
 				i++;
@@ -369,7 +413,7 @@ public final class MethodScriptCompiler {
 				//if it's a number after this, it's a decimal
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.CONCAT, ".", target));
 				continue;
@@ -377,7 +421,7 @@ public final class MethodScriptCompiler {
 			if (c == ':' && c2 == ':' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.DEREFERENCE, "::", target));
 				i++;
@@ -386,7 +430,7 @@ public final class MethodScriptCompiler {
 			if (c == '[' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.LSQUARE_BRACKET, "[", target));
 				in_opt_var = true;
@@ -396,7 +440,7 @@ public final class MethodScriptCompiler {
 			if (c == '=' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				if (in_opt_var) {
 					token_list.add(new Token(TType.OPT_VAR_ASSIGN, "=", target));
@@ -408,7 +452,7 @@ public final class MethodScriptCompiler {
 			if (c == ']' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.RSQUARE_BRACKET, "]", target));
 				in_opt_var = false;
@@ -417,7 +461,7 @@ public final class MethodScriptCompiler {
 			if (c == ':' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.LABEL, ":", target));
 				continue;
@@ -425,7 +469,7 @@ public final class MethodScriptCompiler {
 			if (c == ',' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.COMMA, ",", target));
 				continue;
@@ -433,7 +477,7 @@ public final class MethodScriptCompiler {
 			if (c == '(' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.FUNC_NAME, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				} else {
 					//The previous token, if unknown, should be changed to a FUNC_NAME. If it's not
 					//unknown, we may be doing standalone parenthesis, so auto tack on the __autoconcat__ function
@@ -463,7 +507,7 @@ public final class MethodScriptCompiler {
 			if (c == ')' && !state_in_quote) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.FUNC_END, ")", target));
 				continue;
@@ -473,7 +517,7 @@ public final class MethodScriptCompiler {
 				//was also whitespace. All whitespace is added as a single space.                
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				if (token_list.size() > 0
 						&& token_list.get(token_list.size() - 1).type != TType.WHITESPACE) {
@@ -484,7 +528,7 @@ public final class MethodScriptCompiler {
 			if (c == '\'') {
 				if (state_in_quote && !in_smart_quote) {
 					token_list.add(new Token(TType.STRING, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 					state_in_quote = false;
 					continue;
 				} else if (!state_in_quote) {
@@ -493,7 +537,7 @@ public final class MethodScriptCompiler {
 					in_smart_quote = false;
 					if (buf.length() > 0) {
 						token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-						buf = new StringBuffer();
+						buf = new StringBuilder();
 					}
 					continue;
 				} else {
@@ -507,7 +551,7 @@ public final class MethodScriptCompiler {
 						throw new ConfigCompileException("Doubly quoted strings are not yet supported.", target);
 					}
 					token_list.add(new Token(TType.SMART_STRING, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 					state_in_quote = false;
 					continue;
 				} else if (!state_in_quote) {
@@ -516,7 +560,7 @@ public final class MethodScriptCompiler {
 					smartQuoteLineNumberStart = line_num;
 					if (buf.length() > 0) {
 						token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-						buf = new StringBuffer();
+						buf = new StringBuilder();
 					}
 					continue;
 				} else {
@@ -565,7 +609,7 @@ public final class MethodScriptCompiler {
 			} else if (c == '\n' && !comment_is_block) {
 				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
-					buf = new StringBuffer();
+					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.NEWLINE, "\n", target));
 				in_comment = false;
