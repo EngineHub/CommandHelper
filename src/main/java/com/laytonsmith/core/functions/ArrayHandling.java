@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.RunnableQueue;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -13,11 +14,8 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
-import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Random;
@@ -1143,6 +1141,12 @@ public class ArrayHandling {
 
 				public void run() {
 					//This warms up the queue. Apparently.
+				}
+			});
+			StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+
+				public void run() {
+					queue.shutdown();
 				}
 			});
 		}

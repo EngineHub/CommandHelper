@@ -61,4 +61,8 @@ public class RunnableQueue {
 		return service.submit(callable).get();
 	}
 
+	public void shutdown() {
+		service.shutdownNow();
+	}
+
 }
