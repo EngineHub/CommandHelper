@@ -392,7 +392,7 @@ public class Minecraft {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
 		public boolean isRestricted() {
@@ -455,7 +455,7 @@ public class Minecraft {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
 		public boolean isRestricted() {
@@ -506,7 +506,7 @@ public class Minecraft {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
 		public boolean isRestricted() {
@@ -626,7 +626,7 @@ public class Minecraft {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
 		public boolean isRestricted() {
@@ -672,7 +672,7 @@ public class Minecraft {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.BadEntityException};
 		}
 
 		public boolean isRestricted() {

@@ -12,6 +12,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.RunCommand;
 import java.io.File;
 import java.io.IOException;
 import org.junit.*;
@@ -60,7 +61,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/for");
         verify(fakePlayer).sendMessage("{0, 1, 2, 3, 4}");
     }
 
@@ -86,7 +87,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/for");
         verify(fakePlayer).sendMessage("{1, 2, 3, 4, 5}");
     }
 
@@ -101,7 +102,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/for");
         verify(fakePlayer).sendMessage("{3, 4, 5}");
     }
 
@@ -119,7 +120,7 @@ public class DataHandlingTest {
                 + " )"
                 + " msg(@array2)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/for");
         verify(fakePlayer).sendMessage("{1, 2}");
     }
     
@@ -155,7 +156,7 @@ public class DataHandlingTest {
                 + " msg(is_proc(_proc))"
                 + " call_proc(_proc)"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/for");
         verify(fakePlayer).sendMessage("false");
         verify(fakePlayer).sendMessage("true");
         verify(fakePlayer).sendMessage("hello world");
@@ -177,7 +178,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/continue");
         verify(fakePlayer).sendMessage("{0, 1, 3, 4}");
     }
 
@@ -191,7 +192,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/continue");
         verify(fakePlayer).sendMessage("{0, 1, 4}");
     }
 
@@ -205,7 +206,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/continue");
         verify(fakePlayer).sendMessage("{0, 1}");
     }
 
@@ -222,7 +223,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/break");
         verify(fakePlayer).sendMessage("{j:0, j:1, i:0, j:0, j:1, i:1}");
     }
 
@@ -239,7 +240,7 @@ public class DataHandlingTest {
                 + " )\n"
                 + " msg(@array)\n"
                 + "<<<\n";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/break");
         verify(fakePlayer).sendMessage("{j:0, j:1}");
     }
 

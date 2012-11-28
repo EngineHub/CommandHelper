@@ -272,7 +272,7 @@ public class Exceptions {
 						CArray ex = ObjectGenerator.GetGenerator().exception(e, t);
 						if (ivar != null) {
 							ivar.setIval(ex);
-							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(ivar);
+							env.getEnv(GlobalEnv.class).GetVarList().set(ivar);
 						}
 						that.eval(catchCode, env);
 					}

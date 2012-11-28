@@ -148,7 +148,7 @@ public class XMLDocumentTest {
 		assertEquals("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
 				+ "<root>\n"
 				+ "    <node>value</node>\n"
-				+ "</root>\n", doc.getXML(true));
+				+ "</root>\n", doc.getXML(true).replace("\r\n", "\n").replace("\n\r", "\n"));
 	}
 	
 	@Test

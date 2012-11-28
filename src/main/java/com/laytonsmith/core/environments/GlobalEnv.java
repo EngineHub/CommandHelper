@@ -3,10 +3,12 @@ package com.laytonsmith.core.environments;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.PermissionsResolver;
+import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.PersistanceNetwork;
@@ -31,6 +33,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	private Script script = null;
 	private File root;
 	private CClosure uncaughtExceptionHandler;
+	private Map<String, Procedure> procs = null;
+	private IVariableList iVariableList = null;
+	private String label = null;
 
 	public GlobalEnv(ExecutionQueue queue, Profiler profiler, PersistanceNetwork network, PermissionsResolver resolver, File root) {
 		Static.AssertNonNull(queue, "ExecutionQueue cannot be null");
@@ -43,8 +48,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 		this.persistanceNetwork = network;
 		this.permissionsResolver = resolver;
 		this.root = root;
-		if(this.executionQueue instanceof MethodScriptExecutionQueue){
-			((MethodScriptExecutionQueue)executionQueue).setEnvironment(this);
+		if (this.executionQueue instanceof MethodScriptExecutionQueue) {
+			((MethodScriptExecutionQueue) executionQueue).setEnvironment(this);
 		}
 	}
 
@@ -137,7 +142,15 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 
 	@Override
 	public EnvironmentImpl clone() throws CloneNotSupportedException {
-		GlobalEnv clone = (GlobalEnv)super.clone();
+		GlobalEnv clone = (GlobalEnv) super.clone();
+		if (procs != null) {
+			clone.procs = new HashMap<String, Procedure>(procs);
+		} else {
+			clone.procs = new HashMap<String, Procedure>();
+		}
+		if (iVariableList != null) {
+			clone.iVariableList = (IVariableList) iVariableList.clone();
+		}
 		return clone;
 	}
 
@@ -148,8 +161,54 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public void SetExceptionHandler(CClosure construct) {
 		uncaughtExceptionHandler = construct;
 	}
-	
-	public CClosure GetExceptionHandler(){
+
+	public CClosure GetExceptionHandler() {
 		return uncaughtExceptionHandler;
+	}
+
+	/**
+	 * Returns the Map of known procedures in this environment. If the list of
+	 * procedures is currently empty, a new one is created and stored in the
+	 * environment.
+	 *
+	 * @param env
+	 * @return
+	 */
+	public Map<String, Procedure> GetProcs() {
+		if (procs == null) {
+			procs = new HashMap<String, Procedure>();
+		}
+		return procs;
+	}
+
+	public void SetProcs(Map<String, Procedure> procs) {
+		this.procs = procs;
+	}
+
+	/**
+	 * This function will return the variable list in this environment. If the
+	 * environment doesn't contain a variable list, an empty one is created, and
+	 * stored in the environment.
+	 *
+	 * @param env
+	 * @return
+	 */
+	public IVariableList GetVarList() {
+		if (iVariableList == null) {
+			iVariableList = new IVariableList();
+		}
+		return iVariableList;
+	}
+
+	public void SetVarList(IVariableList varList) {
+		iVariableList = varList;
+	}
+
+	public String GetLabel() {
+		return label;
+	}
+
+	public void SetLabel(String label) {
+		this.label = label;
 	}
 }

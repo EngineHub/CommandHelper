@@ -9,8 +9,8 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -482,7 +482,7 @@ public class Math {
 			return func.exec(t, env, args);
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api
 	public static class inc extends AbstractFunction implements Optimizable{
 
 		public String getName() {
@@ -508,13 +508,13 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1]);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival()) + value, t);
@@ -522,7 +522,7 @@ public class Math {
 					newVal = new CInt(Static.getInt(v.ival()) + value, t);
 				}
 				v = new IVariable(v.getName(), newVal, t);
-				env.getEnv(CommandHelperEnvironment.class).GetVarList().set(v);
+				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else {
 				if (Static.anyDoubles(args[0])) {
@@ -584,7 +584,7 @@ public class Math {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api
 	public static class postinc extends AbstractFunction implements Optimizable {
 
 		public String getName() {
@@ -609,13 +609,13 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1]);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival()) + value, t);
@@ -629,7 +629,7 @@ public class Math {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				v = new IVariable(v.getName(), newVal, t);
-				env.getEnv(CommandHelperEnvironment.class).GetVarList().set(v);
+				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {
@@ -684,7 +684,7 @@ public class Math {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api
 	public static class dec extends AbstractFunction implements Optimizable{
 
 		public String getName() {
@@ -710,13 +710,13 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1]);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival()) - value, t);
@@ -724,7 +724,7 @@ public class Math {
 					newVal = new CInt(Static.getInt(v.ival()) - value, t);
 				}
 				v = new IVariable(v.getName(), newVal, t);
-				env.getEnv(CommandHelperEnvironment.class).GetVarList().set(v);
+				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			} else {
 				if (Static.anyDoubles(args[0])) {
@@ -778,7 +778,7 @@ public class Math {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api
 	public static class postdec extends AbstractFunction implements Optimizable {
 
 		public String getName() {
@@ -804,13 +804,13 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
 				}
 				value = Static.getInt(args[1]);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget());
+				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v.ival())) {
 					newVal = new CDouble(Static.getDouble(v.ival()) - value, t);
@@ -824,7 +824,7 @@ public class Math {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
 				v = new IVariable(v.getName(), newVal, t);
-				env.getEnv(CommandHelperEnvironment.class).GetVarList().set(v);
+				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return oldVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {

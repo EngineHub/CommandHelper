@@ -80,12 +80,6 @@ public class EchoesTest {
         SRun("msg('@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@')", fakePlayer);
         verify(fakePlayer).sendMessage("@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@");
     }
-    
-    @Test(timeout=10000)
-    public void testLongStringMsgd2() throws ConfigCompileException{
-        SRun("msg('.......................................................................................................................................................................')", fakePlayer);
-        verify(fakePlayer, times(2)).sendMessage(Mockito.anyString()); 
-    }
 
     @Test(timeout = 10000)
     public void testChatas() throws CancelCommandException, ConfigCompileException {
@@ -106,10 +100,7 @@ public class EchoesTest {
     @Test
     public void testIndentation() throws ConfigCompileException{
         SRun("msg('yay\n yay\n  yay\n   yay')", fakePlayer);
-        verify(fakePlayer).sendMessage("yay");
-        verify(fakePlayer).sendMessage(" yay");
-        verify(fakePlayer).sendMessage("  yay");
-        verify(fakePlayer).sendMessage("   yay");
+        verify(fakePlayer).sendMessage("yay\n yay\n  yay\n   yay");
     }
     
     @Test

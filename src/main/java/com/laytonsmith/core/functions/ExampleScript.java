@@ -204,7 +204,7 @@ public class ExampleScript {
 		if(output != null){
 			return output;
 		}
-		Script s = Script.GenerateScript(script, "*");
+		Script s = Script.GenerateScript(script, PermissionsResolver.GLOBAL_PERMISSION);
 		Environment env = Static.GenerateStandaloneEnvironment();
 		env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
 		final StringBuilder finalOutput = new StringBuilder();

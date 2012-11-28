@@ -148,23 +148,23 @@ public class Procedure implements Cloneable {
      * @return
      */
     public Construct execute(List<Construct> args, Environment env) {
-        env.getEnv(CommandHelperEnvironment.class).SetVarList(new IVariableList());
+        env.getEnv(GlobalEnv.class).SetVarList(new IVariableList());
         CArray array = new CArray(Target.UNKNOWN);
         for (String key : originals.keySet()) {
             Construct c = originals.get(key);
-            env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
+            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
             array.push(c);
         }
-        Script fakeScript = Script.GenerateScript(tree, env.getEnv(CommandHelperEnvironment.class).GetLabel());//new Script(null, null);        
+        Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);        
         for (int i = 0; i < args.size(); i++) {
             Construct c = args.get(i);
             array.set(i, c);
             if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getName();
-                env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(varname, c, c.getTarget()));
+                env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, c, c.getTarget()));
             }
         }
-        env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable("@arguments", array, Target.UNKNOWN));
+        env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", array, Target.UNKNOWN));
 
         try {
             fakeScript.eval(tree, env);

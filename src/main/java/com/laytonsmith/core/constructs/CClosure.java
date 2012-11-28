@@ -119,7 +119,7 @@ public class CClosure extends Construct {
                     catch (Exception e) {
                         value = defaults[i].clone();
                     }
-                    environment.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(name, value, getTarget()));
+                    environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(name, value, getTarget()));
                 }
             }
             CArray arguments = new CArray(node.getData().getTarget());
@@ -128,7 +128,7 @@ public class CClosure extends Construct {
                     arguments.push(value);
                 }
             }
-            environment.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable("@arguments", arguments, node.getData().getTarget()));
+            environment.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", arguments, node.getData().getTarget()));
             ParseTree newNode = new ParseTree(new CFunction("g", getTarget()), node.getFileOptions());
             List<ParseTree> children = new ArrayList<ParseTree>();
             children.add(node);

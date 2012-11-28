@@ -1308,7 +1308,8 @@ public final class MethodScriptCompiler {
 					//Cool. Caught a runtime error at compile time :D
 					throw new ConfigCompileException(ex);
 				}
-			} //else this procedure isn't listed yet. Maybe a compiler error, maybe not, depends,
+			} 
+			//else this procedure isn't listed yet. Maybe a compiler error, maybe not, depends,
 			//so we can't for sure say, but we do know we can't optimize this
 			return;
 		}
@@ -1321,7 +1322,13 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), fileOptions);
 				Script fakeScript = Script.GenerateScript(root, "*");
-				Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, null, fakeScript, children.toArray(new ParseTree[children.size()]));
+				Environment env = null;
+				try{
+					env = Static.GenerateStandaloneEnvironment();
+				} catch(Exception e){
+					//
+				}
+				Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, env, fakeScript, children.toArray(new ParseTree[children.size()]));
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
 			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere

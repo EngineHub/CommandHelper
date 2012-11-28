@@ -496,18 +496,18 @@ public class Meta {
 			MCPlayer p = Static.GetPlayer(parent.seval(nodes[0], environment).val(), t);
 			MCCommandSender originalPlayer = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			int offset = 0;
-			String originalLabel = environment.getEnv(CommandHelperEnvironment.class).GetLabel();
+			String originalLabel = environment.getEnv(GlobalEnv.class).GetLabel();
 			if (nodes.length == 3) {
 				offset++;
 				String label = environment.getEnv(GlobalEnv.class).GetScript().seval(nodes[1], environment).val();
-				environment.getEnv(CommandHelperEnvironment.class).SetLabel(label);
+				environment.getEnv(GlobalEnv.class).SetLabel(label);
 				environment.getEnv(GlobalEnv.class).GetScript().setLabel(label);
 			}
 			environment.getEnv(CommandHelperEnvironment.class).SetPlayer(p);
 			ParseTree tree = nodes[1 + offset];
 			environment.getEnv(GlobalEnv.class).GetScript().eval(tree, environment);
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(originalPlayer);
-			environment.getEnv(CommandHelperEnvironment.class).SetLabel(originalLabel);
+			environment.getEnv(GlobalEnv.class).SetLabel(originalLabel);
 			environment.getEnv(GlobalEnv.class).GetScript().setLabel(originalLabel);
 			return new CVoid(t);
 		}

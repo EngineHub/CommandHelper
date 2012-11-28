@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
  *
@@ -45,7 +46,7 @@ public class Permissions {
 		}
 
 		public Exceptions.ExceptionType[] thrown() {
-			return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.InsufficientPermissionException};
+			return new Exceptions.ExceptionType[]{ExceptionType.InsufficientPermissionException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {

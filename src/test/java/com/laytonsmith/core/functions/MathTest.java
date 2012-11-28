@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Math;
@@ -51,7 +52,7 @@ public class MathTest {
         varList.set(new IVariable("var", C.onstruct(1), Target.UNKNOWN));
         varList.set(new IVariable("var2", C.onstruct(2.5), Target.UNKNOWN));
 		env = Static.GenerateStandaloneEnvironment();
-        env.getEnv(CommandHelperEnvironment.class).SetVarList(varList);
+        env.getEnv(GlobalEnv.class).SetVarList(varList);
         env.getEnv(CommandHelperEnvironment.class).SetPlayer(fakePlayer);
     }
 

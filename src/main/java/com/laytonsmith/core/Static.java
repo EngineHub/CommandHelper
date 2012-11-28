@@ -707,12 +707,12 @@ public final class Static {
 
     public static boolean hasCHPermission(String functionName, Environment env) {
         //The * label completely overrides everything
-        if("*".equals(env.getEnv(CommandHelperEnvironment.class).GetLabel())){
+        if(PermissionsResolver.GLOBAL_PERMISSION.equals(env.getEnv(GlobalEnv.class).GetLabel())){
             return true;
         }
 		MCPlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 		MCCommandSender commandSender = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-		String label = env.getEnv(CommandHelperEnvironment.class).GetLabel();
+		String label = env.getEnv(GlobalEnv.class).GetLabel();
         boolean perm = false;
         PermissionsResolver perms = env.getEnv(GlobalEnv.class).GetPermissionsResolver();
         if (perms != null) {
@@ -720,7 +720,7 @@ public final class Static {
                 perm = perms.hasPermission(player.getName(), "ch.func.use." + functionName, player.getWorld().getName())
                         || perms.hasPermission(player.getName(), "commandhelper.func.use." + functionName, player.getWorld().getName());
                 if (label != null && label.startsWith("~")) {
-                    String[] groups = env.getEnv(CommandHelperEnvironment.class).GetLabel().substring(1).split("/");
+                    String[] groups = env.getEnv(GlobalEnv.class).GetLabel().substring(1).split("/");
                     for (String group : groups) {
                         if (perms.inGroup(env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName(), group)) {
                             perm = true;
@@ -728,8 +728,8 @@ public final class Static {
                         }
                     }
                 } else {
-                    if (env.getEnv(CommandHelperEnvironment.class).GetLabel() != null){
-                        if(env.getEnv(CommandHelperEnvironment.class).GetLabel().contains(".")){
+                    if (env.getEnv(GlobalEnv.class).GetLabel() != null){
+                        if(env.getEnv(GlobalEnv.class).GetLabel().contains(".")){
                             //We are using a non-standard permission. Don't automatically
                             //add CH's prefix
                             if(perms.hasPermission(player.getName(), label, player.getWorld().getName())){
@@ -747,7 +747,7 @@ public final class Static {
         } else {
             perm = true;
         }
-        if (label != null && label.equals("*")) {
+        if (label != null && PermissionsResolver.GLOBAL_PERMISSION.equals(label)) {
             perm = true;
         }
         if (commandSender == null
@@ -899,6 +899,7 @@ public final class Static {
 				new URI("sqlite://" + new File(jarLocation, "CommandHelper/persistance.db").getCanonicalPath().replace("\\", "/")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScript", "default"), 
 				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, permissionsResolver, new File(jarLocation, "CommandHelper/"));
+		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}
 	

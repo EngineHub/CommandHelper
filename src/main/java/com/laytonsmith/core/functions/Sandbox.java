@@ -454,7 +454,7 @@ public class Sandbox {
 	public static class set_entity_rider extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
 		}
 
 		public boolean isRestricted() {

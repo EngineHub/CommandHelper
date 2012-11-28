@@ -120,11 +120,11 @@ public class OptimizationTest {
 	}
 	
 	@Test public void testRegSplitOptimization1() throws Exception{
-		assertEquals("split(dyn('subject'),'pattern')", optimize("reg_split('pattern', dyn('subject'))"));
+		assertEquals("split('pattern',dyn('subject'))", optimize("reg_split('pattern', dyn('subject'))"));
 	}
 	
 	@Test public void testRegSplitOptimization2() throws Exception{
-		assertEquals("split(dyn('subject'),'.')", optimize("reg_split(reg_escape('.'), dyn('subject'))"));
+		assertEquals("split('.',dyn('subject'))", optimize("reg_split(reg_escape('.'), dyn('subject'))"));
 	}
 	
 	@Test public void testRegReplaceOptimization1() throws Exception{

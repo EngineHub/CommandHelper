@@ -33,7 +33,7 @@ public class Marquee {
 	@api public static class marquee extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {

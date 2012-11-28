@@ -57,7 +57,7 @@ public class Script {
     }
 
     private Procedure getProc(String name) {
-        return CurrentEnv.getEnv(CommandHelperEnvironment.class).GetProcs().get(name);
+        return CurrentEnv.getEnv(GlobalEnv.class).GetProcs().get(name);
     }
     
     public Environment getCurrentEnv(){
@@ -96,7 +96,7 @@ public class Script {
     public void run(final List<Variable> vars, Environment myEnv, final MethodScriptComplete done) {
         //Some things, such as the label are determined at compile time
         this.CurrentEnv = myEnv;
-        this.CurrentEnv.getEnv(CommandHelperEnvironment.class).SetLabel(this.label);
+        this.CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
         MCCommandSender p = myEnv.getEnv(CommandHelperEnvironment.class).GetCommandSender();
         if (!hasBeenCompiled || compilerError) {
             Target target = Target.UNKNOWN;
@@ -112,9 +112,9 @@ public class Script {
                     null, target);
         }
         if (p instanceof MCPlayer) {
-            if (CurrentEnv.getEnv(CommandHelperEnvironment.class).GetLabel() != null) {
+            if (CurrentEnv.getEnv(GlobalEnv.class).GetLabel() != null) {
                 PermissionsResolver perms = CurrentEnv.getEnv(GlobalEnv.class).GetPermissionsResolver();
-                String[] groups = CurrentEnv.getEnv(CommandHelperEnvironment.class).GetLabel().split("/");
+                String[] groups = CurrentEnv.getEnv(GlobalEnv.class).GetLabel().split("/");
                 for (String group : groups) {
                     if (group.startsWith("-") && perms.inGroup(((MCPlayer)p).getName(), group.substring(1))) {
                         //negative permission
@@ -191,7 +191,7 @@ public class Script {
         Construct ret = eval(c, env);
         while(ret instanceof IVariable){
             IVariable cur = (IVariable)ret;
-            ret = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+            ret = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
         }
         return ret;
     }
@@ -199,7 +199,7 @@ public class Script {
     public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
         final Construct m = c.getData();
         CurrentEnv = env;
-        CurrentEnv.getEnv(CommandHelperEnvironment.class).SetLabel(this.label);
+        CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
         if (m.getCType() == ConstructType.FUNCTION) {
                 env.getEnv(GlobalEnv.class).SetScript(this);
                 if (m.val().matches("^_[^_].*")) {
@@ -279,7 +279,7 @@ public class Script {
                     }
                     while(f.preResolveVariables() && ca[i] instanceof IVariable){
                         IVariable cur = (IVariable)ca[i];
-                        ca[i] = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+                        ca[i] = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
                     }
                 }
 

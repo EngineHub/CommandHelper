@@ -8,6 +8,8 @@ package com.laytonsmith.core;
  */
 public interface PermissionsResolver {
 	
+	public static final String GLOBAL_PERMISSION = "*";
+	
 	/**
 	 * Returns true if this user is in the specified group.
 	 * @param user

@@ -85,9 +85,9 @@ public class PermissionsTest {
         Static.InjectPlayer(fakePlayer);
         String world = fakePlayer.getWorld().getName();
         String name = fakePlayer.getName();
-        when(fakePerms.hasPermission(world, name, "commandhelper.alias.simple")).thenReturn(true);
+        when(fakePerms.hasPermission(name, "commandhelper.alias.simple", world)).thenReturn(true);
         StaticTest.RunCommand("simple:/cmd = tmsg(player(), 'hi')", fakePlayer, "/cmd", env);
-        verify(fakePerms, atLeastOnce()).hasPermission(world, name, "commandhelper.alias.simple");
+        verify(fakePerms, atLeastOnce()).hasPermission(name, "commandhelper.alias.simple", world);
     }
     
     //TODO: Get this working again. The behavior is correct, but somewhere along the line, the perms that actually

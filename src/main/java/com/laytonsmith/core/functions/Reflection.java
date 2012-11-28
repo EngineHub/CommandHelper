@@ -7,6 +7,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -79,21 +80,21 @@ public class Reflection {
 
 			String param = args[0].val();
 			if ("label".equalsIgnoreCase(param)) {
-				return new CString(env.getEnv(CommandHelperEnvironment.class).GetLabel(), t);
+				return new CString(env.getEnv(GlobalEnv.class).GetLabel(), t);
 			} else if ("command".equalsIgnoreCase(param)) {
 				return new CString(env.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
 			} else if ("varlist".equalsIgnoreCase(param)) {
 				if (args.length == 1) {
 					//No name provided
 					CArray ca = new CArray(t);
-					for (String name : env.getEnv(CommandHelperEnvironment.class).GetVarList().keySet()) {
+					for (String name : env.getEnv(GlobalEnv.class).GetVarList().keySet()) {
 						ca.push(new CString(name, t));
 					}
 					return ca;
 				} else if (args.length == 2) {
 					//The name was provided
 					String name = args[1].val();
-					return env.getEnv(CommandHelperEnvironment.class).GetVarList().get(name, t).ival();
+					return env.getEnv(GlobalEnv.class).GetVarList().get(name, t).ival();
 				}
 			} else if ("line_num".equalsIgnoreCase(param)) {
 				return new CInt(t.line(), t);
@@ -116,7 +117,7 @@ public class Reflection {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api
 	public static class reflect_docs extends AbstractFunction implements Optimizable {
 
 		public static enum DocField {
@@ -158,12 +159,12 @@ public class Reflection {
 			//For now, we have special handling, since functions are actually the only thing that will work,
 			//but eventually this will be a generic interface.
 			if (element.startsWith("@")) {
-				IVariable var = environment.getEnv(CommandHelperEnvironment.class).GetVarList().get(element, t);
+				IVariable var = environment.getEnv(GlobalEnv.class).GetVarList().get(element, t);
 				if (var == null) {
 					throw new ConfigRuntimeException("Invalid variable provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
 				}
 			} else if (element.startsWith("_")) {
-				if (!environment.getEnv(CommandHelperEnvironment.class).GetProcs().containsKey(element)) {
+				if (!environment.getEnv(GlobalEnv.class).GetProcs().containsKey(element)) {
 					throw new ConfigRuntimeException("Invalid procedure name provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
 				}
 			} else {

@@ -138,7 +138,7 @@ public class DataHandling {
 		
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api
 	public static class assign extends AbstractFunction implements Optimizable {
 
 		public String getName() {
@@ -153,11 +153,11 @@ public class DataHandling {
 			Construct c = args[1];
 			while (c instanceof IVariable) {
 				IVariable cur = (IVariable) c;
-				c = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+				c = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable v = new IVariable(((IVariable) args[0]).getName(), c, t);
-				env.getEnv(CommandHelperEnvironment.class).GetVarList().set(v);
+				env.getEnv(GlobalEnv.class).GetVarList().set(v);
 				return v;
 			}
 			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
@@ -181,7 +181,7 @@ public class DataHandling {
 			Construct ival = toSet;
 			while (ival instanceof IVariable) {
 				IVariable cur = (IVariable) ival;
-				ival = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+				ival = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
 			}
 			Chain c = new Chain();
 			prepare((CArrayReference) arrayAndIndex, c);
@@ -210,7 +210,7 @@ public class DataHandling {
 				}
 			}
 			String name = ((CArrayReference) arrayAndIndex).name.getName();
-			env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
 			return new IVariable("=anon", ival, t);
 		}
 
@@ -597,7 +597,7 @@ public class DataHandling {
 					if (!one.inAssociativeMode()) {
 						for (int i = 0; i < one.size(); i++) {
 							hasRunOnce = true;
-							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -616,7 +616,7 @@ public class DataHandling {
 						for (int i = 0; i < one.size(); i++) {
 							hasRunOnce = true;
 							String index = one.keySet().toArray(new String[]{})[i];
-							env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -1519,7 +1519,7 @@ public class DataHandling {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			Procedure myProc = getProcedure(t, env, parent, nodes);
-			env.getEnv(CommandHelperEnvironment.class).GetProcs().put(myProc.getName(), myProc);
+			env.getEnv(GlobalEnv.class).GetProcs().put(myProc.getName(), myProc);
 			return new CVoid(t);
 		}
 
@@ -1553,7 +1553,7 @@ public class DataHandling {
 								try {
 									Construct c = cons;
 									while (c instanceof IVariable) {
-										c = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
 									}
 									ivar = new IVariable(((IVariable) cons).getName(), c.clone(), t);
 								} catch (CloneNotSupportedException ex) {
@@ -1602,7 +1602,7 @@ public class DataHandling {
 						options = children.get(0).getFileOptions();
 					}
 					ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), options);
-					Script fakeScript = Script.GenerateScript(root, "*");
+					Script fakeScript = Script.GenerateScript(root, PermissionsResolver.GLOBAL_PERMISSION);
 					Environment env = Static.GenerateStandaloneEnvironment();
 					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
 					Construct c = myProc.cexecute(children, env);
@@ -1752,7 +1752,7 @@ public class DataHandling {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api
 	public static class call_proc extends AbstractFunction {
 
 		public String getName() {
@@ -1799,7 +1799,7 @@ public class DataHandling {
 				args[i] = parent.seval(nodes[i], env);
 			}
 
-			Procedure proc = env.getEnv(CommandHelperEnvironment.class).GetProcs().get(args[0].val());
+			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
 			if (proc != null) {
 				List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
 				vars.remove(0);
@@ -1854,7 +1854,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) {
-			return new CBoolean(env.getEnv(CommandHelperEnvironment.class).GetProcs().get(args[0].val()) == null ? false : true, t);
+			return new CBoolean(env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val()) == null ? false : true, t);
 		}
 	}
 
@@ -2007,7 +2007,7 @@ public class DataHandling {
 			if (args[0] instanceof IVariable) {
 				//Mode 1     
 				IVariable var = (IVariable) args[0];
-				environment.getEnv(CommandHelperEnvironment.class).GetVarList().set(Globals.GetGlobalIVar(var));
+				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
 				return new CVoid(t);
 			} else {
 				//Mode 2
@@ -2017,7 +2017,7 @@ public class DataHandling {
 		}
 	}
 
-	@api(environments=CommandHelperEnvironment.class)
+	@api
 	public static class _export extends AbstractFunction {
 
 		public String getName() {
@@ -2062,7 +2062,7 @@ public class DataHandling {
 			if (args.length == 1) {
 				if (args[0] instanceof IVariable) {
 					IVariable cur = (IVariable) args[0];
-					Globals.SetGlobal(environment.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()));
+					Globals.SetGlobal(environment.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()));
 				} else {
 					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
 				}
@@ -2071,7 +2071,7 @@ public class DataHandling {
 				Construct c = args[args.length - 1];
 				//We want to store the value contained, not the ivar itself
 				while (c instanceof IVariable) {
-					c = environment.getEnv(CommandHelperEnvironment.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
 				}
 				Globals.SetGlobal(key, c);
 			}
@@ -2136,7 +2136,7 @@ public class DataHandling {
 				List<ParseTree> children = new ArrayList<ParseTree>();
 				children.add(node);
 				newNode.setChildren(children);
-				Script fakeScript = Script.GenerateScript(newNode, env.getEnv(CommandHelperEnvironment.class).GetLabel());
+				Script fakeScript = Script.GenerateScript(newNode, env.getEnv(GlobalEnv.class).GetLabel());
 				Construct ret = MethodScriptCompiler.execute(newNode, env, null, fakeScript);
 				if (!(ret instanceof IVariable)) {
 					throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, t);

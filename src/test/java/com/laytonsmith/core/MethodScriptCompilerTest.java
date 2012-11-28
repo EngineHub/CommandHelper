@@ -13,6 +13,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
+import static com.laytonsmith.testing.StaticTest.RunCommand;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -151,8 +152,8 @@ public class MethodScriptCompilerTest {
     }
     
     @Test public void testLabel() throws ConfigCompileException{
-        assertEquals("*", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("*:/cmd = die()", null, false)).get(0).compile().getLabel());
-        assertEquals("*", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("* : /cmd = die()", null, false)).get(0).compile().getLabel());
+        assertEquals(PermissionsResolver.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("*:/cmd = die()", null, false)).get(0).compile().getLabel());
+        assertEquals(PermissionsResolver.GLOBAL_PERMISSION, MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("* : /cmd = die()", null, false)).get(0).compile().getLabel());
         assertEquals("~lol/fun", MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("~lol/fun: /cmd = die()", null, false)).get(0).compile().getLabel());
     }
     
@@ -333,7 +334,7 @@ public class MethodScriptCompilerTest {
                 "assign(@i, 0)\n"
                 + "msg('@i is currently' @i)\n"
                 + "proc(_out, @i,\n"
-                + "     msg('@i is currently' @i 'and @j is' @j)\n"
+                + "     msg(trim('@i is currently' @i 'and @j is' @j))\n"
                 + ")\n"
                 + "_out('hello')\n"
                 + "assign(@j, 'goodbye')\n"
@@ -346,14 +347,13 @@ public class MethodScriptCompilerTest {
     
     @Test public void testExecute16() throws ConfigCompileException{
         String script =
-                "proc(_myProc, @i, @j, @k, msg(@i @j @k))\n"
+                "proc(_myProc, @i, @j, @k, msg(trim(@i @j @k)))\n"
                 + "_myProc()\n"
                 + "_myProc(1)\n"
                 + "_myProc(1, 2)\n"
                 + "_myProc(1, 2, 3)\n"
                 + "_myProc(1, 2, 3, 4)\n";
         MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
-        //verify(fakePlayer).sendMessage("null null null");
         verify(fakePlayer).sendMessage("1");
         verify(fakePlayer).sendMessage("1 2");
         verify(fakePlayer, times(2)).sendMessage("1 2 3");
@@ -509,10 +509,10 @@ public class MethodScriptCompilerTest {
     @Test
     public void testCompile6() throws ConfigCompileException {
         String config = "/cmd = >>>\n"
-                + "msg(hello 'world \\\\ \\' \\n')"
+                + "msg(trim(hello 'world \\\\ \\' \\n'))"
                 + "<<<";
-        SRun(config, fakePlayer);
-        verify(fakePlayer).sendMessage("hello world \\ ' ".trim());
+        RunCommand(config, fakePlayer, "/cmd");
+        verify(fakePlayer).sendMessage("hello world \\ '");
     }
     
     @Test
@@ -520,7 +520,7 @@ public class MethodScriptCompilerTest {
         String config = "/cmd = >>>\n"
                 + "msg(hello) \\ msg(world)"
                 + "<<<";
-        SRun(config, fakePlayer);
+        RunCommand(config, fakePlayer, "/cmd");
         verify(fakePlayer).sendMessage("hello");
         verify(fakePlayer).sendMessage("world");
     }

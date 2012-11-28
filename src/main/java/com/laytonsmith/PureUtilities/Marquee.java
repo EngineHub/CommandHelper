@@ -56,6 +56,7 @@ public final class Marquee {
 		if (name.length() > 10) {
 			name = text.substring(0, 10);
 		}
+		
 		new Thread(new Runnable() {
 			public void run() {
 				int loopPointer = 0;

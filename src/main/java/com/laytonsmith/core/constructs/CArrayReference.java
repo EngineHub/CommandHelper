@@ -2,8 +2,8 @@
 
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 
 /**
  *
@@ -22,7 +22,7 @@ public class CArrayReference extends Construct{
         if(!(array instanceof CArray) && !(array instanceof CArrayReference)){
             if(array instanceof IVariable){
                 name = (IVariable)array;
-                Construct ival = env.getEnv(CommandHelperEnvironment.class).GetVarList().get(name.getName(), name.getTarget()).ival();
+                Construct ival = env.getEnv(GlobalEnv.class).GetVarList().get(name.getName(), name.getTarget()).ival();
                 if(ival instanceof CArray){
                     this.array = ival;
                 } else {

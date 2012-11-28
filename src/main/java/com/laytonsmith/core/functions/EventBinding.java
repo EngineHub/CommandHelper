@@ -5,6 +5,7 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.BoundEvent;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.events.BoundEvent.Priority;
@@ -84,7 +85,7 @@ public class EventBinding {
 					throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, t);
 				}
 				IVariable cur = (IVariable) var;
-				((IVariable) var).setIval(env.getEnv(CommandHelperEnvironment.class).GetVarList().get(cur.getName(), cur.getTarget()).ival());
+				((IVariable) var).setIval(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival());
 				custom_params.set((IVariable) var);
 			}
 			Environment newEnv = env;
@@ -92,7 +93,7 @@ public class EventBinding {
 				newEnv = env.clone();
 			} catch (Exception e) {
 			}
-			newEnv.getEnv(CommandHelperEnvironment.class).SetVarList(custom_params);
+			newEnv.getEnv(GlobalEnv.class).SetVarList(custom_params);
 			ParseTree tree = nodes[nodes.length - 1];
 
 			//Check to see if our arguments are correct

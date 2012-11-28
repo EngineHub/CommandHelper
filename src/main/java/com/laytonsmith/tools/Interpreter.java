@@ -168,10 +168,7 @@ public class Interpreter {
 		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
 		ParseTree tree = MethodScriptCompiler.compile(stream);
 		compile.stop();
-		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-		cEnv.SetPlayer(null);
-		cEnv.SetLabel("*");
-		Environment env = Environment.createEnvironment(Interpreter.env.getEnv(GlobalEnv.class), cEnv);
+		Environment env = Environment.createEnvironment(Interpreter.env.getEnv(GlobalEnv.class));
 		List<Variable> vars = null;
 		if (args != null) {
 			vars = new ArrayList<Variable>();
@@ -197,7 +194,7 @@ public class Interpreter {
 			Variable v = new Variable("$", "", false, true, Target.UNKNOWN);
 			v.setVal(new CString(finalArgument.toString(), Target.UNKNOWN));
 			vars.add(v);
-			env.getEnv(CommandHelperEnvironment.class).GetVarList().set(new IVariable("@arguments", arguments, Target.UNKNOWN));
+			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", arguments, Target.UNKNOWN));
 		}
 		try {
 			ProfilePoint p = Interpreter.env.getEnv(GlobalEnv.class).GetProfiler().start("Interpreter Script", LogLevel.ERROR);
