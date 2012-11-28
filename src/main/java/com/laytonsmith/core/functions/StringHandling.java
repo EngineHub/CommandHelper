@@ -12,17 +12,14 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.io.IOException;
 import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.EnumSet;
 import java.util.Formatter;
+import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
-import java.util.regex.Pattern;
 
 /**
  *
@@ -898,7 +895,7 @@ public class StringHandling {
 	}
 
 	@api
-	public static class string_format extends AbstractFunction implements Optimizable {
+	public static class sprintf extends AbstractFunction implements Optimizable {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException,
@@ -926,9 +923,9 @@ public class StringHandling {
 			} catch(IllegalFormatException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			}
-			if (parsed.size() != args.length - 1) {
+			if (requiredArgs(parsed) != args.length - 1) {
 				throw new ConfigRuntimeException("The specified format string: \"" + formatString + "\""
-						+ " expects " + parsed.size() + " argument(1), but " + (args.length - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
+						+ " expects " + requiredArgs(parsed) + " argument, but " + (args.length - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
 			}
 
 			List<Construct> flattenedArgs = new ArrayList<Construct>();
@@ -946,7 +943,7 @@ public class StringHandling {
 				}
 			}
 			//Now figure out how to cast things, now that we know our argument numbers will match up
-			for (int i = 0; i < parsed.size(); i++) {
+			for (int i = 0; i < requiredArgs(parsed); i++) {
 				Construct arg = flattenedArgs.get(i);
 				FormatString fs = parsed.get(i);
 				Character c = fs.getExpectedType();
@@ -1132,9 +1129,9 @@ public class StringHandling {
 				//We can check the format string and make sure it doesn't throw an IllegalFormatException.
 				try {
 					List<FormatString> parsed = parse(children.get(0).getData().val());
-					if (parsed.size() != children.size() - 1) {
+					if (requiredArgs(parsed) != children.size() - 1) {
 						throw new ConfigRuntimeException("The specified format string: \"" + children.get(0).getData().val() + "\""
-								+ " expects " + parsed.size() + " argument(1), but " + (children.size() - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
+								+ " expects " + requiredArgs(parsed) + " argument, but " + (children.size() - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
 					}
 					//If the arguments are constant, we can actually check them too
 					for(int i = 1; i < children.size(); i++){
@@ -1197,10 +1194,21 @@ public class StringHandling {
 				if (ref.getClass() == FixedString) {
 					return null;
 				} else if (ref.getClass() == FormatSpecifier) {
+					if(((Boolean)ReflectionUtils.get(FormatSpecifier, ref, "dt"))){
+						return 't';
+					}
 					return ((Character) ReflectionUtils.get(FormatSpecifier, ref, "c"));
 				} else {
 					throw new RuntimeException("Unknown type: " + ref.getClass());
 				}
+			}
+			
+			public int getArgIndex(){
+				return ((Integer)ReflectionUtils.get(FormatSpecifier, ref, "index"));
+			}
+			
+			public boolean isFixed(){
+				return getExpectedType() == '%' || getExpectedType() == 'n';
 			}
 		}
 
@@ -1216,9 +1224,27 @@ public class StringHandling {
 			}
 			return list;
 		}
+		
+		private int requiredArgs(List<FormatString> list){
+			Set<Integer> knownIndexes = new HashSet<Integer>();
+			int count = 0;
+			for(FormatString s : list){
+				if(s.isFixed()){
+					continue;
+				}
+				int index = s.getArgIndex();
+				if(index == 0){
+					count++;
+				} else {
+					knownIndexes.add(index);
+				}
+			}
+			count += knownIndexes.size();
+			return count;
+		}
 
 		public String getName() {
-			return "string_format";
+			return "sprintf";
 		}
 
 		public Integer[] numArgs() {
@@ -1226,7 +1252,12 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {formatString, parameters...} ";
+			return "string {formatString, parameters... | formatString, array(parameters...)} Returns a string formatted to the"
+					+ " given formatString specification, using the parameters passed in. The formatString should be formatted"
+					+ " according to [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
+					+ " with the caveat that the parameter types are automatically cast to the appropriate type, if possible."
+					+ " Calendar/time specifiers, (t and T) expect an integer which represents unix time, but are otherwise"
+					+ " valid. All format specifiers in the documentation are valid.";
 		}
 
 		public CHVersion since() {
@@ -1236,5 +1267,28 @@ public class StringHandling {
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.CONSTANT_OFFLINE, OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage", "sprintf('%d', 1)"),
+				new ExampleScript("Multiple arguments", "sprintf('%d%d', 1, '2')"),
+				new ExampleScript("Multiple arguments in an array", "sprintf('%d%d', array(1, 2))"),
+				new ExampleScript("Compile error, missing parameters", "sprintf('%d')", true),
+				new ExampleScript("Other formatting: float with precision (using integer)", "sprintf('%07.3f', 4)"),
+				new ExampleScript("Other formatting: float with precision (with rounding)", "sprintf('%07.3f', 3.4567)"),
+				new ExampleScript("Other formatting: time", "sprintf('%1$tm %1$te,%1$tY', time())"),
+				new ExampleScript("Literal percent sign", "sprintf('%%')"),
+				new ExampleScript("Hexidecimal formatting", "sprintf('%x', 15)"),
+				new ExampleScript("Other formatting: character", "sprintf('%c', 's')"),
+				new ExampleScript("Other formatting: character (with capitalization)", "sprintf('%C', 's')"),
+				new ExampleScript("Other formatting: scientific notation", "sprintf('%e', '2345')"),
+				new ExampleScript("Other formatting: plain string", "sprintf('%s', 'plain string')"),
+				new ExampleScript("Other formatting: boolean", "sprintf('%b', 1)"),
+				new ExampleScript("Other formatting: boolean (with capitalization)", "sprintf('%B', 0)"),
+				new ExampleScript("Other formatting: hash code", "sprintf('%h', 'will be hashed')"),
+			};
+		}
+		
 	}
 }

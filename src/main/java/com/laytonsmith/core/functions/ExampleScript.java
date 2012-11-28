@@ -61,7 +61,11 @@ public class ExampleScript {
 	 * @param script 
 	 */
 	public ExampleScript(String description, String script) throws ConfigCompileException{
-		this(description, script, null);
+		this(description, script, null, false);
+	}
+	
+	public ExampleScript(String description, String script, boolean intentionalCompileError) throws ConfigCompileException{
+		this(description, script, null, intentionalCompileError);
 	}
 	
 	/**
@@ -72,10 +76,20 @@ public class ExampleScript {
 	 * @param output 
 	 */
 	public ExampleScript(String description, String script, String output) throws ConfigCompileException{
+		this(description, script, output, false);
+	}
+	
+	private ExampleScript(String description, String script, String output, boolean intentionalCompileError) throws ConfigCompileException{
 		this.description = description;		
 		this.originalScript = script;
-		this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples"), true));
-		this.output = output;
+		try{
+			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples"), true));
+			this.output = output;
+		} catch(ConfigCompileException e){
+			if(intentionalCompileError){
+				this.output = "Causes compile error: " + e.getMessage();
+			}
+		}
 		playerOutput = new StringBuilder();
 		
 		fakePlayer = (MCPlayer)Proxy.newProxyInstance(ExampleScript.class.getClassLoader(), new Class[]{MCPlayer.class}, new InvocationHandler() {

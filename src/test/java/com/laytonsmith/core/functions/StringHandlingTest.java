@@ -127,34 +127,38 @@ public class StringHandlingTest {
 	}
 	
 	@Test public void testStringFormat() throws Exception{
+		assertEquals("%", SRun("sprintf('%%')", null));
 		//ultra simple tests
-		assertEquals("1", SRun("string_format('%d', 1)", null));
-		assertEquals("12", SRun("string_format('%d%d', 1, 2)", null));
+		assertEquals("1", SRun("sprintf('%d', 1)", null));
+		assertEquals("12", SRun("sprintf('%d%d', 1, 2)", null));
 		//simple test with array
-		assertEquals("12", SRun("string_format('%d%d', array(1, 2))", null));
+		assertEquals("12", SRun("sprintf('%d%d', array(1, 2))", null));
 		try{
-			SRun("string_format('%d')", null);
-			fail("Expected string_format('%d') to throw a compile exception");
+			SRun("sprintf('%d')", null);
+			fail("Expected sprintf('%d') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 		
 		try{
-			SRun("string_format('%d', 1, 1)", null);
-			fail("Expected string_format('%d') to throw a compile exception");
+			SRun("sprintf('%d', 1, 1)", null);
+			fail("Expected sprintf('%d') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 		
 		try{
-			SRun("string_format('%c', 'toobig')", null);
-			fail("Expected string_format('%c', 'toobig') to throw a compile exception");
+			SRun("sprintf('%c', 'toobig')", null);
+			fail("Expected sprintf('%c', 'toobig') to throw a compile exception");
 		} catch(ConfigCompileException e){
 			//pass
 		}
 		
 		//A few advanced usages
-		assertEquals("004.000", SRun("string_format('%07.3f', 4)", null));
+		assertEquals("004.000", SRun("sprintf('%07.3f', 4)", null));
+		
+		long s = System.currentTimeMillis();
+		assertEquals(String.format("%1$tm %1$te,%1$tY", s), SRun("sprintf('%1$tm %1$te,%1$tY', " + Long.toString(s) + ")", null));
 		
 	}
 }
