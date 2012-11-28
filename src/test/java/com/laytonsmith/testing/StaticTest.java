@@ -459,6 +459,7 @@ public class StaticTest {
     }
     
 	public static String SRun(String script, MCCommandSender player, Environment env) throws ConfigCompileException{
+		InstallFakeServerFrontend();
         final StringBuffer b = new StringBuffer();
         Run(script, player, new MethodScriptComplete() {
 
