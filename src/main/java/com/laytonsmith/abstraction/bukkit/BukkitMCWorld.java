@@ -136,8 +136,8 @@ public class BukkitMCWorld implements MCWorld {
         return new BukkitMCBlock(w.getHighestBlockAt(x, z));
      }
 
-    public void explosion(double x, double y, double z, float size) {
-        w.createExplosion(new Location(w, x,y,z), size);
+    public void explosion(double x, double y, double z, float size, boolean safe) {
+        w.createExplosion(x, y, z, size, !safe, !safe);
     }
 
     public void setSpawnLocation(int x, int y, int z) {

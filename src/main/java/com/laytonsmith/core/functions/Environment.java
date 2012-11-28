@@ -667,12 +667,14 @@ public class Environment {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{ 1,2};
+            return new Integer[]{1, 2, 3};
         }
 
         public String docs() {
-            return "void {Locationarray, [size]} Creates an explosion with the given size at the given location."
-                    + "Size defaults to size of a creeper (3).";
+            return "void {Locationarray, [size], [safe]} Creates an explosion with the given size at the given location."
+                    + "Size defaults to size of a creeper (3), and null uses the default. If safe is true, (defaults to false)"
+					+ " the explosion"
+					+ " won't hurt the surrounding blocks.";
         }
 
         public ExceptionType[] thrown() {
@@ -693,10 +695,15 @@ public class Environment {
             float size = 3;
             MCWorld w = null;
             MCPlayer m = null;
+			boolean safe = false;
 
-            if(args.length == 2 && args[1] instanceof CInt) {
-                CInt temp = (CInt) args[1];
-                size = temp.getInt();
+			if(args.length >= 3){
+				safe = Static.getBoolean(args[2]);
+			}
+            if(args.length >= 2) {
+				if(!(args[1] instanceof CNull)){
+					size = Static.getInt(args[1]);
+				}
             }
 
             if (size > 100) {
@@ -724,7 +731,7 @@ public class Environment {
                 w = m.getWorld();
             }
 
-            w.explosion(x, y, z, size);
+            w.explosion(x, y, z, size, safe);
             return new CVoid(t);
         }
 

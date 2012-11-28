@@ -50,7 +50,7 @@ public interface MCWorld extends AbstractionObject{
 
     public MCBlock getHighestBlockAt(int x, int z);
 
-    public void explosion(double x, double y, double z, float size);
+    public void explosion(double x, double y, double z, float size, boolean safe);
 	
 	/**
 	 * This method performs some check on the world to ensure it exists.
