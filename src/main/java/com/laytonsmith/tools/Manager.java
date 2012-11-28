@@ -65,7 +65,7 @@ public class Manager {
 		pl("Starting the Data Manager...");
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null)), env, null, null);
+			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null, true)), env, null, null);
 		} catch (ConfigCompileException ex) {
 		}
 		pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
@@ -386,7 +386,7 @@ public class Manager {
 	public static boolean doAddEdit(String key, String valueScript) {
 		try {
 			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-			Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null)), env, null, null);
+			Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null, true)), env, null, null);
 			String value = Construct.json_encode(c, Target.UNKNOWN);
 			pl(CYAN + "Adding: " + WHITE + value);
 			String [] k = key.split("\\.");

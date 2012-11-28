@@ -72,7 +72,7 @@ public class DataHandlingTest {
                 + "     array_push(@array, @i)\n"
                 + " )\n"
                 + " msg(@array)\n";
-        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
 
     }
 
@@ -250,7 +250,7 @@ public class DataHandlingTest {
         //Create the test file
         File test = new File("unit_test_inc.ms");
         FileUtility.write("msg('hello')", test);
-        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("./script.txt"))), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("./script.txt"), true)), env, null, null);
         verify(fakePlayer).sendMessage("hello");
         //delete the test file
         test.delete();

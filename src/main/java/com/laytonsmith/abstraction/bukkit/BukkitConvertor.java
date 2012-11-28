@@ -262,4 +262,8 @@ public class BukkitConvertor extends AbstractConvertor {
 		return (T)Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable);
 	}
 
+	public MCWorldCreator getWorldCreator(String worldName) {
+		return new BukkitMCWorldCreator(worldName);
+	}
+
 }

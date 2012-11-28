@@ -465,7 +465,7 @@ public class Script {
             if(i == 0 && t.type == TType.NEWLINE){
                 continue;
             }
-            if(t.type.isSymbol() && left.size() - 1 >= i && left.get(i + 1).type != TType.WHITESPACE){
+            if(t.type.isSymbol() && left.size() - 1 > i && left.get(i + 1).type != TType.WHITESPACE){
                 StringBuilder b = new StringBuilder();
                 b.append(t.value);
                 i++;

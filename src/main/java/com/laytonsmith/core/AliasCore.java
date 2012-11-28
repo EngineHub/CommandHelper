@@ -52,16 +52,15 @@ public class AliasCore {
 	public static CommandHelperPlugin parent;
 
 	/**
-	 * This constructor accepts the configuration settings for the plugin,
-	 * and ensures that the manager uses these settings.
+	 * This constructor accepts the configuration settings for the plugin, and
+	 * ensures that the manager uses these settings.
 	 *
-	 * @param allowCustomAliases Whether or not to allow users to add their
-	 * own personal aliases
-	 * @param maxCustomAliases How many aliases a player is allowed to have.
-	 * -1 is unlimited.
-	 * @param maxCommands How many commands an alias may contain. Since
-	 * aliases can be used like a macro, this can help prevent command
-	 * spamming.
+	 * @param allowCustomAliases Whether or not to allow users to add their own
+	 * personal aliases
+	 * @param maxCustomAliases How many aliases a player is allowed to have. -1
+	 * is unlimited.
+	 * @param maxCommands How many commands an alias may contain. Since aliases
+	 * can be used like a macro, this can help prevent command spamming.
 	 */
 	public AliasCore(File aliasConfig, File auxAliases, File prefFile, File mainFile, PermissionsResolver perms, CommandHelperPlugin parent) {
 		this.aliasConfig = aliasConfig;
@@ -77,18 +76,17 @@ public class AliasCore {
 	}
 
 	/**
-	 * This is the workhorse function. It takes a given command, then
-	 * converts it into the actual command(s). If the command maps to a
-	 * defined alias, it will run the specified alias. It will search
-	 * through the global list of aliases, as well as the aliases defined
-	 * for that specific player. This function doesn't handle the /alias
-	 * command however.
+	 * This is the workhorse function. It takes a given command, then converts
+	 * it into the actual command(s). If the command maps to a defined alias, it
+	 * will run the specified alias. It will search through the global list of
+	 * aliases, as well as the aliases defined for that specific player. This
+	 * function doesn't handle the /alias command however.
 	 *
 	 * @param command
 	 * @return
 	 */
 	public boolean alias(String command, final MCCommandSender player, List<Script> playerCommands) {
-		
+
 		GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver, parent.chDirectory);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(player);
@@ -220,19 +218,19 @@ public class AliasCore {
 		} catch (Throwable e) {
 			//Not only did an error happen, an error happened in our error handler
 			throw new InternalException(TermColors.RED + "An unexpected error occured in the CommandHelper plugin. "
-				+ "Further, this is likely an error with the error handler, so it may be caused by your script, "
-				+ "however, there is no more information at this point. Check your script, but also report this "
-				+ "as a bug in CommandHelper. Also, it's possible that some commands will no longer work. As a temporary "
-				+ "workaround, restart the server, and avoid doing whatever it is you did to make this happen.\nThe error is as follows: "
-				+ e.toString() + "\n" + TermColors.reset() + "Stack Trace:\n" + StringUtil.joinString(Arrays.asList(e.getStackTrace()), "\n", 0));
+					+ "Further, this is likely an error with the error handler, so it may be caused by your script, "
+					+ "however, there is no more information at this point. Check your script, but also report this "
+					+ "as a bug in CommandHelper. Also, it's possible that some commands will no longer work. As a temporary "
+					+ "workaround, restart the server, and avoid doing whatever it is you did to make this happen.\nThe error is as follows: "
+					+ e.toString() + "\n" + TermColors.reset() + "Stack Trace:\n" + StringUtil.joinString(Arrays.asList(e.getStackTrace()), "\n", 0));
 		}
 		return match;
 	}
 
 	/**
 	 * Loads the global alias file in from the file system. If a player is
-	 * running the command, send a reference to them, and they will see
-	 * compile errors, otherwise, null.
+	 * running the command, send a reference to them, and they will see compile
+	 * errors, otherwise, null.
 	 */
 	public final void reload(MCPlayer player) {
 		try {
@@ -242,9 +240,9 @@ public class AliasCore {
 			parent.profiler = new Profiler(new File(parent.chDirectory, "profiler.config"));
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(parent.chDirectory);
-			parent.persistanceNetwork = new PersistanceNetwork(new File(parent.chDirectory, "persistance.config"), 
+			parent.persistanceNetwork = new PersistanceNetwork(new File(parent.chDirectory, "persistance.config"),
 					new URI("sqlite:/" + new File(parent.chDirectory, "persistance.db").getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
-			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver, 
+			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver,
 					parent.chDirectory);
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 			cEnv.SetCommandSender(player);
@@ -307,7 +305,7 @@ public class AliasCore {
 
 		} catch (IOException ex) {
 			logger.log(Level.SEVERE, "[CommandHelper]: Path to config file is not correct/accessable. Please"
-				+ " check the location and try loading the plugin again.");
+					+ " check the location and try loading the plugin again.");
 		} catch (Throwable t) {
 			t.printStackTrace();
 		}
@@ -315,14 +313,14 @@ public class AliasCore {
 		if (!Economy.setupEconomy()) {
 			if (Prefs.DebugMode()) {
 				logger.log(Level.WARNING, "[CommandHelper]: Economy could not be initialized. No further"
-					+ " errors will occur, unless you try to use an Economy function.");
+						+ " errors will occur, unless you try to use an Economy function.");
 			}
 		}
 	}
 
 	/**
-	 * Returns the contents of a file as a string. Accepts the file location
-	 * as a string.
+	 * Returns the contents of a file as a string. Accepts the file location as
+	 * a string.
 	 *
 	 * @param file_location
 	 * @return the contents of the file as a string
@@ -344,17 +342,16 @@ public class AliasCore {
 	 *
 	 * @param file_location the location of the file on the disk
 	 * @param contents the string to be written to the file
-	 * @param mode the mode in which to write the file: <br /> <ul> <li>"o"
-	 * - overwrite the file if it exists, without asking</li> <li>"a" -
-	 * append to the file if it exists, without asking</li> <li>"c" - cancel
-	 * the operation if the file exists, without asking</li> </ul>
+	 * @param mode the mode in which to write the file: <br /> <ul> <li>"o" -
+	 * overwrite the file if it exists, without asking</li> <li>"a" - append to
+	 * the file if it exists, without asking</li> <li>"c" - cancel the operation
+	 * if the file exists, without asking</li> </ul>
 	 * @return true if the file was written, false if it wasn't. Throws an
-	 * exception if the file could not be created, or if the mode is not
-	 * valid.
+	 * exception if the file could not be created, or if the mode is not valid.
 	 * @throws Exception if the file could not be created
 	 */
 	public static boolean file_put_contents(File file_location, String contents, String mode)
-		throws Exception {
+			throws Exception {
 		BufferedWriter out = null;
 		File f = file_location;
 		if (f.exists()) {
@@ -473,14 +470,20 @@ public class AliasCore {
 			for (FileInfo fi : msa) {
 				List<Script> tempScripts;
 				try {
-					tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file));
+					tempScripts = MethodScriptCompiler.preprocess(MethodScriptCompiler.lex(fi.contents, fi.file, false));
 					for (Script s : tempScripts) {
 						try {
-							s.compile();
-							s.checkAmbiguous((ArrayList<Script>) scripts);
-							scripts.add(s);
-						} catch (ConfigCompileException e) {
-							ConfigRuntimeException.React(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+							try {
+								s.compile();
+								s.checkAmbiguous((ArrayList<Script>) scripts);
+								scripts.add(s);
+							} catch (ConfigCompileException e) {
+								ConfigRuntimeException.React(e, "Compile error in script. Compilation will attempt to continue, however.", player);
+							}
+						} catch (RuntimeException ee) {
+							throw new RuntimeException("While processing a script, "
+									+ "(" + fi.file() + ") an unexpected exception occurred. (No further information"
+									+ " is available, unfortunately.)", ee);
 						}
 					}
 				} catch (ConfigCompileException e) {
@@ -496,12 +499,12 @@ public class AliasCore {
 			}
 			if (errors > 0) {
 				System.out.println(TermColors.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + TermColors.RED + "with " + errors + " aliases with compile errors." + TermColors.reset());
-				if (player != null){
+				if (player != null) {
 					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: " + (scripts.size() - errors) + " alias(es) defined, " + MCChatColor.RED + "with " + errors + " aliases with compile errors.");
 				}
 			} else {
 				System.out.println(TermColors.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined." + TermColors.reset());
-				if (player != null){
+				if (player != null) {
 					player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: " + scripts.size() + " alias(es) defined.");
 				}
 			}
@@ -512,7 +515,7 @@ public class AliasCore {
 				boolean exception = false;
 				try {
 					MethodScriptCompiler.registerAutoIncludes(env, null);
-					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file)), env, null, null);
+					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
 				} catch (ConfigCompileException e) {
 					exception = true;
 					ConfigRuntimeException.React(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);
@@ -528,7 +531,7 @@ public class AliasCore {
 				}
 			}
 			logger.log(Level.INFO, TermColors.YELLOW + "[CommandHelper]: MethodScript files processed" + TermColors.reset());
-			if (player != null){
+			if (player != null) {
 				player.sendMessage(MCChatColor.YELLOW + "[CommandHelper]: MethodScript files processed");
 			}
 		}

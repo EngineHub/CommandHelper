@@ -165,7 +165,7 @@ public class Interpreter {
 
 	public static void execute(String script, List<String> args) throws ConfigCompileException, IOException {
 		ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
-		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"));
+		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
 		ParseTree tree = MethodScriptCompiler.compile(stream);
 		compile.stop();
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
