@@ -2,6 +2,7 @@ package com.laytonsmith.PureUtilities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -13,51 +14,353 @@ import java.util.regex.Pattern;
 public final class StringUtils {
 
 	private StringUtils() {
+		//
+	}
+	
+	/**
+	 * Joins a map together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * 
+	 * @param map The map to concatenate
+	 * @param entryGlue The glue to use between the key and value of each pair in the map
+	 * @param elementGlue The glue to use between each key-value element pairs in the map
+	 * @return The concatenated string
+	 */
+	public static String Join(Map map, String entryGlue, String elementGlue){
+		return Join(map, entryGlue, elementGlue, null, null, null);
+	}
+	
+	/**
+	 * Joins a map together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * 
+	 * @param map The map to concatenate
+	 * @param entryGlue The glue to use between the key and value of each pair in the map
+	 * @param elementGlue The glue to use between each key-value element pairs in the map
+	 * @param lastElementGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the map, then this glue is used instead. If it is null, then lastElementGlue
+	 * is used instead.
+	 * @param empty If the map is completely empty, this string is simply returned. If null, an empty string is used.
+	 * @return The concatenated string
+	 */
+	public static String Join(Map map, String entryGlue, String elementGlue, String lastElementGlue){
+		return Join(map, entryGlue, elementGlue, lastElementGlue, null, null);
+	}
+	
+	/**
+	 * Joins a map together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * 
+	 * @param map The map to concatenate
+	 * @param entryGlue The glue to use between the key and value of each pair in the map
+	 * @param elementGlue The glue to use between each key-value element pairs in the map
+	 * @param lastElementGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the map, then this glue is used instead. If it is null, then lastElementGlue
+	 * is used instead.
+	 * @return The concatenated string
+	 */
+	public static String Join(Map map, String entryGlue, String elementGlue, String lastElementGlue, String elementGlueForTwoItems){
+		return Join(map, entryGlue, elementGlue, lastElementGlue, elementGlueForTwoItems, null);
+	}
+	
+	/**
+	 * Joins a map together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * 
+	 * @param map The map to concatenate
+	 * @param entryGlue The glue to use between the key and value of each pair in the map
+	 * @param elementGlue The glue to use between each key-value element pairs in the map
+	 * @param lastElementGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the map, then this glue is used instead. If it is null, then lastElementGlue
+	 * is used instead.
+	 * @param empty If the map is completely empty, this string is simply returned. If null, an empty string is used.
+	 * @return The concatenated string
+	 */
+	public static String Join(Map map, String entryGlue, String elementGlue, String lastElementGlue, String elementGlueForTwoItems, String empty){
+		//Just create a list of glued together entries, then send it to the other Join method
+		List<String> list = new ArrayList<String>();
+		for(Object key : map.keySet()){
+			StringBuilder b = new StringBuilder();
+			b.append(key).append(entryGlue).append(map.get(key));
+			list.add(b.toString());
+		}
+		return Join(list, elementGlue, lastElementGlue, elementGlueForTwoItems, empty);
 	}
 
-	public static String Join(Set set, String glue) {
-		StringBuilder b = new StringBuilder();
-		boolean first = true;
-		for (Object o : set) {
-			if (!first) {
-				b.append(glue);
-			}
-			first = false;
-			b.append(o);
+	/**
+	 * Joins a set together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue.
+	 * @param list The set to concatenate
+	 * @param glue The glue to use
+	 * @return The concatenated string
+	 */
+	public static String Join(Set set, String glue){
+		return Join(set, glue, null, null, null);
+	}
+	
+	/**
+	 * Joins a set together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for sets that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The set to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @return The concatenated string
+	 */
+	public static String Join(Set set, String glue, String lastGlue){
+		return Join(set, glue, lastGlue, null, null);
+	}
+	
+	/**
+	 * Joins a set together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for sets that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The set to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the set, then this glue is used instead. If it is null, then lastGlue
+	 * is used instead.
+	 * @return The concatenated string
+	 */
+	public static String Join(Set set, String glue, String lastGlue, String glueForTwoItems){
+		return Join(set, glue, lastGlue, glueForTwoItems, null);
+	}
+	
+	/**
+	 * Joins a set together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for sets that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The set to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the set, then this glue is used instead. If it is null, then lastGlue
+	 * is used instead.
+	 * @param empty If the set is completely empty, this string is simply returned. If null, an empty string is used.
+	 * @return The concatenated string
+	 */
+	public static String Join(Set set, String glue, String lastGlue, String glueForTwoItems, String empty) {
+		List list = new ArrayList(set);
+		if(lastGlue == null){
+			lastGlue = glue;
 		}
-		return b.toString();
+		if(glueForTwoItems == null){
+			glueForTwoItems = lastGlue;
+		}
+		if(list.isEmpty()){
+			return empty==null?"":empty;
+		} else if(list.size() == 2){
+			StringBuilder b = new StringBuilder();
+			return b.append(list.get(0)).append(glueForTwoItems).append(list.get(1)).toString();
+		} else {
+			StringBuilder b = new StringBuilder();
+			for (int i = 0; i < list.size(); i++) {
+				Object o = list.get(i);
+				if (i != 0) {
+					if(i == list.size() - 1){
+						b.append(lastGlue);
+					} else {
+						b.append(glue);
+					}
+				}
+				b.append(o);
+			}
+			return b.toString();
+		}
+	}
+	
+	/**
+	 * Joins an array together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue.
+	 * @param list The array to concatenate
+	 * @param glue The glue to use
+	 * @return The concatenated string
+	 */
+	public static String Join(Object[] list, String glue){
+		return Join(list, glue, null, null, null);
+	}
+	
+	/**
+	 * Joins an array together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for lists that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The array to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @return The concatenated string
+	 */
+	public static String Join(Object[] list, String glue, String lastGlue){
+		return Join(list, glue, lastGlue, null, null);
+	}
+	
+	/**
+	 * Joins an array together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for lists that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The array to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the array, then this glue is used instead. If it is null, then lastGlue
+	 * is used instead.
+	 * @return The concatenated string
+	 */
+	public static String Join(Object[] list, String glue, String lastGlue, String glueForTwoItems){
+		return Join(list, glue, lastGlue, glueForTwoItems, null);
 	}
 
-	public static String Join(Object[] list, String glue) {
-		StringBuilder b = new StringBuilder();
-		boolean first = true;
-		for (Object o : list) {
-			if (!first) {
-				b.append(glue);
-			}
-			first = false;
-			b.append(o);
+	/**
+	 * Joins an array together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for lists that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The array to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the array, then this glue is used instead. If it is null, then lastGlue
+	 * is used instead.
+	 * @param empty If the array is completely empty, this string is simply returned. If null, an empty string is used.
+	 * @return The concatenated string
+	 */
+	public static String Join(Object[] list, String glue, String lastGlue, String glueForTwoItems, String empty) {
+		if(lastGlue == null){
+			lastGlue = glue;
 		}
-		return b.toString();
+		if(glueForTwoItems == null){
+			glueForTwoItems = lastGlue;
+		}
+		if(list.length == 0){
+			return empty==null?"":empty;
+		} else if(list.length == 2){
+			StringBuilder b = new StringBuilder();
+			return b.append(list[0]).append(glueForTwoItems).append(list[1]).toString();
+		} else {
+			StringBuilder b = new StringBuilder();
+			for (int i = 0; i < list.length; i++) {
+				Object o = list[i];
+				if (i != 0) {
+					if(i == list.length - 1){
+						b.append(lastGlue);
+					} else {
+						b.append(glue);
+					}
+				}
+				b.append(o);
+			}
+			return b.toString();
+		}
+	}
+	
+	/**
+	 * Joins a list together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue.
+	 * @param list The list to concatenate
+	 * @param glue The glue to use
+	 * @return The concatenated string
+	 */
+	public static String Join(List list, String glue){
+		return Join(list, glue, null, null, null);
+	}
+	
+	/**
+	 * Joins a list together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for lists that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The list to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @return The concatenated string
+	 */
+	public static String Join(List list, String glue, String lastGlue){
+		return Join(list, glue, lastGlue, null, null);
+	}
+	
+	/**
+	 * Joins a list together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for lists that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The list to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the list, then this glue is used instead. If it is null, then lastGlue
+	 * is used instead.
+	 * @return The concatenated string
+	 */
+	public static String Join(List list, String glue, String lastGlue, String glueForTwoItems){
+		return Join(list, glue, lastGlue, glueForTwoItems, null);
 	}
 
-	public static String Join(List list, String glue) {
-		StringBuilder b = new StringBuilder();
-		boolean first = true;
-		for (Object o : list) {
-			if (!first) {
-				b.append(glue);
-			}
-			first = false;
-			b.append(o);
+	/**
+	 * Joins a list together (using StringBuilder's {@see StringBuilder#append(Object)} method to "toString"
+	 * the Object)
+	 * using the specified string for glue. If lastGlue is null, it is the same as glue, but
+	 * otherwise it is used to glue just the last two items together, which is useful for lists that are being read
+	 * by a human, to have a proper conjunction at the end.
+	 * @param list The list to concatenate
+	 * @param glue The glue to use
+	 * @param lastGlue The glue for the last two elements
+	 * @param glueForTwoItems If only two items are in the list, then this glue is used instead. If it is null, then lastGlue
+	 * is used instead.
+	 * @param empty If the list is completely empty, this string is simply returned. If null, an empty string is used.
+	 * @return The concatenated string
+	 */
+	public static String Join(List list, String glue, String lastGlue, String glueForTwoItems, String empty) {
+		if(lastGlue == null){
+			lastGlue = glue;
 		}
-		return b.toString();
+		if(glueForTwoItems == null){
+			glueForTwoItems = lastGlue;
+		}
+		if(list.isEmpty()){
+			return empty==null?"":empty;
+		} else if(list.size() == 2){
+			StringBuilder b = new StringBuilder();
+			return b.append(list.get(0)).append(glueForTwoItems).append(list.get(1)).toString();
+		} else {
+			StringBuilder b = new StringBuilder();
+			for (int i = 0; i < list.size(); i++) {
+				Object o = list.get(i);
+				if (i != 0) {
+					if(i == list.size() - 1){
+						b.append(lastGlue);
+					} else {
+						b.append(glue);
+					}
+				}
+				b.append(o);
+			}
+			return b.toString();
+		}
 	}
 
 	private static int minimum(int a, int b, int c) {
 		return Math.min(Math.min(a, b), c);
 	}
 
+	/**
+	 * Returns the levenshtein distance of two character sequences. For instance, 
+	 * "123" and "133" would have a string distance of 1, while "123" and "123" would be 0,
+	 * since they are the same string.
+	 * @param str1
+	 * @param str2
+	 * @return 
+	 */
 	public static int LevenshteinDistance(CharSequence str1,
 			CharSequence str2) {
 		int[][] distance = new int[str1.length() + 1][str2.length() + 1];

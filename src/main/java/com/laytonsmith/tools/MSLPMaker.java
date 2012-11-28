@@ -9,6 +9,7 @@ import com.laytonsmith.core.Script;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 /**
@@ -17,7 +18,7 @@ import java.util.List;
  */
 public class MSLPMaker {
     
-    public static void start(String path){
+    public static void start(String path) throws IOException{
         File start = new File(path);
         if(!start.exists()){
             System.err.println("The specified file does not exist!");

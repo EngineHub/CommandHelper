@@ -44,10 +44,11 @@ public class XMLDocument {
 	public XMLDocument(){
 		try {
 			DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+			dbf.setNamespaceAware(false);
 			docBuilder = dbf.newDocumentBuilder();
 			doc = docBuilder.newDocument();
 			XPathFactory xpf = XPathFactory.newInstance();
-			xpath = xpf.newXPath();			
+			xpath = xpf.newXPath();
 		} catch (ParserConfigurationException ex) {
 			throw new RuntimeException(ex);
 		}
@@ -310,6 +311,24 @@ public class XMLDocument {
 	public int countChildren(String xpath) throws XPathExpressionException{
 		Element e = getElement(xpath);
 		return e.getChildNodes().getLength();
+	}
+	
+	/**
+	 * Counts the number of elements that exist at this level. For instance, if
+	 * the xml were:
+	 * <pre>
+	 * &lt;xmlroot&gt;
+	 *	&lt;elem /&gt;
+	 *	&lt;elem /&gt;
+	 * &lt;/xmlroot&gt;
+	 * </pre>
+	 * And the xpath were <code>/xmlroot/elem</code>, then this would return 2.
+	 * @param xpath
+	 * @return
+	 * @throws XPathExpressionException 
+	 */
+	public int countNodes(String xpath) throws XPathExpressionException {
+		return ((Double)(getXPath("count(" + xpath + ")").evaluate(doc, XPathConstants.NUMBER))).intValue();
 	}
 	
 	/**

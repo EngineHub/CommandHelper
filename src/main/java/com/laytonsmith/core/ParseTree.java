@@ -81,6 +81,7 @@ public class ParseTree implements Cloneable{
 	private boolean isOptimized = false;
 	private final FileOptions fileOptions;
 	private List<ParseTree> children = null;
+	private boolean hasBeenMadeStatic = false;
 	
 	/**
 	 * Creates a new empty tree node
@@ -113,6 +114,14 @@ public class ParseTree implements Cloneable{
 	
 	public boolean isOptimized(){
 		return isOptimized;
+	}
+	
+	public boolean hasBeenMadeStatic() {
+		return hasBeenMadeStatic;
+	}
+	
+	public void hasBeenMadeStatic(boolean state){
+		hasBeenMadeStatic = state;
 	}
 	
 	/**

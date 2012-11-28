@@ -1348,6 +1348,11 @@ public final class MethodScriptCompiler {
 				tree.setChildren(tempNode.getChildren());
 				optimize(tree, procs);
 				tree.setOptimized(true);
+				//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
+				//array, so if they have reversed this, make note of that now
+				if(tempNode.hasBeenMadeStatic()){
+					fullyStatic = true;
+				}
 			} //else it wasn't an optimization, but a compile check
 		}
 		if (!fullyStatic) {

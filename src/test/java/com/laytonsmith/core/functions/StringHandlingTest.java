@@ -2,16 +2,15 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;
-import static com.laytonsmith.testing.StaticTest.Run;
 import static com.laytonsmith.testing.StaticTest.assertCEquals;
 import org.junit.*;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 
 /**
  *
@@ -125,5 +124,37 @@ public class StringHandlingTest {
 	
 	@Test public void testMulticharacterSplit() throws Exception{
 		assertEquals("{aa, aa, aa}", SRun("split('ab', 'aaabaaabaa')", null));
+	}
+	
+	@Test public void testStringFormat() throws Exception{
+		//ultra simple tests
+		assertEquals("1", SRun("string_format('%d', 1)", null));
+		assertEquals("12", SRun("string_format('%d%d', 1, 2)", null));
+		//simple test with array
+		assertEquals("12", SRun("string_format('%d%d', array(1, 2))", null));
+		try{
+			SRun("string_format('%d')", null);
+			fail("Expected string_format('%d') to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+		
+		try{
+			SRun("string_format('%d', 1, 1)", null);
+			fail("Expected string_format('%d') to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+		
+		try{
+			SRun("string_format('%c', 'toobig')", null);
+			fail("Expected string_format('%c', 'toobig') to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+		
+		//A few advanced usages
+		assertEquals("004.000", SRun("string_format('%07.3f', 4)", null));
+		
 	}
 }

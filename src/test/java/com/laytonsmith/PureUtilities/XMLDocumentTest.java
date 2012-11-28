@@ -150,5 +150,14 @@ public class XMLDocumentTest {
 				+ "    <node>value</node>\n"
 				+ "</root>\n", doc.getXML(true));
 	}
+	
+	@Test
+	public void testWithNamespace() throws XPathExpressionException, SAXException{
+		doc = new XMLDocument("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n"
+				+ "<root>\n"
+				+ "    <ns:node>value</ns:node>\n"
+				+ "</root>\n");
+		assertEquals("value", doc.getNode("/root/node"));
+	}
 
 }
