@@ -53,7 +53,7 @@ public final class ClassDiscovery {
      */
     private static Map<String, Class[]> classCache = new HashMap<String, Class[]>();
     
-    private static List<String> additionalURLs = new ArrayList<String>();
+    private static Set<String> additionalURLs = new HashSet<String>();
 
     public static Class[] GetClassesWithinPackageHierarchy(){
         List<Class> classes = new ArrayList<Class>();

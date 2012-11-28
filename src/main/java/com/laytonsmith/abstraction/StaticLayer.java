@@ -23,16 +23,8 @@ public final class StaticLayer {
     private static void InitConvertor(){
         Class[] classes = ClassDiscovery.GetClassesWithAnnotation(convert.class);
         for(Class c : classes){
-            Class[] implemented = c.getInterfaces();
-            boolean doesImplement = false;
-            for(Class inter : implemented){
-                if(inter.equals(Convertor.class)){                    
-                    doesImplement = true;         
-                    break;
-                }
-            }
-            if(!doesImplement){
-                System.out.println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
+            if(!Convertor.class.isAssignableFrom(c)){
+                System.err.println("The Convertor " + c.getSimpleName() + " doesn't implement Convertor!");
             }
             convert convert = (convert)c.getAnnotation(convert.class);
             if(convert.type() == Implementation.GetServerType()){
@@ -45,12 +37,12 @@ public final class StaticLayer {
                     convertor = (Convertor) c.newInstance();                    
                     //At this point we are all set
                 } catch(Exception e){
-                    System.out.println("Tried to instantiate the Convertor, but couldn't!");
+                    System.err.println("Tried to instantiate the Convertor, but couldn't!");
                 }
             }
         }
         if(convertor == null){
-            System.out.println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
+            System.err.println("Could not find a suitable convertor! You will experience serious issues with this plugin.");
         }
     }
 

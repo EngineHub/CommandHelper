@@ -433,6 +433,7 @@ public class StaticTest {
     }
     
     public static void Run(String script, MCCommandSender player, MethodScriptComplete done, Environment env) throws ConfigCompileException{
+		InstallFakeServerFrontend();
 		if(env == null){
 			env = StaticTest.env;
 		}
@@ -525,7 +526,8 @@ public class StaticTest {
     public static void InstallFakeServerFrontend(){
         if(frontendInstalled){
             return;
-        }                
+        }
+		ClassDiscovery.InstallDiscoveryLocation(StaticTest.class.getProtectionDomain().getCodeSource().getLocation().toString());
 		Implementation.setServerType(Implementation.Type.TEST);
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();
