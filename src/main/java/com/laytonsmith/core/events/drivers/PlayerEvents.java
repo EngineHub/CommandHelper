@@ -4,6 +4,7 @@ package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.PureUtilities.Geometry;
 import com.laytonsmith.PureUtilities.Geometry.Point3D;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCAction;
 import com.laytonsmith.abstraction.*;
@@ -325,8 +326,7 @@ public class PlayerEvents {
                     + "block: The id of the block they clicked, or 0 if they clicked the air. If they clicked the air, "
                     + " neither facing or location will be present. |"
                     + "player: The player associated with this event |"
-                    + "facing: The (lowercase) face of the block they clicked. See <<jd:[bukkit]org.bukkit.block.BlockFace>> for"
-                    + " the possible values |"
+                    + "facing: The (lowercase) face of the block they clicked. (One of " + StringUtils.Join(MCBlockFace.values(), ", ", ", or ") + ") |"
                     + "location: The (x, y, z, world) location of the block they clicked}"
                     + "{}"
                     + "{player|action|item|location|facing}";
@@ -400,7 +400,7 @@ public class PlayerEvents {
             MCAction a = MCAction.valueOf(manual.get("action").val().toUpperCase());
             MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item").val(), 1, Target.UNKNOWN);
             MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, Target.UNKNOWN).getBlock();
-            MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing").val());
+            MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing").val().toUpperCase());
             MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);            
             return e;
         }
