@@ -5,6 +5,7 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
+import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
@@ -262,8 +263,14 @@ public class BukkitConvertor extends AbstractConvertor {
 		return (T)Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, callable);
 	}
 
+	@Override
 	public MCWorldCreator getWorldCreator(String worldName) {
 		return new BukkitMCWorldCreator(worldName);
+	}
+
+	@Override
+	public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
+		return new BukkitMCNote(octave, tone, sharp);
 	}
 
 }

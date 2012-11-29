@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.core.constructs.Construct;
 import java.net.InetSocketAddress;
 
@@ -88,4 +89,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	 * @return 
 	 */
 	public MCLocation asyncGetLocation();
+	
+	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
 }

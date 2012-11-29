@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
+import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -641,6 +642,10 @@ public class StaticTest {
 		}
 
 		public MCInventory GetLocationInventory(MCLocation location) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
         

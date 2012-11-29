@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.concurrent.Callable;
 
@@ -108,5 +109,14 @@ public interface Convertor {
 	 * @return 
 	 */
 	public MCWorldCreator getWorldCreator(String worldName);
+
+	/**
+	 * Gets a note object, which can be used to play a sound
+	 * @param octave May be 0-2
+	 * @param tone
+	 * @param sharp If the note should be a sharp (only applies to some tones)
+	 * @return 
+	 */
+	public MCNote GetNote(int octave, MCTone tone, boolean sharp);
     
 }

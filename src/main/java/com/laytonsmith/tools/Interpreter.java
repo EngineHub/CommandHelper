@@ -11,8 +11,10 @@ import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.CHLog;
@@ -395,6 +397,10 @@ public class Interpreter {
 		}
 
 		public MCInventory GetLocationInventory(MCLocation location) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 		

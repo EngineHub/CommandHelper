@@ -2,14 +2,19 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
+import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
@@ -674,7 +679,8 @@ public class Environment {
             return "void {Locationarray, [size], [safe]} Creates an explosion with the given size at the given location."
                     + "Size defaults to size of a creeper (3), and null uses the default. If safe is true, (defaults to false)"
 					+ " the explosion"
-					+ " won't hurt the surrounding blocks.";
+					+ " won't hurt the surrounding blocks. If size is 0, and safe is true, you will still see the animation"
+					+ " and hear the sound, but players won't be hurt, and neither will the blocks.";
         }
 
         public ExceptionType[] thrown() {
@@ -739,4 +745,102 @@ public class Environment {
             return false;
         }
     }
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class play_note extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCInstrument i = null;
+			MCNote n = null;
+			MCLocation l = null;
+			int instrumentOffset = 0;
+			int noteOffset = 0;
+			if(args.length == 2){
+				instrumentOffset = 0;
+				noteOffset = 1;
+				l = p.getLocation();
+			} else if(args.length == 4){
+				p = Static.GetPlayer(args[0]);
+				instrumentOffset = 1;
+				noteOffset = 2;
+				l = ObjectGenerator.GetGenerator().location(args[3], p.getWorld(), t);
+			} else {
+				if(!(args[1] instanceof CArray) && args[2] instanceof CArray){
+					//Player provided, location not
+					instrumentOffset = 1;
+					noteOffset = 2;
+					p = Static.GetPlayer(args[0]);
+					l = p.getLocation();
+				} else {
+					//location provided, player not
+					instrumentOffset = 0;
+					noteOffset = 1;
+					l = ObjectGenerator.GetGenerator().location(args[2], p.getWorld(), t);
+				}
+			}
+			try{
+				i = MCInstrument.valueOf(args[instrumentOffset].val().toUpperCase().trim());
+			} catch(IllegalArgumentException e){
+				throw new Exceptions.FormatException("Instrument provided is not a valid type, required one of: " + StringUtils.Join(MCInstrument.values(), ", ", ", or "), t);
+			}
+			MCTone tone = null;
+			if(args[noteOffset] instanceof CArray){
+				int octave = (int)Static.getInt(((CArray)args[noteOffset]).get("octave"));
+				if(octave < 0 || octave > 2){
+					throw new Exceptions.RangeException("The octave must be 0, 1, or 2, but was " + octave, t);
+				}
+				String ttone = ((CArray)args[noteOffset]).get("tone").val().toUpperCase().trim();
+				try{
+					tone = MCTone.valueOf(ttone.trim().replaceAll("#", ""));
+				} catch(IllegalArgumentException e){
+					throw new Exceptions.FormatException("Expected the tone parameter to be one of: " 
+							+ StringUtils.Join(MCTone.values(), ", ", ", or ") + " but it was " + ttone, t);
+				}
+				boolean sharped = false;
+				if(ttone.trim().endsWith("#")){
+					sharped = true;
+				}
+				n = StaticLayer.GetConvertor().GetNote(octave, tone, sharped);
+			} else {
+				throw new Exceptions.CastException("Expected an array for note parameter, but " + args[noteOffset] + " found instead", t);
+			}
+			p.playNote(l, i, n);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "play_note";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3, 4};
+		}
+
+		public String docs() {
+			return "void {[player], instrument, note, [location]} Plays a note for the given player, at the given location."
+					+ " Player defaults to the current player, and location defaults to the player's location. Instrument may be one of:"
+					+ " " + StringUtils.Join(MCInstrument.values(), ", ", ", or ") + ", and note is an associative array with 2 values,"
+					+ " array(octave: 0, tone: 'F#') where octave is either 0, 1, or 2, and tone is one of the notes " 
+					+ StringUtils.Join(MCTone.values(), ", ", ", or ") + ", optionally suffixed with a pound symbol, which denotes a sharp."
+					+ " (Not all notes can be sharped.)";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }

@@ -3,6 +3,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.enums.MCInstrument;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
@@ -19,6 +21,7 @@ import net.minecraft.server.ServerConfigurationManager;
 import net.minecraft.server.ServerConfigurationManagerAbstract;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Note;
 import org.bukkit.Server;
 import org.bukkit.craftbukkit.CraftServer;
 import org.bukkit.craftbukkit.entity.CraftPlayer;
@@ -342,5 +345,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	public void sendBlockChange(MCLocation loc, int material, byte data) {
 		p.sendBlockChange(((Location)loc.getHandle()), material, data);
+	}
+
+	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
+		p.playNote((Location)loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note)note.getHandle());
 	}
 }
