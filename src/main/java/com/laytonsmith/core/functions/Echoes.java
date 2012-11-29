@@ -4,11 +4,12 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.LineCallback;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
@@ -18,10 +19,8 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.sk89q.util.StringUtil;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
@@ -263,9 +262,8 @@ public class Echoes {
             for(int i = 0; i < b.length; i++){
                 b[i] = MCChatColor.values()[i].name(); Enum e = null;
             }
-            return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead. ----"
-                    + " The list of valid color names can be found in the MCChatColor class, and case doesn't matter. For your reference,"
-                    + " here is the list of valid colors: " + StringUtil.joinString(b, ", ", 0) + ", in addition the integers 0-15 will work,"
+            return "string {name} Returns the color modifier given a color name. If the given color name isn't valid, white is used instead."
+					+ " The list of valid colors is: " + StringUtils.Join(b, ", ", ", or ") + ", in addition the integers 0-15 will work,"
                     + " or the hex numbers from 0-F, and k, l, m, n, o, and r, which represent styles. Unlike manually putting in the color symbol,"
                     + " using this function will return the platform's color code, so if you are wanting to keep your scripts platform independant,"
                     + " it is a much better idea to use this function as opposed to hard coding your own color codes.";
