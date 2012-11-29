@@ -199,6 +199,8 @@ public class Script {
     public Construct eval(ParseTree c, final Environment env) throws CancelCommandException {
         final Construct m = c.getData();
         CurrentEnv = env;
+		//TODO: Reevaluate if this line is needed. The script doesn't know the label inherently, the
+		//environment does, and setting it this way taints the environment.
         CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
         if (m.getCType() == ConstructType.FUNCTION) {
                 env.getEnv(GlobalEnv.class).SetScript(this);

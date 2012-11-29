@@ -31,6 +31,7 @@ public class ExceptionsTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+		StaticTest.InstallFakeServerFrontend();
     }
 
     @AfterClass

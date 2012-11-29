@@ -7,6 +7,8 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * This class represents a data source model. The underlying model is just a map
@@ -159,15 +161,15 @@ public final class DataSourceModel {
 		}
 	}
 
-	public List<String[]> keySet() {
-		List<String[]> keys = new ArrayList<String[]>();
+	public Set<String[]> keySet() {
+		Set<String[]> keys = new TreeSet<String[]>();
 		for (GenericTreeNode child : tree.getChildren()) {
 			traverse(child, new ArrayList<String>(), keys);
 		}
 		return keys;
 	}
 
-	private void traverse(GenericTreeNode<Pair<String, String>> treeNode, List<String> ongoingKey, List<String[]> keys) {
+	private void traverse(GenericTreeNode<Pair<String, String>> treeNode, List<String> ongoingKey, Set<String[]> keys) {
 		if (treeNode.hasChildren()) {
 			ongoingKey.add(treeNode.getData().getKey());
 			if (treeNode.getData().getValue() != null) {

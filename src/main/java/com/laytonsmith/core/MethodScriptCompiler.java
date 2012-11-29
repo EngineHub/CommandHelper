@@ -1452,6 +1452,7 @@ public final class MethodScriptCompiler {
 		StringBuilder b = new StringBuilder();
 		Construct returnable = null;
 		for (ParseTree gg : root.getChildren()) {
+			script.setLabel(env.getEnv(GlobalEnv.class).GetLabel());
 			Construct retc = script.eval(gg, env);
 			if (root.numberOfChildren() == 1) {
 				returnable = retc;

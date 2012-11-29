@@ -13,7 +13,7 @@ import org.yaml.snakeyaml.Yaml;
  * @author lsmith
  */
 @datasource("yml")
-public class YMLDataSource extends StringDataSource{
+public class YMLDataSource extends StringSerializableDataSource{
 	
 	private YMLDataSource(){
 		

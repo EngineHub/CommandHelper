@@ -386,20 +386,19 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 		}
 	}
 
-	public List<String[]> keySet() {
-		List<String[]> list = new ArrayList<String[]>();
+	public Set<String[]> keySet() {
+		Set<String[]> list = new TreeSet<String[]>();
 		for (String key : data.keySet()) {
 			list.add(key.split("\\."));
 		}
 		return list;
 	}
 
-	public String get(String[] key, boolean bypassTransient) {
+	public String get0(String[] key, boolean bypassTransient) {
 		return getValue(StringUtils.Join(key, "."), bypassTransient);
 	}
 
-	public boolean set(String[] key, String value) throws ReadOnlyException, IOException {
-		checkSet();
+	public boolean set0(String[] key, String value) throws ReadOnlyException, IOException {
 		setValue(key, value);
 		save();
 		return true;

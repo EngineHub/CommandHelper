@@ -87,8 +87,9 @@ public class PersistanceNetwork {
 	 * @param key
 	 * @return
 	 * @throws DataSourceException
+	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized String get(String[] key) throws DataSourceException {
+	public synchronized String get(String[] key) throws DataSourceException, IllegalArgumentException {
 		DataSource ds = getDataSource(filter.getConnection(key));
 		return ds.get(key, false);
 	}
@@ -103,8 +104,9 @@ public class PersistanceNetwork {
 	 * @throws DataSourceException
 	 * @throws ReadOnlyException
 	 * @throws IOException
+	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized boolean set(String[] key, String value) throws DataSourceException, ReadOnlyException, IOException {
+	public synchronized boolean set(String[] key, String value) throws DataSourceException, ReadOnlyException, IOException, IllegalArgumentException {
 		DataSource ds = getDataSource(filter.getConnection(key));
 		return ds.set(key, value);
 	}
@@ -116,8 +118,9 @@ public class PersistanceNetwork {
 	 * @param key
 	 * @return
 	 * @throws DataSourceException
+	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized boolean hasKey(String[] key) throws DataSourceException {
+	public synchronized boolean hasKey(String[] key) throws DataSourceException, IllegalArgumentException {
 		DataSource ds = getDataSource(filter.getConnection(key));
 		return ds.hasKey(key);
 	}
@@ -128,8 +131,9 @@ public class PersistanceNetwork {
 	 * @param key
 	 * @return
 	 * @throws DataSourceException
+	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized void clearKey(String[] key) throws DataSourceException, ReadOnlyException, IOException {
+	public synchronized void clearKey(String[] key) throws DataSourceException, ReadOnlyException, IOException, IllegalArgumentException {
 		DataSource ds = getDataSource(filter.getConnection(key));
 		ds.clearKey(key);
 	}
@@ -141,8 +145,9 @@ public class PersistanceNetwork {
 	 *
 	 * @param namespace
 	 * @return
+	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public synchronized Map<String[], String> getNamespace(String[] namespace) throws DataSourceException {
+	public synchronized Map<String[], String> getNamespace(String[] namespace) throws DataSourceException, IllegalArgumentException {
 		List<URI> uris = filter.getAllConnections(namespace);
 		//First we have to get the namespaces. We can get a list of all the connections
 		//we need to search, then grab all the data in them, but then we need to use

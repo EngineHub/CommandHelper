@@ -3,7 +3,7 @@ package com.laytonsmith.persistance;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import java.io.IOException;
-import java.util.List;
+import java.util.Set;
 
 /**
  * All data sources must implement this interface. It provides methods to gather
@@ -19,7 +19,7 @@ public interface DataSource extends Documentation {
 	 *
 	 * @return
 	 */
-	public List<String[]> keySet() throws DataSourceException;
+	public Set<String[]> keySet() throws DataSourceException;
 
 	/**
 	 * Returns a list of keys, pre-concatenated into dot notation. This may
@@ -29,7 +29,7 @@ public interface DataSource extends Documentation {
 	 *
 	 * @return
 	 */
-	public List<String> stringKeySet() throws DataSourceException;
+	public Set<String> stringKeySet() throws DataSourceException;
 
 	/**
 	 * Given a namespace, returns all the keys in this data source that are
@@ -39,7 +39,7 @@ public interface DataSource extends Documentation {
 	 * @param namespace
 	 * @return
 	 */
-	public List<String[]> getNamespace(String[] namespace) throws DataSourceException;
+	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException;
 
 	/**
 	 * Retrieves a value from the data source. This should be the same
@@ -58,8 +58,9 @@ public interface DataSource extends Documentation {
 	 *
 	 * @param key
 	 * @return
+	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public String get(String[] key, boolean bypassTransient) throws DataSourceException;
+	public String get(String[] key, boolean bypassTransient) throws DataSourceException, IllegalArgumentException;
 
 	/**
 	 * Sets a value in the data source. If value is null, the key is
@@ -70,8 +71,9 @@ public interface DataSource extends Documentation {
 	 * @return True if the value was changed, false otherwise.
 	 * @throws ReadOnlyException If this data source is inherently read
 	 * only, it will throw a read only exception if this method is called.
+	 * @throws IllegalArgumentException If the key is invalid
 	 */
-	public boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException;
+	public boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException, IllegalArgumentException;
 
 	/**
 	 * Instructs this data source to repopulate its internal structure based
@@ -122,7 +124,7 @@ public interface DataSource extends Documentation {
 	 *
 	 * @return
 	 */
-	public List<DataSourceModifier> getModifiers();
+	public Set<DataSourceModifier> getModifiers();
 
 	/**
 	 * Returns true if the data source contains this key or not.
