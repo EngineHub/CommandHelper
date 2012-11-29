@@ -356,8 +356,9 @@ public class ArrayTest {
     }
     
     @Test public void testArrayUsageBeforeDefined() throws ConfigCompileException{
-        SRun("try(@a[1], msg('success'))", fakePlayer);
+        SRun("try(@a[1], msg('success')) msg('end')", fakePlayer);
         verify(fakePlayer).sendMessage("success");
+        verify(fakePlayer).sendMessage("end");
     }
     
     @Test public void testDirectSquareBracketUsage() throws ConfigCompileException{

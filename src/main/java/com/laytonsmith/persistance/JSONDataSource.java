@@ -16,7 +16,7 @@ import org.json.simple.JSONValue;
  * @author lsmith
  */
 @datasource("json")
-public class JSONDataSource extends StringDataSource {
+public class JSONDataSource extends StringSerializableDataSource {
 	
 	private JSONDataSource() {
 		

@@ -3,25 +3,27 @@ package com.laytonsmith.persistance;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
 /**
- * For data sources that can input and output strings, this class should be
- * extended.
+ * For data sources that can input and output strings as the complete
+ * data model, this class should be extended. The data source may not
+ * be written to file, but it is for sure going to be stored (or at least retrievable)
+ * from a UTF-8 encoded string.
  *
  * @author lsmith
  */
-public abstract class StringDataSource extends AbstractDataSource {
+public abstract class StringSerializableDataSource extends AbstractDataSource {
 	/**
 	 * A reference to the DataSourceModel used by the set and get methods.
 	 */
 	protected DataSourceModel model;
 	
-	protected StringDataSource(){
+	protected StringSerializableDataSource(){
 		
 	}
 
-	protected StringDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
+	protected StringSerializableDataSource(URI uri, ConnectionMixinFactory.ConnectionMixinOptions options) throws DataSourceException {
 		super(uri, options);
 	}
 
@@ -39,7 +41,7 @@ public abstract class StringDataSource extends AbstractDataSource {
 	}
 
 	@Override
-	public void clearKey(String[] key) throws DataSourceException, ReadOnlyException, IOException {
+	protected void clearKey0(String[] key) throws DataSourceException, ReadOnlyException, IOException {
 		model.clearKey(key);
 		writeData(serializeModel());
 	}
@@ -54,19 +56,15 @@ public abstract class StringDataSource extends AbstractDataSource {
 		populateModel(data);
 	}
 
-	public List<String[]> keySet() {
+	public Set<String[]> keySet() {
 		return model.keySet();
 	}
 
-	public String get(String[] key, boolean bypassTransient) throws DataSourceException {
-		if (!bypassTransient) {
-			checkGet();
-		}
+	protected final String get0(String[] key, boolean bypassTransient) throws DataSourceException {
 		return model.get(key);
 	}
 
-	public boolean set(String[] key, String value) throws ReadOnlyException, IOException, DataSourceException {
-		checkSet();
+	protected final boolean set0(String[] key, String value) throws ReadOnlyException, IOException, DataSourceException {
 		String old = get(key, false);
 		if ((old == null && value == null) || (old != null && old.equals(value))) {
 			return false;
@@ -100,6 +98,7 @@ public abstract class StringDataSource extends AbstractDataSource {
 	 *
 	 * @return
 	 */
+	@Override
 	protected String getBlankDataModel() {
 		return "";
 	}

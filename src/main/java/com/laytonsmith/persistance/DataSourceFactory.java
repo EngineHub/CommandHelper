@@ -82,33 +82,6 @@ public class DataSourceFactory {
         }        
     }
     
-	/**
-	 * Given a data source, gets a value from it.
-	 * @param ds
-	 * @param key
-	 * @return
-	 * @throws DataSourceException 
-	 */
-    public static String Get(DataSource ds, String [] key) throws DataSourceException{
-        if(ds.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)){
-            ds.populate();
-        }
-        return ds.get(key, false);
-    }
-    
-	/**
-	 * Given a data source, sets a value in it
-	 * @param ds
-	 * @param key
-	 * @param value
-	 * @throws ReadOnlyException
-	 * @throws DataSourceException
-	 * @throws IOException 
-	 */
-    public static void Set(DataSource ds, String [] key, String value) throws ReadOnlyException, DataSourceException, IOException{
-        ds.set(key, value);
-    }
-    
     private static Map<String, Class> protocolHandlers;
     private static void init(){
         if(protocolHandlers == null){

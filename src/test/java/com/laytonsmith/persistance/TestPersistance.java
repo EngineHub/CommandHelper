@@ -210,12 +210,39 @@ public class TestPersistance {
 		assertEquals("value", network.get(new String[]{"key", "key"}));
 		deleteFiles("folder/");
 	}
+	
+	@Test(expected=IllegalArgumentException.class)
+	public void testNamespaceWithUnderscore() throws Exception {
+		PersistanceNetwork network = new PersistanceNetwork("**=sqlite://folder/sqlite.db", new URI("default"), options);
+		try{
+			network.set(new String[]{"Bad", "_", "Key"}, "value");
+		} finally {
+			deleteFiles("folder/");
+		}
+	}
+	
+	@Test
+	public void testMemoryDataSource() throws Exception{
+		PersistanceNetwork network = new PersistanceNetwork("**=mem:default", new URI("default"), options);
+		String[] key = new String[]{"a", "b"};
+		network.set(key, "value");
+		assertEquals("value", network.get(key));
+		assertFalse(network.hasKey(new String[]{"a"}));
+		assertTrue(network.hasKey(key));
+		network.clearKey(key);
+		assertFalse(network.hasKey(key));
+		
+		network.set(key, "value");
+		assertEquals("value", network.get(key));
+		MemoryDataSource.ClearDatabases();
+		assertFalse(network.hasKey(key));
+	}
 
 	public String doOutput(String uri, Map<String[], String> data) {
 		try {
 			DataSource ds = DataSourceFactory.GetDataSource(uri, options);
-			if (ds instanceof StringDataSource) {
-				StringDataSource sdc = (StringDataSource) ds;
+			if (ds instanceof StringSerializableDataSource) {
+				StringSerializableDataSource sdc = (StringSerializableDataSource) ds;
 				if (sdc.getConnectionMixin() instanceof ReadWriteFileConnection) {
 
 					//It is a file based URI, so we can test this.
@@ -246,7 +273,7 @@ public class TestPersistance {
 	}
 
 	File getFileFromDataSource(DataSource ds) {
-		if (ds instanceof StringDataSource) {
+		if (ds instanceof StringSerializableDataSource) {
 			Object output = GetPrivate(ds, "output", Object.class);
 			if (output instanceof ZipReader) {
 				//It is a file based URI, so we can test this.

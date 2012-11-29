@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *
@@ -53,9 +54,48 @@ public abstract class AbstractDataSource implements DataSource {
 		return connectionMixin;
 	}
 
-	public String get(String[] key) throws DataSourceException {
+	/**
+	 * {@inheritDoc}
+	 */
+	public final String get(String[] key) throws DataSourceException {
 		return get(key, false);
-	}		
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public final String get(String[] key, boolean bypassTransient) throws DataSourceException {
+		if(!bypassTransient){
+			checkGet(key);
+		}
+		return get0(key, bypassTransient);
+	}
+
+	public final boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
+		checkSet(key);
+		return set0(key, value);
+	}
+	
+	/**
+	 * Subclasses should implement this, instead of set(), as our version of set() does some standard validation
+	 * on the input.
+	 * @param key
+	 * @param value
+	 * @return
+	 * @throws ReadOnlyException
+	 * @throws DataSourceException
+	 * @throws IOException 
+	 */
+	protected abstract boolean set0(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException;
+	
+	/**
+	 * Subclasses should implement this, instead of get(), as our version of get() does
+	 * some standard validation on the input.
+	 * @param key
+	 * @param bypassTransient
+	 * @return 
+	 */
+	protected abstract String get0(String[] key, boolean bypassTransient) throws DataSourceException;
 
 	/**
 	 * The default implementation of string simply walks through keySet, and
@@ -64,16 +104,16 @@ public abstract class AbstractDataSource implements DataSource {
 	 *
 	 * @return
 	 */
-	public List<String> stringKeySet() throws DataSourceException {
-		List<String> keys = new ArrayList<String>();
+	public Set<String> stringKeySet() throws DataSourceException {
+		Set<String> keys = new TreeSet<String>();
 		for (String[] key : keySet()) {
 			keys.add(StringUtils.Join(key, "."));
 		}
 		return keys;
 	}
 
-	public List<String[]> getNamespace(String[] namespace) throws DataSourceException {
-		List<String[]> list = new ArrayList<String[]>();
+	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException {
+		Set<String[]> list = new TreeSet<String[]>();
 		String ns = StringUtils.Join(namespace, ".");
 		for (String key : stringKeySet()) {
 			if (key.startsWith(ns)) {
@@ -111,19 +151,37 @@ public abstract class AbstractDataSource implements DataSource {
 	}
 		
 
-	public boolean hasKey(String[] key) throws DataSourceException {
-		return get(key, false) != null;
+	public final boolean hasKey(String[] key) throws DataSourceException {
+		checkGet(key);
+		return hasKey0(key);
 	}
 	
 	/**
-	 * By default, setting the value to null should clear the value.
+	 * By default, returns true if the value stored is non-null. In general,
+	 * if clearKey0 is overridden, this should be as well.
+	 * @param key
+	 * @return
+	 * @throws DataSourceException 
+	 */
+	protected boolean hasKey0(String[] key) throws DataSourceException{
+		return get(key, false) != null;
+	}
+	
+	public final void clearKey(String [] key) throws ReadOnlyException, DataSourceException, IOException{
+		checkSet(key);
+		clearKey0(key);
+	}
+	
+	/**
+	 * By default, setting the value to null should clear the value,
+	 * but that can be overridden if a data source has a better method.
 	 * @param key
 	 * @throws ReadOnlyException
 	 * @throws DataSourceException
 	 * @throws IOException 
 	 */
-	public void clearKey(String [] key) throws ReadOnlyException, DataSourceException, IOException{
-		set(key, null);
+	protected void clearKey0(String [] key) throws ReadOnlyException, DataSourceException, IOException{
+		set(key, null);		
 	}
 
 	/**
@@ -166,7 +224,13 @@ public abstract class AbstractDataSource implements DataSource {
 	 * This method checks to see if a set operation should simply throw a
 	 * ReadOnlyException based on the modifiers.
 	 */
-	protected final void checkSet() throws ReadOnlyException {
+	private void checkSet(String [] key) throws ReadOnlyException {
+		for(String namespace : key){
+			if("_".equals(namespace)){
+				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace \"_\" is not allowed."
+						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
+			}
+		}
 		if (modifiers.contains(DataSourceModifier.READONLY)) {
 			throw new ReadOnlyException();
 		}
@@ -176,14 +240,23 @@ public abstract class AbstractDataSource implements DataSource {
 	 * This method checks to see if get operations should re-populate at
 	 * this time. If the data set is transient, it will do so.
 	 */
-	protected final void checkGet() throws DataSourceException {
+	private void checkGet(String[] key) throws DataSourceException {
+		for(String namespace : key){
+			if("_".equals(namespace)){
+				throw new IllegalArgumentException("In the key \"" + StringUtils.Join(key, ".") + ", the namespace \"_\" is not allowed."
+						+ " (Namespaces may contain an underscore, but may not be just an underscore.)");
+			}
+		}
+		if(this.getModifiers().contains(DataSource.DataSourceModifier.TRANSIENT)){
+            this.populate();
+        }
 		if (hasModifier(DataSourceModifier.TRANSIENT)) {
 			populate();
 		}
 	}
 
-	public final List<DataSourceModifier> getModifiers() {
-		return new ArrayList<DataSourceModifier>(modifiers);
+	public final Set<DataSourceModifier> getModifiers() {
+		return EnumSet.copyOf(modifiers);
 	}
 	
 	/**
@@ -197,6 +270,7 @@ public abstract class AbstractDataSource implements DataSource {
 		return "";
 	}
 	
+	@Override
 	public String toString(){
 		StringBuilder b = new StringBuilder();
 		for(DataSourceModifier m : modifiers){

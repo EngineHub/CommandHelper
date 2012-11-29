@@ -12,9 +12,9 @@ else
         SCRIPT="$1"
         shift 1
 		if [ -z "$DEBUG_MSCRIPT" ]; then
-			cat "$SCRIPT" | java -jar "%%LOCATION%%" --interpreter "$SCRIPT" "$@"
+			cat "$SCRIPT" | java -jar "%%LOCATION%%" interpreter "$SCRIPT" "$@"
 		else
 			#Start in debug mode
-			cat "$SCRIPT" | java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9001 -jar "%%LOCATION%%" --interpreter "$SCRIPT" "$@"
+			cat "$SCRIPT" | java -Xdebug -Xrunjdwp:transport=dt_socket,server=y,suspend=y,address=9001 -jar "%%LOCATION%%" interpreter "$SCRIPT" "$@"
 		fi
 fi

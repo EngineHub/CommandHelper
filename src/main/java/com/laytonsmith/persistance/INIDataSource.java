@@ -17,7 +17,7 @@ import java.util.Properties;
  * @author lsmith
  */
 @datasource("ini")
-public class INIDataSource extends StringDataSource {
+public class INIDataSource extends StringSerializableDataSource {
 	
 	private INIDataSource() {
 		

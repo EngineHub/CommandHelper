@@ -15,6 +15,8 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  *
@@ -67,13 +69,13 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}
 
-	public List<String[]> keySet() throws DataSourceException{
+	public Set<String[]> keySet() throws DataSourceException{
 		try{
 			try {
 				connect();
 				Statement statement = connection.createStatement();
 				ResultSet rs = statement.executeQuery("SELECT `" + KEY_COLUMN + "` FROM `" + TABLE_NAME + "`");
-				List<String[]> list = new ArrayList<String[]>();
+				Set<String[]> list = new TreeSet<String[]>();
 				while(rs.next()){
 					list.add(rs.getString(KEY_COLUMN).split("\\."));
 				}
@@ -86,8 +88,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}
 
-	public String get(String[] key, boolean bypassTransient) throws DataSourceException {
-		checkGet();
+	public String get0(String[] key, boolean bypassTransient) throws DataSourceException {
 		try{
 			try{
 				connect();
@@ -107,8 +108,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 		}
 	}
 
-	public boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
-		checkSet();
+	public boolean set0(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		if(value == null){
 			clearKey(key);
 			return true;
@@ -129,7 +129,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 	}
 
 	@Override
-	public void clearKey(String[] key) throws ReadOnlyException, DataSourceException, IOException {
+	protected void clearKey0(String[] key) throws ReadOnlyException, DataSourceException, IOException {
 		if(hasKey(key)){
 			try{
 				try{

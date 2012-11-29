@@ -4,7 +4,7 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
-import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -21,15 +21,15 @@ public class MySQLDataSource extends AbstractDataSource{
 		super(uri, options);
 	}
 
-	public List<String[]> keySet() {
+	public Set<String[]> keySet() {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public String get(String[] key, boolean bypassTransient) throws DataSourceException {
+	public String get0(String[] key, boolean bypassTransient) throws DataSourceException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 
-	public boolean set(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
+	public boolean set0(String[] key, String value) throws ReadOnlyException, DataSourceException, IOException {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 

@@ -9,7 +9,7 @@ import java.net.URI;
  * @author lsmith
  */
 //@datasource("csv")
-public class CSVDataSource extends StringDataSource {
+public class CSVDataSource extends StringSerializableDataSource {
 	
 	private CSVDataSource() {
 		

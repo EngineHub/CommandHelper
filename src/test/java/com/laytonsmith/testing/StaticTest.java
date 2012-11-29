@@ -3,6 +3,7 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -29,6 +30,7 @@ import java.net.MalformedURLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;
@@ -527,7 +529,16 @@ public class StaticTest {
         if(frontendInstalled){
             return;
         }
-		ClassDiscovery.InstallDiscoveryLocation(StaticTest.class.getProtectionDomain().getCodeSource().getLocation().toString());
+		if(StaticTest.class.getProtectionDomain().getCodeSource().getLocation() == null){
+			//Running locally
+			//This is the full path to THIS file, but we need to get the package root.
+			String thisClass = StaticTest.class.getResource(StaticTest.class.getSimpleName() + ".class").toString();
+			String packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(StaticTest.class.getName().replaceAll("\\.", "/") + ".class"), "");
+			ClassDiscovery.InstallDiscoveryLocation(packageRoot);
+		} else {
+			//Running from a jar
+			ClassDiscovery.InstallDiscoveryLocation(StaticTest.class.getProtectionDomain().getCodeSource().getLocation().toString());
+		}
 		Implementation.setServerType(Implementation.Type.TEST);
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();

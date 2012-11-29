@@ -18,6 +18,7 @@ import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.core.profiler.ProfilePoint;
 import com.laytonsmith.core.profiler.Profiler;
+import com.laytonsmith.persistance.MemoryDataSource;
 import com.laytonsmith.persistance.PersistanceNetwork;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.sk89q.util.StringUtil;
@@ -240,6 +241,7 @@ public class AliasCore {
 			parent.profiler = new Profiler(new File(parent.chDirectory, "profiler.config"));
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
 			options.setWorkingDirectory(parent.chDirectory);
+			MemoryDataSource.ClearDatabases();
 			parent.persistanceNetwork = new PersistanceNetwork(new File(parent.chDirectory, "persistance.config"),
 					new URI("sqlite:/" + new File(parent.chDirectory, "persistance.db").getCanonicalFile().toURI().getRawSchemeSpecificPart().replace("\\", "/")), options);
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver,

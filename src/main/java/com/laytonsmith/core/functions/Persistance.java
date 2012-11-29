@@ -53,7 +53,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.IOException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -89,6 +89,8 @@ public class Persistance {
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, "Storing: " + key + " -> " + value, t);
 			try {
 				env.getEnv(GlobalEnv.class).GetPersistanceNetwork().set(("storage." + key).split("\\."), value);
+			} catch(IllegalArgumentException e){
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			} catch (Exception ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 			}
@@ -124,7 +126,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -145,6 +147,8 @@ public class Persistance {
 					obj = env.getEnv(GlobalEnv.class).GetPersistanceNetwork().get(("storage." + namespace).split("\\."));
 				} catch (DataSourceException ex) {
 					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				} catch(IllegalArgumentException e){
+					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 				}
 				if (obj == null) {
 					return new CNull(t);
@@ -193,7 +197,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -216,6 +220,8 @@ public class Persistance {
 				list = p.getNamespace(keyChain.toArray(new String[keyChain.size()]));
 			} catch (DataSourceException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+			} catch(IllegalArgumentException e){
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			}
 			CArray ca = new CArray(t);
 			CHLog.GetLogger().Log(CHLog.Tags.PERSISTANCE, LogLevel.DEBUG, list.size() + " value(s) are being returned", t);
@@ -257,7 +263,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -277,6 +283,8 @@ public class Persistance {
 				return new CBoolean(env.getEnv(GlobalEnv.class).GetPersistanceNetwork().hasKey(("storage." + GetNamespace(args, null, getName(), t)).split("\\.")), t);
 			} catch (DataSourceException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+			} catch(IllegalArgumentException e){
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			}
 		}
 
@@ -302,7 +310,7 @@ public class Persistance {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.IOException};
+			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -328,6 +336,8 @@ public class Persistance {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
 			} catch (IOException ex) {
 				throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+			} catch(IllegalArgumentException e){
+				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			}
 			return new CVoid(t);
 		}
