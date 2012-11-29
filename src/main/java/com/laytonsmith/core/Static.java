@@ -879,7 +879,7 @@ public final class Static {
 	
 	/**
 	 * Generates a new environment, using the permissions resolver given. It is assumed that the jar has a folder
-	 * next to it named CommandHelper, and that folder is the root.
+	 * next to it with the name of the platform, and that folder is the root.
 	 * @param permissionsResolver
 	 * @return
 	 * @throws IOException
@@ -893,12 +893,14 @@ public final class Static {
 		} else {
 			jarLocation = new File(".");
 		}
+		File platformFolder = new File(jarLocation, Implementation.GetServerType().getBranding() + "/");
+		Installer.Install(platformFolder);
 		ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();
-		options.setWorkingDirectory(new File(jarLocation, "CommandHelper/"));
-		PersistanceNetwork persistanceNetwork = new PersistanceNetwork(new File(jarLocation, "CommandHelper/persistance.config"), 
-				new URI("sqlite://" + new File(jarLocation, "CommandHelper/persistance.db").getCanonicalPath().replace("\\", "/")), options);
+		options.setWorkingDirectory(platformFolder);
+		PersistanceNetwork persistanceNetwork = new PersistanceNetwork(new File(platformFolder, "persistance.config"), 
+				new URI("sqlite://" + new File(platformFolder, "persistance.db").getCanonicalPath().replace("\\", "/")), options);
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScript", "default"), 
-				new Profiler(new File("CommandHelper/profiler.config")), persistanceNetwork, permissionsResolver, new File(jarLocation, "CommandHelper/"));
+				new Profiler(new File(platformFolder, "profiler.config")), persistanceNetwork, permissionsResolver, platformFolder);
 		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
 		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
 	}

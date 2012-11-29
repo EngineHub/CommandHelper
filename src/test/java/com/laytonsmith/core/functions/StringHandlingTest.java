@@ -154,6 +154,13 @@ public class StringHandlingTest {
 			//pass
 		}
 		
+		try{
+			SRun("sprintf('%0.3f', 1.1)", null);
+			fail("Expected sprintf('%0.3f', 1.1) to throw a compile exception");
+		} catch(ConfigCompileException e){
+			//pass
+		}
+		
 		//A few advanced usages
 		assertEquals("004.000", SRun("sprintf('%07.3f', 4)", null));
 		

@@ -124,10 +124,18 @@ public final class Implementation {
 		//SINGLE_PLAYER
 		private final String branding;
 
+		/**
+		 * 
+		 * @param branding This MUST be a universally acceptable folder name.
+		 */
 		private Type(String branding) {
 			this.branding = branding;
 		}
 
+		/**
+		 * Returns the branding string for this implementation.
+		 * @return 
+		 */
 		public String getBranding() {
 			return branding;
 		}
