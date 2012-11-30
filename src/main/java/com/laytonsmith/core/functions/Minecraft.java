@@ -7,6 +7,12 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCProfession;
+import com.laytonsmith.abstraction.enums.MCCreeperType;
+import com.laytonsmith.abstraction.enums.MCOcelotType;
+import com.laytonsmith.abstraction.enums.MCPigType;
+import com.laytonsmith.abstraction.enums.MCSkeletonType;
+import com.laytonsmith.abstraction.enums.MCWolfType;
+import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
@@ -305,17 +311,20 @@ public class Minecraft {
 
 		public String docs() {
 			return "array {mobType, [qty], [location]} Spawns qty mob of one of the following types at location. qty defaults to 1, and location defaults"
-					+ " to the location of the player. ---- mobType can be one of: "
-					+ StringUtils.Join(MCMobs.values(), ", ") + ". Spelling matters, but capitalization doesn't. At this"
-					+ " time, the function is limited to spawning a maximum of 50 at a time. Further, SHEEP can be spawned as any color, by specifying"
-					+ " SHEEP:COLOR, where COLOR is any of the dye colors: "
-					+ StringUtils.Join(MCDyeColor.values(), ", ") + ". COLOR defaults to white if not"
-					+ " specified. OCELOT can also take a subtype, like sheep, and may be one of: "
-					+ "WILD_OCELOT, BLACK_CAT, RED_CAT, or SIAMESE_CAT. Villagers can have a profession as a subtype: "
-					+ StringUtils.Join(MCProfession.values(), ", ") + ", defaulting to farmer if not specified. PigZombies' subtype represents their anger,"
-					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked. Defaults to 0. If a material is specified"
-					+ " as the subtype for endermen, they will hold that material, otherwise they will hold nothing."
-					+ " Creepers can have the powered subtype, and wolves can be angry. An array of the entity IDs spawned is returned.";
+					+ " to the location of the player. ---- mobType can be one of: " + StringUtils.Join(MCMobs.values(), ", ", ", or ", " or ") 
+					+ ". Spelling matters, but capitalization doesn't. At this time, the function is limited to spawning a maximum of 50 at a time."
+					+ " Further, subtypes can be applied by specifying MOBTYPE:SUBTYPE, for example the sheep subtype can be any of the dye colors: " 
+					+ StringUtils.Join(MCDyeColor.values(), ", ", ", or ", " or ") + ". COLOR defaults to white if not specified. For mobs with multiple"
+					+ " subtypes, separate each type with a \"-\", currently only zombies which, using ZOMBIE:TYPE1-TYPE2 can be any non-conflicting two of: "
+					+ StringUtils.Join(MCZombieType.values(), ", ", ", or ", " or ") + ", but default to normal zombies. Ocelots may be one of: " 
+					+ StringUtils.Join(MCOcelotType.values(), ", ", ", or ", " or ") + ", defaulting to the wild variety. Villagers can have a profession as a subtype: "
+					+ StringUtils.Join(MCProfession.values(), ", ", ", or ", " or ") + ", defaulting to farmer if not specified. Skeletons can be "
+					+ StringUtils.Join(MCSkeletonType.values(), ", ", ", or ", " or ") + ". PigZombies' subtype represents their anger,"
+					+ " and accepts an integer, where 0 is neutral and 400 is the normal response to being attacked. Defaults to 0. Similarly, Slime"
+					+ " and MagmaCube size can be set by integer, otherwise will be a random natural size. If a material is specified as the subtype"
+					+ " for Endermen, they will hold that material, otherwise they will hold nothing. Creepers can be set to " 
+					+ StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + ", wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ") 
+					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + ". An array of the entity IDs spawned is returned.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1001,7 +1010,7 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			return "void {locationArray, type} Sets the mod spawner type at the location specified. If the location is not a mob spawner,"
+			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
 					+ " or if the type is invalid, a FormatException is thrown.";
 		}
 
