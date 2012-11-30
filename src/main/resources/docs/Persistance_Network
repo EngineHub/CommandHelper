@@ -183,4 +183,58 @@ The third call will store the data in persistance.ser, in the Serialized Persist
 Notice that our code doesn't care at all where data is actually being stored, or in what format,
 it is a transparent routing layer on top of the global key=>value storage system.
 
+== Data Source Comparisons ==
+
+This table of data was generated based on the information obtained from the following script:
+
+<pre>
+@names = array('ini', 'mem', 'sqlite', 'json', 'ser', 'yml')
+@iterations = array(10, 100, 1000, 5000)
+foreach(@iterations, @iteration){
+        foreach(@names, @name){
+                sys_out('Now profiling '.@name.' with '.@iteration.' values')
+                @start = time()
+                foreach(cslice(1,@iteration), @i){
+                        store_value(@name, 'val'.@i, 'value')
+                }
+                foreach(cslice(1,@iteration), @i){
+                        get_value(@name, 'val'.@i)
+                }
+                @stop = time()
+                sys_out(@name.' took '.(@stop - @start).'ms to complete with '.@iteration.' values')
+        }
+}
+</pre>
+
+using the following persistance.config:
+
+<pre>
+**=sqlite://persistance.db
+storage.ini.**=ini://persistance/persistance.ini
+storage.sqlite.**=sqlite://persistance/persistance.db
+storage.mem.**=mem://persistance/persistance.db
+storage.json.**=json://persistance/persistance.json
+storage.ser.**=ser://persistance/persistance.ser
+storage.yml.**=yml://persistance/persistance.yml
+</pre>
+
+Take what information you will from the data, and feel free to run it on your system to get actual values relevant to your system,
+not just relative to each other on the test system.
+
+<pre style='font-family: monospace'>
+       | 10 values | 100 values | 1000 values | 5000 values | file size with 5000 values
+-------+---------------------------------------------------------------------------------
+ini    |   67 ms   |   29 ms    |    139 ms   | 174.644 sec |          144 K
+-------+---------------------------------------------------------------------------------
+mem    |    4 ms   |    22 ms   |    74 ms    |    124 ms   |           N/A
+-------+---------------------------------------------------------------------------------
+sqlite |   177 ms  |   319 ms   |  4.891 sec  |  46.780 sec |          364 K
+-------+---------------------------------------------------------------------------------
+json   |    8 ms   |    15 ms   |    373 ms   |  5.406 sec  |          116 K
+-------+---------------------------------------------------------------------------------
+ser    |   16 ms   |    23 ms   |    83 ms    |    114 ms   |          164 K
+-------+---------------------------------------------------------------------------------
+yml    |   33 ms   |    14 ms   |  2.105 sec  |  46.640 sec |          112 K 
+-------+---------------------------------------------------------------------------------
+</pre>
 {{LearningTrail}}

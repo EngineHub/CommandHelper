@@ -1,6 +1,6 @@
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
-  <modelVersion>4.0.0</modelVersion>
+		 xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.sk89q</groupId>
 	<artifactId>commandhelper</artifactId>
 	<version>3.3.1-SNAPSHOT</version>
@@ -87,7 +87,7 @@
 	<licenses>
 		<license>
 			<name>The MIT License</name>
-      <url>LICENSE.txt</url>
+			<url>LICENSE.txt</url>
 			<distribution>repo</distribution>            
 		</license>
 	</licenses>
@@ -96,15 +96,15 @@
 		<url>https://github.com/sk89q/commandhelper</url>
 		<developerConnection>scm:git:git@github.com:sk89q/commandhelper.git</developerConnection>
 	</scm>
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-  </properties>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
 	<repositories>
 		<!-- Repository for other dependencies of SK's -->
-    <repository>
-      <id>sk89q-mvn2</id>
-      <url>http://mvn2.sk89q.com/repo</url>
-    </repository>
+		<repository>
+			<id>sk89q-mvn2</id>
+			<url>http://mvn2.sk89q.com/repo</url>
+		</repository>
     
 		<!-- Repository for Bukkit -->
 		<repository>
@@ -119,7 +119,7 @@
 			</snapshots>
 		</repository>
     
-    <!-- Other repositories -->
+		<!-- Other repositories -->
 		<repository>
 			<id>maven-central</id>
 			<url>http://repo1.maven.org/maven2/</url>
@@ -127,6 +127,12 @@
 		<repository>
 			<id>zml2008</id>
 			<url>http://files.zachsthings.com/repo/</url>
+		</repository>
+
+		<!-- mcstats repo -->
+		<repository>
+			<id>Plugin Metrics</id>
+			<url>http://repo.mcstats.org/content/repositories/public</url>
 		</repository>
 	</repositories>
 	<dependencies>
@@ -186,20 +192,20 @@
 		</dependency>
         
 		<!-- Used for potion effects
-		  <dependency>
-		      <groupId>org.bukkit</groupId>
-		      <artifactId>minecraft-server</artifactId>
-		      <version>1.8.1</version>
-		      <type>jar</type>
-		  </dependency> -->
+  <dependency>
+   <groupId>org.bukkit</groupId>
+   <artifactId>minecraft-server</artifactId>
+   <version>1.8.1</version>
+   <type>jar</type>
+  </dependency> -->
         
 		<!-- Used for IRC hooks -->
 		<!--<dependency> NOT READY YET
-		      <groupId>org.jibble</groupId>
-		      <artifactId>pircbot</artifactId>
-		      <version>1.5.0</version>
-		      <scope>compile</scope>
-		  </dependency>-->
+   <groupId>org.jibble</groupId>
+   <artifactId>pircbot</artifactId>
+   <version>1.5.0</version>
+   <scope>compile</scope>
+  </dependency>-->
         
 		<!-- Profiling library -->
 		<dependency>
@@ -240,18 +246,18 @@
         
 		<!-- Evil-y things (currently not used) -->
 		<!--<dependency>
-		      <groupId>cglib</groupId>
-		      <artifactId>cglib</artifactId>
-		      <version>2.2.2</version>
-		      <scope>compile</scope>
-		      <type>jar</type>
-		  </dependency>
-		  <dependency>
-		      <groupId>org.javassist</groupId>
-		      <artifactId>javassist</artifactId>
-		      <version>3.15.0-GA</version>
-		      <type>jar</type>
-		  </dependency>-->			
+   <groupId>cglib</groupId>
+   <artifactId>cglib</artifactId>
+   <version>2.2.2</version>
+   <scope>compile</scope>
+   <type>jar</type>
+  </dependency>
+  <dependency>
+   <groupId>org.javassist</groupId>
+   <artifactId>javassist</artifactId>
+   <version>3.15.0-GA</version>
+   <type>jar</type>
+  </dependency>-->			
 		<!-- Embedded SSH Client -->
 		<dependency>
 			<groupId>com.jcraft</groupId>
@@ -295,23 +301,29 @@
 			<artifactId>substance</artifactId>
 			<version>6.0</version>
 		</dependency>
+		<!-- MCStats -->
+		<dependency>
+			<groupId>org.mcstats</groupId>
+			<artifactId>metrics-lite</artifactId>
+			<version>1.2-SNAPSHOT</version>
+		</dependency>
 	</dependencies>
-  <distributionManagement>
-    <site>
-      <id>sk89q-docs-upload</id>
-      <url>ftp://sk89q-maven-deploy/commandhelper/</url>
-    </site>
-  </distributionManagement>
+	<distributionManagement>
+		<site>
+			<id>sk89q-docs-upload</id>
+			<url>ftp://sk89q-maven-deploy/commandhelper/</url>
+		</site>
+	</distributionManagement>
 	<build>
 		<sourceDirectory>${basedir}/src/main/java</sourceDirectory>
     
-    <extensions>
-      <extension>
-        <groupId>org.apache.maven.wagon</groupId>
-         <artifactId>wagon-ftp</artifactId>
-         <version>1.0-beta-6</version>
-      </extension>
-    </extensions>
+		<extensions>
+			<extension>
+				<groupId>org.apache.maven.wagon</groupId>
+				<artifactId>wagon-ftp</artifactId>
+				<version>1.0-beta-6</version>
+			</extension>
+		</extensions>
 
 		<!-- Resources -->
 		<resources>
@@ -408,6 +420,7 @@
 									<include>com.jcraft:jsch:jar:*</include>
 									<include>org.apache.commons:commons-io:jar:*</include>
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
+									<include>org.mcstats:metrics-lite:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
@@ -450,6 +463,12 @@
 								</filter>
 								<filter>
 									<artifact>log4j:log4j:jar:*</artifact>
+									<includes>
+										<include>**</include>
+									</includes>
+								</filter>                                                        
+								<filter>
+									<artifact>org.mcstats:metrics-lite:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
@@ -499,39 +518,39 @@
 				<version>2.4</version>
 			</plugin>
       
-      <!-- Site / report generation -->
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-site-plugin</artifactId>
-        <version>3.1</version>
-        <configuration>
-          <reportPlugins>
-          <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-project-info-reports-plugin</artifactId>
-            <version>2.5</version>
-            <reportSets>
-              <reportSet>
-                <reports>
-                  <report>license</report>
-                  <report>index</report>
-                </reports>
-              </reportSet>
-            </reportSets>
-          </plugin>
-            <plugin>
-              <groupId>org.apache.maven.plugins</groupId>
-              <artifactId>maven-javadoc-plugin</artifactId>
-              <version>2.8.1</version>
-            </plugin>
-            <plugin>
-              <groupId>org.codehaus.mojo</groupId>
-              <artifactId>cobertura-maven-plugin</artifactId>
-              <version>2.4</version>
-            </plugin>
-          </reportPlugins>
-        </configuration>
-      </plugin>
+			<!-- Site / report generation -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-site-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<reportPlugins>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-project-info-reports-plugin</artifactId>
+							<version>2.5</version>
+							<reportSets>
+								<reportSet>
+									<reports>
+										<report>license</report>
+										<report>index</report>
+									</reports>
+								</reportSet>
+							</reportSets>
+						</plugin>
+						<plugin>
+							<groupId>org.apache.maven.plugins</groupId>
+							<artifactId>maven-javadoc-plugin</artifactId>
+							<version>2.8.1</version>
+						</plugin>
+						<plugin>
+							<groupId>org.codehaus.mojo</groupId>
+							<artifactId>cobertura-maven-plugin</artifactId>
+							<version>2.4</version>
+						</plugin>
+					</reportPlugins>
+				</configuration>
+			</plugin>
 		</plugins>
 	</build>
 	<profiles>

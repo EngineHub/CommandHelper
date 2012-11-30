@@ -50,6 +50,7 @@ public class StaticTest {
 	
 	static{
 		try {
+			Implementation.setServerType(Implementation.Type.TEST);
 			env = Static.GenerateStandaloneEnvironment();
 		} catch (Exception ex) {
 			throw new RuntimeException(ex);
@@ -530,6 +531,7 @@ public class StaticTest {
         if(frontendInstalled){
             return;
         }
+		Implementation.setServerType(Implementation.Type.TEST);
 		if(StaticTest.class.getProtectionDomain().getCodeSource().getLocation() == null){
 			//Running locally
 			//This is the full path to THIS file, but we need to get the package root.
@@ -540,7 +542,6 @@ public class StaticTest {
 			//Running from a jar
 			ClassDiscovery.InstallDiscoveryLocation(StaticTest.class.getProtectionDomain().getCodeSource().getLocation().toString());
 		}
-		Implementation.setServerType(Implementation.Type.TEST);
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();
 		SetPrivate(CommandHelperPlugin.class, "ac", fakeCore, AliasCore.class);       

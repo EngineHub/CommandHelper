@@ -197,6 +197,11 @@ public class Reflection {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.isEmpty()){
+				//They are requesting this function's documentation. We can just return a string,
+				//and then it will never actually get called, so we handle it entirely in here.
+				return new ParseTree(new CString(docs(), t), null);
+			}
 			if (children.get(0).isConst()) {
 				//If it's a function, we can check to see if it actually exists,
 				//and make it a compile error if it doesn't, even if parameter 2 is dynamic
@@ -229,15 +234,16 @@ public class Reflection {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{2};
+			return new Integer[]{0, 2};
 		}
 
 		public String docs() {
-			return "string {element, docField} Returns the documentation for an element. There are 4 things that an element might have,"
+			return "string { | element, docField} Returns the documentation for an element. There are 4 things that an element might have,"
 					+ " and one of these should be passed as the docField argument: type, return, args, description. A valid element is either"
 					+ " the name of an ivariable, or a function/proc. For instance, reflect_docs('reflect_docs', 'description') would return"
 					+ " what you are reading right now. User defined variables and procs may not have any documentation, in which case null"
-					+ " is returned. If the specified argument cannot be found, a FormatException is thrown.";
+					+ " is returned. If the specified argument cannot be found, a FormatException is thrown. If no arguments are passed in,"
+					+ " it returns the documentation for " + getName() + ", that is, what you're reading right now.";
 		}
 
 		public CHVersion since() {

@@ -13,10 +13,8 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Set;
-import java.util.TreeSet;
 
 /**
  *
@@ -75,7 +73,7 @@ public class SQLiteDataSource extends AbstractDataSource{
 				connect();
 				Statement statement = connection.createStatement();
 				ResultSet rs = statement.executeQuery("SELECT `" + KEY_COLUMN + "` FROM `" + TABLE_NAME + "`");
-				Set<String[]> list = new TreeSet<String[]>();
+				Set<String[]> list = new HashSet<String[]>();
 				while(rs.next()){
 					list.add(rs.getString(KEY_COLUMN).split("\\."));
 				}

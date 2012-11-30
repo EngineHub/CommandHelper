@@ -70,7 +70,6 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public static ExecutorService hostnameLookupThreadPool;
 	public static ConcurrentHashMap<String, String> hostnameLookupCache;
 	private static int hostnameThreadPoolID = 0;
-
 	public Profiler profiler;
 	public final ExecutionQueue executionQueue = new MethodScriptExecutionQueue("CommandHelper", "default");
 	public PermissionsResolver permissionsResolver;
@@ -80,17 +79,17 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 * Listener for the plugin system.
 	 */
 	final CommandHelperListener playerListener =
-		new CommandHelperListener(this);
+			new CommandHelperListener(this);
 	/**
 	 * Interpreter listener
 	 */
 	public final CommandHelperInterpreterListener interpreterListener =
-		new CommandHelperInterpreterListener(this);
+			new CommandHelperInterpreterListener(this);
 	/**
 	 * Server Command Listener, for console commands
 	 */
 	final CommandHelperServerListener serverListener =
-		new CommandHelperServerListener();
+			new CommandHelperServerListener();
 	final Set<MCPlayer> commandRunning = new HashSet<MCPlayer>();
 
 	@Override
@@ -104,6 +103,13 @@ public class CommandHelperPlugin extends JavaPlugin {
 	 */
 	@Override
 	public void onEnable() {
+		//Metrics
+		try {
+			org.mcstats.MetricsLite metrics = new org.mcstats.MetricsLite(this);
+			metrics.start();
+		} catch (IOException e) {
+			// Failed to submit the stats :-(
+		}
 		self = this;
 		myServer = StaticLayer.GetServer();
 		try {
@@ -147,7 +153,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				//System.out.flush();
 				System.out.println("\n\n\n" + Static.Logo());
 			}
-			ac = new AliasCore(new File(chDirectory, script_name), new File(chDirectory, "LocalPackages"), 
+			ac = new AliasCore(new File(chDirectory, script_name), new File(chDirectory, "LocalPackages"),
 					prefsFile, new File(chDirectory, main_file), permissionsResolver, this);
 			ac.reload(null);
 		} catch (IOException ex) {
@@ -223,8 +229,8 @@ public class CommandHelperPlugin extends JavaPlugin {
 	@Override
 	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		if ((sender.isOp() || (sender instanceof Player && (permissionsResolver.hasPermission(((Player) sender).getName(), "commandhelper.reloadaliases")
-			|| permissionsResolver.hasPermission(((Player) sender).getName(), "ch.reloadaliases"))))
-			&& (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias") || cmd.getName().equals("recompile"))) {
+				|| permissionsResolver.hasPermission(((Player) sender).getName(), "ch.reloadaliases"))))
+				&& (cmd.getName().equals("reloadaliases") || cmd.getName().equals("reloadalias") || cmd.getName().equals("recompile"))) {
 			MCPlayer player = null;
 			if (sender instanceof Player) {
 				player = new BukkitMCPlayer((Player) sender);
@@ -291,7 +297,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		// Repeat command
 		if (cmd.equals("repeat")) {
 			if (player.isOp() || permissionsResolver.hasPermission(player.getName(), "commandhelper.repeat")
-				|| permissionsResolver.hasPermission(player.getName(), "ch.repeat")) {
+					|| permissionsResolver.hasPermission(player.getName(), "ch.repeat")) {
 				//Go ahead and remove them, so that they can repeat aliases. They can't get stuck in
 				//an infinite loop though, because the preprocessor won't try to fire off a repeat command
 				commandRunning.remove(player);
@@ -329,9 +335,9 @@ public class CommandHelperPlugin extends JavaPlugin {
 			} else {
 				//Display a help message
 				Static.SendMessage(player, MCChatColor.GREEN + "Command usage: \n"
-					+ MCChatColor.GREEN + "/alias <alias> - adds an alias to your user defined list\n"
-					+ MCChatColor.GREEN + "/delalias <id> - deletes alias with id <id> from your user defined list\n"
-					+ MCChatColor.GREEN + "/viewalias - shows you all of your aliases");
+						+ MCChatColor.GREEN + "/alias <alias> - adds an alias to your user defined list\n"
+						+ MCChatColor.GREEN + "/delalias <id> - deletes alias with id <id> from your user defined list\n"
+						+ MCChatColor.GREEN + "/viewalias - shows you all of your aliases");
 			}
 
 			commandRunning.remove(player);
@@ -385,7 +391,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 				if (Prefs.EnableInterpreter()) {
 					interpreterListener.startInterpret(player.getName());
 					Static.SendMessage(player, MCChatColor.YELLOW + "You are now in interpreter mode. Type a dash (-) on a line by itself to exit, and >>> to enter"
-						+ " multiline mode.");
+							+ " multiline mode.");
 				} else {
 					Static.SendMessage(player, MCChatColor.RED + "The interpreter is currently disabled. Check your preferences file.");
 				}

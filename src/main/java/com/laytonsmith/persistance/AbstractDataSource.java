@@ -10,6 +10,7 @@ import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
@@ -113,7 +114,7 @@ public abstract class AbstractDataSource implements DataSource {
 	}
 
 	public Set<String[]> getNamespace(String[] namespace) throws DataSourceException {
-		Set<String[]> list = new TreeSet<String[]>();
+		Set<String[]> list = new HashSet<String[]>();
 		String ns = StringUtils.Join(namespace, ".");
 		for (String key : stringKeySet()) {
 			if (key.startsWith(ns)) {
