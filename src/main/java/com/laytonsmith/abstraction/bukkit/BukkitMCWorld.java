@@ -273,7 +273,7 @@ public class BukkitMCWorld implements MCWorld {
             }
             if(((BukkitMCEntity)e).asEntity() instanceof Ocelot){
                 Ocelot o = (Ocelot)((BukkitMCEntity)e).asEntity();
-                if("".equals(subClass)){
+                if(!"".equals(subClass)){
                     subClass = Ocelot.Type.WILD_OCELOT.name();
                 }
                 try{
