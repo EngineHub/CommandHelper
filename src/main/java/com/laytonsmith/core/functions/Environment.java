@@ -93,9 +93,9 @@ public class Environment {
                     world = args[1].val();
                 }
             } else if (args.length == 3 || args.length == 4) {
-                x = Static.getDouble(args[0]);
-                y = Static.getDouble(args[1]);
-                z = Static.getDouble(args[2]);
+                x = Static.getDouble(args[0], t);
+                y = Static.getDouble(args[1], t);
+                z = Static.getDouble(args[2], t);
                 if (args.length == 4) {
                     world = args[3].val();
                 }
@@ -171,9 +171,9 @@ public class Environment {
                 id = args[1].val();
 
             } else {
-                x = Static.getNumber(args[0]);
-                y = Static.getNumber(args[1]);
-                z = Static.getNumber(args[2]);
+                x = Static.getNumber(args[0], t);
+                y = Static.getNumber(args[1], t);
+                z = Static.getNumber(args[2], t);
                 id = args[3].val();
                 if (args.length == 5) {
                     world = args[4].val();
@@ -500,8 +500,8 @@ public class Environment {
                 z = l.getBlockZ();
                 w = l.getWorld();
             } else {
-                x = (int) Static.getInt(args[0]);
-                z = (int) Static.getInt(args[1]);
+                x = (int) Static.getInt(args[0], t);
+                z = (int) Static.getInt(args[1], t);
                 if(args.length != 3){
                     w = Static.getServer().getWorld(args[2].val());
                 }
@@ -567,8 +567,8 @@ public class Environment {
                 z = l.getBlockZ();
                 w = l.getWorld();
             } else {
-                x = (int) Static.getInt(args[0]);
-                z = (int) Static.getInt(args[1]);
+                x = (int) Static.getInt(args[0], t);
+                z = (int) Static.getInt(args[1], t);
                 if(args.length != 2){
                     w = Static.getServer().getWorld(args[2].val());
                 }
@@ -634,8 +634,8 @@ public class Environment {
                     world = args[1].val();
                 }
             } else if (args.length == 2 || args.length == 3) {
-                x = Static.getDouble(args[0]);
-                z = Static.getDouble(args[1]);
+                x = Static.getDouble(args[0], t);
+                z = Static.getDouble(args[1], t);
                 if (args.length == 3) {
                     world = args[2].val();
                 }
@@ -708,7 +708,7 @@ public class Environment {
 			}
             if(args.length >= 2) {
 				if(!(args[1] instanceof CNull)){
-					size = Static.getInt(args[1]);
+					size = Static.getInt(args[1], t);
 				}
             }
 
@@ -773,7 +773,7 @@ public class Environment {
 				noteOffset = 1;
 				l = p.getLocation();
 			} else if(args.length == 4){
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 				instrumentOffset = 1;
 				noteOffset = 2;
 				l = ObjectGenerator.GetGenerator().location(args[3], p.getWorld(), t);
@@ -782,7 +782,7 @@ public class Environment {
 					//Player provided, location not
 					instrumentOffset = 1;
 					noteOffset = 2;
-					p = Static.GetPlayer(args[0]);
+					p = Static.GetPlayer(args[0], t);
 					l = p.getLocation();
 				} else {
 					//location provided, player not
@@ -798,7 +798,7 @@ public class Environment {
 			}
 			MCTone tone = null;
 			if(args[noteOffset] instanceof CArray){
-				int octave = (int)Static.getInt(((CArray)args[noteOffset]).get("octave"));
+				int octave = (int)Static.getInt(((CArray)args[noteOffset]).get("octave"), t);
 				if(octave < 0 || octave > 2){
 					throw new Exceptions.RangeException("The octave must be 0, 1, or 2, but was " + octave, t);
 				}

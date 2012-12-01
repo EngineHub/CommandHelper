@@ -41,18 +41,18 @@ public class ObjectGenerator {
         Construct yaw = new CDouble(l.getYaw(), Target.UNKNOWN);
         Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
         ca.forceAssociativeMode();
-        ca.set("0", x);
-        ca.set("1", y);
-        ca.set("2", z);
-        ca.set("3", world);
-        ca.set("4", yaw);
-        ca.set("5", pitch);
-        ca.set("x", x);
-        ca.set("y", y);
-        ca.set("z", z);
-        ca.set("world", world);
-        ca.set("yaw", yaw);
-        ca.set("pitch", pitch);
+        ca.set("0", x, Target.UNKNOWN);
+        ca.set("1", y, Target.UNKNOWN);
+        ca.set("2", z, Target.UNKNOWN);
+        ca.set("3", world, Target.UNKNOWN);
+        ca.set("4", yaw, Target.UNKNOWN);
+        ca.set("5", pitch, Target.UNKNOWN);
+        ca.set("x", x, Target.UNKNOWN);
+        ca.set("y", y, Target.UNKNOWN);
+        ca.set("z", z, Target.UNKNOWN);
+        ca.set("world", world, Target.UNKNOWN);
+        ca.set("yaw", yaw, Target.UNKNOWN);
+        ca.set("pitch", pitch, Target.UNKNOWN);
         return ca;
     }
 
@@ -80,51 +80,51 @@ public class ObjectGenerator {
         if (!array.inAssociativeMode()) {
             if (array.size() == 3) {
                 //Just the xyz, with default yaw and pitch, and given world
-                x = Static.getNumber(array.get(0, t));
-                y = Static.getNumber(array.get(1, t));
-                z = Static.getNumber(array.get(2, t));
+                x = Static.getNumber(array.get(0, t), t);
+                y = Static.getNumber(array.get(1, t), t);
+                z = Static.getNumber(array.get(2, t), t);
             } else if (array.size() == 4) {
                 //x, y, z, world
-                x = Static.getNumber(array.get(0, t));
-                y = Static.getNumber(array.get(1, t));
-                z = Static.getNumber(array.get(2, t));
+                x = Static.getNumber(array.get(0, t), t);
+                y = Static.getNumber(array.get(1, t), t);
+                z = Static.getNumber(array.get(2, t), t);
                 world = Static.getServer().getWorld(array.get(3, t).val());
             } else if (array.size() == 5) {
                 //x, y, z, yaw, pitch, with given world
-                x = Static.getNumber(array.get(0, t));
-                y = Static.getNumber(array.get(1, t));
-                z = Static.getNumber(array.get(2, t));
-                yaw = (float) Static.getNumber(array.get(3, t));
-                pitch = (float) Static.getNumber(array.get(4, t));
+                x = Static.getNumber(array.get(0, t), t);
+                y = Static.getNumber(array.get(1, t), t);
+                z = Static.getNumber(array.get(2, t), t);
+                yaw = (float) Static.getNumber(array.get(3, t), t);
+                pitch = (float) Static.getNumber(array.get(4, t), t);
             } else if (array.size() == 6) {
                 //All have been given
-                x = Static.getNumber(array.get(0, t));
-                y = Static.getNumber(array.get(1, t));
-                z = Static.getNumber(array.get(2, t));
+                x = Static.getNumber(array.get(0, t), t);
+                y = Static.getNumber(array.get(1, t), t);
+                z = Static.getNumber(array.get(2, t), t);
                 world = Static.getServer().getWorld(array.get(3, t).val());
-                yaw = (float) Static.getNumber(array.get(4, t));
-                pitch = (float) Static.getNumber(array.get(5, t));
+                yaw = (float) Static.getNumber(array.get(4, t), t);
+                pitch = (float) Static.getNumber(array.get(5, t), t);
             } else {
                 throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, t);
             }
         }
         if (array.containsKey("x")) {
-            x = Static.getNumber(array.get("x"));
+            x = Static.getNumber(array.get("x"), t);
         }
         if (array.containsKey("y")) {
-            y = Static.getNumber(array.get("y"));
+            y = Static.getNumber(array.get("y"), t);
         }
         if (array.containsKey("z")) {
-            z = Static.getNumber(array.get("z"));
+            z = Static.getNumber(array.get("z"), t);
         }
         if (array.containsKey("world")) {
             world = Static.getServer().getWorld(array.get("world").val());
         }
         if (array.containsKey("yaw")) {
-            yaw = (float) Static.getDouble(array.get("yaw"));
+            yaw = (float) Static.getDouble(array.get("yaw"), t);
         }
         if (array.containsKey("pitch")) {
-            pitch = (float) Static.getDouble(array.get("pitch"));
+            pitch = (float) Static.getDouble(array.get("pitch"), t);
         }
 		//If world is still null at this point, it's an error
 		if (world == null) {
@@ -164,8 +164,8 @@ public class ObjectGenerator {
         for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
             CArray enchObj = new CArray(t);
             enchObj.forceAssociativeMode();
-            enchObj.set("etype", new CString(entry.getKey().getName(), t));
-            enchObj.set("elevel", new CInt(entry.getValue(), t));
+            enchObj.set("etype", new CString(entry.getKey().getName(), t), t);
+            enchObj.set("elevel", new CInt(entry.getValue(), t), t);
             enchants.push(enchObj);
         }
         CArray ret = new CArray(t);
@@ -173,7 +173,7 @@ public class ObjectGenerator {
         ret.set("type", Integer.toString(type));
         ret.set("data", Integer.toString(data));
         ret.set("qty", Integer.toString(qty));
-        ret.set("enchants", enchants);
+        ret.set("enchants", enchants, t);
         return ret;
     }
 

@@ -337,7 +337,7 @@ public class ExecutionQueue {
 			if(args.length == 2){
 				queue = args[1].nval();
 			}
-			final long delay = Static.getInt(args[0]);
+			final long delay = Static.getInt(args[0], t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().push(queue, new Runnable() {
 
 				public void run() {
@@ -390,7 +390,7 @@ public class ExecutionQueue {
 			if(args.length == 2){
 				queue = args[1].nval();
 			}
-			final long delay = Static.getInt(args[0]);
+			final long delay = Static.getInt(args[0], t);
 			environment.getEnv(GlobalEnv.class).GetExecutionQueue().pushFront(queue, new Runnable() {
 
 				public void run() {

@@ -215,7 +215,7 @@ public class Script {
                         newEnv = env.clone();
                     } catch(Exception e){}
 					ProfilePoint pp = env.getEnv(GlobalEnv.class).GetProfiler().start(m.val() + " execution", LogLevel.INFO);
-                    Construct ret = p.cexecute(c.getChildren(), newEnv);
+                    Construct ret = p.cexecute(c.getChildren(), newEnv, m.getTarget());
 					pp.stop();					
 					return ret;
                 }

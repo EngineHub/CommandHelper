@@ -32,9 +32,14 @@ public class Procedure implements Cloneable {
     private List<IVariable> varIndex = new ArrayList<IVariable>();
     private ParseTree tree;
     private boolean possiblyConstant = false;
+	/**
+	 * The line the procedure is defined at (for stacktraces)
+	 */
+	private Target definedAt;
 
     public Procedure(String name, List<IVariable> varList, ParseTree tree, Target t) {
         this.name = name;
+		this.definedAt = t;
         this.varList = new HashMap<String, IVariable>();
         for (IVariable var : varList) {
             try {
@@ -132,12 +137,12 @@ public class Procedure implements Cloneable {
      * @param env
      * @return
      */
-    public Construct cexecute(List<ParseTree> args, Environment env) {
+    public Construct cexecute(List<ParseTree> args, Environment env, Target t) {
         List<Construct> list = new ArrayList<Construct>();
         for (ParseTree arg : args) {
             list.add(env.getEnv(GlobalEnv.class).GetScript().seval(arg, env));
         }
-        return execute(list, env);
+        return execute(list, env, t);
     }
 
     /**
@@ -147,7 +152,7 @@ public class Procedure implements Cloneable {
      * @param env
      * @return
      */
-    public Construct execute(List<Construct> args, Environment env) {
+    public Construct execute(List<Construct> args, Environment env, Target t) {
         env.getEnv(GlobalEnv.class).SetVarList(new IVariableList());
         CArray array = new CArray(Target.UNKNOWN);
         for (String key : originals.keySet()) {
@@ -158,7 +163,7 @@ public class Procedure implements Cloneable {
         Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);        
         for (int i = 0; i < args.size(); i++) {
             Construct c = args.get(i);
-            array.set(i, c);
+            array.set(i, c, t);
             if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getName();
                 env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, c, c.getTarget()));
@@ -168,10 +173,12 @@ public class Procedure implements Cloneable {
 
         try {
             fakeScript.eval(tree, env);
-        }
-        catch (FunctionReturnException e) {
+        } catch (FunctionReturnException e) {
             return e.getReturn();
-        }
+        } catch(ConfigRuntimeException e){
+			e.addStackTraceTrail(new ConfigRuntimeException.StackTraceElement("proc " + name, e.getTarget()), t);
+			throw e;
+		}
         return new CVoid(Target.UNKNOWN);
     }
 

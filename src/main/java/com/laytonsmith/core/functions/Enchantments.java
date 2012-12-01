@@ -211,7 +211,7 @@ public class Enchantments {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
 			}
-			MCItemStack is = m.getItemAt(args[1 - offset]);
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:(int)Static.getInt(args[1 - offset], t));
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
 //            } else {
@@ -237,7 +237,7 @@ public class Enchantments {
 					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
 				}
 				if (e.canEnchantItem(is)) {
-					int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t));
+					int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 					if (e.getMaxLevel() >= level && level > 0) {
 						is.addEnchantment(e, level);
 					} else {
@@ -293,7 +293,7 @@ public class Enchantments {
 				offset = 0;
 			}
 			Static.AssertPlayerNonNull(m, t);
-			MCItemStack is = m.getItemAt(args[1 - offset]);
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:(int)Static.getInt(args[1 - offset], t));
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
 //            } else {
@@ -360,7 +360,7 @@ public class Enchantments {
 			} else {
 				slot = args[0];
 			}
-			MCItemStack is = m.getItemAt(slot);
+			MCItemStack is = m.getItemAt(slot instanceof CNull?null:(int)Static.getInt(slot, t));
 //            if(slot instanceof CNull){
 //                is = m.getItemInHand();
 //            } else {

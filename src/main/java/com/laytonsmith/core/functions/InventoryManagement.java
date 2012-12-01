@@ -72,25 +72,25 @@ public class InventoryManagement {
                 }
             } else if (args.length == 1) {
                 all = true;
-                m = Static.GetPlayer(args[0]);
+                m = Static.GetPlayer(args[0], t);
             } else if (args.length == 2) {
                 if (args[1] instanceof CNull) {
                     index = null;
                 } else {
-                    index = (int) Static.getInt(args[1]);
+                    index = (int) Static.getInt(args[1], t);
                 }
                 all = false;
-                m = Static.GetPlayer(args[0]);
+                m = Static.GetPlayer(args[0], t);
             }
 
             if(all){
                 CArray ret = new CArray(t);
                 ret.forceAssociativeMode();
                 for(int i = 0; i < 36; i++){
-                    ret.set(i, getInvSlot(m, i, t));
+                    ret.set(i, getInvSlot(m, i, t), t);
                 }
                 for(int i = 100; i < 104; i++){
-                    ret.set(i, getInvSlot(m, i, t));
+                    ret.set(i, getInvSlot(m, i, t), t);
                 }
                 return ret;
             } else {
@@ -185,7 +185,7 @@ public class InventoryManagement {
             }
             Construct arg;
             if(args.length == 2){
-                m = Static.GetPlayer(args[0]);
+                m = Static.GetPlayer(args[0], t);
                 arg = args[1];
             } else if(args.length == 1){
                 arg = args[0];
@@ -275,7 +275,7 @@ public class InventoryManagement {
             if(args.length == 1){
                 item = args[0].val();
             } else {
-                p = Static.GetPlayer(args[0]);
+                p = Static.GetPlayer(args[0], t);
                 item = args[1].val();
             }
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
@@ -344,7 +344,7 @@ public class InventoryManagement {
             if(args.length == 1){
                 item = args[0].val();
             } else {
-                p = Static.GetPlayer(args[0]);
+                p = Static.GetPlayer(args[0], t);
                 item = args[1].val();
             }
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
@@ -418,10 +418,10 @@ public class InventoryManagement {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
             if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1], t), t);
             } else {
-                p = Static.GetPlayer(args[0]);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), t);
+                p = Static.GetPlayer(args[0], t);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2], t), t);
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
@@ -505,10 +505,10 @@ public class InventoryManagement {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
             if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1]), t);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1], t), t);
             } else {
-                p = Static.GetPlayer(args[0]);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2]), t);
+                p = Static.GetPlayer(args[0], t);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2], t), t);
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
@@ -567,7 +567,7 @@ public class InventoryManagement {
 			}
 			
 			MCInventory inv = GetInventory(args[0], w, t);			
-			int slot = (int)Static.getInt(args[1]);
+			int slot = (int)Static.getInt(args[1], t);
 			try{
 				MCItemStack is = inv.getItem(slot);
 				return ObjectGenerator.GetGenerator().item(is, t);
@@ -621,7 +621,7 @@ public class InventoryManagement {
 			}
 			
 			MCInventory inv = GetInventory(args[0], w, t);			
-			int slot = (int)Static.getInt(args[1]);
+			int slot = (int)Static.getInt(args[1], t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try{
 				inv.setItem(slot, is);
@@ -746,7 +746,7 @@ public class InventoryManagement {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
 		} else {
-			int entityID = (int)Static.getInt(specifier);
+			int entityID = (int)Static.getInt(specifier, t);
 			inv = StaticLayer.GetConvertor().GetEntityInventory(entityID);
 		}
 		if(inv == null){
@@ -775,10 +775,10 @@ public class InventoryManagement {
 			MCPlayer p1 = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCPlayer p2;
 			if(args.length == 2){
-				p1 = Static.GetPlayer(args[0]);
-				p2 = Static.GetPlayer(args[1]);
+				p1 = Static.GetPlayer(args[0], t);
+				p2 = Static.GetPlayer(args[1], t);
 			} else {
-				p2 = Static.GetPlayer(args[0]);
+				p2 = Static.GetPlayer(args[0], t);
 			}
 			
 			p1.openInventory(p2.getInventory());
@@ -844,7 +844,7 @@ public class InventoryManagement {
 //        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 //            MCPlayer p = environment.GetPlayer();
 //            if(args.length == 1){
-//                p = Static.GetPlayer(args[0]);
+//                p = Static.GetPlayer(args[0], t);
 //            }
 //            //First, we need to address the hotbar
 //            for(int i = 0; i < 10; i++){

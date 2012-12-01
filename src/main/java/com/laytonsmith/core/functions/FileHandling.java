@@ -13,6 +13,7 @@ import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
 import com.laytonsmith.core.constructs.CClosure;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -108,7 +109,7 @@ public class FileHandling {
 	public static class async_read extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.SecurityException};
 		}
 
 		public boolean isRestricted() {
@@ -127,6 +128,9 @@ public class FileHandling {
 			} else {
 				callback = ((CClosure)args[1]);
 			}
+			if(!Security.CheckSecurity(file)){
+				throw new ConfigRuntimeException("You do not have permission to access the file '" + file + "'", ExceptionType.SecurityException, t);
+			}
 			Threader.GetThreader().submit(new Runnable() {
 
 				public void run() {
@@ -142,7 +146,7 @@ public class FileHandling {
 					} else {
 						try {
 							//It's a local file read
-							returnString = FileUtility.read(new File(file));
+							returnString = FileUtility.read(new File(t.file().getParentFile(), file));
 						} catch (IOException ex) {
 							exception = new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t, ex);
 						}
@@ -191,6 +195,48 @@ public class FileHandling {
 				+ " exeption array. Otherwise, @contents will contain the file's contents, and @exception will be null. This method is useful"
 				+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"
 				+ " simply using the read() function.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class file_size extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.SecurityException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String location = args[0].val();
+			if(!Security.CheckSecurity(location)){
+				throw new ConfigRuntimeException("You do not have permission to access the file '" + location + "'", 
+						ExceptionType.SecurityException, t);
+			}
+			return new CInt(new File(t.file().getParentFile(), location).length(), t);
+		}
+
+		public String getName() {
+			return "file_size";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "int {path} Returns the size of a file on the file system.";
 		}
 
 		public CHVersion since() {

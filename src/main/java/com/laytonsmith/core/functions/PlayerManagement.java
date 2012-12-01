@@ -45,7 +45,7 @@ public class PlayerManagement {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 
 			if (args.length == 1) {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			}
 
 			if (p != null && p instanceof MCPlayer) {
@@ -140,7 +140,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if (args.length == 1) {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			MCLocation l = m.getLocation();
@@ -220,9 +220,9 @@ public class PlayerManagement {
 				if (args[0] instanceof CArray) {
 					CArray ca = (CArray) args[0];
 					l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), t);
-					x = Static.getNumber(ca.get(0, t));
-					y = Static.getNumber(ca.get(1, t));
-					z = Static.getNumber(ca.get(2, t));
+					x = Static.getNumber(ca.get(0, t), t);
+					y = Static.getNumber(ca.get(1, t), t);
+					z = Static.getNumber(ca.get(2, t), t);
 					if (p instanceof MCPlayer) {
 						m = ((MCPlayer) p);
 					}
@@ -247,15 +247,15 @@ public class PlayerManagement {
 				if (p instanceof MCPlayer) {
 					m = (MCPlayer) p;
 				}
-				x = Static.getNumber(args[0]);
-				y = Static.getNumber(args[1]);
-				z = Static.getNumber(args[2]);
+				x = Static.getNumber(args[0], t);
+				y = Static.getNumber(args[1], t);
+				z = Static.getNumber(args[2], t);
 				l = m.getLocation();
 			} else {
 				MCPlayer = args[0].val();
-				x = Static.getNumber(args[1]);
-				y = Static.getNumber(args[2]);
-				z = Static.getNumber(args[3]);
+				x = Static.getNumber(args[1], t);
+				y = Static.getNumber(args[2], t);
+				z = Static.getNumber(args[3], t);
 				l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer, t).getWorld(), x, y, z, 0, 0);
 			}
 			if (m == null && MCPlayer != null) {
@@ -306,7 +306,7 @@ public class PlayerManagement {
 					m = (MCPlayer) p;
 				}
 			} else {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			MCBlock b = m.getTargetBlock(null, 10000);
@@ -340,7 +340,7 @@ public class PlayerManagement {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCPlayer m = null;
 			if (args.length == 1) {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 			} else {
 				if (p instanceof MCPlayer) {
 					m = (MCPlayer) p;
@@ -391,7 +391,7 @@ public class PlayerManagement {
 					m = (MCPlayer) p;
 				}
 			} else {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 			}
 
 			Static.AssertPlayerNonNull(m, t);
@@ -481,7 +481,7 @@ public class PlayerManagement {
 				index = -1;
 			} else {
 				player = args[0].val();
-				index = (int) Static.getInt(args[1]);
+				index = (int) Static.getInt(args[1], t);
 			}
 
 			MCPlayer p = Static.GetPlayer(player, t);
@@ -637,7 +637,7 @@ public class PlayerManagement {
 					m = (MCPlayer) p;
 				}
 			} else {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			return new CString(m.getWorld().getName(), t);
@@ -686,7 +686,7 @@ public class PlayerManagement {
 				}
 			}
 			if (args.length >= 1) {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 			}
 			if (args.length >= 2) {
 				message = args[1].val();
@@ -741,7 +741,7 @@ public class PlayerManagement {
 				}
 				name = args[0].val();
 			} else {
-				MCPlayer = Static.GetPlayer(args[0]);
+				MCPlayer = Static.GetPlayer(args[0], t);
 				name = args[1].val();
 			}
 			Static.AssertPlayerNonNull(MCPlayer, t);
@@ -790,7 +790,7 @@ public class PlayerManagement {
 					MCPlayer = (MCPlayer) p;
 				}
 			} else {
-				MCPlayer = Static.GetPlayer(args[0]);
+				MCPlayer = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(MCPlayer, t);
 			MCPlayer.setDisplayName(MCPlayer.getName());
@@ -852,7 +852,7 @@ public class PlayerManagement {
 					try {
 						Integer.parseInt(args[0].val());
 					} catch (NumberFormatException e) {
-						MCPlayer p2 = Static.GetPlayer(args[0]);
+						MCPlayer p2 = Static.GetPlayer(args[0], t);
 						l = p2.getLocation();
 					}
 				}
@@ -876,7 +876,7 @@ public class PlayerManagement {
 					toSet = (MCPlayer) p;
 					pitch = toSet.getLocation().getPitch();
 				}
-				int g = (int) Static.getInt(args[0]);
+				int g = (int) Static.getInt(args[0], t);
 				if (g < 0 || g > 3) {
 					throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
 							ExceptionType.RangeException, t);
@@ -891,13 +891,13 @@ public class PlayerManagement {
 					if (p instanceof MCPlayer) {
 						toSet = (MCPlayer) p;
 					}
-					yaw = (float) Static.getNumber(args[0]);
-					pitch = (float) Static.getNumber(args[1]);
+					yaw = (float) Static.getNumber(args[0], t);
+					pitch = (float) Static.getNumber(args[1], t);
 				} catch (NumberFormatException e) {
 					//It's the MCPlayer, F variation
-					toSet = Static.GetPlayer(args[0]);
+					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
-					int g = (int) Static.getInt(args[1]);
+					int g = (int) Static.getInt(args[1], t);
 					if (g < 0 || g > 3) {
 						throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
 								ExceptionType.RangeException, t);
@@ -906,9 +906,9 @@ public class PlayerManagement {
 				}
 			} else if (args.length == 3) {
 				//It's the MCPlayer, yaw, pitch variation
-				toSet = Static.GetPlayer(args[0]);
-				yaw = (float) Static.getNumber(args[1]);
-				pitch = (float) Static.getNumber(args[2]);
+				toSet = Static.GetPlayer(args[0], t);
+				yaw = (float) Static.getNumber(args[1], t);
+				pitch = (float) Static.getNumber(args[2], t);
 			}
 
 			//Error check our data
@@ -963,7 +963,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if (args.length == 1) {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 			}
 
 			Static.AssertPlayerNonNull(m, t);
@@ -1013,7 +1013,7 @@ public class PlayerManagement {
 				m = (MCPlayer) p;
 			}
 			if (args.length == 2) {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 				mode = args[1].val();
 			} else {
 				mode = args[0].val();
@@ -1116,9 +1116,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1]);
+				xp = (int) Static.getInt(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0]);
+				xp = (int) Static.getInt(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setExp(((float) xp) / 100.0F);
@@ -1166,9 +1166,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1]);
+				xp = (int) Static.getInt(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0]);
+				xp = (int) Static.getInt(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.giveExp(xp);
@@ -1262,9 +1262,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				level = (int) Static.getInt(args[1]);
+				level = (int) Static.getInt(args[1], t);
 			} else {
-				level = (int) Static.getInt(args[0]);
+				level = (int) Static.getInt(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setLevel(level);
@@ -1357,9 +1357,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1]);
+				xp = (int) Static.getInt(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0]);
+				xp = (int) Static.getInt(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setTotalExperience(xp);
@@ -1456,9 +1456,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				level = (int) Static.getInt(args[1]);
+				level = (int) Static.getInt(args[1], t);
 			} else {
-				level = (int) Static.getInt(args[0]);
+				level = (int) Static.getInt(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setFoodLevel(level);
@@ -1507,12 +1507,12 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
-			int effect = (int) Static.getInt(args[1]);
+			int effect = (int) Static.getInt(args[1], t);
 			
-			int strength = (int) Static.getInt(args[2]);
+			int strength = (int) Static.getInt(args[2], t);
 			int seconds = 30;
 			if (args.length == 4) {
-				seconds = (int) Static.getInt(args[3]);
+				seconds = (int) Static.getInt(args[3], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if (seconds == 0 || strength == 0) {
@@ -1542,14 +1542,14 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if(args.length > 0){
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			}
 			CArray ret = new CArray(t);
 			for(MCLivingEntity.MCEffect e : p.getEffects()){
 				CArray potion = new CArray(t);
-				potion.set("potionID", new CInt(e.getPotionID(), t));
-				potion.set("strength", new CInt(e.getStrength(), t));
-				potion.set("seconds", new CInt(e.getSecondsRemaining(), t));
+				potion.set("potionID", new CInt(e.getPotionID(), t), t);
+				potion.set("strength", new CInt(e.getStrength(), t), t);
+				potion.set("seconds", new CInt(e.getSecondsRemaining(), t), t);
 				ret.push(potion);
 			}
 			return ret;
@@ -1615,9 +1615,9 @@ public class PlayerManagement {
 			int health = 0;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				health = (int) Static.getInt(args[1]);
+				health = (int) Static.getInt(args[1], t);
 			} else {
-				health = (int) Static.getInt(args[0]);
+				health = (int) Static.getInt(args[0], t);
 			}
 			if (health < 0 || health > 20) {
 				throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, t);
@@ -1667,7 +1667,7 @@ public class PlayerManagement {
 			//throw an exception if the player doesn't exist
 			MCPlayer p = null;
 			try {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			} catch (ConfigRuntimeException e) {
 				//They aren't in the player list
 			}
@@ -2017,7 +2017,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			int left = p.getRemainingFireTicks();
@@ -2061,7 +2061,7 @@ public class PlayerManagement {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			Construct ticks;
 			if (args.length == 2) {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 				ticks = args[1];
 			} else {
 				ticks = args[0];
@@ -2073,7 +2073,7 @@ public class PlayerManagement {
 					tick = 20;
 				}
 			} else {
-				tick = (int) Static.getInt(ticks);
+				tick = (int) Static.getInt(ticks, t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setRemainingFireTicks(tick);
@@ -2111,7 +2111,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return new CBoolean(p.getAllowFlight(), t);
@@ -2155,7 +2155,7 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				flight = Static.getBoolean(args[0]);
 			} else {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 				flight = Static.getBoolean(args[1]);
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -2229,7 +2229,7 @@ public class PlayerManagement {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if (args.length == 2) {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			long time = 0;
@@ -2314,7 +2314,7 @@ public class PlayerManagement {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if (args.length == 1) {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			return new CInt(p.getPlayerTime(), t);
@@ -2358,7 +2358,7 @@ public class PlayerManagement {
 				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			}
 			if (args.length == 1) {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.resetPlayerTime();
@@ -2385,7 +2385,7 @@ public class PlayerManagement {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			String listName;
 			if (args.length == 2) {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 				listName = args[1].nval();
 			} else {
 				listName = args[0].nval();
@@ -2439,7 +2439,7 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
-				m = Static.GetPlayer(args[0]);
+				m = Static.GetPlayer(args[0], t);
 			}
 			return new CString(m.getPlayerListName(), t);
 		}
@@ -2494,15 +2494,15 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 			}
 			CArray vector = new CArray(t);
 			vector.forceAssociativeMode();
 			MCPlayer.Velocity velocity = p.getVelocity();
-			vector.set("magnitude", new CDouble(velocity.magnitude, t));
-			vector.set("x", new CDouble(velocity.x, t));
-			vector.set("y", new CDouble(velocity.y, t));
-			vector.set("z", new CDouble(velocity.z, t));
+			vector.set("magnitude", new CDouble(velocity.magnitude, t), t);
+			vector.set("x", new CDouble(velocity.x, t), t);
+			vector.set("y", new CDouble(velocity.y, t), t);
+			vector.set("z", new CDouble(velocity.z, t), t);
 			return vector;
 		}
 
@@ -2535,7 +2535,7 @@ public class PlayerManagement {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3){
-				p = Static.GetPlayer(args[0]);
+				p = Static.GetPlayer(args[0], t);
 				offset = 1;
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);

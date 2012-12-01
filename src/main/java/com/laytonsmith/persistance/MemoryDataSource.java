@@ -8,6 +8,7 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -89,7 +90,7 @@ public final class MemoryDataSource extends AbstractDataSource {
 
 	public Set<String[]> keySet() throws DataSourceException {
 		init();
-		Set<String[]> set = new TreeSet<String[]>();
+		Set<String[]> set = new HashSet<String[]>();
 		for(String key : database.keySet()){
 			set.add(key.split("\\."));
 		}

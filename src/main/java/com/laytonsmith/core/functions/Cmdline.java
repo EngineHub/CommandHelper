@@ -163,7 +163,7 @@ public class Cmdline {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             int exit_code = 0;
             if (args.length == 1) {
-                exit_code = (int) Static.getInt(args[0]);
+                exit_code = (int) Static.getInt(args[0], t);
             }
             if (environment.getEnv(GlobalEnv.class).GetCustom("cmdline") instanceof Boolean 
 					&& (Boolean) environment.getEnv(GlobalEnv.class).GetCustom("cmdline")) {

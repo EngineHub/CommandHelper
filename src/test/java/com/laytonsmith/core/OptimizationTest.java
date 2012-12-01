@@ -131,6 +131,10 @@ public class OptimizationTest {
 		assertEquals("replace('this is a thing','thing',dyn('hi'))", optimize("reg_replace('thing', dyn('hi'), 'this is a thing')"));
 	}
 	
+	@Test public void testTrivialAssignmentWithEqualsSymbol() throws Exception{
+		assertEquals("assign(@a,1)", optimize("@a = 1"));
+	}
+	
 	@Test public void testAssignWithEqualsSymbol() throws Exception {
 		assertEquals("sconcat(assign(@var,'ab'),'c')", optimize("@var = 'a'.'b' 'c'"));
 	}
@@ -140,6 +144,36 @@ public class OptimizationTest {
 		assertEquals("assign(@one,subtract(@one,1))", optimize("@one -= 1"));
 		assertEquals("assign(@one,multiply(@one,1))", optimize("@one *= 1"));
 		assertEquals("assign(@one,divide(@one,1))", optimize("@one /= 1"));
+		assertEquals("assign(@one,concat(@one,1))", optimize("@one .= 1"));
+	}
+	
+	@Test public void testMultiAssign() throws Exception{
+		assertEquals("assign(@one,assign(@two,''))", optimize("@one = @two = ''"));
+		assertEquals("sconcat(assign(@one,assign(@two,'')),'blah')", optimize("@one = @two = '' 'blah'"));
+	}
+	
+	@Test public void testAssignmentMixedWithAddition1() throws Exception{
+		assertEquals("add(1,assign(@a,1))", optimize("1 + @a = 1"));
+	}
+	
+	@Test public void testAssignmentMixedWithAddition2() throws Exception{
+		assertEquals("add(1,assign(@a,add(@b,2)))", optimize("1 + @a = @b + 2"));
+	}
+	
+	@Test public void testAssignmentMixedWithAddition3() throws Exception{
+		assertEquals("add(1,assign(@a,add(@b,@c,2)))", optimize("1 + @a = @b + @c + 2"));
+	}
+	
+	@Test public void testAssignmentMixedWithAddition4() throws Exception{
+		assertEquals("add(1,assign(@a,add(@a,@b,@c,2)))", optimize("1 + @a += @b + @c + 2"));
+	}
+	
+	@Test public void testAssignmentMixedWithAddition5() throws Exception{
+		assertEquals("add(1,assign(@_,assign(@a,add(@a,@b,@c,2))))", optimize("1 + @_ = @a += @b + @c + 2"));
+	}
+	
+	@Test public void testAssignmentMixedWithAddition6() throws Exception{
+		assertEquals("sconcat(add(1,assign(@_,assign(@a,add(@a,@b,@c,2)))),'blah')", optimize("1 + @_ = @a += @b + @c + 2 'blah'"));
 	}
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.

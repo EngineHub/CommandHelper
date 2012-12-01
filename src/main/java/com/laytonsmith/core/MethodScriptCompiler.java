@@ -150,6 +150,15 @@ public final class MethodScriptCompiler {
 				i++;
 				continue;
 			}
+			if(c == '.' && c2 == '=' && !state_in_quote){
+				if(buf.length() > 0){
+					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
+					buf = new StringBuilder();
+				}
+				token_list.add(new Token(TType.CONCAT_ASSIGNMENT, "/=", target));
+				i++;
+				continue;				
+			}
 			//This has to come before subtraction and greater than
 			if (c == '-' && c2 == '>' && !state_in_quote) {
 				if (buf.length() > 0) {
@@ -1181,7 +1190,7 @@ public final class MethodScriptCompiler {
 				ParseTree node = tree.getChildAt(i);
 				if (node.getData().val().equals("__autoconcat__")) {
 					Compiler.__autoconcat__ func = (Compiler.__autoconcat__) FunctionList.getFunction(node.getData());
-					ParseTree tempNode = func.optimizeSpecial(node.getData().getTarget(), node.getChildren(), false);
+					ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
 					tree.setData(tempNode.getData());
 					tree.setChildren(tempNode.getChildren());
 					optimize(tree, procs);

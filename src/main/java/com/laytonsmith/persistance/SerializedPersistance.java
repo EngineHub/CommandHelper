@@ -387,7 +387,7 @@ public class SerializedPersistance extends AbstractDataSource implements Persist
 	}
 
 	public Set<String[]> keySet() {
-		Set<String[]> list = new TreeSet<String[]>();
+		Set<String[]> list = new HashSet<String[]>();
 		for (String key : data.keySet()) {
 			list.add(key.split("\\."));
 		}

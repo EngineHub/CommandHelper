@@ -16,6 +16,7 @@ public class ConfigCompileException extends Exception{
     final int line_num;
     final File file;
     final int col;
+	final Target t;
 
     public ConfigCompileException(String message, Target t){
         this(message, t, null);
@@ -26,6 +27,7 @@ public class ConfigCompileException extends Exception{
         this.line_num = t.line();
         this.file = t.file();
         this.col = t.col();
+		this.t = t;
     }
 
     /**
@@ -45,7 +47,14 @@ public class ConfigCompileException extends Exception{
     public String getLineNum(){
         return Integer.toString(line_num);
     }
-
+	
+	public int getColumn(){
+		return col;
+	}
+	
+	public Target getTarget(){
+		return t;
+	}
 
     @Override
     public String toString(){

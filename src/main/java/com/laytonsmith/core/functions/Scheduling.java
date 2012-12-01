@@ -138,7 +138,7 @@ public class Scheduling {
 //                        null, t);
 //            }
 //            Construct x = args[0];
-//            double time = Static.getNumber(x);
+//            double time = Static.getNumber(x, t);
 //            Integer i = (Integer) (Prefs.);
 //            if (i > time || i <= 0) {
 //                try {
@@ -191,12 +191,12 @@ public class Scheduling {
 		}
 
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
-			long time = Static.getInt(args[0]);
+			long time = Static.getInt(args[0], t);
 			int offset = 0;
 			long delay = time;
 			if (args.length == 3) {
 				offset = 1;
-				delay = Static.getInt(args[1]);
+				delay = Static.getInt(args[1], t);
 			}
 			if (!(args[1 + offset] instanceof CClosure)) {
 				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
@@ -259,7 +259,7 @@ public class Scheduling {
 		}
 
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
-			long time = Static.getInt(args[0]);
+			long time = Static.getInt(args[0], t);
 			if (!(args[1] instanceof CClosure)) {
 				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
 			}
@@ -325,7 +325,7 @@ public class Scheduling {
 			if (args.length == 0 && environment.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
 				StaticLayer.ClearFutureRunnable((Integer) environment.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
 			} else if (args.length == 1) {
-				StaticLayer.ClearFutureRunnable((int) Static.getInt(args[0]));
+				StaticLayer.ClearFutureRunnable((int) Static.getInt(args[0], t));
 			} else {
 				throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -371,7 +371,7 @@ public class Scheduling {
 		public Construct exec(Target t, Environment env, Construct... args) {
 			Date now = new Date();
 			if (args.length == 2) {
-				now = new Date(Static.getInt(args[1]));
+				now = new Date(Static.getInt(args[1], t));
 			}
 			SimpleDateFormat dateFormat = new SimpleDateFormat(args[0].toString());
 			return new CString(dateFormat.format(now), t);

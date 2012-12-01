@@ -114,15 +114,15 @@ public class BlockEvents {
             CArray blk = new CArray(Target.UNKNOWN);
 
             int blktype = event.getBlock().getTypeId();
-            blk.set("type", new CInt(blktype, Target.UNKNOWN));
+            blk.set("type", new CInt(blktype, Target.UNKNOWN), Target.UNKNOWN);
 
             int blkdata = event.getBlock().getData();
-            blk.set("data", new CInt(blkdata, Target.UNKNOWN));
+            blk.set("data", new CInt(blkdata, Target.UNKNOWN), Target.UNKNOWN);
 
-            blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN));
-            blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN));
-            blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN));
-            blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN));
+            blk.set("X", new CInt(event.getBlock().getX(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("Y", new CInt(event.getBlock().getY(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("Z", new CInt(event.getBlock().getZ(), Target.UNKNOWN), Target.UNKNOWN);
+            blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
 
             map.put("block", blk);
 
@@ -273,18 +273,18 @@ public class BlockEvents {
             CArray agst = new CArray(Target.UNKNOWN);
             MCBlock agstblk = event.getBlockAgainst();
             int againsttype = agstblk.getTypeId();
-            agst.set("type", new CInt(againsttype, Target.UNKNOWN));
+            agst.set("type", new CInt(againsttype, Target.UNKNOWN), Target.UNKNOWN);
             int againstdata = agstblk.getData();
-            agst.set("data", new CInt(againstdata, Target.UNKNOWN));
-            agst.set("X", new CInt(agstblk.getX(), Target.UNKNOWN));
-            agst.set("Y", new CInt(agstblk.getY(), Target.UNKNOWN));
-            agst.set("Z", new CInt(agstblk.getZ(), Target.UNKNOWN));
+            agst.set("data", new CInt(againstdata, Target.UNKNOWN), Target.UNKNOWN);
+            agst.set("X", new CInt(agstblk.getX(), Target.UNKNOWN), Target.UNKNOWN);
+            agst.set("Y", new CInt(agstblk.getY(), Target.UNKNOWN), Target.UNKNOWN);
+            agst.set("Z", new CInt(agstblk.getZ(), Target.UNKNOWN), Target.UNKNOWN);
             map.put("against", agst);
 
             MCBlockState old = event.getBlockReplacedState();
             CArray oldarr = new CArray(Target.UNKNOWN);
-            oldarr.set("type", new CInt(old.getTypeId(), Target.UNKNOWN));
-            oldarr.set("data", new CInt(old.getData().getData(), Target.UNKNOWN));
+            oldarr.set("type", new CInt(old.getTypeId(), Target.UNKNOWN), Target.UNKNOWN);
+            oldarr.set("data", new CInt(old.getData().getData(), Target.UNKNOWN), Target.UNKNOWN);
             map.put("oldblock", oldarr);
 
             return map;
@@ -381,10 +381,10 @@ public class BlockEvents {
                 map.put("text", sce.getLines());
 
                 CArray blk = new CArray(Target.UNKNOWN);
-                blk.set("X", new CInt(sce.getBlock().getX(), Target.UNKNOWN));
-                blk.set("Y", new CInt(sce.getBlock().getY(), Target.UNKNOWN));
-                blk.set("Z", new CInt(sce.getBlock().getZ(), Target.UNKNOWN));
-                blk.set("world", new CString(sce.getBlock().getWorld().getName(), Target.UNKNOWN));
+                blk.set("X", new CInt(sce.getBlock().getX(), Target.UNKNOWN), Target.UNKNOWN);
+                blk.set("Y", new CInt(sce.getBlock().getY(), Target.UNKNOWN), Target.UNKNOWN);
+                blk.set("Z", new CInt(sce.getBlock().getZ(), Target.UNKNOWN), Target.UNKNOWN);
+                blk.set("world", new CString(sce.getBlock().getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
                 map.put("location", blk);
 
                 return map;

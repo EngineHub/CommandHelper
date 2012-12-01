@@ -188,7 +188,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             ca.forceAssociativeMode();
             for(Object key : obj.keySet()){
                 ca.set(convertJSON(key, t), 
-                        convertJSON(obj.get(key), t));
+                        convertJSON(obj.get(key), t), t);
             }
             return ca;
         } else if (s.startsWith("[")) {
@@ -236,7 +236,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             ca.forceAssociativeMode();
             for(Object key : ((java.util.Map)o).keySet()){
                 ca.set(convertJSON(key, t), 
-                        convertJSON(((java.util.Map)o).get(key), t));
+                        convertJSON(((java.util.Map)o).get(key), t), t);
             }
             return ca;
         } else {
@@ -287,7 +287,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             a.forceAssociativeMode();            
             Map m = (Map)o;
             for(Object key : m.entrySet()){
-                a.set(key.toString(), GetConstruct(m.get(key)));
+                a.set(key.toString(), GetConstruct(m.get(key)), Target.UNKNOWN);
             }
             return a;
         } else if(o instanceof Collection){

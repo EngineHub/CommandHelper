@@ -71,7 +71,7 @@ public final class Static {
      * @param c
      * @return 
      */
-    public static double getNumber(Construct c) {
+    public static double getNumber(Construct c, Target t) {
         double d;
         if (c == null || c instanceof CNull) {
             return 0.0;
@@ -85,7 +85,7 @@ public final class Static {
                 d = Double.parseDouble(c.val());
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
-                        ExceptionType.CastException, c.getTarget());
+                        ExceptionType.CastException, t);
             }
         } else if(c instanceof CBoolean){
             if(((CBoolean)c).getBoolean()){
@@ -95,7 +95,7 @@ public final class Static {
             }
         } else {
             throw new ConfigRuntimeException("Expecting a number, but received \"" + c.val() + "\" instead",
-                    ExceptionType.CastException, c.getTarget());
+                    ExceptionType.CastException, t);
         }
         return d;
     }
@@ -105,12 +105,12 @@ public final class Static {
      * @param c
      * @return 
      */
-    public static double getDouble(Construct c) {
+    public static double getDouble(Construct c, Target t) {
         try {
-            return getNumber(c);
+            return getNumber(c, t);
         } catch (ConfigRuntimeException e) {
             throw new ConfigRuntimeException("Expecting a double, but received " + c.val() + " instead",
-                    ExceptionType.CastException, c.getTarget());
+                    ExceptionType.CastException, t);
         }
     }
 
@@ -120,7 +120,7 @@ public final class Static {
      * @param c
      * @return 
      */
-    public static long getInt(Construct c) {
+    public static long getInt(Construct c, Target t) {
         long i;
         if (c == null || c instanceof CNull) {
             return 0;
@@ -138,7 +138,7 @@ public final class Static {
                 i = Long.parseLong(c.val());
             } catch (NumberFormatException e) {
                 throw new ConfigRuntimeException("Expecting an integer, but received " + c.val() + " instead",
-                        ExceptionType.CastException, c.getTarget());
+                        ExceptionType.CastException, t);
             }
         }
         return i;
@@ -160,9 +160,9 @@ public final class Static {
         } else if (c instanceof CString) {
             b = (c.val().length() > 0);
         } else if (c instanceof CInt || c instanceof CDouble) {
-            b = !(getNumber(c) == 0);
+            b = !(getNumber(c, Target.UNKNOWN) == 0);
         } else if(c instanceof CArray){
-            b = ((CArray)c).size() != 0;
+            b = !((CArray)c).isEmpty();
         }
         return b;
     }
@@ -509,7 +509,7 @@ public final class Static {
                 throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation, ExceptionType.FormatException, t);
             }
         } else {
-            type = (int) Static.getInt(Static.resolveConstruct(notation, t));
+            type = (int) Static.getInt(Static.resolveConstruct(notation, t), t);
         }
 
         is = StaticLayer.GetItemStack(type, qty);
@@ -564,10 +564,6 @@ public final class Static {
 
     public static MCPlayer GetPlayer(Construct player, Target t) throws ConfigRuntimeException {
         return GetPlayer(player.val(), t);
-    }
-
-    public static MCPlayer GetPlayer(Construct player) {
-        return GetPlayer(player, player.getTarget());
     }
 
     public static boolean isNull(Construct construct) {

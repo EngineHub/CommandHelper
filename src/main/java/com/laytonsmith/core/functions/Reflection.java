@@ -11,7 +11,9 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.persistance.DataSourceFactory;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -37,6 +39,7 @@ public class Reflection {
 	@api(environments={CommandHelperEnvironment.class})
 	public static class reflect_pull extends AbstractFunction {
 
+		private static Set<Construct> protocols;
 		public String getName() {
 			return "reflect_pull";
 		}
@@ -57,6 +60,7 @@ public class Reflection {
 					+ "<tr><td>line_num</td><td></td><td>The current line number</td></tr>"
 					+ "<tr><td>file</td><td></td><td>The absolute path to the current file</td></tr>"
 					+ "<tr><td>col</td><td></td><td>The current column number</td></tr>"
+					+ "<tr><td>datasources</td><td></td><td>An array of data source protocols available</td></tr>"
 					+ "</table>";
 			//+ "<tr><td></td><td></td><td></td></tr>"
 		}
@@ -106,6 +110,14 @@ public class Reflection {
 				}
 			} else if ("col".equalsIgnoreCase(param)) {
 				return new CInt(t.col(), t);
+			} else if("datasources".equalsIgnoreCase(param)){
+				if(protocols == null){
+					protocols = new HashSet<Construct>();
+					for(String s : DataSourceFactory.GetSupportedProtocols()){
+						protocols.add(new CString(s, Target.UNKNOWN));
+					}
+				}
+				return new CArray(t, protocols);
 			}
 
 			throw new ConfigRuntimeException("The arguments passed to " + getName() + " are incorrect. Please check them and try again.",

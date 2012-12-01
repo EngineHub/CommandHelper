@@ -237,11 +237,11 @@ public class BoundEvent implements Comparable<BoundEvent> {
             Environment env = originalEnv.clone();
             CArray ca = new CArray(Target.UNKNOWN);
             for (String key : activeEvent.parsedEvent.keySet()) {
-                ca.set(new CString(key, Target.UNKNOWN), activeEvent.parsedEvent.get(key));
+                ca.set(new CString(key, Target.UNKNOWN), activeEvent.parsedEvent.get(key), Target.UNKNOWN);
             }
             if(activeEvent.parsedEvent.containsKey("player")){
                 try{
-                    MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player"));
+                    MCPlayer p = Static.GetPlayer(activeEvent.parsedEvent.get("player"), Target.UNKNOWN);
                     if(p != null && p.isOnline()){
                         env.getEnv(CommandHelperEnvironment.class).SetPlayer(p);                                        
                     }                    

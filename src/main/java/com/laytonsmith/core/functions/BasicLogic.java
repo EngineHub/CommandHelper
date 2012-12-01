@@ -213,7 +213,7 @@ public class BasicLogic {
 							long rangeLeft = ((CSlice)inner).getStart();
 							long rangeRight = ((CSlice)inner).getFinish();
 							if(value instanceof CInt){
-								long v = Static.getInt(value);
+								long v = Static.getInt(value, t);
 								if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight) 
 									|| (rangeLeft > rangeRight &&  v >= rangeRight && v <= rangeLeft) 
 									|| (rangeLeft == rangeRight && v == rangeLeft)){
@@ -232,7 +232,7 @@ public class BasicLogic {
 					long rangeLeft = ((CSlice)evalStatement).getStart();
 					long rangeRight = ((CSlice)evalStatement).getFinish();
 					if(value instanceof CInt){
-						long v = Static.getInt(value);
+						long v = Static.getInt(value, t);
 						if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight) 
 							|| (rangeLeft > rangeRight &&  v >= rangeRight && v <= rangeLeft) 
 							|| (rangeLeft == rangeRight && v == rangeLeft)){
@@ -569,8 +569,8 @@ public class BasicLogic {
 			try {
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
-					double arg1 = Static.getNumber(args[i - 1]);
-					double arg2 = Static.getNumber(args[i]);
+					double arg1 = Static.getNumber(args[i - 1], t);
+					double arg2 = Static.getNumber(args[i], t);
 					if (arg1 != arg2) {
 						equals = false;
 						break;
@@ -854,8 +854,8 @@ public class BasicLogic {
 			try {
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
-					double arg1 = Static.getNumber(args[i - 1]);
-					double arg2 = Static.getNumber(args[i]);
+					double arg1 = Static.getNumber(args[i - 1], t);
+					double arg2 = Static.getNumber(args[i], t);
 					if (arg1 != arg2) {
 						equals = false;
 						break;
@@ -950,8 +950,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0]);
-			double arg2 = Static.getNumber(args[1]);
+			double arg1 = Static.getNumber(args[0], t);
+			double arg2 = Static.getNumber(args[1], t);
 			return new CBoolean(arg1 < arg2, t);
 		}
 
@@ -1005,8 +1005,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0]);
-			double arg2 = Static.getNumber(args[1]);
+			double arg1 = Static.getNumber(args[0], t);
+			double arg2 = Static.getNumber(args[1], t);
 			return new CBoolean(arg1 > arg2, t);
 		}
 
@@ -1060,8 +1060,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0]);
-			double arg2 = Static.getNumber(args[1]);
+			double arg1 = Static.getNumber(args[0], t);
+			double arg2 = Static.getNumber(args[1], t);
 			return new CBoolean(arg1 <= arg2, t);
 		}
 
@@ -1116,8 +1116,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0]);
-			double arg2 = Static.getNumber(args[1]);
+			double arg1 = Static.getNumber(args[0], t);
+			double arg2 = Static.getNumber(args[1], t);
 			return new CBoolean(arg1 >= arg2, t);
 		}
 
@@ -1590,9 +1590,9 @@ public class BasicLogic {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_and requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
 			}
-			long val = Static.getInt(args[0]);
+			long val = Static.getInt(args[0], t);
 			for (int i = 1; i < args.length; i++) {
-				val = val & Static.getInt(args[i]);
+				val = val & Static.getInt(args[i], t);
 			}
 			return new CInt(val, t);
 		}
@@ -1650,9 +1650,9 @@ public class BasicLogic {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_or requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
 			}
-			long val = Static.getInt(args[0]);
+			long val = Static.getInt(args[0], t);
 			for (int i = 1; i < args.length; i++) {
-				val = val | Static.getInt(args[i]);
+				val = val | Static.getInt(args[i], t);
 			}
 			return new CInt(val, t);
 		}
@@ -1709,7 +1709,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(~Static.getInt(args[0]), t);
+			return new CInt(~Static.getInt(args[0], t), t);
 		}
 
 		@Override
@@ -1760,8 +1760,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			long value = Static.getInt(args[0]);
-			long toShift = Static.getInt(args[1]);
+			long value = Static.getInt(args[0], t);
+			long toShift = Static.getInt(args[1], t);
 			return new CInt(value << toShift, t);
 		}
 
@@ -1813,8 +1813,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			long value = Static.getInt(args[0]);
-			long toShift = Static.getInt(args[1]);
+			long value = Static.getInt(args[0], t);
+			long toShift = Static.getInt(args[1], t);
 			return new CInt(value >> toShift, t);
 		}
 
@@ -1868,8 +1868,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			long value = Static.getInt(args[0]);
-			long toShift = Static.getInt(args[1]);
+			long value = Static.getInt(args[0], t);
+			long toShift = Static.getInt(args[1], t);
 			return new CInt(value >>> toShift, t);
 		}
 

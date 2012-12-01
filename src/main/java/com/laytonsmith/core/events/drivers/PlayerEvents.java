@@ -472,7 +472,7 @@ public class PlayerEvents {
         public BindableEvent convert(CArray manual) {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
-            MCPlayer p = Static.GetPlayer(manual.get("player"));
+            MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
             MCLocation l = ObjectGenerator.GetGenerator().location(manual.get("location"), p.getWorld(), Target.UNKNOWN);
             MCPlayerRespawnEvent e = EventBuilder.instantiate(MCPlayerRespawnEvent.class, p, l, false);
             return e;
@@ -596,7 +596,7 @@ public class PlayerEvents {
                 MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
                 if (key.equals("xp")) {
                     //Change this parameter in e to value
-                    e.setDroppedExp((int)Static.getInt(value));                    
+                    e.setDroppedExp((int)Static.getInt(value, Target.UNKNOWN));                    
                     return true;
                 }
                 if(key.equals("drops")){
@@ -661,7 +661,7 @@ public class PlayerEvents {
         
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"));
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             String message = manualObject.get("message").nval();
             
             BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
@@ -753,7 +753,7 @@ public class PlayerEvents {
         
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"));
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             String message = manualObject.get("message").nval();
             
             BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class, 
@@ -790,7 +790,7 @@ public class PlayerEvents {
                         for(String index : ((CArray)value).keySet()){
                             Construct v = ((CArray)value).get(index);
                             try{
-                                list.add(Static.GetPlayer(v));                                
+                                list.add(Static.GetPlayer(v, Target.UNKNOWN));                                
                             } catch(ConfigRuntimeException ex){
                                 //Ignored
                             }
@@ -857,7 +857,7 @@ public class PlayerEvents {
         }
         
         public BindableEvent convert(CArray manualObject) {
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"));
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             String command = manualObject.get("command").nval();
             
             BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
@@ -938,7 +938,7 @@ public class PlayerEvents {
         }
         
         public BindableEvent convert(CArray manualObject) {
-            MCPlayer player = Static.GetPlayer(manualObject.get("player"));
+            MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             MCWorld from = Static.getServer().getWorld(manualObject.get("from").val());
             
             BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
@@ -992,7 +992,7 @@ public class PlayerEvents {
 		@Override
 		public void bind(Map<String, Construct> prefilters) {
 			if(prefilters.containsKey("threshold")){
-				int i = (int)Static.getInt(prefilters.get("threshold"));
+				int i = (int)Static.getInt(prefilters.get("threshold"), Target.UNKNOWN);
 				thresholdList.add(i);
 			}
 			if(!threadRunning){
@@ -1163,7 +1163,7 @@ public class PlayerEvents {
 					Point3D from = new Point3D(event.getFrom().getX(), event.getFrom().getY(), event.getFrom().getZ());
 					Point3D to = new Point3D(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ());
 					double distance = from.distance(to);
-					double pDistance = Static.getNumber(prefilter.get("threshold"));
+					double pDistance = Static.getNumber(prefilter.get("threshold"), Target.UNKNOWN);
 					if(pDistance > distance){
 						return false;
 					}
@@ -1189,7 +1189,7 @@ public class PlayerEvents {
 		}
 
 		public BindableEvent convert(CArray manualObject) {
-			MCPlayer p = Static.GetPlayer(manualObject.get("player"));
+			MCPlayer p = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
 			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), p.getWorld(), manualObject.getTarget());
 			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), p.getWorld(), manualObject.getTarget());
 			return EventBuilder.instantiate(MCPlayerMoveEvent.class, p, from, to);

@@ -88,7 +88,7 @@ public class Meta {
 				}
 				Static.getServer().runasConsole(cmd);
 			} else {
-				MCPlayer m = Static.GetPlayer(args[0]);
+				MCPlayer m = Static.GetPlayer(args[0], t);
 				if (m != null && m.isOnline()) {
 					MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 					String name;
@@ -608,7 +608,7 @@ public class Meta {
 				operator = oldCommandSender;
 			} else {
 				System.out.println("---------------> Using player, so retrieving operator from args: " + args[0].val());
-				operator = Static.GetPlayer(args[0]);
+				operator = Static.GetPlayer(args[0], t);
 			}
 			if(operator instanceof MCPlayer){
 				Static.UninjectPlayer(((MCPlayer)operator));

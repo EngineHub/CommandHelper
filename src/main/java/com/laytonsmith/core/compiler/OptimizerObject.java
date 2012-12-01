@@ -45,7 +45,7 @@ class OptimizerObject {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);
 				if (node.getData().val().equals("__autoconcat__")) {
-					ParseTree tempNode = autoconcat.optimizeSpecial(node.getData().getTarget(), node.getChildren(), false);
+					ParseTree tempNode = autoconcat.optimizeSpecial(node.getChildren(), false);
 					tree.setData(tempNode.getData());
 					tree.setChildren(tempNode.getChildren());
 					optimize01(tree, compilerEnvironment);
@@ -54,7 +54,7 @@ class OptimizerObject {
 			}
 		} else {
 			if (tree.getData() instanceof CFunction && tree.getData().val().equals("__autoconcat__")) {
-				ParseTree tempNode = autoconcat.optimizeSpecial(tree.getData().getTarget(), tree.getChildren(), true);
+				ParseTree tempNode = autoconcat.optimizeSpecial(tree.getChildren(), true);
 				tree.setData(tempNode.getData());
 				tree.setChildren(tempNode.getChildren());
 			}

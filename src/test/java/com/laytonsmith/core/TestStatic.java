@@ -16,7 +16,7 @@ import org.junit.Test;
  * @author Layton
  */
 public class TestStatic {
-    
+    Target t = Target.UNKNOWN;
     public TestStatic() {
     }
 
@@ -34,26 +34,26 @@ public class TestStatic {
 
     @Test
     public void testGetNumber() {
-        assertEquals(1.0, Static.getNumber(C.String("1.0")), 0.0);
-        assertEquals(1.0, Static.getNumber(C.String("1")), 0.0);
-        assertEquals(1.0, Static.getNumber(C.Int(1)), 0.0);
-        assertEquals(1.0, Static.getNumber(C.Double(1.0)), 0.0);
+        assertEquals(1.0, Static.getNumber(C.String("1.0"), t), 0.0);
+        assertEquals(1.0, Static.getNumber(C.String("1"), t), 0.0);
+        assertEquals(1.0, Static.getNumber(C.Int(1), t), 0.0);
+        assertEquals(1.0, Static.getNumber(C.Double(1.0), t), 0.0);
     }
 
     @Test
     public void testGetDouble() {
-        assertEquals(1.0, Static.getDouble(C.String("1.0")), 0.0);
-        assertEquals(1.0, Static.getDouble(C.String("1")), 0.0);
-        assertEquals(1.0, Static.getDouble(C.Int(1)), 0.0);
-        assertEquals(1.0, Static.getDouble(C.Double(1.0)), 0.0);
+        assertEquals(1.0, Static.getDouble(C.String("1.0"), t), 0.0);
+        assertEquals(1.0, Static.getDouble(C.String("1"), t), 0.0);
+        assertEquals(1.0, Static.getDouble(C.Int(1), t), 0.0);
+        assertEquals(1.0, Static.getDouble(C.Double(1.0), t), 0.0);
     }
 
     @Test
     public void testGetInt() {
-        assertEquals(1, Static.getInt(C.Int(1)));
-        assertEquals(1, Static.getInt(C.String("1")));
+        assertEquals(1, Static.getInt(C.Int(1), t));
+        assertEquals(1, Static.getInt(C.String("1"), t));
         try{
-            Static.getInt(C.Double(1.0));
+            Static.getInt(C.Double(1.0), t);
             fail("Should not have been able to parse 1.0 as an int");
         } catch(ConfigRuntimeException e){ /* Test Passed */ }
     }

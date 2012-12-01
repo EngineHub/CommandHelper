@@ -114,9 +114,9 @@ public class ArrayHandling {
 							na.forceAssociativeMode();
 							for (String key : ca.keySet()) {
 								try {
-									na.set(key, ca.get(key, t).clone());
+									na.set(key, ca.get(key, t).clone(), t);
 								} catch (CloneNotSupportedException ex) {
-									na.set(key, ca.get(key, t));
+									na.set(key, ca.get(key, t), t);
 								}
 							}
 							return na;
@@ -153,7 +153,7 @@ public class ArrayHandling {
 				} else {
 					try {
 						if (!ca.inAssociativeMode()) {
-							int iindex = (int) Static.getInt(args[1]);
+							int iindex = (int) Static.getInt(args[1], t);
 							if (iindex < 0) {
 								//negative index, convert to positive index
 								iindex = ca.size() + iindex;
@@ -205,7 +205,7 @@ public class ArrayHandling {
 					}
 				} else {
 					try {
-						return new CString(args[0].val().charAt((int) Static.getInt(index)), t);
+						return new CString(args[0].val().charAt((int) Static.getInt(index, t)), t);
 					} catch (ConfigRuntimeException e) {
 						if (e.getExceptionType() == ExceptionType.CastException) {
 							throw new ConfigRuntimeException("Expecting an integer index for the array, but found \"" + index
@@ -298,7 +298,7 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				try {
-					((CArray) args[0]).set(args[1], args[2]);
+					((CArray) args[0]).set(args[1], args[2], t);
 				} catch (IndexOutOfBoundsException e) {
 					throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
 				}
@@ -538,7 +538,7 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray) {
 				if (!((CArray) args[0]).inAssociativeMode()) {
 					try {
-						int index = (int) Static.getInt(args[1]);
+						int index = (int) Static.getInt(args[1], t);
 						CArray ca = (CArray) args[0];
 						return new CBoolean(index <= ca.size() - 1, t);
 					} catch (ConfigRuntimeException e) {
@@ -663,14 +663,14 @@ public class ArrayHandling {
 			long finish = 0;
 			long increment = 1;
 			if (args.length == 1) {
-				finish = Static.getInt(args[0]);
+				finish = Static.getInt(args[0], t);
 			} else if (args.length == 2) {
-				start = Static.getInt(args[0]);
-				finish = Static.getInt(args[1]);
+				start = Static.getInt(args[0], t);
+				finish = Static.getInt(args[1], t);
 			} else if (args.length == 3) {
-				start = Static.getInt(args[0]);
-				finish = Static.getInt(args[1]);
-				increment = Static.getInt(args[2]);
+				start = Static.getInt(args[0], t);
+				finish = Static.getInt(args[1], t);
+				increment = Static.getInt(args[2], t);
 			}
 			if (start < finish && increment < 0 || start > finish && increment > 0 || increment == 0) {
 				return new CArray(t);
@@ -851,7 +851,7 @@ public class ArrayHandling {
 						}
 					} else {
 						for (String key : cur.keySet()) {
-							newArray.set(key, cur.get(key, t));
+							newArray.set(key, cur.get(key, t), t);
 						}
 					}
 				} else {
@@ -1019,7 +1019,7 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CSlice(Static.getInt(args[0]), Static.getInt(args[1]), t);
+			return new CSlice(Static.getInt(args[0], t), Static.getInt(args[1], t), t);
 		}
 
 		public CHVersion since() {
@@ -1417,7 +1417,7 @@ public class ArrayHandling {
 			boolean getKeys = true;
 			CArray array = Static.getArray(args[0], t);
 			if(args.length > 1){
-				number = Static.getInt(args[1]);
+				number = Static.getInt(args[1], t);
 			}
 			if(number < 1){
 				throw new ConfigRuntimeException("number may not be less than 1.", ExceptionType.RangeException, t);

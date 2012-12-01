@@ -149,7 +149,7 @@ public class Echoes {
             if(args.length < 2){
                 throw new ConfigRuntimeException("You must send at least 2 arguments to tmsg", ExceptionType.InsufficientArgumentsException, t);
             }
-            MCPlayer p = Static.GetPlayer(args[0]);
+            MCPlayer p = Static.GetPlayer(args[0], t);
             if(p == null){
                 throw new ConfigRuntimeException("The player " + args[0].val() + " is not online", ExceptionType.PlayerOfflineException, t);
             }
@@ -404,7 +404,7 @@ public class Echoes {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            final MCPlayer player = Static.GetPlayer(args[0]);
+            final MCPlayer player = Static.GetPlayer(args[0], t);
             Static.SendMessage(new LineCallback() {
 
                 public void run(String line) {

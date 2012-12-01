@@ -88,11 +88,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         return new BukkitMCPlayerInventory(p.getInventory());
     }
 
-    public MCItemStack getItemAt(Construct construct) {
-        if(construct == null || construct instanceof CNull){
+    public MCItemStack getItemAt(Integer slot) {
+        if(slot == null){
             return new BukkitMCItemStack(p.getItemInHand());
         }
-        int slot = (int) Static.getInt(construct);
         ItemStack is = null;
         //Special slots
         if(slot == 100){

@@ -161,6 +161,8 @@ public class CSymbol extends Construct {
 				return "multiply";
 			case DIVISION_ASSIGNMENT:
 				return "divide";
+			case CONCAT_ASSIGNMENT:
+				return "concat";
 			default:
 				return null;
 		}

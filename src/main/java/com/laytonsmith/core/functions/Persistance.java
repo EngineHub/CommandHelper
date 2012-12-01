@@ -229,7 +229,7 @@ public class Persistance {
 				try {
 					String key = StringUtils.Join(e, ".").replaceFirst("storage\\.", ""); //Get that junk out of here
 					ca.set(new CString(key, t),
-							Construct.json_decode(list.get(e), t));
+							Construct.json_decode(list.get(e), t), t);
 				} catch (MarshalException ex) {
 					Logger.getLogger(Persistance.class.getName()).log(Level.SEVERE, null, ex);
 				}

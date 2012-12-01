@@ -53,9 +53,9 @@ public class Weather {
 				z = (int) java.lang.Math.floor(l.getZ());
 				w = l.getWorld();
 			} else {
-				x = (int) java.lang.Math.floor(Static.getNumber(args[0]));
-				y = (int) java.lang.Math.floor(Static.getNumber(args[1]));
-				z = (int) java.lang.Math.floor(Static.getNumber(args[2]));
+				x = (int) java.lang.Math.floor(Static.getNumber(args[0], t));
+				y = (int) java.lang.Math.floor(Static.getNumber(args[1], t));
+				z = (int) java.lang.Math.floor(Static.getNumber(args[2], t));
 				safeIndex = 3;
 			}
 			if (args.length >= safeIndex + 1) {

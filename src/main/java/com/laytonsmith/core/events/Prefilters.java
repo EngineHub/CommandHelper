@@ -123,8 +123,8 @@ public final class Prefilters {
     
     private static void MathMatch(Construct one, Construct two) throws PrefilterNonMatchException{
         try{
-            double dOne = Static.getNumber(one);
-            double dTwo = Static.getNumber(two);
+            double dOne = Static.getNumber(one, Target.UNKNOWN);
+            double dTwo = Static.getNumber(two, Target.UNKNOWN);
             if(dOne != dTwo){
                 throw new PrefilterNonMatchException();
             }
@@ -147,7 +147,7 @@ public final class Prefilters {
                         throw new PrefilterNonMatchException();
                     }
                 } else {
-                    if(val != Static.getDouble(dvalue)){
+                    if(val != Static.getDouble(dvalue, Target.UNKNOWN)){
                         throw new PrefilterNonMatchException();
                     }
                 }

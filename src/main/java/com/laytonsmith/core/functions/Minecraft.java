@@ -71,7 +71,7 @@ public class Minecraft {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args[0] instanceof CInt) {
-				return new CInt(Static.getInt(args[0]), t);
+				return new CInt(Static.getInt(args[0], t), t);
 			} else {
 				String c = args[0].val();
 				int number = StaticLayer.LookupItemId(c);
@@ -175,7 +175,7 @@ public class Minecraft {
 				i2 = (int) is.getData().getData();
 			}
 			if (i == -1) {
-				i = (int) Static.getInt(args[0]);
+				i = (int) Static.getInt(args[0], t);
 			}
 			if (i2 == -1) {
 				i2 = 0;
@@ -343,7 +343,7 @@ public class Minecraft {
 			}
 			int qty = 1;
 			if (args.length > 1) {
-				qty = (int) Static.getInt(args[1]);
+				qty = (int) Static.getInt(args[1], t);
 			}
 			if (qty > 50) {
 				throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
@@ -420,7 +420,7 @@ public class Minecraft {
 			} else {
 				entityID = args[0];
 			}
-			int id = (int) Static.getInt(entityID);
+			int id = (int) Static.getInt(entityID, t);
 			MCEntity e = Static.getEntity(id, t);
 			if (e == null) {
 				return new CVoid(t);
@@ -471,7 +471,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = (int) Static.getInt(args[0]);
+			int id = (int) Static.getInt(args[0], t);
 			MCEntity e = Static.getEntity(id, t);
 			if (e == null) {
 				return new CNull(t);
@@ -522,7 +522,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = (int) Static.getInt(args[0]);
+			int id = (int) Static.getInt(args[0], t);
 			MCEntity e = Static.getEntity(id, t);
 			boolean ret;
 			if (e == null) {
@@ -602,7 +602,7 @@ public class Minecraft {
 			int data = 0;
 			int radius = 64;
 			if (args.length == 3) {
-				radius = (int) Static.getInt(args[2]);
+				radius = (int) Static.getInt(args[2], t);
 			}
 			l.getWorld().playEffect(l, e, data, radius);
 			return new CVoid(t);
@@ -642,9 +642,9 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity((int) Static.getInt(args[0]), t);
+			MCEntity e = Static.getEntity((int) Static.getInt(args[0], t), t);
 			if (e instanceof MCLivingEntity) {
-				int health = (int) ((double) Static.getInt(args[1]) / 100.0 * (double) ((MCLivingEntity) e).getMaxHealth());
+				int health = (int) ((double) Static.getInt(args[1], t) / 100.0 * (double) ((MCLivingEntity) e).getMaxHealth());
 				if (health != 0) {
 					((MCLivingEntity) e).setHealth(health);
 				} else {
@@ -688,7 +688,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity((int) Static.getInt(args[0]), t);
+			MCEntity e = Static.getEntity((int) Static.getInt(args[0], t), t);
 			if (e instanceof MCLivingEntity) {
 				int h = (int) (((double) ((MCLivingEntity) e).getHealth() / (double) ((MCLivingEntity) e).getMaxHealth()) * 100);
 				return new CInt(h, t);
@@ -747,7 +747,7 @@ public class Minecraft {
 			if (args.length == 0) {
 				index = -1;
 			} else if (args.length == 1) {
-				index = (int) Static.getInt(args[0]);
+				index = (int) Static.getInt(args[0], t);
 			}
 
 			if (index < -1 || index > 8) {

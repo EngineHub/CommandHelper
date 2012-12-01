@@ -110,7 +110,7 @@ public final class EventUtils {
                             try{
                                 convertedEvent = driver.convert(object);
                             } catch(ConfigRuntimeException e){
-                                ConfigRuntimeException.React(e, "Did you include all the event parameters?", b.getEnvironment());
+                                ConfigRuntimeException.React(e, b.getEnvironment());
                                 continue;
                             }
                             if (driver.matches(b.getPrefilter(), convertedEvent)) {

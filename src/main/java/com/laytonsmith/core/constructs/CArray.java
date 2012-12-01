@@ -31,6 +31,19 @@ public class CArray extends Construct implements ArrayAccess{
     public CArray(Target t){
         this(t, (Construct[])null);
     }
+	
+	public CArray(Target t, Collection<Construct> items){
+		this(t, getArray(items));
+	}
+	
+	private static Construct [] getArray(Collection<Construct> items){
+		Construct c [] = new Construct[items.size()];
+		int count = 0;
+		for(Construct cc : items){
+			c[count++] = cc;
+		}
+		return c;
+	}
 
     public CArray(Target t,  Construct... items) {
         super(null, ConstructType.ARRAY, t);
@@ -176,10 +189,10 @@ public class CArray extends Construct implements ArrayAccess{
      * @param index
      * @param c 
      */
-    public void set(Construct index, Construct c) {
+    public void set(Construct index, Construct c, Target t) {
         if (!associative_mode) {
             try {
-                int indx = (int) Static.getInt(index);
+                int indx = (int) Static.getInt(index, t);
                 if (indx > next_index || indx < 0) {
                     throw new ConfigRuntimeException("", Target.UNKNOWN);
                 } else if(indx == next_index){
@@ -206,17 +219,17 @@ public class CArray extends Construct implements ArrayAccess{
         regenValue();
     }
     
-    public void set(int index, Construct c){
-        this.set(new CInt(index, Target.UNKNOWN), c);
+    public void set(int index, Construct c, Target t){
+        this.set(new CInt(index, Target.UNKNOWN), c, t);
     }
     /* Shortcuts */
     
-    public void set(String index, Construct c){
-        set(new CString(index, c.getTarget()), c);
+    public void set(String index, Construct c, Target t){
+        set(new CString(index, c.getTarget()), c, t);
     }
     
     public void set(String index, String value, Target t){
-        set(index, new CString(value, t));
+        set(index, new CString(value, t), t);
     }
     
     public void set(String index, String value){
@@ -226,7 +239,7 @@ public class CArray extends Construct implements ArrayAccess{
     public Construct get(Construct index, Target t) {
         if(!associative_mode){
             try {
-                return array.get((int)Static.getInt(index));
+                return array.get((int)Static.getInt(index, t));
             } catch (IndexOutOfBoundsException e) {
                 throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t);
             }
@@ -594,8 +607,8 @@ public class CArray extends Construct implements ArrayAccess{
                 }
             }
             public int compareNumeric(Construct o1, Construct o2){
-                double d1 = Static.getNumber(o1);
-                double d2 = Static.getNumber(o2);
+                double d1 = Static.getNumber(o1, o1.getTarget());
+                double d2 = Static.getNumber(o2, o2.getTarget());
                 return Double.compare(d1, d2);
             }
             public int compareString(String o1, String o2){

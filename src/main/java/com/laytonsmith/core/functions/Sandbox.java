@@ -158,7 +158,7 @@ public class Sandbox {
                 //If args[0] starts with a number, it's the (item, qty) version, otherwise it's
                 //(player, item)
                 if (args[0].val().matches("\\d.*")) {
-                    qty = (int) Static.getInt(args[1]);
+                    qty = (int) Static.getInt(args[1], t);
                     is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, t);
                     natural = true;
                 } else {
@@ -181,7 +181,7 @@ public class Sandbox {
                     l = Static.GetPlayer(args[0].val(), t).getLocation();
                     natural = true;
                 }
-                qty = (int) Static.getInt(args[2]);
+                qty = (int) Static.getInt(args[2], t);
                 is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, t);
             }
             if (l.getWorld() != null) {
@@ -295,7 +295,7 @@ public class Sandbox {
             if (args[1 - offset] instanceof CNull) {
                 is = m.getItemInHand();
             } else {
-                int slot = (int) Static.getInt(args[1 - offset]);
+                int slot = (int) Static.getInt(args[1 - offset], t);
                 is = m.getInventory().getItem(slot);
             }
             CArray enchantArray = new CArray(t);
@@ -316,7 +316,7 @@ public class Sandbox {
                 if (e == null) {
                     throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
                 }
-                int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t));
+                int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 
                 is.addUnsafeEnchantment(e, level);
             }
@@ -361,11 +361,11 @@ public class Sandbox {
             if (args.length == 2) {
                 me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
                 isVanished = Static.getBoolean(args[0]);
-                other = Static.GetPlayer(args[1]);
+                other = Static.GetPlayer(args[1], t);
             } else {
-                me = Static.GetPlayer(args[0]);
+                me = Static.GetPlayer(args[0], t);
                 isVanished = Static.getBoolean(args[1]);
-                other = Static.GetPlayer(args[2]);
+                other = Static.GetPlayer(args[2], t);
             }
 
             other.setVanished(isVanished, me);
@@ -411,10 +411,10 @@ public class Sandbox {
             MCPlayer other;
             if (args.length == 1) {
                 me = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-                other = Static.GetPlayer(args[0]);
+                other = Static.GetPlayer(args[0], t);
             } else {
-                me = Static.GetPlayer(args[0]);
-                other = Static.GetPlayer(args[1]);
+                me = Static.GetPlayer(args[0], t);
+                other = Static.GetPlayer(args[1], t);
             }
             return new CBoolean(me.canSee(other), t);
         }
@@ -466,8 +466,8 @@ public class Sandbox {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity horse = Static.getEntity((int)Static.getInt(args[0]), t);
-			MCEntity rider = Static.getEntity((int)Static.getInt(args[1]), t);
+			MCEntity horse = Static.getEntity((int)Static.getInt(args[0], t), t);
+			MCEntity rider = Static.getEntity((int)Static.getInt(args[1], t), t);
 			horse.setPassenger(rider);
 			return new CVoid(t);
 		}

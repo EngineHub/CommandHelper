@@ -4,8 +4,8 @@
 package com.laytonsmith.core.exceptions;
 
 import com.laytonsmith.PureUtilities.TermColors;
-import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ObjectGenerator;
@@ -21,7 +21,9 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
-import java.util.Stack;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 
 /**
@@ -30,7 +32,7 @@ import java.util.Stack;
  */
 public class ConfigRuntimeException extends RuntimeException {
 
-    Stack<Target> stackTraceTrail = new Stack<Target>();
+    List<StackTraceElement> stackTraceTrail = new ArrayList<StackTraceElement>();
 
     /**
      * Creates a new instance of <code>ConfigRuntimeException</code> without detail message.
@@ -69,8 +71,13 @@ public class ConfigRuntimeException extends RuntimeException {
         }
     }
     
-    public void addStackTraceTrail(Target t){
-        //TODO: Add better stack traces to stuff that could bubble up
+    public void addStackTraceTrail(StackTraceElement t, Target nextTarget){
+		if(t == null){
+			stackTraceTrail.add(new StackTraceElement("<<main code>>", target));
+		} else {
+			stackTraceTrail.add(t);
+			target = nextTarget;
+		}
     }
     
     public static enum Reaction{
@@ -128,17 +135,6 @@ public class ConfigRuntimeException extends RuntimeException {
 		}
         return reaction;
     }
-    
-    /**
-     * If there's nothing special you want to do with the exception, you can send it
-     * here, and it will take the default action for an uncaught exception. This is
-	 * typically used by top level handlers.
-     * @param e
-     * @param r 
-     */
-    public static void React(ConfigRuntimeException e, Environment env){
-        React(e, HandleUncaughtException(e, env), null);
-    }
 	
 	/**
 	 * Compile errors are always handled with the default mechanism, but
@@ -148,7 +144,7 @@ public class ConfigRuntimeException extends RuntimeException {
 	 * @param player 
 	 */
 	public static void React(ConfigCompileException e, String optionalMessage, MCPlayer player){
-		DoReport(e, optionalMessage, player);
+		DoReport(e, player);
 	}
     
 //    /**
@@ -167,8 +163,8 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param e
      * @param r 
      */
-    public static void React(ConfigRuntimeException e, String optionalMessage, Environment env){
-        React(e, HandleUncaughtException(e, env), optionalMessage);
+    public static void React(ConfigRuntimeException e, Environment env){
+        React(e, HandleUncaughtException(e, env));
     }
     
     /**
@@ -177,16 +173,18 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param e
      * @param r 
      */
-    private static void React(ConfigRuntimeException e, Reaction r, String optionalMessage){        
+    private static void React(ConfigRuntimeException e, Reaction r){
+		//This is the top of the stack chain, so finalize the stack trace at this point
+		e.addStackTraceTrail(null, Target.UNKNOWN);
         if(r == Reaction.IGNORE){
             //Welp, you heard the man.
             CHLog.GetLogger().Log(CHLog.Tags.RUNTIME, LogLevel.DEBUG, "An exception bubbled to the top, but was instructed by an event handler to not cause output.", e.getTarget());
         } else if(r == ConfigRuntimeException.Reaction.REPORT){
-            ConfigRuntimeException.DoReport(e, optionalMessage);
+            ConfigRuntimeException.DoReport(e);
         } else if(r == ConfigRuntimeException.Reaction.FATAL){
-            ConfigRuntimeException.DoReport(e, optionalMessage);
+            ConfigRuntimeException.DoReport(e);
             //Well, here goes nothing
-            ConfigRuntimeException.DoReport(e, optionalMessage);
+            ConfigRuntimeException.DoReport(e);
             throw e;
         }
     }
@@ -199,48 +197,81 @@ public class ConfigRuntimeException extends RuntimeException {
      * @param e
      * @param optionalMessage 
      */
-    private static void DoReport(String message, String exceptionType, String file, String simpleFile, String line_num, String optionalMessage, MCPlayer player){
+    private static void DoReport(String message, String exceptionType, List<StackTraceElement> stacktrace, MCPlayer currentPlayer){
         String type = exceptionType;
         if(exceptionType == null){
             type = "FATAL";
         }
-        String formatted = optionalMessage==null?"":"; " + optionalMessage;
-        String plain = message + formatted + " :: " + type + ":" 
-                + file + ":" + line_num;
-        Target t;
-        int ll = Integer.parseInt(line_num);
-        File ff = file!=null?new File(file):null;
-        int cc = 0;
-        if(ll == 0 && ff == null && cc == 0){
-            t = Target.UNKNOWN;
-        } else {
-            t = new Target(ll, ff, cc);
-        }        
-        CHLog.GetLogger().Log(exceptionType.equals("COMPILE ERROR")?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, LogLevel.ERROR, plain, t);
-        System.out.println(TermColors.RED + message + formatted 
-                + TermColors.WHITE + " :: " + TermColors.GREEN 
-                + type + TermColors.WHITE + ":" 
-                + TermColors.YELLOW + file + TermColors.WHITE + ":" 
-                + TermColors.CYAN + line_num + TermColors.reset());
-        if(player != null){
-            player.sendMessage(MCChatColor.RED.toString() + message + formatted
-                    + MCChatColor.WHITE + " :: " + MCChatColor.GREEN
-                    + type + MCChatColor.WHITE + ":" 
-                    + MCChatColor.YELLOW + simpleFile + MCChatColor.WHITE + ":" 
-                    + MCChatColor.AQUA + line_num);
-        }
+		List<StackTraceElement> st = new ArrayList<StackTraceElement>(stacktrace);
+		if(message == null){
+			message = "";
+		}
+		if(!"".equals(message.trim())){
+			message = ": " + message;
+		}
+		Target top = Target.UNKNOWN;
+		StringBuilder log = new StringBuilder();
+		StringBuilder console = new StringBuilder();
+		StringBuilder player = new StringBuilder();
+		log.append(type).append(message).append("\n");
+		console.append(TermColors.RED).append(type).append(TermColors.WHITE).append(message).append("\n");
+		player.append(MCChatColor.RED).append(type).append(MCChatColor.WHITE).append(message).append("\n");
+		for(StackTraceElement e : st){
+			Target t = e.getDefinedAt();
+			if(top == Target.UNKNOWN){
+				top = t;
+			}
+			String proc = e.getProcedureName();
+			File file = t.file();
+			int line = t.line();
+			int column = t.col();
+			String filepath;
+			String simplepath;
+			if(file == null){
+				filepath = simplepath = "Unknown Source";
+			} else {
+				filepath = file.getPath();
+				simplepath = file.getName();
+			}
+			
+			log.append("\t").append(proc).append(":").append(filepath).append(":")
+					.append(line)/*.append(".")
+					.append(column)*/.append("\n");
+			console.append("\t").append(TermColors.GREEN).append(proc)
+					.append(TermColors.WHITE).append(":")
+					.append(TermColors.YELLOW).append(filepath)
+					.append(TermColors.WHITE).append(":")
+					.append(TermColors.CYAN).append(line)/*.append(".").append(column)*/.append("\n");
+			player.append("\t").append(MCChatColor.GREEN).append(proc)
+					.append(MCChatColor.WHITE).append(":")
+					.append(MCChatColor.YELLOW).append(simplepath)
+					.append(MCChatColor.WHITE).append(":")
+					.append(MCChatColor.AQUA).append(line)/*.append(".").append(column)*/.append("\n");
+			
+		}
+		
+		//Log
+		CHLog.GetLogger().Log(exceptionType.equals("COMPILE ERROR")?CHLog.Tags.COMPILER:CHLog.Tags.RUNTIME, LogLevel.ERROR, log.toString(), top);
+		//Console
+		System.out.println(console.toString() + TermColors.reset());
+		//Player
+		if(currentPlayer != null){
+			currentPlayer.sendMessage(player.toString());
+		}
     }
     
-    private static void DoReport(ConfigRuntimeException e, String optionalMessage){
+    private static void DoReport(ConfigRuntimeException e){
         MCPlayer p = null;
         if(e.getEnv() != null && e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer() != null){
             p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
-        }        
-        DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), Integer.toString(e.getLineNum()), optionalMessage, p);
+        }
+        DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.stackTraceTrail, p);
     }
     
-    private static void DoReport(ConfigCompileException e, String optionalMessage, MCPlayer player){
-        DoReport(e.getMessage(), "COMPILE ERROR", e.getFile()==null?null:e.getFile().getPath(), e.getSimpleFile(), e.getLineNum(), optionalMessage, player);
+    private static void DoReport(ConfigCompileException e, MCPlayer player){
+		List<StackTraceElement> st = new ArrayList<StackTraceElement>();
+		st.add(0, new StackTraceElement("", e.getTarget()));
+        DoReport(e.getMessage(), "COMPILE ERROR", st, player);
     }
         
     
@@ -367,4 +398,29 @@ public class ConfigRuntimeException extends RuntimeException {
             return null;
         }
     }
+	
+	public static class StackTraceElement{
+		private final String procedureName;
+		private final Target definedAt;
+
+		public StackTraceElement(String procedureName, Target definedAt) {
+			this.procedureName = procedureName;
+			this.definedAt = definedAt;
+		}
+
+		public String getProcedureName() {
+			return procedureName;
+		}
+
+		public Target getDefinedAt() {
+			return definedAt;
+		}
+
+		@Override
+		public String toString() {
+			return procedureName + " (Defined at " + definedAt + ")";
+		}
+		
+		
+	}
 }

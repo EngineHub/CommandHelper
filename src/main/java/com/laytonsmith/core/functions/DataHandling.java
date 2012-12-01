@@ -189,7 +189,7 @@ public class DataHandling {
 			for (int i = 0; i < c.indexChain.size(); i++) {
 				if (i == c.indexChain.size() - 1) {
 					//Last one, set it
-					inner.set(c.indexChain.get(i), ival);
+					inner.set(c.indexChain.get(i), ival, t);
 				} else {
 					boolean makeIt = false;
 					Construct ct = null;
@@ -203,7 +203,7 @@ public class DataHandling {
 					}
 					if (makeIt) {
 						Construct newArray = new CArray(t);
-						inner.set(c.indexChain.get(i), newArray);
+						inner.set(c.indexChain.get(i), newArray, t);
 						ct = newArray;
 					}
 					inner = (CArray) ct;
@@ -876,7 +876,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
-				num = (int) Static.getInt(args[0]);
+				num = (int) Static.getInt(args[0], t);
 			}
 			throw new LoopBreakException(num, t);
 		}
@@ -960,7 +960,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
-				num = (int) Static.getInt(args[0]);
+				num = (int) Static.getInt(args[0], t);
 			}
 			throw new LoopContinueException(num, t);
 		}
@@ -1383,7 +1383,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
-				Static.getNumber(args[0]);
+				Static.getNumber(args[0], t);
 			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
@@ -1448,7 +1448,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double d;
 			try {
-				d = Static.getDouble(args[0]);
+				d = Static.getDouble(args[0], t);
 			} catch (ConfigRuntimeException e) {
 				return new CBoolean(false, t);
 			}
@@ -1605,7 +1605,7 @@ public class DataHandling {
 					Script fakeScript = Script.GenerateScript(root, PermissionsResolver.GLOBAL_PERMISSION);
 					Environment env = Static.GenerateStandaloneEnvironment();
 					env.getEnv(GlobalEnv.class).SetScript(fakeScript);
-					Construct c = myProc.cexecute(children, env);
+					Construct c = myProc.cexecute(children, env, t);
 					//Yup! It worked. It's a const proc.
 					return c;
 				} catch (ConfigRuntimeException e) {
@@ -1809,7 +1809,7 @@ public class DataHandling {
 				} catch (CloneNotSupportedException ex) {
 					throw new RuntimeException(ex);
 				}
-				return proc.execute(vars, newEnv);
+				return proc.execute(vars, newEnv, t);
 			}
 			throw new ConfigRuntimeException("Unknown procedure \"" + args[0].val() + "\"",
 					ExceptionType.InvalidProcedureException, t);
@@ -2300,7 +2300,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt((long) Static.getDouble(args[0]), t);
+			return new CInt((long) Static.getDouble(args[0], t), t);
 		}
 
 		public CHVersion since() {
@@ -2355,7 +2355,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(Static.getDouble(args[0]), t);
+			return new CDouble(Static.getDouble(args[0], t), t);
 		}
 
 		public CHVersion since() {

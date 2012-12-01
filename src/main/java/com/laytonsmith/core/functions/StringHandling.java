@@ -735,10 +735,10 @@ public class StringHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
-				int begin = (int) Static.getInt(args[1]);
+				int begin = (int) Static.getInt(args[1], t);
 				int end;
 				if (args.length == 3) {
-					end = (int) Static.getInt(args[2]);
+					end = (int) Static.getInt(args[2], t);
 				} else {
 					end = s.length();
 				}
@@ -958,7 +958,7 @@ public class StringHandling {
 			if (Conversion.isValid(c)) {
 				if (c == 't' || c == 'T') {
 					//Datetime, parse as long
-					o = Static.getInt(arg);
+					o = Static.getInt(arg, t);
 				} else if (Conversion.isCharacter(c)) {
 					//Character, parse as string, and verify it's of length 1
 					String s = arg.val();
@@ -969,10 +969,10 @@ public class StringHandling {
 					o = s.charAt(0);
 				} else if (Conversion.isFloat(c)) {
 					//Float, parse as double
-					o = Static.getDouble(arg);
+					o = Static.getDouble(arg, t);
 				} else if (Conversion.isInteger(c)) {
 					//Integer, parse as long
-					o = Static.getInt(arg);
+					o = Static.getInt(arg, t);
 				} else {
 					//Further processing is needed
 					if (c == Conversion.BOOLEAN || c == Conversion.BOOLEAN_UPPER) {

@@ -385,7 +385,7 @@ public class StaticTest {
         
         //Plethora of fake data
         when(p.getCompassTarget()).thenReturn(fakeLocation);
-        when(p.getItemAt((Construct)Mockito.any())).thenReturn(fakeItemStack);
+        when(p.getItemAt((Integer)Mockito.any())).thenReturn(fakeItemStack);
         return p;
     }
     
@@ -531,17 +531,8 @@ public class StaticTest {
         if(frontendInstalled){
             return;
         }
+		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(StaticTest.class));
 		Implementation.setServerType(Implementation.Type.TEST);
-		if(StaticTest.class.getProtectionDomain().getCodeSource().getLocation() == null){
-			//Running locally
-			//This is the full path to THIS file, but we need to get the package root.
-			String thisClass = StaticTest.class.getResource(StaticTest.class.getSimpleName() + ".class").toString();
-			String packageRoot = StringUtils.replaceLast(thisClass, Pattern.quote(StaticTest.class.getName().replaceAll("\\.", "/") + ".class"), "");
-			ClassDiscovery.InstallDiscoveryLocation(packageRoot);
-		} else {
-			//Running from a jar
-			ClassDiscovery.InstallDiscoveryLocation(StaticTest.class.getProtectionDomain().getCodeSource().getLocation().toString());
-		}
         AliasCore fakeCore = mock(AliasCore.class);
         fakeCore.autoIncludes = new ArrayList<File>();
 		SetPrivate(CommandHelperPlugin.class, "ac", fakeCore, AliasCore.class);       
