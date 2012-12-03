@@ -750,7 +750,7 @@ public class Environment {
 	public static class play_note extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
