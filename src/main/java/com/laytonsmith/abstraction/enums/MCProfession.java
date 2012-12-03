@@ -2,7 +2,7 @@ package com.laytonsmith.abstraction.enums;
 
 /**
  *
- * @author Jim
+ * @author jb_aero
  */
 public enum MCProfession {
 	BLACKSMITH,
