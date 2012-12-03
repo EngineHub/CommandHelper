@@ -26,6 +26,7 @@ public class EnchantmentsTest {
 	com.laytonsmith.core.environments.Environment env;
 
     public EnchantmentsTest() throws Exception {
+		InstallFakeServerFrontend();
 		env = Static.GenerateStandaloneEnvironment();
     }
 

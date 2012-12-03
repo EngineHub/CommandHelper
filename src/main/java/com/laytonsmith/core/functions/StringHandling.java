@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.ReflectionUtils;
+import com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
@@ -13,6 +14,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.lang.reflect.Array;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Formatter;
@@ -919,7 +921,7 @@ public class StringHandling {
 			Object[] params = new Object[args.length - 1];
 			List<FormatString> parsed;
 			try{
-				parsed = parse(formatString);
+				parsed = parse(formatString, t);
 			} catch(IllegalFormatException e){
 				throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 			}
@@ -1128,7 +1130,7 @@ public class StringHandling {
 				}
 				//We can check the format string and make sure it doesn't throw an IllegalFormatException.
 				try {
-					List<FormatString> parsed = parse(children.get(0).getData().val());
+					List<FormatString> parsed = parse(children.get(0).getData().val(), t);
 					if (requiredArgs(parsed) != children.size() - 1) {
 						throw new ConfigRuntimeException("The specified format string: \"" + children.get(0).getData().val() + "\""
 								+ " expects " + requiredArgs(parsed) + " argument, but " + (children.size() - 1) + " were provided.", ExceptionType.InsufficientArgumentsException, t);
@@ -1212,9 +1214,20 @@ public class StringHandling {
 			}
 		}
 
-		private List<FormatString> parse(String format) {
+		private List<FormatString> parse(String format, Target t) {
 			List<FormatString> list = new ArrayList<FormatString>();
-			Object parse = ReflectionUtils.invokeMethod(Formatter.class, new Formatter(), "parse", new Class[]{String.class}, new Object[]{format});
+			Object parse;
+			try{
+				parse = ReflectionUtils.invokeMethod(Formatter.class, new Formatter(), "parse", new Class[]{String.class}, new Object[]{format});
+			} catch(ReflectionException e){
+				if(e.getCause() instanceof InvocationTargetException){
+					Throwable th = e.getCause().getCause();
+					throw new ConfigRuntimeException("A format exception was thrown for the argument \"" + format + "\": " + th.getClass().getSimpleName() + ": " + th.getMessage(), ExceptionType.FormatException, t);
+				} else {
+					//This is unexpected
+					throw new ConfigRuntimeException(e.getMessage(), t);
+				}
+			}
 			int length = Array.getLength(parse);
 			for (int i = 0; i < length; i++) {
 				FormatString s = new FormatString(Array.get(parse, i));

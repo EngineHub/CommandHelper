@@ -24,6 +24,16 @@ public class ReflectionUtils {
 		public ReflectionException(Throwable cause) {
 			super(cause);
 		}
+		
+		/**
+		 * Returns the underlying checked exception that was thrown
+		 * by the reflective operation.
+		 * @return 
+		 */
+		@Override
+		public Throwable getCause(){
+			return super.getCause();
+		}
 	}
 
 	/**
