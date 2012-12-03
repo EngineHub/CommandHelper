@@ -437,4 +437,45 @@ public class World {
 		}
 		
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_worlds extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray worlds = new CArray(t);
+			for(MCWorld w : Static.getServer().getWorlds()){
+				worlds.push(new CString(w.getName(), t));
+			}
+			return worlds;
+		}
+
+		public String getName() {
+			return "get_worlds";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns a list of all currently loaded worlds.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }
