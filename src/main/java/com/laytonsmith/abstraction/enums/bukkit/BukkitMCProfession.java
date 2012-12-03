@@ -12,7 +12,7 @@ import org.bukkit.entity.Villager;
 
 /**
  *
- * @author Jim
+ * @author jb_aero
  */
 @abstractionenum(
 		implementation=Implementation.Type.BUKKIT,
