@@ -2562,4 +2562,177 @@ public class PlayerManagement {
 		}
 		
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class phunger extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(args.length == 1){
+				p = Static.GetPlayer(args[0], t);
+			}
+			return new CInt(p.getHunger(), t);
+		}
+
+		public String getName() {
+			return "phunger";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "int {[player]} Returns the player's hunger level";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class set_phunger extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			int hunger, hungerIndex = 0;
+			if(args.length == 2){
+				p = Static.GetPlayer(args[0], t);
+				hungerIndex = 1;
+			}
+			hunger = (int)Static.getInt(args[hungerIndex], t);
+			p.setHunger(hunger);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_phunger";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[player], hunger} Sets a player's hunger level";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class psaturation extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if(args.length == 1){
+				p = Static.GetPlayer(args[0], t);
+			}
+			return new CDouble(p.getSaturation(), t);
+		}
+
+		public String getName() {
+			return "psaturation";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "double {[player]} Returns the player's saturation level";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class set_psaturation extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			float saturation;
+			int saturationIndex = 0;
+			if(args.length == 2){
+				p = Static.GetPlayer(args[0], t);
+				saturationIndex = 1;
+			}
+			saturation = (float)Static.getDouble(args[saturationIndex], t);
+			p.setSaturation(saturation);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_psaturation";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {[player], saturation} ";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }

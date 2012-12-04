@@ -91,4 +91,12 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public MCLocation asyncGetLocation();
 	
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note);
+	
+	public int getHunger();
+	
+	public void setHunger(int h);
+	
+	public float getSaturation();
+	
+	public void setSaturation(float s);
 }
