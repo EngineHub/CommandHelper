@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -403,6 +404,12 @@ public class BasicLogic {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 
+			FileOptions options = new FileOptions(new HashMap<String, String>());
+			if (!children.isEmpty()) {
+				options = children.get(0).getFileOptions();
+			}
+			ParseTree node = new ParseTree(new CFunction(this.getName(), t), options);
+			node.setOptimized(true);
 			List<ParseTree> optimizedTree = new ArrayList<ParseTree>();
 			//We have to cache the return value if even if we find it, so we can check for syntax errors
 			//in all the branches, not just the ones before the first hardcoded true
@@ -443,6 +450,11 @@ public class BasicLogic {
 					andTree.addChild(code.getChildAt(0));
 					optimizedTree.set(i, andTree);
 					optimizedTree.set(i + 1, code.getChildAt(1));
+					//We need to set this to re-optimize the children, because the and() construction may be unoptimal now
+					for(ParseTree pt : andTree.getChildren()){
+						pt.setOptimized(false);
+					}
+					node.setOptimized(false);
 				}
 			}
 			if (toReturn != null) {
@@ -464,13 +476,7 @@ public class BasicLogic {
 				//The whole tree has been optimized out. Return void
 				return new ParseTree(new CVoid(t), new FileOptions(new HashMap<String, String>()));
 			}
-			FileOptions options = new FileOptions(new HashMap<String, String>());
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
-			ParseTree node = new ParseTree(new CFunction(this.getName(), t), options);
 			node.setChildren(optimizedTree);
-			node.setOptimized(true);
 			return node;
 
 		}
@@ -1181,7 +1187,7 @@ public class BasicLogic {
 	}
 
 	@api(environments={GlobalEnv.class})
-	public static class and extends AbstractFunction {
+	public static class and extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "and";
@@ -1232,6 +1238,13 @@ public class BasicLogic {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, getName());
+			return null;
+		}
+		
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -1241,6 +1254,10 @@ public class BasicLogic {
 				new ExampleScript("Symbolic usage, false condition", "true && false"),
 				new ExampleScript("Short circuit", "false && msg('This will not show')"),
 			};
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CONSTANT_OFFLINE);
 		}
 	}
 

@@ -282,7 +282,7 @@ public class DataHandling {
 
 	@api
 	@noboilerplate
-	public static class _for extends AbstractFunction {
+	public static class _for extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "for";
@@ -357,6 +357,34 @@ public class DataHandling {
 			return "Executing function: " + this.getName() + "(" 
 					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
 					+ ", " + args.get(2).toStringVerbose() + ", <code>)";
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			//In for(@i = 0, @i < @x, @i++, ...), the @i++ is more optimally written as ++@i, but
+			//it is commonplace to use postfix operations, so if the condition is in fact that simple,
+			//let's reverse it.
+			boolean isInc;
+			try{
+				if(children.get(2).getData() instanceof CFunction &&
+						((isInc = children.get(2).getData().val().equals("postinc"))
+						|| children.get(2).getData().val().equals("postdec"))
+						&& children.get(2).getChildAt(0).getData() instanceof IVariable){
+					ParseTree pre = new ParseTree(new CFunction(isInc?"inc":"dec", t), children.get(2).getFileOptions());
+					pre.addChild(children.get(2).getChildAt(0));
+					children.set(2, pre);
+				}
+			} catch(IndexOutOfBoundsException e){
+				//Just ignore it. It's a compile error, but we'll let the rest of the
+				//existing system sort that out.
+			}
+			
+			return null;
+		}
+		
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 				
 	}

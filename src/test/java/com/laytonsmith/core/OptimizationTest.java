@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
@@ -22,39 +23,7 @@ public class OptimizationTest {
 	}
     
     public String optimize(String script) throws ConfigCompileException{
-        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true));        
-        StringBuilder b = new StringBuilder();
-        //The root always contains null.
-        for(ParseTree child : tree.getChildren()){
-            b.append(optimize0(child));
-        }        
-        return b.toString();
-    }
-    private String optimize0(ParseTree node){
-        if(node.getData() instanceof CFunction){
-            StringBuilder b = new StringBuilder();
-            boolean first = true;
-            b.append(((CFunction)node.getData()).val()).append("(");
-            for(ParseTree child : node.getChildren()){
-                if(!first){
-                    b.append(",");
-                }
-                first = false;
-                b.append(optimize0(child));
-            }
-            b.append(")");
-            return b.toString();
-        } else if(node.getData() instanceof CString){
-            //strings
-            return new StringBuilder().append("'").append(node.getData().val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'").toString();
-        } else if(node.getData() instanceof IVariable){
-            return ((IVariable)node.getData()).getName();
-		} else if(node.getData() instanceof Variable){
-			return ((Variable)node.getData()).getName();
-        } else {
-            //static
-            return node.getData().toString();
-        }
+        return OptimizationUtilities.optimize(script);
     }
     
     @Test public void testTestFramework() throws ConfigCompileException{
@@ -194,6 +163,15 @@ public class OptimizationTest {
 	
 	@Test public void testInnerIfWithOtherStatements2() throws Exception{
 		assertEquals("ifelse(@a,sconcat(ifelse(@b,msg('')),msg('')))", optimize("if(@a){ if(@b){ msg('') } msg('') }"));
+	}
+	
+	@Test public void testInnerIfWithExistingAnd() throws Exception{
+		assertEquals("ifelse(and(@a,@b,@c),msg(''))", optimize("if(@a && @b){ if(@c){ msg('') } }"));
+	}
+	
+	@Test public void testForWithPostfix() throws Exception{
+		assertEquals("for(assign(@i,0),lt(@i,5),inc(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i++, msg(''))"));
+		assertEquals("for(assign(@i,0),lt(@i,5),dec(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i--, msg(''))"));
 	}
 	
     
