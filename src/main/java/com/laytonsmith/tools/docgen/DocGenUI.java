@@ -1,6 +1,8 @@
 package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.UIUtils;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.Prefs;
@@ -277,6 +279,7 @@ public class DocGenUI extends javax.swing.JFrame {
 			new Thread(new Runnable() {
 
 				public void run() {
+					Implementation.setServerType(Implementation.Type.BUKKIT);
 					Installer.Install(chDirectory);
 					try {
 						Prefs.init(new File(chDirectory, "preferences.txt"));

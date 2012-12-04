@@ -9,6 +9,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -74,6 +75,22 @@ public class Compiler {
 	@api
 	@noprofile
 	public static class __autoconcat__ extends DummyFunction implements Optimizable {
+		
+		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t){
+			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
+			ParseTree tree = new ParseTree(ac, fo);
+			tree.setChildren(children);
+			return tree;
+		}
+		
+		public static ParseTree getParseTree(ParseTree child, FileOptions fo, Target t){
+			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
+			ParseTree tree = new ParseTree(ac, fo);
+			List<ParseTree> children = new ArrayList<ParseTree>();
+			children.add(child);
+			tree.setChildren(children);
+			return tree;
+		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");

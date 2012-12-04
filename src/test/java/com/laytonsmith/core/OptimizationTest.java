@@ -83,7 +83,7 @@ public class OptimizationTest {
     }
 	
 	@Test public void testProcOptimizationRecursion() throws Exception{
-		assertEquals("sconcat(proc('_loop',@a,if(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))", 
+		assertEquals("sconcat(proc('_loop',@a,ifelse(gt(@a,0),_loop(subtract(@a,1)),return(@a))),_loop(2))", 
 				optimize("proc(_loop, @a, if(@a > 0, _loop(@a - 1), return(@a))) _loop(2)"));
 	}
     
@@ -175,6 +175,19 @@ public class OptimizationTest {
 	@Test public void testAssignmentMixedWithAddition6() throws Exception{
 		assertEquals("sconcat(add(1,assign(@_,assign(@a,add(@a,@b,@c,2)))),'blah')", optimize("1 + @_ = @a += @b + @c + 2 'blah'"));
 	}
+	
+	@Test public void testInnerIfAnded() throws Exception{
+		assertEquals("ifelse(and(@a,@b),msg(''))", optimize("if(@a){ if(@b){ msg('') } }"));
+	}
+	
+	@Test public void testInnerIfWithOtherStatements1() throws Exception{
+		assertEquals("ifelse(@a,ifelse(@b,msg(''),msg('')))", optimize("if(@a){ if(@b){ msg('') } else { msg('') } }"));
+	}
+	
+	@Test public void testInnerIfWithOtherStatements2() throws Exception{
+		assertEquals("ifelse(@a,sconcat(ifelse(@b,msg('')),msg('')))", optimize("if(@a){ if(@b){ msg('') } msg('') }"));
+	}
+	
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{
