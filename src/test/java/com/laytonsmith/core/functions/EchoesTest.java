@@ -6,10 +6,12 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.Echoes.color;
 import com.laytonsmith.testing.C;
 import static com.laytonsmith.testing.StaticTest.*;
 import java.lang.reflect.InvocationTargetException;
@@ -111,4 +113,24 @@ public class EchoesTest {
         assertEquals(String.format("\u00A7%s", "m"), SRun("color(strike)", fakePlayer));
         assertEquals(String.format("\u00A7%s", "a"), SRun("color(a)", fakePlayer));
     }
+	
+	private static String a = new color().exec(Target.UNKNOWN, null, new CString("a", Target.UNKNOWN)).val();
+	@Test public void testColorize1() throws Exception{
+		assertEquals(a + "Hi", SRun("colorize('&aHi')", fakePlayer));
+	}
+	@Test public void testColorize2() throws Exception{
+		assertEquals("&aHi", SRun("colorize('&&aHi')", fakePlayer));
+	}
+	@Test public void testColorize3() throws Exception{
+		assertEquals("&", SRun("colorize('&&')", fakePlayer));
+	}
+	@Test public void testColorize4() throws Exception{
+		assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&aHi')", fakePlayer));
+	}
+	@Test public void testColorize5() throws Exception{
+		assertEquals("&&", SRun("colorize('&&&&', '&&')", fakePlayer));
+	}
+	@Test public void testColorize6() throws Exception{
+		assertEquals("&&" + a + "Hi", SRun("colorize('&&&&&&aHi', '&&')", fakePlayer));
+	}
 }

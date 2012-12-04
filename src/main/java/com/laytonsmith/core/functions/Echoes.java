@@ -21,11 +21,14 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -190,6 +193,15 @@ public class Echoes {
     @api public static class color extends AbstractFunction implements Optimizable {
 		
 		private Map<String, CString> colors = new TreeMap<String, CString>();
+		private static final String symbols = "0123456789abcdefABCDEFmMnNoOlLkK";
+		public static final Set<Character> COLOR_SYMBOLS;
+		static {
+			Set<Character> temp = new TreeSet<Character>();
+			for(Character c : symbols.toCharArray()){
+				temp.add(c);
+			}
+			COLOR_SYMBOLS = Collections.unmodifiableSet(temp);
+		}
 
         public String getName() {
             return "color";
@@ -234,6 +246,12 @@ public class Echoes {
             } else if(a.equals("plain white") || a.equals("plainwhite") || a.equals("plain_white")){
                 a = "r";
             }
+			
+			//////////////////////////////////////////////////////////////
+			// IMPORTANT                                                //
+			// Be sure to update COLOR_SYMBOLS if this list is updated! //
+			//////////////////////////////////////////////////////////////
+			
             if(color == null){
                 try{
                     Character p = String.valueOf(a).charAt(0);
@@ -517,4 +535,100 @@ public class Echoes {
         }
         
     }        
+	
+	@api
+	public static class colorize extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		color color = new color();
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			Construct text = args[0];
+			String symbol = "&";
+			if(args.length == 2){
+				symbol = args[1].val();
+			}
+			if(text instanceof CString){
+				String stext = text.val();
+				StringBuilder b = new StringBuilder();
+				int sl = symbol.length();
+				for(int i = 0; i < stext.length(); i++){
+					if(i + sl >= stext.length()){
+						if(i < stext.length()){
+							b.append(stext.substring(i));
+							break;
+						}
+					} else {
+						String subsequence1 = stext.substring(i, i + sl);
+						if(!symbol.equals(subsequence1)){
+							b.append(stext.charAt(i));
+							continue;
+						}
+						try{
+							String subsequence2 = stext.substring(i + sl, i + (sl * 2));
+							if(subsequence2.equals(subsequence1)){
+								b.append(subsequence1);
+								i += (sl * 2) - 1;
+								continue;
+							}
+						} catch(IndexOutOfBoundsException e){
+							//Ignored, it just means there aren't enough characters to do a second
+							//subsequence
+						}
+						Character c;
+						try{
+							c = stext.charAt(i + sl);
+						} catch(IndexOutOfBoundsException e){
+							b.append(stext.charAt(i + sl - 1));
+							break;
+						}
+						if(color.COLOR_SYMBOLS.contains(c)){
+							b.append(color.exec(t, environment, new CString(c, t)));
+							i += sl;
+							continue;
+						} else {
+							b.append(subsequence1);
+							i += sl - 1;
+							continue;
+						}
+					}
+				}
+				return new CString(b.toString(), t);
+			} else {
+				return text;
+			}
+		}
+
+		public String getName() {
+			return "colorize";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "mixed {text, [symbol]} Replaces all the colorizable text in the string. For instance,"
+					+ " colorize('&aText') would be equivalent to (color('a').'Text'). By default, the"
+					+ " symbol is '&', but that can be any arbitrary string that you specify. If text is not"
+					+ " a string, that value is simply returned. If you need to \"escape\" a symbol, (that is"
+					+ " have a literal symbol followed by a letter that is a valid color) just repeat the symbol"
+					+ " twice, for instance '&&c' would return a literal '&c' instead of a red modifier.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }

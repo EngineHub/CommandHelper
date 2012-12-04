@@ -351,4 +351,20 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void playNote(MCLocation loc, MCInstrument instrument, MCNote note) {
 		p.playNote((Location)loc.getHandle(), BukkitMCInstrument.getConvertor().getConcreteEnum(instrument), (Note)note.getHandle());
 	}
+
+	public int getHunger() {
+		return p.getFoodLevel();
+	}
+
+	public void setHunger(int h) {
+		p.setFoodLevel(h);
+	}
+	
+	public float getSaturation(){
+		return p.getSaturation();
+	}
+	
+	public void setSaturation(float s){
+		p.setSaturation(s);
+	}
 }

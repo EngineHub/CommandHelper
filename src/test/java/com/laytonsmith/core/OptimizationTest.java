@@ -3,6 +3,7 @@ package com.laytonsmith.core;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.*;
@@ -48,6 +49,8 @@ public class OptimizationTest {
             return new StringBuilder().append("'").append(node.getData().val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'").toString();
         } else if(node.getData() instanceof IVariable){
             return ((IVariable)node.getData()).getName();
+		} else if(node.getData() instanceof Variable){
+			return ((Variable)node.getData()).getName();
         } else {
             //static
             return node.getData().toString();
@@ -67,6 +70,11 @@ public class OptimizationTest {
     @Test public void testIfWithBraces() throws ConfigCompileException{
         assertEquals("ifelse(dyn(),msg('hi'),msg('hi'))", optimize("if(dyn()){ msg('hi') } else { msg('hi') }"));
     }
+	
+	@Test public void testIfElseWithDie() throws ConfigCompileException {
+		assertEquals("ifelse(is_null($pl),die(''),not(ponline(player($pl))),die(concat($pl,'')))", 
+				optimize("if(is_null($pl)) {\ndie('') } else if(!ponline(player($pl))){ die($pl.'') }"));
+	}
     
     @Test public void testMultipleLinesInBraces() throws ConfigCompileException{
         assertEquals("ifelse(dyn(false),msg('nope'),sconcat(msg('hi'),msg('hi')))", optimize("if(dyn(false)){\n"
