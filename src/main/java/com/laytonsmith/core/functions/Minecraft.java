@@ -258,47 +258,6 @@ public class Minecraft {
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class get_worlds extends AbstractFunction {
-
-		public String getName() {
-			return "get_worlds";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{0};
-		}
-
-		public String docs() {
-			return "array {} Returns the names of the worlds available in this server";
-		}
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
-		}
-
-		public boolean isRestricted() {
-			return false;
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_1_0;
-		}
-
-		public Boolean runAsync() {
-			return true;
-		}
-
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			List<MCWorld> worlds = StaticLayer.GetServer().getWorlds();
-			CArray c = new CArray(t);
-			for (MCWorld w : worlds) {
-				c.push(new CString(w.getName(), t));
-			}
-			return c;
-		}
-	}
-
-	@api(environments = {CommandHelperEnvironment.class})
 	public static class spawn_mob extends AbstractFunction {
 
 		public String getName() {
