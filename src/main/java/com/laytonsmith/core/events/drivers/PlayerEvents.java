@@ -51,27 +51,6 @@ public class PlayerEvents {
 		public String getName() {
 			return "player_teleport";
 		}
-		
-		@Override
-		public void cancel(BindableEvent o, boolean state) {
-			if(o instanceof MCPlayerTeleportEvent){
-				((MCPlayerTeleportEvent)o).setCancelled(state);
-			}
-		}
-
-		@Override
-		public boolean isCancellable(BindableEvent o) {
-			return true;
-		}
-
-		@Override
-		public boolean isCancelled(BindableEvent o) {
-			if(o instanceof MCPlayerTeleportEvent){
-				return ((MCPlayerTeleportEvent)o).isCancelled();
-			} else {
-				return false;
-			}
-		}		
 
 		public String docs() {
 			return "{player: <macro> The player that teleport. Switching worlds will trigger this event, but world_changed is called "
@@ -86,10 +65,22 @@ public class PlayerEvents {
 		}
 		
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
-			if(e instanceof MCPlayerMoveEvent){
-				MCPlayerMoveEvent event = (MCPlayerMoveEvent)e;
+			if(e instanceof MCPlayerTeleportEvent){
+				MCPlayerTeleportEvent event = (MCPlayerTeleportEvent)e;
 				
-				if(prefilter.containsKey("from")){
+				if (prefilter.containsKey("player")) {
+					if (!(prefilter.get("player").toString().equalsIgnoreCase(event.getPlayer().getName()))){
+						return false;
+					}
+				}
+				
+				if (prefilter.containsKey("type")) {
+					if (!(prefilter.get("type").toString().equalsIgnoreCase(event.getCause()))) {
+						return false;
+					}
+				}
+				
+				if (prefilter.containsKey("from")){
 					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getPlayer().getWorld(), Target.UNKNOWN);
 					MCLocation loc = event.getFrom();
 					
@@ -130,6 +121,7 @@ public class PlayerEvents {
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
                 map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
                 map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
+				map.put("type", new CString(event.getCause(), Target.UNKNOWN));
 				
                 return map;
             } else {
