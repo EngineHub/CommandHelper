@@ -45,6 +45,113 @@ public class PlayerEvents {
     public static String docs(){
         return "Contains events related to a player";
     }
+	
+	@api
+	public static class player_teleport extends AbstractEvent {
+		public String getName() {
+			return "player_teleport";
+		}
+
+		public String docs() {
+			return "{player: <macro> The player that teleport. Switching worlds will trigger this event, but world_changed is called "
+				+ "after, only if this isn't cancelled first."
+				+ "| from: <custom> This should be a location array (x, y, z, world)."
+				+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
+				+ "moved from 1.3, that parameter would match."
+				+ "| to: <custom> The location the player is now in. This should be a location array as well."
+				+ "{player | from: The location the player is coming from | to: The location the player is now in}"
+				+ "{}"
+				+ "{}";
+		}
+		
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerTeleportEvent){
+				MCPlayerTeleportEvent event = (MCPlayerTeleportEvent)e;
+				
+				if (prefilter.containsKey("player")) {
+					if (!(prefilter.get("player").toString().equalsIgnoreCase(event.getPlayer().getName()))){
+						return false;
+					}
+				}
+				
+				if (prefilter.containsKey("type")) {
+					if (!(prefilter.get("type").toString().equalsIgnoreCase(event.getCause()))) {
+						return false;
+					}
+				}
+				
+				if (prefilter.containsKey("from")){
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getPlayer().getWorld(), Target.UNKNOWN);
+					MCLocation loc = event.getFrom();
+					
+					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
+						return false;
+					}
+				}
+				
+				if(prefilter.containsKey("to")){
+					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
+					MCLocation loc = event.getFrom();
+					
+					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
+						return false;
+					}
+				}
+				
+				return true;
+				
+			}
+			
+			return false ;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			MCPlayer p = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
+			MCLocation from = ObjectGenerator.GetGenerator().location(manualObject.get("from"), p.getWorld(), manualObject.getTarget());
+			MCLocation to = ObjectGenerator.GetGenerator().location(manualObject.get("to"), p.getWorld(), manualObject.getTarget());
+			return EventBuilder.instantiate(MCPlayerTeleportEvent.class, p, from, to);
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCPlayerTeleportEvent) {
+                MCPlayerTeleportEvent event = (MCPlayerTeleportEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+				
+                //Fill in the event parameters
+				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+                map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
+                map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
+				map.put("type", new CString(event.getCause(), Target.UNKNOWN));
+				
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerMovedEvent");
+            }
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_TELEPORT;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCPlayerTeleportEvent) {
+				MCPlayerTeleportEvent e = (MCPlayerTeleportEvent)event;
+				
+				if (key.equalsIgnoreCase("to")) {
+					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
+					e.setTo(loc);
+					
+					return true;
+				}
+			}
+			
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+	}
     
     @api
     public static class player_prelogin extends AbstractEvent {
@@ -288,7 +395,7 @@ public class PlayerEvents {
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if(event instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent pje = (MCPlayerJoinEvent)event;
-                if(key.equals("join_message")){
+                if(key.equals("join_message") || key.equals("message")){
                     if(value instanceof CNull){
                         pje.setJoinMessage(null);
                         return pje.getJoinMessage() == null;
