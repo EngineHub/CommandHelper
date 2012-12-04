@@ -10,6 +10,7 @@ package com.laytonsmith.core.events;
 public enum Driver {
 	PLAYER_PRELOGIN,
 	PLAYER_LOGIN,
+	PLAYER_TELEPORT,
     PLAYER_JOIN,    
     PLAYER_INTERACT, 
     PLAYER_SPAWN,     
