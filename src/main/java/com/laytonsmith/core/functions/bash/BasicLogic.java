@@ -16,7 +16,33 @@ public class BasicLogic {
     public static class _if extends BashFunction{
 
         public String getName() {
-            return "if";
+            return "ifelse";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public String docs() {
+            return "void {condition, ifcode, elsecode} Runs the ifcode if condition is true, otherwise, "
+                    + "runs the false code. Note that nothing is ever returned.";
+        }
+
+        public String compile(Target t, String ... args) {
+            return new _ifelse().compile(t, args);
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
+	
+    @api(platform=api.Platforms.COMPILER_BASH)
+    public static class _ifelse extends BashFunction{
+
+        public String getName() {
+            return "ifelse";
         }
 
         public Integer[] numArgs() {

@@ -3,6 +3,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -106,35 +107,43 @@ public class BasicLogic {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> args) throws ConfigCompileException {
+			//Just, always turn this into an ifelse, though throw a compile error if there are more than
+			//3 arguments, if this isn't a pre-ifelse
+			boolean allowOverloading = false;
 			for (ParseTree arg : args) {
 				//If any are CIdentifiers, forward this to ifelse
 				if (arg.getData() instanceof CIdentifier) {
-					return new ifelse().optimizeDynamic(t, args);
+					allowOverloading = true;
+					break;
 				}
 			}
-			//Now check for too many/too few arguments
-			if (args.size() == 1 || args.size() > 3) {
-				throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
+			if(!allowOverloading && args.size() > 3){
+				throw new ConfigCompileException("if() can only have 3 parameters", t);
 			}
-			if (args.get(0).getData().isDynamic()) {
-				return super.optimizeDynamic(t, args); //Can't optimize
-			} else {
-				if (Static.getBoolean(args.get(0).getData())) {
-					return args.get(1);
-				} else {
-					if (args.size() == 3) {
-						return args.get(2);
-					} else {
-						FileOptions options = new FileOptions(new HashMap<String, String>());
-						if (!args.isEmpty()) {
-							options = args.get(0).getFileOptions();
-						}
-						ParseTree node = new ParseTree(new CVoid(t), options);
-						node.setOptimized(true);
-						return node;
-					}
-				}
-			}
+			return new ifelse().optimizeDynamic(t, args);
+//			//Now check for too many/too few arguments
+//			if (args.size() == 1 || args.size() > 3) {
+//				throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
+//			}
+//			if (args.get(0).getData().isDynamic()) {
+//				return super.optimizeDynamic(t, args); //Can't optimize
+//			} else {
+//				if (Static.getBoolean(args.get(0).getData())) {
+//					return args.get(1);
+//				} else {
+//					if (args.size() == 3) {
+//						return args.get(2);
+//					} else {
+//						FileOptions options = new FileOptions(new HashMap<String, String>());
+//						if (!args.isEmpty()) {
+//							options = args.get(0).getFileOptions();
+//						}
+//						ParseTree node = new ParseTree(new CVoid(t), options);
+//						node.setOptimized(true);
+//						return node;
+//					}
+//				}
+//			}
 		}
 
 		@Override
@@ -395,6 +404,12 @@ public class BasicLogic {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 
+			FileOptions options = new FileOptions(new HashMap<String, String>());
+			if (!children.isEmpty()) {
+				options = children.get(0).getFileOptions();
+			}
+			ParseTree node = new ParseTree(new CFunction(this.getName(), t), options);
+			node.setOptimized(true);
 			List<ParseTree> optimizedTree = new ArrayList<ParseTree>();
 			//We have to cache the return value if even if we find it, so we can check for syntax errors
 			//in all the branches, not just the ones before the first hardcoded true
@@ -423,6 +438,24 @@ public class BasicLogic {
 					optimizedTree.add(statement);
 					optimizedTree.add(code);
 				}
+				// We can pull up if(@a){ if(@b){ ...} } to if(@a && @b){ ... },
+				// which, in my profiling is faster. The only special consideration
+				// we have to make is to ensure that the inner if is the only statement
+				// in the entire block, (including lack of an else) so any code outside the inner if causes this
+				// optimization to be impossible. An inner ifelse cannot be optimized.
+				if(code.getChildren().size() == 2 && code.getData() instanceof CFunction && code.getData().val().equals("ifelse")){
+					CFunction and = new CFunction("and", t);
+					ParseTree andTree = new ParseTree(and, statement.getFileOptions());
+					andTree.addChild(statement);
+					andTree.addChild(code.getChildAt(0));
+					optimizedTree.set(i, andTree);
+					optimizedTree.set(i + 1, code.getChildAt(1));
+					//We need to set this to re-optimize the children, because the and() construction may be unoptimal now
+					for(ParseTree pt : andTree.getChildren()){
+						pt.setOptimized(false);
+					}
+					node.setOptimized(false);
+				}
 			}
 			if (toReturn != null) {
 				return toReturn;
@@ -443,13 +476,7 @@ public class BasicLogic {
 				//The whole tree has been optimized out. Return void
 				return new ParseTree(new CVoid(t), new FileOptions(new HashMap<String, String>()));
 			}
-			FileOptions options = new FileOptions(new HashMap<String, String>());
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
-			ParseTree node = new ParseTree(new CFunction(this.getName(), t), options);
 			node.setChildren(optimizedTree);
-			node.setOptimized(true);
 			return node;
 
 		}
@@ -1160,7 +1187,7 @@ public class BasicLogic {
 	}
 
 	@api(environments={GlobalEnv.class})
-	public static class and extends AbstractFunction {
+	public static class and extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "and";
@@ -1211,6 +1238,13 @@ public class BasicLogic {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, getName());
+			return null;
+		}
+		
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -1220,6 +1254,10 @@ public class BasicLogic {
 				new ExampleScript("Symbolic usage, false condition", "true && false"),
 				new ExampleScript("Short circuit", "false && msg('This will not show')"),
 			};
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CONSTANT_OFFLINE);
 		}
 	}
 

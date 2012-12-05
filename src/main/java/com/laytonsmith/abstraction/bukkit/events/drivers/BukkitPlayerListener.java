@@ -153,7 +153,13 @@ public class BukkitPlayerListener implements Listener {
 
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerTeleport(PlayerTeleportEvent event) {
-		if (!event.getFrom().getWorld().equals(event.getTo().getWorld())) {
+		if (event.getFrom().equals(event.getTo())) {
+			return;
+		}
+		
+		EventUtils.TriggerListener(Driver.PLAYER_TELEPORT, "player_teleport", new BukkitPlayerEvents.BukkitMCPlayerTeleportEvent(event));
+	
+		if (!event.getFrom().getWorld().equals(event.getTo().getWorld()) && !event.isCancelled()) {
 			EventUtils.TriggerListener(Driver.WORLD_CHANGED, "world_changed", new BukkitPlayerEvents.BukkitMCWorldChangedEvent(new PlayerChangedWorldEvent(event.getPlayer(), event.getFrom().getWorld())));
 		}
 	}

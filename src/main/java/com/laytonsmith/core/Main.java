@@ -4,9 +4,12 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ArgumentSuite;
+import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -100,6 +103,12 @@ public class Main {
 					.addDescription("Installs one of the built in LocalPackage examples, which may in and of itself be useful.")
 					.addArgument("The name of the package to install. Leave blank to see a list of examples to choose from.", "[packageName]", true);
 			suite.addMode("examples", examplesMode);
+			ArgumentParser optimizerTestMode = ArgumentParser.GetParser()
+					.addDescription("Given a source file, reads it in and outputs the \"optimized\" version. This is meant as a debug"
+					+ " tool, but could be used as an obfuscation tool as well.")
+					.addArgument("File path", "file", true);
+			suite.addMode("optimizer-test", optimizerTestMode);
+			
 			
 			ArgumentParser mode;
 			ArgumentParser.ArgumentParserResults parsedArgs;
@@ -231,6 +240,13 @@ public class Main {
                 String theme = (syntax.size()>=2?syntax.get(1):null);
                 System.out.println(SyntaxHighlighters.generate(type, theme));
                 System.exit(0);
+			} else if(mode == optimizerTestMode){
+				Implementation.setServerType(Implementation.Type.SHELL);
+				String path = parsedArgs.getStringArgument();
+				String plain = FileUtility.read(new File(path));
+				String optimized = OptimizationUtilities.optimize(plain);
+				System.out.println(optimized);
+				System.exit(0);
             } else if(mode == helpMode){
 				String modeForHelp = null;
 				if(parsedArgs != null){

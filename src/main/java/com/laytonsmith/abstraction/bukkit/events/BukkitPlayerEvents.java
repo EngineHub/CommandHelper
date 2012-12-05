@@ -20,6 +20,7 @@ import java.util.HashSet;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -33,6 +34,56 @@ import org.bukkit.inventory.ItemStack;
  * @author layton
  */
 public class BukkitPlayerEvents {
+	
+	public static class BukkitMCPlayerTeleportEvent implements MCPlayerTeleportEvent {
+		PlayerTeleportEvent e;
+		
+		public BukkitMCPlayerTeleportEvent(PlayerTeleportEvent e) {
+			this.e = e;
+		}
+		
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getPlayer());
+		}
+
+		public MCLocation getFrom() {
+			return new BukkitMCLocation(e.getFrom());
+		}
+
+		public MCLocation getTo() {
+			return new BukkitMCLocation(e.getTo());
+		}
+
+		public String getCause() {
+			return e.getCause().name();
+		}
+
+		public void setTo(MCLocation newloc) {
+			World w = ((BukkitMCWorld)newloc.getWorld()).__World();
+			Location loc = new Location(
+				w, 
+				newloc.getX(),
+				newloc.getY(),
+				newloc.getZ(),
+				newloc.getPitch(),
+				newloc.getYaw()
+			);
+			
+			e.setTo(loc);
+		}
+
+		public Object _GetObject() {
+			return e;
+		}
+
+		public void setCancelled(boolean state) {
+			e.setCancelled(state);
+		}
+
+		public boolean isCancelled() {
+			return e.isCancelled();
+		}
+	}
 	
 	public static class BukkitMCPlayerLoginEvent implements MCPlayerLoginEvent {
 		PlayerLoginEvent event;
