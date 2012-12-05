@@ -15,6 +15,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
 import java.util.*;
+import java.lang.Math;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -115,6 +116,92 @@ public class PlayerManagement {
 
 		public CHVersion since() {
 			return CHVersion.V3_0_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class players_in_radius extends AbstractFunction {
+
+		public String getName() {
+			return "players_in_radius";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1,2};
+		}
+		
+		boolean inRadius(MCPlayer player, double dist, MCLocation loc) {
+			double x1 = player.getLocation().getX();
+			double y1 = player.getLocation().getY();
+			double z1 = player.getLocation().getZ();
+			
+			double x2 = loc.getX();
+			double y2 = loc.getY();
+			double z2 = loc.getZ();
+			
+			double distance = Math.sqrt(
+				(x1-x2) * (x1-x2) + 
+				(y1-y2) * (y1-y2) + 
+				(z1-z2) * (z1-z2)
+			); 
+			
+			if (distance <= dist) {
+				return true;
+			}
+			
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			MCPlayer[] pa = Static.getServer().getOnlinePlayers();
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			
+			MCLocation loc;
+			double dist;
+			
+			if (args.length == 1) {
+				dist = Static.getDouble(args[0], t);
+				Static.AssertPlayerNonNull(p, t);
+				loc = p.getLocation();
+			} else {
+				if (!(args[0] instanceof CArray)) {
+					throw new ConfigRuntimeException("Expecting an array at parameter 1 of players_in_radius",
+						ExceptionType.CastException, t);
+				}
+				
+				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);		
+				dist = Static.getDouble(args[1], t);
+			}
+			
+			CArray sa = new CArray(t);
+			
+			for (int i = 0; i < pa.length; i++) {
+				if (inRadius(pa[i], dist, loc)) {
+					sa.push(new CString(pa[i].getName(), t));
+				}
+			}
+			
+			return sa;
+		}
+
+		public String docs() {
+			return "array {[location array], distance} Returns an array of all the player names of all the online players within the given radius";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 
 		public Boolean runAsync() {
