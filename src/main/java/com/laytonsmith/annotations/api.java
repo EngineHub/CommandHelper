@@ -44,8 +44,24 @@ public @interface api {
         }
     }
     
+	/**
+	 * Returns the platform this is implemented for. The default is {@see api.Platforms#INTERPRETER_JAVA}.
+	 * @return 
+	 */
     Platforms [] platform() default {api.Platforms.INTERPRETER_JAVA};
+	/**
+	 * Returns the environments this api element uses. The default is an empty array, but note
+	 * that GlobalEnv.class is implied for all elements, and it is not required to add that to this
+	 * list.
+	 * @return 
+	 */
     Class<? extends Environment.EnvironmentImpl> [] environments() default {};
+	/**
+	 * If this api element is enabled. The default is {@code true}, but you can temporarily
+	 * disable an element by setting this to false.
+	 * @return 
+	 */
+	boolean enabled() default true;
     
     /**
      * This is a list of valid classes that are valid to be tagged with this annotation.

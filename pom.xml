@@ -310,7 +310,7 @@
 		<!-- MCStats -->
 		<dependency>
 			<groupId>org.mcstats</groupId>
-			<artifactId>metrics-lite</artifactId>
+			<artifactId>metrics</artifactId>
 			<version>1.2-SNAPSHOT</version>
 		</dependency>
 	</dependencies>

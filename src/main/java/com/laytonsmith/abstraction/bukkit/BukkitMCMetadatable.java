@@ -47,5 +47,20 @@ public class BukkitMCMetadatable implements MCMetadatable {
 	public Object getHandle() {
 		return meta;
 	}
+	
+	@Override
+	public String toString() {
+		return meta.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCMetadatable?meta.equals(((BukkitMCMetadatable)obj).meta):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return meta.hashCode();
+	}
 
 }

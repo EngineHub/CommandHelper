@@ -41,5 +41,20 @@ public class BukkitMCPluginManager implements MCPluginManager {
     public PluginManager __PluginManager(){
         return p;
     }
+
+	@Override
+	public String toString() {
+		return p.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCPluginManager?p.equals(((BukkitMCPluginManager)obj).p):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return p.hashCode();
+	}
     
 }

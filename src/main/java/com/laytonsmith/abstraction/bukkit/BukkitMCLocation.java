@@ -103,6 +103,16 @@ public class BukkitMCLocation implements MCLocation{
 	public String toString() {
 		return l.toString();
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCLocation?l.equals(((BukkitMCLocation)obj).l):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return l.hashCode();
+	}
 	
 	
 }

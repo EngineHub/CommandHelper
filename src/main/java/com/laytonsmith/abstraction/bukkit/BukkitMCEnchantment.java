@@ -48,4 +48,19 @@ public class BukkitMCEnchantment implements MCEnchantment{
     public String getName() {
         return e.getName();
     }
+	
+	@Override
+	public String toString() {
+		return e.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCEnchantment?e.equals(((BukkitMCEnchantment)obj).e):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return e.hashCode();
+	}
 }

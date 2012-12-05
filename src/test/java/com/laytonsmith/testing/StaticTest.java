@@ -531,6 +531,7 @@ public class StaticTest {
         if(frontendInstalled){
             return;
         }
+		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(Static.class));
 		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(StaticTest.class));
 		Implementation.setServerType(Implementation.Type.TEST);
         AliasCore fakeCore = mock(AliasCore.class);

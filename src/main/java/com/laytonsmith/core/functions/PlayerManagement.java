@@ -197,7 +197,7 @@ public class PlayerManagement {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
@@ -1811,8 +1811,15 @@ public class PlayerManagement {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
-			return new CBoolean(pl.isWhitelisted(), t);
+			boolean ret;
+			if(pl == null){
+				ret = false;
+			} else {
+				ret = pl.isWhitelisted();
+			}
+			return new CBoolean(ret, t);
 		}
+		
 	}
 
 	@api(environments={CommandHelperEnvironment.class})
@@ -2611,7 +2618,7 @@ public class PlayerManagement {
 	public static class set_pvelocity extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -2786,7 +2793,7 @@ public class PlayerManagement {
 	public static class set_phunger extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {
@@ -2847,6 +2854,7 @@ public class PlayerManagement {
 			if(args.length == 1){
 				p = Static.GetPlayer(args[0], t);
 			}
+			Static.AssertPlayerNonNull(p, t);
 			return new CDouble(p.getSaturation(), t);
 		}
 
@@ -2872,7 +2880,7 @@ public class PlayerManagement {
 	public static class set_psaturation extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
+			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException, ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {

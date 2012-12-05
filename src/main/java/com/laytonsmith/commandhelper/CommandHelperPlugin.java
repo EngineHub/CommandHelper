@@ -53,6 +53,7 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.event.server.ServerCommandEvent;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.mcstats.Metrics;
 
 /**
  * Entry point for the plugin.
@@ -105,8 +106,15 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onEnable() {
 		//Metrics
 		try {
-			org.mcstats.MetricsLite metrics = new org.mcstats.MetricsLite(this);
-			metrics.start();
+			org.mcstats.Metrics m = new Metrics(this);
+			m.addCustomData(new Metrics.Plotter("Player count") {
+
+				@Override
+				public int getValue() {
+					return Static.getServer().getOnlinePlayers().length;
+				}
+			});
+			m.start();
 		} catch (IOException e) {
 			// Failed to submit the stats :-(
 		}

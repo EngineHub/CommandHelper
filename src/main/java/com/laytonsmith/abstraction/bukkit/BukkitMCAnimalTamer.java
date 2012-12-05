@@ -54,4 +54,19 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
         }
         return null;
     }
+	
+	@Override
+	public String toString() {
+		return at.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCAnimalTamer?at.equals(((BukkitMCAnimalTamer)obj).at):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return at.hashCode();
+	}
 }

@@ -44,8 +44,11 @@ public class FunctionList {
                     FunctionBase f = (FunctionBase) c.newInstance();
                     api api = f.getClass().getAnnotation(api.class);                    
                     api.Platforms [] platforms = api.platform();
+					if(!api.enabled()){
+						continue;
+					}
                     if(supportedPlatforms.get(f.getName()) == null){
-                        supportedPlatforms.put(f.getName(), new HashSet<api.Platforms>());
+                        supportedPlatforms.put(f.getName(), EnumSet.noneOf(api.Platforms.class));
                     }
                     supportedPlatforms.get(f.getName()).addAll(Arrays.asList(platforms));
                     for(Platforms p : platforms){

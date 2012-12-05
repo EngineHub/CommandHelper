@@ -183,5 +183,20 @@ public class BukkitMCServer implements MCServer{
     public void runasConsole(String cmd) {
         s.dispatchCommand(s.getConsoleSender(), cmd);
     }
+	
+	@Override
+	public String toString() {
+		return s.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCServer?s.equals(((BukkitMCServer)obj).s):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return s.hashCode();
+	}
 
 }

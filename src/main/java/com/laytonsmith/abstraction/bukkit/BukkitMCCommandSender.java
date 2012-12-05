@@ -62,5 +62,20 @@ public class BukkitMCCommandSender implements MCCommandSender{
     public boolean instanceofMCConsoleCommandSender() {
         return c instanceof ConsoleCommandSender;
     }
+	
+	@Override
+	public String toString() {
+		return c.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCCommandSender?c.equals(((BukkitMCCommandSender)obj).c):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return c.hashCode();
+	}
     
 }

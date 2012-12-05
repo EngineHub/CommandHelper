@@ -139,4 +139,19 @@ public class BukkitMCItemStack implements MCItemStack{
     public ItemStack asItemStack() {
         return is;
     }
+	
+	@Override
+	public String toString() {
+		return is.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCItemStack?is.equals(((BukkitMCItemStack)obj).is):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return is.hashCode();
+	}
 }

@@ -42,4 +42,19 @@ public class BukkitMCInventory implements MCInventory {
 	public Object getHandle() {
 		return i;
 	}
+	
+	@Override
+	public String toString() {
+		return i.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCInventory?i.equals(((BukkitMCInventory)obj).i):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return i.hashCode();
+	}
 }

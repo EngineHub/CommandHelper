@@ -45,5 +45,20 @@ public class BukkitMCPlugin implements MCPlugin {
     public Plugin getPlugin() {
         return p;
     }
+	
+	@Override
+	public String toString() {
+		return p.toString();
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return (obj instanceof BukkitMCPlugin?p.equals(((BukkitMCPlugin)obj).p):false);
+	}
+
+	@Override
+	public int hashCode() {
+		return p.hashCode();
+	}
     
 }
