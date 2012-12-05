@@ -48,6 +48,21 @@ public class BukkitMCWorld implements MCWorld {
     public BukkitMCWorld(World w) {
         this.w = w;
     }
+	
+	@Override
+	public boolean equals(Object o) {
+		return o instanceof MCWorld ? this.w.equals(((BukkitMCWorld)o).w) : false;
+	}
+
+	@Override
+	public int hashCode() {
+		return this.w.hashCode();
+	}
+	
+	@Override
+	public String toString() {
+		return this.w.toString();
+	}
     
     public BukkitMCWorld(AbstractionObject a){
         this((World)null);
