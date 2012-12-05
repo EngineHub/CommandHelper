@@ -173,7 +173,12 @@ public class PlayerManagement {
 						ExceptionType.CastException, t);
 				}
 				
-				loc = ObjectGenerator.GetGenerator().location(args[0], null, t);		
+				MCWorld w = null;
+				if (p != null) {
+					w = p.getWorld();
+				};
+				
+				loc = ObjectGenerator.GetGenerator().location(args[0], w, t);		
 				dist = Static.getDouble(args[1], t);
 			}
 			
