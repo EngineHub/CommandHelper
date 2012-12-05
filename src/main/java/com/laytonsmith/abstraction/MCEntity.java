@@ -2,9 +2,9 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.enums.MCDamageCause;
-import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.enums.MCEntityEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import java.util.List;
 import java.util.UUID;
@@ -20,6 +20,9 @@ public interface MCEntity extends MCMetadatable {
 		public double y;
 		public double z;
 
+		public Velocity(double x, double y, double z){
+			this(Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2) + Math.pow(z, 2)), x, y, z);
+		}
 		public Velocity(double magnitude, double x, double y, double z) {
 			this.magnitude = magnitude;
 			this.x = x;
@@ -59,6 +62,8 @@ public interface MCEntity extends MCMetadatable {
 	public MCEntity getVehicle();
 
 	public Velocity getVelocity();
+	
+	public void setVelocity(Velocity v);
 
 	public MCWorld getWorld();
 
@@ -83,8 +88,6 @@ public interface MCEntity extends MCMetadatable {
 	public boolean setPassenger(MCEntity passenger);
 
 	public void setTicksLived(int value);
-
-	public void setVelocity(Velocity velocity);
 
 	public boolean teleport(MCEntity destination);
 

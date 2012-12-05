@@ -2517,6 +2517,93 @@ public class PlayerManagement {
 	}
 	
 	@api(environments={CommandHelperEnvironment.class})
+	public static class set_pvelocity extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			double x;
+			double y;
+			double z;
+			switch(args.length){
+				case 1:
+				case 2: {
+					int offset = 0;
+					if(args.length == 2){
+						offset = 1;
+						p = Static.GetPlayer(args[0], t);
+					}
+					if(args[offset] instanceof CArray){
+						MCLocation l = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
+						x = l.getX();
+						y = l.getY();
+						z = l.getZ();
+					} else {
+						throw new ConfigRuntimeException("Expecting an array, but \"" + args[offset].val() + "\" was given.", ExceptionType.CastException, t);
+					}
+					break;
+				}
+				case 3:
+				case 4: {
+					int offset = 0;
+					if(args.length == 4){
+						offset = 1;
+						p = Static.GetPlayer(args[0], t);
+					}
+					x = Static.getDouble(args[offset], t);
+					y = Static.getDouble(args[offset + 1], t);
+					z = Static.getDouble(args[offset + 2], t);
+					break;
+				}
+				default:
+					throw new RuntimeException();
+			}
+			MCEntity.Velocity v = new MCEntity.Velocity(x, y, z);
+			if(v.magnitude > 10){
+				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, 
+						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
+						+ " (It was " + v.magnitude + ")", t);
+				return new CBoolean(false, t);
+			}
+			p.setVelocity(v);
+			return new CBoolean(true, t);
+		}
+
+		public String getName() {
+			return "set_pvelocity";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3, 4};
+		}
+
+		public String docs() {
+			return "boolean {[player], vector | [player], x, y, z} Sets a player's velocity. vector must be an"
+					+ " associative array with x, y, and z keys defined (if magnitude is set, it is ignored)."
+					+ " If the vector's magnitude is greater than 10, the command is cancelled, because the"
+					+ " server won't allow the player to move faster than that. A warning is issued, and false"
+					+ " is returned if this"
+					+ " happens, otherwise, true is returned.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
 	public static class psend_block_change extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
