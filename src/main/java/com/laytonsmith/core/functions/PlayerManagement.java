@@ -11,6 +11,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
@@ -125,7 +126,6 @@ public class PlayerManagement {
 	
 	@api(environments={CommandHelperEnvironment.class})
 	public static class players_in_radius extends AbstractFunction {
-
 		public String getName() {
 			return "players_in_radius";
 		}
@@ -135,6 +135,10 @@ public class PlayerManagement {
 		}
 		
 		boolean inRadius(MCPlayer player, double dist, MCLocation loc) {
+			if (!(player.getWorld().equals(loc.getWorld()))) {
+				return false;
+			}
+			
 			double x1 = player.getLocation().getX();
 			double y1 = player.getLocation().getY();
 			double z1 = player.getLocation().getZ();
