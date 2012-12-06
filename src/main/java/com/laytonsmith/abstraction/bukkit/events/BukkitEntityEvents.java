@@ -9,7 +9,9 @@ import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
+import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
+import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 import org.bukkit.entity.Entity;
@@ -17,12 +19,49 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.player.PlayerPickupItemEvent;
 
 /**
  *
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerPickupItemEvent implements MCPlayerPickupItemEvent {
+		PlayerPickupItemEvent e;
+		
+		public BukkitMCPlayerPickupItemEvent(PlayerPickupItemEvent e) {
+			this.e = e;
+		}
+		public int getRemaining() {
+			return e.getRemaining();
+		}
+
+		public MCItemStack getItem() {
+			return new BukkitMCItemStack(e.getItem().getItemStack());
+		}
+
+		public void setItem(MCItemStack stack) {
+			BukkitMCItemStack s = (BukkitMCItemStack)stack;
+			e.getItem().setItemStack(s.__ItemStack());
+		}
+
+		public boolean isCancelled() {
+			return e.isCancelled();
+		}
+
+		public void setCancelled(boolean cancelled) {
+			e.setCancelled(cancelled);
+		}
+
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getPlayer());
+		}
+
+		public Object _GetObject() {
+			return e;
+		}
+	}
 	
 	@abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCEntityDamageEvent implements MCEntityDamageEvent {
