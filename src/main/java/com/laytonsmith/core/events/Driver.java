@@ -18,6 +18,7 @@ public enum Driver {
     PLAYER_QUIT,
     PLAYER_CHAT, 
     PLAYER_COMMAND, 
+    PLAYER_KICK,
     WORLD_CHANGED,
     SIGN_CHANGED,
     BLOCK_BREAK,
