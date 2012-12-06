@@ -25,4 +25,5 @@ public enum Driver {
     TARGET_ENTITY, 
     ENTITY_DAMAGE_PLAYER, 
 	PLAYER_MOVE,  
+	ITEM_PICKUP
 }
