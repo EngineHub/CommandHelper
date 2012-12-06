@@ -184,7 +184,7 @@ public final class ClassDiscovery {
 	 * @return 
 	 */
 	static Set<Class> GetAllClasses(){
-		Set<Class> classes = new TreeSet<Class>();
+		Set<Class> classes = new HashSet<Class>();
 		Set<ClassLoader> classLoaders = new HashSet<ClassLoader>();
 		classLoaders.add(ClassDiscovery.class.getClassLoader());
 		for(String url : additionalURLs){
@@ -292,7 +292,9 @@ public final class ClassDiscovery {
 		} else {
 			Set<Class> found = new HashSet<Class>();
 			for(Class c : GetAllClasses()){
-				
+				if(c.getPackage().getName().matches(packageRegex) && c.getSimpleName().equals(className)){
+					found.add(c);
+				}
 			}
 			if(found.size() == 1){
 				return found.iterator().next();
@@ -308,6 +310,7 @@ public final class ClassDiscovery {
 						max = distance;
 					}
 				}
+				fuzzyClassCache.put(index, candidate);
 				return candidate;
 			}
 		}

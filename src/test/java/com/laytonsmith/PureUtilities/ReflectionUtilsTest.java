@@ -1,5 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
+import com.laytonsmith.testing.StaticTest;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -22,7 +23,7 @@ public class ReflectionUtilsTest {
 	
 	@Before
 	public void setUp() {
-		
+		StaticTest.InstallFakeServerFrontend();
 	}
 	
 	class A { B bObj = new B(); }
@@ -32,6 +33,12 @@ public class ReflectionUtilsTest {
 		A a = new A();
 		String result = (String)ReflectionUtils.get(A.class, a, "bObj.cObj.obj");
 		assertEquals("string", result);
+	}
+	
+	@Test public void testFuzzyLookup(){
+		Class expected = ReflectionUtils.class;
+		Class actual = ClassDiscovery.forFuzzyName("com.laytonsmith.Pur.*", "ReflectionUtils");
+		assertEquals(expected, actual);
 	}
 
 }
