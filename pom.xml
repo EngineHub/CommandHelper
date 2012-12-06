@@ -426,7 +426,7 @@
 									<include>com.jcraft:jsch:jar:*</include>
 									<include>org.apache.commons:commons-io:jar:*</include>
 									<include>org.xerial:sqlite-jdbc:jar:*</include>
-									<include>org.mcstats:metrics-lite:jar:*</include>
+									<include>org.mcstats:metrics:jar:*</include>
 								</includes>
 							</artifactSet>
 							<filters>
@@ -474,7 +474,7 @@
 									</includes>
 								</filter>                                                        
 								<filter>
-									<artifact>org.mcstats:metrics-lite:jar:*</artifact>
+									<artifact>org.mcstats:metrics:jar:*</artifact>
 									<includes>
 										<include>**</include>
 									</includes>
