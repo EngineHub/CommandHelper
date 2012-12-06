@@ -13,6 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
 /**
@@ -21,6 +22,11 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
  */
 public class BukkitEntityListener implements Listener{
 
+    @EventHandler(priority=EventPriority.LOWEST)
+    public void onItemDrop(PlayerDropItemEvent event) {
+        EventUtils.TriggerListener(Driver.ITEM_DROP, "item_drop", new BukkitEntityEvents.BukkitMCPlayerDropItemEvent(event));
+    }
+    
 	@EventHandler(priority=EventPriority.LOWEST)
     public void onItemPickup(PlayerPickupItemEvent event) {
 		EventUtils.TriggerListener(Driver.ITEM_PICKUP, "item_pickup", new BukkitEntityEvents.BukkitMCPlayerPickupItemEvent(event));
