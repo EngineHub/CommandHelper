@@ -3,12 +3,15 @@
 package com.laytonsmith.core.events.drivers;
 
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.events.*;
@@ -25,6 +28,83 @@ public class EntityEvents {
     public static String docs(){
         return "Contains events related to an entity";
     }
+	
+	@api
+	public static class item_pickup extends AbstractEvent {
+
+		public String getName() {
+			return "item_pickup";
+		}
+
+		public String docs() {
+			return "{player: <string match> | item: <item match>} "
+				+ "This event is called when a player picks up an item."
+				+ "{player: The player | item: An item array representing " 
+				+ "the item being picked up | "
+				+ "remaining: Other items left on the ground. } "
+				+ "{item} "
+				+ "{player|item|remaining}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+			if (e instanceof MCPlayerPickupItemEvent) {
+				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent)e;
+				
+				Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItem()), Prefilters.PrefilterType.ITEM_MATCH);
+				Prefilters.match(prefilter, "player", event.getPlayer().getName(), Prefilters.PrefilterType.MACRO);
+				
+				return true;
+			}
+			
+			return false;
+		}
+		
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+			if (e instanceof MCPlayerPickupItemEvent) {
+                MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+				
+                //Fill in the event parameters
+				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+                map.put("item", ObjectGenerator.GetGenerator().item(event.getItem(), Target.UNKNOWN));
+                map.put("remaining", new CInt(event.getRemaining(), Target.UNKNOWN));
+				
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerPickupItemEvent");
+            }
+		}
+
+		public Driver driver() {
+			return Driver.ITEM_PICKUP;
+		}
+
+		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+			if (event instanceof MCPlayerPickupItemEvent) {
+				MCPlayerPickupItemEvent e = (MCPlayerPickupItemEvent)event;
+				
+				if (key.equalsIgnoreCase("item")) {
+					MCItemStack stack = ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN);
+					
+					e.setItem(stack);
+					
+					return true;
+				}
+			}
+			
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
     
     @api
     public static class entity_damage_player extends AbstractEvent {
