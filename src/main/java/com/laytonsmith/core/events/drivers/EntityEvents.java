@@ -29,6 +29,7 @@ public class EntityEvents {
         return "Contains events related to an entity";
     }
 	
+	@api
 	public static class item_pickup extends AbstractEvent {
 
 		public String getName() {
@@ -37,11 +38,12 @@ public class EntityEvents {
 
 		public String docs() {
 			return "{player: <string match> | item: <item match>} "
-            		+ "This event is called when a player picks up an item."
-                    + "{player: The player | item: The item being picked up | "
-            		+ "remaining: Other items left on the ground. } "
-                    + "{item} "
-                    + "{player|item|remaining}";
+				+ "This event is called when a player picks up an item."
+				+ "{player: The player | item: An item array representing " 
+				+ "the item being picked up | "
+				+ "remaining: Other items left on the ground. } "
+				+ "{item} "
+				+ "{player|item|remaining}";
 		}
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
