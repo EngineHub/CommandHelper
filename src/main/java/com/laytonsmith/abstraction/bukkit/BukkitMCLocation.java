@@ -113,6 +113,10 @@ public class BukkitMCLocation implements MCLocation{
 	public int hashCode() {
 		return l.hashCode();
 	}
+
+	public void breakBlock() {
+		l.getBlock().breakNaturally();
+	}
 	
 	
 }

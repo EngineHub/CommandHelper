@@ -4,7 +4,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.MCCommandSender;
-import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -12,7 +11,7 @@ import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCSign;
-import com.laytonsmith.abstraction.bukkit.BukkitMCServer;
+import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.api;
@@ -24,9 +23,6 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.sk89q.util.StringUtil;
-import net.minecraft.server.Packet0KeepAlive;
-import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.CraftWorld;
 
 /**
  *
@@ -415,11 +411,11 @@ public class Environment {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{1, 2, 3};
+            return new Integer[]{1};
         }
 
         public String docs() {
-            return "void {x, z, [world] | locationObject} Mostly simulates a block break at a location. Does not trigger an event. Only works with"
+            return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event. Only works with"
                     + " craftbukkit.";
         }
 
@@ -444,16 +440,7 @@ public class Environment {
             p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCWorld w = (p != null ? p.getWorld() : null);
             l = ObjectGenerator.GetGenerator().location(args[0], w, t);
-            if (l.getWorld() instanceof CraftWorld) {
-				if (l.getWorld() == null) {
-					throw new ConfigRuntimeException("The specified world doesn't exist, or no world was provided", ExceptionType.InvalidWorldException, t);
-				}
-                CraftWorld cw = (CraftWorld) l.getWorld();
-                net.minecraft.server.Block.byId[l.getBlock().getTypeId()].dropNaturally(cw.getHandle(), l.getBlockX(), l.getBlockY(), l.getBlockZ(), l.getBlock().getData(), 1.0f, 0);
-            }
-            l.getBlock().setTypeId(0);
-            CraftServer cs = (CraftServer)((BukkitMCServer)Static.getServer()).__Server();
-            cs.getHandle().a(new Packet0KeepAlive(), 0);
+            l.breakBlock();
             return new CVoid(t);            
         }
     }

@@ -45,6 +45,7 @@ public final class ClassDiscovery {
 			for (String u : new HashSet<String>(classCache.keySet())) {
 				InvalidateCache(u);
 			}
+			fuzzyClassCache.clear();
 		} else {
 			classCache.remove(url);
 		}
@@ -63,6 +64,7 @@ public final class ClassDiscovery {
 	 * that, so let's cache unless told otherwise.
 	 */
 	private static Map<String, Class[]> classCache = new HashMap<String, Class[]>();
+	private static Map<String, Class> fuzzyClassCache = new HashMap<String, Class>();
 	private static Set<String> additionalURLs = new HashSet<String>();
 
 	public static Class[] GetClassesWithinPackageHierarchy() {
@@ -176,6 +178,20 @@ public final class ClassDiscovery {
 		}
 		return classes.toArray(new Class[classes.size()]);
 	}
+	
+	/**
+	 * Returns a list of all known or discoverable classes in this class loader.
+	 * @return 
+	 */
+	static Set<Class> GetAllClasses(){
+		Set<Class> classes = new TreeSet<Class>();
+		Set<ClassLoader> classLoaders = new HashSet<ClassLoader>();
+		classLoaders.add(ClassDiscovery.class.getClassLoader());
+		for(String url : additionalURLs){
+			classes.addAll(Arrays.asList(GetClassesWithinPackageHierarchy(url, classLoaders)));
+		}
+		return classes;
+	}
 
 	/**
 	 * Gets all the package hierarchies for all currently known classes. This is
@@ -253,6 +269,48 @@ public final class ClassDiscovery {
 			throw new ClassNotFoundException(name + " was not found in any ClassLoader!");
 		}
 		return c;
+	}
+	
+	public static Class<?> forFuzzyName(String packageRegex, String className){
+		return forFuzzyName(packageRegex, className, true, ClassDiscovery.class.getClassLoader());
+	}
+	
+	/**
+	 * Returns a class given a "fuzzy" package name, that is, the package name provided is a
+	 * regex. The class name must match exactly, but the package name will be the closest match,
+	 * or undefined if there is no clear candidate. If no matches are found, null is returned.
+	 * @param packageRegex
+	 * @param className
+	 * @param initialize
+	 * @param classLoader
+	 * @return 
+	 */
+	public static Class<?> forFuzzyName(String packageRegex, String className, boolean initialize, ClassLoader classLoader){
+		String index = packageRegex + className;
+		if(fuzzyClassCache.containsKey(index)){
+			return fuzzyClassCache.get(index);
+		} else {
+			Set<Class> found = new HashSet<Class>();
+			for(Class c : GetAllClasses()){
+				
+			}
+			if(found.size() == 1){
+				return found.iterator().next();
+			} else if(found.isEmpty()){
+				return null;
+			} else {
+				Class candidate = null;
+				int max = Integer.MAX_VALUE;
+				for(Class f : found){
+					int distance = StringUtils.LevenshteinDistance(f.getPackage().getName(), packageRegex);
+					if(distance < max){
+						candidate = f;
+						max = distance;
+					}
+				}
+				return candidate;
+			}
+		}
 	}
 	
 	/**

@@ -1,7 +1,5 @@
 package com.laytonsmith.PureUtilities.VirtualFS;
 
-import java.io.File;
-
 /**
  * A virtual file represents a path to a file
  * in the virtual file system. Not many operations

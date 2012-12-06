@@ -1,7 +1,6 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.*;
-import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;

@@ -2,20 +2,20 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.enums.MCCreeperType;
-import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
+import com.laytonsmith.abstraction.enums.MCCreeperType;
+import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
+import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCPigType;
 import com.laytonsmith.abstraction.enums.MCProfession;
 import com.laytonsmith.abstraction.enums.MCSkeletonType;
 import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
-import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.blocks.MCBlock;
-import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
-import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCBiomeType;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCDyeColor;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCOcelotType;
@@ -26,16 +26,12 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.bukkit.Effect;
-import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
-import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.entity.*;
-import org.bukkit.event.entity.CreatureSpawnEvent.SpawnReason;
 import org.bukkit.material.MaterialData;
-import org.bukkit.Material;
 
 /**
  *
@@ -239,14 +235,7 @@ public class BukkitMCWorld implements MCWorld {
                     mobType = Spider.class;
                     break;
                 case GIANT:
-                    double x = l.getX();
-                    double y = l.getY();
-                    double z = l.getZ();
-                    float pitch = l.getPitch();
-                    float yaw = l.getYaw();
-                    net.minecraft.server.Entity giant = new net.minecraft.server.EntityGiantZombie(((CraftWorld) (l.getWorld().getHandle())).getHandle());
-                    giant.setLocation(x, y, z, pitch, yaw);
-                    ((CraftWorld) ((BukkitMCLocation)l)._Location().getWorld()).getHandle().addEntity(giant, SpawnReason.CUSTOM);
+					mobType = Giant.class;
                     break;
                 case SNOWGOLEM:
                     mobType = Snowman.class;

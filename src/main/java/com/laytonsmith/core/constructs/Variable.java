@@ -1,7 +1,5 @@
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.Static;
-
 /**
  *
  * @author layton

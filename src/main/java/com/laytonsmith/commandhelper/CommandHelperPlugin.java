@@ -18,11 +18,11 @@
  */
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.PureUtilities.ExecutionQueue;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.events.EventList;
 import com.laytonsmith.core.exceptions.ConfigCompileException;

@@ -2,10 +2,10 @@
 
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -14,12 +14,10 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-
 import java.io.File;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;

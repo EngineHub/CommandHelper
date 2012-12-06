@@ -6,8 +6,6 @@ import com.laytonsmith.PureUtilities.TermColors;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 
 public final class Prefs {

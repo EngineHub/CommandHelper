@@ -1,8 +1,8 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;

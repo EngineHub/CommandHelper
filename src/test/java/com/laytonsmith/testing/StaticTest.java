@@ -3,7 +3,6 @@
 package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -31,7 +30,6 @@ import java.net.MalformedURLException;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import static org.junit.Assert.fail;
 import org.junit.runner.RunWith;
 import org.mockito.Mockito;

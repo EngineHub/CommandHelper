@@ -20,7 +20,6 @@ import com.laytonsmith.persistance.io.ConnectionMixinFactory;
 import com.laytonsmith.tools.*;
 import com.laytonsmith.tools.docgen.DocGen;
 import com.laytonsmith.tools.docgen.DocGenUI;
-import java.io.Console;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;

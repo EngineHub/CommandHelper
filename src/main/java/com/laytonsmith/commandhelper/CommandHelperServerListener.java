@@ -2,10 +2,10 @@
 
 package com.laytonsmith.commandhelper;
 
-import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCConsoleCommandSender;
+import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.InternalException;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;

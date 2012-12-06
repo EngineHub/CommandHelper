@@ -21,6 +21,7 @@ public interface MCLocation extends AbstractionObject{
     
     public void setPitch(float p);
     public void setYaw(float y);
+	public void breakBlock();
     
     public MCLocation clone();
 }

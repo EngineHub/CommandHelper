@@ -1,8 +1,8 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
@@ -11,12 +11,10 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
-import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
 import java.util.*;
-import java.lang.Math;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -147,7 +145,7 @@ public class PlayerManagement {
 			double y2 = loc.getY();
 			double z2 = loc.getZ();
 			
-			double distance = Math.sqrt(
+			double distance = java.lang.Math.sqrt(
 				(x1-x2) * (x1-x2) + 
 				(y1-y2) * (y1-y2) + 
 				(z1-z2) * (z1-z2)

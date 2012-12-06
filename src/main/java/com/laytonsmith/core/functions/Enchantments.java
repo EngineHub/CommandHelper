@@ -13,7 +13,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 /**

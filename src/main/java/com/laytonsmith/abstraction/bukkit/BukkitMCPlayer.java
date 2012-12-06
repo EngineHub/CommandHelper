@@ -2,31 +2,23 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
 import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CNull;
-import com.laytonsmith.core.constructs.Construct;
-import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import net.minecraft.server.EntityLiving;
-import net.minecraft.server.EntityPlayer;
-import net.minecraft.server.MobEffect;
-import net.minecraft.server.ServerConfigurationManager;
-import net.minecraft.server.ServerConfigurationManagerAbstract;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Note;
 import org.bukkit.Server;
-import org.bukkit.craftbukkit.CraftServer;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.potion.PotionEffect;
+import org.bukkit.potion.PotionEffectType;
 
 /**
  *
@@ -170,36 +162,16 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
     public boolean removeEffect(int potionID){
-//        p.removePotionEffect(PotionEffectType.getById(potionID));
-        EntityPlayer ep = ((CraftPlayer) p).getHandle();
-        try {
-            Field f = EntityLiving.class.getDeclaredField("effects");
-            f.setAccessible(true);
-            HashMap effects = (HashMap)f.get(ep);
-            MobEffect me = (MobEffect) effects.get(potionID);
-            if(me == null){
-                //This mob effect isn't added to this player
-                return false;
-            }
-            Field fDuration = me.getClass().getDeclaredField("duration");
-            fDuration.setAccessible(true);
-            fDuration.set(me, 0);
-        } catch (IllegalArgumentException ex) {
-            Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        } catch (IllegalAccessException ex) {
-            Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        } catch (NoSuchFieldException ex) {
-            Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        } catch (SecurityException ex) {
-            Logger.getLogger(BukkitMCPlayer.class.getName()).log(Level.SEVERE, null, ex);
-            return false;
-        }
-        return true;
-        //Meh, stupid bukkit.
-        //ep.effects.remove(potionID);        
+		PotionEffectType t = PotionEffectType.getById(potionID);
+		boolean hasIt = false;
+		for(PotionEffect pe : p.getActivePotionEffects()){
+			if(pe.getType() == t){
+				hasIt = true;
+				break;
+			}
+		}
+		p.removePotionEffect(t);
+		return hasIt;
     }
 
     public void resetPlayerTime() {
@@ -258,45 +230,17 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setTempOp(Boolean value) throws ClassNotFoundException, NoSuchFieldException, IllegalArgumentException, IllegalAccessException, NoSuchMethodException, InvocationTargetException {
         Server server = Bukkit.getServer();
 
-        Class serverClass = Class.forName("org.bukkit.craftbukkit.CraftServer", true, server.getClass().getClassLoader());
+        Class serverClass = ClassDiscovery.forFuzzyName("org.bukkit.craftbukkit.*", "CraftServer");
 
         if (!server.getClass().isAssignableFrom(serverClass)) {
             throw new IllegalStateException("Running server isn't CraftBukkit");
         }
 
         Set opSet = null;
-        Field opSetField;
         
-        if(opSet == null){
-            //For 1.3
-            CraftServer cserver = (CraftServer)server;
-            ServerConfigurationManagerAbstract obj = cserver.getServer().getServerConfigurationManager();
-            //obj contains the operators set
-
-            try{
-                opSetField = ServerConfigurationManagerAbstract.class.getDeclaredField("operators");
-                opSetField.setAccessible(true);
-                opSet = (Set)opSetField.get(obj);
-            } catch(NoSuchFieldException e){
-
-            }
-        }
-        
-        if(opSet == null){
-            //For versions < 1.3
-
-            try {
-                opSetField = ServerConfigurationManager.class.getDeclaredField("operators");
-            } catch (NoSuchFieldException e) {
-                //For even older versions
-                opSetField = ServerConfigurationManager.class.getDeclaredField("h");
-            }
-
-            opSetField.setAccessible(true); // make field accessible for reflection 
-
-            // Reflection magic
-            opSet = (Set) opSetField.get((ServerConfigurationManager) serverClass.getMethod("getHandle").invoke(server));
-        }
+		/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
+		/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
+		opSet = (Set) ReflectionUtils.get(ClassDiscovery.forFuzzyName("org.bukkit.craftbukkit.*", "ServerConfigurationManagerAbstract"), obcServerConfigurationmanagerAbstract, "operators");
 
         // since all Java objects pass by reference, we don't need to set field back to object
         if (value) {

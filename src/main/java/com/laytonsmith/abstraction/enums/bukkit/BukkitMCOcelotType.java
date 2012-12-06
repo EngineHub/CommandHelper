@@ -8,7 +8,6 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.EnumConvertor;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.annotations.abstractionenum;
-
 import org.bukkit.entity.Ocelot;
 
 /**

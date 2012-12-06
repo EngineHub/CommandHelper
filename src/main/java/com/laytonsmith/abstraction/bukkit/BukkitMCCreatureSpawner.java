@@ -5,8 +5,8 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCCreatureSpawner;
-import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlockState;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import org.bukkit.block.CreatureSpawner;
 import org.bukkit.entity.EntityType;
 

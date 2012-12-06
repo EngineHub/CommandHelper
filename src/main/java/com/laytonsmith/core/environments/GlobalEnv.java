@@ -7,7 +7,6 @@ import com.laytonsmith.core.Procedure;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CClosure;
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.IVariableList;
 import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
 import com.laytonsmith.core.profiler.Profiler;

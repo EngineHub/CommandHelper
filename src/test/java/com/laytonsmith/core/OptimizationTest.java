@@ -1,10 +1,6 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.compiler.OptimizationUtilities;
-import com.laytonsmith.core.constructs.CFunction;
-import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.constructs.IVariable;
-import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.*;

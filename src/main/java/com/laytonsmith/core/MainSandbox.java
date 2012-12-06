@@ -4,9 +4,6 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.functions.Regex;
 import com.laytonsmith.core.functions.StringHandling;
-import com.laytonsmith.core.profiler.ProfilePoint;
-import com.laytonsmith.core.profiler.Profiler;
-import java.io.File;
 
 /**
  * This class is for testing concepts

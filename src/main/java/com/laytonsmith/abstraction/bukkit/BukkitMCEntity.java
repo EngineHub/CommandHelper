@@ -2,12 +2,12 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
-import com.laytonsmith.abstraction.enums.MCDamageCause;
-import com.laytonsmith.abstraction.enums.MCTeleportCause;
-import com.laytonsmith.abstraction.enums.MCEntityEffect;
-import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitEntityEvents;
+import com.laytonsmith.abstraction.enums.MCDamageCause;
+import com.laytonsmith.abstraction.enums.MCEntityEffect;
+import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCTeleportCause;
 import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.ArrayList;
@@ -15,8 +15,6 @@ import java.util.List;
 import java.util.UUID;
 import org.apache.commons.lang.NotImplementedException;
 import org.bukkit.EntityEffect;
-import org.bukkit.craftbukkit.entity.CraftEntity;
-import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
@@ -216,8 +214,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	 * @return 
 	 */
 	public MCLocation asyncGetLocation() {
-		CraftEntity ce = (CraftEntity)e;
-		return new BukkitMCLocation(ce.getLocation());
+		return new BukkitMCLocation(e.getLocation());
 	}
     
 }

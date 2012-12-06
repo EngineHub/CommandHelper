@@ -1,12 +1,8 @@
 package com.laytonsmith.database;
 
-import com.laytonsmith.PureUtilities.ZipReader;
-import java.io.File;
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Properties;
 import java.util.Set;
 
 /**

@@ -3,7 +3,6 @@ package com.laytonsmith.persistance;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.persistance.io.ConnectionMixinFactory;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;

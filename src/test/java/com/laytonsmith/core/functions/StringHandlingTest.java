@@ -4,7 +4,6 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.testing.C;
 import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.SRun;

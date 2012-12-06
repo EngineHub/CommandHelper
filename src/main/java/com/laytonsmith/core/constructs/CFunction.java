@@ -6,8 +6,6 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
