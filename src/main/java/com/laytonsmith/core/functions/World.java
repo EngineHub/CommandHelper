@@ -1,11 +1,15 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.MCEntity.Velocity;
+import com.laytonsmith.abstraction.blocks.MCFallingBlock;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.MCWorldCreator;
 import com.laytonsmith.abstraction.StaticLayer;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
@@ -20,6 +24,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import java.util.SortedMap;
 import java.util.TreeMap;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
@@ -477,5 +482,74 @@ public class World {
 			return CHVersion.V3_3_1;
 		}
 		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class spawn_falling_block extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null , t);
+			MCItemStack item = Static.ParseItemNotation(this.getName(), args[1].val(), 1, t);
+			
+			CArray vect = null;
+			
+			if (args.length == 3) {
+				if (args[2] instanceof CArray) {
+					vect = (CArray)args[2];
+					
+					if (vect.size() < 3) {
+						throw new ConfigRuntimeException("Argument 3 of spawn_falling_block must have 3 items", ExceptionType.FormatException, t);
+					}
+				} else {
+					throw new ConfigRuntimeException("Expected array for argument 3 of spawn_falling_block", ExceptionType.FormatException, t);
+				}
+			}
+			
+			MCFallingBlock block = loc.getWorld().spawnFallingBlock(loc, item.getType().getType(), (byte)item.getData().getData());
+			
+			if (args.length == 3 && vect != null) {
+				double x = Double.valueOf(vect.get(0).val());
+				double y = Double.valueOf(vect.get(1).val());
+				double z = Double.valueOf(vect.get(2).val());
+				
+				Velocity v = new Velocity(x, y, z);
+				
+				block.setVelocity(v);
+			}
+
+			return new CInt(block.getEntityId(), t);
+		}
+
+		public String getName() {
+			return "spawn_falling_block";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public String docs() {
+			return "integer {location array, id[:type], [vector array ie. array(x, y, z)]} Spawns a"
+				+ " falling block of the specified id and type at the specified location, applying"
+				+ " vector array as a velocity if given. Values for the vector array are doubles, and 1.0"
+				+ " seems to imply about 3 times walking speed. Gravity applies for y.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 }
