@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCEffect;
@@ -43,6 +44,8 @@ public interface MCWorld extends AbstractionObject{
     public long getTime();
     
     public CArray spawnMob(MCMobs name, String subClass, int qty, MCLocation location, Target t);
+	
+	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data);
 
     public MCBiomeType getBiome(int x, int z);
     

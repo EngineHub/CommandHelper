@@ -4,7 +4,9 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.enums.MCBiomeType;
 import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
@@ -27,6 +29,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.List;
 import org.bukkit.Effect;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
@@ -452,5 +455,10 @@ public class BukkitMCWorld implements MCWorld {
 		} catch(Exception e){
 			return false;
 		}
+	}
+
+	public MCFallingBlock spawnFallingBlock(MCLocation loc, int type, byte data) {
+		Location mcloc = (Location)((BukkitMCLocation)loc).getHandle();
+		return new BukkitMCFallingBlock(w.spawnFallingBlock(mcloc, type, data));
 	}
 }
