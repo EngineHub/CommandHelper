@@ -66,6 +66,9 @@ public class CommandHelperInterpreterListener implements Listener {
 
     @EventHandler(priority= EventPriority.LOWEST)
     public void onPlayerCommandPreprocess(PlayerCommandPreprocessEvent event) {
+		if(event.isCancelled()){
+			return;
+		}
         if (interpreterMode.contains(event.getPlayer().getName())) {
             MCPlayer p = new BukkitMCPlayer(event.getPlayer());
             textLine(p, event.getMessage());

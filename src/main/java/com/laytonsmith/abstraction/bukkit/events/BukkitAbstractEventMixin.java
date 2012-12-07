@@ -48,7 +48,7 @@ public class BukkitAbstractEventMixin implements EventMixinInterface{
     @Override
     public Map<String, Construct> evaluate_helper(BindableEvent event) throws EventException{
         Map<String, Construct> map = new HashMap<String, Construct>();
-        map.put("type", new CString(mySuper.getName(), Target.UNKNOWN));
+        map.put("event_type", new CString(mySuper.getName(), Target.UNKNOWN));
         String macro;
         Object e = event._GetObject();
         if(e instanceof BlockEvent){
