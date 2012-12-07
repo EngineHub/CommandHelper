@@ -19,6 +19,7 @@ import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
+import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
 /**
@@ -26,6 +27,41 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+	
+    @abstraction(type = Implementation.Type.BUKKIT)
+    public static class BukkitMCPlayerDropItemEvent implements MCPlayerDropItemEvent {
+        PlayerDropItemEvent e;
+        
+        public BukkitMCPlayerDropItemEvent(PlayerDropItemEvent e) {
+            this.e = e;
+        }
+        
+        public MCItemStack getItemDrop() {
+            return new BukkitMCItemStack(e.getItemDrop().getItemStack());
+        }
+        
+        public void setItem(MCItemStack stack) {
+            BukkitMCItemStack s = (BukkitMCItemStack) stack;
+            e.getItemDrop().setItemStack(s.__ItemStack());
+        }
+        
+        public boolean isCancelled() {
+            return e.isCancelled();
+        }
+        
+        public void setCancelled(boolean cancelled) {
+            e.setCancelled(cancelled);
+        }
+        
+        public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(e.getPlayer());
+        }
+        
+        public Object _GetObject() {
+            return e;
+        }
+    }
+    
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerPickupItemEvent implements MCPlayerPickupItemEvent {
 		PlayerPickupItemEvent e;

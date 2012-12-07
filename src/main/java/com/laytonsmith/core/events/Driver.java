@@ -18,6 +18,7 @@ public enum Driver {
     PLAYER_QUIT,
     PLAYER_CHAT, 
     PLAYER_COMMAND, 
+    PLAYER_KICK,
     WORLD_CHANGED,
     SIGN_CHANGED,
     BLOCK_BREAK,
@@ -25,5 +26,6 @@ public enum Driver {
     TARGET_ENTITY, 
     ENTITY_DAMAGE_PLAYER, 
 	PLAYER_MOVE,  
-	ITEM_PICKUP
+	ITEM_PICKUP,
+	ITEM_DROP
 }
