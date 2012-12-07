@@ -42,7 +42,11 @@ public class BukkitEntityEvents {
         
         public void setItem(MCItemStack stack) {
             BukkitMCItemStack s = (BukkitMCItemStack) stack;
-            e.getItemDrop().setItemStack(s.__ItemStack());
+            if(s.getTypeId() == 0) {
+                e.getItemDrop().remove();
+            } else {
+                e.getItemDrop().setItemStack(s.__ItemStack());
+            }
         }
         
         public boolean isCancelled() {
@@ -79,7 +83,11 @@ public class BukkitEntityEvents {
 
 		public void setItem(MCItemStack stack) {
 			BukkitMCItemStack s = (BukkitMCItemStack)stack;
-			e.getItem().setItemStack(s.__ItemStack());
+			if(s.getTypeId() == 0) {
+				e.getItem().remove();
+			} else {
+				e.getItem().setItemStack(s.__ItemStack());
+			}
 		}
 
 		public boolean isCancelled() {
