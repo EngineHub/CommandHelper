@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
+import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -29,6 +30,76 @@ public class EntityEvents {
         return "Contains events related to an entity";
     }
 	
+    @api
+    public static class item_drop extends AbstractEvent {
+        
+        public String getName() {
+            return "item_drop";
+        }
+        
+        public String docs() {
+            return "{player: <string match> | item: <item match>} "
+                    + "This event is called when a player drops an item. "
+                    + "{player: The player | item: An item array representing " 
+                    + "the item being dropped. } "
+                    + "{item} "
+                    + "{player|item}";
+        }
+        
+        public BindableEvent convert(CArray manualObject) {
+            return null;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+
+        public Driver driver() {
+            return Driver.ITEM_DROP;
+        }
+        
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+            if (e instanceof MCPlayerDropItemEvent) {
+                MCPlayerDropItemEvent event = (MCPlayerDropItemEvent)e;
+                
+                Prefilters.match(prefilter, "item", Static.ParseItemNotation(event.getItemDrop()), Prefilters.PrefilterType.ITEM_MATCH);
+                Prefilters.match(prefilter, "player", event.getPlayer().getName(), Prefilters.PrefilterType.MACRO);
+                
+                return true;
+            }
+            return false;
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
+            if (e instanceof MCPlayerDropItemEvent) {
+                MCPlayerDropItemEvent event = (MCPlayerDropItemEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                
+                map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+                map.put("item", ObjectGenerator.GetGenerator().item(event.getItemDrop(), Target.UNKNOWN));
+                
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerDropItemEvent");
+            }
+        }
+
+        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+            if (event instanceof MCPlayerDropItemEvent) {
+                MCPlayerDropItemEvent e = (MCPlayerDropItemEvent)event;
+                
+                if (key.equalsIgnoreCase("item")) {
+                    MCItemStack stack = ObjectGenerator.GetGenerator().item(value, Target.UNKNOWN);
+                    
+                    e.setItem(stack);
+                    
+                    return true;
+                }
+            }
+            return false;
+        }
+    }
+    
 	@api
 	public static class item_pickup extends AbstractEvent {
 

@@ -24,6 +24,11 @@ import org.bukkit.event.player.*;
  */
 public class BukkitPlayerListener implements Listener {
 
+    @EventHandler(priority = EventPriority.LOWEST)
+    public void onPlayerKick(PlayerKickEvent e) {
+        EventUtils.TriggerListener(Driver.PLAYER_KICK, "player_kick", new BukkitPlayerEvents.BukkitMCPlayerKickEvent(e));
+    }
+    
 	@EventHandler(priority = EventPriority.LOWEST)
 	public void onPlayerLogin(PlayerLoginEvent e) {
 		EventUtils.TriggerListener(Driver.PLAYER_LOGIN, "player_login", new BukkitPlayerEvents.BukkitMCPlayerLoginEvent(e));
