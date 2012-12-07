@@ -45,6 +45,82 @@ public class PlayerEvents {
         return "Contains events related to a player";
     }
 	
+    @api
+    public static class player_kick extends AbstractEvent {
+
+        public String getName() {
+            return "player_kick";
+        }
+
+        public String docs() {
+            return "{player: <macro match> | reason: <macro match>}"
+                    + "Fired when a player is kicked from the game. "
+                    + "{player: the kicked player | message: the message shown to all online"
+                    + " players | reason: the message shown to the player getting kicked}"
+                    + "{message|reason}"
+                    + "{player|message|reason}";
+        }
+
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+                throws PrefilterNonMatchException {
+            if (e instanceof MCPlayerKickEvent) {
+                //I gather we do not what to intercept anything from players in interpreter mode
+                //because there would be no one to recieve the information
+                if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerKickEvent)e).getPlayer())){
+                    throw new PrefilterNonMatchException();
+                }
+                
+                Prefilters.match(prefilter, "player", ((MCPlayerKickEvent)e).getPlayer().getName(), PrefilterType.MACRO);
+                Prefilters.match(prefilter, "reason", ((MCPlayerKickEvent)e).getReason(), PrefilterType.MACRO);
+                return true;
+            }
+            return false;
+        }
+
+        public BindableEvent convert(CArray manualObject) {
+            return null;
+        }
+
+        public Map<String, Construct> evaluate(BindableEvent e)
+                throws EventException {
+            if (e instanceof MCPlayerKickEvent) {
+                MCPlayerKickEvent event = (MCPlayerKickEvent) e;
+                Map<String, Construct> map = evaluate_helper(e);
+                //Fill in the event parameters
+                map.put("message", new CString(event.getMessage(), Target.UNKNOWN));
+                map.put("reason", new CString(event.getReason(), Target.UNKNOWN));
+                return map;
+            } else {
+                throw new EventException("Cannot convert e to MCPlayerKickEvent");
+            }
+        }
+
+        public Driver driver() {
+            return Driver.PLAYER_KICK;
+        }
+
+        public boolean modifyEvent(String key, Construct value,
+                BindableEvent event) {
+            if(event instanceof MCPlayerKickEvent){
+                MCPlayerKickEvent e = (MCPlayerKickEvent) event;
+                if(key.equalsIgnoreCase("message")){
+                    e.setMessage(value.nval());
+                    return true;
+                }
+                if(key.equalsIgnoreCase("reason")){
+                    e.setReason(value.nval());
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+        
+    }
+    
 	@api
 	public static class player_teleport extends AbstractEvent {
 		public String getName() {

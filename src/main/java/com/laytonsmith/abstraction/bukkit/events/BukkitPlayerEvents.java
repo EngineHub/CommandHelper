@@ -35,6 +35,47 @@ import org.bukkit.inventory.ItemStack;
  */
 public class BukkitPlayerEvents {
 	
+    public static class BukkitMCPlayerKickEvent implements MCPlayerKickEvent {
+        PlayerKickEvent e;
+        
+        public BukkitMCPlayerKickEvent(PlayerKickEvent e){
+            this.e = e;
+        }
+
+        public Object _GetObject() {
+            return e;
+        }
+
+        public String getMessage() {
+            return e.getLeaveMessage();
+        }
+
+        public void setMessage(String message) {
+            e.setLeaveMessage(message);
+        }
+
+        public String getReason() {
+            return e.getReason();
+        }
+
+        public void setReason(String message) {
+            e.setReason(message);
+        }
+
+        public boolean isCancelled() {
+            return e.isCancelled();
+        }
+
+        public void setCancelled(boolean cancelled) {
+            e.setCancelled(cancelled);
+        }
+
+        public MCPlayer getPlayer() {
+            return new BukkitMCPlayer(e.getPlayer());
+        }
+        
+    }
+    
 	public static class BukkitMCPlayerTeleportEvent implements MCPlayerTeleportEvent {
 		PlayerTeleportEvent e;
 		
