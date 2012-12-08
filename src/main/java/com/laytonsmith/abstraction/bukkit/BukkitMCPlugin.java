@@ -60,5 +60,9 @@ public class BukkitMCPlugin implements MCPlugin {
 	public int hashCode() {
 		return p.hashCode();
 	}
+
+	public String getName() {
+		return p.getName();
+	}
     
 }
