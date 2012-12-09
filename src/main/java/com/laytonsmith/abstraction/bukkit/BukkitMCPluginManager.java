@@ -5,6 +5,9 @@ package com.laytonsmith.abstraction.bukkit;
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCPlugin;
 import com.laytonsmith.abstraction.MCPluginManager;
+import java.util.ArrayList;
+import java.util.List;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 
 /**
@@ -55,6 +58,17 @@ public class BukkitMCPluginManager implements MCPluginManager {
 	@Override
 	public int hashCode() {
 		return p.hashCode();
+	}
+
+	public List<MCPlugin> getPlugins() {
+		List<MCPlugin> retn = new ArrayList<MCPlugin>();
+		Plugin[] plugs = p.getPlugins();
+		
+		for (Plugin plug : plugs) {
+			retn.add(new BukkitMCPlugin(plug));
+		}
+		
+		return retn;
 	}
     
 }

@@ -688,7 +688,7 @@ public class Minecraft {
 					+ "</li><li>5 - Allow end; if true, end is enabled"
 					+ "</li><li>6 - World container; The path to the world container.</li><li>7 - "
 					+ "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li>"
-					+ "</ul>";
+					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li></ul>";
 		}
 
 		public ExceptionType[] thrown() {
@@ -718,12 +718,12 @@ public class Minecraft {
 				index = (int) Static.getInt(args[0], t);
 			}
 
-			if (index < -1 || index > 8) {
-				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 10",
+			if (index < -1 || index > 9) {
+				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 9 (inclusive)",
 						ExceptionType.RangeException, t);
 			}
 
-			assert index >= -1 && index <= 8;
+			assert index >= -1 && index <= 9; // Is this needed? Above statement should cause this to never be true. - entityreborn
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 
 			if (index == 0 || index == -1) {
@@ -770,6 +770,22 @@ public class Minecraft {
 					CString os = new CString(o.getName(), t);
 					co.push(os);
 				}
+				retVals.add(co);
+			}
+			if (index == 9 || index == -1) {
+				//Array of plugins
+				CArray co = new CArray(t);
+				List<MCPlugin> plugs = server.getPluginManager().getPlugins();
+				
+				for (MCPlugin p : plugs) {
+					if (p == null) {
+						continue;
+					}
+					
+					CString name = new CString(p.getName(), t);
+					co.push(name);
+				}
+				
 				retVals.add(co);
 			}
 
