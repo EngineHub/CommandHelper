@@ -109,6 +109,10 @@ public class BukkitMCBlock implements MCBlock{
 	public String toString() {
 		return b.toString();
 	}
+
+	public boolean isSolid() {
+		return b.getType().isSolid();
+	}
     
 	
     

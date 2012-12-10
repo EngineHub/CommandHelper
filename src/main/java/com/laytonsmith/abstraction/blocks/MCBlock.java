@@ -37,6 +37,8 @@ public interface MCBlock {
     public boolean isSign();
 
     public boolean isNull();
+	
+	public boolean isSolid();
 
     public Collection<MCItemStack> getDrops();
 }

@@ -831,4 +831,44 @@ public class Environment {
 		}
 		
 	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class is_block_solid extends AbstractFunction{
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p==null?null:p.getWorld(), t);
+			return new CBoolean(l.getBlock().isSolid(), t);
+		}
+
+		public String getName() {
+			return "is_block_solid";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "boolean {locationArray} Returns true if the block is solid and cannot be passed through (i.e. dirt or stone,"
+					+ " as opposed to a torch or water).";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 }
