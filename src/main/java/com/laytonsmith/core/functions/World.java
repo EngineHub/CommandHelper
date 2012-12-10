@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -17,6 +18,7 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
@@ -161,7 +163,7 @@ public class World {
 		}
 
 		public String docs() {
-			return "void {[world], x, z | [world], locationArray} Resends the chunk to all clients, using the specified world, or the current"
+			return "void {[world], x, z | [world], locationArray} Resends the chunk data to all clients, using the specified world, or the current"
 					+ " players world if not provided.";
 		}
 
@@ -217,6 +219,80 @@ public class World {
 			return new CVoid(t);
 		}
 	}
+	
+	@api(environments=CommandHelperEnvironment.class)
+	public static class regen_chunk extends AbstractFunction {
+
+		public String getName() {
+			return "regen_chunk";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		public String docs() {
+			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk, using the specified world, or the current"
+					+ " players world if not provided. Beware that this is destructive! Any data in this chunk will be lost!";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world;
+			int x;
+			int z;
+			
+			if (args.length == 1) {
+				//Location array provided                
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
+				
+				world = l.getWorld();
+				x = l.getChunk().getX();
+				z = l.getChunk().getZ();
+			} else if (args.length == 2) {
+				//Either location array and world provided, or x and z. Test for array at pos 1
+				if (args[0] instanceof CArray) {
+					world = Static.getServer().getWorld(args[1].val());
+					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+					
+					x = l.getChunk().getX();
+					z = l.getChunk().getZ();
+				} else {
+					if (m == null) {
+						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+					}
+					
+					world = m.getWorld();
+					x = (int) Static.getInt(args[0], t);
+					z = (int) Static.getInt(args[1], t);
+				}
+			} else {
+				//world, x and z provided
+				x = (int) Static.getInt(args[0], t);
+				z = (int) Static.getInt(args[1], t);
+				world = Static.getServer().getWorld(args[2].val());
+			}
+			
+			return new CBoolean(world.regenerateChunk(x, z), t);
+		}
+	}
+	
 	private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
 
 	static {
@@ -485,10 +561,77 @@ public class World {
 	}
 	
 	@api(environments={CommandHelperEnvironment.class})
+	public static class get_chunk_loc extends AbstractFunction {
+
+		public String getName() {
+			return "get_chunk_loc";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCPlayer p = null;
+			MCWorld w = null;
+			MCLocation l = null;
+			
+			if (cs instanceof MCPlayer) {
+				p = (MCPlayer)cs;
+				Static.AssertPlayerNonNull(p, t);
+				l = p.getLocation();
+				w = l.getWorld();
+			}
+			
+			if (args.length == 1) {
+				if (args[0] instanceof CArray) {
+					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
+				} else {
+					throw new ConfigRuntimeException("expecting argument 1 of get_chunk_loc to be a location array"
+							, ExceptionType.FormatException, t);
+				}
+			} else {
+				if (p == null) {
+					throw new ConfigRuntimeException("expecting a player context for get_chunk_loc when used without arguments"
+							, ExceptionType.InsufficientArgumentsException, t);
+				}
+			}
+			
+			return new CArray(t,
+				new CInt(l.getChunk().getX(), t),
+				new CInt(l.getChunk().getZ(), t),
+				new CString(l.getChunk().getWorld().getName(), t));
+		}
+
+		public String docs() {
+			return "array {[location array]} Returns an array of x, z, world "
+					+ "coords of the chunk of either the location specified or the location of "
+					+ "the player running the command.";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.InsufficientArgumentsException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
 	public static class spawn_falling_block extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return null;
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
