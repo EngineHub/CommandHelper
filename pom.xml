@@ -162,12 +162,12 @@
 			<version>1.4.5-R0.3-SNAPSHOT</version>
 		</dependency>
         
-		<!-- CraftBukkit Dependency for experimental features -->
+		<!-- CraftBukkit Dependency for experimental features
 		<dependency>
 			<groupId>org.bukkit</groupId>
 			<artifactId>craftbukkit</artifactId>
 			<version>1.4.5-R0.3-SNAPSHOT</version>
-		</dependency>        
+		</dependency>-->        
         
 		<!-- WorldGuard for some of the sk functions -->
 		<dependency>

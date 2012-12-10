@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
+import com.laytonsmith.abstraction.MCChunk;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
@@ -116,6 +117,10 @@ public class BukkitMCLocation implements MCLocation{
 
 	public void breakBlock() {
 		l.getBlock().breakNaturally();
+	}
+
+	public MCChunk getChunk() {
+		return new BukkitMCChunk(l.getChunk());
 	}
 	
 	
