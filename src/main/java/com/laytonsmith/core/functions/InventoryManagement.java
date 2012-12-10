@@ -399,7 +399,9 @@ public class InventoryManagement {
                     + " the entire inventory is filled, or the entire amount has been given."
                     + " The number of items actually given is returned, which will be less than"
                     + " or equal to the quantity provided. This function will not touch the player's"
-                    + " armor slots however.";
+                    + " armor slots however. Supports 'infinite' stacks by providing a negative number."
+					+ " If the player's inv is full, 0 is returned in this case instead of the amount"
+					+ " given.";
         }
 
         public Exceptions.ExceptionType[] thrown() {
@@ -417,49 +419,75 @@ public class InventoryManagement {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
+			
             if(args.length == 2){
                 is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1], t), t);
             } else {
                 p = Static.GetPlayer(args[0], t);
                 is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2], t), t);
             }
+			
             int total = is.getAmount();
-            int remaining = is.getAmount();
             MCPlayerInventory inv = p.getInventory();
-            for(int i = 0; i < 36; i++){
-                MCItemStack iis = inv.getItem(i);
-                if(remaining <= 0){
-                    break;
-                }
-                if(match(is, iis) || iis.getTypeId() == 0){
-                    //It's either the same item stack, or air.
-                    int currentQty = 0;
-                    int max = is.maxStackSize();
-                    if(iis.getTypeId() != 0){
-                        currentQty = iis.getAmount();
-                    }
-                    if(currentQty < 0){
-                        //Infinite stack. Assume max stack size.
-                        currentQty = is.maxStackSize();
-                    }
-                    int left = max - currentQty;
-                    int toGive;
-                    if(left < remaining){
-                        //We'll have to split this across more than this stack.
-                        toGive = left;
-                    } else {
-                        //We can distribute the rest in this stack
-                        toGive = remaining;
-                    }
-                    remaining -= toGive;
-                    
-                    //The total we are going to set the stack size to is toGive + currentQty
-                    int replace = toGive + currentQty;
-                    
-                    inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
-                }
-            }
-            return new CInt(total - remaining, t);
+					
+			if (total < 0) {
+				for(int i = 0; i < 36; i++){
+					MCItemStack iis = inv.getItem(i);
+					
+					if (iis.getTypeId() == 0) {
+						inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), total));
+						
+						return new CInt(total, t);
+					}
+				}
+				
+				return new CInt(0, t);
+			} else {
+				int remaining = is.getAmount();
+				
+				for(int i = 0; i < 36; i++){
+					MCItemStack iis = inv.getItem(i);
+					
+					if(remaining <= 0){
+						break;
+					}
+
+					if(match(is, iis) || iis.getTypeId() == 0){
+						//It's either the same item stack, or air.
+						int currentQty = 0;
+						int max = is.maxStackSize();
+
+						if(iis.getTypeId() != 0){
+							currentQty = iis.getAmount();
+						}
+
+						if(currentQty < 0){
+							//Infinite stack. Assume max stack size.
+							currentQty = is.maxStackSize();
+						}
+
+						int left = max - currentQty;
+						int toGive;
+
+						if(left < remaining){
+							//We'll have to split this across more than this stack.
+							toGive = left;
+						} else {
+							//We can distribute the rest in this stack
+							toGive = remaining;
+						}
+
+						remaining -= toGive;
+
+						//The total we are going to set the stack size to is toGive + currentQty
+						int replace = toGive + currentQty;
+
+						inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
+					}
+				}
+				
+				return new CInt(total - remaining, t);
+			}
         }
        
         private boolean match(MCItemStack is, MCItemStack iis){
