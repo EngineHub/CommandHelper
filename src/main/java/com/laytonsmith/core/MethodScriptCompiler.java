@@ -1363,7 +1363,10 @@ public final class MethodScriptCompiler {
 				//Turn it into a compile exception, then rethrow
 				throw new ConfigCompileException(e);
 			}
-			if (tempNode != null) {
+			if(tempNode == Optimizable.REMOVE_ME){
+				tree.setData(new CFunction("p", Target.UNKNOWN));
+				tree.removeChildren();
+			} else if (tempNode != null) {
 				tree.setData(tempNode.getData());
 				tree.setOptimized(tempNode.isOptimized());
 				tree.setChildren(tempNode.getChildren());

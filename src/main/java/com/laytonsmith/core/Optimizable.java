@@ -13,6 +13,13 @@ import java.util.Set;
  * @author lsmith
  */
 public interface Optimizable extends Function {
+	
+	/**
+	 * This constant can be returned from an optimization method to indicate that
+	 * the need for this node has been removed entirely, and it should be removed from the code tree
+	 * or replaced with a no-op method.
+	 */
+	public static final ParseTree REMOVE_ME = new ParseTree(null);
 
 	public enum OptimizationOption implements Documentation{
 

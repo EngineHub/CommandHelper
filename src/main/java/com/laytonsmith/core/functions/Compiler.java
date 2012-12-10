@@ -31,6 +31,8 @@ public class Compiler {
 	@noprofile
 	public static class p extends DummyFunction {
 
+		private static final CVoid VOID = new CVoid(Target.UNKNOWN);
+
 		public String getName() {
 			return "p";
 		}
@@ -46,10 +48,13 @@ public class Compiler {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if (nodes.length == 1) {
-				return parent.eval(nodes[0], env);
-			} else {
-				return new __autoconcat__().execs(t, env, parent, nodes);
+			switch (nodes.length) {
+				case 0:
+					return VOID;
+				case 1:
+					return parent.eval(nodes[0], env);
+				default:
+					return new __autoconcat__().execs(t, env, parent, nodes);
 			}
 		}
 
@@ -75,15 +80,15 @@ public class Compiler {
 	@api
 	@noprofile
 	public static class __autoconcat__ extends DummyFunction implements Optimizable {
-		
-		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t){
+
+		public static ParseTree getParseTree(List<ParseTree> children, FileOptions fo, Target t) {
 			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
 			ParseTree tree = new ParseTree(ac, fo);
 			tree.setChildren(children);
 			return tree;
 		}
-		
-		public static ParseTree getParseTree(ParseTree child, FileOptions fo, Target t){
+
+		public static ParseTree getParseTree(ParseTree child, FileOptions fo, Target t) {
 			CFunction ac = new CFunction(new __autoconcat__().getName(), t);
 			ParseTree tree = new ParseTree(ac, fo);
 			List<ParseTree> children = new ArrayList<ParseTree>();

@@ -40,6 +40,10 @@ public class OptimizationTest {
 		assertEquals("ifelse(is_null($pl),die(''),not(ponline(player($pl))),die(concat($pl,'')))", 
 				optimize("if(is_null($pl)) {\ndie('') } else if(!ponline(player($pl))){ die($pl.'') }"));
 	}
+	
+	@Test public void testNestedIfsWithRemoval() throws ConfigCompileException {
+		assertEquals("p()", optimize("ifelse(1, if(0, msg('')), msg(''))"));
+	}
     
     @Test public void testMultipleLinesInBraces() throws ConfigCompileException{
         assertEquals("ifelse(dyn(false),msg('nope'),sconcat(msg('hi'),msg('hi')))", optimize("if(dyn(false)){\n"

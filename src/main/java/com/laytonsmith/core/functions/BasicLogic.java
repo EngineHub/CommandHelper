@@ -477,6 +477,10 @@ public class BasicLogic {
 				return new ParseTree(new CVoid(t), new FileOptions(new HashMap<String, String>()));
 			}
 			node.setChildren(optimizedTree);
+			if(node.getChildren().isEmpty()){
+				//We have optimized it out entirely, so remove us
+				return Optimizable.REMOVE_ME;
+			}
 			return node;
 
 		}
