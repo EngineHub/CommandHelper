@@ -288,12 +288,13 @@ public class PlayerManagement {
 			MCWorld w = m.getWorld();
 			return new CArray(t,
 				new CInt(l.getChunk().getX(), t),
+				new CInt(0, t),
 				new CInt(l.getChunk().getZ(), t),
 				new CString(w.getName(), t));
 		}
 
 		public String docs() {
-			return "array {[playerName]} Returns an array of x, z, world coords of either the player specified or the player running the command otherwise.";
+			return "array {[playerName]} Returns an array of x, y, z, world coords of either the player specified or the player running the command otherwise. Y is included, but always 0.";
 		}
 
 		public ExceptionType[] thrown() {
