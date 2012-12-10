@@ -1,6 +1,7 @@
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCEntity.Velocity;
 import com.laytonsmith.abstraction.blocks.MCFallingBlock;
 import com.laytonsmith.abstraction.MCItemStack;
@@ -17,6 +18,7 @@ import com.laytonsmith.core.*;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
@@ -556,6 +558,73 @@ public class World {
 			return CHVersion.V3_3_1;
 		}
 		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_chunk_loc extends AbstractFunction {
+
+		public String getName() {
+			return "get_chunk_loc";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			MCCommandSender cs = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCPlayer p = null;
+			MCWorld w = null;
+			MCLocation l = null;
+			
+			if (cs instanceof MCPlayer) {
+				p = (MCPlayer)cs;
+				Static.AssertPlayerNonNull(p, t);
+				l = p.getLocation();
+				w = l.getWorld();
+			}
+			
+			if (args.length == 1) {
+				if (args[0] instanceof CArray) {
+					l = ObjectGenerator.GetGenerator().location(args[0], w, t);
+				} else {
+					throw new ConfigRuntimeException("expecting argument 1 of get_chunk_loc to be a location array"
+							, ExceptionType.FormatException, t);
+				}
+			} else {
+				if (p == null) {
+					throw new ConfigRuntimeException("expecting a player context for get_chunk_loc when used without arguments"
+							, ExceptionType.InsufficientArgumentsException, t);
+				}
+			}
+			
+			return new CArray(t,
+				new CInt(l.getChunk().getX(), t),
+				new CInt(l.getChunk().getZ(), t),
+				new CString(l.getChunk().getWorld().getName(), t));
+		}
+
+		public String docs() {
+			return "array {[location array]} Returns an array of x, z, world "
+					+ "coords of the chunk of either the location specified or the location of "
+					+ "the player running the command.";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.InsufficientArgumentsException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
 	}
 	
 	@api(environments={CommandHelperEnvironment.class})

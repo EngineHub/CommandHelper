@@ -262,57 +262,6 @@ public class PlayerManagement {
 			return false;
 		}
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
-	public static class pchunk extends AbstractFunction {
-
-		public String getName() {
-			return "pchunk";
-		}
-
-		public Integer[] numArgs() {
-			return new Integer[]{0, 1};
-		}
-
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer m = null;
-			if (p instanceof MCPlayer) {
-				m = (MCPlayer) p;
-			}
-			if (args.length == 1) {
-				m = Static.GetPlayer(args[0], t);
-			}
-			Static.AssertPlayerNonNull(m, t);
-			MCLocation l = m.getLocation();
-			MCWorld w = m.getWorld();
-			return new CArray(t,
-				new CInt(l.getChunk().getX(), t),
-				new CInt(0, t),
-				new CInt(l.getChunk().getZ(), t),
-				new CString(w.getName(), t));
-		}
-
-		public String docs() {
-			return "array {[playerName]} Returns an array of x, y, z, world coords of either the player specified or the player running the command otherwise. Y is included, but always 0.";
-		}
-
-		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
-		}
-
-		public boolean isRestricted() {
-			return true;
-		}
-
-		public CHVersion since() {
-			return CHVersion.V3_3_1;
-		}
-
-		public Boolean runAsync() {
-			return false;
-		}
-	}
 
 	@api(environments={CommandHelperEnvironment.class})
 	public static class set_ploc extends AbstractFunction {
