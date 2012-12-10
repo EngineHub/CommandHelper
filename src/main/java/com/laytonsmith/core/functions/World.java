@@ -161,7 +161,7 @@ public class World {
 		}
 
 		public String docs() {
-			return "void {[world], x, z | [world], locationArray} Resends the chunk to all clients, using the specified world, or the current"
+			return "void {[world], x, z | [world], locationArray} Resends the chunk data to all clients, using the specified world, or the current"
 					+ " players world if not provided.";
 		}
 
@@ -217,6 +217,80 @@ public class World {
 			return new CVoid(t);
 		}
 	}
+	
+	@api(environments=CommandHelperEnvironment.class)
+	public static class regen_chunk extends AbstractFunction {
+
+		public String getName() {
+			return "regen_chunk";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		public String docs() {
+			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk, using the specified world, or the current"
+					+ " players world if not provided. Beware that this is destructive! Any data in this chunk will be lost!";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer m = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld world;
+			int x;
+			int z;
+			
+			if (args.length == 1) {
+				//Location array provided                
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], m != null ? m.getWorld() : null, t);
+				
+				world = l.getWorld();
+				x = l.getChunk().getX();
+				z = l.getChunk().getZ();
+			} else if (args.length == 2) {
+				//Either location array and world provided, or x and z. Test for array at pos 1
+				if (args[0] instanceof CArray) {
+					world = Static.getServer().getWorld(args[1].val());
+					MCLocation l = ObjectGenerator.GetGenerator().location(args[0], null, t);
+					
+					x = l.getChunk().getX();
+					z = l.getChunk().getZ();
+				} else {
+					if (m == null) {
+						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
+					}
+					
+					world = m.getWorld();
+					x = (int) Static.getInt(args[0], t);
+					z = (int) Static.getInt(args[1], t);
+				}
+			} else {
+				//world, x and z provided
+				x = (int) Static.getInt(args[0], t);
+				z = (int) Static.getInt(args[1], t);
+				world = Static.getServer().getWorld(args[2].val());
+			}
+			
+			return new CBoolean(world.regenerateChunk(x, z), t);
+		}
+	}
+	
 	private static final SortedMap<String, Construct> TimeLookup = new TreeMap<String, Construct>();
 
 	static {
