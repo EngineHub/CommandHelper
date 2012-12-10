@@ -1176,10 +1176,10 @@ public final class MethodScriptCompiler {
 		if (tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
-		if (tree.getData() instanceof CIdentifier) {
-			optimize(((CIdentifier) tree.getData()).contained(), procs);
-			return;
-		}
+//		if (tree.getData() instanceof CIdentifier) {
+//			optimize(((CIdentifier) tree.getData()).contained(), procs);
+//			return;
+//		}
 		if (!(tree.getData() instanceof CFunction)) {
 			//There's no way to optimize something that's not a function
 			return;
@@ -1208,6 +1208,12 @@ public final class MethodScriptCompiler {
 			func = (Function) FunctionList.getFunction(cFunction);
 		} catch (ConfigCompileException e) {
 			func = null;
+		}
+		if(cFunction instanceof CIdentifier){
+			//Add the child to the identifier
+			ParseTree c = ((CIdentifier)cFunction).contained();
+			tree.addChild(c);
+			c.getData().setWasIdentifier(true);
 		}
 		List<ParseTree> children = tree.getChildren();
 		//Loop through the children, and if any of them are functions that are terminal, truncate.
@@ -1363,6 +1369,9 @@ public final class MethodScriptCompiler {
 				//Turn it into a compile exception, then rethrow
 				throw new ConfigCompileException(e);
 			}
+			if(tempNode == Optimizable.PULL_ME_UP){
+				tempNode = tree.getChildAt(0);
+			}
 			if(tempNode == Optimizable.REMOVE_ME){
 				tree.setData(new CFunction("p", Target.UNKNOWN));
 				tree.removeChildren();
@@ -1370,6 +1379,7 @@ public final class MethodScriptCompiler {
 				tree.setData(tempNode.getData());
 				tree.setOptimized(tempNode.isOptimized());
 				tree.setChildren(tempNode.getChildren());
+				tree.getData().setWasIdentifier(tempNode.getData().wasIdentifier());
 				optimize(tree, procs);
 				tree.setOptimized(true);
 				//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
@@ -1407,6 +1417,7 @@ public final class MethodScriptCompiler {
 
 				//If the result is null, it was just a check, it can't optimize further.
 				if (result != null) {
+					result.setWasIdentifier(tree.getData().wasIdentifier());
 					tree.setData(result);
 					tree.removeChildren();
 				}

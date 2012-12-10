@@ -112,7 +112,7 @@ public class BasicLogic {
 			boolean allowOverloading = false;
 			for (ParseTree arg : args) {
 				//If any are CIdentifiers, forward this to ifelse
-				if (arg.getData() instanceof CIdentifier) {
+				if (arg.getData().wasIdentifier()) {
 					allowOverloading = true;
 					break;
 				}
@@ -1202,7 +1202,14 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) {
-			return new CNull(t);
+			//This will only happen if they hardcode true/false in, but we still
+			//need to handle it appropriately.
+			for(Construct c : args){
+				if(!Static.getBoolean(c)){
+					return new CBoolean(false, t);
+				}
+			}
+			return new CBoolean(true, t);
 		}
 
 		@Override
@@ -1981,13 +1988,13 @@ public class BasicLogic {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-				OptimizationOption.OPTIMIZE_CONSTANT
+				OptimizationOption.OPTIMIZE_DYNAMIC
 			);
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			return args[0];
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			return Optimizable.PULL_ME_UP;
 		}
 
 		@Override

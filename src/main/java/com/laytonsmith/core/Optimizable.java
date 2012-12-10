@@ -17,9 +17,19 @@ public interface Optimizable extends Function {
 	/**
 	 * This constant can be returned from an optimization method to indicate that
 	 * the need for this node has been removed entirely, and it should be removed from the code tree
-	 * or replaced with a no-op method.
+	 * or replaced with a no-op method. More than likely it will be replaced with a no-op
+	 * method, so that the side effects are removed.
 	 */
 	public static final ParseTree REMOVE_ME = new ParseTree(null);
+	
+	/**
+	 * This constant can be returned from an optimization method to indicate that the
+	 * first child of this method should be pulled up and replace this method.
+	 * For instance, if you had func('arg') it would turn into 'arg'. If there are
+	 * multiple children, you must handle that manually. This is simply a convenience, and
+	 * could be accomplished in other ways.
+	 */
+	public static final ParseTree PULL_ME_UP = new ParseTree(null);
 
 	public enum OptimizationOption implements Documentation{
 

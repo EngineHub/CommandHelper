@@ -40,12 +40,12 @@ public class MethodScriptCompilerTest {
     com.laytonsmith.core.environments.Environment env;
 
     public MethodScriptCompilerTest() {
-		StaticTest.InstallFakeServerFrontend();
+		//StaticTest.InstallFakeServerFrontend();
     }
 
     @BeforeClass
     public static void setUpClass() throws Exception {
-		
+		StaticTest.InstallFakeServerFrontend();
     }
 
     @AfterClass
@@ -883,6 +883,26 @@ public class MethodScriptCompilerTest {
 	@Test
 	public void testDoubleQuotesInSingleQuotes() throws Exception{
 		SRun("'This \"should work\" correctly, and not throw an exception'", null);
+	}
+	
+	@Test public void testClosureToString1() throws Exception{
+		SRun("msg(closure(msg('')))", fakePlayer);
+		verify(fakePlayer).sendMessage("msg('')");
+	}
+	
+	@Test public void testClosureToString2() throws Exception{
+		SRun("msg(closure('\\n'))", fakePlayer);
+		verify(fakePlayer).sendMessage("'\\n'");
+	}
+	
+	@Test public void testClosureToString3() throws Exception{
+		SRun("msg(closure('\\\\'))", fakePlayer);
+		verify(fakePlayer).sendMessage("'\\\\'");
+	}
+    
+	@Test public void testClosureToString4() throws Exception{
+		SRun("msg(closure('\\''))", fakePlayer);
+		verify(fakePlayer).sendMessage("'\\''");
 	}
     
     //TODO: Once the lexer is rewritten, this should work

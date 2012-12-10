@@ -30,6 +30,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     private final String value;
 
     private Target target;
+	private transient boolean wasIdentifier = false;
 
     public ConstructType getCType() {
         return ctype;
@@ -82,6 +83,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     public String val() {
         return value;
     }
+	
+	public void setWasIdentifier(boolean b) {
+		wasIdentifier = b;
+	}
+	
+	public boolean wasIdentifier(){
+		return wasIdentifier;
+	}
+    
     
     /**
      * Returns the standard string representation of this Construct, except

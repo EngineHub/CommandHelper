@@ -58,7 +58,7 @@ public class CClosure extends Construct {
         } else if (node.getData() instanceof CString) {
             CString data = (CString) node.getData();
             // Convert: \ -> \\ and ' -> \'
-            b.append("'").append(data.val().replaceAll("\t", "\\t").replaceAll("\n", "\\n").replace("\\", "\\\\").replace("'", "\\'")).append("'");
+            b.append("'").append(data.val().replace("\\", "\\\\").replaceAll("\t", "\\\\t").replaceAll("\n", "\\\\n").replace("'", "\\'")).append("'");
 		} else if(node.getData() instanceof IVariable){
 			b.append(((IVariable)node.getData()).getName());
         } else {

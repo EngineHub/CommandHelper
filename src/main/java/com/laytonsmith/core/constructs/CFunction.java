@@ -58,5 +58,5 @@ public class CFunction extends Construct {
 	public void setFunction(FunctionBase f){
 		function = (Function)f;
 	}
-    
+	
 }

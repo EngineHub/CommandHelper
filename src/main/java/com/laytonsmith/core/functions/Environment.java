@@ -836,7 +836,7 @@ public class Environment {
 	public static class is_block_solid extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
