@@ -562,7 +562,7 @@ public class World {
 	public static class spawn_falling_block extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return null;
+			return new ExceptionType[]{ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
