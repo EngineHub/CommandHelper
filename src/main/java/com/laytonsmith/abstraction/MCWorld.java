@@ -19,6 +19,8 @@ public interface MCWorld extends AbstractionObject{
     public List<MCLivingEntity> getLivingEntities();
     public String getName();
     public MCBlock getBlockAt(int x, int y, int z);
+	
+	public boolean regenerateChunk(int x, int y);
 
     public MCEntity spawn(MCLocation l, Class mobType);
 
