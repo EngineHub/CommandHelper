@@ -178,6 +178,25 @@ public class OptimizationTest {
 		assertEquals("for(assign(@i,0),lt(@i,5),dec(@i),msg(''))", optimize("for(@i = 0, @i < 5, @i--, msg(''))"));
 	}
 	
+	@Test public void testIfelseWithInnerDynamic() throws Exception{
+		assertEquals("ifelse(dyn(),msg('success'))", optimize("ifelse(1, if(dyn(), msg('success')),msg('fail'))"));
+	}
+	
+	@Test public void testAndOrPullsUp() throws Exception{
+		assertEquals("or(dyn(),dyn(),dyn())", optimize("dyn() || dyn() || dyn()"));
+		assertEquals("and(dyn(),dyn(),dyn())", optimize("dyn() && dyn() && dyn()"));
+	}
+	
+	@Test public void testAndRemovesTrues() throws Exception{
+		assertEquals("and(dyn(),dyn())", optimize("and(true, dyn(), true, dyn())"));
+		assertEquals("true", optimize("and(true, true, true)"));
+	}
+	
+	@Test public void testOrRemovesFalses() throws Exception{
+		assertEquals("or(dyn(),dyn())", optimize("or(false, dyn(), false, dyn())"));
+		assertEquals("false", optimize("or(false, false, false)"));
+	}
+	
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{

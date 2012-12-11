@@ -14,6 +14,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -435,6 +436,7 @@ public class BasicLogic {
 						}
 					} //else it's hard coded false, and we can ignore it.
 				} else {
+					//It's dynamic, so we can't do anything with it
 					optimizedTree.add(statement);
 					optimizedTree.add(code);
 				}
@@ -442,14 +444,23 @@ public class BasicLogic {
 				// which, in my profiling is faster. The only special consideration
 				// we have to make is to ensure that the inner if is the only statement
 				// in the entire block, (including lack of an else) so any code outside the inner if causes this
-				// optimization to be impossible. An inner ifelse cannot be optimized.
+				// optimization to be impossible. An inner ifelse cannot be optimized, unless it only has 2 arguments
+				// (in which case, it's a normal if())
 				if(code.getChildren().size() == 2 && code.getData() instanceof CFunction && code.getData().val().equals("ifelse")){
 					CFunction and = new CFunction("and", t);
 					ParseTree andTree = new ParseTree(and, statement.getFileOptions());
 					andTree.addChild(statement);
 					andTree.addChild(code.getChildAt(0));
-					optimizedTree.set(i, andTree);
-					optimizedTree.set(i + 1, code.getChildAt(1));
+					if(optimizedTree.size() < 1){
+						optimizedTree.add(andTree);
+					} else {
+						optimizedTree.set(i, andTree);
+					}
+					if(optimizedTree.size() < 2){
+						optimizedTree.add(code.getChildAt(1));
+					} else {
+						optimizedTree.set(i + 1, code.getChildAt(1));
+					}
 					//We need to set this to re-optimize the children, because the and() construction may be unoptimal now
 					for(ParseTree pt : andTree.getChildren()){
 						pt.setOptimized(false);
@@ -1253,6 +1264,18 @@ public class BasicLogic {
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
+			Iterator<ParseTree> it = children.iterator();
+			while(it.hasNext()){
+				//Remove hard coded true values, they won't affect the calculation at all
+				ParseTree child = it.next();
+				if(child.isConst() && Static.getBoolean(child.getData()) == true){
+					it.remove();
+				}
+			}
+			if(children.isEmpty()){
+				//We've removed all the children, so return true, because they were all true.
+				return new ParseTree(new CBoolean(true, t), null);
+			}
 			return null;
 		}
 		
@@ -1273,7 +1296,7 @@ public class BasicLogic {
 	}
 
 	@api(environments={GlobalEnv.class})
-	public static class or extends AbstractFunction {
+	public static class or extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "or";
@@ -1284,7 +1307,14 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) {
-			return new CNull(t);
+			//This will only happen if they hardcode true/false in, but we still
+			//need to handle it appropriately.
+			for(Construct c : args){
+				if(Static.getBoolean(c)){
+					return new CBoolean(true, t);
+				}
+			}
+			return new CBoolean(false, t);
 		}
 
 		@Override
@@ -1323,6 +1353,24 @@ public class BasicLogic {
 		public boolean useSpecialExec() {
 			return true;
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			OptimizationUtilities.pullUpLikeFunctions(children, getName());
+			Iterator<ParseTree> it = children.iterator();
+			while(it.hasNext()){
+				//Remove hard coded false values, they won't affect the calculation at all
+				ParseTree child = it.next();
+				if(child.isConst() && Static.getBoolean(child.getData()) == false){
+					it.remove();
+				}
+			}
+			if(children.isEmpty()){
+				//We've removed all the children, so return false, because they were all false.
+				return new ParseTree(new CBoolean(false, t), null);
+			}
+			return null;
+		}
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -1332,6 +1380,10 @@ public class BasicLogic {
 				new ExampleScript("Symbolic usage, false condition", "false || false"),
 				new ExampleScript("Short circuit", "true || msg('This will not show')"),
 			};
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC, OptimizationOption.CONSTANT_OFFLINE);
 		}
 	}
 
