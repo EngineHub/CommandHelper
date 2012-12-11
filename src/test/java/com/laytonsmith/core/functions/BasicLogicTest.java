@@ -13,6 +13,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.C;
+import com.laytonsmith.testing.StaticTest;
 import static com.laytonsmith.testing.StaticTest.*;
 import org.junit.*;
 import static org.junit.Assert.assertEquals;
@@ -43,6 +44,7 @@ public class BasicLogicTest {
 
     @BeforeClass
     public static void setUpClass() throws Exception {
+		StaticTest.InstallFakeServerFrontend();
     }
 
     @AfterClass

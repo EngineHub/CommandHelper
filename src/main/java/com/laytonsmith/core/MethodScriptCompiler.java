@@ -675,11 +675,14 @@ public final class MethodScriptCompiler {
 					t.type = TType.LIT;
 				}
 			}
-			if (t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
-				if (prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
-						|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
-						|| prev1.type.isSymbol() || next.type.isSymbol()) {
-					throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
+			//Skip this check if we're not in pure mscript
+			if(inPureMScript){
+				if (t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
+					if (prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
+							|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
+							|| prev1.type.isSymbol() || next.type.isSymbol()) {
+						throw new ConfigCompileException("Unexpected symbol (" + t.val() + ")", t.getTarget());
+					}
 				}
 			}
 

@@ -112,7 +112,7 @@ public class AliasCore {
 				try {
 					if (s.match(command)) {
 						this.addPlayerReference(player);
-						if (Prefs.ConsoleLogCommands()) {
+						if (Prefs.ConsoleLogCommands() && s.doLog()) {
 							StringBuilder b = new StringBuilder("CH: Running original command ");
 							if (player instanceof MCPlayer) {
 								b.append("on player ").append(((MCPlayer) player).getName());

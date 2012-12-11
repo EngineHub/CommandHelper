@@ -39,6 +39,7 @@ public class Script {
     private List<Token> fullRight;
     private List<Construct> cleft;
     private List<ParseTree> cright;
+	private boolean nolog = false;
     //This should be null if we are running in non-alias mode
     private Map<String, Variable> left_vars;
     boolean hasBeenCompiled = false;
@@ -615,6 +616,12 @@ public class Script {
 
     private boolean compileLeft() {
         cleft = new ArrayList<Construct>();
+		if(label != null && label.startsWith("!")){
+			if(label.length() > 1){
+				label = label.substring(1);
+			}
+			nolog = true;
+		}
         for (int i = 0; i < left.size(); i++) {
             Token t = left.get(i);
             if (t.value.startsWith("/")) {
@@ -778,5 +785,9 @@ public class Script {
     public void setLabel(String label) {
         this.label = label;
     }
+	
+	public boolean doLog(){
+		return !nolog;
+	}
 
 }
