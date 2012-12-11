@@ -274,7 +274,7 @@ public class BukkitMCWorld implements MCWorld {
                 Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
                 s.setPassenger(sk);
             }
-            if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all 
+			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all 
 				if (((BukkitMCEntity)e).asEntity() instanceof Sheep) {
 					Sheep s = (Sheep) ((BukkitMCEntity)e).asEntity();
 					MCDyeColor color = MCDyeColor.WHITE;

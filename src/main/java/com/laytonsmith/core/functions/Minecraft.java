@@ -520,8 +520,7 @@ public class Minecraft {
 					+ " the radius (or 64 by default). The effect can be one of the following: "
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
 					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The RECORD_PLAY effect takes the item"
-					+ " id of a disc as data, and SMOKE takes a direction bit (4 is upwards). STEP_SOUND, when supplied data,"
-					+ "a block with that id breaking, which WILL crash clients if no block exists with that id.";
+					+ " id of a disc as data, STEP_SOUND takes a blockID and SMOKE takes a direction bit (4 is upwards).";
 		}
 
 		public ExceptionType[] thrown() {
@@ -547,13 +546,20 @@ public class Minecraft {
 			int data = 0;
 			int radius = 64;
 			if (preEff.contains(":")) {
-				data = Integer.parseInt(preEff.substring(preEff.indexOf(':') + 1));
+				try {
+					data = Integer.parseInt(preEff.substring(preEff.indexOf(':') + 1));
+				} catch (NumberFormatException ex) {
+					throw new ConfigRuntimeException("Effect data expected an integer", ExceptionType.CastException, t);
+				}
 				preEff = preEff.substring(0, preEff.indexOf(':'));
 			}
 			try {
 				e = MCEffect.valueOf(preEff.toUpperCase());
 			} catch (IllegalArgumentException ex) {
 				throw new ConfigRuntimeException("The effect type " + args[1].val() + " is not valid", ExceptionType.FormatException, t);
+			}
+			if (e.equals(MCEffect.STEP_SOUND) && (data < 0 || data > StaticLayer.GetConvertor().getMaxBlockID())) {
+				throw new ConfigRuntimeException("This effect requires a valid BlockID", ExceptionType.FormatException, t);
 			}
 			if (args.length == 3) {
 				radius = (int) Static.getInt(args[2], t);
