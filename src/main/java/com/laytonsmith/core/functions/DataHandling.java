@@ -499,7 +499,7 @@ public class DataHandling {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{3};
+			return new Integer[]{3, 4};
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -508,7 +508,87 @@ public class DataHandling {
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			return new foreachelse(true).execs(t, env, parent, nodes);
+			ParseTree array = nodes[0];
+			ParseTree key = null;
+			int offset = 0;
+			if(nodes.length == 4){
+				//Key and value provided
+				key = nodes[1];
+				offset = 1;
+			}
+			ParseTree value = nodes[1 + offset];
+			ParseTree code = nodes[2 + offset];
+			Construct arr = parent.seval(array, env);
+			Construct ik = null;
+			if(key != null){
+				ik = parent.eval(key, env);
+				if(!(ik instanceof IVariable)){
+					throw new ConfigRuntimeException("Parameter 2 of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
+				}
+			}
+			Construct iv = parent.eval(value, env);
+			if (arr instanceof CSlice) {
+				long start = ((CSlice) arr).getStart();
+				long finish = ((CSlice) arr).getFinish();
+				if (finish < start) {
+					throw new ConfigRuntimeException("When using the .. notation, the left number may not be greater than the right number. Recieved " + start + " and " + finish, ExceptionType.RangeException, t);
+				}
+				arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
+			}
+			if (arr instanceof CArray) {
+				if (iv instanceof IVariable) {
+					CArray one = (CArray) arr;
+					IVariable kkey = (IVariable) ik;
+					IVariable two = (IVariable) iv;
+					if (!one.inAssociativeMode()) {
+						for (int i = 0; i < one.size(); i++) {
+							if(kkey != null){
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CInt(i, t), t));
+							}
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
+							try {
+								parent.eval(code, env);
+							} catch (LoopBreakException e) {
+								int num = e.getTimes();
+								if (num > 1) {
+									e.setTimes(--num);
+									throw e;
+								}
+								return new CVoid(t);
+							} catch (LoopContinueException e) {
+								i += e.getTimes() - 1;
+								continue;
+							}
+						}
+					} else {
+						for (int i = 0; i < one.size(); i++) {
+							String index = one.keySet().toArray(new String[]{})[i];
+							if(kkey != null){
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CString(index, t), t));
+							}
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
+							try {
+								parent.eval(code, env);
+							} catch (LoopBreakException e) {
+								int num = e.getTimes();
+								if (num > 1) {
+									e.setTimes(--num);
+									throw e;
+								}
+								return new CVoid(t);
+							} catch (LoopContinueException e) {
+								i += e.getTimes() - 1;
+								continue;
+							}
+						}
+					}
+				} else {
+					throw new ConfigRuntimeException("Parameter " + (2 +offset) + " of " + getName() + " must be an ivariable", ExceptionType.CastException, t);
+				}
+			} else {
+				throw new ConfigRuntimeException("Parameter 1 of " + getName() + " must be an array", ExceptionType.CastException, t);
+			}
+			return new CVoid(t);
 		}
 
 		public ExceptionType[] thrown() {
@@ -516,9 +596,10 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {array, ivar, code} Walks through array, setting ivar equal to each element in the array, then running code."
+			return "void {array, [key], ivar, code} Walks through array, setting ivar equal to each element in the array, then running code."
 					+ " In addition, foreach(1..4, @i, code()) is also valid, setting @i to 1, 2, 3, 4 each time. The same syntax is valid as"
-					+ " in an array slice, except negative indexes cannot be tolerated.";
+					+ " in an array slice. If key is set (it must be an ivariable) then the index of each iteration will be set to that."
+					+ " See the examples for a demonstration.";
 		}
 
 		public boolean isRestricted() {
@@ -550,6 +631,7 @@ public class DataHandling {
 				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nforeach(@array, @i,\n\tmsg(@i)\n)"),
 				new ExampleScript("With braces", "assign(@array, array(1, 2, 3))\nforeach(@array, @i){\n\tmsg(@i)\n}"),
 				new ExampleScript("With a slice", "foreach(1..3, @i){\n\tmsg(@i)\n}"),				
+				new ExampleScript("With a keys", "@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}"),
 			};
 		}
 		
@@ -568,107 +650,27 @@ public class DataHandling {
 	
 	@api
 	@noboilerplate
-	public static class foreachelse extends AbstractFunction{
-		
-		boolean runAsForeach = false;
-		public foreachelse(){ }
-		public foreachelse(boolean runAsForeach){
-			this.runAsForeach = runAsForeach;
-		}
-
-		public ExceptionType[] thrown() {
-			return null;
-		}
-
-		public boolean isRestricted() {
-			return false;
-		}
-
-		public Boolean runAsync() {
-			return null;
-		}
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return null;
-		}
-
-		@Override
-		public boolean useSpecialExec() {
-			return true;
-		}
+	public static class foreachelse extends foreach{
 
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			ParseTree array = nodes[0];
-			ParseTree ivar = nodes[1];
-			ParseTree code = nodes[2];
-			ParseTree elseCode = null;
-			if(!runAsForeach){
-				elseCode = nodes[3];
-			}
-			boolean hasRunOnce = false;
+			//The last one
+			ParseTree elseCode = nodes[nodes.length - 1];
 
-			Construct arr = parent.seval(array, env);
-			Construct iv = parent.eval(ivar, env);
-			if (arr instanceof CSlice) {
-				long start = ((CSlice) arr).getStart();
-				long finish = ((CSlice) arr).getFinish();
-				if (finish < start) {
-					throw new ConfigRuntimeException("When using the .. notation, the left number may not be greater than the right number. Recieved " + start + " and " + finish, ExceptionType.RangeException, t);
-				}
-				arr = new ArrayHandling.range().exec(t, env, new CInt(start, t), new CInt(finish + 1, t));
-			}
-			if (arr instanceof CArray) {
-				if (iv instanceof IVariable) {
-					CArray one = (CArray) arr;
-					IVariable two = (IVariable) iv;
-					if (!one.inAssociativeMode()) {
-						for (int i = 0; i < one.size(); i++) {
-							hasRunOnce = true;
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
-							try {
-								parent.eval(code, env);
-							} catch (LoopBreakException e) {
-								int num = e.getTimes();
-								if (num > 1) {
-									e.setTimes(--num);
-									throw e;
-								}
-								return new CVoid(t);
-							} catch (LoopContinueException e) {
-								i += e.getTimes() - 1;
-								continue;
-							}
-						}
-					} else {
-						for (int i = 0; i < one.size(); i++) {
-							hasRunOnce = true;
-							String index = one.keySet().toArray(new String[]{})[i];
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
-							try {
-								parent.eval(code, env);
-							} catch (LoopBreakException e) {
-								int num = e.getTimes();
-								if (num > 1) {
-									e.setTimes(--num);
-									throw e;
-								}
-								return new CVoid(t);
-							} catch (LoopContinueException e) {
-								i += e.getTimes() - 1;
-								continue;
-							}
-						}
-					}
-				} else {
-					throw new ConfigRuntimeException("Parameter 2 of foreach must be an ivariable", ExceptionType.CastException, t);
-				}
-			} else {
-				throw new ConfigRuntimeException("Parameter 1 of foreach must be an array", ExceptionType.CastException, t);
+			Construct data = parent.seval(array, env);
+			
+			if(!(data instanceof CArray) && !(data instanceof CSlice)){
+				throw new Exceptions.CastException(getName() + " expects an array for parameter 1", t);
 			}
 			
-			if(!hasRunOnce && !runAsForeach && elseCode != null){
+			if(((CArray)data).isEmpty()){
 				parent.eval(elseCode, env);
+			} else {
+				ParseTree pass [] = new ParseTree[nodes.length - 1];
+				System.arraycopy(nodes, 0, pass, 0, nodes.length - 1);
+				nodes[0] = new ParseTree(data, null);
+				return super.execs(t, env, parent, pass);
 			}
 
 			return new CVoid(t);
@@ -676,12 +678,14 @@ public class DataHandling {
 		
 		
 
+		@Override
 		public String getName() {
 			return "foreachelse";
 		}
 
+		@Override
 		public Integer[] numArgs() {
-			return new Integer[]{4};
+			return new Integer[]{4, 5};
 		}
 
 		public String docs() {
@@ -692,6 +696,27 @@ public class DataHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Basic usage, with the else code not running", 
+					"@array = array(1, 2, 3)\n"
+					+ "foreachelse(@array, @val,\n"
+					+ "    msg(@val)\n"
+					+ ", #else \n"
+					+ "    msg('No values in the array')\n"
+					+ ")"),
+				new ExampleScript("Empty array, so else block running", 
+					"@array = array()\n"
+					+ "foreachelse(@array, @val,\n"
+					+ "    msg(@val)\n"
+					+ ", #else \n"
+					+ "    msg('No values in the array')\n"
+					+ ")"),
+			};
+		}
+		
 		
 	}
 

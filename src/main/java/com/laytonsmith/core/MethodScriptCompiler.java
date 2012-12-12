@@ -966,7 +966,14 @@ public final class MethodScriptCompiler {
 					slice = new CSlice(t.value + "..", t.target);
 				} else {
 					//both are provided
-					slice = new CSlice(t.value + ".." + next2.value, t.target);
+					String modifier = "";
+					if(prev1.type == TType.MINUS){
+						//It's a negative, incorporate that here, and remove the
+						//minus from the tree
+						modifier = "-";
+						tree.removeChildAt(tree.getChildren().size() - 1);
+					}
+					slice = new CSlice(modifier + t.value + ".." + next2.value, t.target);
 					i++;
 				}
 				i++;

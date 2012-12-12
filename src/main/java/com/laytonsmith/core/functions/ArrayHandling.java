@@ -153,7 +153,7 @@ public class ArrayHandling {
 				} else {
 					try {
 						if (!ca.inAssociativeMode()) {
-							int iindex = (int) Static.getInt(args[1], t);
+							long iindex = Static.getInt(args[1], t);
 							if (iindex < 0) {
 								//negative index, convert to positive index
 								iindex = ca.size() + iindex;
@@ -607,7 +607,7 @@ public class ArrayHandling {
 				if (args.length == 3) {
 					fill = args[2];
 				}
-				for (int i = original.size(); i < size; i++) {
+				for (long i = original.size(); i < size; i++) {
 					original.push(fill);
 				}
 			} else {

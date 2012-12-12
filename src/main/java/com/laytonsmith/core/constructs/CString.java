@@ -43,7 +43,7 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         }
     }
 
-    public int size() {
+    public long size() {
         return val().length();
     }
 

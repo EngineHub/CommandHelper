@@ -343,14 +343,14 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             CArray ca = (CArray)c;
             if(ca.inAssociativeMode()){
                 //HashMap
-                HashMap<String, Object> map = new HashMap<String, Object>(ca.size());
+                HashMap<String, Object> map = new HashMap<String, Object>((int)ca.size());
                 for(String key : ca.keySet()){
                     map.put(key, GetPOJO(ca.get(key)));
                 }
                 return map;
             } else {
                 //ArrayList
-                ArrayList<Object> list = new ArrayList<Object>(ca.size());
+                ArrayList<Object> list = new ArrayList<Object>((int)ca.size());
                 for(int i = 0; i < ca.size(); i++){
                     list.add(GetPOJO(ca.get(i)));
                 }

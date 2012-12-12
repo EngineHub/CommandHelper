@@ -131,6 +131,25 @@ public class DataHandlingTest {
         verify(fakePlayer).sendMessage("2");
     }
 	
+	@Test(timeout = 10000)
+	public void testForeachWithKeys1() throws Exception{
+		SRun("@array = array(1: 'one', 2: 'two') @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
+		verify(fakePlayer).sendMessage("1:one;2:two;");
+	}
+	
+	@Test(timeout = 10000)
+	public void testForeachWithKeys2() throws Exception{
+		SRun("@array = array('one': 1, 'two': 2) @string = '' foreach(@array, @key, @value, @string .= (@key.':'.@value.';')) msg(@string)", fakePlayer);
+		verify(fakePlayer).sendMessage("one:1;two:2;");
+	}
+	
+	@Test(timeout = 10000)
+	public void testForeachWithKeys3() throws Exception{
+		SRun("@array = array('one': 1, 'two': 2)\nforeach(@array, @key, @value){\n\tmsg(@key.':'.@value)\n}", fakePlayer);
+		verify(fakePlayer).sendMessage("one:1");
+		verify(fakePlayer).sendMessage("two:2");
+	}
+	
 	@Test
 	public void testForelse() throws Exception{
 		SRun("forelse(assign(@i, 0), @i < 0, @i++, msg('fail'), msg('pass'))", fakePlayer);
@@ -141,7 +160,9 @@ public class DataHandlingTest {
 	@Test
 	public void testForeachelse() throws Exception{
 		SRun("foreachelse(array(), @val, msg('fail'), msg('pass'))", fakePlayer);
-		verify(fakePlayer).sendMessage("pass");
+		SRun("foreachelse(array(1), @val, msg('pass'), msg('fail'))", fakePlayer);
+		SRun("foreachelse(1..2, @val, msg('pass'), msg('fail'))", fakePlayer);
+		verify(fakePlayer, times(4)).sendMessage("pass");
 		verify(fakePlayer, times(0)).sendMessage("fail");
 	}
 

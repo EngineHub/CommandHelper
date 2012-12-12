@@ -22,7 +22,7 @@ public interface ArrayAccess extends Mixed {
      * Return the size of the array
      * @return 
      */
-    public int size();
+    public long size();
     
     /**
      * Just because it is accessible as an array doesn't mean it will be associative. For optimiziation purposes, it

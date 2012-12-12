@@ -1822,8 +1822,8 @@ public class Math {
 			String[] varNames;
 			if (vars != null) {
 				int i = 0;
-				da = new double[vars.size()];
-				varNames = new String[vars.size()];
+				da = new double[(int)vars.size()];
+				varNames = new String[(int)vars.size()];
 				for (String key : vars.keySet()) {
 					varNames[i] = key;
 					da[i] = Static.getDouble(vars.get(key, t), t);

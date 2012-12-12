@@ -1,17 +1,22 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions;
 
 /**
  *
  * @author layton
  */
-public class CSlice extends Construct {
+public class CSlice extends CArray {
     private long start;
     private long finish;
+	private int direction;
+	private long max;
+	private long size;
     public CSlice(String slice, Target t) throws ConfigCompileException{
-        super(slice, ConstructType.SLICE, t);
+        super(t);
         String [] split = slice.split("\\.\\.");
         if(split.length > 2){
             throw new ConfigCompileException("Invalid slice notation! (" + slice + ")", t);
@@ -37,13 +42,21 @@ public class CSlice extends Construct {
         } catch(NumberFormatException e){
             throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + sstart + " and " + sfinish, t);
         }
+		calculateCaches();
     }
     
     public CSlice(long from, long to, Target t){
-        super(from + ".." + to, ConstructType.SLICE, t);
+        super(t);
         this.start = from;
         this.finish = to;
+		calculateCaches();
     }
+	
+	private void calculateCaches(){
+		direction = start < finish?1:start==finish?0:-1;
+		max = Math.abs(finish - start);
+		size = max + 1;
+	}
     
     public long getStart(){
         return start;
@@ -57,4 +70,34 @@ public class CSlice extends Construct {
     public boolean isDynamic() {
         return false;
     }
+
+	@Override
+	public String val() {
+		return start + ".." + finish;
+	}
+
+	@Override
+	public boolean inAssociativeMode() {
+		return false;
+	}
+
+	@Override
+	public void set(Construct index, Construct c, Target t) {
+		throw new ConfigRuntimeException("CSlices cannot set values", Exceptions.ExceptionType.CastException, t);
+	}
+
+	@Override
+	public Construct get(Construct index, Target t) {
+		long i = Static.getInt(index, t);
+		if(i > max){
+			throw new ConfigRuntimeException("Index out of bounds. Index: " + i + " Size: " + max, Exceptions.ExceptionType.RangeException, t);
+		}
+		return new CInt(start + (direction * i), t);
+	}
+
+	@Override
+	public long size() {
+		return size;
+	}
+	
 }

@@ -219,20 +219,20 @@ public class CArray extends Construct implements ArrayAccess{
         regenValue();
     }
     
-    public void set(int index, Construct c, Target t){
+    public final void set(int index, Construct c, Target t){
         this.set(new CInt(index, Target.UNKNOWN), c, t);
     }
     /* Shortcuts */
     
-    public void set(String index, Construct c, Target t){
+    public final void set(String index, Construct c, Target t){
         set(new CString(index, c.getTarget()), c, t);
     }
     
-    public void set(String index, String value, Target t){
+    public final void set(String index, String value, Target t){
         set(index, new CString(value, t), t);
     }
     
-    public void set(String index, String value){
+    public final void set(String index, String value){
         set(index, value, Target.UNKNOWN);
     }
 
@@ -256,19 +256,19 @@ public class CArray extends Construct implements ArrayAccess{
         }
     }
     
-    public Construct get(int index, Target t){
+    public final Construct get(long index, Target t){
         return this.get(new CInt(index, t), t);
     }
     
-    public Construct get(String index, Target t){
+    public final Construct get(String index, Target t){
         return this.get(new CString(index, t), t);
     }
     
-    public Construct get(String index){
+    public final Construct get(String index){
         return this.get(index, Target.UNKNOWN);
     }
     
-    public Construct get(int index){
+    public final Construct get(long index){
         return this.get(index, Target.UNKNOWN);
     }
     
@@ -373,7 +373,7 @@ public class CArray extends Construct implements ArrayAccess{
         return val();
     }
 
-    public int size() {
+    public long size() {
         if(associative_mode){
             return associative_array.size();
         } else {

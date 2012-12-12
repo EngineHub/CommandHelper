@@ -904,6 +904,34 @@ public class MethodScriptCompilerTest {
 		SRun("msg(closure('\\''))", fakePlayer);
 		verify(fakePlayer).sendMessage("'\\''");
 	}
+	
+	@Test public void testCSlices() throws Exception{
+		assertEquals("-1", SRun("-1..-3[0]", null));
+		assertEquals("-2", SRun("-1..-3[1]", null));
+		assertEquals("-3", SRun("-1..-3[2]", null));
+		
+		assertEquals("0", SRun("0..2[0]", null));
+		assertEquals("1", SRun("0..2[1]", null));
+		assertEquals("2", SRun("0..2[2]", null));
+		
+		assertEquals("5", SRun("5..3[0]", null));
+		assertEquals("4", SRun("5..3[1]", null));
+		assertEquals("3", SRun("5..3[2]", null));
+		
+		assertEquals("1", SRun("1..3[0]", null));
+		assertEquals("2", SRun("1..3[1]", null));
+		assertEquals("3", SRun("1..3[2]", null));
+		
+		try{
+			SRun("1..2[10]", null);
+			fail("Expected an exception");
+		} catch (ConfigRuntimeException e){
+			//pass
+		}
+		
+		assertEquals("2", SRun("array_size(1..2)", null));
+		
+	}
     
     //TODO: Once the lexer is rewritten, this should work
 //    @Test
