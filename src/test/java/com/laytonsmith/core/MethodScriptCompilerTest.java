@@ -940,6 +940,13 @@ public class MethodScriptCompilerTest {
 		assertEquals("true", SRun("array_index_exists(1..2, 0)", null));
 		assertEquals("false", SRun("array_index_exists(1..2, 2)", null));
 	}
+	
+	@Test public void testWhitespaceAroundSymbol1() throws Exception{
+		assertEquals("true", SRun("false == false", null));
+	}
+	@Test public void testWhitespaceAroundSymbol2() throws Exception{
+		assertEquals("true", SRun("false==false", null));
+	}
     
     //TODO: Once the lexer is rewritten, this should work
 //    @Test
