@@ -216,7 +216,20 @@ public class BasicLogic {
 				ParseTree statement = nodes[i];
 				ParseTree code = nodes[i + 1];
 				Construct evalStatement = parent.seval(statement, env);
-				if (evalStatement instanceof CArray) {
+				if(evalStatement instanceof CSlice){ //More specific subclass of array, we can do more optimal handling here
+					long rangeLeft = ((CSlice)evalStatement).getStart();
+					long rangeRight = ((CSlice)evalStatement).getFinish();
+					if(value instanceof CInt){
+						long v = Static.getInt(value, t);
+						if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight) 
+							|| (rangeLeft > rangeRight &&  v >= rangeRight && v <= rangeLeft) 
+							|| (rangeLeft == rangeRight && v == rangeLeft)){
+							return parent.seval(code, env);
+						}
+					} else {
+						throw new ConfigRuntimeException("When using slice notation in a switch case, the value being switched on must be an integer, but instead, " + value.val() + " was found.", ExceptionType.CastException, t);
+					}
+				} else if (evalStatement instanceof CArray) {
 					for (String index : ((CArray) evalStatement).keySet()) {
 						Construct inner = ((CArray) evalStatement).get(index);
 						if(inner instanceof CSlice){
@@ -237,19 +250,6 @@ public class BasicLogic {
 								return parent.seval(code, env);
 							}
 						}
-					}
-				} else if(evalStatement instanceof CSlice){
-					long rangeLeft = ((CSlice)evalStatement).getStart();
-					long rangeRight = ((CSlice)evalStatement).getFinish();
-					if(value instanceof CInt){
-						long v = Static.getInt(value, t);
-						if((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight) 
-							|| (rangeLeft > rangeRight &&  v >= rangeRight && v <= rangeLeft) 
-							|| (rangeLeft == rangeRight && v == rangeLeft)){
-							return parent.seval(code, env);
-						}
-					} else {
-						throw new ConfigRuntimeException("When using slice notation in a switch case, the value being switched on must be an integer, but instead, " + value.val() + " was found.", ExceptionType.CastException, t);
 					}
 				} else {
 					if (((CBoolean) equals.exec(t, env, value, evalStatement)).getBoolean()) {

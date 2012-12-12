@@ -290,7 +290,7 @@ public class CArray extends Construct implements ArrayAccess{
         }
     }
     
-    public boolean containsKey(int i){
+    public final boolean containsKey(int i){
         return this.containsKey(Integer.toString(i));
     }
     
@@ -302,11 +302,11 @@ public class CArray extends Construct implements ArrayAccess{
         }
     }
     
-    public boolean contains(String c){
+    public final boolean contains(String c){
         return contains(new CString(c, Target.UNKNOWN));
     }
     
-    public boolean contains(int i){
+    public final boolean contains(int i){
         return contains(new CString(Integer.toString(i), Target.UNKNOWN));
     }
 	

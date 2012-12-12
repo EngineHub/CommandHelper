@@ -931,6 +931,14 @@ public class MethodScriptCompilerTest {
 		
 		assertEquals("2", SRun("array_size(1..2)", null));
 		
+		assertEquals("true", SRun("array_contains(1..2, 1)", null));
+		assertEquals("false", SRun("array_contains(1..2, 3)", null));
+		
+		assertEquals("true", SRun("array_contains(-1..-2, -2)", null));
+		assertEquals("false", SRun("array_contains(-1..-2, -3)", null));
+		
+		assertEquals("true", SRun("array_index_exists(1..2, 0)", null));
+		assertEquals("false", SRun("array_index_exists(1..2, 2)", null));
 	}
     
     //TODO: Once the lexer is rewritten, this should work

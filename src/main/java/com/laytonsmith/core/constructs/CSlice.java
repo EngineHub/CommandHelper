@@ -99,5 +99,29 @@ public class CSlice extends CArray {
 	public long size() {
 		return size;
 	}
+
+	@Override
+	public boolean contains(Construct c) {
+		try{
+			long i = Static.getInt(c, Target.UNKNOWN);
+			if(start < finish){
+				return start <= i && i <= finish;
+			} else {
+				return start >= i && i <= finish;
+			}
+		} catch(ConfigRuntimeException e){
+			return false;
+		}
+	}
+
+	@Override
+	public boolean containsKey(String c) {
+		try{
+			long i = Long.parseLong(c);
+			return i >= 0 && i < size;
+		} catch(NumberFormatException e){
+			return false;
+		}
+	}
 	
 }
