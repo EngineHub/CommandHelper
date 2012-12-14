@@ -183,9 +183,21 @@ public class BukkitConvertor extends AbstractConvertor {
             return new BukkitMCProjectile((Projectile)be);
         }
     	
+    	if(be instanceof Hanging){
+    		return new BukkitMCHanging(be);
+    	}
+    	
+    	if(be instanceof Vehicle){
+    		return new BukkitMCVehicle(be);
+    	}
+    	
     	if(be instanceof Tameable){
             return new BukkitMCTameable(be);
         }
+    	
+    	if(be instanceof Ageable){
+    		return new BukkitMCAgeable(be);
+    	}
         
         if(be instanceof Player){
             return new BukkitMCPlayer((Player)be);
