@@ -39,6 +39,14 @@ public interface MCBlock {
     public boolean isNull();
 	
 	public boolean isSolid();
+	
+	public boolean isFlammable();
+	
+	public boolean isTransparent();
+	
+	public boolean isOccluding();
+	
+	public boolean isBurnable();
 
     public Collection<MCItemStack> getDrops();
 

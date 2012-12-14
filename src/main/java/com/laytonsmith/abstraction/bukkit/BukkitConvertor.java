@@ -277,21 +277,21 @@ public class BukkitConvertor extends AbstractConvertor {
 	private static int maxItemID = -1;
 	private static int maxRecordID = -1;
 	
-	public int getMaxBlockID() {
+	public synchronized int getMaxBlockID() {
 		if (maxBlockID == -1) {
 			calculateIDs();
 		}
 		return maxBlockID;
 	}
 	
-	public int getMaxItemID() {
+	public synchronized int getMaxItemID() {
 		if (maxItemID == -1) {
 			calculateIDs();
 		}
 		return maxItemID;
 	}
 	
-	public int getMaxRecordID() {
+	public synchronized int getMaxRecordID() {
 		if (maxRecordID == -1) {
 			calculateIDs();
 		}

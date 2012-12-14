@@ -402,15 +402,15 @@ public class Interpreter {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
-		public int getMaxBlockID() {
+		public synchronized int getMaxBlockID() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
-		public int getMaxItemID() {
+		public synchronized int getMaxItemID() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 
-		public int getMaxRecordID() {
+		public synchronized int getMaxRecordID() {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 		

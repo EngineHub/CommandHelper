@@ -121,6 +121,22 @@ public class BukkitMCBlock implements MCBlock{
 	public boolean isSolid() {
 		return b.getType().isSolid();
 	}
+
+	public boolean isFlammable() {
+		return b.getType().isFlammable();
+	}
+
+	public boolean isTransparent() {
+		return b.getType().isTransparent();
+	}
+
+	public boolean isOccluding() {
+		return b.getType().isOccluding();
+	}
+
+	public boolean isBurnable() {
+		return b.getType().isBurnable();
+	}
     
 	
     

@@ -652,15 +652,15 @@ public class StaticTest {
 		}
 
 		public int getMaxBlockID() {
-			throw new UnsupportedOperationException("Not supported yet.");
+			return 0;
 		}
 
 		public int getMaxItemID() {
-			throw new UnsupportedOperationException("Not supported yet.");
+			return 0;
 		}
 
 		public int getMaxRecordID() {
-			throw new UnsupportedOperationException("Not supported yet.");
+			return 0;
 		}
         
     }
