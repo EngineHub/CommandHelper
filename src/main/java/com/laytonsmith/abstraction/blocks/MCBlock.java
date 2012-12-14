@@ -41,4 +41,6 @@ public interface MCBlock {
 	public boolean isSolid();
 
     public Collection<MCItemStack> getDrops();
+
+	public Collection<MCItemStack> getDrops(MCItemStack tool);
 }

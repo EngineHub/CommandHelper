@@ -650,6 +650,18 @@ public class StaticTest {
 		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
+
+		public int getMaxBlockID() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public int getMaxItemID() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public int getMaxRecordID() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
         
     }
     

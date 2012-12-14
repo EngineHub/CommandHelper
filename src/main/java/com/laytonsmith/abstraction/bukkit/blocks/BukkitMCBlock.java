@@ -104,6 +104,14 @@ public class BukkitMCBlock implements MCBlock{
         }
         return collection;
     }
+	
+	public Collection<MCItemStack> getDrops(MCItemStack tool) {
+		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
+		for(ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())){
+			collection.add(new BukkitMCItemStack(is));
+		}
+		return collection;
+	}
 
 	@Override
 	public String toString() {
