@@ -120,6 +120,10 @@ public class BukkitMCServer implements MCServer{
     public Boolean getAllowNether() {
         return s.getAllowNether();
     }
+    
+    public Boolean getOnlineMode() {
+    	return s.getOnlineMode();
+    }
 
     public String getWorldContainer() {
         return s.getWorldContainer().getPath();

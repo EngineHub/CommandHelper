@@ -274,174 +274,176 @@ public class BukkitMCWorld implements MCWorld {
                 Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
                 s.setPassenger(sk);
             }
-            if (((BukkitMCEntity)e).asEntity() instanceof Sheep) {
-                Sheep s = (Sheep) ((BukkitMCEntity)e).asEntity();
-                MCDyeColor color = MCDyeColor.WHITE;
-                for (String type : subTypes) {
-                    try {
-                        color = MCDyeColor.valueOf(type);
-                        s.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
-                    } catch (IllegalArgumentException ex) {
-                        throw new ConfigRuntimeException(type + " is not a valid color",
-                                ExceptionType.FormatException, t);
-                    }
-                }
-            }
-            if(((BukkitMCEntity)e).asEntity() instanceof Ocelot){
-                Ocelot o = (Ocelot)((BukkitMCEntity)e).asEntity();
-                MCOcelotType otype = MCOcelotType.WILD_OCELOT;
-                for (String type : subTypes) {
-                    try {
-                        otype = MCOcelotType.valueOf(type);
-                        o.setCatType(BukkitMCOcelotType.getConvertor().getConcreteEnum(otype));
-                    } catch (IllegalArgumentException ex){
-                        throw new ConfigRuntimeException(type + " is not an ocelot type",
-                                ExceptionType.FormatException, t);                    
-                    }
-                }
-            }
-            if(((BukkitMCEntity)e).asEntity() instanceof Creeper){
-                Creeper c = (Creeper)((BukkitMCEntity)e).asEntity();
-                for (String type : subTypes) {
-                    try {
-                        MCCreeperType ctype = MCCreeperType.valueOf(type);
-                        switch (ctype) {
-                            case POWERED:
-                                c.setPowered(true);
-                                break;
-                            default:
-                                    break;
-                        }
-                    } catch (IllegalArgumentException ex){
-                        throw new ConfigRuntimeException(type + " is not a creeper state",
-                                ExceptionType.FormatException, t);
-                    }
-                }
-            }
-            if(((BukkitMCEntity)e).asEntity() instanceof Wolf){
-                Wolf w = (Wolf)((BukkitMCEntity)e).asEntity();
-                for (String type : subTypes) {
-                    try {
-                        MCWolfType wtype = MCWolfType.valueOf(type);
-                        switch (wtype) {
-                            case ANGRY:
-                                w.setAngry(true);
-                                break;
-                            case TAMED:
-                                w.setTamed(true);
-                                break;
-                            default:
-                                break;
-                        }
-                    } catch (IllegalArgumentException ex){
-                        throw new ConfigRuntimeException(type + " is not a wolf state",
-                                ExceptionType.FormatException, t);
-                    }
-                }
-            }
-            if(((BukkitMCEntity)e).asEntity() instanceof PigZombie){
-                PigZombie pz = (PigZombie)((BukkitMCEntity)e).asEntity();
-                for (String type : subTypes) {
-                    if(!"".equals(type)){
-                        try{
-                            pz.setAnger(Integer.parseInt(type));
-                        } catch (IllegalArgumentException ex){
-                            throw new ConfigRuntimeException(type + " is not a valid anger level",
-                                    ExceptionType.FormatException, t);
-                        }
-                    }
-                }
-            }
-            if (((BukkitMCEntity)e).asEntity() instanceof Villager) {
-                Villager v = (Villager) ((BukkitMCEntity)e).asEntity();
-                MCProfession job = MCProfession.FARMER;
-                for (String type : subTypes){
-                    try {
-                        job = MCProfession.valueOf(type);
-                        v.setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
-                    } catch (IllegalArgumentException ex) {
-                        throw new ConfigRuntimeException(type + " is not a valid profession",
-                                ExceptionType.FormatException, t);
-                    }
-                }
-            }
-            if (((BukkitMCEntity)e).asEntity() instanceof Enderman) {
-                Enderman en = (Enderman) ((BukkitMCEntity)e).asEntity();
-                for (String type : subTypes){
-                    try {
-                        MaterialData held = new MaterialData(Material.valueOf(type));
-                        en.setCarriedMaterial(held);
-                    } catch (IllegalArgumentException ex) {
-                        throw new ConfigRuntimeException(type + " is not a valid material",
-                                ExceptionType.FormatException, t);
-                    }
-                }
-            }
-            if(((BukkitMCEntity)e).asEntity() instanceof Slime){
-                Slime sl = (Slime)((BukkitMCEntity)e).asEntity();
-                for (String type : subTypes) {
-                    if(!"".equals(type)){
-                        try{
-                            sl.setSize(Integer.parseInt(type));
-                        } catch (IllegalArgumentException ex){
-                            throw new ConfigRuntimeException(type + " is not a valid size",
-                                    ExceptionType.FormatException, t);
-                        }
-                    }
-                }
-            }
-            if(((BukkitMCEntity)e).asEntity() instanceof Skeleton){
-                Skeleton sk = (Skeleton)((BukkitMCEntity)e).asEntity();
-                MCSkeletonType stype = MCSkeletonType.NORMAL;
-                for (String type : subTypes) {
-                    try {
-                        stype = MCSkeletonType.valueOf(type);
-                        sk.setSkeletonType(BukkitMCSkeletonType.getConvertor().getConcreteEnum(stype));
-                    } catch (IllegalArgumentException ex){
-                        throw new ConfigRuntimeException(type + " is not a skeleton type",
-                                ExceptionType.FormatException, t);                    
-                    }
-                }
-            }
-            if(((BukkitMCEntity)e).asEntity() instanceof Zombie){
-                Zombie z = (Zombie)((BukkitMCEntity)e).asEntity();
-                for (String type : subTypes) {
-                    try {
-                        MCZombieType ztype = MCZombieType.valueOf(type);
-                        switch (ztype) {
-                            case BABY:
-                                z.setBaby(true);
-                                break;
-                            case VILLAGER:
-                                z.setVillager(true);
-                                break;
-                            default:
-                                break;
-                        }
-                    } catch (IllegalArgumentException ex){
-                        throw new ConfigRuntimeException(type + " is not a zombie state",
-                                ExceptionType.FormatException, t);
-                    }
-                }
-            }
-            if(((BukkitMCEntity)e).asEntity() instanceof Pig){
-                Pig p = (Pig)((BukkitMCEntity)e).asEntity();
-                for (String type : subTypes) {
-                    try {
-                        MCPigType ptype = MCPigType.valueOf(type);
-                        switch (ptype) {
-                            case SADDLED:
-                                p.setSaddle(true);
-                                break;
-                            default:
-                                break;
-                        }
-                    } catch (IllegalArgumentException ex){
-                        throw new ConfigRuntimeException(type + " is not a pig state",
-                                ExceptionType.FormatException, t);
-                    }
-                }
-            }
+			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all 
+				if (((BukkitMCEntity)e).asEntity() instanceof Sheep) {
+					Sheep s = (Sheep) ((BukkitMCEntity)e).asEntity();
+					MCDyeColor color = MCDyeColor.WHITE;
+					for (String type : subTypes) {
+						try {
+							color = MCDyeColor.valueOf(type);
+							s.setColor(BukkitMCDyeColor.getConvertor().getConcreteEnum(color));
+						} catch (IllegalArgumentException ex) {
+							throw new ConfigRuntimeException(type + " is not a valid color",
+									ExceptionType.FormatException, t);
+						}
+					}
+				}
+				if(((BukkitMCEntity)e).asEntity() instanceof Ocelot){
+					Ocelot o = (Ocelot)((BukkitMCEntity)e).asEntity();
+					MCOcelotType otype = MCOcelotType.WILD_OCELOT;
+					for (String type : subTypes) {
+						try {
+							otype = MCOcelotType.valueOf(type);
+							o.setCatType(BukkitMCOcelotType.getConvertor().getConcreteEnum(otype));
+						} catch (IllegalArgumentException ex){
+							throw new ConfigRuntimeException(type + " is not an ocelot type",
+									ExceptionType.FormatException, t);					
+						}
+					}
+				}
+				if(((BukkitMCEntity)e).asEntity() instanceof Creeper){
+					Creeper c = (Creeper)((BukkitMCEntity)e).asEntity();
+					for (String type : subTypes) {
+						try {
+							MCCreeperType ctype = MCCreeperType.valueOf(type);
+							switch (ctype) {
+							case POWERED:
+								c.setPowered(true);
+								break;
+							default:
+								break;
+							}
+						} catch (IllegalArgumentException ex){
+							throw new ConfigRuntimeException(type + " is not a creeper state",
+									ExceptionType.FormatException, t);
+						}
+					}
+				}
+				if(((BukkitMCEntity)e).asEntity() instanceof Wolf){
+					Wolf w = (Wolf)((BukkitMCEntity)e).asEntity();
+					for (String type : subTypes) {
+						try {
+							MCWolfType wtype = MCWolfType.valueOf(type);
+							switch (wtype) {
+							case ANGRY:
+								w.setAngry(true);
+								break;
+							case TAMED:
+								w.setTamed(true);
+								break;
+							default:
+								break;
+							}
+						} catch (IllegalArgumentException ex){
+							throw new ConfigRuntimeException(type + " is not a wolf state",
+									ExceptionType.FormatException, t);
+						}
+					}
+				}
+				if(((BukkitMCEntity)e).asEntity() instanceof PigZombie){
+					PigZombie pz = (PigZombie)((BukkitMCEntity)e).asEntity();
+					for (String type : subTypes) {
+						if(!"".equals(type)){
+							try{
+								pz.setAnger(Integer.parseInt(type));
+							} catch (IllegalArgumentException ex){
+								throw new ConfigRuntimeException(type + " is not a valid anger level",
+										ExceptionType.FormatException, t);
+							}
+						}
+					}
+				}
+				if (((BukkitMCEntity)e).asEntity() instanceof Villager) {
+					Villager v = (Villager) ((BukkitMCEntity)e).asEntity();
+					MCProfession job = MCProfession.FARMER;
+					for (String type : subTypes){
+						try {
+							job = MCProfession.valueOf(type);
+							v.setProfession(BukkitMCProfession.getConvertor().getConcreteEnum(job));
+						} catch (IllegalArgumentException ex) {
+							throw new ConfigRuntimeException(type + " is not a valid profession",
+									ExceptionType.FormatException, t);
+						}
+					}
+				}
+				if (((BukkitMCEntity)e).asEntity() instanceof Enderman) {
+					Enderman en = (Enderman) ((BukkitMCEntity)e).asEntity();
+					for (String type : subTypes){
+						try {
+							MaterialData held = new MaterialData(Material.valueOf(type));
+							en.setCarriedMaterial(held);
+						} catch (IllegalArgumentException ex) {
+							throw new ConfigRuntimeException(type + " is not a valid material",
+									ExceptionType.FormatException, t);
+						}
+					}
+				}
+				if(((BukkitMCEntity)e).asEntity() instanceof Slime){
+					Slime sl = (Slime)((BukkitMCEntity)e).asEntity();
+					for (String type : subTypes) {
+						if(!"".equals(type)){
+							try{
+								sl.setSize(Integer.parseInt(type));
+							} catch (IllegalArgumentException ex){
+								throw new ConfigRuntimeException(type + " is not a valid size",
+										ExceptionType.FormatException, t);
+							}
+						}
+					}
+				}
+				if(((BukkitMCEntity)e).asEntity() instanceof Skeleton){
+					Skeleton sk = (Skeleton)((BukkitMCEntity)e).asEntity();
+					MCSkeletonType stype = MCSkeletonType.NORMAL;
+					for (String type : subTypes) {
+						try {
+							stype = MCSkeletonType.valueOf(type);
+							sk.setSkeletonType(BukkitMCSkeletonType.getConvertor().getConcreteEnum(stype));
+						} catch (IllegalArgumentException ex){
+							throw new ConfigRuntimeException(type + " is not a skeleton type",
+									ExceptionType.FormatException, t);					
+						}
+					}
+				}
+				if((((BukkitMCEntity)e).asEntity() instanceof Zombie) && !(((BukkitMCEntity)e).asEntity() instanceof PigZombie)){
+					Zombie z = (Zombie)((BukkitMCEntity)e).asEntity();
+					for (String type : subTypes) {
+						try {
+							MCZombieType ztype = MCZombieType.valueOf(type);
+							switch (ztype) {
+							case BABY:
+								z.setBaby(true);
+								break;
+							case VILLAGER:
+								z.setVillager(true);
+								break;
+							default:
+								break;
+							}
+						} catch (IllegalArgumentException ex){
+							throw new ConfigRuntimeException(type + " is not a zombie state",
+									ExceptionType.FormatException, t);
+						}
+					}
+				}
+				if(((BukkitMCEntity)e).asEntity() instanceof Pig){
+					Pig p = (Pig)((BukkitMCEntity)e).asEntity();
+					for (String type : subTypes) {
+						try {
+							MCPigType ptype = MCPigType.valueOf(type);
+							switch (ptype) {
+							case SADDLED:
+								p.setSaddle(true);
+								break;
+							default:
+								break;
+							}
+						} catch (IllegalArgumentException ex){
+							throw new ConfigRuntimeException(type + " is not a pig state",
+									ExceptionType.FormatException, t);
+						}
+					}
+				}
+			}
             ids.push(new CInt(e.getEntityId(), t));
         }
         return ids;

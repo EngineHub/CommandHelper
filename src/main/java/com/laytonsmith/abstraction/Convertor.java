@@ -119,4 +119,10 @@ public interface Convertor {
 	 */
 	public MCNote GetNote(int octave, MCTone tone, boolean sharp);
     
+	public int getMaxBlockID();
+	
+	public int getMaxItemID();
+	
+	public int getMaxRecordID();
+	
 }

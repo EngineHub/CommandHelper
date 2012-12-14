@@ -44,6 +44,14 @@ public class BukkitBlockEvents {
         public MCBlock getBlock() {
             return new BukkitMCBlock(event.getBlock());
         }
+
+		public int getExpToDrop() {
+			return event.getExpToDrop();
+		}
+
+		public void setExpToDrop(int exp) {
+			event.setExpToDrop(exp);
+		}
     }
 
     @abstraction(type = Implementation.Type.BUKKIT)
