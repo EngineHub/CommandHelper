@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Projectile;
 import org.bukkit.potion.PotionEffect;
@@ -202,9 +205,10 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 		return blocks.get(0);
 	}
 
-	public MCProjectile launchProjectile(MCProjectile projectile) {
-		Projectile p = ((BukkitMCProjectile) projectile).asProjectile();
-		Projectile proj = le.launchProjectile(p.getClass());
+	public MCProjectile launchProjectile(MCProjectileType projectile) {
+		EntityType et = EntityType.valueOf(projectile.name());
+		Class<? extends Entity> c = et.getEntityClass();
+		Projectile proj = le.launchProjectile(c.asSubclass(Projectile.class));
 
 		MCEntity e = BukkitConvertor.BukkitGetCorrectEntity(proj);
 

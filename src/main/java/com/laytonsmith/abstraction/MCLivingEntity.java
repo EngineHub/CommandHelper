@@ -2,6 +2,7 @@
 package com.laytonsmith.abstraction;
 
 import com.laytonsmith.abstraction.blocks.MCBlock;
+import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.core.constructs.Target;
 import java.util.HashSet;
 import java.util.List;
@@ -30,7 +31,7 @@ public interface MCLivingEntity extends MCEntity {
     public int getNoDamageTicks();
     public int getRemainingAir();
     public MCBlock getTargetBlock(HashSet<Byte> transparent, int maxDistance);
-    public MCProjectile launchProjectile(MCProjectile projectile);
+    public MCProjectile launchProjectile(MCProjectileType projectile);
     public void setHealth(int health);
     public void setLastDamage(int damage);
     public void setMaximumAir(int ticks);

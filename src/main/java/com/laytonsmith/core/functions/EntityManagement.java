@@ -1,11 +1,13 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.abstraction.MCAgeable;
-import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
+import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -112,7 +114,6 @@ public class EntityManagement {
 		}
 
 		public String docs() {
-			// TODO Auto-generated method stub
 			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
 					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if ";
 		}
@@ -122,4 +123,81 @@ public class EntityManagement {
 		}
 		
 	}
+	
+	@api
+	public static class shoot_projectile extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCCommandSender cmdsr = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCEntity ent = null;
+			int id;
+			MCProjectileType toShoot = MCProjectileType.FIREBALL;
+			if (args.length >= 1) {
+				try {
+					id = Static.GetPlayer(args[0], t).getEntityId();
+				} catch (ConfigRuntimeException notPlayer) {
+					try {
+						id = (int) Static.getInt(args[0], t);
+					} catch (ConfigRuntimeException notEntIDEither) {
+						throw new ConfigRuntimeException("Could not find an entity matching " + args[0] + "!", 
+								ExceptionType.BadEntityException, t);
+					}
+				}
+			} else {
+				if (cmdsr instanceof MCPlayer) {
+					id = ((MCLivingEntity) cmdsr).getEntityId();
+					Static.AssertPlayerNonNull((MCPlayer) cmdsr, t);
+				} else {
+					throw new ConfigRuntimeException("A player was expected!", ExceptionType.PlayerOfflineException, t);
+				}
+			}
+			if (args.length == 2) {
+				try {
+					toShoot = MCProjectileType.valueOf(args[1].toString().toUpperCase());
+				} catch (IllegalArgumentException badEnum) {
+					throw new ConfigRuntimeException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
+				}
+			}
+			ent = Static.getEntity(id, t);
+			if (ent instanceof MCLivingEntity) {
+				((MCLivingEntity) ent).launchProjectile(toShoot);
+				return new CVoid(t);
+			} else {
+				throw new ConfigRuntimeException("Entity (" + id + ") is not living", ExceptionType.BadEntityException, t);
+			}
+		}
+
+		public String getName() {
+			return "shoot_projectile";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1, 2};
+		} 
+
+		public String docs() {
+			return "void {[player[, projectile]] | [entityID[, projectile]]} shoots a fireball from the entity or player "
+					+ "specified, or the current player if no arguments are passed. Additionally, the type of projectile "
+					+ "can be overridden. Valid projectiles: " + StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
 }
