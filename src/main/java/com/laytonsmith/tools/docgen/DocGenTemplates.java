@@ -1,7 +1,9 @@
 package com.laytonsmith.tools.docgen;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.StreamUtils;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.persistance.DataSource;
@@ -124,5 +126,20 @@ public class DocGenTemplates {
 			return b.toString();
 		}
 		
+	};
+	
+	public static Generator BURST_VALUE_TYPES = new Generator() {
+
+		public String generate() {
+			return StringUtils.Join(Burst.BurstType.values(), ", ", ", or ", " or ");
+		}
+	};
+	
+	public static Generator BURST_TYPE_DOCS = new Generator() {
+
+		public String generate() {
+			//TODO
+			return "TODO";
+		}
 	};
 }

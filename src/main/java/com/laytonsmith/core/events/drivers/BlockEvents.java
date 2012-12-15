@@ -42,9 +42,11 @@ public class BlockEvents {
                     + "{player: The player's name | block: An array with "
                     + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) "
                     + "and 'world' (string) for the physical location of the block | "
+                    + "location: the locationArray of this block | "
                     + "drops: an array of arrays (with keys 'type' (string), "
-                    + "'qty' (int), 'data' (int), 'enchants' (array)) of items the block will drop} "
-                    + "{drops} "
+                    + "'qty' (int), 'data' (int), 'enchants' (array)) of items the block will drop} | "
+                    + "xp: the xp that this block will drop, if any"
+                    + "{drops|xp} "
                     + "{player|block|drops}";
         }
 
@@ -125,15 +127,21 @@ public class BlockEvents {
             blk.set("world", new CString(event.getBlock().getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
 
             map.put("block", blk);
+			
+			CArray location = ObjectGenerator.GetGenerator()
+					.location(StaticLayer.GetLocation(event.getBlock().getWorld(), event.getBlock().getX(), event.getBlock().getY(), event.getBlock().getZ()));
+			map.put("location", location);
 
             CArray drops = new CArray(Target.UNKNOWN);
-            Collection<MCItemStack> items = event.getBlock().getDrops();
+            Collection<MCItemStack> items = event.getBlock().getDrops(event.getPlayer().getItemInHand());
             for (Iterator<MCItemStack> iter = items.iterator(); iter.hasNext();) {
                 MCItemStack stack = new BukkitMCItemStack((MCItemStack) iter.next());
                 CArray item = (CArray) ObjectGenerator.GetGenerator().item(stack, Target.UNKNOWN);
                 drops.push(item);
             }
             map.put("drops", drops);
+			
+			map.put("xp", new CInt(event.getExpToDrop(), Target.UNKNOWN));
 
             return map;
         }
@@ -166,6 +174,17 @@ public class BlockEvents {
                     return true;
                 }
             }
+			
+			if (key.equals("xp")) {
+				if (value instanceof CInt) {
+					
+					int xp = Integer.parseInt(value.val());
+					
+					event.setExpToDrop(xp);
+					
+					return true;
+				}
+			}
 
             return false;
         }

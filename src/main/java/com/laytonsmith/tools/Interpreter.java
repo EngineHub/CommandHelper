@@ -401,6 +401,18 @@ public class Interpreter {
 		public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
+
+		public synchronized int getMaxBlockID() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public synchronized int getMaxItemID() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public synchronized int getMaxRecordID() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
 		
 	}
 }

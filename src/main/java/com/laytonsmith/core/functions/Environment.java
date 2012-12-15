@@ -833,7 +833,7 @@ public class Environment {
 	}
 	
 	@api(environments={CommandHelperEnvironment.class})
-	public static class is_block_solid extends AbstractFunction{
+	public static class get_block_info extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
@@ -850,11 +850,19 @@ public class Environment {
 		public Construct exec(Target t, com.laytonsmith.core.environments.Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], p==null?null:p.getWorld(), t);
-			return new CBoolean(l.getBlock().isSolid(), t);
+			MCBlock b = l.getBlock();
+			CArray array = new CArray(t);
+			array.set("solid", new CBoolean(b.isSolid(), t), t);
+			array.set("flammable", new CBoolean(b.isFlammable(), t), t);
+			array.set("transparent", new CBoolean(b.isTransparent(), t), t);
+			array.set("occluding", new CBoolean(b.isOccluding(), t), t);
+			array.set("burnable", new CBoolean(b.isBurnable(), t), t);
+			return array;
+			//return new CBoolean(l.getBlock().isSolid(), t);
 		}
 
 		public String getName() {
-			return "is_block_solid";
+			return "get_block_info";
 		}
 
 		public Integer[] numArgs() {
@@ -862,8 +870,13 @@ public class Environment {
 		}
 
 		public String docs() {
-			return "boolean {locationArray} Returns true if the block is solid and cannot be passed through (i.e. dirt or stone,"
-					+ " as opposed to a torch or water).";
+			return "array {locationArray} Returns an associative array with various information about a block ---- <ul>"
+					+ " <li>solid: If a block is solid (i.e. dirt or stone, as opposed to a torch or water)</li>"
+					+ " <li>flammable: Indicates if a block can catch fire</li>"
+					+ " <li>transparent: Indicates if light can pass through</li>"
+					+ " <li>occluding: indicates If the block fully blocks vision</li>"
+					+ " <li>burnable: Indicates if the block can burn away</li>"
+					+ "</ul>";
 		}
 
 		public CHVersion since() {
