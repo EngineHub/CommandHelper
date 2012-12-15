@@ -41,7 +41,7 @@ import org.bukkit.World;
 public class WorldEdit {
 
     public static String docs() {
-        return "Provides various methods for programmatically hooking into WorldEdit";
+        return "Provides various methods for programmatically hooking into WorldEdit and WorldGuard";
     }
 
     @api(environments=CommandHelperEnvironment.class)
@@ -624,7 +624,7 @@ public class WorldEdit {
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
-			World world = Bukkit.getServer().getWorld(args[2].val());
+            World world = Bukkit.getServer().getWorld(args[2].val());
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
 
@@ -637,40 +637,40 @@ public class WorldEdit {
             if (args[2] instanceof CArray) {
                 CArray arg = (CArray) args[2];
 
-				if (arg.size() != 2) {
-					throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
-				}
-
-				List<BlockVector> vectors = new ArrayList<BlockVector>();
-
-				int x = 0;
-				int y = 0;
-				int z = 0;
-
-                for (int i = 0; i < arg.size(); i++) {
-					CArray point = (CArray)arg.get(i, t);
-
-					x = (int) Static.getInt(point.get(0), t);
-					y = (int) Static.getInt(point.get(1), t);
-					z = (int) Static.getInt(point.get(2), t);
-
-					vectors.add(new BlockVector(x, y, z));
+                if (arg.size() != 2) {
+                    throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
                 }
 
-				ProtectedCuboidRegion pr = new ProtectedCuboidRegion(args[0].val(), vectors.get(0), vectors.get(1));
+                List<BlockVector> vectors = new ArrayList<BlockVector>();
 
-				if (pr == null) {
-					throw new ConfigRuntimeException("Error while creating protected cuboid", ExceptionType.PluginInternalException, t);
-				}
+                int x = 0;
+                int y = 0;
+                int z = 0;
+
+                for (int i = 0; i < arg.size(); i++) {
+                    CArray point = (CArray)arg.get(i, t);
+
+                    x = (int) Static.getInt(point.get(0), t);
+                    y = (int) Static.getInt(point.get(1), t);
+                    z = (int) Static.getInt(point.get(2), t);
+
+                    vectors.add(new BlockVector(x, y, z));
+                }
+
+                ProtectedCuboidRegion pr = new ProtectedCuboidRegion(args[0].val(), vectors.get(0), vectors.get(1));
+
+                if (pr == null) {
+                    throw new ConfigRuntimeException("Error while creating protected cuboid", ExceptionType.PluginInternalException, t);
+                }
 
             } else {
-				throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
             }
 
             return new CVoid(t);
         }
 
-		@Override
+        @Override
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
