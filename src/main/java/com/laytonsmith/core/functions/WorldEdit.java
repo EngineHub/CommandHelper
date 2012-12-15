@@ -15,6 +15,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.BukkitUtil;
@@ -25,6 +26,7 @@ import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.*;
@@ -520,13 +522,13 @@ public class WorldEdit {
             if (c != null && !( c instanceof MCPlayer)) {
                 w = ((MCPlayer)c).getWorld();
             }
-            
+
             MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 
             if (loc.getWorld() == null) {
                 throw new ConfigRuntimeException(this.getName() + " needs a world", ExceptionType.InsufficientArgumentsException, t);
             }
-            
+
             world = Bukkit.getServer().getWorld(loc.getWorld().getName());
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
@@ -597,6 +599,80 @@ public class WorldEdit {
             }
 
             return new CInt(region.volume(), t);
+        }
+    }
+
+    @api
+    public static class sk_region_create extends SKFunction {
+
+        public String getName() {
+            return "sk_region_create";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{Integer.MAX_VALUE};
+        }
+
+        public String docs() {
+            return "boolean {name, array(array(x, y, z), array(x, y, z), [array(x, y, z)...]), world} Create region of the given name in the given world.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+			World world = Bukkit.getServer().getWorld(args[2].val());
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(args[0].val());
+
+            if (regionExists != null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) exists in world (%s).", args[0].val(), args[2].val()), ExceptionType.PluginInternalException, t);
+            }
+
+            if (args[2] instanceof CArray) {
+                CArray arg = (CArray) args[2];
+
+				if (arg.size() != 2) {
+					throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
+				}
+
+				List<BlockVector> vectors = new ArrayList<BlockVector>();
+
+				int x = 0;
+				int y = 0;
+				int z = 0;
+
+                for (int i = 0; i < arg.size(); i++) {
+					CArray point = (CArray)arg.get(i, t);
+
+					x = (int) Static.getInt(point.get(0), t);
+					y = (int) Static.getInt(point.get(1), t);
+					z = (int) Static.getInt(point.get(2), t);
+
+					vectors.add(new BlockVector(x, y, z));
+                }
+
+				ProtectedCuboidRegion pr = new ProtectedCuboidRegion(args[0].val(), vectors.get(0), vectors.get(1));
+
+				if (pr == null) {
+					throw new ConfigRuntimeException("Error while creating protected cuboid", ExceptionType.PluginInternalException, t);
+				}
+
+            } else {
+				throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
+            }
+
+            return new CVoid(t);
+        }
+
+		@Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
     }
 
