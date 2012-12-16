@@ -726,10 +726,10 @@ public class WorldEdit {
     }
 
     @api
-    public static class sk_region_exists extends SKFunction {
+    public static class sk_region_remove extends SKFunction {
 
         public String getName() {
-            return "sk_region_exists";
+            return "sk_region_remove";
         }
 
         public Integer[] numArgs() {
@@ -737,19 +737,22 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "boolean {name, [world]} Check if given region exists.";
+            return "boolean {[world], name} Check if given region exists.";
         }
 
         public ExceptionType[] thrown() {
-            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
             World world = null;
+            String region;
 
             if (args.length == 1) {
+
+                region = args[0].val();
 
                 MCPlayer m = null;
 
@@ -761,8 +764,9 @@ public class WorldEdit {
                     world = Bukkit.getServer().getWorld(m.getWorld().getName());
                 }
             } else {
+                region = args[1].val();
                 world = Bukkit.getServer().getWorld(args[0].val());
-			}
+            }
 
             if (world == null) {
                 throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
@@ -770,10 +774,76 @@ public class WorldEdit {
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
 
-            ProtectedRegion region = mgr.getRegion(args[0].val());
+            ProtectedRegion regionExists = mgr.getRegion(region);
 
-            if (region != null) {
-				return new CBoolean(true, t);
+            if (regionExists == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+            }
+
+            mgr.removeRegion(region);
+
+            return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_exists extends SKFunction {
+
+        public String getName() {
+            return "sk_region_exists";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "boolean {[world], name} Check if a given region exists.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            String region;
+
+            if (args.length == 1) {
+
+                region = args[0].val();
+
+                MCPlayer m = null;
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                }
+            } else {
+                region = args[1].val();
+                world = Bukkit.getServer().getWorld(args[0].val());
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(region);
+
+            if (regionExists != null) {
+                return new CBoolean(true, t);
             }
 
             return new CBoolean(false, t);
