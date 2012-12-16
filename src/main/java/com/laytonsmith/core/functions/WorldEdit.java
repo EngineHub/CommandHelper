@@ -646,7 +646,7 @@ public class WorldEdit {
 			}
 
             if (world == null) {
-                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
             }
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
@@ -717,6 +717,66 @@ public class WorldEdit {
             }
 
             return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_exists extends SKFunction {
+
+        public String getName() {
+            return "sk_region_exists";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "boolean {name, [world]} Check if given region exists.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+
+            if (args.length == 1) {
+
+                MCPlayer m = null;
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                }
+            } else {
+                world = Bukkit.getServer().getWorld(args[0].val());
+			}
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion region = mgr.getRegion(args[0].val());
+
+            if (region != null) {
+				return new CBoolean(true, t);
+            }
+
+            return new CBoolean(false, t);
         }
 
         @Override
