@@ -610,11 +610,11 @@ public class WorldEdit {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{3};
+            return new Integer[]{2, 3};
         }
 
         public String docs() {
-            return "boolean {name, array(array(x, y, z), array(x, y, z), [array(x, y, z)...]), world} Create region of the given name in the given world.";
+            return "boolean {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Create region of the given name in the given world.";
         }
 
         public ExceptionType[] thrown() {
@@ -624,48 +624,101 @@ public class WorldEdit {
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             Static.checkPlugin("WorldGuard", t);
 
-            World world = Bukkit.getServer().getWorld(args[2].val());
+			World world = null;
+			String region;
+
+			if (args.length == 2) {
+
+				region = args[0].val();
+
+				MCPlayer m = null;
+
+				if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+				}
+
+				if (m != null) {
+					world = Bukkit.getServer().getWorld(m.getWorld().getName());
+				}
+			} else {
+
+				region = args[1].val();
+
+				world = Bukkit.getServer().getWorld(args[0].val());
+			}
+
+			if (world == null) {
+				throw new ConfigRuntimeException("Unknown world specified", ExceptionType.PluginInternalException, t);
+			}
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
 
-            ProtectedRegion regionExists = mgr.getRegion(args[0].val());
+            ProtectedRegion regionExists = mgr.getRegion(region);
 
             if (regionExists != null) {
-                throw new ConfigRuntimeException(String.format("The region (%s) exists in world (%s).", args[0].val(), args[2].val()), ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException(String.format("The region (%s) exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
             }
 
-            if (args[2] instanceof CArray) {
-                CArray arg = (CArray) args[2];
+			if (!(args[args.length - 1] instanceof CArray)) {
+				throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
+			}
 
-                if (arg.size() != 2) {
-                    throw new ConfigRuntimeException("Only cuboid regions are supported with " + this.getName(), ExceptionType.PluginInternalException, t);
-                }
+			List<BlockVector> points = new ArrayList<BlockVector>();
+			List<BlockVector2D> points2D = new ArrayList<BlockVector2D>();
 
-                List<BlockVector> vectors = new ArrayList<BlockVector>();
+			int x = 0;
+			int y = 0;
+			int z = 0;
 
-                int x = 0;
-                int y = 0;
-                int z = 0;
+			int minY = 0;
+			int maxY = 0;
 
-                for (int i = 0; i < arg.size(); i++) {
-                    CArray point = (CArray)arg.get(i, t);
+			ProtectedCuboidRegion cr = null;
+			ProtectedPolygonalRegion pr = null;
 
-                    x = (int) Static.getInt(point.get(0), t);
-                    y = (int) Static.getInt(point.get(1), t);
-                    z = (int) Static.getInt(point.get(2), t);
+			CArray arg = (CArray) args[args.length - 1];
 
-                    vectors.add(new BlockVector(x, y, z));
-                }
 
-                ProtectedCuboidRegion pr = new ProtectedCuboidRegion(args[0].val(), vectors.get(0), vectors.get(1));
+			for (int i = 0; i < arg.size(); i++) {
+				CArray point = (CArray)arg.get(i, t);
 
-                if (pr == null) {
-                    throw new ConfigRuntimeException("Error while creating protected cuboid", ExceptionType.PluginInternalException, t);
-                }
+				x = (int) Static.getInt(point.get(0), t);
+				y = (int) Static.getInt(point.get(1), t);
+				z = (int) Static.getInt(point.get(2), t);
 
-            } else {
-                throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
-            }
+				if (arg.size() == 2) {
+					points.add(new BlockVector(x, y, z));
+				} else {
+					points2D.add(new BlockVector2D(x, z));
+
+					if (i == 0) {
+						minY = maxY = y;
+					} else {
+						if (y < minY) {
+							minY = y;
+						} else if (y > maxY) {
+							maxY = y;
+						}
+					}
+				}
+
+			}
+
+			if (arg.size() == 2) {
+				cr = new ProtectedCuboidRegion(region, points.get(0), points.get(1));
+			} else {
+				pr = new ProtectedPolygonalRegion(region, points2D, minY, maxY);
+			}
+
+			if (cr == null && pr == null) {
+				throw new ConfigRuntimeException("Error while creating protected cuboid", ExceptionType.PluginInternalException, t);
+			}
+
+			if (arg.size() == 2) {
+				mgr.addRegion(cr);
+			} else {
+				mgr.addRegion(pr);
+			}
 
             return new CVoid(t);
         }
