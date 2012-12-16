@@ -707,7 +707,7 @@ public class WorldEdit {
             }
 
             if (cr == null && pr == null) {
-                throw new ConfigRuntimeException("Error while creating protected cuboid", ExceptionType.PluginInternalException, t);
+                throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t);
             }
 
             if (arg.size() == 2) {
