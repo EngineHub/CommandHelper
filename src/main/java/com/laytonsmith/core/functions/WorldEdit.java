@@ -881,7 +881,6 @@ public class WorldEdit {
 
             World world = null;
             MCPlayer m = null;
-            MCOfflinePlayer pl = null;
             List<MCOfflinePlayer> owners = new ArrayList<MCOfflinePlayer>();
             String region = args[0].val();
 
@@ -978,7 +977,6 @@ public class WorldEdit {
 
             World world = null;
             MCPlayer m = null;
-            MCOfflinePlayer pl = null;
             List<MCOfflinePlayer> owners = new ArrayList<MCOfflinePlayer>();
             String region = args[0].val();
 
@@ -1075,7 +1073,6 @@ public class WorldEdit {
 
             World world = null;
             MCPlayer m = null;
-            MCOfflinePlayer pl = null;
             List<MCOfflinePlayer> members = new ArrayList<MCOfflinePlayer>();
             String region = args[0].val();
 
@@ -1172,7 +1169,6 @@ public class WorldEdit {
 
             World world = null;
             MCPlayer m = null;
-            MCOfflinePlayer pl = null;
             List<MCOfflinePlayer> members = new ArrayList<MCOfflinePlayer>();
             String region = args[0].val();
 
