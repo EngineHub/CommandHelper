@@ -272,5 +272,46 @@ public class BukkitConvertor extends AbstractConvertor {
 	public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 		return new BukkitMCNote(octave, tone, sharp);
 	}
+	
+	private static int maxBlockID = -1;
+	private static int maxItemID = -1;
+	private static int maxRecordID = -1;
+	
+	public synchronized int getMaxBlockID() {
+		if (maxBlockID == -1) {
+			calculateIDs();
+		}
+		return maxBlockID;
+	}
+	
+	public synchronized int getMaxItemID() {
+		if (maxItemID == -1) {
+			calculateIDs();
+		}
+		return maxItemID;
+	}
+	
+	public synchronized int getMaxRecordID() {
+		if (maxRecordID == -1) {
+			calculateIDs();
+		}
+		return maxRecordID;
+	}
+	
+	private void calculateIDs() {
+		maxBlockID = 0;
+		maxItemID = 256;
+		maxRecordID = 2256;
+		for (Material m : Material.values()) {
+			int mID = m.getId();
+			if (mID >= maxRecordID) {
+				maxRecordID = mID;
+			} else if (mID >= maxItemID) {
+				maxItemID = mID;
+			} else if (mID >= maxBlockID) {
+				maxBlockID = mID;
+			}
+		}
+	}
 
 }

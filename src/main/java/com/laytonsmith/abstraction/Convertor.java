@@ -119,4 +119,22 @@ public interface Convertor {
 	 */
 	public MCNote GetNote(int octave, MCTone tone, boolean sharp);
     
+	/**
+	 * Returns the max block ID number supported by this server.
+	 * @return 
+	 */
+	public int getMaxBlockID();
+	
+	/**
+	 * Returns the max item ID number supported by this server.
+	 * @return 
+	 */
+	public int getMaxItemID();
+	
+	/**
+	 * Returns the max record ID number supported by this server.
+	 * @return 
+	 */
+	public int getMaxRecordID();
+	
 }

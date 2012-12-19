@@ -516,26 +516,11 @@ public class Minecraft {
 		}
 
 		public String docs() {
-			String docs = "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
-					+ " the radius (or 64 by default). The effect can be one of the following:";
-			
-			List<String> values = new ArrayList<String>();
-			for(MCEffect effect : MCEffect.values()){
-				switch(effect){
-					case RECORD_PLAY:
-					case SMOKE:
-					case STEP_SOUND:
-					case BLAZE_SHOOT:
-					case ENDER_SIGNAL:
-						continue;
-					default:
-						values.add(effect.name());
-				}
-			}
-			
-			docs += StringUtils.Join(values, ", ");
-			
-			return docs;
+			return "void {xyzArray, effect, [radius]} Plays the specified effect (sound effect) at the given location, for all players within"
+					+ " the radius (or 64 by default). The effect can be one of the following: "
+					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
+					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The RECORD_PLAY effect takes the item"
+					+ " id of a disc as data, STEP_SOUND takes a blockID and SMOKE takes a direction bit (4 is upwards).";
 		}
 
 		public ExceptionType[] thrown() {
@@ -557,18 +542,25 @@ public class Minecraft {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld() : null), t);
 			MCEffect e = null;
-			try {
-				e = MCEffect.valueOf(args[1].val().toUpperCase());
-				if (e.equals(MCEffect.RECORD_PLAY) || e.equals(MCEffect.SMOKE)
-						|| e.equals(MCEffect.STEP_SOUND) || e.equals(MCEffect.BLAZE_SHOOT)
-						|| e.equals(MCEffect.ENDER_SIGNAL)) {
-					throw new IllegalArgumentException();
+			String preEff = args[1].val();
+			int data = 0;
+			int radius = 64;
+			if (preEff.contains(":")) {
+				try {
+					data = Integer.parseInt(preEff.substring(preEff.indexOf(':') + 1));
+				} catch (NumberFormatException ex) {
+					throw new ConfigRuntimeException("Effect data expected an integer", ExceptionType.CastException, t);
 				}
+				preEff = preEff.substring(0, preEff.indexOf(':'));
+			}
+			try {
+				e = MCEffect.valueOf(preEff.toUpperCase());
 			} catch (IllegalArgumentException ex) {
 				throw new ConfigRuntimeException("The effect type " + args[1].val() + " is not valid", ExceptionType.FormatException, t);
 			}
-			int data = 0;
-			int radius = 64;
+			if (e.equals(MCEffect.STEP_SOUND) && (data < 0 || data > StaticLayer.GetConvertor().getMaxBlockID())) {
+				throw new ConfigRuntimeException("This effect requires a valid BlockID", ExceptionType.FormatException, t);
+			}
 			if (args.length == 3) {
 				radius = (int) Static.getInt(args[2], t);
 			}
@@ -688,7 +680,8 @@ public class Minecraft {
 					+ "</li><li>5 - Allow end; if true, end is enabled"
 					+ "</li><li>6 - World container; The path to the world container.</li><li>7 - "
 					+ "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li>"
-					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li></ul>";
+					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
+					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li></ul>";
 		}
 
 		public ExceptionType[] thrown() {
@@ -718,12 +711,12 @@ public class Minecraft {
 				index = (int) Static.getInt(args[0], t);
 			}
 
-			if (index < -1 || index > 9) {
-				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 9 (inclusive)",
+			if (index < -1 || index > 10) {
+				throw new ConfigRuntimeException("get_server_info expects the index to be between -1 and 10 (inclusive)",
 						ExceptionType.RangeException, t);
 			}
 
-			assert index >= -1 && index <= 9; // Is this needed? Above statement should cause this to never be true. - entityreborn
+			assert index >= -1 && index <= 10; // Is this needed? Above statement should cause this to never be true. - entityreborn
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 
 			if (index == 0 || index == -1) {
@@ -787,6 +780,10 @@ public class Minecraft {
 				}
 				
 				retVals.add(co);
+			}
+			if (index == 10 || index == -1) {
+				//Online Mode
+				retVals.add(new CBoolean(server.getOnlineMode(), t));
 			}
 
 			if (retVals.size() == 1) {

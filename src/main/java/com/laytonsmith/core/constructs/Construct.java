@@ -360,6 +360,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
         }
     }
+	
+	public CString asString(){
+		return new CString(val(), target);
+	}
     
     /**
      * If this type of construct is dynamic, that is to say, if it isn't a constant.

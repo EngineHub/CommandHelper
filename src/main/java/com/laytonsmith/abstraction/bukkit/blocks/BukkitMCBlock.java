@@ -104,6 +104,14 @@ public class BukkitMCBlock implements MCBlock{
         }
         return collection;
     }
+	
+	public Collection<MCItemStack> getDrops(MCItemStack tool) {
+		Collection<MCItemStack> collection = new ArrayList<MCItemStack>();
+		for(ItemStack is : b.getDrops(((BukkitMCItemStack) tool).asItemStack())){
+			collection.add(new BukkitMCItemStack(is));
+		}
+		return collection;
+	}
 
 	@Override
 	public String toString() {
@@ -112,6 +120,22 @@ public class BukkitMCBlock implements MCBlock{
 
 	public boolean isSolid() {
 		return b.getType().isSolid();
+	}
+
+	public boolean isFlammable() {
+		return b.getType().isFlammable();
+	}
+
+	public boolean isTransparent() {
+		return b.getType().isTransparent();
+	}
+
+	public boolean isOccluding() {
+		return b.getType().isOccluding();
+	}
+
+	public boolean isBurnable() {
+		return b.getType().isBurnable();
 	}
     
 	

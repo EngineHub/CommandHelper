@@ -30,7 +30,7 @@ public class Meta {
 		return "These functions provide a way to run other commands";
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class runas extends AbstractFunction {
 
 		public String getName() {
@@ -55,31 +55,10 @@ public class Meta {
 				return new CVoid(t);
 			}
 			if (args[0].val().equals("~op")) {
-				//Store their current op status
-				Boolean isOp = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().isOp();
-
-				CHLog.GetLogger().Log(CHLog.Tags.META, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[1].val().trim(), t);
-				if (Prefs.DebugMode()) {
-					Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[1].val().trim());
-				}
-
-				//If they aren't op, op them now
-				if (!isOp) {
-					this.setOp(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), true);
-				}
-
-				try {
-					Static.getServer().dispatchCommand(this.getOPCommandSender(env.getEnv(CommandHelperEnvironment.class).GetCommandSender()), cmd);
-				} finally {
-					//If they just opped themselves, or deopped themselves in the command
-					//don't undo what they just did. Otherwise, set their op status back
-					//to their original status
-					if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null 
-							&& !cmd.equalsIgnoreCase("op " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName())
-							&& !cmd.equalsIgnoreCase("deop " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName())) {
-						this.setOp(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), isOp);
-					}
-				}
+				//TODO: Remove this after next release (3.3.1)
+				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "Using runas(~op, " + args[1].asString().getQuote() 
+						+ ") is deprecated. Use sudo(" + args[1].asString().getQuote() + ") instead.", t);
+				new sudo().exec(t, env, args[1]);
 			} else if (args[0].val().equals("~console")) {
 				CHLog.GetLogger().Log(CHLog.Tags.META, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as console): " + args[1].val().trim(), t);
 				if (Prefs.DebugMode()) {
@@ -117,8 +96,9 @@ public class Meta {
 		}
 
 		public String docs() {
-			return "void {player, command} Runs a command as a particular user. The special user '~op' is a user that runs as op. Be careful with this very powerful function."
-					+ " Commands cannot be run as an offline player. Returns void. If the first argument is an array of usernames, the command"
+			return "void {player, command} Runs a command as a particular user. The special user '~console' can be used to run it as a console"
+					+ " user. Using '~op' is deprecated, and will be removed after the next release, use sudo() instead."
+					+ " Commands cannot be run as an offline player. If the first argument is an array of usernames, the command"
 					+ " will be run in the context of each user in the array.";
 		}
 
@@ -132,6 +112,69 @@ public class Meta {
 
 		public Boolean runAsync() {
 			return false;
+		}
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class sudo extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			String cmd = args[0].val().substring(1);
+			//Store their current op status
+			Boolean isOp = env.getEnv(CommandHelperEnvironment.class).GetCommandSender().isOp();
+
+			CHLog.GetLogger().Log(CHLog.Tags.META, "Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[0].val().trim(), t);
+			if (Prefs.DebugMode()) {
+				Static.getLogger().log(Level.INFO, "[CommandHelper]: Executing command on " + (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null ? env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName() : "console") + " (as op): " + args[1].val().trim());
+			}
+
+			//If they aren't op, op them now
+			if (!isOp) {
+				this.setOp(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), true);
+			}
+
+			try {
+				Static.getServer().dispatchCommand(this.getOPCommandSender(env.getEnv(CommandHelperEnvironment.class).GetCommandSender()), cmd);
+			} finally {
+				//If they just opped themselves, or deopped themselves in the command
+				//don't undo what they just did. Otherwise, set their op status back
+				//to their original status
+				if (env.getEnv(CommandHelperEnvironment.class).GetPlayer() != null
+						&& !cmd.equalsIgnoreCase("op " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName())
+						&& !cmd.equalsIgnoreCase("deop " + env.getEnv(CommandHelperEnvironment.class).GetPlayer().getName())) {
+					this.setOp(env.getEnv(CommandHelperEnvironment.class).GetCommandSender(), isOp);
+				}
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "sudo";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {command} Runs a single command for this user, as op. Works like runas(~op, '/command') used to work,"
+					+ " before it was deprecated.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 
 		/**
@@ -176,7 +219,7 @@ public class Meta {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class run extends AbstractFunction {
 
 		public String getName() {
@@ -334,7 +377,7 @@ public class Meta {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
+	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class is_alias extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
@@ -361,16 +404,16 @@ public class Meta {
 
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (p instanceof MCPlayer) {
-						try {
-							// p might be null
-							for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistanceNetwork())) {
-								if (s.match(args[0].val())) {
-									return new CBoolean(true, t);
-								}
-							}
-						} catch (DataSourceException ex) {
-							throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				try {
+					// p might be null
+					for (Script s : UserManager.GetUserManager(p.getName()).getAllScripts(environment.getEnv(GlobalEnv.class).GetPersistanceNetwork())) {
+						if (s.match(args[0].val())) {
+							return new CBoolean(true, t);
 						}
+					}
+				} catch (DataSourceException ex) {
+					throw new ConfigRuntimeException(ex.getMessage(), ExceptionType.IOException, t);
+				}
 			}
 
 			return new CBoolean(false, t);
@@ -393,7 +436,7 @@ public class Meta {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class call_alias extends AbstractFunction {
 
 		public String getName() {
@@ -447,7 +490,7 @@ public class Meta {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
+	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class scriptas extends AbstractFunction {
 
 		public String getName() {
@@ -517,7 +560,7 @@ public class Meta {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_cmd extends AbstractFunction {
 
 		public String getName() {
@@ -558,18 +601,20 @@ public class Meta {
 			return CHVersion.V3_3_0;
 		}
 	}
-	
-	public static class CommandSenderIntercepter implements InvocationHandler{
+
+	public static class CommandSenderIntercepter implements InvocationHandler {
+
 		MCCommandSender sender;
 		StringBuilder buffer;
-		public CommandSenderIntercepter(MCCommandSender sender){
+
+		public CommandSenderIntercepter(MCCommandSender sender) {
 			this.sender = sender;
 			buffer = new StringBuilder();
 		}
 
-		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {	
+		public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
 			System.out.println("---------------> Invoking proxy");
-			if("sendMessage".equals(method.getName())){
+			if ("sendMessage".equals(method.getName())) {
 				System.out.println("---------------> Intercepting sendMessage()");
 				buffer.append(args[0].toString());
 				return Void.TYPE;
@@ -578,13 +623,14 @@ public class Meta {
 				return method.invoke(sender, args);
 			}
 		}
-		
-		public String getBuffer(){
+
+		public String getBuffer() {
 			return buffer.toString();
 		}
 	}
-	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
-	public static class capture_runas extends AbstractFunction{
+
+	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
+	public static class capture_runas extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -602,27 +648,27 @@ public class Meta {
 			System.out.println("---------------> Executing capture_runas(" + args[0].val() + ", " + args[1].val() + ")");
 			MCCommandSender oldCommandSender = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			MCCommandSender operator;
-			if("~op".equals(args[0].val()) || "~console".equals(args[0].val())){
+			if ("~op".equals(args[0].val()) || "~console".equals(args[0].val())) {
 				System.out.println("---------------> Using ~op or ~console, so retrieving operator from environment");
 				operator = oldCommandSender;
 			} else {
 				System.out.println("---------------> Using player, so retrieving operator from args: " + args[0].val());
 				operator = Static.GetPlayer(args[0], t);
 			}
-			if(operator instanceof MCPlayer){
-				Static.UninjectPlayer(((MCPlayer)operator));
+			if (operator instanceof MCPlayer) {
+				Static.UninjectPlayer(((MCPlayer) operator));
 			}
 			CommandSenderIntercepter intercepter = new CommandSenderIntercepter(operator);
 			MCCommandSender newCommandSender = (MCCommandSender) Proxy.newProxyInstance(Meta.class.getClassLoader(), new Class[]{MCCommandSender.class, MCPlayer.class}, intercepter);
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(newCommandSender);
-			if(operator instanceof MCPlayer){
-				Static.InjectPlayer(((MCPlayer)newCommandSender));
+			if (operator instanceof MCPlayer) {
+				Static.InjectPlayer(((MCPlayer) newCommandSender));
 			}
 			new runas().exec(t, environment, args);
 			environment.getEnv(CommandHelperEnvironment.class).SetCommandSender(oldCommandSender);
-			if(operator instanceof MCPlayer){
-				Static.UninjectPlayer(((MCPlayer)newCommandSender));
-				Static.InjectPlayer(((MCPlayer)operator));
+			if (operator instanceof MCPlayer) {
+				Static.UninjectPlayer(((MCPlayer) newCommandSender));
+				Static.InjectPlayer(((MCPlayer) operator));
 			}
 			return new CString(intercepter.getBuffer(), t);
 		}
@@ -645,6 +691,5 @@ public class Meta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
 }
