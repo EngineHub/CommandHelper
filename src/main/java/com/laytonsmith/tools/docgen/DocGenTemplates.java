@@ -5,7 +5,10 @@ import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.datasource;
+import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistance.DataSource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
@@ -140,6 +143,19 @@ public class DocGenTemplates {
 		public String generate() {
 			//TODO
 			return "TODO";
+		}
+	};
+	
+	public static Generator EXCEPTION_TYPES = new Generator() {
+
+		public String generate() {
+			StringBuilder b = new StringBuilder();
+			for(Documentation d : ExceptionType.values()){
+				b.append("===").append(d.getName()).append("===\n");
+				b.append(d.docs());
+				b.append("\n\nSince: ").append(d.since().getVersionString()).append("\n\n");
+			}
+			return b.toString();
 		}
 	};
 }
