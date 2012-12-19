@@ -388,7 +388,7 @@ public final class Static {
         if(variable == null){
             return new CNull();
         }
-        if (variable.getCType() == Construct.ConstructType.VARIABLE) {
+        if (variable instanceof Variable){//== Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {
                 if (var.getName().equals(((Variable) variable).getName())) {
                     return new CString(var.val(), var.getTarget());

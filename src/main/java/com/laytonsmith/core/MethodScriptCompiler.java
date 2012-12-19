@@ -1,7 +1,10 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.core.Optimizable.OptimizationOption;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.NewMethodScriptCompiler;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.environments.Environment;
@@ -23,15 +26,17 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author Layton
  */
 public final class MethodScriptCompiler {
-	
-	private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
 
+	private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
 	private final static FileOptions fileOptions = new FileOptions(new HashMap<String, String>());
 
 	private MethodScriptCompiler() {
 	}
 
 	public static List<Token> lex(String config, File file, boolean inPureMScript) throws ConfigCompileException {
+		if (true) {
+			return NewMethodScriptCompiler.lex(config, file, inPureMScript);
+		}
 		config = config.replaceAll("\r\n", "\n");
 		config = config + "\n";
 		List<Token> token_list = new ArrayList<Token>();
@@ -44,7 +49,7 @@ public final class MethodScriptCompiler {
 		int commentLineNumberStart = 1;
 		boolean comment_is_block = false;
 		boolean in_opt_var = false;
-		boolean inCommand = (inPureMScript?false:true);
+		boolean inCommand = (inPureMScript ? false : true);
 		boolean inMultiline = false;
 		StringBuilder buf = new StringBuilder();
 		int line_num = 1;
@@ -68,7 +73,7 @@ public final class MethodScriptCompiler {
 			if (c == '\n') {
 				line_num++;
 				column = 1;
-				if(!inMultiline && !inPureMScript){
+				if (!inMultiline && !inPureMScript) {
 					inCommand = true;
 				}
 			}
@@ -113,8 +118,8 @@ public final class MethodScriptCompiler {
 			if (in_comment) {
 				continue;
 			}
-			if(c == '+' && c2 == '=' && !state_in_quote){
-				if(buf.length() > 0){
+			if (c == '+' && c2 == '=' && !state_in_quote) {
+				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
@@ -122,8 +127,8 @@ public final class MethodScriptCompiler {
 				i++;
 				continue;
 			}
-			if(c == '-' && c2 == '=' && !state_in_quote){
-				if(buf.length() > 0){
+			if (c == '-' && c2 == '=' && !state_in_quote) {
+				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
@@ -131,8 +136,8 @@ public final class MethodScriptCompiler {
 				i++;
 				continue;
 			}
-			if(c == '*' && c2 == '=' && !state_in_quote){
-				if(buf.length() > 0){
+			if (c == '*' && c2 == '=' && !state_in_quote) {
+				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
@@ -141,8 +146,8 @@ public final class MethodScriptCompiler {
 				continue;
 			}
 			//This has to come before division and equals
-			if(c == '/' && c2 == '=' && !state_in_quote){
-				if(buf.length() > 0){
+			if (c == '/' && c2 == '=' && !state_in_quote) {
+				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
@@ -150,14 +155,14 @@ public final class MethodScriptCompiler {
 				i++;
 				continue;
 			}
-			if(c == '.' && c2 == '=' && !state_in_quote){
-				if(buf.length() > 0){
+			if (c == '.' && c2 == '=' && !state_in_quote) {
+				if (buf.length() > 0) {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
 				token_list.add(new Token(TType.CONCAT_ASSIGNMENT, "/=", target));
 				i++;
-				continue;				
+				continue;
 			}
 			//This has to come before subtraction and greater than
 			if (c == '-' && c2 == '>' && !state_in_quote) {
@@ -451,7 +456,7 @@ public final class MethodScriptCompiler {
 					token_list.add(new Token(TType.UNKNOWN, buf.toString(), target));
 					buf = new StringBuilder();
 				}
-				if(inCommand){
+				if (inCommand) {
 					if (in_opt_var) {
 						token_list.add(new Token(TType.OPT_VAR_ASSIGN, "=", target));
 					} else {
@@ -676,7 +681,7 @@ public final class MethodScriptCompiler {
 				}
 			}
 			//Skip this check if we're not in pure mscript
-			if(inPureMScript){
+			if (inPureMScript) {
 				if (t.type.isSymbol() && !t.type.isUnary() && !next.type.isUnary()) {
 					if (prev1.type.equals(TType.FUNC_START) || prev1.type.equals(TType.COMMA)
 							|| next.type.equals(TType.FUNC_END) || next.type.equals(TType.COMMA)
@@ -812,6 +817,14 @@ public final class MethodScriptCompiler {
 	}
 
 	public static ParseTree compile(List<Token> stream) throws ConfigCompileException {
+		if (true) {
+			Environment env = Environment.createEnvironment(new CompilerEnvironment());
+			ParseTree tree = NewMethodScriptCompiler.compile((TokenStream) stream, env);
+			Stack<List<Procedure>> procs = new Stack<List<Procedure>>();
+			procs.add(new ArrayList<Procedure>());
+			optimize(tree, procs);
+			return tree;
+		}
 		Target unknown;
 		try {
 			//Instead of using Target.UNKNOWN, we can at least set the file.
@@ -967,7 +980,7 @@ public final class MethodScriptCompiler {
 				} else {
 					//both are provided
 					String modifier = "";
-					if(prev1.type == TType.MINUS){
+					if (prev1.type == TType.MINUS) {
 						//It's a negative, incorporate that here, and remove the
 						//minus from the tree
 						modifier = "-";
@@ -1219,9 +1232,9 @@ public final class MethodScriptCompiler {
 		} catch (ConfigCompileException e) {
 			func = null;
 		}
-		if(cFunction instanceof CIdentifier){
+		if (cFunction instanceof CIdentifier) {
 			//Add the child to the identifier
-			ParseTree c = ((CIdentifier)cFunction).contained();
+			ParseTree c = ((CIdentifier) cFunction).contained();
 			tree.addChild(c);
 			c.getData().setWasIdentifier(true);
 		}
@@ -1262,25 +1275,26 @@ public final class MethodScriptCompiler {
 		//For the time being, we will simply say that if a function uses execs, it
 		//is a branch (branches always use execs, though using execs doesn't strictly
 		//mean you are a branch type function).
-		
-		outer: for(int i = 0; i < children.size(); i++){
-			ParseTree t = children.get(i);			
-			if(t.getData() instanceof CFunction){
-				if(t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())){
+
+		outer:
+		for (int i = 0; i < children.size(); i++) {
+			ParseTree t = children.get(i);
+			if (t.getData() instanceof CFunction) {
+				if (t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())) {
 					continue outer;
 				}
-				Function f = (Function)FunctionList.getFunction(t.getData());
+				Function f = (Function) FunctionList.getFunction(t.getData());
 				Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-				if(f instanceof Optimizable){
-					options = ((Optimizable)f).optimizationOptions();
+				if (f instanceof Optimizable) {
+					options = ((Optimizable) f).optimizationOptions();
 				}
-				if(options.contains(OptimizationOption.TERMINAL)){
-					if(children.size() > i + 1){
+				if (options.contains(OptimizationOption.TERMINAL)) {
+					if (children.size() > i + 1) {
 						//First, a compiler warning
 						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
 						//Now, truncate the children
-						for(int j = i + 1; j < children.size(); j++){
-							children.remove(j);							
+						for (int j = i + 1; j < children.size(); j++) {
+							children.remove(j);
 						}
 						break outer;
 					}
@@ -1305,8 +1319,8 @@ public final class MethodScriptCompiler {
 		//In all cases, at this point, we are either unable to optimize, or we will
 		//optimize, so set our optimized variable at this point.
 		tree.setOptimized(true);
-		
-		if(func == null) {
+
+		if (func == null) {
 			//It's a proc call. Let's see if we can optimize it
 			Procedure p = null;
 			//Did you know about this feature in java? I didn't until recently.
@@ -1333,7 +1347,7 @@ public final class MethodScriptCompiler {
 					//Cool. Caught a runtime error at compile time :D
 					throw new ConfigCompileException(ex);
 				}
-			} 
+			}
 			//else this procedure isn't listed yet. Maybe a compiler error, maybe not, depends,
 			//so we can't for sure say, but we do know we can't optimize this
 			return;
@@ -1348,9 +1362,9 @@ public final class MethodScriptCompiler {
 				ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), fileOptions);
 				Script fakeScript = Script.GenerateScript(root, "*");
 				Environment env = null;
-				try{
+				try {
 					env = Static.GenerateStandaloneEnvironment();
-				} catch(Exception e){
+				} catch (Exception e) {
 					//
 				}
 				Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, env, fakeScript, children.toArray(new ParseTree[children.size()]));
@@ -1368,21 +1382,21 @@ public final class MethodScriptCompiler {
 		//static, so do this first.
 		String oldFunctionName = func.getName();
 		Set<OptimizationOption> options = NO_OPTIMIZATIONS;
-		if(func instanceof Optimizable){
-			options = ((Optimizable)func).optimizationOptions();
+		if (func instanceof Optimizable) {
+			options = ((Optimizable) func).optimizationOptions();
 		}
 		if (options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
 			ParseTree tempNode;
 			try {
-				tempNode = ((Optimizable)func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren());
+				tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren());
 			} catch (ConfigRuntimeException e) {
 				//Turn it into a compile exception, then rethrow
 				throw new ConfigCompileException(e);
 			}
-			if(tempNode == Optimizable.PULL_ME_UP){
+			if (tempNode == Optimizable.PULL_ME_UP) {
 				tempNode = tree.getChildAt(0);
 			}
-			if(tempNode == Optimizable.REMOVE_ME){
+			if (tempNode == Optimizable.REMOVE_ME) {
 				tree.setData(new CFunction("p", Target.UNKNOWN));
 				tree.removeChildren();
 			} else if (tempNode != null) {
@@ -1394,7 +1408,7 @@ public final class MethodScriptCompiler {
 				tree.setOptimized(true);
 				//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
 				//array, so if they have reversed this, make note of that now
-				if(tempNode.hasBeenMadeStatic()){
+				if (tempNode.hasBeenMadeStatic()) {
 					fullyStatic = true;
 				}
 			} //else it wasn't an optimization, but a compile check
@@ -1411,18 +1425,18 @@ public final class MethodScriptCompiler {
 		}
 		//It could have optimized by changing the name, in that case, we
 		//don't want to run this now
-		if (tree.getData().getValue().equals(oldFunctionName) && 
-				(options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
+		if (tree.getData().getValue().equals(oldFunctionName)
+				&& (options.contains(OptimizationOption.OPTIMIZE_CONSTANT) || options.contains(OptimizationOption.CONSTANT_OFFLINE))) {
 			Construct[] constructs = new Construct[tree.getChildren().size()];
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				constructs[i] = tree.getChildAt(i).getData();
 			}
 			try {
 				Construct result;
-				if(options.contains(OptimizationOption.CONSTANT_OFFLINE)){
+				if (options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
 					result = func.exec(tree.getData().getTarget(), null, constructs);
 				} else {
-					result = ((Optimizable)func).optimize(tree.getData().getTarget(), constructs);
+					result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);
 				}
 
 				//If the result is null, it was just a check, it can't optimize further.
@@ -1484,17 +1498,17 @@ public final class MethodScriptCompiler {
 		}
 		StringBuilder b = new StringBuilder();
 		Construct returnable = null;
-		for (ParseTree gg : root.getChildren()) {
-			script.setLabel(env.getEnv(GlobalEnv.class).GetLabel());
-			Construct retc = script.eval(gg, env);
-			if (root.numberOfChildren() == 1) {
-				returnable = retc;
-			}
-			String ret = retc instanceof CNull ? "null" : retc.val();
-			if (ret != null && !ret.trim().isEmpty()) {
-				b.append(ret).append(" ");
-			}
+		//for (ParseTree gg : root.getChildren()) {
+		script.setLabel(env.getEnv(GlobalEnv.class).GetLabel());
+		Construct retc = script.eval(root, env);
+		if (root.numberOfChildren() == 1) {
+			returnable = retc;
 		}
+		String ret = retc instanceof CNull ? "null" : retc.val();
+		if (ret != null && !ret.trim().isEmpty()) {
+			b.append(ret).append(" ");
+		}
+		//}
 		if (done != null) {
 			done.done(b.toString().trim());
 		}

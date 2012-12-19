@@ -749,6 +749,11 @@ public class MethodScriptCompilerTest {
     public void testSpuriousSymbols() throws ConfigCompileException{
         SRun("2 +", fakePlayer);
     }
+	
+	@Test
+	public void testExtraParentheticals() throws Exception{
+		assertEquals("12", SRun("((2 + 2) * 3)", null));
+	}
     
     @Test
     public void testBraceIf() throws ConfigCompileException{

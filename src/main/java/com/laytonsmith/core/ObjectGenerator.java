@@ -68,7 +68,7 @@ public class ObjectGenerator {
      */
     public MCLocation location(Construct c, MCWorld w, Target t) {
         if (!(c instanceof CArray)) {
-            throw new ConfigRuntimeException("Expecting an array, received " + c.getCType(), ExceptionType.FormatException, t);
+            throw new ConfigRuntimeException("Expecting an array, received " + c.getClass().getSimpleName(), ExceptionType.FormatException, t);
         }
         CArray array = (CArray) c;
         MCWorld world = w;

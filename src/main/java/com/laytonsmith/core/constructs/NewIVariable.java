@@ -4,10 +4,10 @@ package com.laytonsmith.core.constructs;
  *
  * @author lsmith
  */
-public class NewIVariable extends Construct{
+public class NewIVariable extends IVariable{
 	private String name;
 	public NewIVariable(String name, Target t){
-		super("", ConstructType.IVARIABLE, t);
+		super("", null, t);
 		this.name = name;
 	}
 

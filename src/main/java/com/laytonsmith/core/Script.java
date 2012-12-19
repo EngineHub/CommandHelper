@@ -203,7 +203,7 @@ public class Script {
 		//TODO: Reevaluate if this line is needed. The script doesn't know the label inherently, the
 		//environment does, and setting it this way taints the environment.
         CurrentEnv.getEnv(GlobalEnv.class).SetLabel(this.label);
-        if (m.getCType() == ConstructType.FUNCTION) {
+        if (m instanceof CFunction){// == ConstructType.FUNCTION) {
                 env.getEnv(GlobalEnv.class).SetScript(this);
                 if (m.val().matches("^_[^_].*")) {
                     //Not really a function, so we can't put it in Function.
@@ -300,7 +300,7 @@ public class Script {
 					return ret;
 				}
 
-        } else if (m.getCType() == ConstructType.VARIABLE) {            
+        } else if (m instanceof Variable){// ConstructType.VARIABLE) {            
             return new CString(m.val(), m.getTarget());
         } else {
             return m;
@@ -327,7 +327,7 @@ public class Script {
                 lastJ = j;
                 Construct c = cleft.get(j);
                 String arg = args.get(j);
-                if (c.getCType() != ConstructType.VARIABLE) {
+                if (!(c instanceof Variable)){// != ConstructType.VARIABLE) {
                     if (case_sensitive && !c.val().equals(arg) || !case_sensitive && !c.val().equalsIgnoreCase(arg)) {
                         isAMatch = false;
                         continue;
@@ -350,7 +350,7 @@ public class Script {
                     }
                 }
                 if (j == cleft.size() - 1) {
-                    if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
+                    if (cleft.get(j) instanceof Variable){//.getCType() == ConstructType.VARIABLE) {
                         Variable lv = (Variable) cleft.get(j);
                         if (lv.isFinal()) {
                             for (int a = j; a < args.size(); a++) {
@@ -365,9 +365,7 @@ public class Script {
                 }
             }
         } catch (IndexOutOfBoundsException e) {
-            if (cleft.get(lastJ).getCType() != ConstructType.VARIABLE
-                    || cleft.get(lastJ).getCType() == ConstructType.VARIABLE
-                    && !((Variable) cleft.get(lastJ)).isOptional()) {
+            if (!((Variable) cleft.get(lastJ)).isOptional()) {
                 isAMatch = false;
             }
         }
@@ -419,7 +417,7 @@ public class Script {
         Variable v = null;
         for (int j = 0; j < cleft.size(); j++) {
             try {
-                if (cleft.get(j).getCType() == ConstructType.VARIABLE) {
+                if (cleft.get(j) instanceof Variable){//== ConstructType.VARIABLE) {
                     if (((Variable) cleft.get(j)).getName().equals("$")) {
                         for (int k = j; k < args.size(); k++) {
                             lastVar.append(args.get(k).trim()).append(" ");
@@ -698,7 +696,7 @@ public class Script {
                 try {
                     Construct c1 = thisCommand.get(k);
                     Construct c2 = thatCommand.get(k);
-                    if (c1.getCType() != c2.getCType() || ((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
+                    if (/*c1.getCType() != c2.getCType() || */((c1 instanceof Variable) && !((Variable) c1).isOptional())) {
                         soFarAMatch = false;
                     } else {
                         //It's a literal, check to see if it's the same literal

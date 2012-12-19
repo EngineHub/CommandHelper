@@ -42,7 +42,7 @@ public class IncludeCache {
                     IncludeCache.add(file, tree);
                 } catch (ConfigCompileException ex) {
                     throw new ConfigRuntimeException("There was a compile error when trying to include the script at " + file
-                            + "\n" + ex.getMessage() + " :: " + file.getName() + ":" + ex.getLineNum(), 
+                            + "\n" + ex.getMessage() + " :: " + file.getAbsolutePath() + ":" + ex.getLineNum(), 
                             Exceptions.ExceptionType.IncludeException, t);
                 } catch (IOException ex) {
                     throw new ConfigRuntimeException("The script at " + file + " could not be found or read in.", 

@@ -26,15 +26,15 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
         SYMBOL, IDENTIFIER, BRACE, BRACKET
     }
-    private final ConstructType ctype;
+//    protected ConstructType ctype;
     private final String value;
 
     private Target target;
 	private transient boolean wasIdentifier = false;
 
-    public ConstructType getCType() {
-        return ctype;
-    }
+//    public ConstructType getCType() {
+//        return ctype;
+//    }
     
     /**
      * This method should only be used by Script when setting the children's target, if it's an ivariable.
@@ -66,13 +66,13 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
     public Construct(String value, ConstructType ctype, int line_num, File file, int column) {
         this.value = value;
-        this.ctype = ctype;
+        //this.ctype = ctype;
         this.target = new Target(line_num, file, column);
     }
     
     public Construct(String value, ConstructType ctype, Target t){
         this.value = value;
-        this.ctype = ctype;
+        //this.ctype = ctype;
         this.target = t;
     }
 

@@ -557,7 +557,7 @@ public class CArray extends Construct implements ArrayAccess{
                     }
                     if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt || 
                             c instanceof CDouble || c instanceof CNull)){
-                        throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getCType(), CArray.this.getTarget());
+                        throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getClass().getSimpleName(), CArray.this.getTarget());
                     }
                 }
                 if(o1 instanceof CNull || o2 instanceof CNull){

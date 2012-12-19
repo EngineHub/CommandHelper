@@ -174,10 +174,10 @@ class LexerObject {
 		if (item.trim().equals("$")) {
 			return new Token(Token.TType.FINAL_VAR, "$", target);
 		}
-		if (item.matches("\\$[a-zA-Z0-9]+")) {
+		if (item.matches("\\$[a-zA-Z0-9_]+")) {
 			return new Token(Token.TType.VARIABLE, item.trim(), target);
 		}
-		if (item.matches("@[a-zA-Z0-9]+")) {
+		if (item.matches("@[a-zA-Z0-9_]+")) {
 			return new Token(Token.TType.IVARIABLE, item.trim(), target);
 		}
 		//else it's a bare string
@@ -234,7 +234,25 @@ class LexerObject {
 			//Comments are only applicable if we are not inside a string
 			if (!state_in_double_quote && !state_in_single_quote) {
 				//If we aren't already in a comment, we might be starting one here
-				if (!state_in_block_comment && !state_in_line_comment) {
+				if (state_in_block_comment) {
+					//We might be ending the block comment
+					if (c == '*' && c2 == '/') {
+						state_in_block_comment = false;
+						state_in_smart_block_comment = false;
+						i++;
+						clearBuffer();
+					} else if (state_in_smart_block_comment) {
+						//We need to process the block comment here
+						//TODO:
+					}
+					continue;
+				} else if (state_in_line_comment) {
+					if (c == '\n') {
+						state_in_line_comment = false;
+						clearBuffer();
+					}
+					continue;
+				} else if (!state_in_block_comment && !state_in_line_comment) {
 					if (c == '/' && c2 == '*') {
 						//Start of block comment
 						parseBuffer();
@@ -254,26 +272,6 @@ class LexerObject {
 						parseBuffer();
 						//Start of line comment
 						state_in_line_comment = true;
-						continue;
-					}
-				} else if (state_in_block_comment) {
-					//We might be ending the block comment
-					if (c == '*' && c2 == '/') {
-						state_in_block_comment = false;
-						i++;
-						if (state_in_smart_block_comment) {
-							//We need to process the block comment here
-							//TODO:
-							//We need to process the block comment here
-							//TODO:
-						}
-						clearBuffer();
-						continue;
-					}
-				} else if (state_in_line_comment) {
-					if (c == '\n') {
-						state_in_line_comment = false;
-						clearBuffer();
 						continue;
 					}
 				}
@@ -515,13 +513,24 @@ class LexerObject {
 			buffer(c);
 		}
 		parseBuffer();
+		int left = 0;
+		int right = 0;
+		for(Token t : token_list){
+			if(t.val().equals("(")){
+				left++;
+			}
+			if(t.val().equals(")")){
+				right++;
+			}
+		}
+		System.out.println("There are " + left + " left parens, and " + right + " right ones.");
 		return new TokenStream(new ArrayList<Token>(token_list), fileopts.toString());
 	}
 
 	/**
 	 * If a symbol token is the next thing in the stream, it will be
 	 * identified, pushed onto the token_list, and the number of characters
-	 * to advance the stream is returned. If this method returns 0, no token
+	 * to advance the stream is returned. If this method returns -1, no token
 	 * was identified, and no changes will have been made.
 	 * @param startAt
 	 * @return

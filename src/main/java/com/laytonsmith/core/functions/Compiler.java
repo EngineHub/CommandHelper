@@ -398,7 +398,7 @@ public class Compiler {
 				return list.get(0);
 			} else {
 				for (int i = 0; i < list.size(); i++) {
-					if (list.get(i).getData().getCType() == Construct.ConstructType.IDENTIFIER) {
+					if (list.get(i).getData().wasIdentifier()){//.getCType() == Construct.ConstructType.IDENTIFIER) {
 						if (i == 0) {
 							//Yup, it's an identifier
 							CFunction identifier = new CFunction(list.get(i).getData().val(), list.get(i).getTarget());

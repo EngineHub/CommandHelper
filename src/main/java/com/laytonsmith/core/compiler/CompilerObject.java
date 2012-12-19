@@ -103,13 +103,26 @@ class CompilerObject {
 			pushNode(f);
 			return;
 		}
+		
+		if(t.type == TType.FUNC_START){
+			//It's a loose parenthetical. Push an autoconcat onto the stack.
+			CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
+			functionLines.add(peek().getTarget());
+			pushNode(f);
+			autoConcatCounter++;
+			return;
+		}
 		if (t.type == TType.FUNC_END || t.type == TType.COMMA) {
 			if (autoConcatCounter > 0) {
 				autoConcatCounter--;
-				popNode(t.getTarget());
+				//popNode(t.getTarget());
 			}
 		}
 		if (t.type == TType.COMMA) {
+			if(peek().type == TType.COMMA){
+				//This is a compile error, but extra commas at the end are ok
+				throw new ConfigCompileException("Unexpected comma found. (Two commas in a row were found. Are you missing an argument?)", t.getTarget());
+			}
 			return;
 		}
 		if (t.type == TType.FUNC_END) {

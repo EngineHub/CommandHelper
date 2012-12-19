@@ -195,12 +195,12 @@ public class Token {
     @Override
     public String toString() {
         if (type.equals(TType.NEWLINE)) {
-            return "newline";
+            return "\\n";
         }
         if (type.equals(TType.STRING)) {
-            return "'" + value + "'";
+            return "'" + value.replace("\\", "\\\\").replace("'", "\\'") + "'";
         }
-        return type + ":" + value;
+        return value;
     }
 
     public String toSimpleString() {

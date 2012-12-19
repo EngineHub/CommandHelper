@@ -18,6 +18,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.environments.InvalidEnvironmentException;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -87,7 +88,7 @@ public class Echoes {
 		}				
     }
     
-    @api(environments={CommandHelperEnvironment.class})
+    @api()
 	@noboilerplate 
 	public static class msg extends AbstractFunction{
 
@@ -100,7 +101,12 @@ public class Echoes {
         }
 
         public Construct exec(final Target t, Environment env, final Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			final MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCCommandSender p = null;
+			try{
+				p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			} catch(InvalidEnvironmentException e){
+				//That's ok, we can still work with p being null
+			}
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++){
 				b.append(args[i].val());
