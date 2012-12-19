@@ -1,5 +1,9 @@
 package com.laytonsmith.abstraction;
 
+import java.util.Map;
+
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
+
 /**
  *
  * @author jb_aero
@@ -9,12 +13,12 @@ public interface MCEntityEquipment {
 	public void clearEquipment();
 	public int getSize();
 	
-	public MCItemStack[] getAllArmor();
-	public void setAllArmor(MCItemStack[] stackarray);
+	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment();
+	public void setAllEquipment(Map<MCEquipmentSlot, MCItemStack> stackmap);
 	
 	public MCItemStack getWeapon();
 	public MCItemStack getHelmet();
-	public MCItemStack getChestPlate();
+	public MCItemStack getChestplate();
 	public MCItemStack getLeggings();
 	public MCItemStack getBoots();
 	
@@ -26,13 +30,13 @@ public interface MCEntityEquipment {
 	
 	public float getWeaponDropChance();
 	public float getHelmetDropChance();
-	public float getChestPlateDropChance();
+	public float getChestplateDropChance();
 	public float getLeggingsDropChance();
 	public float getBootsDropChance();
 	
 	public void setWeaponDropChance(float chance);
 	public void setHelmetDropChance(float chance);
-	public void setChestPlateDropChance(float chance);
+	public void setChestplateDropChance(float chance);
 	public void setLeggingsDropChance(float chance);
 	public void setBootsDropChance(float chance);
 	

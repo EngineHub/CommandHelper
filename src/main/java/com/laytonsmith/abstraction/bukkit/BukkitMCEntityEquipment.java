@@ -1,10 +1,13 @@
 package com.laytonsmith.abstraction.bukkit;
 
+import java.util.EnumMap;
+import java.util.Map;
+
 import com.laytonsmith.abstraction.MCEntityEquipment;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 
 import org.bukkit.inventory.EntityEquipment;
-import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -13,19 +16,7 @@ import org.bukkit.inventory.ItemStack;
 public class BukkitMCEntityEquipment implements MCEntityEquipment {
 
 	private EntityEquipment ee;
-	
-	// Slot positions
-	private int WEAP = 0;
-	/*
-	private int HELM = 4;
-	private int CHEST = 3;
-	private int LEG = 2;
-	private int BOOT = 1;
-	*/
-	
-	// Total number of slots
-	private int SLOTS = 5;
-	
+
 	public BukkitMCEntityEquipment(EntityEquipment equipment) {
 		this.ee = equipment;
 	}
@@ -35,23 +26,55 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 	}
 
 	public int getSize() {
-		return 5;
+		return MCEquipmentSlot.values().length;
 	}
 
-	public MCItemStack[] getAllArmor() {
-		BukkitMCItemStack[] stacks = new BukkitMCItemStack[SLOTS - 1];
-		for (int i=WEAP+1; i < (SLOTS - 1); i++) {
-			stacks[i] = new BukkitMCItemStack(ee.getArmorContents()[i]);
+	public Map<MCEquipmentSlot, MCItemStack> getAllEquipment() {
+		Map<MCEquipmentSlot, MCItemStack> slots = new EnumMap<MCEquipmentSlot, MCItemStack>(MCEquipmentSlot.class);
+		for (MCEquipmentSlot key : slots.keySet()) {
+			switch (key) {
+			case WEAPON:
+				slots.put(key, (BukkitMCItemStack) getWeapon());
+				break;
+			case HELMET:
+				slots.put(key, (BukkitMCItemStack) getWeapon());
+				break;
+			case CHESTPLATE:
+				slots.put(key, (BukkitMCItemStack) getChestplate());
+				break;
+			case LEGGINGS:
+				slots.put(key, (BukkitMCItemStack) getLeggings());
+				break;
+			case BOOTS:
+				slots.put(key, (BukkitMCItemStack) getBoots());
+				break;
+			}
 		}
-		return stacks;
+		return slots;
 	}
 
-	public void setAllArmor(MCItemStack[] stackarray) {
-		ItemStack[] stacks = new ItemStack[SLOTS - 1];
-		for (int i=WEAP+1; i < (SLOTS - 1); i++) {
-			stacks[i] = ((BukkitMCItemStack) stackarray[i]).asItemStack();
+	public void setAllEquipment(Map<MCEquipmentSlot, MCItemStack> slots) {
+		MCItemStack stack = null;
+		for (MCEquipmentSlot key : slots.keySet()) {
+			stack = slots.get(key);
+			switch (key) {
+			case WEAPON:
+				setWeapon(stack);
+				break;
+			case HELMET:
+				setHelmet(stack);
+				break;
+			case CHESTPLATE:
+				setChestplate(stack);
+				break;
+			case LEGGINGS:
+				setLeggings(stack);
+				break;
+			case BOOTS:
+				setBoots(stack);
+				break;
+			}
 		}
-		ee.setArmorContents(stacks);
 	}
 
 	// For the purposes of faking a normal inventory, we most likely will not be accessing
@@ -65,7 +88,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		return new BukkitMCItemStack(ee.getHelmet());
 	}
 
-	public MCItemStack getChestPlate() {
+	public MCItemStack getChestplate() {
 		return new BukkitMCItemStack(ee.getChestplate());
 	}
 
@@ -105,8 +128,8 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		return ee.getHelmetDropChance();
 	}
 
-	public float getChestPlateDropChance() {
-		return ee.getChestPlateDropChance();
+	public float getChestplateDropChance() {
+		return ee.getChestplateDropChance();
 	}
 
 	public float getLeggingsDropChance() {
@@ -125,8 +148,8 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 		ee.setHelmetDropChance(chance);
 	}
 
-	public void setChestPlateDropChance(float chance) {
-		ee.setChestPlateDropChance(chance);
+	public void setChestplateDropChance(float chance) {
+		ee.setChestplateDropChance(chance);
 	}
 
 	public void setLeggingsDropChance(float chance) {

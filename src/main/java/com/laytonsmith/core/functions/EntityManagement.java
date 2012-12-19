@@ -115,7 +115,7 @@ public class EntityManagement {
 
 		public String docs() {
 			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
-					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if ";
+					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does not age naturally.";
 		}
 
 		public CHVersion since() {
