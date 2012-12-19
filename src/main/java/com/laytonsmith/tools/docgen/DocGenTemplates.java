@@ -7,7 +7,6 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.persistance.DataSource;
 import java.lang.reflect.Constructor;
