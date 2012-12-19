@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
@@ -31,6 +32,7 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import org.bukkit.Server;
 
 /**
  * This class contains all the handling code. It only deals with built-in Java
@@ -238,6 +240,8 @@ public class AliasCore {
 		try {
 			StaticLayer.GetConvertor().runShutdownHooks();
 			CHLog.initialize(parent.chDirectory);
+			//Install bukkit into the class discovery class
+			ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(Server.class));
 			CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.VERBOSE, "Scripts reloading...", Target.UNKNOWN);
 			parent.profiler = new Profiler(new File(parent.chDirectory, "profiler.config"));
 			ConnectionMixinFactory.ConnectionMixinOptions options = new ConnectionMixinFactory.ConnectionMixinOptions();

@@ -240,7 +240,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         
 		/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
 		/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
-		opSet = (Set) ReflectionUtils.get(ClassDiscovery.forFuzzyName("org.bukkit.craftbukkit.*", "ServerConfigurationManagerAbstract"), obcServerConfigurationmanagerAbstract, "operators");
+		opSet = (Set) ReflectionUtils.get(ClassDiscovery.forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract"), obcServerConfigurationmanagerAbstract, "operators");
 
         // since all Java objects pass by reference, we don't need to set field back to object
         if (value) {
