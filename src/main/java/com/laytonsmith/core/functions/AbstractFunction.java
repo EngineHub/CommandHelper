@@ -9,6 +9,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.snapins.PackagePermission;
 import java.util.List;
 
 /**
@@ -154,4 +155,10 @@ public abstract class AbstractFunction implements Function {
 		return "Executing function: " + this.getName() + "(<" + args.size() + " child"
 				+ (args.size() == 1 ? "" : "ren") + " not shown>)";
 	}
+
+	public PackagePermission getPermission() {
+		return PackagePermission.NO_PERMISSIONS_NEEDED;
+	}
+	
+	
 }
