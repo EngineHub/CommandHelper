@@ -14,22 +14,22 @@ import org.bukkit.Location;
  *
  * @author layton
  */
-public class BukkitMCLocation implements MCLocation{
+public class BukkitMCLocation implements MCLocation {
     Location l;
-    public BukkitMCLocation(Location l){
-        this.l = l;        
+    public BukkitMCLocation(Location l) {
+        this.l = l;
     }
-    
-    public BukkitMCLocation(AbstractionObject a){
+
+    public BukkitMCLocation(AbstractionObject a) {
         this((Location)null);
-        if(a instanceof MCLocation){
+        if (a instanceof MCLocation) {
             this.l = ((Location)a.getHandle());
         } else {
             throw new ClassCastException();
         }
     }
-    
-    public Object getHandle(){
+
+    public Object getHandle() {
         return l;
     }
 
@@ -46,7 +46,7 @@ public class BukkitMCLocation implements MCLocation{
     }
 
     public MCWorld getWorld() {
-        if(l.getWorld() == null){
+        if (l.getWorld() == null) {
             return null;
         }
         return new BukkitMCWorld(l.getWorld());
@@ -73,13 +73,13 @@ public class BukkitMCLocation implements MCLocation{
     }
 
     public MCBlock getBlock() {
-        if(l == null || l.getBlock() == null){
+        if (l == null || l.getBlock() == null) {
             return null;
         }
         return new BukkitMCBlock(l.getBlock());
     }
     
-    public Location _Location(){
+    public Location _Location() {
         return l;
     }
 
@@ -122,6 +122,6 @@ public class BukkitMCLocation implements MCLocation{
 	public MCChunk getChunk() {
 		return new BukkitMCChunk(l.getChunk());
 	}
-	
-	
+
+
 }

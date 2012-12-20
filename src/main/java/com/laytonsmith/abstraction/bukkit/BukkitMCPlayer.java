@@ -33,7 +33,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         this.p = player;
     }
 
-	public Player _Player(){
+	public Player _Player() {
         return p;
     }
 
@@ -45,11 +45,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.chat(chat);
     }
 
-    public InetSocketAddress getAddress(){
+    public InetSocketAddress getAddress() {
         return p.getAddress();
     }
 
-    public boolean getAllowFlight(){
+    public boolean getAllowFlight() {
         return p.getAllowFlight();
     }
 
@@ -81,34 +81,34 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
     public MCItemStack getItemAt(Integer slot) {
-        if(slot == null){
+        if (slot == null) {
             return new BukkitMCItemStack(p.getItemInHand());
         }
         ItemStack is = null;
         //Special slots
-        if(slot == 100){
+        if (slot == 100) {
             is = p.getInventory().getBoots();
-        } else if(slot == 101){
+        } else if (slot == 101) {
             is = p.getInventory().getLeggings();
-        } else if(slot == 102){
+        } else if (slot == 102) {
             is = p.getInventory().getChestplate();
-        } else if(slot == 103){
+        } else if (slot == 103) {
             is = p.getInventory().getHelmet();
         }
-        if(slot >= 0 && slot <= 35){
+        if (slot >= 0 && slot <= 35) {
             is = p.getInventory().getItem(slot);
         }
-        if(is == null){
+        if (is == null) {
             return null;
         } else {
             return new BukkitMCItemStack(is);
         }
     }
-    
+
     public long getLastPlayed() {
 		return p.getLastPlayed();
 	}
-    
+
     public int getLevel() {
         return p.getLevel();
     }
@@ -116,7 +116,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public MCPlayer getPlayer() {
         return new BukkitMCPlayer(p);
     }
-    
+
     public long getPlayerTime() {
         return p.getPlayerTime();
     }
@@ -161,11 +161,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.kickPlayer(message);
     }
 
-    public boolean removeEffect(int potionID){
+    public boolean removeEffect(int potionID) {
 		PotionEffectType t = PotionEffectType.getById(potionID);
 		boolean hasIt = false;
-		for(PotionEffect pe : p.getActivePotionEffects()){
-			if(pe.getType() == t){
+		for(PotionEffect pe : p.getActivePotionEffects()) {
+			if (pe.getType() == t) {
 				hasIt = true;
 				break;
 			}
@@ -183,15 +183,15 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		string = string.replaceAll("\t", "    ");
         p.sendMessage(string);
     }
-    
-    public void setAllowFlight(boolean flight){
+
+    public void setAllowFlight(boolean flight) {
         p.setAllowFlight(flight);
     }
 
     public void setBanned(boolean banned) {
         p.setBanned(banned);
     }
-    
+
     public void setCompassTarget(MCLocation l) {
         p.setCompassTarget(((BukkitMCLocation)l).l);
     }
@@ -207,23 +207,23 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setFoodLevel(int f) {
         p.setFoodLevel(f);
     }
-    
-    /*public void setHealth(int i) { 
+
+    /*public void setHealth(int i) {
         if(i == 0){
             this.fireEntityDamageEvent(MCDamageCause.CUSTOM);
         }
         p.setHealth(i);
     }*/
-    
+
     public void setLevel(int xp) {
         p.setLevel(xp);
     }
-    
+
     public void setPlayerTime(Long time) {
         p.setPlayerTime(time, false);
     }
-    
-    public void setRemainingFireTicks(int i){
+
+    public void setRemainingFireTicks(int i) {
         p.setFireTicks(i);
     }
 
@@ -237,7 +237,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         }
 
         Set opSet = null;
-        
+
 		/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
 		/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
 		opSet = (Set) ReflectionUtils.get(ClassDiscovery.forFuzzyName("org.bukkit.craftbukkit.*", "ServerConfigurationManagerAbstract"), obcServerConfigurationmanagerAbstract, "operators");
@@ -259,7 +259,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
     public void setVanished(boolean set, MCPlayer to) {
-        if(!set){
+        if (!set) {
             p.showPlayer(((BukkitMCPlayer)to)._Player());
         } else {
             p.hidePlayer(((BukkitMCPlayer)to)._Player());
@@ -283,8 +283,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         //a new player.
         return !p.getServer().getOfflinePlayer(p.getName()).hasPlayedBefore();
     }
-    
-    public String getHost(){
+
+    public String getHost() {
         return Static.GetHost(this);
     }
 
@@ -303,12 +303,27 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setHunger(int h) {
 		p.setFoodLevel(h);
 	}
-	
-	public float getSaturation(){
+
+	public float getSaturation() {
 		return p.getSaturation();
 	}
-	
-	public void setSaturation(float s){
+
+	public void setSaturation(float s) {
 		p.setSaturation(s);
+	}
+
+	public MCLocation getBedSpawnLocation() {
+		if (p.getBedSpawnLocation() != null) {
+			return new BukkitMCLocation(p.getBedSpawnLocation());
+		}
+		return null;
+	}
+
+	public void setBedSpawnLocation(MCLocation l) {
+		p.setBedSpawnLocation(((BukkitMCLocation)l).l);
+	}
+
+	public void setBedSpawnLocation(MCLocation l, boolean f) {
+		p.setBedSpawnLocation(((BukkitMCLocation)l).l, f);
 	}
 }
