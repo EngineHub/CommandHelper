@@ -326,4 +326,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setBedSpawnLocation(MCLocation l, boolean f) {
 		p.setBedSpawnLocation(((BukkitMCLocation)l).l, f);
 	}
+
+	public MCEntity getVehicle() {
+		return new BukkitMCEntity(p.getVehicle());
+	}
 }

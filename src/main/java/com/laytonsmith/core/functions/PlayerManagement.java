@@ -539,7 +539,7 @@ public class PlayerManagement {
 					+ "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - player groups;"
 					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
-					+ " <li>13 - Player's current entity id</li></ul>";
+					+ " <li>13 - Player's current entity id</li><li>14 - Is player is in vehicle? Returns true or false.</li></ul>";
 		}
 
 		public ExceptionType[] thrown() {
@@ -576,7 +576,7 @@ public class PlayerManagement {
 			MCPlayer p = Static.GetPlayer(player, t);
 
 			Static.AssertPlayerNonNull(p, t);
-			int maxIndex = 13;
+			int maxIndex = 14;
 			if (index < -1 || index > maxIndex) {
 				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
@@ -674,6 +674,9 @@ public class PlayerManagement {
 			}
 			if (index == 13 || index == -1) {
 				retVals.add(new CInt(p.getEntityId(), t));
+			}
+			if (index == 14 || index == -1) {
+				retVals.add(new CBoolean(p.isInsideVehicle(), t));
 			}
 			if (retVals.size() == 1) {
 				return retVals.get(0);
@@ -2941,7 +2944,7 @@ public class PlayerManagement {
 		}
 
 		public boolean isRestricted() {
-			return false;
+			return true;
 		}
 
 		public CHVersion since() {
@@ -2986,7 +2989,7 @@ public class PlayerManagement {
 		}
 
 		public boolean isRestricted() {
-			return false;
+			return true;
 		}
 
 		public CHVersion since() {
@@ -3015,6 +3018,92 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(p, t);
 			p.setBedSpawnLocation(ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null , t), force);
 			return new CVoid(t);
+		}
+	}
+
+	@api(environments={CommandHelperEnvironment.class})
+	public static class pvehicle extends AbstractFunction {
+
+		public String getName() {
+			return "pvehicle";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "mixed {[player]} Returns name of vehicle which player is in or null if player is outside the vehicle";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 1) {;
+				p = Static.GetPlayer(args[0].val(), t);
+			}
+
+			if (p.isInsideVehicle() == false) {
+				return new CNull(t);
+			}
+
+			return new CString(p.getVehicle().getType().name(), t);
+		}
+	}
+
+	@api(environments={CommandHelperEnvironment.class})
+	public static class pvehicle_leave extends AbstractFunction {
+
+		public String getName() {
+			return "pvehicle_leave";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "boolean {[player]} Leave vehicle by player or return false if player is outside the vehicle";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 1) {;
+				p = Static.GetPlayer(args[0].val(), t);
+			}
+
+			return new CBoolean(p.leaveVehicle(), t);
 		}
 	}
 }
