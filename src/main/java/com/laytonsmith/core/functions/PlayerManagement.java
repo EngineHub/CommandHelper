@@ -19,6 +19,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import org.omg.CORBA.ARG_IN;
 
 /**
  *
@@ -30,7 +31,7 @@ public class PlayerManagement {
 		return "This class of functions allow players to be managed";
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class player extends AbstractFunction {
 
 		public String getName() {
@@ -81,7 +82,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class all_players extends AbstractFunction {
 
 		public String getName() {
@@ -121,50 +122,50 @@ public class PlayerManagement {
 			return false;
 		}
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
+
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class players_in_radius extends AbstractFunction {
+
 		public String getName() {
 			return "players_in_radius";
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1,2};
+			return new Integer[]{1, 2};
 		}
-		
+
 		boolean inRadius(MCPlayer player, double dist, MCLocation loc) {
 			if (!(player.getWorld().equals(loc.getWorld()))) {
 				return false;
 			}
-			
+
 			double x1 = player.getLocation().getX();
 			double y1 = player.getLocation().getY();
 			double z1 = player.getLocation().getZ();
-			
+
 			double x2 = loc.getX();
 			double y2 = loc.getY();
 			double z2 = loc.getZ();
-			
+
 			double distance = java.lang.Math.sqrt(
-				(x1-x2) * (x1-x2) + 
-				(y1-y2) * (y1-y2) + 
-				(z1-z2) * (z1-z2)
-			); 
-			
+					(x1 - x2) * (x1 - x2)
+					+ (y1 - y2) * (y1 - y2)
+					+ (z1 - z2) * (z1 - z2));
+
 			if (distance <= dist) {
 				return true;
 			}
-			
+
 			return false;
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCPlayer[] pa = Static.getServer().getOnlinePlayers();
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			
+
 			MCLocation loc;
 			double dist;
-			
+
 			if (args.length == 1) {
 				dist = Static.getDouble(args[0], t);
 				Static.AssertPlayerNonNull(p, t);
@@ -172,21 +173,21 @@ public class PlayerManagement {
 			} else {
 				if (!(args[0] instanceof CArray)) {
 					throw new ConfigRuntimeException("Expecting an array at parameter 1 of players_in_radius",
-						ExceptionType.CastException, t);
+							ExceptionType.CastException, t);
 				}
-				
-				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null , t);		
+
+				loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
 				dist = Static.getDouble(args[1], t);
 			}
-			
+
 			CArray sa = new CArray(t);
-			
+
 			for (int i = 0; i < pa.length; i++) {
 				if (inRadius(pa[i], dist, loc)) {
 					sa.push(new CString(pa[i].getName(), t));
 				}
 			}
-			
+
 			return sa;
 		}
 
@@ -211,7 +212,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class ploc extends AbstractFunction {
 
 		public String getName() {
@@ -263,7 +264,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_ploc extends AbstractFunction {
 
 		public String getName() {
@@ -351,14 +352,14 @@ public class PlayerManagement {
 				m = Static.GetPlayer(MCPlayer, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			if(!l.getWorld().exists()){
+			if (!l.getWorld().exists()) {
 				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
 			}
 			return new CBoolean(m.teleport(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch())), t);
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pcursor extends AbstractFunction {
 
 		public String getName() {
@@ -414,7 +415,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class kill extends AbstractFunction {
 
 		public String getName() {
@@ -461,7 +462,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
+	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class pgroup extends AbstractFunction {
 
 		public String getName() {
@@ -515,7 +516,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class, GlobalEnv.class})
+	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
 	public static class pinfo extends AbstractFunction {
 
 		public String getName() {
@@ -672,7 +673,7 @@ public class PlayerManagement {
 			if (index == 12 || index == -1) {
 				retVals.add(new CString(p.getHost(), t));
 			}
-			if(index == 13 || index == -1){
+			if (index == 13 || index == -1) {
 				retVals.add(new CInt(p.getEntityId(), t));
 			}
 			if (retVals.size() == 1) {
@@ -687,7 +688,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pworld extends AbstractFunction {
 
 		public String getName() {
@@ -733,7 +734,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class kick extends AbstractFunction {
 
 		public String getName() {
@@ -787,7 +788,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_display_name extends AbstractFunction {
 
 		public String getName() {
@@ -839,7 +840,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class reset_display_name extends AbstractFunction {
 
 		public String getName() {
@@ -887,7 +888,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pfacing extends AbstractFunction {
 
 		public String getName() {
@@ -1014,7 +1015,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pmode extends AbstractFunction {
 
 		public String getName() {
@@ -1061,7 +1062,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pmode extends AbstractFunction {
 
 		public String getName() {
@@ -1119,7 +1120,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pexp extends AbstractFunction {
 
 		public String getName() {
@@ -1165,7 +1166,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pexp extends AbstractFunction {
 
 		public String getName() {
@@ -1215,7 +1216,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class give_pexp extends AbstractFunction {
 
 		public String getName() {
@@ -1266,7 +1267,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class plevel extends AbstractFunction {
 
 		public String getName() {
@@ -1311,7 +1312,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_plevel extends AbstractFunction {
 
 		public String getName() {
@@ -1361,7 +1362,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class ptexp extends AbstractFunction {
 
 		public String getName() {
@@ -1406,7 +1407,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_ptexp extends AbstractFunction {
 
 		public String getName() {
@@ -1460,7 +1461,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pfood extends AbstractFunction {
 
 		public String getName() {
@@ -1505,7 +1506,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pfood extends AbstractFunction {
 
 		public String getName() {
@@ -1555,7 +1556,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_peffect extends AbstractFunction {
 
 		public String getName() {
@@ -1597,7 +1598,7 @@ public class PlayerManagement {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
 			int effect = (int) Static.getInt(args[1], t);
-			
+
 			int strength = (int) Static.getInt(args[2], t);
 			int seconds = 30;
 			if (args.length == 4) {
@@ -1612,9 +1613,9 @@ public class PlayerManagement {
 			}
 		}
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
-	public static class get_peffect extends AbstractFunction{
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class get_peffect extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -1630,11 +1631,11 @@ public class PlayerManagement {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length > 0){
+			if (args.length > 0) {
 				p = Static.GetPlayer(args[0], t);
 			}
 			CArray ret = new CArray(t);
-			for(MCLivingEntity.MCEffect e : p.getEffects()){
+			for (MCLivingEntity.MCEffect e : p.getEffects()) {
 				CArray potion = new CArray(t);
 				potion.set("potionID", new CInt(e.getPotionID(), t), t);
 				potion.set("strength", new CInt(e.getStrength(), t), t);
@@ -1661,10 +1662,9 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_phealth extends AbstractFunction {
 
 		public String getName() {
@@ -1717,7 +1717,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class ponline extends AbstractFunction {
 
 		public String getName() {
@@ -1775,7 +1775,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pwhitelisted extends AbstractFunction {
 
 		public String getName() {
@@ -1810,17 +1810,16 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCOfflinePlayer pl = Static.getServer().getOfflinePlayer(args[0].val());
 			boolean ret;
-			if(pl == null){
+			if (pl == null) {
 				ret = false;
 			} else {
 				ret = pl.isWhitelisted();
 			}
 			return new CBoolean(ret, t);
 		}
-		
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pwhitelisted extends AbstractFunction {
 
 		public String getName() {
@@ -1860,7 +1859,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pbanned extends AbstractFunction {
 
 		public String getName() {
@@ -1901,7 +1900,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pbanned extends AbstractFunction {
 
 		public String getName() {
@@ -1944,7 +1943,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pisop extends AbstractFunction {
 
 		public String getName() {
@@ -1986,7 +1985,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_compass_target extends AbstractFunction {
 
 		public String getName() {
@@ -2036,7 +2035,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_compass_target extends AbstractFunction {
 
 		public String getName() {
@@ -2077,7 +2076,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class ponfire extends AbstractFunction {
 
 		public String getName() {
@@ -2121,7 +2120,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_ponfire extends AbstractFunction {
 
 		public String getName() {
@@ -2177,7 +2176,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class phas_flight extends AbstractFunction {
 
 		public String getName() {
@@ -2218,7 +2217,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pset_flight extends AbstractFunction {
 
 		public String getName() {
@@ -2279,7 +2278,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pset_time extends AbstractFunction {
 
 		public String getName() {
@@ -2372,7 +2371,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pget_time extends AbstractFunction {
 
 		public String getName() {
@@ -2417,7 +2416,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class preset_time extends AbstractFunction {
 
 		public String getName() {
@@ -2462,7 +2461,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_list_name extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
@@ -2517,7 +2516,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class get_list_name extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
@@ -2557,7 +2556,7 @@ public class PlayerManagement {
 		}
 	}
 
-	@api(environments={CommandHelperEnvironment.class})
+	@api(environments = {CommandHelperEnvironment.class})
 	public static class pvelocity extends AbstractFunction {
 
 		public String getName() {
@@ -2611,9 +2610,9 @@ public class PlayerManagement {
 			return false;
 		}
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
-	public static class set_pvelocity extends AbstractFunction{
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pvelocity extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
@@ -2632,15 +2631,15 @@ public class PlayerManagement {
 			double x;
 			double y;
 			double z;
-			switch(args.length){
+			switch (args.length) {
 				case 1:
 				case 2: {
 					int offset = 0;
-					if(args.length == 2){
+					if (args.length == 2) {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t);
 					}
-					if(args[offset] instanceof CArray){
+					if (args[offset] instanceof CArray) {
 						MCLocation l = ObjectGenerator.GetGenerator().location(args[offset], p.getWorld(), t);
 						x = l.getX();
 						y = l.getY();
@@ -2653,7 +2652,7 @@ public class PlayerManagement {
 				case 3:
 				case 4: {
 					int offset = 0;
-					if(args.length == 4){
+					if (args.length == 4) {
 						offset = 1;
 						p = Static.GetPlayer(args[0], t);
 					}
@@ -2666,8 +2665,8 @@ public class PlayerManagement {
 					throw new RuntimeException();
 			}
 			MCEntity.Velocity v = new MCEntity.Velocity(x, y, z);
-			if(v.magnitude > 10){
-				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING, 
+			if (v.magnitude > 10) {
+				CHLog.GetLogger().Log(CHLog.Tags.GENERAL, LogLevel.WARNING,
 						"The call to " + getName() + " has been cancelled, because the magnitude was greater than 10."
 						+ " (It was " + v.magnitude + ")", t);
 				return new CBoolean(false, t);
@@ -2696,11 +2695,10 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
-	public static class psend_block_change extends AbstractFunction{
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class psend_block_change extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
@@ -2717,13 +2715,13 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
-			if(args.length == 3){
+			if (args.length == 3) {
 				p = Static.GetPlayer(args[0], t);
 				offset = 1;
 			}
 			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0 + offset], p.getWorld(), t);
 			MCItemStack item = Static.ParseItemNotation(getName(), args[1 + offset].val(), 1, t);
-			p.sendBlockChange(loc, item.getType().getType(), (byte)item.getData().getData());
+			p.sendBlockChange(loc, item.getType().getType(), (byte) item.getData().getData());
 			return new CVoid(t);
 		}
 
@@ -2743,11 +2741,10 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
-	public static class phunger extends AbstractFunction{
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class phunger extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -2763,7 +2760,7 @@ public class PlayerManagement {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length == 1){
+			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
 			return new CInt(p.getHunger(), t);
@@ -2784,11 +2781,10 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
-	public static class set_phunger extends AbstractFunction{
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_phunger extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException, ExceptionType.CastException};
@@ -2805,11 +2801,11 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int hunger, hungerIndex = 0;
-			if(args.length == 2){
+			if (args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				hungerIndex = 1;
 			}
-			hunger = (int)Static.getInt(args[hungerIndex], t);
+			hunger = (int) Static.getInt(args[hungerIndex], t);
 			p.setHunger(hunger);
 			return new CVoid(t);
 		}
@@ -2829,11 +2825,10 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
-	public static class psaturation extends AbstractFunction{
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class psaturation extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException};
@@ -2849,7 +2844,7 @@ public class PlayerManagement {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if(args.length == 1){
+			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
 			Static.AssertPlayerNonNull(p, t);
@@ -2871,11 +2866,10 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
-	@api(environments={CommandHelperEnvironment.class})
-	public static class set_psaturation extends AbstractFunction{
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_psaturation extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.PlayerOfflineException, ExceptionType.CastException};
@@ -2893,11 +2887,11 @@ public class PlayerManagement {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			float saturation;
 			int saturationIndex = 0;
-			if(args.length == 2){
+			if (args.length == 2) {
 				p = Static.GetPlayer(args[0], t);
 				saturationIndex = 1;
 			}
-			saturation = (float)Static.getDouble(args[saturationIndex], t);
+			saturation = (float) Static.getDouble(args[saturationIndex], t);
 			p.setSaturation(saturation);
 			return new CVoid(t);
 		}
@@ -2917,6 +2911,157 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class pbed_location extends AbstractFunction {
+
+		public String getName() {
+			return "pbed_location";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 1) {
+				player = Static.getServer().getOfflinePlayer(args[0].val());
+			}
+			MCLocation loc = player.getBedSpawnLocation();
+			MCWorld w;
+			try {
+				w = loc.getWorld();
+			} catch (Exception e) {
+				return new CNull(t);
+			}
+//			if (loc == null) {
+//				return new CNull(t);
+//			}
+//			MCWorld w = loc.getWorld();
+			return new CArray(t,
+					new CDouble(loc.getX(), t),
+					new CDouble(loc.getY(), t),
+					new CDouble(loc.getZ(), t),
+					new CString(w.getName(), t));
+		}
+
+		public String docs() {
+			return "array {[playerName]} Returns an array of x, y, z, coords of the bed of the player specified, or the player running the command otherwise."
+					+ "The array returned will also include the bed's world in index 3 of the array. This is set when a player sleeps or by set_pbed_location.";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+	}
+	
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pbedlocation extends AbstractFunction {
+
+		public String getName() {
+			return "set_pbed_location";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3, 4};
+		}
+
+		public String docs() {
+			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the bed of the player to the specified coordinates."
+					+ " If player is omitted, the current player is used."
+					+ " When using ploc() it is wise to add 1 to the y value or the bed will almost always get removed becuase it is obstructed.";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.LengthException, ExceptionType.PlayerOfflineException, ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			String MCPlayer = null;
+			double x;
+			double y;
+			double z;
+			MCPlayer m = null;
+			MCLocation l = null;
+			if (args.length == 1) {
+				if (args[0] instanceof CArray) {
+					CArray ca = (CArray) args[0];
+					l = ObjectGenerator.GetGenerator().location(ca, (p instanceof MCPlayer ? ((MCPlayer) p).getWorld() : null), t);
+					x = Static.getNumber(ca.get(0, t), t);
+					y = Static.getNumber(ca.get(1, t), t);
+					z = Static.getNumber(ca.get(2, t), t);
+					if (p instanceof MCPlayer) {
+						m = ((MCPlayer) p);
+					}
+
+				} else {
+					throw new ConfigRuntimeException("Expecting an array at parameter 1 of set_pbed_location",
+							ExceptionType.CastException, t);
+				}
+			} else if (args.length == 2) {
+				if (args[1] instanceof CArray) {
+					CArray ca = (CArray) args[1];
+					MCPlayer = args[0].val();
+					l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer, t).getWorld(), t);
+					x = l.getX();
+					y = l.getY();
+					z = l.getZ();
+				} else {
+					throw new ConfigRuntimeException("Expecting parameter 2 to be an array in set_pbed_location",
+							ExceptionType.CastException, t);
+				}
+			} else if (args.length == 3) {
+				if (p instanceof MCPlayer) {
+					m = (MCPlayer) p;
+				}
+				x = Static.getNumber(args[0], t);
+				y = Static.getNumber(args[1], t);
+				z = Static.getNumber(args[2], t);
+				l = m.getLocation();
+			} else {
+				MCPlayer = args[0].val();
+				x = Static.getNumber(args[1], t);
+				y = Static.getNumber(args[2], t);
+				z = Static.getNumber(args[3], t);
+				l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer, t).getWorld(), x, y, z, 0, 0);
+			}
+			if (m == null && MCPlayer != null) {
+				m = Static.GetPlayer(MCPlayer, t);
+			}
+			Static.AssertPlayerNonNull(m, t);
+			if (!l.getWorld().exists()) {
+				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
+			}
+			m.setBedSpawnLocation(l);
+			return new CVoid(t);
+		}
 	}
 }

@@ -319,4 +319,12 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setSaturation(float s){
 		p.setSaturation(s);
 	}
+
+	public MCLocation getBedSpawnLocation() {
+		return new BukkitMCLocation(p.getBedSpawnLocation());
+	}
+	
+	public void setBedSpawnLocation(MCLocation l) {
+		p.setBedSpawnLocation((Location)l.getHandle(), true);
+	}
 }
