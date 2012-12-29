@@ -124,7 +124,7 @@ public class EntityManagement {
 		
 	}
 	
-	@api
+	@api(environments={CommandHelperEnvironment.class})
 	public static class shoot_projectile extends AbstractFunction {
 
 		public ExceptionType[] thrown() {

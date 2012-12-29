@@ -1,12 +1,14 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLivingEntity;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCBlock;
+import com.laytonsmith.abstraction.enums.MCEquipmentSlot;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.Target;
@@ -16,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.bukkit.block.Block;
@@ -241,5 +244,15 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 
 	public LivingEntity asLivingEntity() {
 		return le;
+	}
+	
+	public Map<MCEquipmentSlot, MCItemStack> getEquipment() {
+		BukkitMCEntityEquipment ee = new BukkitMCEntityEquipment(le.getEquipment());
+		return ee.getAllEquipment();
+	}
+	
+	public void setEquipment(Map<MCEquipmentSlot, MCItemStack> emap) {
+		BukkitMCEntityEquipment ee = new BukkitMCEntityEquipment(le.getEquipment());
+		ee.setAllEquipment(emap);
 	}
 }
