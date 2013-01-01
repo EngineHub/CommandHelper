@@ -37,7 +37,7 @@ public class BukkitMCEntityEquipment implements MCEntityEquipment {
 				slots.put(key, (BukkitMCItemStack) getWeapon());
 				break;
 			case HELMET:
-				slots.put(key, (BukkitMCItemStack) getWeapon());
+				slots.put(key, (BukkitMCItemStack) getHelmet());
 				break;
 			case CHESTPLATE:
 				slots.put(key, (BukkitMCItemStack) getChestplate());
