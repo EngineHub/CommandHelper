@@ -170,6 +170,12 @@ public class Exceptions {
 		 */
 		EnchantmentException("If an enchantment is added to an item that isn't supported, this is thrown.", CHVersion.V3_3_1),
 		/**
+		 * If an age function is called on an unageable mob, this
+		 * exception is thrown
+		 */
+		UnageableMobException("If an age function is called on an unageable mob, this "
+			+ "exception is thrown.", CHVersion.V3_3_1),
+		/**
 		 * If an untameable mob is attempted to be tamed, this exception is
 		 * thrown
 		 */
