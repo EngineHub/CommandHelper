@@ -8,6 +8,7 @@ import com.laytonsmith.core.LogLevel;
  */
 public class ProfilePoint implements Comparable<ProfilePoint> {
 	private String name;
+	private String message;
 	boolean GCRun;
 	private Profiler parent;
 	private LogLevel granularity;
@@ -16,6 +17,7 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 		this.name = name;
 		GCRun = false;
 		this.parent = parent;
+		this.message = "";
 	}
 
 	@Override
@@ -35,6 +37,14 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 		parent.stop(this);
 	}
 
+	public String getMessage() {
+		return message;
+	}
+	
+	public void setMessage(String newMessage) {
+		message = newMessage;
+	}
+	
 	/**
 	 * This is an arbitrary comparison, for the sake of fast tree searches.
 	 *
