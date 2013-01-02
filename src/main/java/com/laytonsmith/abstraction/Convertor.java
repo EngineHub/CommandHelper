@@ -136,5 +136,14 @@ public interface Convertor {
 	 * @return 
 	 */
 	public int getMaxRecordID();
+
+	/**
+	 * Returns a color object for this server.
+	 * @param red
+	 * @param green
+	 * @param blue
+	 * @return 
+	 */
+	public MCColor GetColor(int red, int green, int blue);
 	
 }

@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -324,6 +325,10 @@ public class BukkitConvertor extends AbstractConvertor {
 				maxBlockID = mID;
 			}
 		}
+	}
+
+	public MCColor GetColor(int red, int green, int blue) {
+		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
 	}
 
 }

@@ -5,6 +5,7 @@ import com.laytonsmith.PureUtilities.TermColors;
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.abstraction.AbstractConvertor;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCInventory;
@@ -411,6 +412,10 @@ public class Interpreter {
 		}
 
 		public synchronized int getMaxRecordID() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCColor GetColor(int red, int green, int blue) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 		
