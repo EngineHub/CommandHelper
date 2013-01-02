@@ -1,12 +1,15 @@
 package com.laytonsmith.tools.docgen;
 
+import com.laytonsmith.PureUtilities.ArgumentParser;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.MSP.Burst;
+import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.Main;
 import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -36,7 +39,7 @@ public class DocGenTemplates {
 	
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		System.out.println(Generate("Persistance_Network"));
+		System.out.println(Generate("CommandLineTools"));
 	}
 	
 	public static String Generate(String forPage){
@@ -246,6 +249,22 @@ public class DocGenTemplates {
 				return "Unknown function: " + args[0];
 			}
 			
+		}
+	};
+	
+	public static Generator cmdlinehelp = new Generator() {
+
+		public String generate(String... args) {
+			StringBuilder b = new StringBuilder();
+			b.append("<pre style=\"white-space: pre-wrap;\">\n").append(Main.ARGUMENT_SUITE.getBuiltDescription()).append("\n</pre>\n");
+			for(Field f : Main.class.getDeclaredFields()){
+				if(f.getType() == ArgumentParser.class){
+					b.append("==== ").append(StringUtils.replaceLast(f.getName(), "(?i)mode", "")).append(" ====\n<pre style=\"white-space: pre-wrap;\">");
+					ArgumentParser parser = (ArgumentParser)ReflectionUtils.get(Main.class, f.getName());
+					b.append(parser.getBuiltDescription()).append("</pre>\n\n");
+				}
+			}
+			return b.toString();
 		}
 	};
 }
