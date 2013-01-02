@@ -2970,7 +2970,7 @@ public class PlayerManagement {
 	}
 	
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class set_pbedlocation extends AbstractFunction {
+	public static class set_pbed_location extends AbstractFunction {
 
 		public String getName() {
 			return "set_pbed_location";
@@ -2982,8 +2982,7 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the bed of the player to the specified coordinates."
-					+ " If player is omitted, the current player is used."
-					+ " When using ploc() it is wise to add 1 to the y value or the bed will almost always get removed becuase it is obstructed.";
+					+ " If player is omitted, the current player is used.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -3050,7 +3049,7 @@ public class PlayerManagement {
 				x = Static.getNumber(args[1], t);
 				y = Static.getNumber(args[2], t);
 				z = Static.getNumber(args[3], t);
-				l = StaticLayer.GetLocation(Static.GetPlayer(MCPlayer, t).getWorld(), x, y, z, 0, 0);
+				l = m.getLocation();
 			}
 			if (m == null && MCPlayer != null) {
 				m = Static.GetPlayer(MCPlayer, t);
@@ -3058,8 +3057,8 @@ public class PlayerManagement {
 			Static.AssertPlayerNonNull(m, t);
 			if (!l.getWorld().exists()) {
 				throw new ConfigRuntimeException("The world specified does not exist.", ExceptionType.InvalidWorldException, t);
-			}
-			m.setBedSpawnLocation(l);
+			};
+			m.setBedSpawnLocation(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch()));
 			return new CVoid(t);
 		}
 	}
