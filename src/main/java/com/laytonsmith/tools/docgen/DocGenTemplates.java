@@ -4,16 +4,24 @@ import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.MSP.Burst;
 import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.functions.FunctionBase;
+import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.persistance.DataSource;
+import java.io.IOException;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -23,30 +31,60 @@ import java.util.regex.Pattern;
  */
 public class DocGenTemplates {
 	public static interface Generator{
-		public String generate();
+		public String generate(String ... args);
+	}
+	
+	public static void main(String[] args){
+		Implementation.setServerType(Implementation.Type.SHELL);
+		System.out.println(Generate("Persistance_Network"));
 	}
 	
 	public static String Generate(String forPage){
 		return Generate(forPage, new HashMap<String, String>());
 	}
 	public static String Generate(String forPage, Map<String, String> customTemplates){
+		try {
+			Prefs.init(null);
+		} catch (IOException ex) {
+			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(DocGenTemplates.class));
 		//Grab the template from the resources
 		String template = StreamUtils.GetString(DocGenTemplates.class.getResourceAsStream("/docs/" + forPage));
 		//Find all the %%templates%% in the template
-		Matcher m = Pattern.compile("%%(.*?)%%").matcher(template);
+		Matcher m = Pattern.compile("%%([^\\|%]+)([^%]*?)%%").matcher(template);
+		StringBuilder templateBuilder = new StringBuilder();
+		int lastMatch = 0;
+		boolean appended = false;
 		while(m.find()){
+			if(!appended){
+				templateBuilder.append(template.substring(lastMatch, m.start()));
+				appended = true;
+			}
 			String name = m.group(1);
 			for(String templateName : customTemplates.keySet()){
 				if(templateName.equals(name)){
-					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", customTemplates.get(name));
+					templateBuilder.append(customTemplates.get(name));
+					lastMatch = m.end();
+					appended = false;
+					//template = template.replaceAll("%%" + Pattern.quote(name) + ".*?%%", customTemplates.get(name));
 				}
 			}
 			try{
 				Field f = DocGenTemplates.class.getDeclaredField(name);
 				f.setAccessible(true);
 				if(Generator.class.isAssignableFrom(f.getType()) && Modifier.isStatic(f.getModifiers())){
-					String templateValue = ((Generator)f.get(null)).generate();
-					template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue);
+					String [] tmplArgs = new String[0]; 
+					if(m.group(2) != null && !m.group(2).equals("")){
+						//We have arguments
+						//remove the initial |, then split
+						tmplArgs = m.group(2).substring(1).split("\\|");
+					}
+					String templateValue = ((Generator)f.get(null)).generate(tmplArgs);
+					templateBuilder.append(templateValue);
+					lastMatch = m.end();
+					appended = false;
+					//template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue);
 				} else {
 					throw new Error(DocGenTemplates.class.getSimpleName() + "." + f.getName() 
 						+ " is not an instance of " + Generator.class.getSimpleName() 
@@ -56,12 +94,15 @@ public class DocGenTemplates {
 				//Oh well, skip it.
 			}
 		}
-		return template;
+		if(!appended){
+			templateBuilder.append(template.substring(lastMatch));
+		}
+		return templateBuilder.toString();
 	}
 	
 	public static Generator data_source_modifiers = new Generator() {
 
-		public String generate() {
+		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
 			for(DataSource.DataSourceModifier mod : DataSource.DataSourceModifier.values()){
 				b.append("|-\n| ").append(mod.getName().toLowerCase()).append(" || ").append(mod.docs()).append("\n");
@@ -73,7 +114,7 @@ public class DocGenTemplates {
 	
 	public static Generator persistance_connections = new Generator(){
 
-		public String generate() {
+		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
 			Class [] classes = ClassDiscovery.GetClassesWithAnnotation(datasource.class);
 			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{\\s*(.*?)\\s*\\}\\s*(.*?)\\s*$");
@@ -118,7 +159,7 @@ public class DocGenTemplates {
 	
 	public static Generator optimization_explanations = new Generator(){
 
-		public String generate() {
+		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
 			for(Optimizable.OptimizationOption option : Optimizable.OptimizationOption.values()){
 				b.append("=== ").append(option.getName()).append(" ===\n");
@@ -132,14 +173,14 @@ public class DocGenTemplates {
 	
 	public static Generator BURST_VALUE_TYPES = new Generator() {
 
-		public String generate() {
+		public String generate(String ... args) {
 			return StringUtils.Join(Burst.BurstType.values(), ", ", ", or ", " or ");
 		}
 	};
 	
 	public static Generator BURST_TYPE_DOCS = new Generator() {
 
-		public String generate() {
+		public String generate(String ... args) {
 			//TODO
 			return "TODO";
 		}
@@ -147,7 +188,7 @@ public class DocGenTemplates {
 	
 	public static Generator EXCEPTION_TYPES = new Generator() {
 
-		public String generate() {
+		public String generate(String ... args) {
 			StringBuilder b = new StringBuilder();
 			for(Documentation d : ExceptionType.values()){
 				b.append("===").append(d.getName()).append("===\n");
@@ -155,6 +196,56 @@ public class DocGenTemplates {
 				b.append("\n\nSince: ").append(d.since().getVersionString()).append("\n\n");
 			}
 			return b.toString();
+		}
+	};
+	
+	private static final String githubBaseURL = "https://github.com/sk89q/commandhelper/tree/master/src/main/java";
+	
+	/**
+	 * Returns the fully qualified (and github linked) class name, given the package
+	 * regex and complete class name. For instance: %%GET_CLASS|.*|DocGenTemplates%% would
+	 * (likely) return [http://url.to.github.com/path/to/file/ com.laytonsmith.tools.docgen.DocGenTemplates]
+	 */
+	public static Generator GET_CLASS = new Generator() {
+
+		public String generate(String... args) {
+			Class c = ClassDiscovery.forFuzzyName(args[0], args[1]);
+			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getName() + "]";
+		}
+	};
+	
+	/**
+	 * Returns the (github linked) simple class name, given the package
+	 * regex and complete class name. For instance: %%GET_CLASS|.*|DocGenTemplates%% would
+	 * (likely) return [http://url.to.github.com/path/to/file/ DocGenTemplates]
+	 */
+	public static Generator GET_SIMPLE_CLASS = new Generator() {
+
+		public String generate(String... args) {
+			Class c = ClassDiscovery.forFuzzyName(args[0], args[1]);
+			return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + c.getSimpleName() + "]";
+		}
+	};
+	
+	/**
+	 * Returns a github link to the source file this function is in. Note that it is not possible
+	 * to get more specific line information (at least generically).
+	 * %%GET_FUNCTION_FILE|msg%%, for instance.
+	 */
+	public static Generator GET_FUNCTION_FILE = new Generator() {
+
+		public String generate(String... args) {
+			try {
+				FunctionBase b = FunctionList.getFunction(args[0]);
+				Class c = b.getClass();
+				while(c.getEnclosingClass() != null){
+					c = c.getEnclosingClass();
+				}
+				return "[" + githubBaseURL + "/" + c.getName().replace(".", "/") + ".java " + b.getName() + "]";
+			} catch (ConfigCompileException ex) {
+				return "Unknown function: " + args[0];
+			}
+			
 		}
 	};
 }

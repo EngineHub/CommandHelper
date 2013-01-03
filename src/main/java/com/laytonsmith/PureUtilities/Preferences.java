@@ -108,7 +108,7 @@ public class Preferences {
      */
     public void init(File prefFile) throws IOException {
         this.prefFile = prefFile;
-        if(prefFile.exists()){
+        if(prefFile != null && prefFile.exists()){
             Properties userProperties = new Properties();
             FileInputStream in = new FileInputStream(prefFile);
             userProperties.load(in);
@@ -249,13 +249,15 @@ public class Preferences {
                 }
                 b.append(c).append(nl).append(p.name).append("=").append(p.value).append(nl).append(nl);
             }
-            if(!prefFile.exists()){
+            if(prefFile != null && !prefFile.exists()){
                 prefFile.getAbsoluteFile().getParentFile().mkdirs();
                 prefFile.createNewFile();
             }
-			FileUtility.write(b.toString(), prefFile);
+			if(prefFile != null){
+				FileUtility.write(b.toString(), prefFile);
+			}
         } catch (Exception ex) {
-            logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file: " + prefFile.getAbsolutePath(), ex);
+            logger.log(Level.WARNING, "[" + appName + "] Could not write out preferences file: " + (prefFile!=null?prefFile.getAbsolutePath():"null"), ex);
         }
     }
     
