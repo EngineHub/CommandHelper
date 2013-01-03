@@ -6,8 +6,6 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CBoolean;
-import com.laytonsmith.core.constructs.CBrace;
-import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -24,7 +22,6 @@ import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
-import com.sun.org.apache.xalan.internal.xsltc.compiler.CompilerException;
 import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.List;

@@ -501,39 +501,6 @@ public class CompilerFunctions {
 	}
 
 	@api
-	public static class __cbracket__ extends DummyFunction implements Optimizable {
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			FileOptions options = new FileOptions(new HashMap<String, String>());
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
-			ParseTree node;
-			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), options);
-			} else if (children.size() == 1) {
-				node = children.get(0);
-			} else {
-				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
-				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
-						+ " report this error to the developer.", t);
-			}
-			return new ParseTree(new CBracket(node), options);
-		}
-	}
-
-	@api
 	public static class __cbrace__ extends DummyFunction implements Optimizable {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
