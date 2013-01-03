@@ -139,23 +139,23 @@ public class CompilerFunctions {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
 			
-			//[Bracket syntax] - This needs resolving far before most other operations.
-			for (int i = 0; i < list.size() - 1; i++) {
-				if (list.size() > i + 1) {
-					ParseTree ident = list.get(i);
-					ParseTree node = list.get(i + 1);
-					if (node.getData() instanceof CBracket) {
-						ParseTree replacement = new ParseTree(new CFunction("array_get", node.getTarget()), node.getFileOptions());
-						ParseTree newNode = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), node.getFileOptions());
-						newNode.setChildren(node.getChildren());
-						replacement.addChild(ident);
-						replacement.addChild(newNode);
-						list.set(i, replacement);
-						list.remove(i + 1);
-						i--;
-					}
-				}
-			}
+//			//[Bracket syntax] - This needs resolving far before most other operations.
+//			for (int i = 0; i < list.size() - 1; i++) {
+//				if (list.size() > i + 1) {
+//					ParseTree ident = list.get(i);
+//					ParseTree node = list.get(i + 1);
+//					if (node.getData() instanceof CBracket) {
+//						ParseTree replacement = new ParseTree(new CFunction("array_get", node.getTarget()), node.getFileOptions());
+//						ParseTree newNode = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), node.getFileOptions());
+//						newNode.setChildren(node.getChildren());
+//						replacement.addChild(ident);
+//						replacement.addChild(newNode);
+//						list.set(i, replacement);
+//						list.remove(i + 1);
+//						i--;
+//					}
+//				}
+//			}
 
 			//Assignment
 			//Note that we are walking the array in reverse, because multiple assignments,

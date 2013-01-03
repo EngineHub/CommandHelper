@@ -231,18 +231,18 @@ public class Script {
                     //Turn it into a config runtime exception. This shouldn't ever happen though.
                     throw new ConfigRuntimeException("Unable to find function " + m.val(), m.getTarget());
                 }
-                //We have special handling for loop and other control flow functions
-                if(f instanceof assign){
-                    if(c.getChildAt(0).getData() instanceof CFunction){
-                        CFunction test = (CFunction)c.getChildAt(0).getData();
-                        if(test.val().equals("array_get")){
-                            env.getEnv(GlobalEnv.class).SetFlag("array_get_alt_mode", true);
-                            Construct arrayAndIndex = eval(c.getChildAt(0), env);
-                            env.getEnv(GlobalEnv.class).ClearFlag("array_get_alt_mode");
-                            return ((assign)f).array_assign(m.getTarget(), env, arrayAndIndex, eval(c.getChildAt(1), env));
-                        }
-                    }
-                }
+//                //We have special handling for loop and other control flow functions
+//                if(f instanceof assign){
+//                    if(c.getChildAt(0).getData() instanceof CFunction){
+//                        CFunction test = (CFunction)c.getChildAt(0).getData();
+//                        if(test.val().equals("array_get")){
+//                            env.getEnv(GlobalEnv.class).SetFlag("array_get_alt_mode", true);
+//                            Construct arrayAndIndex = eval(c.getChildAt(0), env);
+//                            env.getEnv(GlobalEnv.class).ClearFlag("array_get_alt_mode");
+//                            return ((assign)f).array_assign(m.getTarget(), env, arrayAndIndex, eval(c.getChildAt(1), env));
+//                        }
+//                    }
+//                }
                 
                 if(f.useSpecialExec()){
 					ProfilePoint p = null;

@@ -123,6 +123,11 @@ class LexerObject {
 		tokenMap.add(new TokenMap(",", Token.TType.COMMA));
 		tokenMap.add(new TokenMap("(", Token.TType.FUNC_START));
 		tokenMap.add(new TokenMap(")", Token.TType.FUNC_END));
+		tokenMap.add(new TokenMap("+=", TType.PLUS_ASSIGNMENT));
+		tokenMap.add(new TokenMap("-=", TType.MINUS_ASSIGNMENT));
+		tokenMap.add(new TokenMap("*=", TType.MULTIPLICATION_ASSIGNMENT));
+		tokenMap.add(new TokenMap("/=", TType.DIVISION_ASSIGNMENT));
+		tokenMap.add(new TokenMap(".=", TType.CONCAT_ASSIGNMENT));
 	}
 	static {
 		setupTokens();

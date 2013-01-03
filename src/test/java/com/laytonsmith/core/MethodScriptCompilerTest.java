@@ -963,6 +963,11 @@ public class MethodScriptCompilerTest {
 	@Test public void testWhitespaceAroundSymbol2() throws Exception{
 		assertEquals("true", SRun("false==false", null));
 	}
+	
+	@Test(expected=ConfigCompileException.class)
+	public void testLooseSquareBrackets() throws Exception{
+		SRun("(['not allowed'])", fakePlayer);
+	}
     
     //TODO: Once the lexer is rewritten, this should work
 //    @Test
