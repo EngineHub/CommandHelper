@@ -908,8 +908,10 @@ public class PlayerEvents {
                     + "{message|recipients: An array of"
                     + " players that will recieve the chat message. If a player doesn't exist"
                     + " or is offline, and is in the array, it is simply ignored, no"
-                    + " exceptions will be thrown.}"
-                    + "{player|message}";
+                    + " exceptions will be thrown.|format: The \"printf\" format string, by "
+					+ " default: \"<%1$s> %2$s\". The first parameter is the player's display"
+					+ " name, and the second one is the message.}"
+                    + "{player|message|format}";
         }
         
         public Driver driver() {
@@ -937,9 +939,10 @@ public class PlayerEvents {
             //Get the parameters from the manualObject
             MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             String message = manualObject.get("message").nval();
+			String format = manualObject.get("format").nval();
             
             BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class, 
-                player, message);
+                player, message, format);
             return e;
         }
         
@@ -953,6 +956,7 @@ public class PlayerEvents {
                 for(MCPlayer recipient : event.getRecipients()){
                     ca.push(new CString(recipient.getName(), Target.UNKNOWN));
                 }
+				map.put("format", new CString(event.getFormat(), Target.UNKNOWN));
                 map.put("recipients", ca);
                 return map;
             } else {
@@ -982,6 +986,9 @@ public class PlayerEvents {
                         throw new ConfigRuntimeException("recipients must be an array", Exceptions.ExceptionType.CastException, value.getTarget());
                     }
                 }
+				if("format".equals(key)){
+					e.setFormat(value.nval());
+				}
                 return true;
             }
             return false;
