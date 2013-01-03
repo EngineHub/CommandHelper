@@ -6,6 +6,8 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CBrace;
+import com.laytonsmith.core.constructs.CBracket;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
@@ -128,12 +130,18 @@ class CompilerObject {
 		if (t.type == TType.FUNC_END) {
 			//We're done with this child, so push it up
 			popNode(t.getTarget());
-			functionLines.pop();
+			try{
+				functionLines.pop();
+			} catch(EmptyStackException e){
+				//They have too many right parenthesis
+				throw new ConfigCompileException("Unexpected right parenthesis. (You have too many closing parenthesis)", t.getTarget());
+			}
 			return;
 		}
 		if (t.type == TType.LSQUARE_BRACKET) {
-			CFunction f = new CFunction("__cbracket__", Target.UNKNOWN);
-			pushNode(f);
+			CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
+			CBracket c = new CBracket(new ParseTree(f, stream.getFileOptions()));
+			pushNode(c);
 			bracketCounter++;
 			bracketLines.push(t.getTarget());
 			return;
@@ -164,7 +172,9 @@ class CompilerObject {
 			return;
 		}
 		//If the next token ISN'T a ) , } ] we need to autoconcat this
-		if (peek().type != TType.FUNC_END && peek().type != TType.COMMA && peek().type != TType.RCURLY_BRACKET && peek().type != TType.RSQUARE_BRACKET) {
+		if (peek().type != TType.FUNC_END && peek().type != TType.COMMA 
+				&& peek().type != TType.RCURLY_BRACKET 
+				&& peek().type != TType.RSQUARE_BRACKET) {
 			//... unless we're already in an autoconcat
 			if (!(pointer.getData() instanceof CFunction && ((CFunction) pointer.getData()).val().equals("__autoconcat__"))) {
 				CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);

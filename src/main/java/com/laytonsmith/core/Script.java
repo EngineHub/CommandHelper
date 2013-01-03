@@ -4,6 +4,8 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
+import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -35,7 +37,7 @@ import java.util.*;
 public class Script {
 
     private List<Token> left;
-    private List<List<Token>> right;
+    private List<TokenStream> right;
     private List<Token> fullRight;
     private List<Construct> cleft;
     private List<ParseTree> cright;
@@ -46,6 +48,7 @@ public class Script {
     boolean compilerError = false;
     private String label;
     private Environment CurrentEnv;
+	private FileOptions fileOptions;
 
     @Override
     public String toString() {
@@ -69,10 +72,11 @@ public class Script {
         return label;
     }
     
-    public Script(List<Token> left, List<Token> right) {
+    public Script(List<Token> left, List<Token> right, FileOptions fileOptions) {
         this.left = left;
         this.fullRight = right;
         this.left_vars = new HashMap<String, Variable>();        
+		this.fileOptions = fileOptions;
         //this.OriginalEnv = env;
     }
     
@@ -658,12 +662,12 @@ public class Script {
     }
 
     public void compileRight() throws ConfigCompileException {
-        List<Token> temp = new ArrayList<Token>();
-        right = new ArrayList<List<Token>>();
+        TokenStream temp = new TokenStream(new ArrayList<Token>(), fileOptions);
+        right = new ArrayList<TokenStream>();
         for (Token t : fullRight) {
             if (t.type == TType.SEPERATOR) {
                 right.add(temp);
-                temp = new ArrayList<Token>();
+                temp = new TokenStream(new ArrayList<Token>(), fileOptions);
             } else {
                 if(t.type == TType.WHITESPACE){
                     continue; //Whitespace is ignored on the right side
@@ -673,7 +677,7 @@ public class Script {
         }
         right.add(temp);
         cright = new ArrayList<ParseTree>();
-        for (List<Token> l : right) {
+        for (TokenStream l : right) {
             cright.add(MethodScriptCompiler.compile(l));
         }
     }

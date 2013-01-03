@@ -523,7 +523,23 @@ class LexerObject {
 				right++;
 			}
 		}
-		System.out.println("There are " + left + " left parens, and " + right + " right ones.");
+		//Check for unclosed things
+		if(state_in_multiline){
+			throw new ConfigCompileException("Unclosed multiline construct (You have a >>> without a matching <<<). The last multiline construct"
+					+ " was started on line " + start_multiline, target);
+		}
+		if(state_in_block_comment){
+			throw new ConfigCompileException("Unclosed block comment (You have a /* without a matching */). The last block comment was started"
+					+ " on line " + start_block_comment, target);
+		}
+		if(state_in_single_quote){
+			throw new ConfigCompileException("Unclosed single quote (You have a single quote without a matching end single quote). The last single quote"
+					+ " was started on line " + start_single_quote + " ('strings that don't escape conjunctions' (like that) are a common cause of this)", target);
+		}
+		if(state_in_double_quote){
+			throw new ConfigCompileException("Unclosed double quote (You have a double quote without a matching end double quote). The last double quote"
+					+ " was started on line " + start_double_quote, target);
+		}
 		return new TokenStream(new ArrayList<Token>(token_list), fileopts.toString());
 	}
 

@@ -197,6 +197,18 @@ public class OptimizationTest {
 		assertEquals("false", optimize("or(false, false, false)"));
 	}
 	
+	@Test public void testArrayGetConversion() throws Exception{
+		assertEquals("array_get(@a,0)", optimize("@a[0]"));
+	}
+	
+	@Test public void testArraySetConversion1() throws Exception{
+		assertEquals("array_set(@a,0,0)", optimize("assign(@a[0], 0)"));
+	}
+	
+	@Test public void testArraySetConversion2() throws Exception{
+		assertEquals("array_set(@a,0,0)", optimize("@a[0] = 0"));
+	}
+	
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{

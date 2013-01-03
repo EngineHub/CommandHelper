@@ -132,6 +132,7 @@ public class Compiler {
 		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
+			
 
 			//Assignment
 			//Note that we are walking the array in reverse, because multiple assignments,
@@ -374,6 +375,24 @@ public class Compiler {
 					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", list.get(list.size() - 1).getTarget());
 				}
 			}
+			
+			//bracket syntax
+			for (int i = 0; i < list.size() - 1; i++) {
+				if (list.size() > i + 1) {
+					ParseTree ident = list.get(i);
+					ParseTree node = list.get(i + 1);
+					if (node.getData() instanceof CBracket) {
+						ParseTree replacement = new ParseTree(new CFunction("array_get", node.getTarget()), node.getFileOptions());
+						ParseTree newNode = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), node.getFileOptions());
+						newNode.setChildren(node.getChildren());
+						replacement.addChild(ident);
+						replacement.addChild(newNode);
+						list.set(i, replacement);
+						list.remove(i + 1);
+						i--;
+					}
+				}
+			}
 
 			//Look for a CEntry here
 			if (list.size() >= 1) {
@@ -389,6 +408,7 @@ public class Compiler {
 					return ce;
 				}
 			}
+			
 
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will

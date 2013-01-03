@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -120,7 +121,7 @@ public class CommandHelperInterpreterListener implements Listener {
     }
 
     public void execute(String script, final MCPlayer p) throws ConfigCompileException {
-        List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
+        TokenStream stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
         ParseTree tree = MethodScriptCompiler.compile(stream);
         interpreterMode.remove(p.getName());
 		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistanceNetwork, plugin.permissionsResolver, plugin.chDirectory);

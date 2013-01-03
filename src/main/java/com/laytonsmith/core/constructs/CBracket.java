@@ -6,11 +6,11 @@ import com.laytonsmith.core.ParseTree;
  *
  * @author lsmith
  */
-public class CBracket extends Construct{
+public class CBracket extends CFunction{
 	ParseTree code;
 	
 	public CBracket(ParseTree code){
-		super(code.toString(), ConstructType.BRACKET, code.getTarget());
+		super(code.toString(), code.getTarget());
 		this.code = code;
 	}
 
