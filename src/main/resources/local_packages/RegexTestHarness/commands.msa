@@ -1,0 +1,77 @@
+	
+/**
+ * Outputs a table demonstrating usage of regexes in MethodScript.
+ */
+/testregex $regex $replacement $ = >>>
+	/**
+	 * Formats a 2d table of data into a nice textual table output.
+	 * @param @data A 2d array of data to put in the table.
+	 */
+	proc(_format_table, @data,
+		@data = @data[] #Make a copy, so we don't break the original
+		proc(_string_multiply, @string, @count,
+			@ret = ''
+			foreach(range(@count), @i,
+				@ret = @ret.@string
+			)
+			return(@ret)
+		)
+		# First calculate the column widths, which is based on the widest element
+		@columnWidths = array()
+		foreach(@data, @row,
+			@row = array_normalize(@row) #Protect against associative arrays
+			array_resize(@columnWidths, array_size(@row), 0)
+			foreach(array_keys(@row), @columnIndex,
+				@columnWidths[@columnIndex] = max(@columnWidths[@columnIndex], length(@row[@columnIndex]) + 2) #Pad with 2 spaces
+			)
+		)
+
+		# Ok, we have the column widths now, so write out the data.
+		@string = ''
+		@divider = ''
+		foreach(@columnWidths, @width,
+			@divider = @divider . '+' . _string_multiply('-', @width)
+		)
+		@divider = @divider . '+\n'
+		foreach(@data, @row,
+			array_resize(@row, array_size(@columnWidths), '')
+			@string = @string . @divider
+			@row = array_normalize(@row)
+			foreach(array_keys(@row), @column,
+				@cell = @row[@column]
+				@width = length(@cell)
+				@paddingLeft = _string_multiply(' ', ceil((@columnWidths[@column] - @width) / 2))
+				@paddingRight = _string_multiply(' ', floor((@columnWidths[@column] - @width) / 2))
+				@string = @string . '|' . @paddingLeft . @cell . @paddingRight	
+			)
+			@string = @string . '|\n'
+		)
+		return('\n'.@string.@divider.'\n')
+	)
+
+	@regex = $regex
+	@replacement = $replacement
+	@arguments = parse_args($)
+	msg('Regex: '.@regex)
+	msg('Replacement: '.@replacement)
+
+	#Now begin the output
+	@testCount = 0
+	@output = array()
+	array_push(@output, array('Test', 'Target String', 'reg_count()', 'reg_replace()', 'reg_match_all()'))
+	foreach(@arguments, @test,
+		@results = array(@testCount++, @test, reg_count(@regex, @test), reg_replace(@regex, @replacement, @test))
+		@matches = reg_match_all(@regex, @test)
+		@matchCount = 1
+		foreach(@matches, @match,
+			@groupCount = 0
+			foreach(@match, @group,
+				array_push(@output, @results)
+				@results = array('','',if(@groupCount == 0, 'match '.@matchCount.':', ''),'group '.(@groupCount++).':',@group)
+			)
+			@matchCount++
+		)
+		array_push(@output, @results)
+	)
+	msg(_format_table(@output))
+<<<
