@@ -40,7 +40,7 @@ class OptimizerObject {
 	 * @throws ConfigCompileException
 	 */
 	private void optimize01(ParseTree tree, CompilerEnvironment compilerEnvironment) throws ConfigCompileException {
-		com.laytonsmith.core.functions.Compiler.__autoconcat__ autoconcat = (com.laytonsmith.core.functions.Compiler.__autoconcat__) FunctionList.getFunction("__autoconcat__");
+		com.laytonsmith.core.compiler.CompilerFunctions.__autoconcat__ autoconcat = (com.laytonsmith.core.compiler.CompilerFunctions.__autoconcat__) FunctionList.getFunction("__autoconcat__");
 		if (tree.getData() instanceof CFunction && tree.getData().val().equals("cc")) {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);

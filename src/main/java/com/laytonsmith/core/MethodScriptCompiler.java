@@ -11,7 +11,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Compiler;
+import com.laytonsmith.core.compiler.CompilerFunctions;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
@@ -1212,7 +1212,7 @@ public final class MethodScriptCompiler {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);
 				if (node.getData().val().equals("__autoconcat__")) {
-					Compiler.__autoconcat__ func = (Compiler.__autoconcat__) FunctionList.getFunction(node.getData());
+					CompilerFunctions.__autoconcat__ func = (CompilerFunctions.__autoconcat__) FunctionList.getFunction(node.getData());
 					ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
 					tree.setData(tempNode.getData());
 					tree.setChildren(tempNode.getChildren());
