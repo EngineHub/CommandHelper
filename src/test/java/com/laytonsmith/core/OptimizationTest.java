@@ -28,7 +28,11 @@ public class OptimizationTest {
         assertEquals("msg('\\'quoted\\'')", optimize("msg( '\\'quoted\\'' )"));
     }
     
-    @Test public void testIfBasic() throws ConfigCompileException{
+    @Test public void testIfBasic1() throws ConfigCompileException{
+        assertEquals("1", optimize("if(true){ 1 }"));
+    }
+	
+    @Test public void testIfBasic2() throws ConfigCompileException{
         assertEquals("msg('hi')", optimize("if(true){ msg('hi') } else { msg('fail') }"));
     }
     

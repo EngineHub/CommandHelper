@@ -11,7 +11,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
  * @author Layton
  */
 public class CString extends Construct implements Cloneable, ArrayAccess{
-    
+	
     public CString(String value, Target t){
         super(value, ConstructType.STRING, t);
     }

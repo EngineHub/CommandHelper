@@ -271,8 +271,7 @@ public class Exceptions {
 					if (catchCode != null) {
 						CArray ex = ObjectGenerator.GetGenerator().exception(e, t);
 						if (ivar != null) {
-							ivar.setIval(ex);
-							env.getEnv(GlobalEnv.class).GetVarList().set(ivar);
+							env.getEnv(GlobalEnv.class).GetVarList().set(ivar, ex);
 						}
 						that.eval(catchCode, env);
 					}

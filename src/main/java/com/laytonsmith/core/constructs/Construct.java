@@ -113,6 +113,14 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     public Construct clone() throws CloneNotSupportedException {
         return (Construct) super.clone();
     }
+	
+	/**
+	 * Subclasses are free to implement this as needed. This is called
+	 * if a value goes out of scope. By default, nothing happens.
+	 */
+	public void destructor(){
+		//
+	}
 
     /**
      * This function takes a Construct, and turns it into a JSON value. If the construct is

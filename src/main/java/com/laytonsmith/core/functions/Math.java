@@ -509,22 +509,21 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2, cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
+				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v.ival())) {
-					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
+				if (Static.anyDoubles(v)) {
+					newVal = new CDouble(Static.getDouble(v, t) + value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
+					newVal = new CInt(Static.getInt(v, t) + value, t);
 				}
-				v = new IVariable(v.getName(), newVal, t);
-				env.getEnv(GlobalEnv.class).GetVarList().set(v);
-				return v;
+				env.getEnv(GlobalEnv.class).GetVarList().set(cur, newVal);
+				return newVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {
 					return new CDouble(Static.getNumber(args[0], t) + value, t);
@@ -610,27 +609,26 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2, cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
+				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v.ival())) {
-					newVal = new CDouble(Static.getDouble(v.ival(), t) + value, t);
+				if (Static.anyDoubles(v)) {
+					newVal = new CDouble(Static.getDouble(v, t) + value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v.ival(), t) + value, t);
+					newVal = new CInt(Static.getInt(v, t) + value, t);
 				}
 				Construct oldVal = null;
 				try {
-					oldVal = v.ival().clone();
+					oldVal = v.clone();
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getName(), newVal, t);
-				env.getEnv(GlobalEnv.class).GetVarList().set(v);
+				env.getEnv(GlobalEnv.class).GetVarList().set(cur, v);
 				return oldVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {
@@ -711,21 +709,20 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2, cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
+				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v.ival())) {
-					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
+				if (Static.anyDoubles(v)) {
+					newVal = new CDouble(Static.getDouble(v, t) - value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
+					newVal = new CInt(Static.getInt(v, t) - value, t);
 				}
-				v = new IVariable(v.getName(), newVal, t);
-				env.getEnv(GlobalEnv.class).GetVarList().set(v);
+				env.getEnv(GlobalEnv.class).GetVarList().set(cur, v);
 				return v;
 			} else {
 				if (Static.anyDoubles(args[0])) {
@@ -805,27 +802,26 @@ public class Math {
 			if (args.length == 2) {
 				if (args[1] instanceof IVariable) {
 					IVariable cur2 = (IVariable) args[1];
-					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2.getName(), cur2.getTarget());
+					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2, cur2.getTarget());
 				}
 				value = Static.getInt(args[1], t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
-				IVariable v = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget());
+				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
-				if (Static.anyDoubles(v.ival())) {
-					newVal = new CDouble(Static.getDouble(v.ival(), t) - value, t);
+				if (Static.anyDoubles(v)) {
+					newVal = new CDouble(Static.getDouble(v, t) - value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v.ival(), t) - value, t);
+					newVal = new CInt(Static.getInt(v, t) - value, t);
 				}
 				Construct oldVal = null;
 				try {
-					oldVal = v.ival().clone();
+					oldVal = v.clone();
 				} catch (CloneNotSupportedException ex) {
 					Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
 				}
-				v = new IVariable(v.getName(), newVal, t);
-				env.getEnv(GlobalEnv.class).GetVarList().set(v);
+				env.getEnv(GlobalEnv.class).GetVarList().set(cur, v);
 				return oldVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {

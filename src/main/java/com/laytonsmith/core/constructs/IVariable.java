@@ -2,60 +2,54 @@ package com.laytonsmith.core.constructs;
 
 /**
  *
- * @author layton
+ * @author lsmith
  */
 public class IVariable extends Construct implements Cloneable {
+	private final String name;
+	public IVariable(String name, Target t){
+		super("", null, t);
+		this.name = name;
+	}
 
-    public static final long serialVersionUID = 1L;
-    private Construct var_value;
-    final private String name;
+	@Override
+	public boolean isDynamic() {
+		return true;
+	}
+	
+	public String getName(){
+		return name;
+	}
 
-    public IVariable(String name, Target t) {
-        super(name, ConstructType.IVARIABLE, t);
-        this.var_value = new CString("", t);
-        this.name = name;
-    }
+	@Override
+	/**
+	 * This overrides Construct to make two variables equal if they
+	 * have the same name, not the same value.
+	 */
+	public boolean equals(Object obj) {
+		return obj instanceof IVariable && ((IVariable)obj).name.equals(name);
+	}
 
-    public IVariable(String name, Construct value, Target t) {
-        super(name, ConstructType.IVARIABLE, t);
-        this.var_value = value;
-        this.name = name;
-    }
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 29 * hash + (this.name != null ? this.name.hashCode() : 0);
+		return hash;
+	}
 
-    @Override
-    public String val() {
-        return var_value.val();
-    }
+	/**
+	 * IVariables are immutable, so this instance is returned.
+	 * @return
+	 * @throws CloneNotSupportedException 
+	 */
+	@Override
+	public IVariable clone() {
+		return this;
+	}
 
-    public Construct ival() {
-        var_value.setTarget(getTarget());
-        return var_value;
-    }
+	@Override
+	public String toString() {
+		return name;
+	}
 
-    public String getName() {
-        return name;
-    }
-
-    public void setIval(Construct c) {
-        var_value = c;
-    }
-
-    @Override
-    public String toString() {
-        return this.name + ":(" + this.ival().getClass().getSimpleName() + ") '" + this.ival().val() + "'";
-    }
-
-    @Override
-    public IVariable clone() throws CloneNotSupportedException {
-        IVariable clone = (IVariable) super.clone();
-        if (this.var_value != null) {
-            clone.var_value = this.var_value.clone();
-        }
-        return (IVariable) clone;
-    }
-
-    @Override
-    public boolean isDynamic() {
-        return true;
-    }
+	
 }

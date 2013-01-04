@@ -90,13 +90,6 @@ public interface Function extends FunctionBase, Documentation {
      * @return 
      */
     public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
-
-    /**
-     * If a function's syntax allows { braces }, then this method should return true. Exceedingly few functions
-     * should allow this, as only language construct emulators should use braces.
-     * @return 
-     */
-    public boolean allowBraces();
 	
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.

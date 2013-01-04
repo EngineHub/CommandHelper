@@ -98,7 +98,7 @@ public class Reflection {
 				} else if (args.length == 2) {
 					//The name was provided
 					String name = args[1].val();
-					return env.getEnv(GlobalEnv.class).GetVarList().get(name, t).ival();
+					return env.getEnv(GlobalEnv.class).GetVarList().get(new IVariable(name, t), t);
 				}
 			} else if ("line_num".equalsIgnoreCase(param)) {
 				return new CInt(t.line(), t);
@@ -171,7 +171,7 @@ public class Reflection {
 			//For now, we have special handling, since functions are actually the only thing that will work,
 			//but eventually this will be a generic interface.
 			if (element.startsWith("@")) {
-				IVariable var = environment.getEnv(GlobalEnv.class).GetVarList().get(element, t);
+				Construct var = environment.getEnv(GlobalEnv.class).GetVarList().get(new IVariable(element, t), t);
 				if (var == null) {
 					throw new ConfigRuntimeException("Invalid variable provided: " + element + " does not exist in the current scope", ExceptionType.FormatException, t);
 				}

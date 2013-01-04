@@ -22,7 +22,7 @@ public class CArrayReference extends Construct{
         if(!(array instanceof CArray) && !(array instanceof CArrayReference)){
             if(array instanceof IVariable){
                 name = (IVariable)array;
-                Construct ival = env.getEnv(GlobalEnv.class).GetVarList().get(name.getName(), name.getTarget()).ival();
+                Construct ival = env.getEnv(GlobalEnv.class).GetVarList().get(name, name.getTarget());
                 if(ival instanceof CArray){
                     this.array = ival;
                 } else {

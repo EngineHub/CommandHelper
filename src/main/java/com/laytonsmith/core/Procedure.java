@@ -31,24 +31,14 @@ public class Procedure implements Cloneable {
     private List<IVariable> varIndex = new ArrayList<IVariable>();
     private ParseTree tree;
     private boolean possiblyConstant = false;
-	/**
-	 * The line the procedure is defined at (for stacktraces)
-	 */
-	private Target definedAt;
 
     public Procedure(String name, List<IVariable> varList, ParseTree tree, Target t) {
         this.name = name;
-		this.definedAt = t;
         this.varList = new HashMap<String, IVariable>();
         for (IVariable var : varList) {
-            try {
-                this.varList.put(var.getName(), var.clone());
-            }
-            catch (CloneNotSupportedException e) {
-                this.varList.put(var.getName(), var);
-            }
+			this.varList.put(var.getName(), var);
             this.varIndex.add(var);
-            this.originals.put(var.getName(), var.ival());
+            this.originals.put(var.getName(), var);
         }
         this.tree = tree;
         if (!this.name.matches("^_[^_].*")) {
@@ -156,7 +146,7 @@ public class Procedure implements Cloneable {
         CArray array = new CArray(Target.UNKNOWN);
         for (String key : originals.keySet()) {
             Construct c = originals.get(key);
-            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(key, c, Target.UNKNOWN));
+            env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(key, Target.UNKNOWN), c);
             array.push(c);
         }
         Script fakeScript = Script.GenerateScript(tree, env.getEnv(GlobalEnv.class).GetLabel());//new Script(null, null);        
@@ -165,10 +155,10 @@ public class Procedure implements Cloneable {
             array.set(i, c, t);
             if (varIndex.size() > i) {
                 String varname = varIndex.get(i).getName();
-                env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, c, c.getTarget()));
+                env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(varname, c.getTarget()), c);
             }
         }
-        env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", array, Target.UNKNOWN));
+        env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable("@arguments", Target.UNKNOWN), array);
 
         try {
             fakeScript.eval(tree, env);

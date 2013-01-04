@@ -85,8 +85,7 @@ public class EventBinding {
 					throw new ConfigRuntimeException("The custom parameters must be ivariables", ExceptionType.CastException, t);
 				}
 				IVariable cur = (IVariable) var;
-				((IVariable) var).setIval(env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival());
-				custom_params.set((IVariable) var);
+				custom_params.set(cur, env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget()));
 			}
 			Environment newEnv = env;
 			try {

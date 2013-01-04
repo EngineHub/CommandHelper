@@ -44,8 +44,8 @@ public class C {
     public static CVoid Void(){
         return new CVoid(Target.UNKNOWN);
     }
-    public static IVariable IVariable(String name, Construct val){
-        return new IVariable(name, val, Target.UNKNOWN);
+    public static IVariable IVariable(String name){
+        return new IVariable(name, Target.UNKNOWN);
     }
     public static Variable Variable(String name, String val){
         return new Variable(name, val, false, false, Target.UNKNOWN);

@@ -14,23 +14,24 @@ public final class Globals {
     
     private Globals(){}
     
-    public static Map<String, IVariable> global_ivar = new HashMap<String, IVariable>();
+    public static Map<String, Construct> global_ivar = new HashMap<String, Construct>();
     public static Map<String, Construct> global_construct = new HashMap<String, Construct>();
     
-    public static synchronized void SetGlobal(IVariable ivar){
-        Map<String, IVariable> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
-        vars.put(ivar.getName(), ivar);
+    public static synchronized void SetGlobal(IVariable ivar, Construct value){
+        Map<String, Construct> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
+        vars.put(ivar.getName(), value);
     }
-    public static synchronized IVariable GetGlobalIVar(IVariable var){
-        Map<String, IVariable> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
+    public static synchronized Construct GetGlobalIVar(IVariable var){
+        Map<String, Construct> vars = global_ivar;//(HashMap<String, IVariable>)env.get("global_ivar");
         if(vars.containsKey(var.getName())){
             return vars.get(var.getName());
         } else {
-            IVariable v = new IVariable(var.getName(), new CString("", Target.UNKNOWN), Target.UNKNOWN);
-            vars.put(v.getName(), v);
+            Construct v = new CString("", Target.UNKNOWN);
+            vars.put(var.getName(), v);
             return v;
         }
     }
+	
     public static synchronized void SetGlobal(String name, Construct value){
         Map<String, Construct> vars = global_construct;//(HashMap<String, Construct>)env.get("global_construct");
         vars.put(name, value);

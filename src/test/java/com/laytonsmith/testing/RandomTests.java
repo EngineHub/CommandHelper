@@ -151,7 +151,7 @@ public class RandomTests {
 		CString c8 = C.String("").clone();
 		CVoid c9 = C.Void().clone();
 		Command c10 = new Command("/c", Target.UNKNOWN).clone();
-		IVariable c12 = new IVariable("@name", C.Null(), Target.UNKNOWN).clone();
+		IVariable c12 = new IVariable("@name", Target.UNKNOWN).clone();
 		Variable c13 = new Variable("$name", "", false, false, Target.UNKNOWN);
 	}
 

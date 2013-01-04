@@ -29,7 +29,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class _if extends AbstractFunction implements Optimizable {
+	public static class _if extends AbstractFunction implements Optimizable, Braceable {
 
 		public String getName() {
 			return "if";
@@ -122,34 +122,6 @@ public class BasicLogic {
 				throw new ConfigCompileException("if() can only have 3 parameters", t);
 			}
 			return new ifelse().optimizeDynamic(t, args);
-//			//Now check for too many/too few arguments
-//			if (args.size() == 1 || args.size() > 3) {
-//				throw new ConfigCompileException("Incorrect number of arguments passed to if()", t);
-//			}
-//			if (args.get(0).getData().isDynamic()) {
-//				return super.optimizeDynamic(t, args); //Can't optimize
-//			} else {
-//				if (Static.getBoolean(args.get(0).getData())) {
-//					return args.get(1);
-//				} else {
-//					if (args.size() == 3) {
-//						return args.get(2);
-//					} else {
-//						FileOptions options = new FileOptions(new HashMap<String, String>());
-//						if (!args.isEmpty()) {
-//							options = args.get(0).getFileOptions();
-//						}
-//						ParseTree node = new ParseTree(new CVoid(t), options);
-//						node.setOptimized(true);
-//						return node;
-//					}
-//				}
-//			}
-		}
-
-		@Override
-		public boolean allowBraces() {
-			return true;
 		}
 
 		@Override
@@ -160,12 +132,22 @@ public class BasicLogic {
 				new ExampleScript("With braces, false condition", "msg('Start')\nif(false){\n\tmsg('This will not show')\n}\nmsg('Finish')"),
 			};
 		}
+
+		@Override
+		public void handleBraces(List<ParseTree> allNodes, int startingWith) throws ConfigCompileException {
+			for(int i = startingWith; i < allNodes.size(); i++){
+				//Only this configuration is expected:
+				// - if/brace/[else/if/brace]*[/else/brace]
+				//We will use a mini-lexer here for this process.
+			}
+			throw new UnsupportedOperationException();
+		}
 		
 		
 	}
 
 	@api
-	public static class _switch extends AbstractFunction {
+	public static class _switch extends AbstractFunction implements Braceable {
 
 		public String getName() {
 			return "switch";
@@ -267,11 +249,6 @@ public class BasicLogic {
 		public boolean useSpecialExec() {
 			return true;
 		}
-
-		@Override
-		public boolean allowBraces() {
-			return true;
-		}
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -317,6 +294,10 @@ public class BasicLogic {
 					+ "\t\tmsg('Second')\n"
 					+ "}"),
 			};
+		}
+
+		public void handleBraces(List<ParseTree> allNodes, int startingWith) throws ConfigCompileException {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 	}
 
@@ -1214,7 +1195,7 @@ public class BasicLogic {
 
 		public Construct exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
-			//need to handle it appropriately.
+			//need to handleBraces it appropriately.
 			for(Construct c : args){
 				if(!Static.getBoolean(c)){
 					return new CBoolean(false, t);
@@ -1308,7 +1289,7 @@ public class BasicLogic {
 
 		public Construct exec(Target t, Environment env, Construct... args) {
 			//This will only happen if they hardcode true/false in, but we still
-			//need to handle it appropriately.
+			//need to handleBraces it appropriately.
 			for(Construct c : args){
 				if(Static.getBoolean(c)){
 					return new CBoolean(true, t);

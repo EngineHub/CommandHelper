@@ -150,15 +150,9 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			Construct c = args[1];
-			while (c instanceof IVariable) {
-				IVariable cur = (IVariable) c;
-				c = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
-			}
 			if (args[0] instanceof IVariable) {
-				IVariable v = new IVariable(((IVariable) args[0]).getName(), c, t);
-				env.getEnv(GlobalEnv.class).GetVarList().set(v);
-				return v;
+				env.getEnv(GlobalEnv.class).GetVarList().set((IVariable)args[0], args[1]);
+				return args[0];
 			}
 			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
 		}
@@ -248,10 +242,10 @@ public class DataHandling {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.get(0).getData() instanceof NewIVariable
-					&& children.get(1).getData() instanceof NewIVariable){
-				if(((NewIVariable)children.get(0).getData()).getName().equals(
-						((NewIVariable)children.get(1).getData()).getName())){
+			if(children.get(0).getData() instanceof IVariable
+					&& children.get(1).getData() instanceof IVariable){
+				if(((IVariable)children.get(0).getData()).getName().equals(
+						((IVariable)children.get(1).getData()).getName())){
 					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
 				}
 			} else if(children.get(0).getData() instanceof CFunction 
@@ -262,7 +256,7 @@ public class DataHandling {
 				array_set.addChild(children.get(0).getChildAt(1));
 				array_set.addChild(children.get(1));
 				return array_set;
-			} else if(!(children.get(0).getData() instanceof NewIVariable)){
+			} else if(!(children.get(0).getData() instanceof IVariable)){
 				throw new ConfigCompileException("Only ivariables may be assigned a value", t);
 			}
 			return null;
@@ -281,7 +275,7 @@ public class DataHandling {
 
 	@api
 	@noboilerplate
-	public static class _for extends AbstractFunction implements Optimizable {
+	public static class _for extends AbstractFunction implements Optimizable, Braceable {
 
 		public String getName() {
 			return "for";
@@ -327,11 +321,6 @@ public class DataHandling {
 
 		public Boolean runAsync() {
 			return null;
-		}
-
-		@Override
-		public boolean allowBraces() {
-			return true;
 		}
 		
 		@Override
@@ -384,6 +373,10 @@ public class DataHandling {
 
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		public void handleBraces(List<ParseTree> allNodes, int startingWith) throws ConfigCompileException {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 				
 	}
@@ -491,7 +484,7 @@ public class DataHandling {
 	}
 
 	@api(environments=CommandHelperEnvironment.class)
-	public static class foreach extends AbstractFunction {
+	public static class foreach extends AbstractFunction implements Braceable {
 
 		public String getName() {
 			return "foreach";
@@ -542,9 +535,9 @@ public class DataHandling {
 					if (!one.inAssociativeMode()) {
 						for (int i = 0; i < one.size(); i++) {
 							if(kkey != null){
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CInt(i, t), t));
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), t), new CInt(i, t));
 							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(i, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), t), one.get(i, t));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -563,9 +556,9 @@ public class DataHandling {
 						for (int i = 0; i < one.size(); i++) {
 							String index = one.keySet().toArray(new String[]{})[i];
 							if(kkey != null){
-								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), new CString(index, t), t));
+								env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(kkey.getName(), t), new CString(index, t));
 							}
-							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), one.get(index, t), t));
+							env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(two.getName(), t), one.get(index, t));
 							try {
 								parent.eval(code, env);
 							} catch (LoopBreakException e) {
@@ -618,11 +611,6 @@ public class DataHandling {
 		public boolean useSpecialExec() {
 			return true;
 		}
-
-		@Override
-		public boolean allowBraces() {
-			return true;
-		}
 		
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
@@ -644,6 +632,10 @@ public class DataHandling {
 			return "Executing function: " + this.getName() + "(" 
 					+ args.get(0).toStringVerbose() + ", " + args.get(1).toStringVerbose()
 					+ ", <code>)";
+		}
+
+		public void handleBraces(List<ParseTree> allNodes, int startingWith) throws ConfigCompileException {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 	}
 	
@@ -1601,17 +1593,7 @@ public class DataHandling {
 							if (!(cons instanceof IVariable)) {
 								throw new ConfigRuntimeException("You must use IVariables as the arguments", ExceptionType.InvalidProcedureException, t);
 							} else {
-								IVariable ivar = null;
-								try {
-									Construct c = cons;
-									while (c instanceof IVariable) {
-										c = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
-									}
-									ivar = new IVariable(((IVariable) cons).getName(), c.clone(), t);
-								} catch (CloneNotSupportedException ex) {
-									//
-								}
-								vars.add(ivar);
+								vars.add((IVariable)cons);
 							}
 						}
 					}
@@ -2059,7 +2041,13 @@ public class DataHandling {
 			if (args[0] instanceof IVariable) {
 				//Mode 1     
 				IVariable var = (IVariable) args[0];
-				environment.getEnv(GlobalEnv.class).GetVarList().set(Globals.GetGlobalIVar(var));
+				//This method is going to be deprecated next release
+				CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "In future versions of CH, this will work differently."
+						+ " The value stored in the variable will be used, not the name of the variable itself. Take corrective action"
+						+ " now to get rid of this warning, then once the feature is switched, you can use the method as you would"
+						+ " normally. (For instance, change usages of import(@var) to import('@var'), or use a more meaningful name"
+						+ " in general.)", t);
+				environment.getEnv(GlobalEnv.class).GetVarList().set(var, Globals.GetGlobalIVar(var));
 				return new CVoid(t);
 			} else {
 				//Mode 2
@@ -2114,7 +2102,12 @@ public class DataHandling {
 			if (args.length == 1) {
 				if (args[0] instanceof IVariable) {
 					IVariable cur = (IVariable) args[0];
-					Globals.SetGlobal(environment.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()));
+					CHLog.GetLogger().Log(CHLog.Tags.DEPRECATION, LogLevel.WARNING, "In future versions of CH, this will work differently."
+						+ " The value stored in the variable will be used, not the name of the variable itself. Take corrective action"
+						+ " now to get rid of this warning, then once the feature is switched, you can use the method as you would"
+						+ " normally. (For instance, change usages of export(@var) to export('@var'), or use a more meaningful name"
+						+ " in general.)", t);
+					Globals.SetGlobal(cur, environment.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget()));
 				} else {
 					throw new ConfigRuntimeException("Expecting a IVariable when only one parameter is specified", ExceptionType.InsufficientArgumentsException, t);
 				}
@@ -2123,7 +2116,7 @@ public class DataHandling {
 				Construct c = args[args.length - 1];
 				//We want to store the value contained, not the ivar itself
 				while (c instanceof IVariable) {
-					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c).getName(), t).ival();
+					c = environment.getEnv(GlobalEnv.class).GetVarList().get(((IVariable) c), t);
 				}
 				Globals.SetGlobal(key, c);
 			}
@@ -2194,11 +2187,7 @@ public class DataHandling {
 					throw new ConfigRuntimeException("Arguments sent to closure (barring the last) must be ivariables", ExceptionType.CastException, t);
 				}
 				names[i] = ((IVariable) ret).getName();
-				try {
-					defaults[i] = ((IVariable) ret).ival().clone();
-				} catch (CloneNotSupportedException ex) {
-					Logger.getLogger(DataHandling.class.getName()).log(Level.SEVERE, null, ex);
-				}
+				defaults[i] = env.getEnv(GlobalEnv.class).GetVarList().get(((IVariable)ret), t);
 			}
 			CClosure closure = new CClosure(nodes[nodes.length - 1], env, names, defaults, t);
 			return closure;

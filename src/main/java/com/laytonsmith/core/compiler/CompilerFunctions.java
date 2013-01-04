@@ -415,6 +415,35 @@ public class CompilerFunctions {
 				}
 			}
 			
+			//We need to look for CBraces (actually, the function) and resolve that, and then grab the first function (or bare string
+			//that is a keyword) and pass it to that function (or keyword) to finish resolving. We will send it the whole list.
+			//There could be multiple things that need resolving, so we will continue resolving things until we get to the end,
+			//though we will make corrections for list size shrinkage.
+			for(int i = 0; i < list.size(); i++){
+				int currentSize = list.size();
+				ParseTree node = list.get(i);
+				if(node.getData() instanceof CFunction && ((CFunction)node.getData()).val().equals("__cbrace__")){
+					if(i == 0){
+						//This is a compile error, they have a { at the beginning of a sibling chain.
+						throw new ConfigCompileException("Unexpected {", node.getTarget());
+					}
+					ParseTree prev = list.get(i - 1);
+					Construct data = prev.getData();
+					if(data instanceof CFunction){
+						Function f = ((CFunction)node.getData()).getFunction();
+						if(f instanceof Braceable){
+							
+						}
+					} else if(data instanceof CString){
+						//Eventually keywords will be allowed, but not yet
+						throw new ConfigCompileException("Unexpected {", node.getTarget());
+					}
+				}
+				int newSize = list.size();
+				//Index correction. Note that it will be 0 if no correction was needed,
+				//and so i will be unaffected.
+				i = i - (currentSize - newSize);
+			}
 
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
