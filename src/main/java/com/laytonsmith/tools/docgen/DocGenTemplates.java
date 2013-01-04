@@ -16,6 +16,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistance.DataSource;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -95,6 +96,57 @@ public class DocGenTemplates {
 				}
 			} catch(Exception e){
 				//Oh well, skip it.
+			}
+		}
+		if(!appended){
+			templateBuilder.append(template.substring(lastMatch));
+		}
+		return templateBuilder.toString();
+	}
+	
+	/**
+	 * A utility method to replace all template methods in a generic template string.
+	 * @param template The template string on which to perform the replacements
+	 * @param generators The list of String-Generator entries, where the String is the template
+	 * name, and the Generator is the replacement to use.
+	 * @return 
+	 */
+	public static String doTemplateReplacement(String template, Map<String, Generator> generators){
+		try {
+			Prefs.init(null);
+		} catch (IOException ex) {
+			Logger.getLogger(DocGenTemplates.class.getName()).log(Level.SEVERE, null, ex);
+		}
+		ClassDiscovery.InstallDiscoveryLocation(ClassDiscovery.GetClassPackageHierachy(DocGenTemplates.class));
+
+		//Find all the %%templates%% in the template
+		Matcher m = Pattern.compile("%%([^\\|%]+)([^%]*?)%%").matcher(template);
+		StringBuilder templateBuilder = new StringBuilder();
+		int lastMatch = 0;
+		boolean appended = false;
+		while(m.find()){
+			if(!appended){
+				templateBuilder.append(template.substring(lastMatch, m.start()));
+				appended = true;
+			}
+			String name = m.group(1);
+			try{
+				if(generators.containsKey(name)){
+					String [] tmplArgs = new String[0]; 
+					if(m.group(2) != null && !m.group(2).equals("")){
+						//We have arguments
+						//remove the initial |, then split
+						tmplArgs = m.group(2).substring(1).split("\\|");
+					}
+					String templateValue = generators.get(name).generate(tmplArgs);
+					templateBuilder.append(templateValue);
+					lastMatch = m.end();
+					appended = false;
+					//template = template.replaceAll("%%" + Pattern.quote(name) + "%%", templateValue);
+				}
+			} catch(Exception e){
+				//Oh well, skip it.
+				e.printStackTrace();
 			}
 		}
 		if(!appended){

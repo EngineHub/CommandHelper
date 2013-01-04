@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
@@ -12,8 +13,16 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.ProfilePoint;
+import com.laytonsmith.tools.docgen.DocGenTemplates;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.TimeZone;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
@@ -345,11 +354,33 @@ public class Scheduling {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{1, 2, 3};
 		}
 
 		public String docs() {
-			return getBundledDocs();
+			Map<String, DocGenTemplates.Generator> map = new HashMap<String, DocGenTemplates.Generator>();
+			map.put("timezoneValues", new DocGenTemplates.Generator() {
+
+				public String generate(String... args) {
+					String [] timezones = new String[0];
+					try{
+						timezones = TimeZone.getAvailableIDs();
+					} catch(NullPointerException e){
+						//This is due to a JDK bug. As you can see, the code above
+						//should never NPE due to our mistake, so it would only occur
+						//during an internal error. The solution that worked for me is here: 
+						//https://bugs.launchpad.net/ubuntu/+source/tzdata/+bug/1053160
+						//however, this appears to be an issue in Open JDK, so performance on
+						//other systems may vary. We will handle this error by reporting that
+						//list could not be retrieved, using the Join method's empty parameter.
+					}
+					//Let's sort the timezones
+					List<String> tz = new ArrayList<String>(Arrays.asList(timezones));
+					Collections.sort(tz);
+					return StringUtils.Join(tz, ", ", " or ", " or ", "Couldn't retrieve the list of timezones!");
+				}
+			});
+			return getBundledDocs(map);
 		}
 
 		public ExceptionType[] thrown() {
@@ -370,10 +401,15 @@ public class Scheduling {
 
 		public Construct exec(Target t, Environment env, Construct... args) {
 			Date now = new Date();
-			if (args.length == 2) {
+			if (args.length >= 2 && !(args[1] instanceof CNull)) {
 				now = new Date(Static.getInt(args[1], t));
 			}
+			TimeZone timezone = TimeZone.getDefault();
+			if(args.length >= 3){
+				timezone = TimeZone.getTimeZone(args[2].val());
+			}
 			SimpleDateFormat dateFormat = new SimpleDateFormat(args[0].toString());
+			dateFormat.setTimeZone(timezone);
 			return new CString(dateFormat.format(now), t);
 		}
 
@@ -387,10 +423,12 @@ public class Scheduling {
 						new ExampleScript("With timezone", "simple_date('hh \\'o\\'\\'clock\\' a, zzzz')"),
 						new ExampleScript("With simple timezone", "simple_date('hh \\'o\\'\\'clock\\' a, zzzz')"),
 						new ExampleScript("With timezone", "simple_date('K:mm a, z')"),
+						new ExampleScript("With alternate timezone", "simple_date('K:mm a, z', time(), 'GMT')"),
 						new ExampleScript("With 5 digit year", "simple_date('yyyyy.MMMMM.dd GGG hh:mm aaa')"),
 						new ExampleScript("Long format", "simple_date('EEE, d MMM yyyy HH:mm:ss Z')"),
 						new ExampleScript("Computer readable format", "simple_date('yyMMddHHmmssZ')"),
-						new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')"),};
+						new ExampleScript("With milliseconds", "simple_date('yyyy-MM-dd\\'T\\'HH:mm:ss.SSSZ')"),
+			};
 		}
 	}
 }
