@@ -1,12 +1,8 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.abstraction.blocks;
 
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCMetadatable;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 
 /**
  *

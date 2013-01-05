@@ -13,7 +13,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 public class CString extends Construct implements Cloneable, ArrayAccess{
 	
     public CString(String value, Target t){
-        super(value, ConstructType.STRING, t);
+        super(value==null?"":value, ConstructType.STRING, t);
     }
     
     public CString(char value, Target t){
@@ -57,4 +57,15 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
         }
         return new CString(this.val().substring(begin, end), t);
     }
+	
+	/**
+	 * Returns the underlying string, quoted. So, if the value were
+	 * {@code This is 'the value'}, then {@code 'This is \'the value\''} would
+	 * be returned. (That is, characters needing escapes will be escaped.) It includes
+	 * the outer quotes as well.S
+	 * @return 
+	 */
+	public String getQuote(){
+		return "'" + val().replace("\\", "\\\\").replace("'", "\\'") + "'";
+	}
 }

@@ -9,7 +9,11 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.snapins.PackagePermission;
+import com.laytonsmith.tools.docgen.DocGenTemplates;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  *
@@ -137,12 +141,40 @@ public abstract class AbstractFunction implements Function {
 		return "Executing function: " + this.getName() + "(" + b.toString() + ")";
 	}
 	
+	/**
+	 * Returns the documentation for this function that is provided as an external resource.
+	 * This is useful for functions that have especially long or complex documentation, and adding
+	 * it as a string directly in code would be cumbersome.
+	 * @return 
+	 */
 	protected String getBundledDocs(){
-		return StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
+		return getBundledDocs(null);
+	}
+	
+	/**
+	 * Returns the documentation for this function that is provided as an external resource.
+	 * This is useful for functions that have especially long or complex documentation, and adding
+	 * it as a string directly in code would be cumbersome. To facilitate dynamic docs, templates
+	 * can be provided, which will be replaced for you.
+	 * @param map
+	 * @return 
+	 */
+	protected String getBundledDocs(Map<String, DocGenTemplates.Generator> map){
+		String template = StreamUtils.GetString(AbstractFunction.class.getResourceAsStream("/functionDocs/" + getName()));
+		if(map == null){
+			map = new HashMap<String, DocGenTemplates.Generator>();
+		}
+		return DocGenTemplates.doTemplateReplacement(template, map);
 	}
 
 	public String profileMessageS(List<ParseTree> args) {
 		return "Executing function: " + this.getName() + "(<" + args.size() + " child"
 				+ (args.size() == 1 ? "" : "ren") + " not shown>)";
 	}
+
+	public PackagePermission getPermission() {
+		return PackagePermission.NO_PERMISSIONS_NEEDED;
+	}
+	
+	
 }

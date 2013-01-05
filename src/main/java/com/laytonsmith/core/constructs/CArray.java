@@ -46,7 +46,7 @@ public class CArray extends Construct implements ArrayAccess{
 	}
 
     public CArray(Target t,  Construct... items) {
-        super(null, ConstructType.ARRAY, t);
+        super("{}", ConstructType.ARRAY, t);
         if(items != null){
             for(Construct item : items){
                 if(item instanceof CEntry){
@@ -424,6 +424,7 @@ public class CArray extends Construct implements ArrayAccess{
         if(!associative_mode){
             try{
                 ret = array.remove(Integer.parseInt(c));
+				next_index--;
             } catch(NumberFormatException e){ 
                 throw new ConfigRuntimeException("Expecting an integer, but received " + c + " (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, construct.getTarget());
             } catch(IndexOutOfBoundsException e){

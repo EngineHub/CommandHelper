@@ -1,6 +1,4 @@
-/* To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.abstraction.bukkit.events;
 
 import com.laytonsmith.abstraction.*;
@@ -20,6 +18,7 @@ import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerPickupItemEvent;
 
 /**
@@ -27,6 +26,36 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCPlayerInteractEntityEvent implements MCPlayerInteractEntityEvent {
+
+		PlayerInteractEntityEvent e;
+		public BukkitMCPlayerInteractEntityEvent(PlayerInteractEntityEvent event) {
+			this.e = event;
+		}
+		
+		public Object _GetObject() {
+			return e;
+		}
+
+		public MCEntity getEntity() {
+			return BukkitConvertor.BukkitGetCorrectEntity(e.getRightClicked());
+		}
+
+		public boolean isCancelled() {
+			return e.isCancelled();
+		}
+
+		public void setCancelled(boolean cancelled) {
+			e.setCancelled(cancelled);
+		}
+
+		public MCPlayer getPlayer() {
+			return new BukkitMCPlayer(e.getPlayer());
+		}
+		
+	}
 	
     @abstraction(type = Implementation.Type.BUKKIT)
     public static class BukkitMCPlayerDropItemEvent implements MCPlayerDropItemEvent {

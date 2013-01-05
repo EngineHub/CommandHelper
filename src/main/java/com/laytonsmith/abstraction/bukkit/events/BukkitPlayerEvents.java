@@ -219,9 +219,11 @@ public class BukkitPlayerEvents {
             return pce;
         }
         
-        public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message){
-            return new BukkitMCPlayerChatEvent(new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message, 
-                    new HashSet<Player>(Arrays.asList(Bukkit.getServer().getOnlinePlayers()))));
+        public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format){
+			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message, 
+                    new HashSet<Player>(Arrays.asList(Bukkit.getServer().getOnlinePlayers())));
+			apce.setFormat(format);
+            return new BukkitMCPlayerChatEvent(apce);
         }
 
         public String getMessage() {
@@ -250,6 +252,14 @@ public class BukkitPlayerEvents {
         public MCPlayer getPlayer() {
             return new BukkitMCPlayer(pce.getPlayer());
         }
+
+		public String getFormat() {
+			return pce.getFormat();
+		}
+
+		public void setFormat(String format) {
+			pce.setFormat(format);
+		}
         
     }
 	

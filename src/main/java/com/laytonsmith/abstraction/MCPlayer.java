@@ -98,4 +98,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public float getSaturation();
 	
 	public void setSaturation(float s);
+	
+	public void setBedSpawnLocation(MCLocation l);
 }

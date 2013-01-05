@@ -1,12 +1,6 @@
 package com.laytonsmith.PureUtilities;
 
 import com.laytonsmith.testing.StaticTest;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.Test;
