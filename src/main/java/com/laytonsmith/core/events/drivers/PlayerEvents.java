@@ -875,8 +875,8 @@ public class PlayerEvents {
         }
 	
 	@Override
-        public void preExecution(Environment env, ActiveEvent activeEvent) {
-            if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
+        public void preExecution(Environment env, ActiveEvent activeEvent) { 
+           if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
                 MCPlayer player = ((MCPlayerQuitEvent)activeEvent.getUnderlyingEvent()).getPlayer();
@@ -904,7 +904,7 @@ public class PlayerEvents {
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when any player attempts to send a chat message."
-                    + "{message: The message to be sent | recipients}"
+                    + "{message: The message to be sent | recipients | format}"
                     + "{message|recipients: An array of"
                     + " players that will recieve the chat message. If a player doesn't exist"
                     + " or is offline, and is in the array, it is simply ignored, no"
