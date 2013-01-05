@@ -365,5 +365,12 @@ public class ArrayTest {
         SRun("msg(array(0, 1, 2)[0])", fakePlayer);
         verify(fakePlayer).sendMessage("0");
     }
+	
+	@Test public void testArraySets() throws Exception{
+		SRun("@arr = array()\n"
+				+ "array_set(@arr,0,array())\n"
+				+ "array_remove(@arr,0)\n"
+				+ "array_set(@arr,0,array())", fakePlayer);
+	}
 
 }

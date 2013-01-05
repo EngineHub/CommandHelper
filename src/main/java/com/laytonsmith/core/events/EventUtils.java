@@ -11,6 +11,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.EventException;
 import com.laytonsmith.core.exceptions.FunctionReturnException;
 import com.laytonsmith.core.exceptions.PrefilterNonMatchException;
+import com.laytonsmith.core.functions.Exceptions;
 import java.util.*;
 
 /**
@@ -37,6 +38,17 @@ public final class EventUtils {
         if (!event_handles.containsKey(event.driver())) {
             event_handles.put(event.driver(), new TreeSet<BoundEvent>());
         }
+		//Check for duplicate IDs
+		for(Set<BoundEvent> s : event_handles.values()){
+			for(BoundEvent bb : s){
+				if(bb.getId().equals(b.getId())){
+					throw new ConfigRuntimeException("Cannot have duplicate IDs defined."
+							+ " (Tried to define an event handler with id \"" + b.getId() + "\" at " + b.getTarget() + ","
+							+ " but it has already been defined at " + bb.getTarget() + ")", 
+							Exceptions.ExceptionType.BindException, b.getTarget());
+				}
+			}
+		}
         SortedSet<BoundEvent> set = event_handles.get(event.driver());
         set.add(b);
         try {

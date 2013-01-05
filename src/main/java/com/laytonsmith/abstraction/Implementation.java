@@ -37,6 +37,8 @@ public final class Implementation {
 			Thread abstractionenumsThread;
 			abstractionenumsThread = new Thread(new Runnable() {
 				public void run() {
+					//This goes ahead and runs the cache, which we can offset to our own thread.
+					StaticLayer.GetConvertor().getMaxBlockID();
 					try {
 						//Let the server startup data blindness go by first, so we display any error messages prominently,
 						//since an Error is a case of very bad code that shouldn't have been released to begin with.

@@ -1,4 +1,4 @@
-mixed {format, [time]} Returns a date of the current time (or the time specified) in the format you give. ---- 
+mixed {format, [time, [timezone]]} Returns a date of the current time (or the time specified) in the format you give. ---- 
 Date and time formats are specified by date and time pattern strings.
 Within date and time pattern strings, unquoted letters from 'A' to 'Z'
 and from 'a' to 'z' are interpreted as pattern letters representing
@@ -82,3 +82,9 @@ For parsing, RFC 822 time zones are also accepted.
 *** Digit Digit
 TwoDigitHours must be between 00 and 23. Other definitions are as for general time zones.
 For parsing, general time zones are also accepted.
+
+The timezone parameter can be specified as well, to change the timezone of the generated date. The
+default is to use the system's time. To bypass the time parameter, you can either send time() 
+(which is the default) or null. Valid timezone values are:
+
+%%timezoneValues%%

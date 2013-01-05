@@ -62,6 +62,7 @@ public enum MCEntityType {
     WEATHER,
     PLAYER,
     COMPLEX_PART,
+	FIREWORK,
     /**
      * An unknown entity without an Entity Class
      */

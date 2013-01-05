@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -183,9 +184,21 @@ public class BukkitConvertor extends AbstractConvertor {
             return new BukkitMCProjectile((Projectile)be);
         }
     	
+    	if(be instanceof Hanging){
+    		return new BukkitMCHanging(be);
+    	}
+    	
+    	if(be instanceof Vehicle){
+    		return new BukkitMCVehicle(be);
+    	}
+    	
     	if(be instanceof Tameable){
             return new BukkitMCTameable(be);
         }
+    	
+    	if(be instanceof Ageable){
+    		return new BukkitMCAgeable(be);
+    	}
         
         if(be instanceof Player){
             return new BukkitMCPlayer((Player)be);
@@ -271,6 +284,51 @@ public class BukkitConvertor extends AbstractConvertor {
 	@Override
 	public MCNote GetNote(int octave, MCTone tone, boolean sharp) {
 		return new BukkitMCNote(octave, tone, sharp);
+	}
+	
+	private static int maxBlockID = -1;
+	private static int maxItemID = -1;
+	private static int maxRecordID = -1;
+	
+	public synchronized int getMaxBlockID() {
+		if (maxBlockID == -1) {
+			calculateIDs();
+		}
+		return maxBlockID;
+	}
+	
+	public synchronized int getMaxItemID() {
+		if (maxItemID == -1) {
+			calculateIDs();
+		}
+		return maxItemID;
+	}
+	
+	public synchronized int getMaxRecordID() {
+		if (maxRecordID == -1) {
+			calculateIDs();
+		}
+		return maxRecordID;
+	}
+	
+	private void calculateIDs() {
+		maxBlockID = 0;
+		maxItemID = 256;
+		maxRecordID = 2256;
+		for (Material m : Material.values()) {
+			int mID = m.getId();
+			if (mID >= maxRecordID) {
+				maxRecordID = mID;
+			} else if (mID >= maxItemID) {
+				maxItemID = mID;
+			} else if (mID >= maxBlockID) {
+				maxBlockID = mID;
+			}
+		}
+	}
+
+	public MCColor GetColor(int red, int green, int blue) {
+		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
 	}
 
 }

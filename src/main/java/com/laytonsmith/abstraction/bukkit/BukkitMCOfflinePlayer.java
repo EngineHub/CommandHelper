@@ -2,6 +2,7 @@
 
 package com.laytonsmith.abstraction.bukkit;
 
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import org.bukkit.OfflinePlayer;
@@ -60,6 +61,9 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 
 	public boolean hasPlayedBefore() {
 		return op.hasPlayedBefore();
-	}
-    
+	}	
+	public MCLocation getBedSpawnLocation() {
+        return new BukkitMCLocation(op.getBedSpawnLocation());
+    }
+	
 }

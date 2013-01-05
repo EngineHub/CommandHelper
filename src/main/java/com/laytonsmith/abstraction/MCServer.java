@@ -28,6 +28,7 @@ public interface MCServer extends AbstractionObject{
     public Boolean getAllowEnd();
     public Boolean getAllowFlight();
     public Boolean getAllowNether();
+    public Boolean getOnlineMode();
     public String getWorldContainer();
     public int getMaxPlayers();
     public List<MCOfflinePlayer> getBannedPlayers();

@@ -13,4 +13,8 @@ public interface MCBlockBreakEvent extends BindableEvent {
     public MCPlayer getPlayer();
 
     public MCBlock getBlock();
+
+	public int getExpToDrop();
+
+	public void setExpToDrop(int exp);
 }

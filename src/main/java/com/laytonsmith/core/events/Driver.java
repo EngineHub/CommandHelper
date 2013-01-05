@@ -13,6 +13,7 @@ public enum Driver {
 	PLAYER_TELEPORT,
     PLAYER_JOIN,    
     PLAYER_INTERACT, 
+    PLAYER_INTERACT_ENTITY,
     PLAYER_SPAWN,     
     PLAYER_DEATH, 
     PLAYER_QUIT,

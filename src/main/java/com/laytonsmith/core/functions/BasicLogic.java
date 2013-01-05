@@ -979,6 +979,66 @@ public class BasicLogic {
 			};
 		}
 	}
+	
+	@api
+	public static class ref_equals extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			if(args[0] instanceof CArray && args[1] instanceof CArray){
+				return new CBoolean(args[0] == args[1], t);
+			} else {
+				return new equals().exec(t, environment, args);
+			}
+		}
+
+		public String getName() {
+			return "ref_equals";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "boolean {val1, val2} Returns true if and only if the two values are actually the same reference."
+					+ " Primitives that are equal will always be the same reference, this method is only useful for"
+					+ " object/array comparisons.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Usage with primitives", "msg(ref_equals(1, 1))\n"
+					+ "msg(ref_equals(1, 2))"),
+				new ExampleScript("Usage with arrays that are the same reference", "@a = array(1, 2, 3)\n"
+					+ "@b = @a\n"
+					+ "msg(ref_equals(@a, @b)) # Note that an assignment simply sets it to reference the same underlying object, so this is true"),
+				new ExampleScript("Usage with a cloned array", "@a = array(1, 2, 3)\n"
+					+ "@b = @a[] # Clone the array\n"
+					+ "msg(ref_equals(@a, @b)) # False, because although the arrays are == (and ===) they are different references"),
+				new ExampleScript("Usage with a duplicated array", "@a = array(1, 2, 3)\n"
+					+ "@b = array(1, 2, 3) # New array with duplicate content\n"
+					+ "msg(ref_equals(@a, @b)) # Again, even though @a == @b and @a === @b, this is false, because they are two different references"),
+			};
+		}
+		
+	}
 
 	@api
 	public static class lt extends AbstractFunction implements Optimizable {

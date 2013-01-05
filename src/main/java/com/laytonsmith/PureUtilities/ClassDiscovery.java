@@ -1,7 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+
 package com.laytonsmith.PureUtilities;
 
 import java.io.File;
@@ -291,7 +288,8 @@ public final class ClassDiscovery {
 			return fuzzyClassCache.get(index);
 		} else {
 			Set<Class> found = new HashSet<Class>();
-			for(Class c : GetAllClasses()){
+			Set<Class> searchSpace = GetAllClasses();
+			for(Class c : searchSpace){
 				if(c.getPackage().getName().matches(packageRegex) && c.getSimpleName().equals(className)){
 					found.add(c);
 				}
