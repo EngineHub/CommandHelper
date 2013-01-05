@@ -74,11 +74,9 @@ public class MethodScriptCompilerTest {
         List e = null;
         e = new ArrayList();
         //This is the decomposed version of the above config
-        e.add(new Token(Token.TType.COMMAND, "/cmd", Target.UNKNOWN));
-        e.add(new Token(Token.TType.WHITESPACE, " ", Target.UNKNOWN));
+        e.add(new Token(Token.TType.BARE_STRING, "/cmd", Target.UNKNOWN));
         e.add(new Token(Token.TType.ALIAS_END, "=", Target.UNKNOWN));
-        e.add(new Token(Token.TType.WHITESPACE, " ", Target.UNKNOWN));
-        e.add(new Token(Token.TType.FUNC_NAME, "msg", Target.UNKNOWN));
+        e.add(new Token(Token.TType.BARE_STRING, "msg", Target.UNKNOWN));
         e.add(new Token(Token.TType.FUNC_START, "(", Target.UNKNOWN));
         e.add(new Token(Token.TType.STRING, "string", Target.UNKNOWN));
         e.add(new Token(Token.TType.FUNC_END, ")", Target.UNKNOWN));
@@ -108,7 +106,7 @@ public class MethodScriptCompilerTest {
 
     }
     @Test
-    public void testCompile() throws ConfigCompileException {
+    public void testCompileFailureExtraParameter() throws ConfigCompileException {
         MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)", null, false)).get(0).compileRight();
         try {
             //extra parameter
@@ -117,6 +115,9 @@ public class MethodScriptCompilerTest {
         } catch (ConfigCompileException e) {
             //passed
         }
+	}
+    @Test
+    public void testCompileFailureMissingParenthesis() throws ConfigCompileException {
         try {
             //missing parenthesis
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function", null, false)).get(0).compileRight();
@@ -124,13 +125,19 @@ public class MethodScriptCompilerTest {
         } catch (ConfigCompileException e) {
             //passed
         }
+	}
+    @Test
+    public void testCompileFailureExtraParenthesis() throws ConfigCompileException {
         try {
             //extra parenthesis
-            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function)))))", null, false)).get(0).compileRight();
+            MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(s, if(true, s, s) s)))))", null, false)).get(0).compileRight();
             fail("Did not expect test to pass");
         } catch (ConfigCompileException e) {
             //passed
         }
+	}
+    @Test
+    public void testCompileFailureExtraMultilineEnd() throws ConfigCompileException {
         try {
             //extra multiline end construct
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = msg(this is a string, if(true, and, another) function) <<<", null, false)).get(0).compileRight();
@@ -138,7 +145,9 @@ public class MethodScriptCompilerTest {
         } catch (ConfigCompileException e) {
             //passed
         }
-        
+	}   
+    @Test
+    public void testCompileFailureNoMultilineEnd() throws ConfigCompileException {
         try{
             //no multiline end construct
             MethodScriptCompiler.preprocess(MethodScriptCompiler.lex("/cmd = >>>\nmsg('hi')\n", null, false)).get(0).compileRight();
@@ -146,9 +155,11 @@ public class MethodScriptCompilerTest {
         } catch(ConfigCompileException e){
             //passed
         }
-
+	}
+    @Test
+    public void testCompileSimple() throws ConfigCompileException {
+		//No errors
         MethodScriptCompiler.compile(MethodScriptCompiler.lex("if(1, msg('') msg(''))", null, true));
-        
     }
     
     @Test public void testLabel() throws ConfigCompileException{
@@ -951,6 +962,11 @@ public class MethodScriptCompilerTest {
 	}
 	@Test public void testWhitespaceAroundSymbol2() throws Exception{
 		assertEquals("true", SRun("false==false", null));
+	}
+	
+	@Test(expected=ConfigCompileException.class)
+	public void testLooseSquareBrackets() throws Exception{
+		SRun("(['not allowed'])", fakePlayer);
 	}
     
     //TODO: Once the lexer is rewritten, this should work

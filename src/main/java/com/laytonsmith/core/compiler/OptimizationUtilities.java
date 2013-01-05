@@ -50,9 +50,13 @@ public class OptimizationUtilities {
         ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true));        
         StringBuilder b = new StringBuilder();
         //The root always contains null.
-        for(ParseTree child : tree.getChildren()){
-            b.append(optimize0(child));
-        }        
+		if(tree.getData() == null){
+			for(ParseTree child : tree.getChildren()){
+				b.append(optimize0(child));
+			}        
+		} else {
+			b.append(optimize0(tree));
+		}
         return b.toString();
     }
     private static String optimize0(ParseTree node){

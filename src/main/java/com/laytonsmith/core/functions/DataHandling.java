@@ -177,42 +177,42 @@ public class DataHandling {
 			}
 		}
 
-		public Construct array_assign(Target t, Environment env, Construct arrayAndIndex, Construct toSet) {
-			Construct ival = toSet;
-			while (ival instanceof IVariable) {
-				IVariable cur = (IVariable) ival;
-				ival = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
-			}
-			Chain c = new Chain();
-			prepare((CArrayReference) arrayAndIndex, c);
-			CArray inner = (CArray) ((CArrayReference) arrayAndIndex).getInternalArray();
-			for (int i = 0; i < c.indexChain.size(); i++) {
-				if (i == c.indexChain.size() - 1) {
-					//Last one, set it
-					inner.set(c.indexChain.get(i), ival, t);
-				} else {
-					boolean makeIt = false;
-					Construct ct = null;
-					if (!inner.containsKey(c.indexChain.get(i).val())) {
-						makeIt = true;
-					} else {
-						ct = inner.get(c.indexChain.get(i), t);
-						if (!(ct instanceof CArray)) {
-							makeIt = true;
-						}
-					}
-					if (makeIt) {
-						Construct newArray = new CArray(t);
-						inner.set(c.indexChain.get(i), newArray, t);
-						ct = newArray;
-					}
-					inner = (CArray) ct;
-				}
-			}
-			String name = ((CArrayReference) arrayAndIndex).name.getName();
-			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
-			return new IVariable("=anon", ival, t);
-		}
+//		public Construct array_assign(Target t, Environment env, Construct arrayAndIndex, Construct toSet) {
+//			Construct ival = toSet;
+//			while (ival instanceof IVariable) {
+//				IVariable cur = (IVariable) ival;
+//				ival = env.getEnv(GlobalEnv.class).GetVarList().get(cur.getName(), cur.getTarget()).ival();
+//			}
+//			Chain c = new Chain();
+//			prepare((CArrayReference) arrayAndIndex, c);
+//			CArray inner = (CArray) ((CArrayReference) arrayAndIndex).getInternalArray();
+//			for (int i = 0; i < c.indexChain.size(); i++) {
+//				if (i == c.indexChain.size() - 1) {
+//					//Last one, set it
+//					inner.set(c.indexChain.get(i), ival, t);
+//				} else {
+//					boolean makeIt = false;
+//					Construct ct = null;
+//					if (!inner.containsKey(c.indexChain.get(i).val())) {
+//						makeIt = true;
+//					} else {
+//						ct = inner.get(c.indexChain.get(i), t);
+//						if (!(ct instanceof CArray)) {
+//							makeIt = true;
+//						}
+//					}
+//					if (makeIt) {
+//						Construct newArray = new CArray(t);
+//						inner.set(c.indexChain.get(i), newArray, t);
+//						ct = newArray;
+//					}
+//					inner = (CArray) ct;
+//				}
+//			}
+//			String name = ((CArrayReference) arrayAndIndex).name.getName();
+//			env.getEnv(GlobalEnv.class).GetVarList().set(new IVariable(name, (CArray) ((CArrayReference) arrayAndIndex).getInternalArray(), t));
+//			return new IVariable("=anon", ival, t);
+//		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -242,29 +242,28 @@ public class DataHandling {
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-						OptimizationOption.OPTIMIZE_CONSTANT,
 						OptimizationOption.OPTIMIZE_DYNAMIC
 			);
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-			//We can't really optimize, but we can check that we are
-			//getting an ivariable.
-			if (!(args[0] instanceof IVariable)) {
-				throw new ConfigCompileException("Expecting an ivar for argument 1 to assign", t);
-			}
-			return null;
-		}
-
-		@Override
 		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			if(children.get(0).getData() instanceof IVariable
-					&& children.get(1).getData() instanceof IVariable){
-				if(((IVariable)children.get(0).getData()).getName().equals(
-						((IVariable)children.get(1).getData()).getName())){
+			if(children.get(0).getData() instanceof NewIVariable
+					&& children.get(1).getData() instanceof NewIVariable){
+				if(((NewIVariable)children.get(0).getData()).getName().equals(
+						((NewIVariable)children.get(1).getData()).getName())){
 					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
 				}
+			} else if(children.get(0).getData() instanceof CFunction 
+					&& ((CFunction)children.get(0).getData()).val().equals("array_get")){
+				//Special handling for array assignment. This should be transformed into an array set
+				ParseTree array_set = new ParseTree(new CFunction("array_set", t), children.get(0).getFileOptions());
+				array_set.addChild(children.get(0).getChildAt(0));
+				array_set.addChild(children.get(0).getChildAt(1));
+				array_set.addChild(children.get(1));
+				return array_set;
+			} else if(!(children.get(0).getData() instanceof NewIVariable)){
+				throw new ConfigCompileException("Only ivariables may be assigned a value", t);
 			}
 			return null;
 		}

@@ -197,6 +197,36 @@ public class OptimizationTest {
 		assertEquals("false", optimize("or(false, false, false)"));
 	}
 	
+	@Test public void testArrayGetConversion1() throws Exception{
+		assertEquals("array_get(@a,0)", optimize("@a[0]"));
+	}
+	
+	@Test public void testArrayGetConversion2() throws Exception{
+		assertEquals("array_get(array_get(@a,@one),concat(@two,' '))", optimize("@a[@one][@two.' ']"));
+	}
+	
+	@Test public void testArrayGetConversionWithMultiDimensional() throws Exception{
+		assertEquals("array_get(array_get(@a,0),1)", optimize("@a[0][1]"));
+	}
+	
+	@Test public void testArraySetConversion1() throws Exception{
+		assertEquals("array_set(@a,0,0)", optimize("assign(@a[0], 0)"));
+	}
+	
+	@Test public void testArraySetConversion2() throws Exception{
+		assertEquals("array_set(@a,0,0)", optimize("@a[0] = 0"));
+	}
+	
+	@Test public void testArraySetConversionWithMultiDimensional() throws Exception{
+		assertEquals("array_set(array_get(@a,0),1,'s')", optimize("@a[0][1] = 's'"));
+	}
+	
+	@Test public void testArraySetConversionWithMultiDimensionalAndVariables() throws Exception{
+		assertEquals("array_set(array_get(@a,@zero),concat(@one,' '),'s')", optimize("@a[@zero][@one.' '] = 's'"));
+	}
+	
+	
+	
     
     //TODO: This is a bit ambitious for now, put this back at some point, and then make it pass.
 //    @Test public void testAssign() throws ConfigCompileException{

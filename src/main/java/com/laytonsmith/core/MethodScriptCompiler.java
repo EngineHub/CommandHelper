@@ -11,7 +11,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Compiler;
+import com.laytonsmith.core.compiler.CompilerFunctions;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
@@ -33,13 +33,13 @@ public final class MethodScriptCompiler {
 	private MethodScriptCompiler() {
 	}
 
-	public static List<Token> lex(String config, File file, boolean inPureMScript) throws ConfigCompileException {
+	public static TokenStream lex(String config, File file, boolean inPureMScript) throws ConfigCompileException {
 		if (true) {
 			return NewMethodScriptCompiler.lex(config, file, inPureMScript);
 		}
 		config = config.replaceAll("\r\n", "\n");
 		config = config + "\n";
-		List<Token> token_list = new ArrayList<Token>();
+		TokenStream token_list = new TokenStream(new ArrayList<Token>(), fileOptions);
 		//Set our state variables
 		boolean state_in_quote = false;
 		int quoteLineNumberStart = 1;
@@ -804,7 +804,7 @@ public final class MethodScriptCompiler {
 //                    try{
 //                        newEnv = env.clone();
 //                    } catch(Exception e){}
-					Script s = new Script(left, right);
+					Script s = new Script(left, right, fileOptions);
 					scripts.add(s);
 					left = new ArrayList();
 					right = new ArrayList();
@@ -816,10 +816,10 @@ public final class MethodScriptCompiler {
 		return scripts;
 	}
 
-	public static ParseTree compile(List<Token> stream) throws ConfigCompileException {
+	public static ParseTree compile(TokenStream stream) throws ConfigCompileException {
 		if (true) {
 			Environment env = Environment.createEnvironment(new CompilerEnvironment());
-			ParseTree tree = NewMethodScriptCompiler.compile((TokenStream) stream, env);
+			ParseTree tree = NewMethodScriptCompiler.compile(stream, env);
 			Stack<List<Procedure>> procs = new Stack<List<Procedure>>();
 			procs.add(new ArrayList<Procedure>());
 			optimize(tree, procs);
@@ -833,7 +833,7 @@ public final class MethodScriptCompiler {
 			unknown = Target.UNKNOWN;
 		}
 
-		List<Token> tempStream = new ArrayList<Token>(stream.size());
+		TokenStream tempStream = new TokenStream(new ArrayList<Token>(), stream.getFileOptions());
 		List<Integer> irrelevantWhitespace = new ArrayList<Integer>();
 		int startingRelevant = -1;
 		int endingRelevant = -1;
@@ -1212,7 +1212,7 @@ public final class MethodScriptCompiler {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);
 				if (node.getData().val().equals("__autoconcat__")) {
-					Compiler.__autoconcat__ func = (Compiler.__autoconcat__) FunctionList.getFunction(node.getData());
+					CompilerFunctions.__autoconcat__ func = (CompilerFunctions.__autoconcat__) FunctionList.getFunction(node.getData());
 					ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
 					tree.setData(tempNode.getData());
 					tree.setChildren(tempNode.getChildren());
@@ -1482,7 +1482,7 @@ public final class MethodScriptCompiler {
 	 */
 	public static Construct execute(ParseTree root, Environment env, MethodScriptComplete done, Script script, List<Variable> vars) {
 		if (script == null) {
-			script = new Script(null, null);
+			script = new Script(null, null, fileOptions);
 		}
 		if (vars != null) {
 			Map<String, Variable> varMap = new HashMap<String, Variable>();

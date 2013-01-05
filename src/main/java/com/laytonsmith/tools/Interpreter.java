@@ -27,6 +27,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
+import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
@@ -166,7 +167,7 @@ public class Interpreter {
 
 	public static void execute(String script, List<String> args) throws ConfigCompileException, IOException {
 		ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
-		List<Token> stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
+		TokenStream stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
 		ParseTree tree = MethodScriptCompiler.compile(stream);
 		compile.stop();
 		Environment env = Environment.createEnvironment(Interpreter.env.getEnv(GlobalEnv.class));

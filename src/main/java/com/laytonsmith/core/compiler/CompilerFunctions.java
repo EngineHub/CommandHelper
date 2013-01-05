@@ -1,14 +1,16 @@
-package com.laytonsmith.core.functions;
+package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
-import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.DummyFunction;
+import com.laytonsmith.core.functions.Function;
+import com.laytonsmith.core.functions.FunctionList;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -16,10 +18,14 @@ import java.util.List;
 import java.util.Set;
 
 /**
- *
+ * Though technically a function container, none of these functions should
+ * typically be used in the course of normal scripting, and ideally they would
+ * be removed at some point in the future. (The paradigm doesn't seem very stable).
+ * For now, functions like __autoconcat__ are a necessary evil to simplify other parts
+ * of the code, but at the price of complicating other things.
  * @author layton
  */
-public class Compiler {
+public class CompilerFunctions {
 
 	public static String docs() {
 		return "Compiler internal functions should be declared here. If you're reading this from anywhere"
@@ -132,6 +138,24 @@ public class Compiler {
 		public ParseTree optimizeSpecial(List<ParseTree> list, boolean returnSConcat) throws ConfigCompileException {
 			//If any of our nodes are CSymbols, we have different behavior
 			boolean inSymbolMode = false; //caching this can save Xn
+			
+//			//[Bracket syntax] - This needs resolving far before most other operations.
+//			for (int i = 0; i < list.size() - 1; i++) {
+//				if (list.size() > i + 1) {
+//					ParseTree ident = list.get(i);
+//					ParseTree node = list.get(i + 1);
+//					if (node.getData() instanceof CBracket) {
+//						ParseTree replacement = new ParseTree(new CFunction("array_get", node.getTarget()), node.getFileOptions());
+//						ParseTree newNode = new ParseTree(new CFunction("__autoconcat__", node.getTarget()), node.getFileOptions());
+//						newNode.setChildren(node.getChildren());
+//						replacement.addChild(ident);
+//						replacement.addChild(newNode);
+//						list.set(i, replacement);
+//						list.remove(i + 1);
+//						i--;
+//					}
+//				}
+//			}
 
 			//Assignment
 			//Note that we are walking the array in reverse, because multiple assignments,
@@ -374,6 +398,7 @@ public class Compiler {
 					throw new ConfigCompileException("Unexpected symbol (" + list.get(list.size() - 1).getData().val() + "). Did you forget to quote your symbols?", list.get(list.size() - 1).getTarget());
 				}
 			}
+			
 
 			//Look for a CEntry here
 			if (list.size() >= 1) {
@@ -389,6 +414,7 @@ public class Compiler {
 					return ce;
 				}
 			}
+			
 
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments
 			//left, it needs to go to sconcat, which MAY be able to be further optimized, but that will
@@ -471,39 +497,6 @@ public class Compiler {
 				return new CVoid(t);
 			}
 			return args[0];
-		}
-	}
-
-	@api
-	public static class __cbracket__ extends DummyFunction implements Optimizable {
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			throw new UnsupportedOperationException("Not supported yet.");
-		}
-
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			FileOptions options = new FileOptions(new HashMap<String, String>());
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
-			ParseTree node;
-			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), options);
-			} else if (children.size() == 1) {
-				node = children.get(0);
-			} else {
-				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
-				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
-						+ " report this error to the developer.", t);
-			}
-			return new ParseTree(new CBracket(node), options);
 		}
 	}
 

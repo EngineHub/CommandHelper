@@ -16,6 +16,7 @@ import com.laytonsmith.core.constructs.NewIVariable;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
+import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.Arrays;
@@ -94,7 +95,7 @@ class CompilerObject {
 			t = new Token(TType.STRING, constant.val(), constant.getTarget());
 		}							
 		if (t.type == TType.BARE_STRING && peek().type == TType.FUNC_START) {
-			consume();
+			consume(); //Consume the left parenthesis
 			CFunction f = new CFunction(t.val(), t.getTarget());
 			functionLines.add(peek().getTarget());
 			pushNode(f);
@@ -112,7 +113,7 @@ class CompilerObject {
 		if (t.type == TType.FUNC_END || t.type == TType.COMMA) {
 			if (autoConcatCounter > 0) {
 				autoConcatCounter--;
-				//popNode(t.getTarget());
+				popNode(t.getTarget());
 			}
 		}
 		if (t.type == TType.COMMA) {
@@ -125,12 +126,32 @@ class CompilerObject {
 		if (t.type == TType.FUNC_END) {
 			//We're done with this child, so push it up
 			popNode(t.getTarget());
-			functionLines.pop();
+			try{
+				functionLines.pop();
+			} catch(EmptyStackException e){
+				//They have too many right parenthesis
+				throw new ConfigCompileException("Unexpected right parenthesis. (You have too many closing parenthesis)", t.getTarget());
+			}
 			return;
 		}
 		if (t.type == TType.LSQUARE_BRACKET) {
-			CFunction f = new CFunction("__cbracket__", Target.UNKNOWN);
-			pushNode(f);
+			//If the pointer has children, we actually want to turn this into an array_get,
+			//with the last child being the first argument. If there aren't any children,
+			//this is a generic array creation instead, so we want to change it into
+			//an array function.
+			if(pointer.hasChildren()){
+				ParseTree lhs = pointer.getChildAt(pointer.numberOfChildren() - 1);
+				pointer.removeChildAt(pointer.numberOfChildren() - 1);
+				pushNode(new CFunction("array_get", Target.UNKNOWN));
+				pointer.addChild(lhs);
+				pushNode(new CFunction("__autoconcat__", Target.UNKNOWN));
+			} else {
+				//For now, a compile error
+				throw new ConfigCompileException("Unexpected left square bracket", t.getTarget());
+			}
+//			CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
+//			CBracket c = new CBracket(new ParseTree(f, stream.getFileOptions()));
+//			pushNode(c);
 			bracketCounter++;
 			bracketLines.push(t.getTarget());
 			return;
@@ -141,7 +162,8 @@ class CompilerObject {
 			}
 			bracketCounter--;
 			bracketLines.pop();
-			popNode(t.getTarget());
+			popNode(t.getTarget());//pops the autoconcat
+			popNode(t.getTarget());//pops the array get
 			return;
 		}
 		if (t.type == TType.LCURLY_BRACKET) {
@@ -161,7 +183,9 @@ class CompilerObject {
 			return;
 		}
 		//If the next token ISN'T a ) , } ] we need to autoconcat this
-		if (peek().type != TType.FUNC_END && peek().type != TType.COMMA && peek().type != TType.RCURLY_BRACKET && peek().type != TType.RSQUARE_BRACKET) {
+		if (peek().type != TType.FUNC_END && peek().type != TType.COMMA 
+				&& peek().type != TType.RCURLY_BRACKET 
+				&& peek().type != TType.RSQUARE_BRACKET) {
 			//... unless we're already in an autoconcat
 			if (!(pointer.getData() instanceof CFunction && ((CFunction) pointer.getData()).val().equals("__autoconcat__"))) {
 				CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
@@ -234,6 +258,8 @@ class CompilerObject {
 				return new CDouble(t.val(), t.getTarget());
 			case INTEGER:
 				return new CInt(t.val(), t.getTarget());
+			case VARIABLE:
+				return new Variable(t.val(), null, t.getTarget());
 			default:
 				throw new ConfigCompileException("Unexpected identifier? Found '" + t.val() + "' but was not any expected value.", t.getTarget());
 		}
