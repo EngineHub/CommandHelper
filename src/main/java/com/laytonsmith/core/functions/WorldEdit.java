@@ -718,6 +718,13 @@ public class WorldEdit {
                 mgr.addRegion(pr);
             }
 
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
             return new CVoid(t);
         }
 
@@ -783,6 +790,13 @@ public class WorldEdit {
             }
 
             mgr.removeRegion(region);
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while removing protected region", ExceptionType.PluginInternalException, t, e);
+			}
 
             return new CVoid(t);
         }
@@ -944,6 +958,13 @@ public class WorldEdit {
 
             mgr.getRegion(region).setOwners(newOwners);
 
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while adding owner(s) to protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
             return new CVoid(t);
         }
 
@@ -1039,6 +1060,13 @@ public class WorldEdit {
             }
 
             mgr.getRegion(region).setOwners(newOwners);
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while deleting owner(s) from protected region", ExceptionType.PluginInternalException, t, e);
+			}
 
             return new CVoid(t);
         }
@@ -1136,6 +1164,13 @@ public class WorldEdit {
 
             mgr.getRegion(region).setMembers(newMembers);
 
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while adding member(s) to protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
             return new CVoid(t);
         }
 
@@ -1231,6 +1266,13 @@ public class WorldEdit {
             }
 
             mgr.getRegion(region).setMembers(newMembers);
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while deleting members(s) from protected region", ExceptionType.PluginInternalException, t, e);
+			}
 
             return new CVoid(t);
         }
