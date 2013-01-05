@@ -46,7 +46,7 @@ public class CArray extends Construct implements ArrayAccess{
 	}
 
     public CArray(Target t,  Construct... items) {
-        super(null, ConstructType.ARRAY, t);
+        super("{}", ConstructType.ARRAY, t);
         if(items != null){
             for(Construct item : items){
                 if(item instanceof CEntry){

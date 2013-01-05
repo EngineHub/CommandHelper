@@ -191,7 +191,7 @@ public class Reflection {
 		}
 
 		public String formatFunctionDoc(String docs, DocField field) {
-			Pattern p = Pattern.compile("\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
+			Pattern p = Pattern.compile("(?s)\\s*(.*?)\\s*\\{(.*?)\\}\\s*(.*)\\s*");
 			Matcher m = p.matcher(docs);
 			if (!m.find()) {
 				throw new Error("An error has occured in " + getName() + ". While trying to get the documentation"
