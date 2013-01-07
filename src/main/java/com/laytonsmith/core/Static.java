@@ -6,7 +6,9 @@ import com.laytonsmith.PureUtilities.*;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlugin;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -898,7 +900,8 @@ public final class Static {
 		GlobalEnv gEnv = new GlobalEnv(new MethodScriptExecutionQueue("MethodScript", "default"), 
 				new Profiler(new File(platformFolder, "profiler.config")), persistanceNetwork, permissionsResolver, platformFolder);
 		gEnv.SetLabel(PermissionsResolver.GLOBAL_PERMISSION);
-		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
+		CompilerEnvironment ceEnv = new CompilerEnvironment(Implementation.Type.SHELL, api.Platforms.INTERPRETER_JAVA);
+		return Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), ceEnv);
 	}
 	
 	/**

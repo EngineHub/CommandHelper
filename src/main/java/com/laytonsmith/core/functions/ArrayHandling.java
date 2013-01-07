@@ -100,7 +100,7 @@ public class ArrayHandling {
 				defaultConstruct = args[2];
 			}
 
-			if (env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE) {
+			if (env.getEnv(GlobalEnv.class).HasFlag("array_get_alt_mode")) {
 				return new CArrayReference(args[0], args[1], env);
 			}
 
@@ -251,7 +251,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
 			if (args[0] instanceof ArrayAccess) {
 				ArrayAccess aa = (ArrayAccess) args[0];
 				if (!aa.canBeAssociative()) {
@@ -1107,7 +1107,7 @@ public class ArrayHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.size() == 2) {
 				if (!children.get(1).getData().isDynamic()) {
 					try {

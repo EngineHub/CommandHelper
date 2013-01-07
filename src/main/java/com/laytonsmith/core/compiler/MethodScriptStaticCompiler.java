@@ -1,8 +1,10 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.CompiledFunction;
 import com.laytonsmith.core.functions.FunctionBase;
@@ -31,7 +33,8 @@ public final class MethodScriptStaticCompiler {
     public static String compile(String script, api.Platforms platform, File file) throws ConfigCompileException{
         //First, we optimize. The "core" functions are always run through
         //the native interpreter's compiler for optimization.
-        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file, true));
+		Environment c = Environment.createEnvironment(new CompilerEnvironment(Implementation.Type.SHELL, platform));
+        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, file, true), c);
         StringBuilder b = new StringBuilder();
         for(ParseTree node : tree.getChildren()){
             go(node, b, platform);

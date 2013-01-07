@@ -107,7 +107,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> args) throws ConfigCompileException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> args) throws ConfigCompileException {
 			//Just, always turn this into an ifelse, though throw a compile error if there are more than
 			//3 arguments, if this isn't a pre-ifelse
 			boolean allowOverloading = false;
@@ -121,7 +121,7 @@ public class BasicLogic {
 			if(!allowOverloading && args.size() > 3){
 				throw new ConfigCompileException("if() can only have 3 parameters", t);
 			}
-			return new ifelse().optimizeDynamic(t, args);
+			return new ifelse().optimizeDynamic(t, env, args);
 		}
 
 		@Override
@@ -384,7 +384,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 
 			FileOptions options = new FileOptions(new HashMap<String, String>());
 			if (!children.isEmpty()) {
@@ -1303,7 +1303,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			while(it.hasNext()){
@@ -1396,7 +1396,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, getName());
 			Iterator<ParseTree> it = children.iterator();
 			while(it.hasNext()){
@@ -2086,7 +2086,7 @@ public class BasicLogic {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			return Optimizable.PULL_ME_UP;
 		}
 

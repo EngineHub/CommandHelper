@@ -7,6 +7,7 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.IVariable;
 import com.laytonsmith.core.constructs.Variable;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.List;
 
@@ -46,8 +47,8 @@ public class OptimizationUtilities {
 	 * @return
 	 * @throws ConfigCompileException 
 	 */
-	public static String optimize(String script) throws ConfigCompileException{
-        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true));        
+	public static String optimize(String script, Environment env) throws ConfigCompileException{
+        ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), env);
         StringBuilder b = new StringBuilder();
         //The root always contains null.
 		if(tree.getData() == null){

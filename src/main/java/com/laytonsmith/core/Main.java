@@ -7,7 +7,9 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.Util;
 import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
@@ -264,7 +266,8 @@ public class Main {
 				Implementation.setServerType(Implementation.Type.SHELL);
 				String path = parsedArgs.getStringArgument();
 				String plain = FileUtility.read(new File(path));
-				String optimized = OptimizationUtilities.optimize(plain);
+				Environment ce = Environment.createEnvironment(new CompilerEnvironment(Implementation.Type.SHELL, api.Platforms.INTERPRETER_JAVA));
+				String optimized = OptimizationUtilities.optimize(plain, ce);
 				System.out.println(optimized);
 				System.exit(0);
 			} else if (mode == helpMode) {

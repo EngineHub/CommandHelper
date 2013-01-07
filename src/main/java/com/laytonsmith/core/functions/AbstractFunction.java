@@ -59,33 +59,6 @@ public abstract class AbstractFunction implements Function {
 	}
 
 	/**
-	 * Just return null by default. Most functions won't get to this anyways,
-	 * since canOptimize is returning false.
-	 *
-	 * @param t
-	 * @param args
-	 * @return
-	 */
-	public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
-		return null;
-	}
-
-	/**
-	 * It may be that a function can simply check for compile errors, but not
-	 * optimize. In this case, it is appropriate to use this definition of
-	 * optimizeDynamic, to return a value that will essentially make no changes,
-	 * or in the case where it can optimize anyways, even if some values are
-	 * undetermined at the moment.
-	 *
-	 * @param t
-	 * @param children
-	 * @return
-	 */
-	public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-		return null;
-	}
-
-	/**
 	 * Most functions don't need the varlist.
 	 *
 	 * @param varList
@@ -174,6 +147,37 @@ public abstract class AbstractFunction implements Function {
 
 	public PackagePermission getPermission() {
 		return PackagePermission.NO_PERMISSIONS_NEEDED;
+	}
+	
+		/**
+	 * This is called during compile time, if canOptimize returns true. It
+	 * should return the construct to replace this function, if possible. If
+	 * only type checking is being done, it may return null, in which case no
+	 * changes will be made to the parse tree. During the optimization, it is
+	 * also possible for a function to throw a ConfigCompileException. It may
+	 * also throw a ConfigRuntimeException, which will be caught, and changed
+	 * into a ConfigCompileException.
+	 *
+	 * @param t
+	 * @param args
+	 * @return
+	 */
+	public Construct optimize(Target t, Environment env, Construct... args) throws ConfigRuntimeException, ConfigCompileException{
+		return null;
+	}
+
+	/**
+	 * If the function indicates it can optimize dynamic values, this method is
+	 * called. It may also throw a compile exception should the parameters be
+	 * unacceptable. It may return null if no changes should be made (which is
+	 * likely the default).
+	 *
+	 * @param t
+	 * @param children
+	 * @return
+	 */
+	public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException{
+		return null;
 	}
 	
 	

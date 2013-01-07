@@ -168,10 +168,11 @@ public class Interpreter {
 	public static void execute(String script, List<String> args) throws ConfigCompileException, IOException {
 		ProfilePoint compile = env.getEnv(GlobalEnv.class).GetProfiler().start("Compilation", LogLevel.VERBOSE);
 		TokenStream stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
-		ParseTree tree = MethodScriptCompiler.compile(stream);
+		ParseTree tree = MethodScriptCompiler.compile(stream, env);
 		compile.stop();
 		Environment env = Environment.createEnvironment(Interpreter.env.getEnv(GlobalEnv.class));
 		List<Variable> vars = null;
+		env.getEnv(GlobalEnv.class).GetVarList().pushScope();
 		if (args != null) {
 			vars = new ArrayList<Variable>();
 			//Build the @arguments variable, the $ vars, and $ itself. Note that
@@ -236,6 +237,7 @@ public class Interpreter {
 				+ " an actual backing engine that isn't currently loaded. (It still might fail even if you load the engine though.) You simply won't be"
 				+ " able to use that function here.");
 		}
+		env.getEnv(GlobalEnv.class).GetVarList().popScope();
 	}
 
 	public static void install() {

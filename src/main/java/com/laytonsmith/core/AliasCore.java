@@ -523,7 +523,7 @@ public class AliasCore {
 				boolean exception = false;
 				try {
 					MethodScriptCompiler.registerAutoIncludes(env, null);
-					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true)), env, null, null);
+					MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents, fi.file, true), env), env, null, null);
 				} catch (ConfigCompileException e) {
 					exception = true;
 					ConfigRuntimeException.React(e, fi.file.getAbsolutePath() + " could not be compiled, due to a compile error.", player);

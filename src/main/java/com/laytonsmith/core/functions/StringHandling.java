@@ -152,7 +152,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -259,7 +259,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -1104,7 +1104,7 @@ public class StringHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if (children.isEmpty()) {
 				throw new ConfigCompileException(getName() + " expects 1 or more argument", t);
 			} else if (children.get(0).isConst()) {

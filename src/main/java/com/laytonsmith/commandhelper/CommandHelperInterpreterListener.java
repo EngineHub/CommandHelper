@@ -2,11 +2,14 @@
 
 package com.laytonsmith.commandhelper;
 
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -121,13 +124,14 @@ public class CommandHelperInterpreterListener implements Listener {
     }
 
     public void execute(String script, final MCPlayer p) throws ConfigCompileException {
-        TokenStream stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
-        ParseTree tree = MethodScriptCompiler.compile(stream);
-        interpreterMode.remove(p.getName());
 		GlobalEnv gEnv = new GlobalEnv(plugin.executionQueue, plugin.profiler, plugin.persistanceNetwork, plugin.permissionsResolver, plugin.chDirectory);
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
+		CompilerEnvironment ceEnv = new CompilerEnvironment(Implementation.Type.BUKKIT, api.Platforms.INTERPRETER_JAVA);
         cEnv.SetPlayer(p);
-		Environment env = Environment.createEnvironment(gEnv, cEnv);
+		Environment env = Environment.createEnvironment(gEnv, cEnv, ceEnv);
+        TokenStream stream = MethodScriptCompiler.lex(script, new File("Interpreter"), true);
+        ParseTree tree = MethodScriptCompiler.compile(stream, env);
+        interpreterMode.remove(p.getName());
         try {
             MethodScriptCompiler.registerAutoIncludes(env, null);
             MethodScriptCompiler.execute(tree, env, new MethodScriptComplete() {

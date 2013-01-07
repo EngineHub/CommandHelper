@@ -62,7 +62,7 @@ public class ExceptionsTest {
                 + "msg(@ex[2])\n"
                 + "msg(@ex[3])\n"
                 + ")";
-        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), env), env, null, null);
         verify(fakePlayer).sendMessage("PlayerOfflineException");
         verify(fakePlayer).sendMessage("The specified player (offlineplayer) is not online");
         verify(fakePlayer).sendMessage("null");
@@ -80,7 +80,7 @@ public class ExceptionsTest {
                 + "msg(@ex[2])\n"
                 + "msg(@ex[3])\n"
                 + ")";
-        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), env), env, null, null);
         verify(fakePlayer).sendMessage("PlayerOfflineException");
         verify(fakePlayer).sendMessage("This is a message");
         verify(fakePlayer).sendMessage("null");
@@ -99,7 +99,7 @@ public class ExceptionsTest {
                 + "msg(@ex[3])\n"
                 + "), @ex, msg('2'))";
         try {
-            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("file.txt"), true)), env, null, null);
+            MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("file.txt"), true), env), env, null, null);
             fail("This test was supposed to throw an exception");
         } catch (ConfigRuntimeException e) {
             //Pass

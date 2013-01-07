@@ -54,7 +54,7 @@ public class MetaTest {
         MCPlayer fakePlayer2 = GetOnlinePlayer("wraithguard02", fakeServer);
         when(fakeServer.getPlayer("wraithguard02")).thenReturn(fakePlayer2);
         when(fakePlayer.isOp()).thenReturn(true);
-        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true)), env, null, null);
+        MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, null, true), env), env, null, null);
         //verify(fakePlayer2).performCommand("cmd yay");
         verify(fakeServer).dispatchCommand(fakePlayer2, "cmd yay");
     }

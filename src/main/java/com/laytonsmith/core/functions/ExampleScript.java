@@ -1,7 +1,9 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
@@ -10,6 +12,7 @@ import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -83,7 +86,8 @@ public class ExampleScript {
 		this.description = description;		
 		this.originalScript = script;
 		try{
-			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples"), true));
+			Environment env = Environment.createEnvironment(new CompilerEnvironment(Implementation.Type.BUKKIT, api.Platforms.INTERPRETER_JAVA));
+			this.script = MethodScriptCompiler.compile(MethodScriptCompiler.lex(script, new File("Examples"), true), env);
 			this.output = output;
 		} catch(ConfigCompileException e){
 			if(intentionalCompileError){

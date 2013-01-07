@@ -281,7 +281,7 @@ public class Script {
                                 + ca[i].getClass() + ") being passed as an argument to a function (" 
                                 + f.getName() + ")", null, m.getTarget());
                     }
-                    if(env.getEnv(GlobalEnv.class).GetFlag("array_get_alt_mode") == Boolean.TRUE && i == 0){
+                    if(env.getEnv(GlobalEnv.class).HasFlag("array_get_alt_mode") && i == 0){
                         continue;
                     }
                     if(f.preResolveVariables() && ca[i] instanceof IVariable){
@@ -678,7 +678,7 @@ public class Script {
         right.add(temp);
         cright = new ArrayList<ParseTree>();
         for (TokenStream l : right) {
-            cright.add(MethodScriptCompiler.compile(l));
+            cright.add(MethodScriptCompiler.compile(l, CurrentEnv));
         }
     }
 

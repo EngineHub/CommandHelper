@@ -3,12 +3,15 @@ package com.laytonsmith.tools;
 import com.laytonsmith.PureUtilities.FileUtility;
 import com.laytonsmith.PureUtilities.StringUtils;
 import static com.laytonsmith.PureUtilities.TermColors.*;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.Installer;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.MethodScriptExecutionQueue;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -42,6 +45,7 @@ public class Manager {
 
 	private static Profiler profiler;
 	private static GlobalEnv gEnv;
+	private static CompilerEnvironment ceEnv;
 	private static final File jarLocation = new File(Interpreter.class.getProtectionDomain().getCodeSource().getLocation().getFile()).getParentFile();
 	private static final File chDirectory = new File(jarLocation, "CommandHelper");
 	private static PersistanceNetwork persistanceNetwork;
@@ -55,14 +59,15 @@ public class Manager {
 		CHLog.initialize(chDirectory);
 		profiler = new Profiler(new File(chDirectory, "profiler.config"));
 		gEnv = new GlobalEnv(new MethodScriptExecutionQueue("Manager", "default"), profiler, persistanceNetwork, new PermissionsResolver.PermissiveResolver(), chDirectory);
+		ceEnv = new CompilerEnvironment(Implementation.Type.BUKKIT, api.Platforms.INTERPRETER_JAVA);
 		cls();
 		pl("\n" + Static.Logo() + "\n\n" + Static.DataManagerLogo());
 
 
 		pl("Starting the Data Manager...");
 		try {
-			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null, true)), env, null, null);
+			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), ceEnv);
+			MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex("player()", null, true), env), env, null, null);
 		} catch (ConfigCompileException ex) {
 		}
 		pl(GREEN + "Welcome to the CommandHelper " + CYAN + "Data Manager!");
@@ -382,8 +387,8 @@ public class Manager {
 
 	public static boolean doAddEdit(String key, String valueScript) {
 		try {
-			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment());
-			Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null, true)), env, null, null);
+			Environment env = Environment.createEnvironment(gEnv, new CommandHelperEnvironment(), ceEnv);
+			Construct c = MethodScriptCompiler.execute(MethodScriptCompiler.compile(MethodScriptCompiler.lex(valueScript, null, true), env), env, null, null);
 			String value = Construct.json_encode(c, Target.UNKNOWN);
 			pl(CYAN + "Adding: " + WHITE + value);
 			String [] k = key.split("\\.");

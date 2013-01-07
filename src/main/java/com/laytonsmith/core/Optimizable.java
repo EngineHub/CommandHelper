@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
@@ -118,31 +119,4 @@ public interface Optimizable extends Function {
 	 * @return
 	 */
 	public Set<OptimizationOption> optimizationOptions();
-
-	/**
-	 * This is called during compile time, if canOptimize returns true. It
-	 * should return the construct to replace this function, if possible. If
-	 * only type checking is being done, it may return null, in which case no
-	 * changes will be made to the parse tree. During the optimization, it is
-	 * also possible for a function to throw a ConfigCompileException. It may
-	 * also throw a ConfigRuntimeException, which will be caught, and changed
-	 * into a ConfigCompileException.
-	 *
-	 * @param t
-	 * @param args
-	 * @return
-	 */
-	public Construct optimize(Target t, Construct... args) throws ConfigRuntimeException, ConfigCompileException;
-
-	/**
-	 * If the function indicates it can optimize dynamic values, this method is
-	 * called. It may also throw a compile exception should the parameters be
-	 * unacceptable. It may return null if no changes should be made (which is
-	 * likely the default).
-	 *
-	 * @param t
-	 * @param children
-	 * @return
-	 */
-	public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException;
 }

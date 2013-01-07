@@ -3,9 +3,13 @@ package com.laytonsmith.tools;
 
 import static com.laytonsmith.PureUtilities.TermColors.*;
 import com.laytonsmith.PureUtilities.ZipMaker;
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.AliasCore;
 import com.laytonsmith.core.MethodScriptCompiler;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import java.io.File;
@@ -37,9 +41,10 @@ public class MSLPMaker {
         AliasCore.LocalPackage localPackage = new AliasCore.LocalPackage();
         AliasCore.GetAuxAliases(start, localPackage);      
         boolean error = false;
+		Environment env = Environment.createEnvironment(new CompilerEnvironment(Implementation.Type.BUKKIT, api.Platforms.INTERPRETER_JAVA));
         for(AliasCore.LocalPackage.FileInfo fi : localPackage.getMSFiles()){
             try{
-                MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file(), true));
+                MethodScriptCompiler.compile(MethodScriptCompiler.lex(fi.contents(), fi.file(), true), env);
             } catch(ConfigCompileException e){
                 error = true;
                 ConfigRuntimeException.React(e, "Compile error in script. Compilation will attempt to continue, however.", null);

@@ -1,5 +1,7 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CBareString;
 import com.laytonsmith.core.constructs.CDouble;
@@ -207,7 +209,7 @@ public class NewMethodScriptCompiler {
 	}
 
 	public static void main(String[] args) throws ConfigCompileException {
-		CompilerEnvironment env = new CompilerEnvironment();
+		CompilerEnvironment env = new CompilerEnvironment(Implementation.Type.TEST, api.Platforms.INTERPRETER_JAVA);
 		env.setConstant("v.n", "value");
 		TokenStream stream = lex("<! strict; > @var", null, true);
 		System.out.println(stream + "\n");

@@ -241,7 +241,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.get(0).getData() instanceof IVariable
 					&& children.get(1).getData() instanceof IVariable){
 				if(((IVariable)children.get(0).getData()).getName().equals(
@@ -348,7 +348,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			//In for(@i = 0, @i < @x, @i++, ...), the @i++ is more optimally written as ++@i, but
 			//it is commonplace to use postfix operations, so if the condition is in fact that simple,
 			//let's reverse it.
@@ -943,7 +943,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() == 1){
 				if(children.get(0).isDynamic()){
 					//This is absolutely a bad design, if there is a variable here
@@ -1759,7 +1759,7 @@ public class DataHandling {
 			ParseTree tree = nodes[0];
 			Construct arg = parent.seval(tree, env);
 			String location = arg.val();
-			ParseTree include = IncludeCache.get(new File(t.file().getParent(), location), t);
+			ParseTree include = IncludeCache.get(new File(t.file().getParent(), location), t, env);
 			parent.eval(include.getChildAt(0), env);
 			return new CVoid(t);
 		}
@@ -1777,11 +1777,11 @@ public class DataHandling {
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
 			//We can't optimize per se, but if the path is constant, and the code is uncompilable, we
 			//can give a warning, and go ahead and cache the tree.
 			String path = args[0].val();
-			IncludeCache.get(new File(t.file().getParent(), path), t);
+			IncludeCache.get(new File(t.file().getParent(), path), t, env);
 			return null;
 		}
 	}

@@ -91,7 +91,7 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -149,7 +149,7 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -214,7 +214,7 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -284,7 +284,7 @@ public class Math {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
 			return null;
 		}
@@ -568,7 +568,7 @@ public class Math {
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable){
 				return null;
 			} else {
@@ -667,7 +667,7 @@ public class Math {
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable){
 				return null;
 			} else {
@@ -760,7 +760,7 @@ public class Math {
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable){
 				return null;
 			} else {
@@ -859,7 +859,7 @@ public class Math {
 		}
 
 		@Override
-		public Construct optimize(Target t, Construct... args) throws ConfigCompileException {
+		public Construct optimize(Target t, Environment env, Construct... args) throws ConfigCompileException {
 			if(args[0] instanceof IVariable){
 				return null;
 			} else {

@@ -2,7 +2,10 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.MethodScriptCompiler;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import static com.laytonsmith.testing.StaticTest.SRun;
@@ -18,7 +21,7 @@ public class RegexTest {
 
     public RegexTest() {
     }
-
+	com.laytonsmith.core.environments.Environment env = com.laytonsmith.core.environments.Environment.createEnvironment(new CompilerEnvironment(Implementation.Type.SHELL, api.Platforms.INTERPRETER_JAVA));
     @BeforeClass
     public static void setUpClass() throws Exception {
     }
@@ -76,7 +79,7 @@ public class RegexTest {
     //Here, it's a compile error, since we're using it statically
     @Test(expected=ConfigCompileException.class)
     public void testRegFailureStatic() throws ConfigCompileException{
-        MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null, true));
+        MethodScriptCompiler.compile(MethodScriptCompiler.lex("reg_match('(?i)asd(', 'irrelevant')", null, true), env);
     }
     
     //Here, it's a runtime error, since we're using it dynamically

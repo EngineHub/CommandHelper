@@ -27,7 +27,7 @@ public class IncludeCache {
         cache.put(file, tree);
     }
     
-    public static ParseTree get(File file, Target t){
+    public static ParseTree get(File file, Target t, com.laytonsmith.core.environments.Environment env){
         CHLog.GetLogger().Log(TAG, LogLevel.DEBUG, "Loading " + file.getAbsolutePath(), t);
         if(!cache.containsKey(file)){
             CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Cache does not already contain include file, compiling, then caching.", t);
@@ -36,8 +36,7 @@ public class IncludeCache {
                 CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Security check passed", t);
                 try {
                     String s = new ZipReader(file).getFileContents();
-					//TODO: Is the g() really needed now?
-                    ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true));
+                    ParseTree tree = MethodScriptCompiler.compile(MethodScriptCompiler.lex(s, file, true), env);
                     CHLog.GetLogger().Log(TAG, LogLevel.VERBOSE, "Compilation succeeded, adding to cache.", t);
                     IncludeCache.add(file, tree);
                 } catch (ConfigCompileException ex) {

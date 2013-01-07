@@ -6,6 +6,7 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.LineCallback;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCServer;
@@ -19,6 +20,7 @@ import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.InvalidEnvironmentException;
+import com.laytonsmith.core.environments.RuntimeEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
@@ -271,10 +273,11 @@ public class Echoes {
             if(color == null){
                 color = MCChatColor.WHITE.toString();
             }
+			
 			//Until we get a compilation environment going, this must be removed so we can optimize it out.
-//            if(env.GetCustom("cmdline") instanceof Boolean && (Boolean)env.GetCustom("cmdline") == true){
-//                color = Static.MCToANSIColors(color);
-//            }
+            if(env.getEnv(RuntimeEnvironment.class).GetImplementation() == Implementation.Type.SHELL){
+                color = Static.MCToANSIColors(color);
+            }
 			CString ret = new CString(color, t);
 			colors.put(val, ret);
             return ret;

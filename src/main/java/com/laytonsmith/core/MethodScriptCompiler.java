@@ -158,12 +158,11 @@ public final class MethodScriptCompiler {
 		return scripts;
 	}
 
-	public static ParseTree compile(TokenStream stream) throws ConfigCompileException {
-		Environment env = Environment.createEnvironment(new CompilerEnvironment());
+	public static ParseTree compile(TokenStream stream, Environment env) throws ConfigCompileException {
 		ParseTree tree = NewMethodScriptCompiler.compile(stream, env);
 		Stack<List<Procedure>> procs = new Stack<List<Procedure>>();
 		procs.add(new ArrayList<Procedure>());
-		optimize(tree, procs); //TODO: Is this needed anymore?
+		optimize(tree, procs, env); //TODO: Is this needed anymore?
 		return tree;
 	}
 
@@ -175,7 +174,7 @@ public final class MethodScriptCompiler {
 	 * @param tree
 	 * @return
 	 */
-	private static void optimize(ParseTree tree, Stack<List<Procedure>> procs) throws ConfigCompileException {
+	private static void optimize(ParseTree tree, Stack<List<Procedure>> procs, Environment env) throws ConfigCompileException {
 		if (tree.isOptimized()) {
 			return; //Don't need to re-run this
 		}
@@ -196,7 +195,7 @@ public final class MethodScriptCompiler {
 					ParseTree tempNode = func.optimizeSpecial(node.getChildren(), false);
 					tree.setData(tempNode.getData());
 					tree.setChildren(tempNode.getChildren());
-					optimize(tree, procs);
+					optimize(tree, procs, env);
 					return;
 				}
 			}
@@ -286,7 +285,7 @@ public final class MethodScriptCompiler {
 		for (int i = 0; i < children.size(); i++) {
 			ParseTree node = children.get(i);
 			if (node.getData() instanceof CFunction) {
-				optimize(node, procs);
+				optimize(node, procs, env);
 			}
 
 			if (node.getData().isDynamic() && !(node.getData() instanceof IVariable)) {
@@ -341,18 +340,12 @@ public final class MethodScriptCompiler {
 			try {
 				ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), fileOptions);
 				Script fakeScript = Script.GenerateScript(root, "*");
-				Environment env = null;
-				try {
-					env = Static.GenerateStandaloneEnvironment();
-				} catch (Exception e) {
-					//
-				}
 				Procedure myProc = DataHandling.proc.getProcedure(Target.UNKNOWN, env, fakeScript, children.toArray(new ParseTree[children.size()]));
 				procs.peek().add(myProc); //Yep. So, we can move on with our lives now, and if it's used later, it could possibly be static.
 			} catch (ConfigRuntimeException e) {
 				//Well, they have an error in there somewhere
 				throw new ConfigCompileException(e);
-			} catch (NullPointerException e) {
+			} catch (Exception e) {
 				//Nope, can't optimize.
 				return;
 			}
@@ -368,7 +361,7 @@ public final class MethodScriptCompiler {
 		if (options.contains(OptimizationOption.OPTIMIZE_DYNAMIC)) {
 			ParseTree tempNode;
 			try {
-				tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), tree.getChildren());
+				tempNode = ((Optimizable) func).optimizeDynamic(tree.getData().getTarget(), env, tree.getChildren());
 			} catch (ConfigRuntimeException e) {
 				//Turn it into a compile exception, then rethrow
 				throw new ConfigCompileException(e);
@@ -384,7 +377,7 @@ public final class MethodScriptCompiler {
 				tree.setOptimized(tempNode.isOptimized());
 				tree.setChildren(tempNode.getChildren());
 				tree.getData().setWasIdentifier(tempNode.getData().wasIdentifier());
-				optimize(tree, procs);
+				optimize(tree, procs, env);
 				tree.setOptimized(true);
 				//Some functions can actually make static the arguments, for instance, by pulling up a hardcoded
 				//array, so if they have reversed this, make note of that now
@@ -414,9 +407,9 @@ public final class MethodScriptCompiler {
 			try {
 				Construct result;
 				if (options.contains(OptimizationOption.CONSTANT_OFFLINE)) {
-					result = func.exec(tree.getData().getTarget(), null, constructs);
+					result = func.exec(tree.getData().getTarget(), env, constructs);
 				} else {
-					result = ((Optimizable) func).optimize(tree.getData().getTarget(), constructs);
+					result = ((Optimizable) func).optimize(tree.getData().getTarget(), env, constructs);
 				}
 
 				//If the result is null, it was just a check, it can't optimize further.
@@ -502,11 +495,11 @@ public final class MethodScriptCompiler {
 		File root = env.getEnv(GlobalEnv.class).GetRootFolder();
 		File auto_include = new File(root, "auto_include.ms");
 		if (auto_include.exists()) {
-			MethodScriptCompiler.execute(IncludeCache.get(auto_include, new Target(0, auto_include, 0)), env, null, s);
+			MethodScriptCompiler.execute(IncludeCache.get(auto_include, new Target(0, auto_include, 0), env), env, null, s);
 		}
 
 		for (File f : Static.getAliasCore().autoIncludes) {
-			MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0)), env, null, s);
+			MethodScriptCompiler.execute(IncludeCache.get(f, new Target(0, f, 0), env), env, null, s);
 		}
 	}
 }

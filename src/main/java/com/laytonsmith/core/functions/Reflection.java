@@ -208,7 +208,7 @@ public class Reflection {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.isEmpty()){
 				//They are requesting this function's documentation. We can just return a string,
 				//and then it will never actually get called, so we handle it entirely in here.

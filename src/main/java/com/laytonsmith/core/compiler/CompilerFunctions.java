@@ -119,7 +119,7 @@ public class CompilerFunctions {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> list) throws ConfigCompileException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> list) throws ConfigCompileException {
 			return optimizeSpecial(list, true);
 		}
 
@@ -543,7 +543,7 @@ public class CompilerFunctions {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			FileOptions options = new FileOptions(new HashMap<String, String>());
 			if (!children.isEmpty()) {
 				options = children.get(0).getFileOptions();

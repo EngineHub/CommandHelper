@@ -1,18 +1,24 @@
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.abstraction.Implementation.Type;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.environments.Environment.EnvironmentImpl;
+import com.laytonsmith.core.environments.RuntimeEnvironment;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.SortedSet;
 import java.util.Stack;
+import java.util.TreeSet;
 
 /**
  * The compiler environment provides compilation settings, or other controller
@@ -23,7 +29,7 @@ import java.util.Stack;
  * but you can use the various factory methods to create an environment from other sources.
  * @author lsmith
  */
-public class CompilerEnvironment implements Environment.EnvironmentImpl{	
+public class CompilerEnvironment implements Environment.EnvironmentImpl, RuntimeEnvironment {	
 	/**
 	 * A constant is a construct that is defined in source like ${this}. The value
 	 * must be passed in at compile time.
@@ -41,6 +47,16 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl{
 	 * variable hasn't been declared yet, it will be a compiler error.
 	 */
 	private Stack<Set<String>> knownVars = new Stack<Set<String>>();
+	private final Implementation.Type implementation;
+	private final api.Platforms platform;
+	private Map<String, Object> custom = new HashMap<String, Object>();
+	private SortedSet<String> flags = new TreeSet<String>();
+	
+	public CompilerEnvironment(Implementation.Type implementation, api.Platforms platform){
+		this.implementation = implementation;
+		this.platform = platform;
+	}
+	
 	//TODO: Need to figure out how to do known procs.
 	public void setConstant(String name, Construct value){
 		constants.put(name, value);
@@ -76,9 +92,41 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl{
 	public List<ParseTree> getIncludes(){
 		return new ArrayList<ParseTree>(includes);
 	}
+	
+	
+	@Override
+	public CompilerEnvironment clone() throws CloneNotSupportedException {
+		CompilerEnvironment clone = (CompilerEnvironment)super.clone();
+		
+		return clone;
+	}
 
-	public EnvironmentImpl clone() throws CloneNotSupportedException {
-		throw new UnsupportedOperationException("Not supported yet.");
+	public void SetCustom(String name, Object var) {
+		custom.put(name, var);
+	}
+
+	public Object GetCustom(String name) {
+		return custom.get(name);
+	}
+
+	public boolean HasFlag(String name) {
+		return flags.contains(name);
+	}
+
+	public void SetFlag(String name) {
+		flags.add(name);
+	}
+
+	public void ClearFlag(String name) {
+		flags.remove(name);
+	}
+	
+	public Implementation.Type GetImplementation(){
+		return implementation;
+	}
+
+	public Platforms GetPlatform() {
+		return platform;
 	}
 	
 }

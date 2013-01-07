@@ -84,7 +84,7 @@ public class Regex {
         }             
 
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }
@@ -152,7 +152,7 @@ public class Regex {
         }              
 
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }
@@ -219,7 +219,7 @@ public class Regex {
         }           
 
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			ParseTree data = children.get(0);
             if(!data.getData().isDynamic()){
 				String pattern = data.getData().val();
@@ -297,7 +297,7 @@ public class Regex {
         }
         
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             ParseTree data = children.get(0);
             if(!data.getData().isDynamic()){
 				String pattern = data.getData().val();
@@ -367,7 +367,7 @@ public class Regex {
         }               
 
         @Override
-        public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+        public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
             if(!children.get(0).getData().isDynamic()){
                 getPattern(children.get(0).getData(), t);
             }

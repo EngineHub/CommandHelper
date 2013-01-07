@@ -14,6 +14,8 @@ import com.laytonsmith.persistance.PersistanceNetwork;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 /**
  * A global environment is always available, and contains the objects that the
@@ -21,13 +23,13 @@ import java.util.Map;
  *
  * @author lsmith
  */
-public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
+public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable, CustomEnvironment {
 
 	private ExecutionQueue executionQueue = null;
 	private Profiler profiler = null;
 	private PersistanceNetwork persistanceNetwork = null;
 	private PermissionsResolver permissionsResolver = null;
-	private Map<String, Boolean> flags = new HashMap<String, Boolean>();
+	private SortedSet<String> flags = new TreeSet<String>();
 	private Map<String, Object> custom = new HashMap<String, Object>();
 	private Script script = null;
 	private File root;
@@ -74,22 +76,8 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	 * @param name
 	 * @param value
 	 */
-	public void SetFlag(String name, boolean value) {
-		flags.put(name, value);
-	}
-
-	/**
-	 * Returns the value of a flag. Null if unset.
-	 *
-	 * @param name
-	 * @return
-	 */
-	public Boolean GetFlag(String name) {
-		if (!flags.containsKey(name)) {
-			return null;
-		} else {
-			return flags.get(name);
-		}
+	public void SetFlag(String name) {
+		flags.add(name);
 	}
 
 	/**
@@ -210,4 +198,9 @@ public class GlobalEnv implements Environment.EnvironmentImpl, Cloneable {
 	public void SetLabel(String label) {
 		this.label = label;
 	}
+
+	public boolean HasFlag(String name) {
+		return flags.contains(name);
+	}
+
 }

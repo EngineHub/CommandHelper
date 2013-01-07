@@ -1,6 +1,10 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.compiler.CompilerEnvironment;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
+import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.testing.StaticTest;
 import org.junit.*;
@@ -19,7 +23,8 @@ public class OptimizationTest {
 	}
     
     public String optimize(String script) throws ConfigCompileException{
-        return OptimizationUtilities.optimize(script);
+		Environment env = Environment.createEnvironment(new CompilerEnvironment(Implementation.Type.TEST, api.Platforms.INTERPRETER_JAVA));
+        return OptimizationUtilities.optimize(script, env);
     }
     
     @Test public void testTestFramework() throws ConfigCompileException{
