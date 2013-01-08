@@ -160,6 +160,9 @@ public final class MethodScriptCompiler {
 
 	public static ParseTree compile(TokenStream stream, Environment env) throws ConfigCompileException {
 		ParseTree tree = NewMethodScriptCompiler.compile(stream, env);
+		if(true){
+			return tree;
+		}
 		Stack<List<Procedure>> procs = new Stack<List<Procedure>>();
 		procs.add(new ArrayList<Procedure>());
 		optimize(tree, procs, env); //TODO: Is this needed anymore?

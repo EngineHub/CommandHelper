@@ -195,7 +195,8 @@ class CompilerObject {
 		//If the next token ISN'T a ) , } ] we need to autoconcat this
 		if (peek().type != TType.FUNC_END && peek().type != TType.COMMA 
 				&& peek().type != TType.RCURLY_BRACKET 
-				&& peek().type != TType.RSQUARE_BRACKET) {
+				&& peek().type != TType.RSQUARE_BRACKET
+				&& peek().type != TType.LCURLY_BRACKET) {
 			//... unless we're already in an autoconcat
 			if (!(pointer.getData() instanceof CFunction && ((CFunction) pointer.getData()).val().equals("__autoconcat__"))) {
 				CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);

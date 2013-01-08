@@ -4,6 +4,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
+import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.Construct;
@@ -134,15 +135,7 @@ public interface Function extends FunctionBase, Documentation {
      * about their branches; if the branch conditions are static, they should be reduceable to a single
      * branch anyways, but some optimizations require knowledge about code branches.
      */
-    public interface CodeBranch{
-		/**
-		 * Returns a list of all the child nodes that are considered separate code branches.
-		 * Likely this is all of them, but not necessarily, especially if the optimization routine could
-		 * eliminate some of the branches, due to const conditions. The current "self" ParseTree is passed
-		 * in, which is the function's ParseTree wrapper, and from there, the children can be selected. The
-		 * list of children returned should reference equal (==, not just .equals()) the children passed in.
-		 * @return
-		 */
-        public List<ParseTree> getBranches(ParseTree self);
+    public interface CodeBranch extends Optimizable {
+		
     }
 }

@@ -11,6 +11,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.functions.Function.CodeBranch;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -29,7 +30,7 @@ public class BasicLogic {
 	}
 
 	@api
-	public static class _if extends AbstractFunction implements Optimizable, Braceable {
+	public static class _if extends AbstractFunction implements Optimizable, Braceable, CodeBranch {
 
 		public String getName() {
 			return "if";
@@ -369,7 +370,7 @@ public class BasicLogic {
 	}
 
 	@api(environments = {GlobalEnv.class})
-	public static class ifelse extends AbstractFunction implements Optimizable {
+	public static class ifelse extends AbstractFunction implements Optimizable, CodeBranch {
 
 		public String getName() {
 			return "ifelse";
@@ -519,20 +520,13 @@ public class BasicLogic {
 				return toReturn;
 			}
 			if (children.size() % 2 == 1) {
+				//Look at the final else block
 				ParseTree ret = children.get(children.size() - 1);
-				if (ret.getData() instanceof CIdentifier) {
-					optimizedTree.add(((CIdentifier) ret.getData()).contained());
-				} else {
-					optimizedTree.add(ret);
-				}
-				if (optimizedTree.size() == 1) {
+				if (optimizedTree.isEmpty()) {
 					//Oh. Well, we can just return this node then.
-					return optimizedTree.get(0);
+					return ret;
 				}
-			}
-			if (optimizedTree.size() == 1) {
-				//The whole tree has been optimized out. Return void
-				return new ParseTree(new CVoid(t), new FileOptions(new HashMap<String, String>()));
+				optimizedTree.add(ret);
 			}
 			node.setChildren(optimizedTree);
 			if (node.getChildren().isEmpty()) {
