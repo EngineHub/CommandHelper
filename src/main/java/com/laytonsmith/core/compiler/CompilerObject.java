@@ -19,6 +19,7 @@ import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
 import java.util.List;
@@ -73,6 +74,8 @@ class CompilerObject {
 		if (!functionLines.isEmpty()) {
 			throw new ConfigCompileException("Unclosed left parenthesis. (Did you forget to close a function?)", functionLines.peek());
 		}
+		
+		//Go through and __autoconcat__ the cbrace children
 	}
 
 	void compile0() throws ConfigCompileException {
@@ -176,6 +179,13 @@ class CompilerObject {
 		if (t.type == TType.RCURLY_BRACKET) {
 			if (braceCounter == 0) {
 				throw new ConfigCompileException("Unexpected right brace. (Did you have too many right braces (}) in your code?)", t.getTarget());
+			}
+			//If our pointer has multiple children, we need to throw them all in an autoconcat
+			if(pointer.numberOfChildren() > 1){
+				ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), stream.getFileOptions());
+				ac.setChildren(new ArrayList<ParseTree>(pointer.getChildren()));
+				pointer.removeChildren();
+				pointer.addChild(ac);
 			}
 			braceCounter--;
 			braceLines.pop();

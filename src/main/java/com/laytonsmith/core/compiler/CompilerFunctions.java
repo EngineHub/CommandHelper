@@ -430,9 +430,9 @@ public class CompilerFunctions {
 					ParseTree prev = list.get(i - 1);
 					Construct data = prev.getData();
 					if(data instanceof CFunction){
-						Function f = ((CFunction)node.getData()).getFunction();
+						Function f = ((CFunction)prev.getData()).getFunction();
 						if(f instanceof Braceable){
-							
+							((Braceable)f).handleBraces(list, i - 1);
 						}
 					} else if(data instanceof CString){
 						//Eventually keywords will be allowed, but not yet
@@ -442,7 +442,9 @@ public class CompilerFunctions {
 				int newSize = list.size();
 				//Index correction. Note that it will be 0 if no correction was needed,
 				//and so i will be unaffected.
-				i = i - (currentSize - newSize);
+				if(currentSize - newSize != 0){
+					i--;
+				}
 			}
 
 			//We've eliminated the need for __autoconcat__ either way, however, if there are still arguments

@@ -774,6 +774,12 @@ public class MethodScriptCompilerTest {
                 + "}", fakePlayer);
         verify(fakePlayer).sendMessage("success!");
     }
+	
+		
+	@Test(expected=ConfigCompileException.class)
+	public void testIfError1() throws ConfigCompileException{
+		SRun("if(true,true){ msg('hi') }", null);
+	}
     
     @Test
     public void testBraceElseIfElse() throws ConfigCompileException{
