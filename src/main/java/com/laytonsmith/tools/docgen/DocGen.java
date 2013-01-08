@@ -292,7 +292,7 @@ public class DocGen {
                 } else if (type.equals("wiki")) {
                     //Turn args into a prettified version
                     out.append("|- id=\"" + f.getName() + "\"\n"
-                            + "! scope=\"row\" | [[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "|" + f.getName() + "]]()\n"
+                            + "! scope=\"row\" | [[CommandHelper/" + (staged?"Staged/":"") + "API/" + f.getName() + "|" + f.getName() + "]]\n"
                             + "| " + di.ret + "\n"
                             + "| " + di.args + "\n"
                             + "| " + thrown.toString() + "\n"
