@@ -17,7 +17,7 @@ public class ProfilePoint implements Comparable<ProfilePoint> {
 		this.name = name;
 		GCRun = false;
 		this.parent = parent;
-		this.message = "";
+		this.message = null;
 	}
 
 	@Override
