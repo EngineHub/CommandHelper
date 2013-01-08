@@ -193,7 +193,9 @@ public final class Profiler {
 				//Let's change this to seconds, actually.
 				stringTime = Double.toString(((long)time) / 1000.0) + "sec";
 			}
-			doLog("[" + stringTime + "][Lvl:" + (operationName.getGranularity().getLevel()) + "]:" + getIndent(queuedProfilePoints) + operationName.toString() + (operationName.wasGCd()?gcString:""));
+			String operationMessage = operationName.getMessage()!=null?" Message: "+operationName.getMessage():"";
+			doLog("[" + stringTime + "][Lvl:" + (operationName.getGranularity().getLevel()) + "]:" + getIndent(queuedProfilePoints)
+					+ operationName.toString() + operationMessage + (operationName.wasGCd()?gcString:""));
 		}
 		queuedProfilePoints--;
 	}
