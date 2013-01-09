@@ -3,15 +3,19 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
@@ -32,11 +36,29 @@ class OptimizerObject {
 	}
 
 	public ParseTree optimize() throws ConfigCompileException {
+		//If at any point we get a PullMeUpException, we just set root = to that node
+		env.getEnv(CompilerEnvironment.class).pushProcedureScope();
 		optimize01(root, env);
-		optimize02(root, env);
-		optimize03(root, env);
+		optimize02(root, env, false);
+		try{
+			optimize03(root, env, false); // Once
+		} catch(PullMeUpException e){
+			root = e.getNode();
+		}
 		optimize04(root, env, new ArrayList<String>());
 		optimize05(root, env);
+		try{
+			optimize03(root, env, true); // Twice
+		} catch(PullMeUpException e){
+			root = e.getNode();
+		}
+		try{
+			optimize03(root, env, true); // Thrice
+		} catch(PullMeUpException e){
+			root = e.getNode();
+		}
+		optimize02(root, env, true); // Gotta do this one again too
+		env.getEnv(CompilerEnvironment.class).popProcedureScope();
 
 		return root;
 	}
@@ -83,16 +105,16 @@ class OptimizerObject {
 	 * @param tree
 	 * @param compilerEnvironment
 	 */
-	private void optimize02(ParseTree tree, Environment compilerEnvironment) throws ConfigCompileException {
+	private void optimize02(ParseTree tree, Environment compilerEnvironment, boolean optimizeProcs) throws ConfigCompileException {
 		ParseTree tempNode = null;
 		int numChildren;
 		do {
-			if (tree.getData().val().startsWith("_")) {
-				//Procedure. Can't optimize this yet, so just return.
-				return;
-			}
 			numChildren = tree.numberOfChildren();
 			if (tree.getData() instanceof CFunction) {
+				if(((CFunction)tree.getData()).isProcedure()){
+					//Procedure. Can't optimize this yet, so just return.
+					return;
+				}
 				Function func = ((CFunction) tree.getData()).getFunction();
 				List<ParseTree> children = tree.getChildren();
 				//Loop through the children, and if any of them are functions that are terminal, truncate.
@@ -158,8 +180,23 @@ class OptimizerObject {
 					}
 				}
 
-				if (((CFunction) tree.getData()).getFunction() instanceof Function.CodeBranch) {
-					tempNode = ((Function.CodeBranch) func).optimizeDynamic(tree.getTarget(), env, tree.getChildren());
+				Function f = ((CFunction)tree.getData()).getFunction();
+				if (f instanceof Function.CodeBranch) {
+					Function.CodeBranch cb = (Function.CodeBranch)f;
+					//Go ahead and depth first optimize the non code branch parts
+					List<Integer> branches = Arrays.asList(cb.getCodeBranches(tree.getChildren()));
+					for(int i = 0; i < tree.getChildren().size(); i++){
+						if(!branches.contains(i)){
+							ParseTree child = tree.getChildAt(i);
+							try{
+								optimize03(child, compilerEnvironment, optimizeProcs);
+							} catch(PullMeUpException e){
+								tree.getChildren().set(i, e.getNode());
+							}
+						}
+					}
+					
+					tempNode = cb.optimizeDynamic(tree.getTarget(), env, tree.getChildren());
 
 					if (tempNode == Optimizable.PULL_ME_UP) {
 						tempNode = tree.getChildAt(0);
@@ -177,18 +214,99 @@ class OptimizerObject {
 		//Now optimize the children
 		for (int i = 0; i < tree.getChildren().size(); i++) {
 			ParseTree node = tree.getChildAt(i);
-			optimize02(node, compilerEnvironment);
+			optimize02(node, compilerEnvironment, optimizeProcs);
 		}
 	}
 
 	/**
 	 * This pass runs the optimization of the remaining functions.
+	 * This gets run three times, once before proc optimizations (to optimize inside
+	 * procedures), once after (to optimize down procedure usages),
+	 * and a final third time, for the benefit of functions that can pull up or
+	 * otherwise reoptimize now that some procs may be gone.
 	 *
 	 * @param tree
 	 * @param compilerEnvironment
 	 * @throws ConfigCompileException
 	 */
-	private void optimize03(ParseTree tree, Environment compilerEnvironment) throws ConfigCompileException {
+	private void optimize03(ParseTree tree, Environment compilerEnvironment, boolean optimizeProcs) throws ConfigCompileException, PullMeUpException {
+		//Depth first
+		for(int i = 0; i < tree.numberOfChildren(); i++){
+			ParseTree child = tree.getChildAt(i);
+			try{
+				optimize03(child, compilerEnvironment, optimizeProcs);
+			} catch(PullMeUpException e){
+				tree.getChildren().set(i, e.getNode());
+			}
+		}
+		
+		CompilerEnvironment env = compilerEnvironment.getEnv(CompilerEnvironment.class);
+		if(!(tree.getData() instanceof CFunction)){
+			//Not a function, no optimization needed
+			return;
+		}
+		if(optimizeProcs && ((CFunction)tree.getData()).isProcedure()){
+			//Different way to optimize these, but it won't happen the first go through
+			//TODO
+		} else {
+			Function func = ((CFunction)tree.getData()).getFunction();
+			if(func instanceof Optimizable){
+				Optimizable f = (Optimizable)func;
+				Set<Optimizable.OptimizationOption> options = f.optimizationOptions();
+				if(options.contains(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC)){
+					ParseTree tempNode;
+					try{
+						tempNode = f.optimizeDynamic(tree.getTarget(), compilerEnvironment, tree.getChildren());
+					} catch(ConfigRuntimeException e){
+						//Turn this into a compile exception, then rethrow
+						throw new ConfigCompileException(e);
+					}
+					if(tempNode == Optimizable.PULL_ME_UP){
+						//We're fully done with this function now, because it's completely
+						//gone from the tree, so actually we need to replace us with the child
+						//in our parent's child list, but we don't have access to that information,
+						//so throw an exception up with the child, and the parent will have to
+						//deal with it.
+						throw new PullMeUpException(tree.getChildAt(0));
+					} else if(tempNode == Optimizable.REMOVE_ME){
+						tree.setData(new CVoid(tree.getTarget()));
+						tree.removeChildren();
+					} else if(tempNode != null){
+						tree.setData(tempNode.getData());
+						tree.setChildren(tempNode.getChildren());
+					} //else it was just a compile check
+				}
+				
+				//Now that we have done all the optimizations we can with dynamic functions,
+				//let's see if we are constant, and then optimize const stuff
+				if(options.contains(OptimizationOption.OPTIMIZE_CONSTANT)
+						|| options.contains(OptimizationOption.CONSTANT_OFFLINE)){
+					Construct [] constructs = new Construct[tree.getChildren().size()];
+					for(int i = 0; i < tree.getChildren().size(); i++){
+						constructs[i] = tree.getChildAt(i).getData();
+						if(constructs[i].isDynamic()){
+							//Can't optimize any further, so return
+							return;
+						}
+					}
+					try{
+						Construct result;
+						if(options.contains(OptimizationOption.CONSTANT_OFFLINE)){
+							result = f.exec(tree.getData().getTarget(), compilerEnvironment, constructs);
+						} else {
+							result = f.optimize(tree.getData().getTarget(), compilerEnvironment, constructs);
+						}
+						//If the result is null, it was just a check, it can't optimize further
+						if(result != null){
+							tree.setData(result);
+							tree.removeChildren();
+						}
+					} catch(ConfigRuntimeException e){
+						throw new ConfigCompileException(e);
+					}
+				}
+			}
+		}
 	}
 
 	/**
@@ -229,4 +347,19 @@ class OptimizerObject {
 	 */
 	private void optimize05(ParseTree tree, Environment compilerEnvironment) throws ConfigCompileException {
 	}
+	
+	/**
+	 * Used by {@link #optimize03(com.laytonsmith.core.ParseTree, com.laytonsmith.core.environments.Environment, boolean)}
+	 */
+	private class PullMeUpException extends Exception{
+		private ParseTree tree;
+		public PullMeUpException(ParseTree tree){
+			this.tree = tree;
+		}
+		
+		public ParseTree getNode(){
+			return tree;
+		}
+	}
+
 }

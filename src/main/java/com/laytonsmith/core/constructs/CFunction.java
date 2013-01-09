@@ -58,5 +58,11 @@ public class CFunction extends Construct {
 	public void setFunction(FunctionBase f){
 		function = (Function)f;
 	}
+
+	public boolean isProcedure() {
+		//For now, just see if it starts with _. Later, this
+		//will be made a bit more robust.
+		return val().startsWith("_");
+	}
 	
 }

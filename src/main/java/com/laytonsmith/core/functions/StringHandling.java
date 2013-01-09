@@ -196,48 +196,6 @@ public class StringHandling {
 			return new CString(b.toString(), t);
 		}
 
-//        @Override
-//        public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-//            StringBuilder b = new StringBuilder();
-//            boolean centry = false;
-//            Construct key = null;
-//            for (int i = 0; i < nodes.length; i++) {
-//                Construct c = parent.seval(nodes[i], env);
-//                if (i == 0) {
-//                    if (c instanceof CLabel) {
-//                        key = c;
-//                        centry = true;
-//                        break;
-//                    }
-//                }
-//                if (!centry) {
-//                    if (i > 1 || i > 0 && !centry) {
-//                        b.append(" ");
-//                    }
-//                    b.append(c.val());
-//                }
-//            }
-//            if (centry) {
-//                Construct value;
-//                if (nodes.length > 2) {
-//                    //it's a string
-//                    StringBuilder c = new StringBuilder();
-//                    for (int i = 1; i < nodes.length; i++) {
-//                        Construct d = parent.seval(nodes[i], env);
-//                        if (i > 1) {
-//                            c.append(" ");
-//                        }
-//                        c.append(d.val());                        
-//                    }
-//                    value = new CString(c.toString(), t);
-//                } else {
-//                    value = parent.seval(nodes[1], env);
-//                }
-//                return new CEntry(key, value, t);
-//            } else {
-//                return new CString(b.toString(), t);
-//            }
-//        }
 		public String docs() {
 			return "string {var1, [var2...]} Concatenates any number of arguments together, but puts a space between elements";
 		}
@@ -261,6 +219,9 @@ public class StringHandling {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			OptimizationUtilities.pullUpLikeFunctions(children, this.getName());
+			if(children.size() == 1){
+				return PULL_ME_UP;
+			}
 			return null;
 		}
 

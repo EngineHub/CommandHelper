@@ -137,5 +137,18 @@ public interface Function extends FunctionBase, Documentation {
      */
     public interface CodeBranch extends Optimizable {
 		
+		/**
+		 * Given a list of children, this function should
+		 * return the indexes of the code branches themselves.
+		 * This optimization step occurs during the breadth first optimization,
+		 * but non-code branches need to be optimized down fully before
+		 * they can be reliably determined whether or not to be removed.
+		 * This function identifies which branches are code branches, and
+		 * prevents them from being depth first analysed at the wrong stage
+		 * of optimization.
+		 * @param children
+		 * @return 
+		 */
+		Integer [] getCodeBranches(List<ParseTree> children);
     }
 }

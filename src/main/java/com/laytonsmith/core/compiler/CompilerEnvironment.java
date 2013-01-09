@@ -5,12 +5,16 @@ import com.laytonsmith.abstraction.Implementation.Type;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.api.Platforms;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.Procedure;
+import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.RuntimeEnvironment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.ArrayList;
+import java.util.EmptyStackException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -51,6 +55,14 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Runtime
 	private final api.Platforms platform;
 	private Map<String, Object> custom = new HashMap<String, Object>();
 	private SortedSet<String> flags = new TreeSet<String>();
+	
+	/**
+	 * Since procedure names can't actually override other procs in the stack,
+	 * we don't have to keep track of anything complex here. Just check nothing
+	 * in the stack so far has the procedure name, add the procedure, push on a new list, run through
+	 * the children, then pop it off. Simple.
+	 */
+	private Stack<List<Procedure>> procedures = new Stack<List<Procedure>>();
 	
 	public CompilerEnvironment(Implementation.Type implementation, api.Platforms platform){
 		this.implementation = implementation;
@@ -128,5 +140,77 @@ public class CompilerEnvironment implements Environment.EnvironmentImpl, Runtime
 	public Platforms GetPlatform() {
 		return platform;
 	}
+	
+	/**
+	 * This adds a procedure to the current Procedure list.
+	 * Once you add the procedure, when you recurse down to optimize
+	 * the code in the proc, you should then {@link #pushProcedureScope()},
+	 * then {@link #popProcedureScope()} when you finish. This manages all
+	 * the scoping issues, and makes {@link #getProcedure(String)} work.
+	 * @param proc 
+	 * @throws ConfigCompileException If the procedure is already defined in the scope.
+	 */
+	public void addProcedure(Procedure proc) throws ConfigCompileException{
+		try{
+			//Make sure that the procedure doesn't already exist
+			for(List<Procedure> list : procedures){
+				for(Procedure p : list){
+					if(p.getName().equals(proc.getName())){
+						throw new ConfigCompileException("Cannot redefine " + proc.getName() 
+								+ " it was already defined at " + p.getTarget(), proc.getTarget());
+					}
+				}
+			}
+			List<Procedure> list = procedures.peek();
+			list.add(proc);
+		} catch(EmptyStackException e){
+			//Error, this shouldn't occur.
+			throw new Error(e);
+		}
+	}
+	
+	/**
+	 * Pushes a new procedure scope onto the stack
+	 */
+	public void pushProcedureScope(){
+		procedures.push(new ArrayList<Procedure>());
+	}
+	
+	/**
+	 * Pops a procedure scope off the stack
+	 */
+	public void popProcedureScope(){
+		try{
+			procedures.pop();
+		} catch(EmptyStackException e){
+			throw new Error(e);
+		}
+	}
+	
+	/**
+	 * Returns the Procedure with the given name.
+	 * @param name
+	 * @param t
+	 * @return
+	 * @throws ConfigCompileException If the procedure does not exist in the current scope.
+	 */
+	public Procedure getProcedure(String name, Target t) throws ConfigCompileException{
+		if(name == null){
+			//Honestly, this should be an error.
+			throw new NullPointerException("name cannot be null");
+		}
+		//Since we guarantee not to have conflicting names,
+		//we can easily just run through all the procs and look for
+		//the specified one.
+		for(List<Procedure> list : procedures){
+			for(Procedure p : list){
+				if(name.equals(p.getName())){
+					return p;
+				}
+			}
+		}
+		throw new ConfigCompileException("Unknown procedure \"" + name + "\"", t);
+	}
+	
 	
 }

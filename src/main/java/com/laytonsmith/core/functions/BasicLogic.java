@@ -15,6 +15,7 @@ import com.laytonsmith.core.functions.Function.CodeBranch;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -212,6 +213,10 @@ public class BasicLogic {
 					allNodes.add(startingWith, ifelse);
 				}
 			}
+		}
+
+		public Integer[] getCodeBranches(List<ParseTree> children) {
+			return new Integer[]{1, 2};
 		}
 	}
 
@@ -579,6 +584,17 @@ public class BasicLogic {
 						new ExampleScript("With braces", "if(false){\n\tmsg('This is false')\n} else {\n\tmsg('This is true')\n}"),
 						new ExampleScript("With braces, with else if", "if(false){\n\tmsg('This will not show')\n} else if(false){\n"
 						+ "\n\tmsg('This will not show')\n} else {\n\tmsg('This will show')\n}"),};
+		}
+
+		public Integer[] getCodeBranches(List<ParseTree> children) {
+			Set<Integer> list = new HashSet<Integer>();
+			list.add(1);
+			for(int i = 3; i < children.size(); i+=2){
+				list.add(i);
+			}
+			//Last one is always a code branch
+			list.add(children.size() - 1);
+			return list.toArray(new Integer[list.size()]);
 		}
 	}
 

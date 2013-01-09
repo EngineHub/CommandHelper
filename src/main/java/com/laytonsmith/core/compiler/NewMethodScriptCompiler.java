@@ -153,7 +153,7 @@ public class NewMethodScriptCompiler {
 				throw new ConfigCompileException("Expecting more tokens, but reached end of alias signature before tokens were resolved.", left.get(0).getTarget());
 			}
 			if (!cleft.isEmpty()) {
-				link(cright, compilerEnvironment);
+				cright = link(cright, compilerEnvironment);
 				scripts.add(new NewScript(cleft, cright, label));
 			}
 		}
@@ -171,11 +171,10 @@ public class NewMethodScriptCompiler {
 	public static ParseTree compile(TokenStream tokenStream, Environment compilerEnvironment) throws ConfigCompileException {
 		ParseTree root = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), tokenStream.getFileOptions());
 		new CompilerObject(tokenStream).compile(root, compilerEnvironment);
-		link(root, compilerEnvironment);
-		return root;
+		return link(root, compilerEnvironment);
 	}
 
-	private static void link(ParseTree root, Environment compilerEnvirontment) throws ConfigCompileException {
+	private static ParseTree link(ParseTree root, Environment compilerEnvirontment) throws ConfigCompileException {
 		//Before we actually link, we need to optimize our branch functions, that is,
 		//currently just if. However, at this point, we also need to optimize __autoconcat__ and cc.
 		//so we know what the tree actually looks like. Also, we want to first group all our auto includes
@@ -186,7 +185,7 @@ public class NewMethodScriptCompiler {
 		}
 		master.addChild(root);
 		OptimizerObject optimizer = new OptimizerObject(root, compilerEnvirontment);
-		optimizer.optimize();
+		return optimizer.optimize();
 		//root is now optimized
 	}
 

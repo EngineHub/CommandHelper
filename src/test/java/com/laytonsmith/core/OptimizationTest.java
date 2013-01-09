@@ -56,7 +56,7 @@ public class OptimizationTest {
 	}
 	
 	@Test(timeout=10000) public void testNestedIfsWithRemoval() throws ConfigCompileException {
-		assertEquals("p()", optimize("ifelse(1, if(0, msg('')), msg(''))"));
+		assertEquals("", optimize("ifelse(1, if(0, msg('')), msg(''))"));
 	}
     
     @Test(timeout=10000) public void testMultipleLinesInBraces() throws ConfigCompileException{
@@ -102,7 +102,7 @@ public class OptimizationTest {
                 optimize("proc(_proc, return(array(1))) _proc()[0]"));
     }
 	
-	@Test(timeout=10000) public void testUnreachableCode1() throws ConfigCompileException{
+	@Test public void testUnreachableCode1() throws ConfigCompileException{
 		assertEquals("die()", optimize("die() msg('1')"));
 	}
 	
@@ -238,6 +238,18 @@ public class OptimizationTest {
 	
 	@Test(timeout=10000) public void testArraySetConversionWithMultiDimensionalAndVariables() throws Exception{
 		assertEquals("array_set(array_get(@a,@zero),concat(@one,' '),'s')", optimize("@a[@zero][@one.' '] = 's'"));
+	}
+	
+	@Test(timeout=10000)
+	public void testComplicatedButConstIfCondition() throws Exception{
+		//Test to see if the complicated (but const) condition in an if
+		//doesn't prevent actual optimization
+		assertEquals("msg('')", optimize("if('a'.'a' == 'aa', msg(''))"));
+	}
+	
+	@Test
+	public void testLinkerDoesntLinkUntilAfterIfsCompileDown() throws Exception{
+		assertEquals("msg('')", optimize("if(false, bad_function(), msg(''))"));
 	}
 	
 	

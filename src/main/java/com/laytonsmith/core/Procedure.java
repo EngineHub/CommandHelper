@@ -31,6 +31,7 @@ public class Procedure implements Cloneable {
     private List<IVariable> varIndex = new ArrayList<IVariable>();
     private ParseTree tree;
     private boolean possiblyConstant = false;
+	private Target t;
 
     public Procedure(String name, List<IVariable> varList, ParseTree tree, Target t) {
         this.name = name;
@@ -44,6 +45,7 @@ public class Procedure implements Cloneable {
         if (!this.name.matches("^_[^_].*")) {
             throw new ConfigRuntimeException("Procedure names must start with an underscore", ExceptionType.FormatException, t);
         }
+		this.t = t;
         //Let's look through the tree now, and see if this is possibly constant or not.
         //If it is, it may or may not help us during compilation, but if it's not,
         //we can be sure that we cannot inline this in any way.
@@ -185,5 +187,9 @@ public class Procedure implements Cloneable {
 
 	public void definitelyNotConstant() {
 		possiblyConstant = false;
+	}
+
+	public Target getTarget() {
+		throw new UnsupportedOperationException("Not yet implemented");
 	}
 }
