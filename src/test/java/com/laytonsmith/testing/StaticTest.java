@@ -666,6 +666,10 @@ public class StaticTest {
 		public MCColor GetColor(int red, int green, int blue) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
+
+		public MCFirework GetFirework() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
         
     }
     

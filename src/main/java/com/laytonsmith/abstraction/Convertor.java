@@ -146,4 +146,10 @@ public interface Convertor {
 	 */
 	public MCColor GetColor(int red, int green, int blue);
 	
+	/**
+	 * Returns an MCFirework which can be built.
+	 * @return 
+	 */
+	public MCFirework GetFirework();
+	
 }
