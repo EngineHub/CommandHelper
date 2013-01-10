@@ -1,5 +1,8 @@
-package com.laytonsmith.core;
+package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;

@@ -1,5 +1,6 @@
-package com.laytonsmith.core;
+package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.util.List;
 

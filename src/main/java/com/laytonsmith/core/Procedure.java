@@ -1,5 +1,6 @@
 package com.laytonsmith.core;
 
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;

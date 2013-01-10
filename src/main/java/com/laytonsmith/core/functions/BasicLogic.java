@@ -1,5 +1,7 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.compiler.Braceable;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.compiler.FileOptions;
@@ -11,7 +13,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.core.functions.Function.CodeBranch;
+import com.laytonsmith.core.compiler.CodeBranch;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -458,13 +460,6 @@ public class BasicLogic {
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 
-			FileOptions options = new FileOptions(new HashMap<String, String>());
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
-			ParseTree node = new ParseTree(new CFunction(this.getName(), t), options);
-			node.setOptimized(true);
-			List<ParseTree> optimizedTree = new ArrayList<ParseTree>();
 			//We have to cache the return value if even if we find it, so we can check for syntax errors
 			//in all the branches, not just the ones before the first hardcoded true
 			ParseTree toReturn = null;
@@ -487,11 +482,12 @@ public class BasicLogic {
 						if (toReturn == null) {
 							toReturn = code;
 						}
-					} //else it's hard coded false, and we can ignore it.
-				} else {
-					//It's dynamic, so we can't do anything with it
-					optimizedTree.add(statement);
-					optimizedTree.add(code);
+					} else {
+						//else it's hard coded false, and we can ignore it.
+						children.remove(i);
+						children.remove(i);
+						i -= 2;
+					}
 				}
 				// We can pull up if(@a){ if(@b){ ...} } to if(@a && @b){ ... },
 				// which, in my profiling is faster. The only special consideration
@@ -504,21 +500,19 @@ public class BasicLogic {
 					ParseTree andTree = new ParseTree(and, statement.getFileOptions());
 					andTree.addChild(statement);
 					andTree.addChild(code.getChildAt(0));
-					if (optimizedTree.size() < 1) {
-						optimizedTree.add(andTree);
-					} else {
-						optimizedTree.set(i, andTree);
-					}
-					if (optimizedTree.size() < 2) {
-						optimizedTree.add(code.getChildAt(1));
-					} else {
-						optimizedTree.set(i + 1, code.getChildAt(1));
-					}
-					//We need to set this to re-optimize the children, because the and() construction may be unoptimal now
-					for (ParseTree pt : andTree.getChildren()) {
-						pt.setOptimized(false);
-					}
-					node.setOptimized(false);
+					//TODO: Finish this. The optimized tree approach is wrong,
+					//and the reverse approach is not being used, so there is
+					//
+//					if (optimizedTree.size() < 1) {
+//						optimizedTree.add(andTree);
+//					} else {
+//						optimizedTree.set(i, andTree);
+//					}
+//					if (optimizedTree.size() < 2) {
+//						optimizedTree.add(code.getChildAt(1));
+//					} else {
+//						optimizedTree.set(i + 1, code.getChildAt(1));
+//					}
 				}
 			}
 			if (toReturn != null) {
@@ -527,19 +521,16 @@ public class BasicLogic {
 			if (children.size() % 2 == 1) {
 				//Look at the final else block
 				ParseTree ret = children.get(children.size() - 1);
-				if (optimizedTree.isEmpty()) {
+				if (children.size() == 1) {
 					//Oh. Well, we can just return this node then.
 					return ret;
 				}
-				optimizedTree.add(ret);
 			}
-			node.setChildren(optimizedTree);
-			if (node.getChildren().isEmpty()) {
+			if (children.isEmpty()) {
 				//We have optimized it out entirely, so remove us
 				return Optimizable.REMOVE_ME;
 			}
-			return node;
-
+			return null;
 		}
 //        @Override
 //        public Construct optimize(Target t, Construct... args) throws ConfigCompileException {

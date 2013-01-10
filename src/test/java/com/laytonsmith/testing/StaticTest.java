@@ -2,6 +2,7 @@
 
 package com.laytonsmith.testing;
 
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;

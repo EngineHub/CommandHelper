@@ -1,7 +1,7 @@
 package com.laytonsmith.core;
 
-import com.laytonsmith.core.Optimizable.OptimizationOption;
-import com.laytonsmith.core.compiler.CompilerEnvironment;
+import com.laytonsmith.core.compiler.Optimizable;
+import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.NewMethodScriptCompiler;
 import com.laytonsmith.core.compiler.TokenStream;
@@ -12,14 +12,13 @@ import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.compiler.CompilerFunctions;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.functions.DataHandling;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import com.laytonsmith.core.functions.IncludeCache;
 import java.io.File;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  *
@@ -28,7 +27,16 @@ import java.util.concurrent.atomic.AtomicInteger;
 public final class MethodScriptCompiler {
 
 	private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
-	private final static FileOptions fileOptions = new FileOptions(new HashMap<String, String>());
+	private final static FileOptions fileOptions;
+	static {
+		FileOptions temp = null;
+		try {
+			temp = new FileOptions(new HashMap<FileOptions.Directive, String>(), Target.UNKNOWN);
+		} catch (ConfigCompileException ex) {
+			//Can't happen, but sure.
+		}
+		fileOptions = temp;
+	}
 
 	private MethodScriptCompiler() {
 	}
@@ -273,7 +281,7 @@ public final class MethodScriptCompiler {
 				if (options.contains(OptimizationOption.TERMINAL)) {
 					if (children.size() > i + 1) {
 						//First, a compiler warning
-						CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
+						CHLog.GetLogger().CompilerWarning(CompilerWarning.UnreachableCode, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget(), fileOptions);
 						//Now, truncate the children
 						for (int j = i + 1; j < children.size(); j++) {
 							children.remove(j);

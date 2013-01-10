@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException;
 import com.laytonsmith.PureUtilities.StringUtils;

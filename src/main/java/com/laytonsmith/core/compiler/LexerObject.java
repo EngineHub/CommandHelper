@@ -32,6 +32,7 @@ class LexerObject {
 	boolean state_in_ivar = false;
 	boolean state_in_fileopts = false;
 	StringBuffer fileopts = new StringBuffer();
+	Target fileoptsTarget = null;
 	int start_single_quote = 1;
 	int start_double_quote = 1;
 	int start_multiline = 1;
@@ -196,7 +197,7 @@ class LexerObject {
 
 	public TokenStream lex() throws ConfigCompileException {
 		if (token_list != null) {
-			return new TokenStream(new ArrayList<Token>(token_list), "");
+			return new TokenStream(new ArrayList<Token>(token_list), "", Target.UNKNOWN);
 		} else {
 			token_list = new ArrayList<Token>();
 		}
@@ -412,6 +413,7 @@ class LexerObject {
 					throw new ConfigCompileException("File options must come first in the file.", target);
 				}
 				state_in_fileopts = true;
+				fileoptsTarget = target;
 				i++;
 				continue;
 			}
@@ -542,7 +544,7 @@ class LexerObject {
 			throw new ConfigCompileException("Unclosed double quote (You have a double quote without a matching end double quote). The last double quote"
 					+ " was started on line " + start_double_quote, target);
 		}
-		return new TokenStream(new ArrayList<Token>(token_list), fileopts.toString());
+		return new TokenStream(new ArrayList<Token>(token_list), fileopts.toString(), fileoptsTarget);
 	}
 
 	/**

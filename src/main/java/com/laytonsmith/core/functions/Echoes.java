@@ -14,7 +14,7 @@ import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;

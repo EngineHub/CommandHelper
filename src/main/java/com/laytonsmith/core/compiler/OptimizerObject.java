@@ -2,8 +2,7 @@ package com.laytonsmith.core.compiler;
 
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.Optimizable.OptimizationOption;
+import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CVoid;
@@ -169,7 +168,7 @@ class OptimizerObject {
 						if (options.contains(Optimizable.OptimizationOption.TERMINAL)) {
 							if (children.size() > i + 1) {
 								//First, a compiler warning
-								CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget());
+								CHLog.GetLogger().CompilerWarning(CompilerWarning.UnreachableCode, "Unreachable code. Consider removing this code.", children.get(i + 1).getTarget(), tree.getFileOptions());
 								//Now, truncate the children
 								for (int j = i + 1; j < children.size(); j++) {
 									children.remove(j);
@@ -181,8 +180,8 @@ class OptimizerObject {
 				}
 
 				Function f = ((CFunction)tree.getData()).getFunction();
-				if (f instanceof Function.CodeBranch) {
-					Function.CodeBranch cb = (Function.CodeBranch)f;
+				if (f instanceof CodeBranch) {
+					CodeBranch cb = (CodeBranch)f;
 					//Go ahead and depth first optimize the non code branch parts
 					List<Integer> branches = Arrays.asList(cb.getCodeBranches(tree.getChildren()));
 					for(int i = 0; i < tree.getChildren().size(); i++){
@@ -310,30 +309,18 @@ class OptimizerObject {
 	}
 
 	/**
-	 * This pass makes sure that all variables are initialized before usage, if
-	 * strict mode is on. For the first call, send a new List for assignments.
+	 * This pass ensures no violations of strict mode, if strict mode is enabled.
+	 * This includes use of uninitialized variables. For the first call, send a new List for assignments. Scopes
+	 * will be handled appropriately.
 	 */
 	private void optimize04(ParseTree tree, Environment compilerEnvironment, List<String> assignments) throws ConfigCompileException {
-		//TODO: I don't think all this is necessary
-//		if(tree.getFileOptions().isStrict()){
-//			if(tree.getData() instanceof NewIVariable){
-//				if(!assignments.contains(((NewIVariable)tree.getData()).getName())){
-//					throw new ConfigCompileException("Variables must be declared before use, in strict mode.", tree.getTarget());
-//				}
-//			}
-//		}
-//		for (int i = 0; i < tree.getChildren().size(); i++) {
-//			ParseTree node = tree.getChildren().get(i);
-//			if(node.getData() instanceof CFunction && node.getData().val().equals("assign")){
-//				if(node.getChildAt(0).getData() instanceof NewIVariable){
-//					String name = ((NewIVariable)node.getChildAt(0).getData()).getName();
-//					assignments.add(name);
-//				} else {
-//					throw new ConfigCompileException("An assignment can only occur on a variable.", node.getChildAt(0).getTarget());
-//				}
-//			}
-//			optimize04(node, compilerEnvironment, assignments);
-//		}
+		//Depth first, except for code branches, which have to have the non-branches initialized first.
+		//We still go through all the motions, even if strict mode is off, because only part
+		//of the tree may be in strict mode, in which case we will simply skip throwing the exception
+		//if we aren't in strict mode.
+		if(tree.getFileOptions().isStrict()){
+
+		}
 	}
 
 	/**

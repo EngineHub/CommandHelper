@@ -4,7 +4,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;

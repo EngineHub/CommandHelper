@@ -1,8 +1,11 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.compiler.Braceable;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -13,6 +16,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -246,7 +250,7 @@ public class DataHandling {
 					&& children.get(1).getData() instanceof IVariable){
 				if(((IVariable)children.get(0).getData()).getName().equals(
 						((IVariable)children.get(1).getData()).getName())){
-					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Assigning a variable to itself", t);
+					CHLog.GetLogger().CompilerWarning(CompilerWarning.AssignmentToItself, "Assigning a variable to itself", t, children.get(0).getFileOptions());
 				}
 			} else if(children.get(0).getData() instanceof CFunction 
 					&& ((CFunction)children.get(0).getData()).val().equals("array_get")){
@@ -679,11 +683,13 @@ public class DataHandling {
 			return new Integer[]{4, 5};
 		}
 
+		@Override
 		public String docs() {
 			return "void {array, ivar, code, else} Works like a foreach, except if the array is empty, the else code runs instead. That is, if the code"
 					+ " would not run at all, the else condition would.";
 		}
 
+		@Override
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
@@ -950,12 +956,12 @@ public class DataHandling {
 					//in the break, HOWEVER, it is not an error, we will simply
 					//issue a compiler warning. break() parameters should
 					//be hard coded.
-					CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "The parameter sent to break() should"
+					CHLog.GetLogger().CompilerWarning(CompilerWarning.VariableBreak, "The parameter sent to break() should"
 							+ " be hard coded, and should not be dynamically determinable, since this is always a sign"
 							+ " of loose code flow, which should be avoided. This may break optimizations and other"
 							+ " code analysis tools, and will most likely cause an error at runtime if not very carefully"
 							+ " regulated. Due to all these reasons, not hardcoding the break parameter should always"
-							+ " be avoided.", t);
+							+ " be avoided.", t, children.get(0).getFileOptions());
 				}
 			}
 			return null;
@@ -1631,7 +1637,7 @@ public class DataHandling {
 			if (myProc.isPossiblyConstant()) {
 				//Oooh, it's possibly constant. So, let's run it with our children.
 				try {
-					FileOptions options = new FileOptions(new HashMap<String, String>());
+					FileOptions options = new FileOptions(new EnumMap<FileOptions.Directive, String>(FileOptions.Directive.class), Target.UNKNOWN);
 					if(!children.isEmpty()){
 						options = children.get(0).getFileOptions();
 					}

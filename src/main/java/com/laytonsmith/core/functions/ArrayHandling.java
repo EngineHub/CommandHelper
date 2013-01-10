@@ -1,5 +1,6 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;

@@ -7,7 +7,7 @@ import com.laytonsmith.PureUtilities.StreamUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.Documentation;
-import com.laytonsmith.core.Optimizable;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.events.Event;

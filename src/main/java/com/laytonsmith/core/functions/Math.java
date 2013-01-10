@@ -2,8 +2,8 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
-import com.laytonsmith.core.Optimizable;
-import com.laytonsmith.core.Optimizable.OptimizationOption;
+import com.laytonsmith.core.compiler.Optimizable;
+import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;

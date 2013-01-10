@@ -10,13 +10,13 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.annotations.datasource;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Main;
-import com.laytonsmith.core.Optimizable;
 import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.FunctionBase;
 import com.laytonsmith.core.functions.FunctionList;
-import com.laytonsmith.core.functions.Scheduling;
 import com.laytonsmith.persistance.DataSource;
 import java.io.IOException;
 import java.lang.reflect.Constructor;
@@ -40,7 +40,7 @@ public class DocGenTemplates {
 	
 	public static void main(String[] args){
 		Implementation.setServerType(Implementation.Type.SHELL);
-		System.out.println(Generate("CommandLineTools"));
+		System.out.println(Generate("FileOptions"));
 	}
 	
 	public static String Generate(String forPage){
@@ -315,6 +315,33 @@ public class DocGenTemplates {
 					ArgumentParser parser = (ArgumentParser)ReflectionUtils.get(Main.class, f.getName());
 					b.append(parser.getBuiltDescription()).append("</pre>\n\n");
 				}
+			}
+			return b.toString();
+		}
+	};
+	
+	public static Generator DIRECTIVE = new Generator() {
+
+		public String generate(String... args) {
+			return FileOptions.Directive.valueOf(args[0]).toString();
+		}
+	};
+	
+	public static Generator CompilerWarning = new Generator() {
+
+		public String generate(String... args) {
+			//Just verifies that it exists.
+			return com.laytonsmith.core.compiler.CompilerWarning.valueOf(args[0]).name();
+		}
+	};
+	
+	public static Generator CompilerWarnings = new Generator() {
+
+		public String generate(String... args) {
+			StringBuilder b = new StringBuilder();
+			for(com.laytonsmith.core.compiler.CompilerWarning c : com.laytonsmith.core.compiler.CompilerWarning.values()){
+				b.append("===").append(c.name()).append("===\n");
+				b.append(c.docs()).append("\n\nSince: ").append(c.since().toString()).append("\n\n");
 			}
 			return b.toString();
 		}

@@ -12,6 +12,7 @@ import com.laytonsmith.core.functions.DummyFunction;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
@@ -39,10 +40,12 @@ public class CompilerFunctions {
 
 		private static final CVoid VOID = new CVoid(Target.UNKNOWN);
 
+		@Override
 		public String getName() {
 			return "p";
 		}
 
+		@Override
 		public String docs() {
 			return "mixed {c...} Used internally by the compiler. You shouldn't use it.";
 		}
@@ -73,6 +76,7 @@ public class CompilerFunctions {
 	@noprofile
 	public static class centry extends DummyFunction {
 
+		@Override
 		public String docs() {
 			return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
 					+ "compiler.";
@@ -107,6 +111,7 @@ public class CompilerFunctions {
 			throw new Error("Should not have gotten here, __autoconcat__ was not removed before runtime.");
 		}
 
+		@Override
 		public String docs() {
 			return "string {var1, [var2...]} This function should only be used by the compiler, behavior"
 					+ " may be undefined if it is used in code.";
@@ -480,7 +485,7 @@ public class CompilerFunctions {
 					}
 				}
 				ParseTree tree;
-				FileOptions options = new FileOptions(new HashMap<String, String>());
+				FileOptions options = new FileOptions(new EnumMap<FileOptions.Directive, String>(FileOptions.Directive.class), Target.UNKNOWN);
 				if (!list.isEmpty()) {
 					options = list.get(0).getFileOptions();
 				}
@@ -498,10 +503,12 @@ public class CompilerFunctions {
 	@api
 	public static class npe extends DummyFunction {
 
+		@Override
 		public Integer[] numArgs() {
 			return new Integer[]{0};
 		}
 
+		@Override
 		public boolean isRestricted() {
 			return true;
 		}
@@ -517,6 +524,7 @@ public class CompilerFunctions {
 	@noprofile
 	public static class dyn extends DummyFunction {
 
+		@Override
 		public String docs() {
 			return "exception {[argument]} Registers as a dynamic component, for optimization testing; that is"
 					+ " to say, this will not be optimizable ever."
@@ -546,7 +554,7 @@ public class CompilerFunctions {
 
 		@Override
 		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			FileOptions options = new FileOptions(new HashMap<String, String>());
+			FileOptions options = new FileOptions(new EnumMap<FileOptions.Directive, String>(FileOptions.Directive.class), Target.UNKNOWN);
 			if (!children.isEmpty()) {
 				options = children.get(0).getFileOptions();
 			}

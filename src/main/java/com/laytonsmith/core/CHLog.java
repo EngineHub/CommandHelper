@@ -3,7 +3,10 @@ package com.laytonsmith.core;
 import com.laytonsmith.PureUtilities.Preferences;
 import com.laytonsmith.PureUtilities.Preferences.Preference;
 import com.laytonsmith.abstraction.Implementation;
+import com.laytonsmith.core.compiler.CompilerWarning;
+import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -212,7 +215,17 @@ public final class CHLog {
         }
     }
     
-    
+    public void CompilerWarning(CompilerWarning type, String message, Target t, FileOptions fileOptions) throws ConfigCompileException{
+		if(!fileOptions.isWarningSupressed(type)){
+			//Since this isn't supressed, we will throw a compile exception instead if that option is set.
+			if(fileOptions.failOnWarning()){
+				throw new ConfigCompileException("Failure on warning: " + type + ": " + message, t);
+			} else {
+				//Otherwise, it's just a warning
+				Log(Tags.COMPILER, LogLevel.WARNING, message, t);
+			}
+		}
+	}
     
     public static class MsgBundle{
         private LogLevel level;

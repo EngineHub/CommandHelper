@@ -1,0 +1,83 @@
+File options are meta data that can be added to any MethodScript file at the top
+of the file, and provide the ability to manage the compilation process more
+granularly. Read on for the various options and their values.
+
+==Using File Options==
+As the name suggests, file options are set per individual file. Even if the file
+is included elsewhere, the options only affect that particular file. The options
+must be the first non-line comment, non-whitespace text at the top of a file 
+(or more specifically, the top of a compilation unit). This is an example file
+option:
+<pre>
+&lt;!
+	%%DIRECTIVE|STRICT%%: true;
+	%%DIRECTIVE|DESCRIPTION%%: This is a description of the file;
+&gt;
+</pre>
+
+File options follow the format <code>optionName: optionValue;</code>. If the 
+option value needs a literal semicolon, it can be escaped with \;. Literal
+greater than symbols may not be used, but text based options (such as the description)
+will support html escapes, so &amp;gt; can be used. Additionally, directives that
+are boolean always default to false, and you can set them to true by leaving off
+the parameter, like this:
+
+<pre>
+&lt;!
+	%%DIRECTIVE|STRICT%%;
+&gt;
+</pre>
+==Strict Mode==
+Strict mode is a mode that allows you to put a file into a more strict compilation
+mode. This provides several benefits, including better programmer error detection, more
+optimal compilations, and more readable code. It is recommended that all files
+have strict mode on, and in fact, some features in the future will require it.
+Strict mode is HIGHLY recommended, so in fact failing to enable it will trigger
+a warning itself, unless that warning is purposely suppressed as well.
+
+Example:
+<pre>
+&lt;!
+	%%DIRECTIVE|STRICT%%: true;
+&gt;
+</pre>
+
+==Supressed Warnings==
+Supressing warnings is usually not desirable, but for the sake of giving you
+precise control, it is possible to disable individual warning types with this
+directive. A full list of warnings (and their explanations and recommendations)
+is listed below. Multiple warnings can be suppressed by comma separating the types.
+
+<pre>
+&lt;!
+	%%DIRECTIVE|SUPRESS_WARNINGS%%: %%CompilerWarning|StrictModeOff%%, %%CompilerWarning|UseOfEval%%;
+&gt;
+</pre>
+
+%%CompilerWarnings%%
+
+==Description==
+The description of a file is useful for future programmers (or yourself) that access a file.
+Eventually, the description will be used in automatic documentation generation, but for now
+it serves as a standard way to add documentation to an individual file.
+
+<pre>
+&lt;!
+	%%DIRECTIVE|DESCRIPTION%%: This is a description of this file\; It takes a
+		string, and can contain any amount of text. Greater than signs must be
+		escaped with &amp;gt;, and semi colons like this\; However, all other characters
+		are valid.;
+&gt;
+</pre>
+
+==Fail on Warnings==
+It is good practice to never have warnings. If you want to turn on a super strict mode however, 
+setting this directive to true has the effect of failing the compile on ANY warning, instead
+of simply emitting a log message. This should be turned on for all production code, since it
+is never recommended for any warnings to exist in code.
+
+<pre>
+&lt;!
+	%%DIRECTIVE|FAIL_ON_WARNING%%: true;
+&gt;
+</pre>
