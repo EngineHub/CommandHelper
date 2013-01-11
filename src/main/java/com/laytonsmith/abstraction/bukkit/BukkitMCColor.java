@@ -13,12 +13,9 @@ import org.bukkit.Color;
  */
 public class BukkitMCColor implements MCColor {
 	
+	private static final BukkitMCColor builder = new BukkitMCColor();
 	public static MCColor GetMCColor(Color c){
-		BukkitMCColor cc = new BukkitMCColor();
-		cc.red = c.getRed();
-		cc.green = c.getGreen();
-		cc.blue = c.getBlue();
-		return cc;
+		return builder.build(c.getRed(), c.getGreen(), c.getBlue());
 	}
 	
 	public static Color GetColor(MCColor c){
@@ -45,17 +42,46 @@ public class BukkitMCColor implements MCColor {
 		return blue;
 	}
 
-	public void setRed(int red) {
-		this.red = red;
+	public MCColor build(int red, int green, int blue) {
+		BukkitMCColor color = new BukkitMCColor();
+		color.red = red;
+		color.green = green;
+		color.blue = blue;
+		return color;
 	}
 
-	public void setGreen(int green) {
-		this.green = green;
+
+	@Override
+	public int hashCode() {
+		int hash = 5;
+		hash = 11 * hash + this.red;
+		hash = 11 * hash + this.green;
+		hash = 11 * hash + this.blue;
+		return hash;
 	}
 
-	public void setBlue(int blue) {
-		this.blue = blue;
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null) {
+			return false;
+		}
+		if (getClass() != obj.getClass()) {
+			return false;
+		}
+		final BukkitMCColor other = (BukkitMCColor) obj;
+		if (this.red != other.red) {
+			return false;
+		}
+		if (this.green != other.green) {
+			return false;
+		}
+		if (this.blue != other.blue) {
+			return false;
+		}
+		return true;
 	}
+	
+	
 
 	
 }

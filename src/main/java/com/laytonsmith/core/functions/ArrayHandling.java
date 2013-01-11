@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.PureUtilities.RunnableQueue;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
@@ -1062,7 +1063,7 @@ public class ArrayHandling {
 					sortType = CArray.SortType.valueOf(args[1].val().toUpperCase());
 				}
 			} catch (IllegalArgumentException e) {
-				throw new ConfigRuntimeException("The sort type must be one of either: REGULAR, NUMERIC, STRING, or STRING_IC",
+				throw new ConfigRuntimeException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "),
 						ExceptionType.FormatException, t);
 			}
 			ca.sort(sortType);
@@ -1084,7 +1085,7 @@ public class ArrayHandling {
 					+ " is passed in as a variable, the contents of that variable will be sorted, even if you don't re-assign"
 					+ " the returned array back to the variable. If you really need the old array, you should create a copy of"
 					+ " the array first, like so: assign(@sorted, array_sort(@array[])). The sort type may be one of the following:"
-					+ " REGULAR, NUMERIC, STRING, STRING_IC. A regular sort sorts the elements without changing types first. A"
+					+ " " + StringUtils.Join(CArray.SortType.values(), ", ", " or ") + ". A regular sort sorts the elements without changing types first. A"
 					+ " numeric sort always converts numeric values to numbers first (so 001 becomes 1). A string sort compares"
 					+ " values as strings, and a string_ic sort is the same as a string sort, but the comparision is case-insensitive."
 					+ " If the array contains array values, a CastException is thrown; inner arrays cannot be sorted against each"
@@ -1114,7 +1115,7 @@ public class ArrayHandling {
 					try {
 						CArray.SortType.valueOf(children.get(1).getData().val().toUpperCase());
 					} catch (IllegalArgumentException e) {
-						throw new ConfigCompileException("The sort type must be one of either: REGULAR, NUMERIC, STRING, or STRING_CI", t);
+						throw new ConfigCompileException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "), t);
 					}
 				}
 			}
@@ -1189,7 +1190,8 @@ public class ArrayHandling {
 		public String docs() {
 			return "void {array, [sortType], closure(array)} Works like array_sort, but does the sort on another"
 					+ " thread, then calls the closure and sends it the sorted array. This is useful if the array"
-					+ " is large enough to actually \"stall\" the server when doing the sort.";
+					+ " is large enough to actually \"stall\" the server when doing the sort. Sort type should be"
+					+ " one of " + StringUtils.Join(CArray.SortType.values(), ", ", " or ");
 		}
 
 		public CHVersion since() {

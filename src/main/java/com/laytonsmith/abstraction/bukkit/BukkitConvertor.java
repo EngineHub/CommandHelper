@@ -331,4 +331,8 @@ public class BukkitConvertor extends AbstractConvertor {
 		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
 	}
 
+	public MCFirework GetFirework() {
+		return new BukkitMCFirework();
+	}
+
 }

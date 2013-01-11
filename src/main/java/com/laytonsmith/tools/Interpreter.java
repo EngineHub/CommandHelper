@@ -8,6 +8,7 @@ import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCFirework;
 import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
@@ -420,6 +421,10 @@ public class Interpreter {
 
 		public MCColor GetColor(int red, int green, int blue) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCFirework GetFirework() {
+			throw new UnsupportedOperationException("Not supported yet.");
 		}
 		
 	}

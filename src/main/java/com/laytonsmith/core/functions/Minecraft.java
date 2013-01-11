@@ -6,6 +6,7 @@ import com.laytonsmith.abstraction.enums.MCCreeperType;
 import com.laytonsmith.abstraction.enums.MCDyeColor;
 import com.laytonsmith.abstraction.enums.MCEffect;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCFireworkType;
 import com.laytonsmith.abstraction.enums.MCMobs;
 import com.laytonsmith.abstraction.enums.MCOcelotType;
 import com.laytonsmith.abstraction.enums.MCPigType;
@@ -984,6 +985,171 @@ public class Minecraft {
 		public String docs() {
 			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
 					+ " or if the type is invalid, a FormatException is thrown.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class launch_firework extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			MCWorld w = null;
+			if(p != null){
+				w = p.getWorld();
+			}
+			MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
+			CArray options = new CArray(t);
+			if(args.length == 2){
+				options = Static.getArray(args[1], t);
+			}
+			int strength = 2;
+			boolean flicker = false;
+			boolean trail = true;
+			Set<MCColor> colors = new HashSet<MCColor>();
+			colors.add(MCColor.WHITE);
+			Set<MCColor> fade = new HashSet<MCColor>();
+			MCFireworkType type = MCFireworkType.BALL;
+			
+			if(options.containsKey("strength")){
+				strength = (int)Static.getInt(options.get("strength"), t);
+			}
+			if(options.containsKey("flicker")){
+				flicker = Static.getBoolean(options.get("flicker"));
+			}
+			if(options.containsKey("trail")){
+				trail = Static.getBoolean(options.get("trail"));
+			}
+			if(options.containsKey("colors")){
+				colors = parseColors(options.get("colors"), t);
+			}
+			if(options.containsKey("fade")){
+				fade = parseColors(options.get("fade"), t);
+			}
+			if(options.containsKey("type")){
+				try{
+					type = MCFireworkType.valueOf(options.get("type").val().toUpperCase());
+				} catch(IllegalArgumentException e){
+					throw new Exceptions.FormatException("Invalid type: " + options.get("type").val(), t);
+				}
+			}
+			
+			MCFirework fw = StaticLayer.GetConvertor().GetFirework();
+			fw.setStrength(strength);
+			fw.setFlicker(flicker);
+			fw.setTrail(trail);
+			fw.setType(type);
+			for(MCColor color : colors){
+				fw.addColor(color);
+			}
+			
+			for(MCColor color : fade){
+				fw.addFadeColor(color);
+			}
+			
+			fw.launch(loc);
+			return new CVoid(t);
+		}
+		
+		private Set<MCColor> parseColors(Construct c, Target t){
+			Set<MCColor> colors = new HashSet<MCColor>();
+			if(c instanceof CArray){
+				CArray ca = ((CArray)c);
+				if(ca.size() == 3
+						&& ca.get(0) instanceof CInt
+						&& ca.get(1) instanceof CInt
+						&& ca.get(2) instanceof CInt
+						){
+					//It's a single custom color
+					colors.add(parseColor(ca, t));
+				} else {
+					for(String key : ca.keySet()){
+						Construct val = ca.get(key);
+						if(val instanceof CArray){
+							colors.add(parseColor(((CArray)val), t));
+						} else if(val instanceof CString){
+							colors.addAll(parseColor(((CString)val), t));
+						}
+					}
+				}
+			} else if(c instanceof CString){
+				colors.addAll(parseColor(((CString)c), t));
+			}
+			return colors;
+		}
+		
+		private MCColor parseColor(CArray ca, Target t){
+			return StaticLayer.GetConvertor().GetColor(
+							(int)Static.getInt(ca.get(0), t), 
+							(int)Static.getInt(ca.get(1), t), 
+							(int)Static.getInt(ca.get(2), t)
+						);
+		}
+		
+		private List<MCColor> parseColor(CString cs, Target t){
+			String split[] = cs.val().split("\\|");
+			List<MCColor> colors = new ArrayList<MCColor>();
+			for(String s : split){
+				if(MCColor.STANDARD_COLORS.containsKey(s.toUpperCase())){
+					 colors.add(MCColor.STANDARD_COLORS.get(s.toUpperCase()));
+				} else {
+					throw new Exceptions.FormatException("Unknown color type: " + s, t);
+				}
+			}
+			return colors;
+		}
+
+		public String getName() {
+			return "launch_firework";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "void {locationArray, [optionsArray]} Launches a firework. The location array specifies where it is launched from,"
+					+ " and the options array is an associative array described below. All parameters in the associative array are"
+					+ " optional, and default to the specified values if not set. The default options being set will make it look like"
+					+ " a normal firework, with a white explosion. ----"
+					+ " The options array may have the following keys:\n"
+					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
+					+ "! Array key !! Description !! Default\n"
+					+ "|-\n"
+					+ "| strength || A number specifying how far up the firework should go || 2\n"
+					+ "|-\n"
+					+ "| flicker || A boolean, determining if the firework will flicker\n || false\n"
+					+ "|-\n"
+					+ "| trail || A boolean, determining if the firework will leave a trail || true\n"
+					+ "|-\n"
+					+ "| colors || An array of colors, or a pipe seperated string of color names (for the named colors only)"
+					+ " for instance: array('WHITE') or 'WHITE<nowiki>|</nowiki>BLUE'. If you want custom colors, you must use an array, though"
+					+ " you can still use color names as an item in the array, for instance: array('ORANGE', array(30, 45, 150))."
+					+ " These colors are used as the primary colors. || 'WHITE'\n"
+					+ "|-\n"
+					+ "| fade || An array of colors to be used as the fade colors. This parameter should be formatted the same as"
+					+ " the colors parameter || array()\n"
+					+ "|-\n"
+					+ "| type || An enum value of one of the firework types, one of: " + StringUtils.Join(MCFireworkType.values(), ", ", " or ")
+					+ " || " + MCFireworkType.BALL.name() + "\n"
+					+ "|}\n"
+					+ "The \"named colors\" can be one of: " + StringUtils.Join(MCColor.STANDARD_COLORS.keySet(), ", ", " or ");
 		}
 
 		public CHVersion since() {
