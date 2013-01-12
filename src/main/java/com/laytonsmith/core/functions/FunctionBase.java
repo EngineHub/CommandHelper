@@ -1,5 +1,7 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.core.snapins.PackagePermission;
+
 /**
  * All functions that are implemented across all compilation platforms must implement
  * this interface at minimum. The annotation provides the platform(s) that the
@@ -40,4 +42,10 @@ public interface FunctionBase {
      * functions. If they shouldn't show up in the normal API documentation, return false.
      */
     public boolean appearInDocumentation();
+	
+	/**
+	 * Returns the package permission required to use this function.
+	 * @return 
+	 */
+	public PackagePermission getPermission();
 }

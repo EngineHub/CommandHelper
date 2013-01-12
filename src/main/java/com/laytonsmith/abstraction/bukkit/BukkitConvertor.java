@@ -15,6 +15,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import org.apache.log4j.Logger;
 import org.bukkit.Bukkit;
+import org.bukkit.Color;
 import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
@@ -183,9 +184,21 @@ public class BukkitConvertor extends AbstractConvertor {
             return new BukkitMCProjectile((Projectile)be);
         }
     	
+    	if(be instanceof Hanging){
+    		return new BukkitMCHanging(be);
+    	}
+    	
+    	if(be instanceof Vehicle){
+    		return new BukkitMCVehicle(be);
+    	}
+    	
     	if(be instanceof Tameable){
             return new BukkitMCTameable(be);
         }
+    	
+    	if(be instanceof Ageable){
+    		return new BukkitMCAgeable(be);
+    	}
         
         if(be instanceof Player){
             return new BukkitMCPlayer((Player)be);
@@ -312,6 +325,14 @@ public class BukkitConvertor extends AbstractConvertor {
 				maxBlockID = mID;
 			}
 		}
+	}
+
+	public MCColor GetColor(int red, int green, int blue) {
+		return BukkitMCColor.GetMCColor(Color.fromRGB(red, green, blue));
+	}
+
+	public MCFirework GetFirework() {
+		return new BukkitMCFirework();
 	}
 
 }

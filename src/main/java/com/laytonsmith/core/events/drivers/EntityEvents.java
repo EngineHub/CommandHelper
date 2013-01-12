@@ -2,13 +2,18 @@
 
 package com.laytonsmith.core.events.drivers;
 
+import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCEntity;
+import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
+import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
+import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
 import com.laytonsmith.abstraction.events.MCPlayerPickupItemEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
@@ -30,6 +35,71 @@ public class EntityEvents {
         return "Contains events related to an entity";
     }
 	
+	@api
+	public static class player_interact_entity extends AbstractEvent {
+
+		public String getName() {
+			return "player_interact_entity";
+		}
+
+		public String docs() {
+			return "{} "
+				+ "Fires when a player right clicks an entity. Note, not all entities are clickable"
+				+ "{player: the player clicking | clicked: the entity type clicked | "
+				+ "id: the id of the entity | data: if a player is clicked, this will contain their name} "
+				+ "{} "
+				+ "{player|clicked|id|data}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+				throws PrefilterNonMatchException {
+			if(e instanceof MCPlayerInteractEntityEvent){
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if (e instanceof MCPlayerInteractEntityEvent) {
+				MCPlayerInteractEntityEvent event = (MCPlayerInteractEntityEvent) e;
+				Map<String, Construct> map = evaluate_helper(e);
+				
+				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
+				map.put("clicked", new CString(event.getEntity().getType().name(), Target.UNKNOWN));
+				map.put("id", new CInt(event.getEntity().getEntityId(),Target.UNKNOWN));
+				
+				String data = "";
+				if(event.getEntity() instanceof MCPlayer) {
+					data = ((MCPlayer)event.getEntity()).getName();
+				}
+				map.put("data",  new CString(data, Target.UNKNOWN));
+				
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCPlayerDropItemEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.PLAYER_INTERACT_ENTITY;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+    
     @api
     public static class item_drop extends AbstractEvent {
         

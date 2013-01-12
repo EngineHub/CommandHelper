@@ -64,10 +64,6 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 	}
 
 	public MCLocation getBedSpawnLocation() {
-		if (op.getBedSpawnLocation() != null) {
-			return new BukkitMCLocation(op.getBedSpawnLocation());
-		}
-		return null;
-	}
-
+        return new BukkitMCLocation(op.getBedSpawnLocation());
+    }
 }

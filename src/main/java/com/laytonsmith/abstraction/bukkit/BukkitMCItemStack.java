@@ -4,6 +4,7 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.AbstractionObject;
 import com.laytonsmith.abstraction.MCEnchantment;
+import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCMaterialData;
 import com.laytonsmith.abstraction.blocks.MCMaterial;
@@ -12,13 +13,15 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.ItemMeta;
+import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.MaterialData;
 
 /**
  *
  * @author layton
  */
-public class BukkitMCItemStack implements MCItemStack{
+public class BukkitMCItemStack implements MCItemStack {
     ItemStack is;
     public BukkitMCItemStack(ItemStack is){
         this.is = is;
@@ -153,5 +156,18 @@ public class BukkitMCItemStack implements MCItemStack{
 	@Override
 	public int hashCode() {
 		return is.hashCode();
+	}
+
+	public MCItemMeta getItemMeta() {
+		ItemMeta im = is.getItemMeta();
+		if(im instanceof LeatherArmorMeta){
+			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta)im);
+		} else {
+			return new BukkitMCItemMeta(im);
+		}
+	}
+
+	public void setItemMeta(MCItemMeta im) {
+		is.setItemMeta(((BukkitMCItemMeta)im).im);
 	}
 }

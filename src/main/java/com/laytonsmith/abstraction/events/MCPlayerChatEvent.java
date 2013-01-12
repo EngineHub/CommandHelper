@@ -12,6 +12,10 @@ public interface MCPlayerChatEvent extends BindableEvent{
     public String getMessage();
     
     public void setMessage(String message);
+	
+	public String getFormat();
+	
+	public void setFormat(String format);
     
     public List<MCPlayer> getRecipients();
     

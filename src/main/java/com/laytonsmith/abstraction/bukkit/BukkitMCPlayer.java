@@ -237,10 +237,18 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         }
 
         Set opSet = null;
-
-		/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
-		/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
-		opSet = (Set) ReflectionUtils.get(ClassDiscovery.forFuzzyName("org.bukkit.craftbukkit.*", "ServerConfigurationManagerAbstract"), obcServerConfigurationmanagerAbstract, "operators");
+		try{
+			//Probably 1.4.5
+			/*n.m.s.Server*/ Object nmsServer = ReflectionUtils.invokeMethod(server, "getServer");
+			/*o.b.c.ServerConfigurationManagerAbstract*/ Object obcServerConfigurationmanagerAbstract = ReflectionUtils.invokeMethod(nmsServer, "getServerConfigurationManager");
+			opSet = (Set) ReflectionUtils.get(ClassDiscovery.forFuzzyName("net.minecraft.server.*", "ServerConfigurationManagerAbstract"), obcServerConfigurationmanagerAbstract, "operators");
+		} catch(ReflectionUtils.ReflectionException e){
+			//Probably 1.4.6
+			Class nmsMinecraftServerClass = ClassDiscovery.forFuzzyName("net.minecraft.server.*", "MinecraftServer");
+			/*n.m.s.MinecraftServer*/ Object nmsServer = ReflectionUtils.invokeMethod(nmsMinecraftServerClass, null, "getServer");
+			/*n.m.s.PlayerList*/ Object nmsPlayerList = ReflectionUtils.invokeMethod(nmsServer, "getPlayerList");
+			opSet = (Set)ReflectionUtils.get(ClassDiscovery.forFuzzyName("net.minecraft.server.*", "PlayerList"), nmsPlayerList, "operators");
+		}
 
         // since all Java objects pass by reference, we don't need to set field back to object
         if (value) {
@@ -313,18 +321,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	}
 
 	public MCLocation getBedSpawnLocation() {
-		if (p.getBedSpawnLocation() != null) {
-			return new BukkitMCLocation(p.getBedSpawnLocation());
-		}
-		return null;
+	    return new BukkitMCLocation(p.getBedSpawnLocation());
 	}
 
 	public void setBedSpawnLocation(MCLocation l) {
-		p.setBedSpawnLocation(((BukkitMCLocation)l).l);
-	}
-
-	public void setBedSpawnLocation(MCLocation l, boolean f) {
-		p.setBedSpawnLocation(((BukkitMCLocation)l).l, f);
+		p.setBedSpawnLocation((Location)l.getHandle(), true);
 	}
 
 	public MCEntity getVehicle() {

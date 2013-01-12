@@ -3,6 +3,7 @@
 package com.laytonsmith.tools;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
+import com.laytonsmith.abstraction.Implementation;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.Documentation;
@@ -25,6 +26,7 @@ import java.util.regex.Pattern;
 public class SyntaxHighlighters {
 
     public static String generate(String type, String theme) {
+		Implementation.setServerType(Implementation.Type.BUKKIT);
         if("npp".equals(type) || "notepad++".equals(type)){
 
             if("default".equals(theme)){

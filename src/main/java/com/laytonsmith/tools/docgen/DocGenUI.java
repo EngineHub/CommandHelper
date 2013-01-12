@@ -278,8 +278,6 @@ public class DocGenUI extends javax.swing.JFrame {
 			new Thread(new Runnable() {
 
 				public void run() {
-					Implementation.setServerType(Implementation.Type.BUKKIT);
-					Installer.Install(chDirectory);
 					try {
 						Prefs.init(new File(chDirectory, "preferences.txt"));
 						CHLog.initialize(chDirectory);
@@ -324,6 +322,9 @@ public class DocGenUI extends javax.swing.JFrame {
 				e.printStackTrace(System.err);
 			}
 		}
+		
+		Implementation.setServerType(Implementation.Type.BUKKIT);
+		Installer.Install(chDirectory);
 
 		/* Create and display the form */
 		java.awt.EventQueue.invokeLater(new Runnable() {

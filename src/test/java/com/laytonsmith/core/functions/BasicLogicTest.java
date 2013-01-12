@@ -403,4 +403,40 @@ public class BasicLogicTest {
 				+ "}", fakePlayer);
 		verify(fakePlayer, times(4)).sendMessage("yes");
 	}
+	
+	@Test
+	public void testRefEquals1() throws Exception {
+		SRun("@a = array(1, 2, 3)\n" //Same reference
+				+ "@b = @a\n"
+				+ "msg(ref_equals(@a, @b))", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+	@Test
+	public void testRefEquals2() throws Exception {
+		SRun("@a = array(1, 2, 3)\n" //Cloned array
+				+ "@b = @a[]\n"
+				+ "msg(ref_equals(@a, @b))", fakePlayer);
+		verify(fakePlayer).sendMessage("false");
+	}
+	@Test
+	public void testRefEquals3() throws Exception {
+		SRun("@a = array(1, 2, 3)\n" //Duplicated array
+				+ "@b = array(1, 2, 3)\n"
+				+ "msg(ref_equals(@a, @b))", fakePlayer);
+		verify(fakePlayer).sendMessage("false");
+	}
+	@Test
+	public void testRefEquals4() throws Exception {
+		SRun("@a = 1\n" //Primitives; same
+				+ "@b = 1\n"
+				+ "msg(ref_equals(@a, @b))", fakePlayer);
+		verify(fakePlayer).sendMessage("true");
+	}
+	@Test
+	public void testRefEquals5() throws Exception {
+		SRun("@a = 1\n" //Primitives; different
+				+ "@b = 2\n"
+				+ "msg(ref_equals(@a, @b))", fakePlayer);
+		verify(fakePlayer).sendMessage("false");
+	}
 }

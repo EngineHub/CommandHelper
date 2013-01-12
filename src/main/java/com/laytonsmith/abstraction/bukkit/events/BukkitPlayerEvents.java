@@ -219,9 +219,11 @@ public class BukkitPlayerEvents {
             return pce;
         }
 
-        public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message){
-            return new BukkitMCPlayerChatEvent(new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message,
-                    new HashSet<Player>(Arrays.asList(Bukkit.getServer().getOnlinePlayers()))));
+        public static BukkitMCPlayerChatEvent _instantiate(MCPlayer player, String message, String format){
+			AsyncPlayerChatEvent apce = new AsyncPlayerChatEvent(false, ((BukkitMCPlayer)player)._Player(), message,
+                    new HashSet<Player>(Arrays.asList(Bukkit.getServer().getOnlinePlayers())));
+			apce.setFormat(format);
+            return new BukkitMCPlayerChatEvent(apce);
         }
 
         public String getMessage() {
@@ -251,6 +253,13 @@ public class BukkitPlayerEvents {
             return new BukkitMCPlayer(pce.getPlayer());
         }
 
+		public String getFormat() {
+			return pce.getFormat();
+		}
+
+		public void setFormat(String format) {
+			pce.setFormat(format);
+		}
     }
 
 	@abstraction(type=Implementation.Type.BUKKIT)
@@ -366,10 +375,9 @@ public class BukkitPlayerEvents {
             return pre;
         }
 
-        public static BukkitMCPlayerRespawnEvent _instantiate(MCPlayer player, MCLocation location,
-                boolean isBedSpawn){
+        public static BukkitMCPlayerRespawnEvent _instantiate(MCPlayer player, MCLocation location, boolean isBedSpawn) {
             return new BukkitMCPlayerRespawnEvent(new PlayerRespawnEvent(((BukkitMCPlayer)player)._Player(),
-                    ((BukkitMCLocation)location)._Location(), isBedSpawn));
+					((BukkitMCLocation)location)._Location(), isBedSpawn));
         }
 
         public MCPlayer getPlayer() {

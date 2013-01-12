@@ -301,4 +301,57 @@ public class ObjectGenerator {
 		ex.push(new CInt(e.getLineNum(), t));
 		return ex;
     }
+	
+	/**
+	 * Returns a CArray given an MCColor. It will be in the format
+	 * array(r: 0, g: 0, b: 0)
+	 * @param color
+	 * @param t
+	 * @return 
+	 */
+	public CArray color(MCColor color, Target t){
+		CArray ca = new CArray(t);
+		ca.set("r", new CInt(color.getRed(), t), t);
+		ca.set("g", new CInt(color.getRed(), t), t);
+		ca.set("b", new CInt(color.getRed(), t), t);
+		return ca;
+	}
+	
+	/**
+	 * Returns an MCColor given a colorArray, which supports the following
+	 * three format types (in this order of priority)
+	 * array(r: 0, g: 0, b: 0)
+	 * array(red: 0, green: 0, blue: 0)
+	 * array(0, 0, 0)
+	 * @param color
+	 * @param t
+	 * @return 
+	 */
+	public MCColor color(CArray color, Target t){
+		int red;
+		int green;
+		int blue;
+		if(color.containsKey("r")){
+			red = (int)Static.getInt(color.get("r"), t);
+		} else if(color.containsKey("red")){
+			red = (int)Static.getInt(color.get("red"), t);
+		} else {
+			red = (int)Static.getInt(color.get(0), t);
+		}
+		if(color.containsKey("g")){
+			green = (int)Static.getInt(color.get("g"), t);
+		} else if(color.containsKey("green")){
+			green = (int)Static.getInt(color.get("green"), t);
+		} else {
+			green = (int)Static.getInt(color.get(1), t);
+		}
+		if(color.containsKey("b")){
+			blue = (int)Static.getInt(color.get("b"), t);
+		} else if(color.containsKey("blue")){
+			blue = (int)Static.getInt(color.get("blue"), t);
+		} else {
+			blue = (int)Static.getInt(color.get(2), t);
+		}
+		return StaticLayer.GetConvertor().GetColor(red, green, blue);
+	}
 }
