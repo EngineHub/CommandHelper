@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.bukkit.entities.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.abstraction.enums.MCTone;
@@ -192,8 +193,12 @@ public class BukkitConvertor extends AbstractConvertor {
     		return new BukkitMCVehicle(be);
     	}
     	
-    	if(be instanceof Tameable){
-            return new BukkitMCTameable(be);
+    	if(be instanceof Wolf){
+            return new BukkitMCWolf(be);
+        }
+    	
+    	if(be instanceof Ocelot){
+            return new BukkitMCOcelot(be);
         }
     	
     	if(be instanceof Ageable){
