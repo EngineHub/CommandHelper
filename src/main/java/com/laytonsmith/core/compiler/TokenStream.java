@@ -51,7 +51,7 @@ public class TokenStream extends ArrayList<Token> {
 				} else if (c == ';') {
 					//Self closed
 					try {
-						map.put(FileOptions.Directive.valueOf(buffer.toString().trim()), "true");
+						map.put(FileOptions.Directive.valueOfDirective(buffer.toString().trim()), "true");
 					} catch (IllegalArgumentException e) {
 						throw new ConfigCompileException("Unknown file option directive: " + buffer.toString().trim(), fileOptionsTarget);
 					}
@@ -69,7 +69,7 @@ public class TokenStream extends ArrayList<Token> {
 					//We're done
 					inKey = true;
 					try {
-						map.put(FileOptions.Directive.valueOf(keyName.trim()), buffer.toString());
+						map.put(FileOptions.Directive.valueOfDirective(keyName.trim()), buffer.toString());
 					} catch (IllegalArgumentException e) {
 						throw new ConfigCompileException("Unknown file option directive: " + buffer.toString().trim(), fileOptionsTarget);
 					}
@@ -82,14 +82,14 @@ public class TokenStream extends ArrayList<Token> {
 		if (buffer.length() > 0) {
 			if (!inKey) {
 				try {
-					map.put(FileOptions.Directive.valueOf(keyName.trim()), buffer.toString());
+					map.put(FileOptions.Directive.valueOfDirective(keyName.trim()), buffer.toString());
 				} catch (IllegalArgumentException e) {
 					throw new ConfigCompileException("Unknown file option directive: " + keyName.toString().trim(), fileOptionsTarget);
 				}
 			} else {
 				if (!buffer.toString().trim().isEmpty()) {
 					try {
-						map.put(FileOptions.Directive.valueOf(buffer.toString().trim()), "true");
+						map.put(FileOptions.Directive.valueOfDirective(buffer.toString().trim()), "true");
 					} catch (IllegalArgumentException e) {
 						throw new ConfigCompileException("Unknown file option directive: " + buffer.toString().trim(), fileOptionsTarget);
 					}

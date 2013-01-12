@@ -41,12 +41,12 @@ public enum CompilerWarning implements Documentation {
 			+ " an accident. Usually, if(@a = @b){ ... } was intended to be"
 			+ " if(@a == @b){ ... }. If it truly was not an error, it is better"
 			+ " to use @a = @b if(@a){ ... } instead, which will remove this warning, yet"
-			+ " still have the same functionality.", CHVersion.V3_3_1), //TODO: Implement this
+			+ " still have the same functionality.", CHVersion.V3_3_1),
 	UseOfEval("Eval is almost never the solution. Sometimes this is necessary, but only in a very"
 			+ " select few cases, such as writing a custom interpreter mode, or something that is"
 			+ " intended as a developer debug tool. Otherwise, this likely indicates extremely"
-			+ " bad coding. If eval is used at all, this warning is triggered.", CHVersion.V3_3_1), //TODO: Implement this
-	StrictModeOff("Strict mode is HIGHLY recommended, so strict mode not being enabled is itself a warning.", CHVersion.V3_3_1), //TODO: Implement this
+			+ " bad coding. If eval is used at all, this warning is triggered.", CHVersion.V3_3_1),
+	StrictModeOff("Strict mode is HIGHLY recommended, so strict mode not being enabled is itself a warning.", CHVersion.V3_3_1),
 	AmbiguousUnaryOperators("In the case where prefix/postfix unary operators are used, if not delimited"
 			+ " correctly, they can look ambiguous. Consider the code: @a ++ @b. While this code has a"
 			+ " well defined execution (sconcat(postinc(@a), @b)) when written this way, it is difficult"
@@ -55,13 +55,13 @@ public enum CompilerWarning implements Documentation {
 			+ " is when the identifier is the sole argument in a function call, for instance in a for loop,"
 			+ " for(@i = 0, @i < @x, @i++, ...). This is not ambiguous at all, since it is the only"
 			+ " operation in that statement. Using the functional notation will not trigger this warning ever,"
-			+ " because there is implicit parenthesis usage when not using operators.", CHVersion.V3_3_1), //TODO: Implement this
+			+ " because there is implicit parenthesis usage when not using operators.", CHVersion.V3_3_1),
 	MagicNumber("Other than when doing a variable assignments, and a few other occasions,"
 			+ " raw numbers can often times be confusing. For"
 			+ " instance, in code, if you see @i < 5, what is 5? Without knowing more about the surrounding"
 			+ " code, it could be confusing. Instead, consider assigning 5 to a variable. This gives it a"
 			+ " name/description, which is useful when you or another programmer look back on the code. This also"
-			+ " makes it easier to change, in the event that it is used in multiple places.", CHVersion.V3_3_1), //TODO: Implement this
+			+ " makes it easier to change, in the event that it is used in multiple places.", CHVersion.V3_3_1),
 	ExecutableCodeInInclude("Other than include() and proc(), nothing else should be contained in an include, as"
 			+ " this will be removed later. It is a sign of bad programming, because there is no particular"
 			+ " guarantee that the code will be run once or multiple times. Only having procs and includes inside"
@@ -70,14 +70,14 @@ public enum CompilerWarning implements Documentation {
 			+ " your code to prepare for this eventuality.", CHVersion.V3_3_1), //TODO: Implement this
 	BareStrings("If strict mode is on, using bare strings is an error, not a warning, but even in non-strict mode,"
 			+ " it is a warning. This is triggered if any string is not quoted. So, the following, while valid,"
-			+ " would trigger the warning: if(this string == @thatString){ ... }.", CHVersion.V3_3_1), //TODO: Implement this
+			+ " would trigger the warning: if(this string == @thatString){ ... }.", CHVersion.V3_3_1),
 	UnquotedSymbols("If using bare strings, unquoted symbols that do not yet have a special meaning are extra evil, because"
-			+ " they may be added as a symbol in the future, silently breaking your code.", CHVersion.V3_3_1), //TODO: Implement this
+			+ " they may be added as a symbol in the future, silently breaking your code.", CHVersion.V3_3_1),
 	SupressedWarnings("If a file has supressed any warnings, this warning will be triggered (unless it itself is supressed)."
 			+ " There are rarely any cases to leaving in warnings in production code, but during development, it is often times"
 			+ " useful to break a few rules to more quickly develop the software, then come back later and clean it up. Since"
 			+ " this warning is only triggered once per file, you can safely supress all other warnings except this one during"
-			+ " development, and still have a \"note\" to come back to this later.", CHVersion.V3_3_1), //TODO: Implement this
+			+ " development, and still have a \"note\" to come back to this later.", CHVersion.V3_3_1),
 	;
 	
 	private final String docs;

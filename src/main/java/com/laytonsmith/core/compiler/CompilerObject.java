@@ -38,6 +38,7 @@ class CompilerObject {
 	int braceCounter = 0;
 	Stack<Target> braceLines = new Stack<Target>();
 	Stack<Target> functionLines = new Stack<Target>();
+	Stack<Boolean> looseParentheticalStack = new Stack<Boolean>();
 	ParseTree pointer;
 	ParseTree root;
 	CompilerEnvironment env;
@@ -102,6 +103,7 @@ class CompilerObject {
 			CFunction f = new CFunction(t.val(), t.getTarget());
 			functionLines.add(peek().getTarget());
 			pushNode(f);
+			looseParentheticalStack.push(false);
 			return;
 		}
 		
@@ -111,6 +113,7 @@ class CompilerObject {
 			functionLines.add(peek().getTarget());
 			pushNode(f);
 			autoConcatCounter++;
+			looseParentheticalStack.push(true);
 			return;
 		}
 		if (t.type == TType.FUNC_END || t.type == TType.COMMA) {
@@ -119,6 +122,7 @@ class CompilerObject {
 				popNode(t.getTarget());
 			}
 		}
+		
 		if (t.type == TType.COMMA) {
 			if(peek().type == TType.COMMA){
 				//This is a compile error, but extra commas at the end are ok
@@ -127,10 +131,16 @@ class CompilerObject {
 			return;
 		}
 		if (t.type == TType.FUNC_END) {
-			//We're done with this child, so push it up
-			popNode(t.getTarget());
+			//If this is the end of the loose parenthetical, we don't actually need to push.
+			//Either way though, we need to pop from the looseParentheticals stack
 			try{
 				functionLines.pop();
+				Boolean isLoose = looseParentheticalStack.pop();
+				if(isLoose){
+					return;
+				}
+				//We're done with this child, so push it up
+				popNode(t.getTarget());
 			} catch(EmptyStackException e){
 				//They have too many right parenthesis
 				throw new ConfigCompileException("Unexpected right parenthesis. (You have too many closing parenthesis)", t.getTarget());

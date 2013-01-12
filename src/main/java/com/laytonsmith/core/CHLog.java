@@ -20,7 +20,7 @@ import java.util.List;
  * is to use the preferences file and output to the debug log file.
  * @author layton
  */
-public final class CHLog {
+public class CHLog {
     
     private CHLog(){}
     
@@ -70,6 +70,9 @@ public final class CHLog {
     }
     
 	private static File root = null;
+	/**
+	 * This should not be changed, it is used reflectively by test cases.
+	 */
 	private static CHLog instance = null;
     
 	public static CHLog GetLogger(){

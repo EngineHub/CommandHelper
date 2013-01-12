@@ -255,6 +255,12 @@ public class CompilerFunctions {
 				if (node.getData() instanceof CSymbol && ((CSymbol) node.getData()).isPostfix()) {
 					if (i - 1 >= 0) {// && list.get(i - 1).getData() instanceof IVariable) {
 						CSymbol sy = (CSymbol) node.getData();
+						if(list.size() > i + 1){
+							//Ambiguous. Trigger warning.
+							CHLog.GetLogger().CompilerWarning(CompilerWarning.AmbiguousUnaryOperators, 
+									"You have used " + sy.val() + " in an ambiguous way. Consider using parenthesis to"
+									+ " make it more obvious what you are trying to do.", sy.getTarget(), node.getFileOptions());
+						}
 						ParseTree conversion;
 						if (sy.val().equals("++")) {
 							conversion = new ParseTree(new CFunction("postinc", node.getTarget()), node.getFileOptions());

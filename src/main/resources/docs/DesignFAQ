@@ -1,0 +1,198 @@
+Design and History FAQ
+
+===Why are bare strings autoconcatenation supported?===
+Bare strings are a holdover from the initial design of CommandHelper; a simple
+way to specify aliases. This is also why variables have an identifier character,
+instead of just being a-z characters. For the time being, bare strings are allowed,
+and likely always will be, but a strict mode has been introduced that fixes most
+of the problems that come from this. Additionally, there is no reason not to support
+autoconcatenation. Some languages actually do support this general idea
+anyways, for instance, C. "Hello " "World" is the equivalent of the MethodScript
+'Hello' 'World'. Granted, in C, this only works with string literals, not variables,
+but the general idea is there. One thing that MethodScript has a distinct lack of
+is formalized "statements". Consider the code:
+<pre>
+@a = 10
+divide_by_2(@a) #Assume this returns 5
+</pre>
+
+If you were to wrap all that code in an output, you would actually get "10 5",
+which is a side effect of the fact that when fully compiled, the code actually
+looks like this:
+<pre>
+sconcat(assign(@a, 10), divide_by_2(@a))
+</pre>
+
+Generally speaking, this output will be ignored, and so it doesn't really matter
+that it is concatenated, then ignored. This ''does'' cause a performance hit however,
+because the sconcat function does take a non-zero amount of time to run,
+so at some point, this will likely be further optimized, but that requires strict
+typing first, at which point it can be determined that some of the values in the
+sconcat are not intended to be sconcated because they are functions that return void.
+Alternatively, this feature may just entirely be deprecated except for the ability
+to auto concatenate literals and variables, but this would only happen in strict
+mode.
+
+===Why aren't there semicolons?===
+
+Quite simply, they aren't yet needed. Take javascript for instance, it does not have
+them either. Javascript will however "insert" them for you wherever you have
+a newline. Eventually, MethodScript will require them in a very few cases, at which
+point they will be introduced. Additionally, it will be possible to detect when an ambiguous
+situation is present, and trigger a compile error, instead of using javascript's approach
+and inferring where the seperators are needed. They will be required once anonymous
+functions are added. Consider the following theoretical syntax:
+
+<pre>
+@a = 5
+@func = proc(@b){
+	msg(@b + 10)
+}
+(++@a)
+</pre>
+
+When written like this, you might assume that the following is intended:
+<pre>
+assign(@a, 5)
+assign(@func, proc(@b){
+	msg(@b + 10)
+})
+preinc(@a)
+</pre>
+
+However, once we rearrange the whitespace:
+
+<pre>
+@a = 5
+@func = proc(@b){
+	msg(@b + 10)
+}(++@a)
+</pre>
+
+Now it becomes less obvious whether or not we meant to do this instead:
+
+<pre>
+assign(@a, 5)
+call_function(assign(@func, proc(@b){
+	msg(@b + 10)
+}), preinc(@a))
+</pre>
+
+As you can see, this ambiguity is only introduced when you have several "operator-like"
+features in the language; the code shown with only functions is not ambiguous at all, 
+so until those features are added, it is not necessary to require any sort of
+statement separator. However, with the addition of a semicolon after the brace, this
+is no longer ambiguous, and does not require any sort of weird parenthesation anymore:
+
+<pre>
+@a = 5
+@func = proc(@b){
+	msg(@b + 10)
+};
+(++@a)
+</pre>
+
+If the second usage is actually desired, the following would be required:
+
+<pre>
+@a = 5; #Note that we require this semicolon here now, one statement above, so it doesn't
+		#think we are trying to call @a()
+(@func = proc(@b){
+	msg(@b + 10)
+})
+(++@a)
+</pre>
+
+Besides making this more readable anyways, neither of these cases are ambiguious
+anymore, and an error can be raised if a loose parenthetical is used alongside
+an actual function, and it will only attempt to call the procedure if two loose
+parentheticals are next to each other.
+
+Regardless, this change is still in the future, and may be changed depending on
+what features actually get added, however, semicolons will be added long before
+these changes, and will be highly encouraged, then required in all cases in strict mode.
+Additionally, autoconcat may be removed after this change (in strict mode), and explicit concatenation
+required. It is unlikely that these shorthand features will be available outside of
+strict mode, which is an additional reason that strict mode being on is highly encouraged.
+
+===Why is everything a function?===
+When you boil it down to making everything a function, it becomes much easier to learn
+for new programmers. The only syntax they have to learn is "function name", "parenthesis",
+and "arguments", instead of having to learn brace syntax, array syntax operators, etc.
+This allows for a much easier learning curve, even if it makes for less readable code.
+Luckily, there is no reason that the code cannot be automatically refactored into using
+brackets, operators, etc. The compiler internals have to do it one way, it's in fact
+even easier to go the other way. So eventually, once all the tools are written for it,
+a new developer will be able to "graduate" to the advanced syntax, and the tools
+can automatically convert the existing code to the new format.
+
+Additionally, actually implementing the functions becomes much easier, because
+even things like if() with bracket notation can use a the same functional style 
+syntax processor, and the
+bulk of the work to changing over to functional notation from bracket notation can be
+left to the compiler, so new language features can easily be added, without having
+to rework the entire compiler each time.
+
+Finally, adding infix operators is more difficult to write a parser for, so the
+first versions of MethodScript did not support them, however, doing all the operations
+that the operators provide is essential to even the most basic programs, so they had
+to be added either way. The initial design opted to make them functions, and so that
+standard framework could be reused, instead of duplicating code for both approaches,
+or removing the old approach.
+
+===Why are trailing commas allowed?===
+Trailing commas are allowed in all functions, but their primary use is for arrays.
+Consider the code:
+
+<pre>
+@a = array(
+	'a',
+	'b',
+	'd',
+	'c',
+)
+</pre>
+
+Now, if we want to sort the array into alphabetical order, we can just copy the 'd'
+line, and paste it below the 'c' line, without having to add and remove commas. Because
+arrays are created using a function, it would require a special condition in the parser
+to make this an error in other cases, so it was decided to not prevent this in other
+cases. So, add(1, 2,) is also valid. However, there is logic for detecting ''duplicate''
+commas, so add(1, ,2) is a compile error, since this indicates a missing parameter, not
+the standardization of argument syntax.
+
+===Why are things that are simply warnings in other languages compile errors in MethodScript?===
+If you are not familiar with this, consider that this code causes an error at ''compile time'',
+not ''runtime''.
+<pre>
+reg_match('(', $userInput)
+</pre>
+As you can see, there is no way for us to completely run this function at compile time, because
+the user input may vary, so we cannot predict if it will match or not. However, since the
+regex itself ''is'' hardcoded, we can examine it, and see that it will ''always'' throw an
+exception.
+
+There are no good reasons for forcing a function to throw a runtime exception, if it
+can reliably be determined at compile time that it will always do so. There can be exceptions to
+this rule only in a very few meta cases, for instance, testing the function's performance
+in runtime vs compile time, but these reasons are all non-typical, and do not justify
+the removal of such a feature. So, to this end, functions are able to do optimizations during
+the compilation process, and even if some of the parameters are variable, if some of them are
+constant, they are able to go ahead and do some processing on them to see if they are guaranteed
+to throw an exception at run time, and if so, they go ahead and cause a compiler error. Additionally,
+this same mechanism is used to fully resolve some functions, if there is no user input, and the
+function needs no external inputs to do the processing. This speeds up the script at execution time,
+and even if the code is only run once (say, in interpreter mode) the process will take the same
+amount of time. So, functions like add() can run during compile time if the numbers to be hard
+coded are constant.
+
+Currently, analysis is not done on variable paths, so even though @a = 5 add(@a, 2) will
+always result in 7, since it uses a variable, it is assumed that it is completely dynamic,
+and will not be optimized. This behavior WILL change in the future however, so it
+should not be relied on.
+
+It is worth noting however, that in the rare cases where you absolutely must require
+the function to be evaluated as if it were dynamic, but you also want to hardcode in
+a value, you can use the dyn() function. This is meant to be used during testing,
+to ensure that code is optimized properly, and is not documented in the API, but
+is available to user code nonetheless.

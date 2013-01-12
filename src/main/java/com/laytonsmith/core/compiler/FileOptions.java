@@ -99,6 +99,21 @@ public class FileOptions {
 			return value;
 		}
 		
+		/**
+		 * Returns the Directive given the specified directive toString value.
+		 * @param name
+		 * @return The specified Directive
+		 * @throws IllegalArgumentException If the value cannot be found.
+		 */
+		public static Directive valueOfDirective(String name) throws IllegalArgumentException {
+			for(Directive d : values()){
+				if(d.toString().equals(name)){
+					return d;
+				}
+			}
+			throw new IllegalArgumentException();
+		}
+		
 	}
 	
 }

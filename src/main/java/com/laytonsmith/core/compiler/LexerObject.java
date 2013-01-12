@@ -1,6 +1,7 @@
 
 package com.laytonsmith.core.compiler;
 
+import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.constructs.Token;
 import com.laytonsmith.core.constructs.Token.TType;
@@ -544,7 +545,12 @@ class LexerObject {
 			throw new ConfigCompileException("Unclosed double quote (You have a double quote without a matching end double quote). The last double quote"
 					+ " was started on line " + start_double_quote, target);
 		}
-		return new TokenStream(new ArrayList<Token>(token_list), fileopts.toString(), fileoptsTarget);
+		TokenStream ts = new TokenStream(new ArrayList<Token>(token_list), fileopts.toString(), fileoptsTarget);
+		//Check for lack of strict mode, and trigger the warning here
+		if(!ts.getFileOptions().isStrict()){
+			CHLog.GetLogger().CompilerWarning(CompilerWarning.StrictModeOff, "Strict mode is turned off in this file. Strict mode is HIGHLY recommended.", fileoptsTarget, ts.getFileOptions());
+		}
+		return ts;
 	}
 
 	/**

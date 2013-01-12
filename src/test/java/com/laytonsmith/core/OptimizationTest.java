@@ -252,6 +252,12 @@ public class OptimizationTest {
 		assertEquals("msg('')", optimize("if(false, bad_function(), msg(''))"));
 	}
 	
+	@Test public void testLooseParentheticals() throws Exception{
+		//First test the basic setup
+		assertEquals("postinc(@a)", optimize("@a++"));
+		assertEquals("postinc(@a)", optimize("(@a++)"));
+	}
+	
 	
 	
     
