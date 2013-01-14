@@ -486,8 +486,8 @@ public class Environment {
 			if (sender instanceof MCPlayer) {
 				w = ((MCPlayer) sender).getWorld();
 			}
-			MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 			if (args.length == 2) {
+				MCLocation l = ObjectGenerator.GetGenerator().location(args[0], w, t);
 				x = l.getBlockX();
 				z = l.getBlockZ();
 				w = l.getWorld();
