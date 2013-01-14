@@ -466,6 +466,7 @@ public class BukkitPlayerEvents {
 
         public void cancel() {
             pcpe.setMessage("/commandhelper null");
+			pcpe.setCancelled(true);
             isCancelled = true;
         }
 
