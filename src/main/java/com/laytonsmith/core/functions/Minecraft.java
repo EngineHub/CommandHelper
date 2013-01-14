@@ -446,10 +446,8 @@ public class Minecraft {
 				return new CNull(t);
 			} else if (e instanceof MCTameable) {
 				MCAnimalTamer at = ((MCTameable) e).getOwner();
-				if (at instanceof MCHumanEntity) {
-					return new CString(((MCHumanEntity) at).getName(), t);
-				} else if (at instanceof MCOfflinePlayer) {
-					return new CString(((MCOfflinePlayer) at).getName(), t);
+				if (null != at) {
+					return new CString(at.getName(), t);
 				} else {
 					return new CNull(t);
 				}
