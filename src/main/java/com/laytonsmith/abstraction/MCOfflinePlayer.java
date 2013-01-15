@@ -22,7 +22,7 @@ public interface MCOfflinePlayer extends MCAnimalTamer{
      * <p>
      * If the player is online, this will return that player. Otherwise,
      * it will return null.
-     * 
+     *
      * @return Online player
      */
     public MCPlayer getPlayer();
@@ -35,14 +35,14 @@ public interface MCOfflinePlayer extends MCAnimalTamer{
      * @return true if banned, otherwise false
      */
     public boolean isBanned();
-    
+
     /**
      * Checks if this player is currently online
      *
      * @return true if they are online
      */
     public boolean isOnline();
-    
+
     /**
      * Checks if this player is whitelisted or not
      *
@@ -61,6 +61,7 @@ public interface MCOfflinePlayer extends MCAnimalTamer{
      * @param value true if whitelisted
      */
     public void setWhitelisted(boolean value);
+
 	/**
      * Gets the Location where the player will spawn at their bed, null if they have not slept in one or their current bed spawn is invalid.
      *

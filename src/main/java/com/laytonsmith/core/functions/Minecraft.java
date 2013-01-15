@@ -446,10 +446,8 @@ public class Minecraft {
 				return new CNull(t);
 			} else if (e instanceof MCTameable) {
 				MCAnimalTamer at = ((MCTameable) e).getOwner();
-				if (at instanceof MCHumanEntity) {
-					return new CString(((MCHumanEntity) at).getName(), t);
-				} else if (at instanceof MCOfflinePlayer) {
-					return new CString(((MCOfflinePlayer) at).getName(), t);
+				if (null != at) {
+					return new CString(at.getName(), t);
 				} else {
 					return new CNull(t);
 				}
@@ -1129,9 +1127,8 @@ public class Minecraft {
 					+ " optional, and default to the specified values if not set. The default options being set will make it look like"
 					+ " a normal firework, with a white explosion. ----"
 					+ " The options array may have the following keys:\n"
-					+ "{|\n"
-					+ "!-\n"
-					+ "! Array key !! Description !! Default"
+					+ "{| cellspacing=\"1\" cellpadding=\"1\" border=\"1\" class=\"wikitable\"\n"
+					+ "! Array key !! Description !! Default\n"
 					+ "|-\n"
 					+ "| strength || A number specifying how far up the firework should go || 2\n"
 					+ "|-\n"
@@ -1140,7 +1137,7 @@ public class Minecraft {
 					+ "| trail || A boolean, determining if the firework will leave a trail || true\n"
 					+ "|-\n"
 					+ "| colors || An array of colors, or a pipe seperated string of color names (for the named colors only)"
-					+ " for instance: array('WHITE') or 'WHITE|BLUE'. If you want custom colors, you must use an array, though"
+					+ " for instance: array('WHITE') or 'WHITE<nowiki>|</nowiki>BLUE'. If you want custom colors, you must use an array, though"
 					+ " you can still use color names as an item in the array, for instance: array('ORANGE', array(30, 45, 150))."
 					+ " These colors are used as the primary colors. || 'WHITE'\n"
 					+ "|-\n"

@@ -34,11 +34,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
     	super(e);
         this.e = e;
     }
-    
+
     public Entity asEntity(){
         return e;
     }
-    
+
     public boolean eject() {
 		return e.eject();
 	}
@@ -47,7 +47,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
         EntityDamageEvent ede = new EntityDamageEvent(e, EntityDamageEvent.DamageCause.valueOf(dc.name()), 9001);
         CommandHelperPlugin.self.getServer().getPluginManager().callEvent(ede);
     }
-    
+
     public int getEntityId(){
         return e.getEntityId();
     }
@@ -64,7 +64,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
     public Object getHandle(){
         return e;
     }
-    
+
     public MCEntityDamageEvent getLastDamageCause() {
         return new BukkitEntityEvents.BukkitMCEntityDamageEvent(e.getLastDamageCause());
     }
@@ -90,11 +90,11 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public List<MCEntity> getNearbyEntities(double x, double y, double z) {
 		List<Entity> lst = e.getNearbyEntities(x, y, z);
 		List<MCEntity> retn = new ArrayList<MCEntity>();
-		
+
 		for(Entity e : lst) {
 			retn.add(BukkitConvertor.BukkitGetCorrectEntity(e));
 		}
-		
+
 		return retn;
 	}
 
@@ -120,7 +120,7 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	}
 
 	public MCEntity getVehicle() {
-		throw new NotImplementedException();
+		return new BukkitMCEntity(e);
 	}
 
 	public Velocity getVelocity() {
@@ -208,13 +208,13 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
 	public boolean teleport(MCLocation location, MCTeleportCause cause) {
 		return e.teleport(((BukkitMCLocation)location).asLocation(), TeleportCause.valueOf(cause.name()));
 	}
-	
+
 	/**
 	 * This only works with craftbukkit
-	 * @return 
+	 * @return
 	 */
 	public MCLocation asyncGetLocation() {
 		return new BukkitMCLocation(e.getLocation());
 	}
-    
+
 }
