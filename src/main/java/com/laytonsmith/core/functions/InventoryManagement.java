@@ -617,7 +617,7 @@ public class InventoryManagement {
 					+ " inventories, it will be valid. Otherwise, if a location array is provided, it is assumed to be a block (chest, brewer, etc)"
 					+ " and interpreted thusly. Depending on the inventory type, the max index will vary. If the index is too large, a RangeException is thrown,"
 					+ " otherwise, the item at that location is returned as an item array, or null, if no item is there. You can determine the inventory type"
-					+ " (and thus the max index count) with get_inventory_type()";
+					+ " (and thus the max index count) with get_inventory_type(). An itemArray, like the one used by pinv/set_pinv is returned.";
 		}
 
 		public CHVersion since() {
@@ -669,7 +669,7 @@ public class InventoryManagement {
 
 		public String docs() {
 			return "void {entityID, index, itemArray | locationArray, index, itemArray} Sets the specified item in the specified slot given either an entityID or a location array of a container"
-					+ " object. See get_inventory_type for more information.";
+					+ " object. See get_inventory_type for more information. The itemArray is an array in the same format as pinv/set_pinv takes.";
 		}
 
 		public CHVersion since() {
