@@ -399,12 +399,10 @@ public class BlockEvents {
 
                 map.put("text", sce.getLines());
 
-                CArray blk = new CArray(Target.UNKNOWN);
-                blk.set("X", new CInt(sce.getBlock().getX(), Target.UNKNOWN), Target.UNKNOWN);
-                blk.set("Y", new CInt(sce.getBlock().getY(), Target.UNKNOWN), Target.UNKNOWN);
-                blk.set("Z", new CInt(sce.getBlock().getZ(), Target.UNKNOWN), Target.UNKNOWN);
-                blk.set("world", new CString(sce.getBlock().getWorld().getName(), Target.UNKNOWN), Target.UNKNOWN);
-                map.put("location", blk);
+                MCBlock blc = sce.getBlock();
+                CArray location = ObjectGenerator.GetGenerator()
+    					.location(StaticLayer.GetLocation(blc.getWorld(), blc.getX(), blc.getY(), blc.getZ()));
+    			map.put("location", location);
 
                 return map;
             } else {

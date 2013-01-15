@@ -69,4 +69,8 @@ public class BukkitMCAnimalTamer implements MCAnimalTamer{
 	public int hashCode() {
 		return at.hashCode();
 	}
+
+	public String getName() {
+		return at.getName();
+	}
 }
