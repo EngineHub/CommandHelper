@@ -4,7 +4,7 @@ package com.laytonsmith.abstraction;
  * 
  * @author jb_aero
  */
-public interface MCAgeable extends MCEntity {
+public interface MCAgeable extends MCLivingEntity {
 
 	public boolean getCanBreed();
 	public void setCanBreed(boolean breed);

@@ -259,9 +259,10 @@ public class EntityEvents {
             		+ "This event is called when a player is damaged by another entity."
                     + "{player: The player being damaged | damager: The type of entity causing damage | "
             		+ "amount: amount of damage caused | cause: the cause of damage | "
-                    + "data: any data about the event} "
+                    + "data: the attacking player's name or the shooter if damager is a projectile | "
+            		+ "id: EntityID of the damager} "
                     + "{amount} "
-                    + "{player|amount|damager|cause|data}";
+                    + "{player|amount|damager|cause|data|id}";
 		}
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
@@ -290,6 +291,7 @@ public class EntityEvents {
                 map.put("damager",  new CString(dtype, Target.UNKNOWN));
                 map.put("cause",  new CString(event.getCause().name(), Target.UNKNOWN));
                 map.put("amount",  new CInt(event.getDamage(), Target.UNKNOWN));
+                map.put("id", new CInt(event.getDamager().getEntityId(), Target.UNKNOWN));
                 
                 String data = "";
                 if(event.getDamager() instanceof MCPlayer) {
@@ -346,8 +348,8 @@ public class EntityEvents {
             return "{player: <string match> | mobtype: <macro>} "
             		+ "This event is called when a player is targeted by another entity."
                     + "{player: The player's name | mobtype: The type of mob targeting "
-                    + "the player (this will be all capitals!)}"
-                    + "{player}"
+                    + "the player (this will be all capitals!) | id: The EntityID of the mob}"
+                    + "{player: target a different player, or null to make the mob re-look for targets}"
                     + "{player|mobtype}";
         }
 
@@ -395,6 +397,7 @@ public class EntityEvents {
                 
                 String type = ete.getEntityType().name();
                 map.put("mobtype", new CString(type, Target.UNKNOWN));
+                map.put("id", new CInt(ete.getEntity().getEntityId(), Target.UNKNOWN));
                 
                 return map;
             } else {

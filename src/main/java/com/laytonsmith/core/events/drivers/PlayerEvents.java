@@ -53,7 +53,7 @@ public class PlayerEvents {
         }
 
         public String docs() {
-            return "{player: <macro match> | reason: <macro match>}"
+            return "{player: <macro> | reason: <macro>}"
                     + "Fired when a player is kicked from the game. "
                     + "{player: the kicked player | message: the message shown to all online"
                     + " players | reason: the message shown to the player getting kicked}"
