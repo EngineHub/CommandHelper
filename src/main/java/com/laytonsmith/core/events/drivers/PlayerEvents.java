@@ -44,7 +44,7 @@ public class PlayerEvents {
     public static String docs(){
         return "Contains events related to a player";
     }
-	
+
     @api
     public static class player_kick extends AbstractEvent {
 
@@ -69,7 +69,7 @@ public class PlayerEvents {
                 if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerKickEvent)e).getPlayer())){
                     throw new PrefilterNonMatchException();
                 }
-                
+
                 Prefilters.match(prefilter, "player", ((MCPlayerKickEvent)e).getPlayer().getName(), PrefilterType.MACRO);
                 Prefilters.match(prefilter, "reason", ((MCPlayerKickEvent)e).getReason(), PrefilterType.MACRO);
                 return true;
@@ -118,9 +118,9 @@ public class PlayerEvents {
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-        
+
     }
-    
+
 	@api
 	public static class player_teleport extends AbstractEvent {
 		public String getName() {
@@ -138,45 +138,45 @@ public class PlayerEvents {
 				+ "{}"
 				+ "{}";
 		}
-		
+
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerTeleportEvent){
 				MCPlayerTeleportEvent event = (MCPlayerTeleportEvent)e;
-				
+
 				if (prefilter.containsKey("player")) {
 					if (!(prefilter.get("player").toString().equalsIgnoreCase(event.getPlayer().getName()))){
 						return false;
 					}
 				}
-				
+
 				if (prefilter.containsKey("type")) {
 					if (!(prefilter.get("type").toString().equalsIgnoreCase(event.getCause()))) {
 						return false;
 					}
 				}
-				
+
 				if (prefilter.containsKey("from")){
 					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("from"), event.getPlayer().getWorld(), Target.UNKNOWN);
 					MCLocation loc = event.getFrom();
-					
+
 					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
 						return false;
 					}
 				}
-				
+
 				if(prefilter.containsKey("to")){
 					MCLocation pLoc = ObjectGenerator.GetGenerator().location(prefilter.get("to"), event.getPlayer().getWorld(), Target.UNKNOWN);
 					MCLocation loc = event.getFrom();
-					
+
 					if(loc.getBlockX() != pLoc.getBlockX() || loc.getBlockY() != pLoc.getBlockY() || loc.getBlockZ() != pLoc.getBlockZ()){
 						return false;
 					}
 				}
-				
+
 				return true;
-				
+
 			}
-			
+
 			return false ;
 		}
 
@@ -191,13 +191,13 @@ public class PlayerEvents {
 			if (e instanceof MCPlayerTeleportEvent) {
                 MCPlayerTeleportEvent event = (MCPlayerTeleportEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-				
+
                 //Fill in the event parameters
 				map.put("player", new CString(event.getPlayer().getName(), Target.UNKNOWN));
                 map.put("from", ObjectGenerator.GetGenerator().location(event.getFrom()));
                 map.put("to", ObjectGenerator.GetGenerator().location(event.getTo()));
 				map.put("type", new CString(event.getCause(), Target.UNKNOWN));
-				
+
                 return map;
             } else {
                 throw new EventException("Cannot convert e to MCPlayerMovedEvent");
@@ -211,15 +211,15 @@ public class PlayerEvents {
 		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
 			if (event instanceof MCPlayerTeleportEvent) {
 				MCPlayerTeleportEvent e = (MCPlayerTeleportEvent)event;
-				
+
 				if (key.equalsIgnoreCase("to")) {
 					MCLocation loc = ObjectGenerator.GetGenerator().location(value, null, Target.UNKNOWN);
 					e.setTo(loc);
-					
+
 					return true;
 				}
 			}
-			
+
 			return false;
 		}
 
@@ -227,7 +227,7 @@ public class PlayerEvents {
 			return CHVersion.V3_3_1;
 		}
 	}
-    
+
     @api
     public static class player_prelogin extends AbstractEvent {
 
@@ -257,9 +257,9 @@ public class PlayerEvents {
                     if(!event.getName().equals(prefilter.get("player").val())){
                         return false;
                     }
-                }      
+                }
 			}
-			
+
 			return true;
 		}
 
@@ -272,12 +272,12 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerPreLoginEvent){
                 MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                
+
                 map.put("player", new CString(event.getName(), Target.UNKNOWN));
                 map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
                 map.put("result", new CString(event.getResult(), Target.UNKNOWN));
                 map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
-                
+
                 return map;
             } else{
                 throw new EventException("Cannot convert e to PlayerPreLoginEvent");
@@ -308,9 +308,9 @@ public class PlayerEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-    	
+
     }
-    
+
     @api
     public static class player_login extends AbstractEvent {
 
@@ -339,9 +339,9 @@ public class PlayerEvents {
                     if(!event.getName().equals(prefilter.get("player").val())){
                         return false;
                     }
-                }      
+                }
 			}
-			
+
 			return true;
 		}
 
@@ -354,13 +354,13 @@ public class PlayerEvents {
 			if(e instanceof MCPlayerLoginEvent){
                 MCPlayerLoginEvent event = (MCPlayerLoginEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
-                
+
                 map.put("player", new CString(event.getName(), Target.UNKNOWN));
                 map.put("ip", new CString(event.getIP(), Target.UNKNOWN));
 				//TODO: The event.getResult needs to be enum'd
                 map.put("result", new CString(event.getResult(), Target.UNKNOWN));
                 map.put("kickmsg", new CString(event.getKickMessage(), Target.UNKNOWN));
-                
+
                 return map;
             } else{
                 throw new EventException("Cannot convert e to PlayerLoginEvent");
@@ -385,14 +385,14 @@ public class PlayerEvents {
                 	event.setKickMessage(value.val());
                 }
 			}
-			
+
 			return false;
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
         @Override
         public void preExecution(Environment env, ActiveEvent activeEvent) {
             if(activeEvent.getUnderlyingEvent() instanceof MCPlayerLoginEvent){
@@ -411,9 +411,9 @@ public class PlayerEvents {
                 Static.UninjectPlayer(player);
             }
         }
-    	
+
     }
-    
+
     @api
     public static class player_join extends AbstractEvent{
 
@@ -435,7 +435,7 @@ public class PlayerEvents {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         public Driver driver(){
             return Driver.PLAYER_JOIN;
         }
@@ -447,13 +447,13 @@ public class PlayerEvents {
                     if(!ple.getPlayer().getName().equals(prefilter.get("player").val())){
                         return false;
                     }
-                }                
+                }
                 Prefilters.match(prefilter, "join_message", ple.getJoinMessage(), Prefilters.PrefilterType.REGEX);
                 return true;
             }
             return false;
         }
-        
+
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if(e instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
@@ -466,7 +466,7 @@ public class PlayerEvents {
                 throw new EventException("Cannot convert e to PlayerLoginEvent");
             }
         }
-        
+
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if(event instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent pje = (MCPlayerJoinEvent)event;
@@ -482,15 +482,15 @@ public class PlayerEvents {
             }
             return false;
         }
-        
+
         public BindableEvent convert(CArray manual){
-            MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN), 
+            MCPlayerJoinEvent e = EventBuilder.instantiate(MCPlayerJoinEvent.class, Static.GetPlayer(manual.get("player").val(), Target.UNKNOWN),
                     manual.get("join_message").val());
             return e;
         }
-        
+
     }
-    
+
     @api
     public static class player_interact extends AbstractEvent{
 
@@ -540,11 +540,11 @@ public class PlayerEvents {
                         }
                     }
                 }
-                
+
                 Prefilters.match(prefilter, "item", Static.ParseItemNotation(pie.getItem()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "block", Static.ParseItemNotation(pie.getClickedBlock()), PrefilterType.ITEM_MATCH);
                 Prefilters.match(prefilter, "player", pie.getPlayer().getName(), PrefilterType.MACRO);
-                
+
                 return true;
             }
             return false;
@@ -567,7 +567,7 @@ public class PlayerEvents {
                     map.put("facing", new CString(pie.getBlockFace().name().toLowerCase(), Target.UNKNOWN));
                     MCBlock b = pie.getClickedBlock();
                     map.put("location", new CArray(Target.UNKNOWN, new CInt(b.getX(), Target.UNKNOWN),
-                            new CInt(b.getY(), Target.UNKNOWN), new CInt(b.getZ(), Target.UNKNOWN), 
+                            new CInt(b.getY(), Target.UNKNOWN), new CInt(b.getZ(), Target.UNKNOWN),
                             new CString(b.getWorld().getName(), Target.UNKNOWN)));
                 }
                 map.put("item", new CString(Static.ParseItemNotation(pie.getItem()), Target.UNKNOWN));
@@ -576,34 +576,34 @@ public class PlayerEvents {
                 throw new EventException("Cannot convert e to PlayerInteractEvent");
             }
         }
-        
+
         public BindableEvent convert(CArray manual){
             MCPlayer p = Static.GetPlayer(manual.get("player"), Target.UNKNOWN);
             MCAction a = MCAction.valueOf(manual.get("action").val().toUpperCase());
             MCItemStack is = Static.ParseItemNotation("player_interact event", manual.get("item").val(), 1, Target.UNKNOWN);
             MCBlock b = ObjectGenerator.GetGenerator().location(manual.get("location"), null, Target.UNKNOWN).getBlock();
             MCBlockFace bf = MCBlockFace.valueOf(manual.get("facing").val().toUpperCase());
-            MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);            
+            MCPlayerInteractEvent e = EventBuilder.instantiate(MCPlayerInteractEvent.class, p, a, is, b, bf);
             return e;
         }
 
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if(event instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)event;
-                
+
             }
             return false;
         }
-        
+
     }
-    
+
     @api
-    public static class player_spawn extends AbstractEvent {        
-        
+    public static class player_spawn extends AbstractEvent {
+
         public String getName() {
             return "player_spawn";
         }
-        
+
         public String docs() {
             return "{x: <expression>| y: <expression>| z: <expression>| world: <string match>| player: <macro>}"
                     + "Fires when a player respawns. Technically during this time, the player is not considered to be"
@@ -612,19 +612,20 @@ public class PlayerEvents {
                     + " all CH functions should respond correctly, as if the player was online, however other plugins or"
                     + " plain text commands that are run may not."
                     + "{player: The player that is respawning | "
-                    + "location: The location they are going to respawn at}"
+                    + "location: The location they are going to respawn at | "
+					+ "bed_spawn: True if the respawn location is the player's bed}"
                     + "{location}"
-                    + "{player|location}";
+                    + "{player|location|bed_spawn}";
         }
-        
+
         public Driver driver() {
             return Driver.PLAYER_SPAWN;
         }
-        
+
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerRespawnEvent) {
                 MCPlayerRespawnEvent event = (MCPlayerRespawnEvent) e;
@@ -637,7 +638,7 @@ public class PlayerEvents {
             }
             return false;
         }
-        
+
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerRespawnEvent) {
                 MCPlayerRespawnEvent event = (MCPlayerRespawnEvent) e;
@@ -645,12 +646,13 @@ public class PlayerEvents {
                 //the helper puts the player in for us
                 CArray location = ObjectGenerator.GetGenerator().location(event.getRespawnLocation());
                 map.put("location", location);
+				map.put("bed_spawn", new CBoolean(event.isBedSpawn(), Target.UNKNOWN));
                 return map;
             } else {
                 throw new EventException("Cannot convert e to PlayerRespawnEvent");
             }
         }
-        
+
         public BindableEvent convert(CArray manual) {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
@@ -659,18 +661,18 @@ public class PlayerEvents {
             MCPlayerRespawnEvent e = EventBuilder.instantiate(MCPlayerRespawnEvent.class, p, l, false);
             return e;
         }
-        
+
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if (event instanceof MCPlayerRespawnEvent) {
                 MCPlayerRespawnEvent e = (MCPlayerRespawnEvent) event;
                 if (key.equals("location")) {
                     //Change this parameter in e to value
-                    e.setRespawnLocation(ObjectGenerator.GetGenerator().location(value, e.getPlayer().getWorld(), Target.UNKNOWN));                    
+                    e.setRespawnLocation(ObjectGenerator.GetGenerator().location(value, e.getPlayer().getWorld(), Target.UNKNOWN));
                     return true;
                 }
             }
             return false;
-        }        
+        }
 
         @Override
         public void preExecution(Environment env, ActiveEvent activeEvent) {
@@ -691,15 +693,15 @@ public class PlayerEvents {
             }
         }
     }
-        
-    
+
+
     @api
     public static class player_death extends AbstractEvent {
-        
+
         public String getName() {
             return "player_death";
         }
-        
+
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when a player dies."
@@ -711,15 +713,15 @@ public class PlayerEvents {
                     + " or null to remove it entirely}"
                     + "{player | drops | death_message}";
         }
-        
+
         public Driver driver() {
             return Driver.PLAYER_DEATH;
         }
-        
+
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
@@ -736,7 +738,7 @@ public class PlayerEvents {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 CArray ca = new CArray(Target.UNKNOWN);
-                for(MCItemStack is : event.getDrops()){                    
+                for(MCItemStack is : event.getDrops()){
                     ca.push(ObjectGenerator.GetGenerator().item(is, Target.UNKNOWN));
                 }
                 MCPlayer p = (MCPlayer)event.getEntity();
@@ -756,7 +758,7 @@ public class PlayerEvents {
                 throw new EventException("Cannot convert e to EntityDeathEvent");
             }
         }
-        
+
         public BindableEvent convert(CArray manual) {
             //For firing off the event manually, we have to convert the CArray into an
             //actual object that will trigger it
@@ -766,7 +768,7 @@ public class PlayerEvents {
             CArray clist = (CArray)manual.get("drops");
             for(String key : clist.keySet()){
                 list.add(ObjectGenerator.GetGenerator().item(clist.get(key), clist.getTarget()));
-            }            
+            }
             MCPlayerDeathEvent e = EventBuilder.instantiate(MCPlayerDeathEvent.class, Static.GetPlayer(splayer, Target.UNKNOWN), list,
                     0, deathMessage);
             return e;
@@ -778,7 +780,7 @@ public class PlayerEvents {
                 MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
                 if (key.equals("xp")) {
                     //Change this parameter in e to value
-                    e.setDroppedExp((int)Static.getInt(value, Target.UNKNOWN));                    
+                    e.setDroppedExp((int)Static.getInt(value, Target.UNKNOWN));
                     return true;
                 }
                 if(key.equals("drops")){
@@ -803,14 +805,14 @@ public class PlayerEvents {
             return false;
         }
     }
-    
+
     @api
     public static class player_quit extends AbstractEvent {
-        
+
         public String getName() {
             return "player_quit";
         }
-        
+
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when any player quits."
@@ -818,15 +820,15 @@ public class PlayerEvents {
                     + "{message}"
                     + "{player|message}";
         }
-        
+
         public Driver driver() {
             return Driver.PLAYER_QUIT;
         }
-        
+
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-        
+
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerQuitEvent) {
                 //As a very special case, if this player is currently in interpreter mode, we do not want to
@@ -834,23 +836,23 @@ public class PlayerEvents {
                 if(CommandHelperPlugin.self.interpreterListener.isInInterpreterMode(((MCPlayerQuitEvent)e).getPlayer())){
                     throw new PrefilterNonMatchException();
                 }
-                
+
                 Prefilters.match(prefilter, "player", ((MCPlayerQuitEvent)e).getPlayer().getName(), PrefilterType.MACRO);
                 return true;
             }
             return false;
         }
-        
+
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
             MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             String message = manualObject.get("message").nval();
-            
-            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
+
+            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
                 player, message);
             return e;
         }
-        
+
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerQuitEvent) {
                 MCPlayerQuitEvent event = (MCPlayerQuitEvent) e;
@@ -862,7 +864,7 @@ public class PlayerEvents {
                 throw new EventException("Cannot convert e to MCPlayerQuitEvent");
             }
         }
-        
+
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if (event instanceof MCPlayerQuitEvent) {
                 MCPlayerQuitEvent e = (MCPlayerQuitEvent)event;
@@ -873,9 +875,9 @@ public class PlayerEvents {
             }
             return false;
         }
-	
+
 	@Override
-        public void preExecution(Environment env, ActiveEvent activeEvent) { 
+        public void preExecution(Environment env, ActiveEvent activeEvent) {
            if(activeEvent.getUnderlyingEvent() instanceof MCPlayerQuitEvent){
                 //Static lookups of the player don't seem to work here, but
                 //the player is passed in with the event.
@@ -893,14 +895,14 @@ public class PlayerEvents {
             }
         }
     }
-    
+
     @api
     public static class player_chat extends AbstractEvent {
-        
+
         public String getName() {
             return "player_chat";
         }
-        
+
         public String docs() {
             return "{player: <macro>}"
                     + "Fired when any player attempts to send a chat message."
@@ -913,15 +915,15 @@ public class PlayerEvents {
 					+ " name, and the second one is the message.}"
                     + "{player|message|format}";
         }
-        
+
         public Driver driver() {
             return Driver.PLAYER_CHAT;
         }
-        
+
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
+
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerChatEvent) {
                 //As a very special case, if this player is currently in interpreter mode, we do not want to
@@ -934,18 +936,18 @@ public class PlayerEvents {
             }
             return false;
         }
-        
+
         public BindableEvent convert(CArray manualObject) {
             //Get the parameters from the manualObject
             MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             String message = manualObject.get("message").nval();
 			String format = manualObject.get("format").nval();
-            
-            BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class, 
+
+            BindableEvent e = EventBuilder.instantiate(MCPlayerChatEvent.class,
                 player, message, format);
             return e;
         }
-        
+
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerChatEvent) {
                 MCPlayerChatEvent event = (MCPlayerChatEvent) e;
@@ -963,7 +965,7 @@ public class PlayerEvents {
                 throw new EventException("Cannot convert e to MCPlayerChatEvent");
             }
         }
-        
+
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if (event instanceof MCPlayerChatEvent) {
                 MCPlayerChatEvent e = (MCPlayerChatEvent)event;
@@ -976,7 +978,7 @@ public class PlayerEvents {
                         for(String index : ((CArray)value).keySet()){
                             Construct v = ((CArray)value).get(index);
                             try{
-                                list.add(Static.GetPlayer(v, Target.UNKNOWN));                                
+                                list.add(Static.GetPlayer(v, Target.UNKNOWN));
                             } catch(ConfigRuntimeException ex){
                                 //Ignored
                             }
@@ -994,14 +996,14 @@ public class PlayerEvents {
             return false;
         }
     }
-    
+
     @api
     public static class player_command extends AbstractEvent {
-        
+
         public String getName() {
             return "player_command";
         }
-        
+
         public String docs() {
             return "{command: <string match> The entire command the player ran "
                     + "| prefix: <string match> Just the first part of the command, i.e. '/cmd' in '/cmd blah blah'"
@@ -1012,20 +1014,20 @@ public class PlayerEvents {
                     + "{command}"
                     + "{command}";
         }
-        
+
         public Driver driver() {
             return Driver.PLAYER_COMMAND;
         }
-        
+
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-        
+
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
                 String command = event.getCommand();
-                Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);   
+                Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
                 if(prefilter.containsKey("command") && !command.equals(event.getCommand())){
                     return false;
                 }
@@ -1044,41 +1046,41 @@ public class PlayerEvents {
             }
             return false;
         }
-        
+
         public BindableEvent convert(CArray manualObject) {
             MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             String command = manualObject.get("command").nval();
-            
-            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
+
+            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
                 player, command);
             return e;
         }
-        
+
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
                 Map<String, Construct> map = evaluate_helper(e);
                 //Fill in the event parameters
                 map.put("command", new CString(event.getCommand(), Target.UNKNOWN));
-                
+
                 StringHandling.parse_args pa = new StringHandling.parse_args();
                 CArray ca = (CArray)pa.exec(Target.UNKNOWN, null, new CString(event.getCommand(), Target.UNKNOWN));
                 map.put("prefix", new CString(ca.get(0).val(), Target.UNKNOWN));
-                
+
                 return map;
             } else {
                 throw new EventException("Cannot convert e to MCPlayerCommandEvent");
             }
         }
-        
+
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if (event instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent e = (MCPlayerCommandEvent) event;
-                
+
                 if("command".equals(key)){
                     e.setCommand(value.val());
                 }
-                
+
                 return true;
             }
             return false;
@@ -1087,16 +1089,16 @@ public class PlayerEvents {
         @Override
         public void cancel(BindableEvent o, boolean state) {
             ((MCPlayerCommandEvent)o).cancel();
-        }                
+        }
     }
-    
+
     @api
     public static class world_changed extends AbstractEvent {
-        
+
         public String getName() {
             return "world_changed";
         }
-        
+
         public String docs() {
             return "{player: <macro> The player that switched worlds "
                     + "| from: <string match> The world the player is coming from "
@@ -1106,35 +1108,35 @@ public class PlayerEvents {
                     + "{}"
                     + "{player, from}";
         }
-        
+
         public Driver driver() {
             return Driver.WORLD_CHANGED;
         }
-        
+
         public CHVersion since() {
             return CHVersion.V3_3_1;
         }
-        
+
         public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
             if (e instanceof MCWorldChangedEvent) {
                 MCWorldChangedEvent event = (MCWorldChangedEvent) e;
-                Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);   
+                Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
                 Prefilters.match(prefilter, "from", event.getFrom().getName(), PrefilterType.STRING_MATCH);
                 Prefilters.match(prefilter, "to", event.getTo().getName(), PrefilterType.STRING_MATCH);
                 return true;
             }
             return false;
         }
-        
+
         public BindableEvent convert(CArray manualObject) {
             MCPlayer player = Static.GetPlayer(manualObject.get("player"), Target.UNKNOWN);
             MCWorld from = Static.getServer().getWorld(manualObject.get("from").val());
-            
-            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class, 
+
+            BindableEvent e = EventBuilder.instantiate(MCPlayerCommandEvent.class,
                 player, from);
             return e;
         }
-        
+
         public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
             if (e instanceof MCWorldChangedEvent) {
                 MCWorldChangedEvent event = (MCWorldChangedEvent) e;
@@ -1147,23 +1149,23 @@ public class PlayerEvents {
                 throw new EventException("Cannot convert e to MCWorldChangedEvent");
             }
         }
-        
+
         public boolean modifyEvent(String key, Construct value, BindableEvent event) {
             if (event instanceof MCWorldChangedEvent) {
                 MCWorldChangedEvent e = (MCWorldChangedEvent) event;
-                
+
                 return true;
             }
             return false;
         }
-                        
+
     }
-	
+
 	@api
 	public static class player_move extends AbstractEvent{
-		
+
 		/*
-		 * TODO: 
+		 * TODO:
 		 * 1. Add player prefilter
 		 * 2. See if the same event can be fired with different from fields, so that
 		 * one move only causes one "chain" of handlers to be fired.
@@ -1173,11 +1175,11 @@ public class PlayerEvents {
 		 * 5. Tie this in to player teleport events. Probably set a prefilter that determines
 		 * whether or not a teleport should count as a movement or not.
 		 */
-		
+
 		private boolean threadRunning = false;
 		private Set<Integer> thresholdList = new HashSet<Integer>();
 		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
-		
+
 		@Override
 		public void bind(Map<String, Construct> prefilters) {
 			if(prefilters.containsKey("threshold")){
@@ -1338,9 +1340,9 @@ public class PlayerEvents {
 			} else {
 				return false;
 			}
-		}		
-		
-		
+		}
+
+
 
 		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerMoveEvent){
@@ -1372,7 +1374,7 @@ public class PlayerEvents {
 					}
 				}
 				return true;
-				
+
 			}
 			return false ;
 		}
@@ -1384,7 +1386,7 @@ public class PlayerEvents {
 			return EventBuilder.instantiate(MCPlayerMoveEvent.class, p, from, to);
 		}
 
-		
+
 		public Map<String, Construct> evaluate(BindableEvent e) throws EventException {
 			if (e instanceof MCPlayerMoveEvent) {
                 MCPlayerMoveEvent event = (MCPlayerMoveEvent) e;
@@ -1411,8 +1413,8 @@ public class PlayerEvents {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-    
-    
+
+
 }

@@ -45,7 +45,7 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
     }
 
     public MCPlayer getPlayer() {
-        if(op instanceof Player){
+        if(op instanceof Player) {
             return new BukkitMCPlayer(((Player)op));
         }
         return null;
@@ -61,9 +61,9 @@ public class BukkitMCOfflinePlayer extends BukkitMCAnimalTamer implements MCOffl
 
 	public boolean hasPlayedBefore() {
 		return op.hasPlayedBefore();
-	}	
+	}
+
 	public MCLocation getBedSpawnLocation() {
         return new BukkitMCLocation(op.getBedSpawnLocation());
     }
-	
 }
