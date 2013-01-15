@@ -11,6 +11,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
@@ -2215,12 +2216,43 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-
+	
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class pset_flight extends AbstractFunction {
+	@Deprecated
+	public static class pset_flight extends set_pflight implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "pset_flight";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return super.exec(t, environment, args);
+		}
+
+		@Override
+		public String docs() {
+			return super.docs() + " DEPRECATED(use set_pflight instead)";
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_flight is deprecated, change it to set_pflight before the next release", t);
+			return super.optimizeDynamic(t, children);
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pflight extends AbstractFunction {
+
+		public String getName() {
+			return "set_pflight";
 		}
 
 		public Integer[] numArgs() {
@@ -2276,12 +2308,43 @@ public class PlayerManagement {
 			Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-
+	
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class pset_time extends AbstractFunction {
+	@Deprecated
+	public static class pset_time extends set_ptime implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "pset_time";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return super.exec(t, environment, args);
+		}
+
+		@Override
+		public String docs() {
+			return super.docs() + " DEPRECATED(use set_ptime instead)";
+		}
+
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_time is deprecated, change it to set_ptime before the next release", t);
+			return super.optimizeDynamic(t, children);
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_ptime extends AbstractFunction {
+
+		public String getName() {
+			return "set_ptime";
 		}
 
 		public Integer[] numArgs() {
