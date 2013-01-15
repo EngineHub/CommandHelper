@@ -4,22 +4,23 @@ package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
 
 /**
  *
  * @author layton
  */
-public class BukkitMCTameable extends BukkitMCEntity implements MCTameable{
+public class BukkitMCTameable extends BukkitMCAgeable implements MCTameable{
 
     Tameable t;
     public BukkitMCTameable(Entity t){
-        super(t);
+        super((LivingEntity) t);
         this.t = (Tameable)t;
     }
     
     public BukkitMCTameable(AbstractionObject a){
-        super((Entity)a.getHandle());
+        super((LivingEntity)a.getHandle());
         this.t = ((Tameable)a.getHandle());
     }
 
