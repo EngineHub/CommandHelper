@@ -112,7 +112,7 @@ public class EntityEvents {
                     + "This event is called when a player drops an item. "
                     + "{player: The player | item: An item array representing " 
                     + "the item being dropped. } "
-                    + "{item} "
+                    + "{item: setting this to null removes the dropped item} "
                     + "{player|item}";
         }
         
