@@ -33,14 +33,13 @@ public class ObjectGenerator {
      * @return
      */
     public CArray location(MCLocation l) {
-        CArray ca = new CArray(Target.UNKNOWN);
+        CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN);
         Construct x = new CDouble(l.getX(), Target.UNKNOWN);
         Construct y = new CDouble(l.getY(), Target.UNKNOWN);
         Construct z = new CDouble(l.getZ(), Target.UNKNOWN);
         Construct world = new CString(l.getWorld().getName(), Target.UNKNOWN);
         Construct yaw = new CDouble(l.getYaw(), Target.UNKNOWN);
         Construct pitch = new CDouble(l.getPitch(), Target.UNKNOWN);
-        ca.forceAssociativeMode();
         ca.set("0", x, Target.UNKNOWN);
         ca.set("1", y, Target.UNKNOWN);
         ca.set("2", z, Target.UNKNOWN);
@@ -162,14 +161,12 @@ public class ObjectGenerator {
         int qty = is.getAmount();
         CArray enchants = new CArray(t);
         for (Map.Entry<MCEnchantment, Integer> entry : is.getEnchantments().entrySet()) {
-            CArray enchObj = new CArray(t);
-            enchObj.forceAssociativeMode();
+            CArray enchObj = CArray.GetAssociativeArray(t);
             enchObj.set("etype", new CString(entry.getKey().getName(), t), t);
             enchObj.set("elevel", new CInt(entry.getValue(), t), t);
             enchants.push(enchObj);
         }
-        CArray ret = new CArray(t);
-        ret.forceAssociativeMode();
+        CArray ret = CArray.GetAssociativeArray(t);
         ret.set("type", Integer.toString(type));
         ret.set("data", Integer.toString(data));
         ret.set("qty", Integer.toString(qty));
@@ -332,25 +329,25 @@ public class ObjectGenerator {
 		int green;
 		int blue;
 		if(color.containsKey("r")){
-			red = (int)Static.getInt(color.get("r"), t);
+			red = Static.getInt32(color.get("r"), t);
 		} else if(color.containsKey("red")){
-			red = (int)Static.getInt(color.get("red"), t);
+			red = Static.getInt32(color.get("red"), t);
 		} else {
-			red = (int)Static.getInt(color.get(0), t);
+			red = Static.getInt32(color.get(0), t);
 		}
 		if(color.containsKey("g")){
-			green = (int)Static.getInt(color.get("g"), t);
+			green = Static.getInt32(color.get("g"), t);
 		} else if(color.containsKey("green")){
-			green = (int)Static.getInt(color.get("green"), t);
+			green = Static.getInt32(color.get("green"), t);
 		} else {
-			green = (int)Static.getInt(color.get(1), t);
+			green = Static.getInt32(color.get(1), t);
 		}
 		if(color.containsKey("b")){
-			blue = (int)Static.getInt(color.get("b"), t);
+			blue = Static.getInt32(color.get("b"), t);
 		} else if(color.containsKey("blue")){
-			blue = (int)Static.getInt(color.get("blue"), t);
+			blue = Static.getInt32(color.get("blue"), t);
 		} else {
-			blue = (int)Static.getInt(color.get(2), t);
+			blue = Static.getInt32(color.get(2), t);
 		}
 		return StaticLayer.GetConvertor().GetColor(red, green, blue);
 	}

@@ -492,8 +492,8 @@ public class Environment {
 				z = l.getBlockZ();
 				w = l.getWorld();
 			} else {
-				x = (int) Static.getInt(args[0], t);
-				z = (int) Static.getInt(args[1], t);
+				x = Static.getInt32(args[0], t);
+				z = Static.getInt32(args[1], t);
 				if (args.length != 3) {
 					w = Static.getServer().getWorld(args[2].val());
 				}
@@ -559,8 +559,8 @@ public class Environment {
 				z = l.getBlockZ();
 				w = l.getWorld();
 			} else {
-				x = (int) Static.getInt(args[0], t);
-				z = (int) Static.getInt(args[1], t);
+				x = Static.getInt32(args[0], t);
+				z = Static.getInt32(args[1], t);
 				if (args.length != 2) {
 					w = Static.getServer().getWorld(args[2].val());
 				}
@@ -791,7 +791,7 @@ public class Environment {
 			}
 			MCTone tone = null;
 			if (args[noteOffset] instanceof CArray) {
-				int octave = (int) Static.getInt(((CArray) args[noteOffset]).get("octave"), t);
+				int octave = Static.getInt32(((CArray) args[noteOffset]).get("octave"), t);
 				if (octave < 0 || octave > 2) {
 					throw new Exceptions.RangeException("The octave must be 0, 1, or 2, but was " + octave, t);
 				}

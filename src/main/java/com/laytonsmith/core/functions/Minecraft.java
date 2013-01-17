@@ -182,7 +182,7 @@ public class Minecraft {
 				i2 = (int) is.getData().getData();
 			}
 			if (i == -1) {
-				i = (int) Static.getInt(args[0], t);
+				i = Static.getInt32(args[0], t);
 			}
 			if (i2 == -1) {
 				i2 = 0;
@@ -312,7 +312,7 @@ public class Minecraft {
 			}
 			int qty = 1;
 			if (args.length > 1) {
-				qty = (int) Static.getInt(args[1], t);
+				qty = Static.getInt32(args[1], t);
 			}
 			if (qty > 50) {
 				throw new ConfigRuntimeException("A bit excessive, don't you think? Let's scale that back some, huh?",
@@ -389,7 +389,7 @@ public class Minecraft {
 			} else {
 				entityID = args[0];
 			}
-			int id = (int) Static.getInt(entityID, t);
+			int id = Static.getInt32(entityID, t);
 			MCEntity e = Static.getEntity(id, t);
 			if (e == null) {
 				return new CVoid(t);
@@ -440,7 +440,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = (int) Static.getInt(args[0], t);
+			int id = Static.getInt32(args[0], t);
 			MCEntity e = Static.getEntity(id, t);
 			if (e == null) {
 				return new CNull(t);
@@ -489,7 +489,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			int id = (int) Static.getInt(args[0], t);
+			int id = Static.getInt32(args[0], t);
 			MCEntity e = Static.getEntity(id, t);
 			boolean ret;
 			if (e == null) {
@@ -561,7 +561,7 @@ public class Minecraft {
 				throw new ConfigRuntimeException("This effect requires a valid BlockID", ExceptionType.FormatException, t);
 			}
 			if (args.length == 3) {
-				radius = (int) Static.getInt(args[2], t);
+				radius = Static.getInt32(args[2], t);
 			}
 			l.getWorld().playEffect(l, e, data, radius);
 			return new CVoid(t);
@@ -601,7 +601,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity((int) Static.getInt(args[0], t), t);
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
 			if (e instanceof MCLivingEntity) {
 				int health = (int) ((double) Static.getInt(args[1], t) / 100.0 * (double) ((MCLivingEntity) e).getMaxHealth());
 				if (health != 0) {
@@ -647,7 +647,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity((int) Static.getInt(args[0], t), t);
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
 			if (e instanceof MCLivingEntity) {
 				int h = (int) (((double) ((MCLivingEntity) e).getHealth() / (double) ((MCLivingEntity) e).getMaxHealth()) * 100);
 				return new CInt(h, t);
@@ -707,7 +707,7 @@ public class Minecraft {
 			if (args.length == 0) {
 				index = -1;
 			} else if (args.length == 1) {
-				index = (int) Static.getInt(args[0], t);
+				index = Static.getInt32(args[0], t);
 			}
 
 			if (index < -1 || index > 10) {
@@ -1026,7 +1026,7 @@ public class Minecraft {
 			MCFireworkType type = MCFireworkType.BALL;
 			
 			if(options.containsKey("strength")){
-				strength = (int)Static.getInt(options.get("strength"), t);
+				strength = Static.getInt32(options.get("strength"), t);
 			}
 			if(options.containsKey("flicker")){
 				flicker = Static.getBoolean(options.get("flicker"));
@@ -1094,9 +1094,9 @@ public class Minecraft {
 		
 		private MCColor parseColor(CArray ca, Target t){
 			return StaticLayer.GetConvertor().GetColor(
-							(int)Static.getInt(ca.get(0), t), 
-							(int)Static.getInt(ca.get(1), t), 
-							(int)Static.getInt(ca.get(2), t)
+							Static.getInt32(ca.get(0), t), 
+							Static.getInt32(ca.get(1), t), 
+							Static.getInt32(ca.get(2), t)
 						);
 		}
 		

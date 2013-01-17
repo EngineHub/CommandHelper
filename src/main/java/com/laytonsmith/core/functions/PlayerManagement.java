@@ -571,7 +571,7 @@ public class PlayerManagement {
 				index = -1;
 			} else {
 				player = args[0].val();
-				index = (int) Static.getInt(args[1], t);
+				index = Static.getInt32(args[1], t);
 			}
 
 			MCPlayer p = Static.GetPlayer(player, t);
@@ -969,7 +969,7 @@ public class PlayerManagement {
 					toSet = (MCPlayer) p;
 					pitch = toSet.getLocation().getPitch();
 				}
-				int g = (int) Static.getInt(args[0], t);
+				int g = Static.getInt32(args[0], t);
 				if (g < 0 || g > 3) {
 					throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
 							ExceptionType.RangeException, t);
@@ -990,7 +990,7 @@ public class PlayerManagement {
 					//It's the MCPlayer, F variation
 					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
-					int g = (int) Static.getInt(args[1], t);
+					int g = Static.getInt32(args[1], t);
 					if (g < 0 || g > 3) {
 						throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
 								ExceptionType.RangeException, t);
@@ -1209,9 +1209,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1], t);
+				xp = Static.getInt32(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0], t);
+				xp = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setExp(((float) xp) / 100.0F);
@@ -1259,9 +1259,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1], t);
+				xp = Static.getInt32(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0], t);
+				xp = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.giveExp(xp);
@@ -1355,9 +1355,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				level = (int) Static.getInt(args[1], t);
+				level = Static.getInt32(args[1], t);
 			} else {
-				level = (int) Static.getInt(args[0], t);
+				level = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setLevel(level);
@@ -1450,9 +1450,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1], t);
+				xp = Static.getInt32(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0], t);
+				xp = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setTotalExperience(xp);
@@ -1549,9 +1549,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				level = (int) Static.getInt(args[1], t);
+				level = Static.getInt32(args[1], t);
 			} else {
-				level = (int) Static.getInt(args[0], t);
+				level = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setFoodLevel(level);
@@ -1600,12 +1600,12 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
-			int effect = (int) Static.getInt(args[1], t);
+			int effect = Static.getInt32(args[1], t);
 
-			int strength = (int) Static.getInt(args[2], t);
+			int strength = Static.getInt32(args[2], t);
 			int seconds = 30;
 			if (args.length == 4) {
-				seconds = (int) Static.getInt(args[3], t);
+				seconds = Static.getInt32(args[3], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if (seconds == 0 || strength == 0) {
@@ -1707,9 +1707,9 @@ public class PlayerManagement {
 			int health = 0;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				health = (int) Static.getInt(args[1], t);
+				health = Static.getInt32(args[1], t);
 			} else {
-				health = (int) Static.getInt(args[0], t);
+				health = Static.getInt32(args[0], t);
 			}
 			if (health < 0 || health > 20) {
 				throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, t);
@@ -2171,7 +2171,7 @@ public class PlayerManagement {
 					tick = 20;
 				}
 			} else {
-				tick = (int) Static.getInt(ticks, t);
+				tick = Static.getInt32(ticks, t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setRemainingFireTicks(tick);
@@ -2656,8 +2656,7 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
-			CArray vector = new CArray(t);
-			vector.forceAssociativeMode();
+			CArray vector = CArray.GetAssociativeArray(t);
 			MCPlayer.Velocity velocity = p.getVelocity();
 			vector.set("magnitude", new CDouble(velocity.magnitude, t), t);
 			vector.set("x", new CDouble(velocity.x, t), t);
@@ -2870,7 +2869,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 				hungerIndex = 1;
 			}
-			hunger = (int) Static.getInt(args[hungerIndex], t);
+			hunger = Static.getInt32(args[hungerIndex], t);
 			p.setHunger(hunger);
 			return new CVoid(t);
 		}

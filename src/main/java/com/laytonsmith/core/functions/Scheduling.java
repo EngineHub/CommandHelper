@@ -334,7 +334,7 @@ public class Scheduling {
 			if (args.length == 0 && environment.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
 				StaticLayer.ClearFutureRunnable((Integer) environment.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
 			} else if (args.length == 1) {
-				StaticLayer.ClearFutureRunnable((int) Static.getInt(args[0], t));
+				StaticLayer.ClearFutureRunnable(Static.getInt32(args[0], t));
 			} else {
 				throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
 			}

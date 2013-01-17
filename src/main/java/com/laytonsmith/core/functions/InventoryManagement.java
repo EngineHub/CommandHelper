@@ -77,15 +77,14 @@ public class InventoryManagement {
                 if (args[1] instanceof CNull) {
                     index = null;
                 } else {
-                    index = (int) Static.getInt(args[1], t);
+                    index = Static.getInt32(args[1], t);
                 }
                 all = false;
                 m = Static.GetPlayer(args[0], t);
             }
 
             if(all){
-                CArray ret = new CArray(t);
-                ret.forceAssociativeMode();
+                CArray ret = CArray.GetAssociativeArray(t);
                 for(int i = 0; i < 36; i++){
                     ret.set(i, getInvSlot(m, i, t), t);
                 }
@@ -421,10 +420,10 @@ public class InventoryManagement {
             MCItemStack is;
 			
             if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1], t), t);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
             } else {
                 p = Static.GetPlayer(args[0], t);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2], t), t);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
             }
 			
             int total = is.getAmount();
@@ -533,10 +532,10 @@ public class InventoryManagement {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
             if(args.length == 2){
-                is = Static.ParseItemNotation(this.getName(), args[0].val(), (int)Static.getInt(args[1], t), t);
+                is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
             } else {
                 p = Static.GetPlayer(args[0], t);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), (int)Static.getInt(args[2], t), t);
+                is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
@@ -595,7 +594,7 @@ public class InventoryManagement {
 			}
 			
 			MCInventory inv = GetInventory(args[0], w, t);			
-			int slot = (int)Static.getInt(args[1], t);
+			int slot = Static.getInt32(args[1], t);
 			try{
 				MCItemStack is = inv.getItem(slot);
 				return ObjectGenerator.GetGenerator().item(is, t);
@@ -649,7 +648,7 @@ public class InventoryManagement {
 			}
 			
 			MCInventory inv = GetInventory(args[0], w, t);			
-			int slot = (int)Static.getInt(args[1], t);
+			int slot = Static.getInt32(args[1], t);
 			MCItemStack is = ObjectGenerator.GetGenerator().item(args[2], t);
 			try{
 				inv.setItem(slot, is);
@@ -774,7 +773,7 @@ public class InventoryManagement {
 			MCLocation l = ObjectGenerator.GetGenerator().location(specifier, w, t);
 			inv = StaticLayer.GetConvertor().GetLocationInventory(l);
 		} else {
-			int entityID = (int)Static.getInt(specifier, t);
+			int entityID = Static.getInt32(specifier, t);
 			inv = StaticLayer.GetConvertor().GetEntityInventory(entityID);
 		}
 		if(inv == null){

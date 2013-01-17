@@ -38,7 +38,7 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			int id = (int) Static.getInt(args[0], t);
+			int id = Static.getInt32(args[0], t);
 			MCEntity ent = Static.getEntity(id, t);
 			if (ent == null) {
 				return new CNull(t);
@@ -86,8 +86,8 @@ public class EntityManagement {
 
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
-			int id = (int) Static.getInt(args[0], t);
-			int age = (int) Static.getInt(args[1], t);
+			int id = Static.getInt32(args[0], t);
+			int age = Static.getInt32(args[1], t);
 			boolean lock = false;
 			if (args.length == 3) {
 				lock = (boolean) Static.getBoolean(args[2]);
@@ -150,7 +150,7 @@ public class EntityManagement {
 					id = Static.GetPlayer(args[0], t).getEntityId();
 				} catch (ConfigRuntimeException notPlayer) {
 					try {
-						id = (int) Static.getInt(args[0], t);
+						id = Static.getInt32(args[0], t);
 					} catch (ConfigRuntimeException notEntIDEither) {
 						throw new ConfigRuntimeException("Could not find an entity matching " + args[0] + "!", 
 								ExceptionType.BadEntityException, t);

@@ -737,10 +737,10 @@ public class StringHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
-				int begin = (int) Static.getInt(args[1], t);
+				int begin = Static.getInt32(args[1], t);
 				int end;
 				if (args.length == 3) {
-					end = (int) Static.getInt(args[2], t);
+					end = Static.getInt32(args[2], t);
 				} else {
 					end = s.length();
 				}

@@ -780,7 +780,7 @@ public class PlayerEvents {
                 MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
                 if (key.equals("xp")) {
                     //Change this parameter in e to value
-                    e.setDroppedExp((int)Static.getInt(value, Target.UNKNOWN));
+                    e.setDroppedExp(Static.getInt32(value, Target.UNKNOWN));
                     return true;
                 }
                 if(key.equals("drops")){
@@ -1183,7 +1183,7 @@ public class PlayerEvents {
 		@Override
 		public void bind(Map<String, Construct> prefilters) {
 			if(prefilters.containsKey("threshold")){
-				int i = (int)Static.getInt(prefilters.get("threshold"), Target.UNKNOWN);
+				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
 				thresholdList.add(i);
 			}
 			if(!threadRunning){

@@ -681,9 +681,9 @@ public class WorldEdit {
             for (int i = 0; i < arg.size(); i++) {
                 CArray point = (CArray)arg.get(i, t);
 
-                x = (int) Static.getInt(point.get(0), t);
-                y = (int) Static.getInt(point.get(1), t);
-                z = (int) Static.getInt(point.get(2), t);
+                x = Static.getInt32(point.get(0), t);
+                y = Static.getInt32(point.get(1), t);
+                z = Static.getInt32(point.get(2), t);
 
                 if (arg.size() == 2) {
                     points.add(new BlockVector(x, y, z));

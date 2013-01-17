@@ -58,8 +58,8 @@ public class Marquee {
 				marqueeName = null;
 			}
 			text = args[1 + offset].val();
-			stringWidth = (int)Static.getInt(args[2 + offset], t);
-			delayTime = (int)Static.getInt(args[3 + offset], t);
+			stringWidth = Static.getInt32(args[2 + offset], t);
+			delayTime = Static.getInt32(args[3 + offset], t);
 			if(args[4 + offset] instanceof CClosure){
 				callback = ((CClosure)args[4 + offset]);
 			} else {

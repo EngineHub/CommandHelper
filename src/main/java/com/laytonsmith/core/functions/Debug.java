@@ -104,7 +104,7 @@ public class Debug {
 //            }
 //            int verbosity = 1;
 //            if (args.length == 2) {
-//                verbosity = (int) Static.getInt(args[1]);
+//                verbosity = Static.getInt32(args[1]);
 //            }
 //            try {
 //                SimplePluginManager pm = (SimplePluginManager) AliasCore.parent.getServer().getPluginManager();
@@ -273,7 +273,7 @@ public class Debug {
 //            boolean on = Static.getBoolean(args[0]);
 //            int level = 1;
 //            if(args.length >= 2){
-//                level = Static.Normalize((int) Static.getInt(args[1]), 1, 5);
+//                level = Static.Normalize(Static.getInt32(args[1]), 1, 5);
 //            }
 //            Debug.EVENT_LOGGING = on;
 //            Debug.EVENT_LOGGING_LEVEL = level;

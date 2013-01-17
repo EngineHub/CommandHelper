@@ -158,7 +158,7 @@ public class Sandbox {
                 //If args[0] starts with a number, it's the (item, qty) version, otherwise it's
                 //(player, item)
                 if (args[0].val().matches("\\d.*")) {
-                    qty = (int) Static.getInt(args[1], t);
+                    qty = Static.getInt32(args[1], t);
                     is = Static.ParseItemNotation(this.getName(), args[0].val(), qty, t);
                     natural = true;
                 } else {
@@ -181,7 +181,7 @@ public class Sandbox {
                     l = Static.GetPlayer(args[0].val(), t).getLocation();
                     natural = true;
                 }
-                qty = (int) Static.getInt(args[2], t);
+                qty = Static.getInt32(args[2], t);
                 is = Static.ParseItemNotation(this.getName(), args[1].val(), qty, t);
             }
             if (l.getWorld() != null) {
@@ -295,7 +295,7 @@ public class Sandbox {
             if (args[1 - offset] instanceof CNull) {
                 is = m.getItemInHand();
             } else {
-                int slot = (int) Static.getInt(args[1 - offset], t);
+                int slot = Static.getInt32(args[1 - offset], t);
                 is = m.getInventory().getItem(slot);
             }
             CArray enchantArray = new CArray(t);
@@ -316,7 +316,7 @@ public class Sandbox {
                 if (e == null) {
                     throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
                 }
-                int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
+                int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 
                 is.addUnsafeEnchantment(e, level);
             }
@@ -466,8 +466,8 @@ public class Sandbox {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity horse = Static.getEntity((int)Static.getInt(args[0], t), t);
-			MCEntity rider = Static.getEntity((int)Static.getInt(args[1], t), t);
+			MCEntity horse = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity rider = Static.getEntity(Static.getInt32(args[1], t), t);
 			horse.setPassenger(rider);
 			return new CVoid(t);
 		}
