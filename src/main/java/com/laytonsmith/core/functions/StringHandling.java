@@ -14,6 +14,8 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Sizable;
+import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -23,6 +25,8 @@ import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -538,8 +542,8 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				return new CInt(((CArray) args[0]).size(), t);
+			if (args[0] instanceof Sizable) {
+				return new CInt(((Sizable) args[0]).size(), t);
 			} else {
 				return new CInt(args[0].val().length(), t);
 			}
@@ -699,10 +703,10 @@ public class StringHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				String s = args[0].val();
-				int begin = (int) Static.getInt(args[1], t);
+				int begin = Static.getInt32(args[1], t);
 				int end;
 				if (args.length == 3) {
-					end = (int) Static.getInt(args[2], t);
+					end = Static.getInt32(args[2], t);
 				} else {
 					end = s.length();
 				}
@@ -1263,6 +1267,100 @@ public class StringHandling {
 				new ExampleScript("Other formatting: boolean (with capitalization)", "sprintf('%B', 0)"),
 				new ExampleScript("Other formatting: hash code", "sprintf('%h', 'will be hashed')"),
 			};
+		}
+		
+	}
+	
+	@api
+	public static class string_get_bytes extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			String val = args[0].val();
+			String encoding = "UTF-8";
+			if(args.length == 2){
+				encoding = args[1].val();
+			}
+			try {
+				return CByteArray.wrap(val.getBytes(encoding), t);
+			} catch (UnsupportedEncodingException ex) {
+				throw new Exceptions.FormatException("Unknown encoding type \"" + encoding + "\"", t);
+			}
+		}
+
+		public String getName() {
+			return "string_get_bytes";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "byte_array {string, [encoding]} Returns this string as a byte_array, encoded using the specified encoding,"
+					+ " or UTF-8 if no encoding is specified. Valid encodings are the encoding types that java supports.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class string_from_bytes extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = Static.getByteArray(args[0], t);
+			String encoding = "UTF-8";
+			if(args.length == 2){
+				encoding = args[1].val();
+			}
+			try {
+				return new CString(new String(ba.asByteArrayCopy(), encoding), t);
+			} catch (UnsupportedEncodingException ex) {
+				throw new Exceptions.FormatException("Unknown encoding type \"" + encoding + "\"", t);
+			}
+		}
+
+		public String getName() {
+			return "string_from_bytes";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "string {byte_array, [encoding]} Returns a new string, given the byte array encoding provided. The encoding defaults"
+					+ " to UTF-8, but may be specified.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
 		}
 		
 	}

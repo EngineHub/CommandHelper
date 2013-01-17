@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCLocation;
+import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
@@ -15,16 +16,19 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.sk89q.worldedit.BlockVector;
 import com.sk89q.worldedit.BlockVector2D;
 import com.sk89q.worldedit.Vector;
 import com.sk89q.worldedit.bukkit.BukkitUtil;
 import com.sk89q.worldedit.regions.CuboidRegion;
 import com.sk89q.worldedit.regions.CuboidRegionSelector;
 import com.sk89q.worldedit.regions.RegionSelector;
+import com.sk89q.worldguard.domains.DefaultDomain;
 import com.sk89q.worldguard.protection.ApplicableRegionSet;
 import com.sk89q.worldguard.protection.GlobalRegionManager;
 import com.sk89q.worldguard.protection.flags.Flag;
 import com.sk89q.worldguard.protection.managers.RegionManager;
+import com.sk89q.worldguard.protection.regions.ProtectedCuboidRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedPolygonalRegion;
 import com.sk89q.worldguard.protection.regions.ProtectedRegion;
 import java.util.*;
@@ -39,7 +43,7 @@ import org.bukkit.World;
 public class WorldEdit {
 
     public static String docs() {
-        return "Provides various methods for programmatically hooking into WorldEdit";
+        return "Provides various methods for programmatically hooking into WorldEdit and WorldGuard";
     }
 
     @api(environments=CommandHelperEnvironment.class)
@@ -213,7 +217,7 @@ public class WorldEdit {
 
         public String docs() {
             return "array {region, world} Given a region name, returns an array of information about that region."
-					+ " ---- The following information is returned:<ul>"
+                    + " ---- The following information is returned:<ul>"
                     + " <li>0 - An array of points that define this region</li>"
                     + " <li>1 - An array of owners of this region</li>"
                     + " <li>2 - An array of members of this region</li>"
@@ -520,13 +524,13 @@ public class WorldEdit {
             if (c != null && !( c instanceof MCPlayer)) {
                 w = ((MCPlayer)c).getWorld();
             }
-            
+
             MCLocation loc = ObjectGenerator.GetGenerator().location(args[0], w, t);
 
             if (loc.getWorld() == null) {
                 throw new ConfigRuntimeException(this.getName() + " needs a world", ExceptionType.InsufficientArgumentsException, t);
             }
-            
+
             world = Bukkit.getServer().getWorld(loc.getWorld().getName());
 
             RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
@@ -597,6 +601,685 @@ public class WorldEdit {
             }
 
             return new CInt(region.volume(), t);
+        }
+    }
+
+    @api
+    public static class sk_region_create extends SKFunction {
+
+        public String getName() {
+            return "sk_region_create";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{2, 3};
+        }
+
+        public String docs() {
+            return "boolean {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Create region of the given name in the given world.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            String region;
+
+            if (args.length == 2) {
+
+                region = args[0].val();
+
+                MCPlayer m = null;
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                }
+            } else {
+                region = args[1].val();
+                world = Bukkit.getServer().getWorld(args[0].val());
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(region);
+
+            if (regionExists != null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+            }
+
+            if (!(args[args.length - 1] instanceof CArray)) {
+                throw new ConfigRuntimeException("Pass an array of points for a new region", ExceptionType.PluginInternalException, t);
+            }
+
+            List<BlockVector> points = new ArrayList<BlockVector>();
+            List<BlockVector2D> points2D = new ArrayList<BlockVector2D>();
+
+            int x = 0;
+            int y = 0;
+            int z = 0;
+
+            int minY = 0;
+            int maxY = 0;
+
+            ProtectedCuboidRegion cr = null;
+            ProtectedPolygonalRegion pr = null;
+
+            CArray arg = (CArray) args[args.length - 1];
+
+            for (int i = 0; i < arg.size(); i++) {
+                CArray point = (CArray)arg.get(i, t);
+
+                x = Static.getInt32(point.get(0), t);
+                y = Static.getInt32(point.get(1), t);
+                z = Static.getInt32(point.get(2), t);
+
+                if (arg.size() == 2) {
+                    points.add(new BlockVector(x, y, z));
+                } else {
+                    points2D.add(new BlockVector2D(x, z));
+
+                    if (i == 0) {
+                        minY = maxY = y;
+                    } else {
+                        if (y < minY) {
+                            minY = y;
+                        } else if (y > maxY) {
+                            maxY = y;
+                        }
+                    }
+                }
+            }
+
+            if (arg.size() == 2) {
+                cr = new ProtectedCuboidRegion(region, points.get(0), points.get(1));
+            } else {
+                pr = new ProtectedPolygonalRegion(region, points2D, minY, maxY);
+            }
+
+            if (cr == null && pr == null) {
+                throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t);
+            }
+
+            if (arg.size() == 2) {
+                mgr.addRegion(cr);
+            } else {
+                mgr.addRegion(pr);
+            }
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
+            return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_remove extends SKFunction {
+
+        public String getName() {
+            return "sk_region_remove";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "boolean {[world], name} Check if given region exists.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            String region;
+
+            if (args.length == 1) {
+
+                region = args[0].val();
+
+                MCPlayer m = null;
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                }
+            } else {
+                region = args[1].val();
+                world = Bukkit.getServer().getWorld(args[0].val());
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(region);
+
+            if (regionExists == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+            }
+
+            mgr.removeRegion(region);
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while removing protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
+            return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_exists extends SKFunction {
+
+        public String getName() {
+            return "sk_region_exists";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2};
+        }
+
+        public String docs() {
+            return "boolean {[world], name} Check if a given region exists.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            String region;
+
+            if (args.length == 1) {
+
+                region = args[0].val();
+
+                MCPlayer m = null;
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                }
+            } else {
+                region = args[1].val();
+                world = Bukkit.getServer().getWorld(args[0].val());
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(region);
+
+            if (regionExists != null) {
+                return new CBoolean(true, t);
+            }
+
+            return new CBoolean(false, t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_addowner extends SKFunction {
+
+        public String getName() {
+            return "sk_region_addowner";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3};
+        }
+
+        public String docs() {
+            return "boolean {region, [world], [owner1] | region, [world], [array(owner1, ownerN, ...)]} Add owner(s) to given region.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            MCPlayer m = null;
+            List<MCOfflinePlayer> owners = new ArrayList<MCOfflinePlayer>();
+            String region = args[0].val();
+
+            if (args.length == 1) {
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                    owners.add(Static.getServer().getOfflinePlayer(m.getName()));
+                }
+
+            } else if (args.length == 2) {
+
+                world = Bukkit.getServer().getWorld(args[0].val());
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    owners.add(Static.getServer().getOfflinePlayer(m.getName()));
+                }
+
+            } else {
+
+                world = Bukkit.getServer().getWorld(args[1].val());
+
+                if (args[2] instanceof CArray) {
+
+                    CArray arg = (CArray) args[2];
+
+                    for (int i = 0; i < arg.size(); i++) {
+                        owners.add(Static.getServer().getOfflinePlayer(arg.get(i, t).val()));
+                    }
+                } else {
+                    owners.add(Static.getServer().getOfflinePlayer(args[2].val()));
+                }
+
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(region);
+
+            if (regionExists == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+            }
+
+            DefaultDomain newOwners = mgr.getRegion(region).getOwners();
+
+            for (MCOfflinePlayer owner : owners) {
+                newOwners.addPlayer(owner.getName());
+            }
+
+            mgr.getRegion(region).setOwners(newOwners);
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while adding owner(s) to protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
+            return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_remowner extends SKFunction {
+
+        public String getName() {
+            return "sk_region_remowner";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3};
+        }
+
+        public String docs() {
+            return "boolean {region, [world], [owner1] | region, [world], [array(owner1, ownerN, ...)]} Remove owner(s) from given region.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            MCPlayer m = null;
+            List<MCOfflinePlayer> owners = new ArrayList<MCOfflinePlayer>();
+            String region = args[0].val();
+
+            if (args.length == 1) {
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                    owners.add(Static.getServer().getOfflinePlayer(m.getName()));
+                }
+
+            } else if (args.length == 2) {
+
+                world = Bukkit.getServer().getWorld(args[0].val());
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    owners.add(Static.getServer().getOfflinePlayer(m.getName()));
+                }
+
+            } else {
+
+                world = Bukkit.getServer().getWorld(args[1].val());
+
+                if (args[2] instanceof CArray) {
+
+                    CArray arg = (CArray) args[2];
+
+                    for (int i = 0; i < arg.size(); i++) {
+                        owners.add(Static.getServer().getOfflinePlayer(arg.get(i, t).val()));
+                    }
+                } else {
+                    owners.add(Static.getServer().getOfflinePlayer(args[2].val()));
+                }
+
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(region);
+
+            if (regionExists == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+            }
+
+            DefaultDomain newOwners = mgr.getRegion(region).getOwners();
+
+            for (MCOfflinePlayer owner : owners) {
+                newOwners.removePlayer(owner.getName());
+            }
+
+            mgr.getRegion(region).setOwners(newOwners);
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while deleting owner(s) from protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
+            return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_addmember extends SKFunction {
+
+        public String getName() {
+            return "sk_region_addmember";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3};
+        }
+
+        public String docs() {
+            return "boolean {region, [world], [member1] | region, [world], [array(member1, memberN, ...)]} Add member(s) to given region.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            MCPlayer m = null;
+            List<MCOfflinePlayer> members = new ArrayList<MCOfflinePlayer>();
+            String region = args[0].val();
+
+            if (args.length == 1) {
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                    members.add(Static.getServer().getOfflinePlayer(m.getName()));
+                }
+
+            } else if (args.length == 2) {
+
+                world = Bukkit.getServer().getWorld(args[0].val());
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    members.add(Static.getServer().getOfflinePlayer(m.getName()));
+                }
+
+            } else {
+
+                world = Bukkit.getServer().getWorld(args[1].val());
+
+                if (args[2] instanceof CArray) {
+
+                    CArray arg = (CArray) args[2];
+
+                    for (int i = 0; i < arg.size(); i++) {
+                        members.add(Static.getServer().getOfflinePlayer(arg.get(i, t).val()));
+                    }
+                } else {
+                    members.add(Static.getServer().getOfflinePlayer(args[2].val()));
+                }
+
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(region);
+
+            if (regionExists == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+            }
+
+            DefaultDomain newMembers = mgr.getRegion(region).getMembers();
+
+            for (MCOfflinePlayer member : members) {
+                newMembers.addPlayer(member.getName());
+            }
+
+            mgr.getRegion(region).setMembers(newMembers);
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while adding member(s) to protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
+            return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
+        }
+    }
+
+    @api
+    public static class sk_region_remmember extends SKFunction {
+
+        public String getName() {
+            return "sk_region_remmember";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{1, 2, 3};
+        }
+
+        public String docs() {
+            return "boolean {region, [world], [member1] | region, [world], [array(member1, memberN, ...)]} Remove member(s) from given region.";
+        }
+
+        public ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
+        }
+
+        public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+            Static.checkPlugin("WorldGuard", t);
+
+            World world = null;
+            MCPlayer m = null;
+            List<MCOfflinePlayer> members = new ArrayList<MCOfflinePlayer>();
+            String region = args[0].val();
+
+            if (args.length == 1) {
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    world = Bukkit.getServer().getWorld(m.getWorld().getName());
+                    members.add(Static.getServer().getOfflinePlayer(m.getName()));
+                }
+
+            } else if (args.length == 2) {
+
+                world = Bukkit.getServer().getWorld(args[0].val());
+
+                if (env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+                    m = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+                }
+
+                if (m != null) {
+                    members.add(Static.getServer().getOfflinePlayer(m.getName()));
+                }
+
+            } else {
+
+                world = Bukkit.getServer().getWorld(args[1].val());
+
+                if (args[2] instanceof CArray) {
+
+                    CArray arg = (CArray) args[2];
+
+                    for (int i = 0; i < arg.size(); i++) {
+                        members.add(Static.getServer().getOfflinePlayer(arg.get(i, t).val()));
+                    }
+                } else {
+                    members.add(Static.getServer().getOfflinePlayer(args[2].val()));
+                }
+
+            }
+
+            if (world == null) {
+                throw new ConfigRuntimeException("Unknown world specified", ExceptionType.InvalidWorldException, t);
+            }
+
+            RegionManager mgr = Static.getWorldGuardPlugin(t).getGlobalRegionManager().get(world);
+
+            ProtectedRegion regionExists = mgr.getRegion(region);
+
+            if (regionExists == null) {
+                throw new ConfigRuntimeException(String.format("The region (%s) doesn't exists in world (%s).", region, world.getName()), ExceptionType.PluginInternalException, t);
+            }
+
+            DefaultDomain newMembers = mgr.getRegion(region).getMembers();
+
+            for (MCOfflinePlayer member : members) {
+                newMembers.removePlayer(member.getName());
+            }
+
+            mgr.getRegion(region).setMembers(newMembers);
+
+			try {
+				mgr.save();
+			}
+			catch (Exception e) {
+				throw new ConfigRuntimeException("Error while deleting members(s) from protected region", ExceptionType.PluginInternalException, t, e);
+			}
+
+            return new CVoid(t);
+        }
+
+        @Override
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
     }
 

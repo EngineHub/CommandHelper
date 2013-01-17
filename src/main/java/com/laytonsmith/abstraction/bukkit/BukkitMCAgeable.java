@@ -10,11 +10,11 @@ import com.laytonsmith.abstraction.MCAgeable;
  * 
  * @author jb_aero
  */
-public class BukkitMCAgeable extends BukkitMCEntity implements MCAgeable {
+public class BukkitMCAgeable extends BukkitMCLivingEntity implements MCAgeable {
 
 	Ageable a;
 	public BukkitMCAgeable(Entity be) {
-		super(be);
+		super((LivingEntity) be);
 		this.a = (Ageable) be;
 	}
 	

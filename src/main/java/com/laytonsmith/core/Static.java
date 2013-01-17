@@ -14,6 +14,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.profiler.Profiler;
 import com.laytonsmith.persistance.DataSourceException;
@@ -115,10 +116,19 @@ public final class Static {
                     ExceptionType.CastException, t);
         }
     }
+	
+	public static float getDouble32(Construct c, Target t){
+		double delta = 0.000000001; //Eight places should be enough, right?
+		double l = getDouble(c, t);
+		float f = (float)l;
+		if(Math.abs(f - l) > delta){
+			throw new Exceptions.RangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
+		}
+		return f;
+	}
 
     /**
-     * Returns an integer from any given construct. If the number is not castable to an int, a ConfigRuntimeException
-     * is thrown.
+     * Returns an integer from any given construct.
      * @param c
      * @return 
      */
@@ -145,7 +155,61 @@ public final class Static {
         }
         return i;
     }
-
+	
+	/**
+	 * Returns a 32 bit int from the construct. Since the backing value is actually
+	 * a long, if the number contained in the construct is not the same after truncating,
+	 * an exception is thrown (fail fast). When needing an int from a construct, this
+	 * method is much preferred over silently truncating.
+	 * @param c
+	 * @param t
+	 * @return 
+	 */
+	public static int getInt32(Construct c, Target t){
+		long l = getInt(c, t);
+		int i = (int)l;
+		if(i != l){
+			throw new Exceptions.RangeException("Expecting a 32 bit integer, but a larger value was found: " + l, t);
+		}
+		return i;
+	}
+	
+	/**
+	 * Returns a 16 bit int from the construct (a short). Since the backing value is actually
+	 * a long, if the number contained in the construct is not the same after truncating,
+	 * an exception is thrown (fail fast). When needing an short from a construct, this
+	 * method is much preferred over silently truncating.
+	 * @param c
+	 * @param t
+	 * @return 
+	 */
+	public static short getInt16(Construct c, Target t){
+		long l = getInt(c, t);
+		short s = (short)l;
+		if(s != l){
+			throw new Exceptions.RangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
+		}
+		return s;
+	}
+	
+	/**
+	 * Returns an 8 bit int from the construct (a byte). Since the backing value is actually
+	 * a long, if the number contained in the construct is not the same after truncating,
+	 * an exception is thrown (fail fast). When needing a byte from a construct, this
+	 * method is much preferred over silently truncating.
+	 * @param c
+	 * @param t
+	 * @return 
+	 */
+	public static byte getInt8(Construct c, Target t){
+		long l = getInt(c, t);
+		byte b = (byte)l;
+		if(b != l){
+			throw new Exceptions.RangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
+		}
+		return b;
+	}
+	
     /**
      * Returns a boolean from any given construct. Depending on the type of the construct being converted, it follows the following rules:
      * If it is an integer or a double, it is false if 0, true otherwise. If it is a string, if it is empty, it is false, otherwise it is true.
@@ -168,6 +232,16 @@ public final class Static {
         }
         return b;
     }
+	
+	public static CByteArray getByteArray(Construct c, Target t){
+		if(c instanceof CByteArray){
+			return (CByteArray)c;
+		} else if(c instanceof CNull){
+			return new CByteArray(t, 0);
+		} else {
+			throw new Exceptions.CastException("Expecting byte array, but found " + c.getCType() + " instead.", t);
+		}
+	}
 
     /**
      * Returns true if any of the constructs are a CDouble, false otherwise.
@@ -511,7 +585,7 @@ public final class Static {
                 throw new ConfigRuntimeException("Item value passed to " + functionName + " is invalid: " + notation, ExceptionType.FormatException, t);
             }
         } else {
-            type = (int) Static.getInt(Static.resolveConstruct(notation, t), t);
+            type = Static.getInt32(Static.resolveConstruct(notation, t), t);
         }
 
         is = StaticLayer.GetItemStack(type, qty);

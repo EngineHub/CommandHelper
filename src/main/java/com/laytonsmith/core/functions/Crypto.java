@@ -293,7 +293,7 @@ public class Crypto {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             int log_rounds = 5;
             if(args.length == 2){
-                log_rounds = (int)Static.getInt(args[1], t);
+                log_rounds = Static.getInt32(args[1], t);
             }
             String hash = BCrypt.hashpw(args[0].val(), BCrypt.gensalt(log_rounds));
             return new CString(hash, t);

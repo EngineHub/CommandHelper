@@ -112,8 +112,7 @@ public class ArrayHandling {
 					if (ca.inAssociativeMode()) {
 						if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
 							//Special exception, we want to clone the whole array
-							CArray na = new CArray(t);
-							na.forceAssociativeMode();
+							CArray na = CArray.GetAssociativeArray(t);
 							for (String key : ca.keySet()) {
 								try {
 									na.set(key, ca.get(key, t).clone(), t);
@@ -207,7 +206,7 @@ public class ArrayHandling {
 					}
 				} else {
 					try {
-						return new CString(args[0].val().charAt((int) Static.getInt(index, t)), t);
+						return new CString(args[0].val().charAt(Static.getInt32(index, t)), t);
 					} catch (ConfigRuntimeException e) {
 						if (e.getExceptionType() == ExceptionType.CastException) {
 							throw new ConfigRuntimeException("Expecting an integer index for the array, but found \"" + index
@@ -540,7 +539,7 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray) {
 				if (!((CArray) args[0]).inAssociativeMode()) {
 					try {
-						int index = (int) Static.getInt(args[1], t);
+						int index = Static.getInt32(args[1], t);
 						CArray ca = (CArray) args[0];
 						return new CBoolean(index <= ca.size() - 1, t);
 					} catch (ConfigRuntimeException e) {

@@ -188,7 +188,13 @@ public class Exceptions {
 		/**
 		 * Thrown if an entity is looked up by id, but doesn't exist.
 		 */
-		BadEntityException("Thrown if an entity is looked up by id, but doesn't exist.", CHVersion.V3_3_1);
+		BadEntityException("Thrown if an entity is looked up by id, but doesn't exist.", CHVersion.V3_3_1),
+		
+		/**
+		 * Thrown if a field was read only, but a write operation was attempted.
+		 */
+		ReadOnlyException("Thrown if a field was read only, but a write operation was attempted.", CHVersion.V3_3_1),
+		;
 		
 		private String docs;
 		private CHVersion since;

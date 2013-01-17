@@ -14,7 +14,12 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 import java.util.*;
 
 /**
- *
+ * A class that represents a dynamic array.
+ * 
+ * For subclasses, the ArrayAccess methods are the most commonly
+ * overridden methods. There are several overloaded methods in this
+ * class, you need only to override the non-final ones for the
+ * same effect.
  * @author layton
  */
 public class CArray extends Construct implements ArrayAccess{
@@ -34,6 +39,30 @@ public class CArray extends Construct implements ArrayAccess{
 	
 	public CArray(Target t, Collection<Construct> items){
 		this(t, getArray(items));
+	}
+	
+	/**
+	 * Returns if this array is in associative mode or not.
+	 * @return 
+	 */
+	protected boolean isAssociative(){
+		return associative_mode;
+	}
+	
+	/**
+	 * Returns the backing array.
+	 * @return 
+	 */
+	protected List<Construct> getArray(){
+		return array;
+	}
+	
+	/**
+	 * Returns the backing associative array.
+	 * @return 
+	 */
+	protected SortedMap<String, Construct> getAssociativeArray(){
+		return associative_array;
 	}
 	
 	private static Construct [] getArray(Collection<Construct> items){
@@ -101,16 +130,30 @@ public class CArray extends Construct implements ArrayAccess{
     public boolean inAssociativeMode() {
         return associative_mode;
     }
+	
+	/**
+	 * Returns a new empty CArray that is in associative mode.
+	 * @param t
+	 * @return 
+	 */
+	public static CArray GetAssociativeArray(Target t){
+		return new CArray(t).forceAssociativeMode();
+	}
+	
+	public static CArray GetAssociativeArray(Target t, Construct[] args){
+		return new CArray(t, args).forceAssociativeMode();
+	}
     
     /**
      * This should only be used when copying an array that is already known to be associative, so integer keys will
      * remain associative.
      */
-    public void forceAssociativeMode(){
+    private CArray forceAssociativeMode(){
         if(associative_array == null){
             associative_array = new TreeMap<String, Construct>();
         }
         associative_mode = true;
+		return this;
     }
 
 	/**
@@ -192,7 +235,7 @@ public class CArray extends Construct implements ArrayAccess{
     public void set(Construct index, Construct c, Target t) {
         if (!associative_mode) {
             try {
-                int indx = (int) Static.getInt(index, t);
+                int indx = Static.getInt32(index, t);
                 if (indx > next_index || indx < 0) {
                     throw new ConfigRuntimeException("", Target.UNKNOWN);
                 } else if(indx == next_index){
@@ -239,7 +282,7 @@ public class CArray extends Construct implements ArrayAccess{
     public Construct get(Construct index, Target t) {
         if(!associative_mode){
             try {
-                return array.get((int)Static.getInt(index, t));
+                return array.get(Static.getInt32(index, t));
             } catch (IndexOutOfBoundsException e) {
                 throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t);
             }

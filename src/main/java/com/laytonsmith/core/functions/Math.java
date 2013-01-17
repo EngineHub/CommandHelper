@@ -1733,7 +1733,7 @@ public class Math {
 			double number = Static.getNumber(args[0], t);
 			int precision = 0;
 			if(args.length > 1){
-				precision = (int)Static.getInt(args[1], t);
+				precision = Static.getInt32(args[1], t);
 			}
 			if(precision < 0){
 				throw new Exceptions.RangeException("precision cannot be less than 0, was " + precision, t);

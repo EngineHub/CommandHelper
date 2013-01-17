@@ -152,4 +152,6 @@ public interface Convertor {
 	 */
 	public MCFirework GetFirework();
 	
+	public MCPluginMeta GetPluginMeta();
+	
 }

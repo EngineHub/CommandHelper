@@ -11,6 +11,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.io.IOException;
@@ -539,7 +540,7 @@ public class PlayerManagement {
 					+ "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - player groups;"
 					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
-					+ " <li>13 - Player's current entity id</li></ul>";
+					+ " <li>13 - Player's current entity id</li><li>14 - Is player is in vehicle? Returns true or false.</li></ul>";
 		}
 
 		public ExceptionType[] thrown() {
@@ -570,20 +571,20 @@ public class PlayerManagement {
 				index = -1;
 			} else {
 				player = args[0].val();
-				index = (int) Static.getInt(args[1], t);
+				index = Static.getInt32(args[1], t);
 			}
 
 			MCPlayer p = Static.GetPlayer(player, t);
 
 			Static.AssertPlayerNonNull(p, t);
-			int maxIndex = 13;
+			int maxIndex = 14;
 			if (index < -1 || index > maxIndex) {
 				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
 			}
 			ArrayList<Construct> retVals = new ArrayList<Construct>();
 			if (index == 0 || index == -1) {
-				//MCPlayer name 
+				//MCPlayer name
 				retVals.add(new CString(p.getName(), t));
 			}
 			if (index == 1 || index == -1) {
@@ -601,7 +602,7 @@ public class PlayerManagement {
 				}
 			}
 			if (index == 3 || index == -1) {
-				//MCPlayer IP       
+				//MCPlayer IP
 				String add;
 				try {
 					add = p.getAddress().getAddress().getHostAddress();
@@ -674,6 +675,9 @@ public class PlayerManagement {
 			}
 			if (index == 13 || index == -1) {
 				retVals.add(new CInt(p.getEntityId(), t));
+			}
+			if (index == 14 || index == -1) {
+				retVals.add(new CBoolean(p.isInsideVehicle(), t));
 			}
 			if (retVals.size() == 1) {
 				return retVals.get(0);
@@ -965,7 +969,7 @@ public class PlayerManagement {
 					toSet = (MCPlayer) p;
 					pitch = toSet.getLocation().getPitch();
 				}
-				int g = (int) Static.getInt(args[0], t);
+				int g = Static.getInt32(args[0], t);
 				if (g < 0 || g > 3) {
 					throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
 							ExceptionType.RangeException, t);
@@ -986,7 +990,7 @@ public class PlayerManagement {
 					//It's the MCPlayer, F variation
 					toSet = Static.GetPlayer(args[0], t);
 					pitch = toSet.getLocation().getPitch();
-					int g = (int) Static.getInt(args[1], t);
+					int g = Static.getInt32(args[1], t);
 					if (g < 0 || g > 3) {
 						throw new ConfigRuntimeException("The F specifed must be from 0 to 3",
 								ExceptionType.RangeException, t);
@@ -1205,9 +1209,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1], t);
+				xp = Static.getInt32(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0], t);
+				xp = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setExp(((float) xp) / 100.0F);
@@ -1255,9 +1259,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1], t);
+				xp = Static.getInt32(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0], t);
+				xp = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.giveExp(xp);
@@ -1351,9 +1355,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				level = (int) Static.getInt(args[1], t);
+				level = Static.getInt32(args[1], t);
 			} else {
-				level = (int) Static.getInt(args[0], t);
+				level = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setLevel(level);
@@ -1446,9 +1450,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				xp = (int) Static.getInt(args[1], t);
+				xp = Static.getInt32(args[1], t);
 			} else {
-				xp = (int) Static.getInt(args[0], t);
+				xp = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setTotalExperience(xp);
@@ -1545,9 +1549,9 @@ public class PlayerManagement {
 			}
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				level = (int) Static.getInt(args[1], t);
+				level = Static.getInt32(args[1], t);
 			} else {
-				level = (int) Static.getInt(args[0], t);
+				level = Static.getInt32(args[0], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			m.setFoodLevel(level);
@@ -1596,12 +1600,12 @@ public class PlayerManagement {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer m = Static.GetPlayer(args[0].val(), t);
 
-			int effect = (int) Static.getInt(args[1], t);
+			int effect = Static.getInt32(args[1], t);
 
-			int strength = (int) Static.getInt(args[2], t);
+			int strength = Static.getInt32(args[2], t);
 			int seconds = 30;
 			if (args.length == 4) {
-				seconds = (int) Static.getInt(args[3], t);
+				seconds = Static.getInt32(args[3], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if (seconds == 0 || strength == 0) {
@@ -1703,9 +1707,9 @@ public class PlayerManagement {
 			int health = 0;
 			if (args.length == 2) {
 				m = Static.GetPlayer(args[0].val(), t);
-				health = (int) Static.getInt(args[1], t);
+				health = Static.getInt32(args[1], t);
 			} else {
-				health = (int) Static.getInt(args[0], t);
+				health = Static.getInt32(args[0], t);
 			}
 			if (health < 0 || health > 20) {
 				throw new ConfigRuntimeException("Health must be between 0 and 20", ExceptionType.RangeException, t);
@@ -2167,7 +2171,7 @@ public class PlayerManagement {
 					tick = 20;
 				}
 			} else {
-				tick = (int) Static.getInt(ticks, t);
+				tick = Static.getInt32(ticks, t);
 			}
 			Static.AssertPlayerNonNull(p, t);
 			p.setRemainingFireTicks(tick);
@@ -2215,12 +2219,43 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-
+	
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class pset_flight extends AbstractFunction {
+	@Deprecated
+	public static class pset_flight extends set_pflight implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "pset_flight";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return super.exec(t, environment, args);
+		}
+
+		@Override
+		public String docs() {
+			return super.docs() + " DEPRECATED(use set_pflight instead)";
+		}
+
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_flight is deprecated, change it to set_pflight before the next release", t);
+			return super.optimizeDynamic(t, children);
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_pflight extends AbstractFunction {
+
+		public String getName() {
+			return "set_pflight";
 		}
 
 		public Integer[] numArgs() {
@@ -2276,12 +2311,43 @@ public class PlayerManagement {
 			Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-
+	
 	@api(environments = {CommandHelperEnvironment.class})
-	public static class pset_time extends AbstractFunction {
+	@Deprecated
+	public static class pset_time extends set_ptime implements Optimizable {
 
+		@Override
 		public String getName() {
 			return "pset_time";
+		}
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return super.exec(t, environment, args);
+		}
+
+		@Override
+		public String docs() {
+			return super.docs() + " DEPRECATED(use set_ptime instead)";
+		}
+
+		public Set<Optimizable.OptimizationOption> optimizationOptions() {
+			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_time is deprecated, change it to set_ptime before the next release", t);
+			return super.optimizeDynamic(t, children);
+		}
+
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_ptime extends AbstractFunction {
+
+		public String getName() {
+			return "set_ptime";
 		}
 
 		public Integer[] numArgs() {
@@ -2590,8 +2656,7 @@ public class PlayerManagement {
 			if (args.length == 1) {
 				p = Static.GetPlayer(args[0], t);
 			}
-			CArray vector = new CArray(t);
-			vector.forceAssociativeMode();
+			CArray vector = CArray.GetAssociativeArray(t);
 			MCPlayer.Velocity velocity = p.getVelocity();
 			vector.set("magnitude", new CDouble(velocity.magnitude, t), t);
 			vector.set("x", new CDouble(velocity.x, t), t);
@@ -2804,7 +2869,7 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 				hungerIndex = 1;
 			}
-			hunger = (int) Static.getInt(args[hungerIndex], t);
+			hunger = Static.getInt32(args[hungerIndex], t);
 			p.setHunger(hunger);
 			return new CVoid(t);
 		}
@@ -2910,6 +2975,7 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+
 	}
 
 	@api(environments = {CommandHelperEnvironment.class})
@@ -2968,7 +3034,7 @@ public class PlayerManagement {
 			return false;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	public static class set_pbed_location extends AbstractFunction {
 
@@ -3060,6 +3126,92 @@ public class PlayerManagement {
 			};
 			m.setBedSpawnLocation(StaticLayer.GetLocation(l.getWorld(), x, y + 1, z, m.getLocation().getYaw(), m.getLocation().getPitch()));
 			return new CVoid(t);
+		}
+	}
+
+	@api(environments={CommandHelperEnvironment.class})
+	public static class pvehicle extends AbstractFunction {
+
+		public String getName() {
+			return "pvehicle";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "mixed {[player]} Returns name of vehicle which player is in or null if player is outside the vehicle";
+			}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 1) {;
+				p = Static.GetPlayer(args[0].val(), t);
+			}
+
+			if (p.isInsideVehicle() == false) {
+				return new CNull(t);
+			}
+
+			return new CString(p.getVehicle().getType().name(), t);
+		}
+	}
+
+	@api(environments={CommandHelperEnvironment.class})
+	public static class pvehicle_leave extends AbstractFunction {
+
+		public String getName() {
+			return "pvehicle_leave";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "boolean {[player]} Leave vehicle by player or return false if player is outside the vehicle";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+	}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			if (args.length == 1) {;
+				p = Static.GetPlayer(args[0].val(), t);
+			}
+
+			return new CBoolean(p.leaveVehicle(), t);
 		}
 	}
 }

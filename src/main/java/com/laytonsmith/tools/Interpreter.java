@@ -13,6 +13,7 @@ import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
+import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.enums.MCTone;
@@ -424,7 +425,11 @@ public class Interpreter {
 		}
 
 		public MCFirework GetFirework() {
-			throw new UnsupportedOperationException("Not supported yet.");
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCPluginMeta GetPluginMeta() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 		
 	}

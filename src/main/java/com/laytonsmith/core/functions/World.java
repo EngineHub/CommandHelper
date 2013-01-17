@@ -114,14 +114,14 @@ public class World {
 				y = l.getBlockY();
 				z = l.getBlockZ();
 			} else if (args.length == 3) {
-				x = (int) Static.getInt(args[0], t);
-				y = (int) Static.getInt(args[1], t);
-				z = (int) Static.getInt(args[2], t);
+				x = Static.getInt32(args[0], t);
+				y = Static.getInt32(args[1], t);
+				z = Static.getInt32(args[2], t);
 			} else if (args.length == 4) {
 				w = Static.getServer().getWorld(args[0].val());
-				x = (int) Static.getInt(args[1], t);
-				y = (int) Static.getInt(args[2], t);
-				z = (int) Static.getInt(args[3], t);
+				x = Static.getInt32(args[1], t);
+				y = Static.getInt32(args[2], t);
+				z = Static.getInt32(args[3], t);
 			}
 			if (w == null) {
 				throw new ConfigRuntimeException("Invalid world given.", ExceptionType.InvalidWorldException, t);
@@ -204,14 +204,14 @@ public class World {
 						throw new ConfigRuntimeException("No world specified", ExceptionType.InvalidWorldException, t);
 					}
 					world = m.getWorld();
-					x = (int) Static.getInt(args[0], t);
-					z = (int) Static.getInt(args[1], t);
+					x = Static.getInt32(args[0], t);
+					z = Static.getInt32(args[1], t);
 				}
 			} else {
 				//world, x and z provided
 				world = Static.getServer().getWorld(args[0].val());
-				x = (int) Static.getInt(args[1], t);
-				z = (int) Static.getInt(args[2], t);
+				x = Static.getInt32(args[1], t);
+				z = Static.getInt32(args[2], t);
 			}
 			world.refreshChunk(x, z);
 			return new CVoid(t);
@@ -277,13 +277,13 @@ public class World {
 					}
 					
 					world = m.getWorld();
-					x = (int) Static.getInt(args[0], t);
-					z = (int) Static.getInt(args[1], t);
+					x = Static.getInt32(args[0], t);
+					z = Static.getInt32(args[1], t);
 				}
 			} else {
 				//world, x and z provided
-				x = (int) Static.getInt(args[0], t);
-				z = (int) Static.getInt(args[1], t);
+				x = Static.getInt32(args[0], t);
+				z = Static.getInt32(args[1], t);
 				world = Static.getServer().getWorld(args[2].val());
 			}
 			

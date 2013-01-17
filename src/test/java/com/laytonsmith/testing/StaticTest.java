@@ -671,6 +671,10 @@ public class StaticTest {
 		public MCFirework GetFirework() {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
+
+		public MCPluginMeta GetPluginMeta() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
         
     }
     

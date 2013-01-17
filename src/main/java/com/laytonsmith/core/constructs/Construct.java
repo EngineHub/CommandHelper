@@ -25,7 +25,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 
         TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
         DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
-        SYMBOL, IDENTIFIER, BRACE, BRACKET
+        SYMBOL, IDENTIFIER, BRACE, BRACKET, BYTE_ARRAY;
     }
 //    protected ConstructType ctype;
     private final String value;
@@ -204,8 +204,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         if (s.startsWith("{")) {
             //Object
             JSONObject obj = (JSONObject) JSONValue.parse(s);
-            CArray ca = new CArray(t);
-            ca.forceAssociativeMode();
+            CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : obj.keySet()){
                 ca.set(convertJSON(key, t), 
                         convertJSON(obj.get(key), t), t);
@@ -252,8 +251,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         } else if (o == null) {
             return new CNull();
         } else if(o instanceof java.util.Map){
-            CArray ca = new CArray(t);
-            ca.forceAssociativeMode();
+            CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : ((java.util.Map)o).keySet()){
                 ca.set(convertJSON(key, t), 
                         convertJSON(((java.util.Map)o).get(key), t), t);
@@ -303,8 +301,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             return new CBoolean(((Boolean)o).booleanValue(), Target.UNKNOWN);
         } else if(o instanceof Map){
             //associative array
-            CArray a = new CArray(Target.UNKNOWN);
-            a.forceAssociativeMode();            
+            CArray a = CArray.GetAssociativeArray(Target.UNKNOWN);           
             Map m = (Map)o;
             for(Object key : m.entrySet()){
                 a.set(key.toString(), GetConstruct(m.get(key)), Target.UNKNOWN);

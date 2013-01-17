@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.bukkit.entities.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
 import com.laytonsmith.abstraction.enums.MCTone;
@@ -34,6 +35,8 @@ import org.bukkit.material.MaterialData;
  */
 @convert(type=Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
+	
+	private static BukkitMCPluginMeta pluginMeta = null;
 
     public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
         World w2 = null;
@@ -192,8 +195,12 @@ public class BukkitConvertor extends AbstractConvertor {
     		return new BukkitMCVehicle(be);
     	}
     	
-    	if(be instanceof Tameable){
-            return new BukkitMCTameable(be);
+    	if(be instanceof Wolf){
+            return new BukkitMCWolf(be);
+        }
+    	
+    	if(be instanceof Ocelot){
+            return new BukkitMCOcelot(be);
         }
     	
     	if(be instanceof Ageable){
@@ -333,6 +340,19 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	public MCFirework GetFirework() {
 		return new BukkitMCFirework();
+	}
+
+	public MCPluginMeta GetPluginMeta() {
+		if(pluginMeta == null){
+			pluginMeta = new BukkitMCPluginMeta(CommandHelperPlugin.self);
+			addShutdownHook(new Runnable() {
+
+				public void run() {
+					pluginMeta = null;
+				}
+			});
+		}
+		return pluginMeta;
 	}
 
 }

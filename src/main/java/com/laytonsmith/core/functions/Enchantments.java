@@ -210,11 +210,11 @@ public class Enchantments {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
 			}
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:(int)Static.getInt(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
 //            } else {
-//                int slot = (int) Static.getInt(args[1 - offset]);
+//                int slot = Static.getInt32(args[1 - offset]);
 //                is = m.getInventory().getItem(slot);
 //            }
 			CArray enchantArray = new CArray(t);
@@ -236,7 +236,7 @@ public class Enchantments {
 					throw new ConfigRuntimeException(enchantArray.get(key, t).val().toUpperCase() + " is not a valid enchantment type", ExceptionType.EnchantmentException, t);
 				}
 				if (e.canEnchantItem(is)) {
-					int level = (int) Static.getInt(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
+					int level = Static.getInt32(new CString(Enchantments.ConvertLevel(levelArray.get(key, t).val()), t), t);
 					if (e.getMaxLevel() >= level && level > 0) {
 						is.addEnchantment(e, level);
 					} else {
@@ -292,11 +292,11 @@ public class Enchantments {
 				offset = 0;
 			}
 			Static.AssertPlayerNonNull(m, t);
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:(int)Static.getInt(args[1 - offset], t));
+			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
 //            if (args[1 - offset] instanceof CNull) {
 //                is = m.getItemInHand();
 //            } else {
-//                int slot = (int) Static.getInt(args[1 - offset]);
+//                int slot = Static.getInt32(args[1 - offset]);
 //                is = m.getInventory().getItem(slot);
 //            }
 
@@ -359,11 +359,11 @@ public class Enchantments {
 			} else {
 				slot = args[0];
 			}
-			MCItemStack is = m.getItemAt(slot instanceof CNull?null:(int)Static.getInt(slot, t));
+			MCItemStack is = m.getItemAt(slot instanceof CNull?null:Static.getInt32(slot, t));
 //            if(slot instanceof CNull){
 //                is = m.getItemInHand();
 //            } else {
-//                int slotID = (int) Static.getInt(slot);
+//                int slotID = Static.getInt32(slot);
 //                is = m.getInventory().getItem(slotID);
 //            }
 			CArray enchants = new CArray(t);

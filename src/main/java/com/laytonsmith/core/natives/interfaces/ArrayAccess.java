@@ -10,7 +10,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
  * Things that implement this can be accessed like an array, with array_get, or [].
  * @author Layton
  */
-public interface ArrayAccess extends Mixed {
+public interface ArrayAccess extends Mixed, Sizable {
     /**
      * Return the mixed at this location. This should throw an exception if
      * the index does not exist.
@@ -18,6 +18,7 @@ public interface ArrayAccess extends Mixed {
      * @return 
      */
     public Construct get(String index, Target t) throws ConfigRuntimeException;
+	
     /**
      * Return the size of the array
      * @return 

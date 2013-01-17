@@ -105,8 +105,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CArray array = new CArray(t, args);
-			array.forceAssociativeMode();
+			CArray array = CArray.GetAssociativeArray(t, args);
 			return array;
 		}
 
@@ -926,7 +925,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
-				num = (int) Static.getInt(args[0], t);
+				num = Static.getInt32(args[0], t);
 			}
 			throw new LoopBreakException(num, t);
 		}
@@ -1010,7 +1009,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
-				num = (int) Static.getInt(args[0], t);
+				num = Static.getInt32(args[0], t);
 			}
 			throw new LoopContinueException(num, t);
 		}

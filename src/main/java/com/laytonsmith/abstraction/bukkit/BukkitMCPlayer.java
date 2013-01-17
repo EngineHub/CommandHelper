@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
@@ -33,7 +34,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         this.p = player;
     }
 
-	public Player _Player(){
+	public Player _Player() {
         return p;
     }
 
@@ -45,11 +46,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.chat(chat);
     }
 
-    public InetSocketAddress getAddress(){
+    public InetSocketAddress getAddress() {
         return p.getAddress();
     }
 
-    public boolean getAllowFlight(){
+    public boolean getAllowFlight() {
         return p.getAllowFlight();
     }
 
@@ -81,34 +82,34 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
     public MCItemStack getItemAt(Integer slot) {
-        if(slot == null){
+        if (slot == null) {
             return new BukkitMCItemStack(p.getItemInHand());
         }
         ItemStack is = null;
         //Special slots
-        if(slot == 100){
+        if (slot == 100) {
             is = p.getInventory().getBoots();
-        } else if(slot == 101){
+        } else if (slot == 101) {
             is = p.getInventory().getLeggings();
-        } else if(slot == 102){
+        } else if (slot == 102) {
             is = p.getInventory().getChestplate();
-        } else if(slot == 103){
+        } else if (slot == 103) {
             is = p.getInventory().getHelmet();
         }
-        if(slot >= 0 && slot <= 35){
+        if (slot >= 0 && slot <= 35) {
             is = p.getInventory().getItem(slot);
         }
-        if(is == null){
+        if (is == null) {
             return null;
         } else {
             return new BukkitMCItemStack(is);
         }
     }
-    
+
     public long getLastPlayed() {
 		return p.getLastPlayed();
 	}
-    
+
     public int getLevel() {
         return p.getLevel();
     }
@@ -116,7 +117,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public MCPlayer getPlayer() {
         return new BukkitMCPlayer(p);
     }
-    
+
     public long getPlayerTime() {
         return p.getPlayerTime();
     }
@@ -161,11 +162,11 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         p.kickPlayer(message);
     }
 
-    public boolean removeEffect(int potionID){
+    public boolean removeEffect(int potionID) {
 		PotionEffectType t = PotionEffectType.getById(potionID);
 		boolean hasIt = false;
-		for(PotionEffect pe : p.getActivePotionEffects()){
-			if(pe.getType() == t){
+		for(PotionEffect pe : p.getActivePotionEffects()) {
+			if (pe.getType() == t) {
 				hasIt = true;
 				break;
 			}
@@ -183,15 +184,15 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		string = string.replaceAll("\t", "    ");
         p.sendMessage(string);
     }
-    
-    public void setAllowFlight(boolean flight){
+
+    public void setAllowFlight(boolean flight) {
         p.setAllowFlight(flight);
     }
 
     public void setBanned(boolean banned) {
         p.setBanned(banned);
     }
-    
+
     public void setCompassTarget(MCLocation l) {
         p.setCompassTarget(((BukkitMCLocation)l).l);
     }
@@ -207,23 +208,23 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public void setFoodLevel(int f) {
         p.setFoodLevel(f);
     }
-    
-    /*public void setHealth(int i) { 
+
+    /*public void setHealth(int i) {
         if(i == 0){
             this.fireEntityDamageEvent(MCDamageCause.CUSTOM);
         }
         p.setHealth(i);
     }*/
-    
+
     public void setLevel(int xp) {
         p.setLevel(xp);
     }
-    
+
     public void setPlayerTime(Long time) {
         p.setPlayerTime(time, false);
     }
-    
-    public void setRemainingFireTicks(int i){
+
+    public void setRemainingFireTicks(int i) {
         p.setFireTicks(i);
     }
 
@@ -267,7 +268,7 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     }
 
     public void setVanished(boolean set, MCPlayer to) {
-        if(!set){
+        if (!set) {
             p.showPlayer(((BukkitMCPlayer)to)._Player());
         } else {
             p.hidePlayer(((BukkitMCPlayer)to)._Player());
@@ -291,8 +292,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
         //a new player.
         return !p.getServer().getOfflinePlayer(p.getName()).hasPlayedBefore();
     }
-    
-    public String getHost(){
+
+    public String getHost() {
         return Static.GetHost(this);
     }
 
@@ -311,20 +312,28 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 	public void setHunger(int h) {
 		p.setFoodLevel(h);
 	}
-	
-	public float getSaturation(){
+
+	public float getSaturation() {
 		return p.getSaturation();
 	}
-	
-	public void setSaturation(float s){
+
+	public void setSaturation(float s) {
 		p.setSaturation(s);
 	}
 
 	public MCLocation getBedSpawnLocation() {
-		return new BukkitMCLocation(p.getBedSpawnLocation());
+	    return new BukkitMCLocation(p.getBedSpawnLocation());
 	}
-	
+
 	public void setBedSpawnLocation(MCLocation l) {
 		p.setBedSpawnLocation((Location)l.getHandle(), true);
+	}
+
+	public MCEntity getVehicle() {
+		return new BukkitMCEntity(p.getVehicle());
+	}
+
+	public void sendPluginMessage(String channel, byte[] message) {
+		p.sendPluginMessage(CommandHelperPlugin.self, channel, message);
 	}
 }

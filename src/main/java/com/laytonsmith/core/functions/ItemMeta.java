@@ -51,9 +51,9 @@ public class ItemMeta {
 			int slot;
 			if(args.length == 2){
 				p = Static.GetPlayer(args[0], t);
-				slot = (int)Static.getInt(args[1], t);
+				slot = Static.getInt32(args[1], t);
 			} else {
-				slot = (int)Static.getInt(args[0], t);
+				slot = Static.getInt32(args[0], t);
 			}
 			MCItemMeta im = p.getItemAt(slot).getItemMeta();
 			if(im instanceof MCLeatherArmorMeta){
@@ -104,10 +104,10 @@ public class ItemMeta {
 			CArray color;
 			if(args.length == 3){
 				p = Static.GetPlayer(args[0], t);
-				slot = (int)Static.getInt(args[1], t);
+				slot = Static.getInt32(args[1], t);
 				color = (CArray)args[2];
 			} else {
-				slot = (int)Static.getInt(args[0], t);
+				slot = Static.getInt32(args[0], t);
 				color = (CArray)args[1];
 			}
 			MCItemStack is = p.getItemAt(slot);
@@ -162,9 +162,9 @@ public class ItemMeta {
 			int slot;
 			if(args.length == 2){
 				p = Static.GetPlayer(args[0], t);
-				slot = (int)Static.getInt(args[1], t);
+				slot = Static.getInt32(args[1], t);
 			} else {
-				slot = (int)Static.getInt(args[0], t);
+				slot = Static.getInt32(args[0], t);
 			}
 			MCItemMeta im = p.getItemAt(slot).getItemMeta();
 			return new CBoolean(im instanceof MCLeatherArmorMeta, t);
