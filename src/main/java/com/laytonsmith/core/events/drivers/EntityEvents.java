@@ -267,7 +267,7 @@ public class EntityEvents {
 				+ "{player: The player | item: An item array representing " 
 				+ "the item being picked up | "
 				+ "remaining: Other items left on the ground. } "
-				+ "{item} "
+				+ "{item: setting this to null will remove the item from the world} "
 				+ "{player|item|remaining}";
 		}
 
