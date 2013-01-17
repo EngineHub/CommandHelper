@@ -25,6 +25,56 @@ public class PluginMeta {
 	}
 	
 	@api
+	public static class fake_incoming_plugin_message extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			int offset = 0;
+			if(args.length == 3){
+				offset = 1;
+				p = Static.GetPlayer(args[0], t);
+			}
+			String channel = args[0 + offset].val();
+			CByteArray ba = Static.getByteArray(args[1 + offset], t);
+			Static.AssertPlayerNonNull(p, t);
+			meta.fakeIncomingMessage(p, channel, ba.asByteArrayCopy());
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "fake_incoming_plugin_message";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		public String docs() {
+			return "void {[player,] channel, message} Fakes an incoming plugin message from the player. Channel should be a string (the"
+					+ " channel name) and message should be a byte_array primitive. Depending on the plugin, these parameters"
+					+ " will vary. If message is null an empty byte_array is sent.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
 	public static class send_plugin_message extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
@@ -50,7 +100,7 @@ public class PluginMeta {
 			String channel = args[0 + offset].val();
 			CByteArray ba = Static.getByteArray(args[1 + offset], t);
 			Static.AssertPlayerNonNull(p, t);
-			meta.sendMessage(p, channel, ba.asByteArrayCopy());
+			p.sendPluginMessage(channel, ba.asByteArrayCopy());
 			return new CVoid(t);
 		}
 
@@ -59,7 +109,7 @@ public class PluginMeta {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2, 3};
+			return new Integer[]{2, 3};
 		}
 
 		public String docs() {

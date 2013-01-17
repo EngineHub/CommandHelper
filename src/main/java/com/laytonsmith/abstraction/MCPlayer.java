@@ -100,4 +100,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public void setSaturation(float s);
 
 	public void setBedSpawnLocation(MCLocation l);
+	
+	public void sendPluginMessage(String channel, byte[] message);
 }

@@ -7,6 +7,7 @@ import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInstrument;
 import com.laytonsmith.abstraction.enums.bukkit.BukkitMCInstrument;
+import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.Static;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetSocketAddress;
@@ -330,5 +331,9 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 
 	public MCEntity getVehicle() {
 		return new BukkitMCEntity(p.getVehicle());
+	}
+
+	public void sendPluginMessage(String channel, byte[] message) {
+		p.sendPluginMessage(CommandHelperPlugin.self, channel, message);
 	}
 }

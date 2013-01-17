@@ -70,13 +70,13 @@ public abstract class MCPluginMeta {
 	/**
 	 * Sends a message to the given player. If the channel specified is not opened,
 	 * it will be opened first.
-	 * @param player
+	 * @param from
 	 * @param channel
 	 * @param message 
 	 */
-	public final void sendMessage(MCPlayer player, String channel, byte[] message){
+	public final void fakeIncomingMessage(MCPlayer from, String channel, byte[] message){
 		openOutgoingChannel(channel);
-		sendIncomingMessage0(player, channel, message);
+		sendIncomingMessage0(from, channel, message);
 	}
 	
 	public abstract void closeIncomingChannel0(String channel);
