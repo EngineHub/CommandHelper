@@ -11,6 +11,7 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
 import org.bukkit.event.player.PlayerDropItemEvent;
@@ -48,6 +49,11 @@ public class BukkitEntityListener implements Listener{
     @EventHandler(priority=EventPriority.LOWEST)
     public void onTargetLiving(EntityTargetEvent event) {
         EventUtils.TriggerListener(Driver.TARGET_ENTITY, "target_player", new BukkitEntityEvents.BukkitMCTargetEvent(event));
+    }
+    
+    @EventHandler(priority=EventPriority.LOWEST)
+    public void onEntityDamage(EntityDamageEvent event) {
+    	EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", new BukkitEntityEvents.BukkitMCEntityDamageEvent(event));
     }
     
     @EventHandler(priority=EventPriority.LOWEST)
