@@ -4,19 +4,17 @@ import com.laytonsmith.PureUtilities.Sizes;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
-import java.nio.charset.Charset;
 import java.util.List;
 import java.util.SortedMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author lsmith
  */
-public class CByteArray extends Construct {
+public class CByteArray extends Construct implements Sizable {
 	
 	/**
 	 * Initial size of the ByteBuffer
@@ -27,11 +25,23 @@ public class CByteArray extends Construct {
 	 */
 	private static final int scaleMultiplier = 2;
 	
+	public static CByteArray wrap(byte[] b, Target t){
+		CByteArray ba = new CByteArray(t, 0);
+		ba.data = ByteBuffer.wrap(b);
+		return ba;
+	}
+	
 	private ByteBuffer data;
+	private int maxValue = 0;
+	private String value = null;
 	
 	public CByteArray(Target t){
+		this(t, initialSize);
+	}
+	
+	public CByteArray(Target t, int capacity){
 		super("", ConstructType.BYTE_ARRAY, t);
-		data = ByteBuffer.allocate(initialSize);
+		data = ByteBuffer.allocate(capacity);
 	}
 
 	@Override
@@ -40,13 +50,43 @@ public class CByteArray extends Construct {
 	}
 	
 	private void checkSize(int need){
+		//set our max position
+		maxValue = Math.max(maxValue, data.position() + need);
+		//Reallocate if needed
 		if(data.position() + need >= data.limit()){
-			//Reallocate
 			ByteBuffer temp = ByteBuffer.allocate(data.limit() * scaleMultiplier);
 			data.rewind();
 			temp.put(data);
 			data = temp;
+			value = null;
 		}
+	}
+
+	@Override
+	public String val() {
+		if(value == null){
+			int position = data.position();
+			data.rewind();
+			try {
+				value = new String(data.array(), "UTF-8");
+			} catch (UnsupportedEncodingException ex) {
+				throw new Error(ex);
+			}
+			data.position(position);
+		}
+		return value;
+	}
+	
+	public void rewind(){
+		data.rewind();
+	}
+	
+	public void putByte(byte b, Integer pos){
+		checkSize(Sizes.sizeof(byte.class));
+		if(pos != null){
+			data.position(pos);
+		}
+		data.put(b);
 	}
 	
 	public void putChar(char c, Integer pos){
@@ -103,6 +143,14 @@ public class CByteArray extends Construct {
 		}
 	}
 	
+	public byte getByte(Integer pos){
+		if(pos == null){
+			return data.get();
+		} else {
+			return data.get(pos);
+		}
+	}
+	
 	public char getChar(Integer pos){
 		if(pos == null){
 			return data.getChar();
@@ -149,6 +197,36 @@ public class CByteArray extends Construct {
 		} else {
 			return data.getShort(pos);
 		}
+	}
+	
+	public void putBytes(CByteArray d, Integer pos){
+		checkSize((int)d.size());
+		if(pos == null){
+			data.position(pos);
+		}
+		data.put(d.data);
+	}
+	
+	/**
+	 * Returns a byte array, of the given size, read from pos, or
+	 * the current position, if null.
+	 * @param size
+	 * @param pos
+	 * @return 
+	 */
+	public CByteArray getBytes(int size, Integer pos){
+		CByteArray ba = new CByteArray(this.getTarget(), 0);
+		byte[] d = new byte[size];
+		if(pos != null){
+			data.position(pos);
+		}
+		data.get(d);
+		ba.data = ByteBuffer.wrap(d);
+		return ba;
+	}
+	
+	public long size(){
+		return data.limit();
 	}
 	
 	//Supplemental methods
@@ -203,10 +281,20 @@ public class CByteArray extends Construct {
 	 * @return 
 	 */
 	public CArray asArray(Target t){
-		byte[] org = data.array();
-		byte[] src = new byte[org.length];
-		System.arraycopy(org, 0, src, 0, org.length);
-		return new CArrayByteBacking(src, t);
+		return new CArrayByteBacking(asByteArrayCopy(), t);
+	}
+	
+	/**
+	 * Returns a copy of this CByteArray, as a Java byte array, at this
+	 * point in time. This is meant to be used as the final step before sending the
+	 * data off to an external process, or when interfacing mscript with other POJO code.
+	 * @return 
+	 */
+	public byte[] asByteArrayCopy(){
+		byte[] src = data.array();
+		byte[] dest = new byte[src.length];
+		System.arraycopy(src, 0, dest, 0, maxValue);
+		return dest;
 	}
 	
 	private static class CArrayByteBacking extends CArray {

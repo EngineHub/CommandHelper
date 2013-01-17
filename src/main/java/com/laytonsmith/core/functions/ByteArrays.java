@@ -1,0 +1,484 @@
+package com.laytonsmith.core.functions;
+
+import com.laytonsmith.annotations.api;
+import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.Static;
+import com.laytonsmith.core.constructs.CByteArray;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
+/**
+ * 
+ * @author lsmith
+ */
+public class ByteArrays {
+	public static String docs(){
+		return "This class contains all the methods needed to manipulate a byte array primitive. Since"
+				+ " byte arrays would be very inefficient to implement using a normal array, this data type"
+				+ " allows for more efficient operations, while still allowing for low level data access."
+				+ " Most data transferred within scripts is higher level, and does not require access"
+				+ " to a byte array, however, code that interacts with external processes may require"
+				+ " use of these functions to properly manipulate the data. Note that all the methods"
+				+ " deal with low level types, so the following definitions apply: a byte is 8 bits,"
+				+ " a short is 16 bits, an int is 32 bits, a long is 64 bits. UTF-8 strings are supported"
+				+ " directly. The byte array is automatically resized as needed.";
+	}
+	
+	@api
+	public static class byte_array extends ba {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			return new CByteArray(t);
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "byte_array {} Returns a new byte array primitive, which can be operated on with the ba_ series of functions.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_as_array extends ba {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = Static.getByteArray(args[0], t);
+			return ba.asArray(t);
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "array {byte_array} Returns a new read only copy of the underlying byte array. This array is much more efficient"
+					+ " than if the array were made manually, however, it is read only. If you need to manipulate the array's"
+					+ " contents, then you can clone the array, however, the returned array (and any clones) cannot be automatically"
+					+ " interfaced with the byte array primitives. This operation is discouraged, because normal arrays are very"
+					+ " inefficient for dealing with low level bit data.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_rewind extends ba {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			ba.rewind();
+			return new CVoid(t);
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {byte_array} Rewinds the byte array marker to 0.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_get_byte extends ba_get {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			Integer pos = get_getPos(args, t);
+			return new CInt(ba.getByte(pos), t);
+		}
+
+		public String docs() {
+			return "int {byte_array, [pos]} Returns an int, read in as an 8 bit byte, from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_get_char extends ba_get {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			Integer pos = get_getPos(args, t);
+			return new CString(ba.getChar(pos), t);
+		}
+
+		public String docs() {
+			return "string {byte_array, [pos]} Returns a one character string, read in as an 32 bit char, from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_get_short extends ba_get {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			Integer pos = get_getPos(args, t);
+			return new CInt(ba.getShort(pos), t);
+		}
+
+		public String docs() {
+			return "int {byte_array, [pos]} Returns an int, read in as a 16 bit short, from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+			
+	}
+	
+	@api
+	public static class ba_get_int extends ba_get {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			Integer pos = get_getPos(args, t);
+			return new CInt(ba.getInt(pos), t);
+		}
+
+		public String docs() {
+			return "int {byte_array, [pos]} Returns an int, read in as a 32 bit int, from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_get_long extends ba_get {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			Integer pos = get_getPos(args, t);
+			return new CInt(ba.getLong(pos), t);
+		}
+
+		public String docs() {
+			return "int {byte_array, [pos]} Returns an int, read in as a 64 bit long, from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_get_float extends ba_get {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			Integer pos = get_getPos(args, t);
+			return new CDouble(ba.getFloat(pos), t);
+		}
+
+		public String docs() {
+			return "double {byte_array, [pos]} Returns a double, read in as a 32 bit float, from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_get_double extends ba_get {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			Integer pos = get_getPos(args, t);
+			return new CDouble(ba.getDouble(pos), t);
+		}
+
+		public String docs() {
+			return "double {byte_array, [pos]} Returns a double, read in as a 64 bit double, from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_get_bytes extends ba_get {
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			int size = Static.getInt32(args[1], t);
+			Integer pos = null;
+			if(args.length == 3){
+				pos = Static.getInt32(args[2], t);
+			}
+			return ba.getBytes(size, pos);
+		}
+
+		public String docs() {
+			return "byte_array {byte_array, length, [pos]} Returns a new byte_array primitive, starting from pos (or wherever the marker is"
+					+ " by default) to length.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_get_string extends ba_get {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			Integer pos = get_getPos(args, t);
+			return new CString(ba.readUTF8String(pos), t);
+		}
+
+		public String docs() {
+			return "string {byte_array, [pos]} Returns a UTF-8 encoded string, from the given position, or wherever the"
+					+ " marker is currently at by default. The string is assumed to have encoded the length of the string"
+					+ " with a 32 bit integer, then the string bytes. (This will be the case is the byte_array was encoded"
+					+ " with ba_set_string.)";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_byte extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			byte b = Static.getInt8(args[1], t);
+			Integer pos = set_getPos(args, t);
+			ba.putByte(b, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 8 bit byte, starting from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_char extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			String b = args[1].val();
+			char c = '\0';
+			if(b.length() > 0){
+				c = b.charAt(0);
+			}
+			Integer pos = set_getPos(args, t);
+			ba.putChar(c, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {byte_array, string, [pos]} Writes the first character of the string, interpreted as an 32 bit char, starting from the given position, or wherever the"
+					+ " marker is currently at by default. If the string is empty, a \\0 is written instead.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_short extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			short b = Static.getInt16(args[1], t);
+			Integer pos = set_getPos(args, t);
+			ba.putShort(b, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 16 bit short, starting from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_int extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			int b = Static.getInt32(args[1], t);
+			Integer pos = set_getPos(args, t);
+			ba.putInt(b, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 32 bit int, starting from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_long extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			long b = Static.getInt(args[1], t);
+			Integer pos = set_getPos(args, t);
+			ba.putLong(b, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 64 bit, starting from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_float extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			float b = Static.getDouble32(args[1], t);
+			Integer pos = set_getPos(args, t);
+			ba.putFloat(b, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {byte_array, double, [pos]} Writes a double, interpreted as a 32 bit float, starting from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_double extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			double b = Static.getDouble(args[1], t);
+			Integer pos = set_getPos(args, t);
+			ba.putDouble(b, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {byte_array, double, [pos]} Writes a double, interpreted as a 64 bit double, starting from the given position, or wherever the"
+					+ " marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_bytes extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray dest = getBA(args, t);
+			CByteArray src = Static.getByteArray(args[1], t);
+			Integer pos = set_getPos(args, t);
+			dest.putBytes(src, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {destination_byte_array, source_byte_array, [pos]} Writes the contents of the source_byte_array into this byte array,"
+					+ " starting at pos, or wherever the marker is currently at by default.";
+		}
+		
+	}
+	
+	@api
+	public static class ba_put_string extends ba_put {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CByteArray ba = getBA(args, t);
+			String s = args[1].val();
+			Integer pos = set_getPos(args, t);
+			ba.writeUTF8String(s, pos);
+			return new CVoid(t);
+		}
+
+		public String docs() {
+			return "void {byte_array, string, [pos]} Writes the length of the string to the byte array, (interpreted as UTF-8),"
+					+ " then writes the UTF-8 string itself. If an external application requires the string to be serialized"
+					+ " in a different manner, then use the string-byte_array conversion methods in StringHandling, however"
+					+ " strings written in this manner are compatible with ba_get_string.";
+		}
+		
+	}
+	
+	private static CByteArray getBA(Construct [] args, Target t){
+		return Static.getByteArray(args[0], t);
+	}
+	
+	private static Integer get_getPos(Construct [] args, Target t){
+		if(args.length == 2){
+			return Static.getInt32(args[1], t);
+		} else {
+			return null;
+		}
+	}
+	
+	private static Integer set_getPos(Construct [] args, Target t){
+		if(args.length == 3){
+			return Static.getInt32(args[2], t);
+		} else {
+			return null;
+		}
+	}
+	
+	private static abstract class ba extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException};
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public String getName() {
+			return getClass().getSimpleName();
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+	}
+	
+	public static abstract class ba_put extends ba {
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+		
+	}
+	
+	public static abstract class ba_get extends ba {
+
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.RangeException};
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+		
+	}
+	
+}

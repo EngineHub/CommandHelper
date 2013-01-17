@@ -13,6 +13,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.lang.reflect.Array;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
@@ -576,8 +577,8 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				return new CInt(((CArray) args[0]).size(), t);
+			if (args[0] instanceof Sizable) {
+				return new CInt(((Sizable) args[0]).size(), t);
 			} else {
 				return new CInt(args[0].val().length(), t);
 			}

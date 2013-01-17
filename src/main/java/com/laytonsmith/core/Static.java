@@ -114,6 +114,16 @@ public final class Static {
                     ExceptionType.CastException, t);
         }
     }
+	
+	public static float getDouble32(Construct c, Target t){
+		double delta = 0.000000001; //Eight places should be enough, right?
+		double l = getDouble(c, t);
+		float f = (float)l;
+		if(Math.abs(f - l) > delta){
+			throw new Exceptions.RangeException("Expecting a 32 bit float, but a larger value was found: " + l, t);
+		}
+		return f;
+	}
 
     /**
      * Returns an integer from any given construct.
@@ -220,6 +230,16 @@ public final class Static {
         }
         return b;
     }
+	
+	public static CByteArray getByteArray(Construct c, Target t){
+		if(c instanceof CByteArray){
+			return (CByteArray)c;
+		} else if(c instanceof CNull){
+			return new CByteArray(t, 0);
+		} else {
+			throw new Exceptions.CastException("Expecting byte array, but found " + c.getCType() + " instead.", t);
+		}
+	}
 
     /**
      * Returns true if any of the constructs are a CDouble, false otherwise.

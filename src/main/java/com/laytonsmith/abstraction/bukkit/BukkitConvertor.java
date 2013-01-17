@@ -35,6 +35,8 @@ import org.bukkit.material.MaterialData;
  */
 @convert(type=Implementation.Type.BUKKIT)
 public class BukkitConvertor extends AbstractConvertor {
+	
+	private static BukkitMCPluginMeta pluginMeta = null;
 
     public MCLocation GetLocation(MCWorld w, double x, double y, double z, float yaw, float pitch) {
         World w2 = null;
@@ -338,6 +340,19 @@ public class BukkitConvertor extends AbstractConvertor {
 
 	public MCFirework GetFirework() {
 		return new BukkitMCFirework();
+	}
+
+	public MCPluginMeta GetPluginMeta() {
+		if(pluginMeta == null){
+			pluginMeta = new BukkitMCPluginMeta(CommandHelperPlugin.self);
+			addShutdownHook(new Runnable() {
+
+				public void run() {
+					pluginMeta = null;
+				}
+			});
+		}
+		return pluginMeta;
 	}
 
 }
