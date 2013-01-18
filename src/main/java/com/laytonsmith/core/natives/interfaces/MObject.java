@@ -21,7 +21,7 @@ import java.util.Map;
  * <pre>
  * public Integer x;
  * ...
- * public void setX(Integer x, Target t){
+ * public void setX(Construct x, Target t){
  *		super.set("x", x, t);
  * }
  * ...
@@ -46,7 +46,7 @@ import java.util.Map;
  */
 public class MObject {
 	
-	public static <T extends MObject> T Construct(Class<T> type, CArray data){
+	public static <T extends MObject> T Construct(Class<T> type, CArray data, Target t){
 		T instance;
 		try {
 			instance = type.newInstance();
@@ -55,7 +55,10 @@ public class MObject {
 		} catch (IllegalAccessException ex) {
 			throw new RuntimeException(type.getName() + "'s default constructor is not public.");
 		}
-		return null; //TODO
+		for(String key : data.keySet()){
+			instance.set(key, data.get(key), t);
+		}
+		return instance;
 	}
 	
 	/**
@@ -64,8 +67,8 @@ public class MObject {
 	 * @param data
 	 * @return 
 	 */
-	public static MObject Construct(CArray data){
-		return Construct(MObject.class, data);
+	public static MObject Construct(CArray data, Target t){
+		return Construct(MObject.class, data, t);
 	}
 	
 	private Map<String, Construct> fields = new HashMap<String, Construct>();
@@ -106,7 +109,7 @@ public class MObject {
 				//This is it, so let's set it, (converting if necessary) then break
 				Object val;
 				Class fType = f.getType();
-				if(value.isNull()){ //TODO
+				if(value.isNull()){
 					//Easy case
 					val = null;
 				} else {
@@ -152,7 +155,7 @@ public class MObject {
 						val = value;
 					} else if(MObject.class.isAssignableFrom(fType)){
 						CArray ca = Static.getArray(value, t);
-						val = MObject.Construct(fType, ca);
+						val = MObject.Construct(fType, ca, t);
 					} else {
 						//Programming error.
 						throw new Error(this.getClass().getName() + " contained the public field " 
@@ -162,6 +165,7 @@ public class MObject {
 				try {
 					//val is now set correctly, guaranteed.
 					f.set(this, val);
+					return;
 					//These exceptions cannot happen.
 				} catch (IllegalArgumentException ex) {
 					throw new Error(ex);
@@ -170,16 +174,26 @@ public class MObject {
 				}
 			}
 		}
-		//Always put the dynamic parameter, regardless
+		//Put the dynamic parameter in, it wasn't found
 		fields.put(field, value);
 	}
 	
 	/**
-	 * Retrieves a Construct from the 
+	 * Retrieves a Construct from the underlying object, or
+	 * a null construct if it doesn't exist. 
 	 * @param field
 	 * @return 
 	 */
 	public Construct get(String field){
-		return null; //TODO
+		//TODO: This won't work. It needs to scan the object first, THEN look for
+		//the parameter
+		if(alias(field) != null){
+			field = alias(field);
+		}
+		if(fields.containsKey(field)){
+			return fields.get(field);
+		} else {
+			return Construct.GetNullConstruct(Target.UNKNOWN);
+		}
 	}
 }
