@@ -201,7 +201,7 @@ public class CByteArray extends Construct implements Sizable {
 	
 	public void putBytes(CByteArray d, Integer pos){
 		checkSize((int)d.size());
-		if(pos == null){
+		if(pos != null){
 			data.position(pos);
 		}
 		data.put(d.data);
