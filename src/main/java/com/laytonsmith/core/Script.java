@@ -7,13 +7,11 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.compiler.TokenStream;
 import com.laytonsmith.core.constructs.*;
-import com.laytonsmith.core.constructs.Construct.ConstructType;
 import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.*;
-import com.laytonsmith.core.functions.DataHandling.assign;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
@@ -273,7 +271,7 @@ public class Script {
                     ca[i] = (Construct) a[i];
                     //CArray, CBoolean, CDouble, CInt, CNull, CString, CVoid, CEntry, CLabel (only to sconcat).
                     if (!(ca[i] instanceof CArray || ca[i] instanceof CBoolean || ca[i] instanceof CDouble
-                            || ca[i] instanceof CInt || ca[i] instanceof CNull
+                            || ca[i] instanceof CInt
                             || ca[i] instanceof CString || ca[i] instanceof CVoid 
                             || ca[i] instanceof IVariable || ca[i] instanceof CEntry || ca[i] instanceof CLabel)
                             && (!f.getName().equals("__autoconcat__") && (ca[i] instanceof CLabel))) {
@@ -627,7 +625,7 @@ public class Script {
         for (int i = 0; i < left.size(); i++) {
             Token t = left.get(i);
             if (t.value.startsWith("/")) {
-                cleft.add(new Command(t.val(), t.target));
+                cleft.add(new CString(t.val(), t.target));
             } else if (t.type == Token.TType.VARIABLE) {
                 cleft.add(new Variable(t.val(), null, t.target));
             } else if (t.type.equals(TType.FINAL_VAR)) {

@@ -17,12 +17,12 @@ public class CFunction extends Construct {
 	private transient Function function;
 
     public CFunction(String name, Target t) {
-        super(name, ConstructType.FUNCTION, t);
+        super(name, t);
     }
 
     @Override
     public String toString() {
-        return getValue();
+        return val();
     }
     
     @Override
@@ -63,6 +63,10 @@ public class CFunction extends Construct {
 		//For now, just see if it starts with _. Later, this
 		//will be made a bit more robust.
 		return val().startsWith("_");
+	}
+
+	public String typeName() {
+		return "$function";
 	}
 	
 }

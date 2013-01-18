@@ -14,7 +14,6 @@ import com.laytonsmith.core.functions.FunctionList;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 
@@ -465,31 +464,32 @@ public class CompilerFunctions {
 			if (list.size() == 1) {
 				return list.get(0);
 			} else {
-				for (int i = 0; i < list.size(); i++) {
-					if (list.get(i).getData().wasIdentifier()){//.getCType() == Construct.ConstructType.IDENTIFIER) {
-						if (i == 0) {
-							//Yup, it's an identifier
-							CFunction identifier = new CFunction(list.get(i).getData().val(), list.get(i).getTarget());
-							list.remove(0);
-							ParseTree child = list.get(0);
-							if (list.size() > 1) {
-								child = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), child.getFileOptions());
-								child.setChildren(list);
-							}
-							try {
-								Function f = (Function) FunctionList.getFunction(identifier);
-								ParseTree node = new ParseTree(f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
-								return node;
-							} catch (Exception e) {
-								throw new Error("Unknown function " + identifier.val() + "?");
-							}
-						} else {
-							//Hmm, this is weird. I'm not sure what condition this can happen in
-							throw new ConfigCompileException("Unexpected IDENTIFIER? O.o Please report a bug,"
-									+ " and include the script you used to get this error.", Target.UNKNOWN);
-						}
-					}
-				}
+				//TODO: Don't think this block is needed anymore?
+//				for (int i = 0; i < list.size(); i++) {
+//					if (list.get(i).getData().wasIdentifier()){//.getCType() == Construct.ConstructType.IDENTIFIER) {
+//						if (i == 0) {
+//							//Yup, it's an identifier
+//							CFunction identifier = new CFunction(list.get(i).getData().val(), list.get(i).getTarget());
+//							list.remove(0);
+//							ParseTree child = list.get(0);
+//							if (list.size() > 1) {
+//								child = new ParseTree(new CFunction("sconcat", Target.UNKNOWN), child.getFileOptions());
+//								child.setChildren(list);
+//							}
+//							try {
+//								Function f = (Function) FunctionList.getFunction(identifier);
+//								ParseTree node = new ParseTree(f.execs(identifier.getTarget(), null, null, child), child.getFileOptions());
+//								return node;
+//							} catch (Exception e) {
+//								throw new Error("Unknown function " + identifier.val() + "?");
+//							}
+//						} else {
+//							//Hmm, this is weird. I'm not sure what condition this can happen in
+//							throw new ConfigCompileException("Unexpected IDENTIFIER? O.o Please report a bug,"
+//									+ " and include the script you used to get this error.", Target.UNKNOWN);
+//						}
+//					}
+//				}
 				ParseTree tree;
 				FileOptions options = new FileOptions(new EnumMap<FileOptions.Directive, String>(FileOptions.Directive.class), Target.UNKNOWN);
 				if (!list.isEmpty()) {

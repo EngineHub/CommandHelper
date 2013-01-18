@@ -100,7 +100,7 @@ public class TestStatic {
         assertTrue(Static.resolveConstruct("1", Target.UNKNOWN) instanceof CInt);
         assertTrue(Static.resolveConstruct("true", Target.UNKNOWN) instanceof CBoolean);
         assertTrue(Static.resolveConstruct("false", Target.UNKNOWN) instanceof CBoolean);
-        assertTrue(Static.resolveConstruct("null", Target.UNKNOWN) instanceof CNull);
+        assertTrue(Static.resolveConstruct("null", Target.UNKNOWN).isNull());
         assertTrue(Static.resolveConstruct("1.1", Target.UNKNOWN) instanceof CDouble);
         assertTrue(Static.resolveConstruct("string", Target.UNKNOWN) instanceof CString);
     }

@@ -450,7 +450,7 @@ public class BlockEvents {
                     return false;
                 }
 
-                if (value instanceof CNull) {
+                if (value.isNull()) {
                     sce.setLine(index, "");
                     return "".equals(sce.getLine(index).toString());
                 } else {

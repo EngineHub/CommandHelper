@@ -99,11 +99,11 @@ public class Minecraft {
 				if (DataValueLookup.containsKey(changed)) {
 					String split[] = DataValueLookup.get(changed).toString().split(":");
 					if (split[1].equals("0")) {
-						return new CInt(split[0], t);
+						return new CInt(Long.parseLong(split[0]), t);
 					}
 					return new CString(split[0] + ":" + split[1], t);
 				}
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			}
 		}
 
@@ -195,7 +195,7 @@ public class Minecraft {
 				try {
 					return new CString(StaticLayer.LookupMaterialName(i), t);
 				} catch (NullPointerException e) {
-					return new CNull(t);
+					return Construct.GetNullConstruct(t);
 				}
 			}
 		}
@@ -380,7 +380,7 @@ public class Minecraft {
 			String player = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getName();
 			Construct entityID = null;
 			if (args.length == 2) {
-				if (args[0] instanceof CNull) {
+				if (args[0].isNull()) {
 					player = null;
 				} else {
 					player = args[0].val();
@@ -443,13 +443,13 @@ public class Minecraft {
 			int id = Static.getInt32(args[0], t);
 			MCEntity e = Static.getEntity(id, t);
 			if (e == null) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else if (e instanceof MCTameable) {
 				MCAnimalTamer at = ((MCTameable) e).getOwner();
 				if (null != at) {
 					return new CString(at.getName(), t);
 				} else {
-					return new CNull(t);
+					return Construct.GetNullConstruct(t);
 				}
 			} else {
 				throw new ConfigRuntimeException("The specified entity is not tameable", ExceptionType.UntameableMobException, t);

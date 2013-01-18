@@ -8,7 +8,6 @@ import com.laytonsmith.core.constructs.CFunction;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CKeyword;
 import com.laytonsmith.core.constructs.CLabel;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CSymbol;
 import com.laytonsmith.core.constructs.Construct;
@@ -265,7 +264,7 @@ class CompilerObject {
 				} else if (t.val().equals("false")) {
 					return new CBoolean(false, t.getTarget());
 				} else if (t.val().equals("null")) {
-					return new CNull(t.getTarget());
+					return Construct.GetNullConstruct(t.getTarget());
 				} else if (keywords.contains(t.val())) {
 					return new CKeyword(t.val(), t.getTarget());
 				} else {
@@ -276,9 +275,9 @@ class CompilerObject {
 					}
 				}
 			case DOUBLE:
-				return new CDouble(t.val(), t.getTarget());
+				return new CDouble(Double.parseDouble(t.val()), t.getTarget());
 			case INTEGER:
-				return new CInt(t.val(), t.getTarget());
+				return new CInt(Long.parseLong(t.val()), t.getTarget());
 			case VARIABLE:
 				return new Variable(t.val(), null, t.getTarget());
 			default:

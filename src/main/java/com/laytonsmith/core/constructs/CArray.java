@@ -75,7 +75,7 @@ public class CArray extends Construct implements ArrayAccess{
 	}
 
     public CArray(Target t,  Construct... items) {
-        super("{}", ConstructType.ARRAY, t);
+        super(null, t);
         if(items != null){
             for(Construct item : items){
                 if(item instanceof CEntry){
@@ -378,7 +378,7 @@ public class CArray extends Construct implements ArrayAccess{
 	}		
 
     @Override
-    public String val() {
+    public String toString() {
 		if(valueDirty){
 			StringBuilder b = new StringBuilder();
 			b.append("{");
@@ -411,11 +411,6 @@ public class CArray extends Construct implements ArrayAccess{
         return mutVal;
     }
 
-    @Override
-    public String toString() {
-        return val();
-    }
-
     public long size() {
         if(associative_mode){
             return associative_array.size();
@@ -446,7 +441,7 @@ public class CArray extends Construct implements ArrayAccess{
             throw new ConfigRuntimeException("Arrays cannot be used as the key in an associative array", ExceptionType.CastException, c.getTarget());
         } else if(c instanceof CString || c instanceof CInt){
             return c.val();
-        } else if(c instanceof CNull){
+        } else if(c.isNull()){
             return "";
         } else if(c instanceof CBoolean){
             if(((CBoolean)c).getBoolean()){
@@ -554,6 +549,10 @@ public class CArray extends Construct implements ArrayAccess{
     public Construct slice(int begin, int end, Target t) {
         return new ArrayHandling.array_get().exec(t, null, new CSlice(begin, end, t));
     }
+
+	public String typeName() {
+		return "array";
+	}
     
     public enum SortType{
         /**
@@ -600,15 +599,15 @@ public class CArray extends Construct implements ArrayAccess{
                         throw new ConfigRuntimeException("Cannot sort an array of arrays.", ExceptionType.CastException, CArray.this.getTarget());
                     }
                     if(!(c instanceof CBoolean || c instanceof CString || c instanceof CInt || 
-                            c instanceof CDouble || c instanceof CNull)){
+                            c instanceof CDouble || c.isNull())){
                         throw new ConfigRuntimeException("Unsupported type being sorted: " + c.getClass().getSimpleName(), CArray.this.getTarget());
                     }
                 }
-                if(o1 instanceof CNull || o2 instanceof CNull){
-                    if(o1 instanceof CNull && o2 instanceof CNull){
+                if(o1.isNull() || o2.isNull()){
+                    if(o1.isNull() && o2.isNull()){
                         return 0;
-                    } else if(o1 instanceof CNull){
-                        return "".compareTo(o2.getValue());
+                    } else if(o1.isNull()){
+                        return "".compareTo(o2.val());
                     } else {
                         return o1.val().compareTo("");
                     }

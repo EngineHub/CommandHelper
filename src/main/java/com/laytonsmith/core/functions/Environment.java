@@ -699,7 +699,7 @@ public class Environment {
 				safe = Static.getBoolean(args[2]);
 			}
 			if (args.length >= 2) {
-				if (!(args[1] instanceof CNull)) {
+				if (!(args[1].isNull())) {
 					size = Static.getInt(args[1], t);
 				}
 			}

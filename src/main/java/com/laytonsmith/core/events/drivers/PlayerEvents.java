@@ -471,7 +471,7 @@ public class PlayerEvents {
             if(event instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent pje = (MCPlayerJoinEvent)event;
                 if(key.equals("join_message") || key.equals("message")){
-                    if(value instanceof CNull){
+                    if(value.isNull()){
                         pje.setJoinMessage(null);
                         return pje.getJoinMessage() == null;
                     } else {
@@ -784,7 +784,7 @@ public class PlayerEvents {
                     return true;
                 }
                 if(key.equals("drops")){
-                    if(value instanceof CNull){
+                    if(value.isNull()){
                         value = new CArray(Target.UNKNOWN);
                     }
                     if(!(value instanceof CArray)){

@@ -75,7 +75,7 @@ public class Regex {
 
                 for(int i = 1; i <= m.groupCount(); i++){
                     if(m.group(i) == null){
-                        ret.push(new CNull(t));
+                        ret.push(Construct.GetNullConstruct(t));
                     } else {
                         ret.push(Static.resolveConstruct(m.group(i), t));
                     }

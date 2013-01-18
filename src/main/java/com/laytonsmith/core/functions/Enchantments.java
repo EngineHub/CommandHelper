@@ -210,8 +210,8 @@ public class Enchantments {
 				m = Static.GetPlayer(args[0].val(), t);
 				offset = 0;
 			}
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
-//            if (args[1 - offset] instanceof CNull) {
+			MCItemStack is = m.getItemAt(args[1 - offset].isNull()?null:Static.getInt32(args[1 - offset], t));
+//            if (args[1 - offset].isNull()) {
 //                is = m.getItemInHand();
 //            } else {
 //                int slot = Static.getInt32(args[1 - offset]);
@@ -292,8 +292,8 @@ public class Enchantments {
 				offset = 0;
 			}
 			Static.AssertPlayerNonNull(m, t);
-			MCItemStack is = m.getItemAt(args[1 - offset] instanceof CNull?null:Static.getInt32(args[1 - offset], t));
-//            if (args[1 - offset] instanceof CNull) {
+			MCItemStack is = m.getItemAt(args[1 - offset].isNull()?null:Static.getInt32(args[1 - offset], t));
+//            if (args[1 - offset].isNull()) {
 //                is = m.getItemInHand();
 //            } else {
 //                int slot = Static.getInt32(args[1 - offset]);
@@ -301,9 +301,9 @@ public class Enchantments {
 //            }
 
 			CArray enchantArray = new CArray(t);
-			if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset] instanceof CNull)) {
+			if (!(args[2 - offset] instanceof CArray) && !(args[2 - offset].isNull())) {
 				enchantArray.push(args[2 - offset]);
-			} else if (args[2 - offset] instanceof CNull) {
+			} else if (args[2 - offset].isNull()) {
 				for (MCEnchantment e : is.getEnchantments().keySet()) {
 					is.removeEnchantment(e);
 				}
@@ -359,8 +359,8 @@ public class Enchantments {
 			} else {
 				slot = args[0];
 			}
-			MCItemStack is = m.getItemAt(slot instanceof CNull?null:Static.getInt32(slot, t));
-//            if(slot instanceof CNull){
+			MCItemStack is = m.getItemAt(slot.isNull()?null:Static.getInt32(slot, t));
+//            if(slot.isNull()){
 //                is = m.getItemInHand();
 //            } else {
 //                int slotID = Static.getInt32(slot);

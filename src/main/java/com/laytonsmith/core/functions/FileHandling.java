@@ -14,7 +14,6 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -153,13 +152,13 @@ public class FileHandling {
 					}
 					final Construct cret;
 					if(returnString == null){
-						cret = new CNull(t);
+						cret = Construct.GetNullConstruct(t);
 					} else {
 						cret = new CString(returnString, t);
 					}
 					final Construct cex;
 					if(exception == null){
-						cex = new CNull(t);
+						cex = Construct.GetNullConstruct(t);
 					} else {
 						cex = ObjectGenerator.GetGenerator().exception(exception, t);
 					}

@@ -476,7 +476,7 @@ public class Echoes {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            if(args[0] instanceof CNull){
+            if(args[0].isNull()){
                 throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, t);
             }
             final MCServer server = Static.getServer();

@@ -104,7 +104,7 @@ public abstract class AbstractFunction implements Function {
 				//The toString of a closure is too long, so let's not output them either.
 				b.append("<closureNotShown>");
 			} else if (ccc instanceof CString) {
-				b.append("'").append(ccc.val().replace("\\", "\\\\").replace("'", "\\'")).append("'");
+				b.append("'").append(ccc.toString().replace("\\", "\\\\").replace("'", "\\'")).append("'");
 			} else if (ccc instanceof IVariable) {
 				b.append(((IVariable) ccc).getName());
 			} else {

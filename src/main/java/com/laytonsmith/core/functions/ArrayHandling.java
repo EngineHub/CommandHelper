@@ -181,10 +181,10 @@ public class ArrayHandling {
 					try {
 						//Convert negative indexes 
 						if (start < 0) {
-							start = aa.val().length() + start;
+							start = aa.toString().length() + start;
 						}
 						if (finish < 0) {
-							finish = aa.val().length() + finish;
+							finish = aa.toString().length() + finish;
 						}
 						CArray na = new CArray(t);
 						if (finish < start) {
@@ -192,7 +192,7 @@ public class ArrayHandling {
 							return new CString("", t);
 						}
 						StringBuilder b = new StringBuilder();
-						String val = aa.val();
+						String val = aa.toString();
 						for (long i = start; i <= finish; i++) {
 							try{
 							b.append(val.charAt((int) i));
@@ -604,7 +604,7 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray && args[1] instanceof CInt) {
 				CArray original = (CArray) args[0];
 				int size = (int) ((CInt) args[1]).getInt();
-				Construct fill = new CNull(t);
+				Construct fill = Construct.GetNullConstruct(t);
 				if (args.length == 3) {
 					fill = args[2];
 				}
@@ -1316,7 +1316,7 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray ca = (CArray)new array_indexes().exec(t, environment, args);
 			if(ca.isEmpty()){
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else {
 				return ca.get(0);
 			}

@@ -96,20 +96,20 @@ public class EventBinding {
 			ParseTree tree = nodes[nodes.length - 1];
 
 			//Check to see if our arguments are correct
-			if (!(options instanceof CNull || options instanceof CArray)) {
+			if (!(options.isNull() || options instanceof CArray)) {
 				throw new ConfigRuntimeException("The options must be an array or null", ExceptionType.CastException, t);
 			}
-			if (!(prefilter instanceof CNull || prefilter instanceof CArray)) {
+			if (!(prefilter.isNull() || prefilter instanceof CArray)) {
 				throw new ConfigRuntimeException("The prefilters must be an array or null", ExceptionType.CastException, t);
 			}
 			if (!(event_obj instanceof IVariable)) {
 				throw new ConfigRuntimeException("The event object must be an IVariable", ExceptionType.CastException, t);
 			}
 			CString id;
-			if (options instanceof CNull) {
+			if (options.isNull()) {
 				options = null;
 			}
-			if (prefilter instanceof CNull) {
+			if (prefilter.isNull()) {
 				prefilter = null;
 			}
 			try {
@@ -349,7 +349,7 @@ public class EventBinding {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			CArray obj = null;
-			if (args[1] instanceof CNull) {
+			if (args[1].isNull()) {
 				obj = new CArray(t);
 			} else if (args[1] instanceof CArray) {
 				obj = (CArray) args[1];

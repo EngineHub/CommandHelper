@@ -3,33 +3,18 @@
 
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-
 /**
  *
  * @author layton
  */
 public class CInt extends Construct implements Cloneable{
     
-    public static final long serialVersionUID = 1L;
-    final long val;
-    public CInt(String value, Target t){
-        super(value, ConstructType.INT, t);
-        try{
-            val = Long.parseLong(value);
-        } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not parse " + value + " as an integer", ExceptionType.FormatException, t);
-        }
-    }
-    
     public CInt(long value, Target t){
-        super(Long.toString(value), ConstructType.INT, t);
-        val = value;
+        super(Long.toString(value), t);
     }
 
     public long getInt(){
-        return val;
+        return (Long)value();
     }
     
     @Override
@@ -41,5 +26,9 @@ public class CInt extends Construct implements Cloneable{
     public boolean isDynamic() {
         return false;
     }
+
+	public String typeName() {
+		return "int";
+	}
 
 }

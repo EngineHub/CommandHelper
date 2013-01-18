@@ -20,7 +20,7 @@ public class ProcedureDefinition extends Construct{
 	List<ParseTree> varDefaults;
 	ParseTree code;	
 	public ProcedureDefinition(String name, DocComment comment, List<String> varNames, List<ParseTree> varDefaults, ParseTree code, Target target){
-		super(name, Construct.ConstructType.FUNCTION, target);
+		super(name, target);
 	}
 
 	public boolean isDynamic() {
@@ -35,5 +35,9 @@ public class ProcedureDefinition extends Construct{
 			ret = false;
 		}
 		return ret;
+	}
+
+	public String typeName() {
+		return "$proc";
 	}
 }

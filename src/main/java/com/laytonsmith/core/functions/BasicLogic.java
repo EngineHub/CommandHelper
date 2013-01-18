@@ -1,10 +1,10 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.compiler.Braceable;
-import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
-import com.laytonsmith.core.compiler.FileOptions;
+import com.laytonsmith.core.compiler.Braceable;
+import com.laytonsmith.core.compiler.CodeBranch;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
@@ -13,10 +13,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import com.laytonsmith.core.compiler.CodeBranch;
-import java.util.ArrayList;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -116,7 +113,7 @@ public class BasicLogic {
 			boolean allowOverloading = false;
 			for (ParseTree arg : args) {
 				//If any are CIdentifiers, forward this to ifelse
-				if (arg.getData().wasIdentifier()) {
+				if (arg.getData() instanceof CBrace) {
 					allowOverloading = true;
 					break;
 				}
@@ -263,7 +260,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull(t);
+			return Construct.GetNullConstruct(t);
 		}
 
 		@Override
@@ -415,7 +412,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull(t);
+			return Construct.GetNullConstruct(t);
 		}
 
 		@Override
@@ -1603,7 +1600,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) {
-			return new CNull(t);
+			return Construct.GetNullConstruct(t);
 		}
 
 		@Override
@@ -1657,7 +1654,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) {
-			return new CNull(t);
+			return Construct.GetNullConstruct(t);
 		}
 
 		@Override

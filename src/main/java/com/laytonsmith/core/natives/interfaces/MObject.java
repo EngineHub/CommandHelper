@@ -3,7 +3,6 @@ package com.laytonsmith.core.natives.interfaces;
 import com.laytonsmith.annotations.nofield;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -11,8 +10,6 @@ import com.laytonsmith.core.functions.Exceptions;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * An MObject is a definition of an array with a certain configuration. While an MObject can be constructed
@@ -109,7 +106,7 @@ public class MObject {
 				//This is it, so let's set it, (converting if necessary) then break
 				Object val;
 				Class fType = f.getType();
-				if(value instanceof CNull){ //TODO
+				if(value.isNull()){ //TODO
 					//Easy case
 					val = null;
 				} else {

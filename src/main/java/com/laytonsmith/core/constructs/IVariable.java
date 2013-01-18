@@ -7,7 +7,7 @@ package com.laytonsmith.core.constructs;
 public class IVariable extends Construct implements Cloneable {
 	private final String name;
 	public IVariable(String name, Target t){
-		super("", null, t);
+		super("", t);
 		this.name = name;
 	}
 
@@ -49,6 +49,10 @@ public class IVariable extends Construct implements Cloneable {
 	@Override
 	public String toString() {
 		return name;
+	}
+
+	public String typeName() {
+		return "$ival";
 	}
 
 	

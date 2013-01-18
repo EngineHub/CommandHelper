@@ -9,7 +9,7 @@ package com.laytonsmith.core.constructs;
 public class CVoid extends Construct implements Cloneable{
     
     public CVoid(Target t){
-        super("", ConstructType.VOID, t);
+        super("", t);
     }
     
     @Override
@@ -21,4 +21,8 @@ public class CVoid extends Construct implements Cloneable{
     public boolean isDynamic() {
         return false;
     }
+
+	public String typeName() {
+		return "void";
+	}
 }

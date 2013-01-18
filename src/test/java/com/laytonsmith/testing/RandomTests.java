@@ -147,10 +147,8 @@ public class RandomTests {
 		CDouble c4 = C.Double(1).clone();
 		CFunction c5 = new CFunction("", Target.UNKNOWN).clone();
 		CInt c6 = C.Int(1).clone();
-		CNull c7 = C.Null().clone();
 		CString c8 = C.String("").clone();
 		CVoid c9 = C.Void().clone();
-		Command c10 = new Command("/c", Target.UNKNOWN).clone();
 		IVariable c12 = new IVariable("@name", Target.UNKNOWN).clone();
 		Variable c13 = new Variable("$name", "", false, false, Target.UNKNOWN);
 	}
@@ -166,7 +164,6 @@ public class RandomTests {
 		ca.push(C.Boolean(false));
 		ca.push(C.Null());
 		ca.push(C.Void());
-		ca.push(new Command("/Command", Target.UNKNOWN));
 		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
 		//[1, 2.2, "string", "\"Quote\"", true, false, null, "", "/Command", [1]]
 		assertEquals("[1,2.2,\"string\",\"\\\"Quote\\\"\",true,false,null,\"\",\"\\/Command\",[1]]", Construct.json_encode(ca, Target.UNKNOWN));
@@ -183,7 +180,6 @@ public class RandomTests {
 		ca.push(C.Boolean(false));
 		ca.push(C.Null());
 		ca.push(C.Void());
-		ca.push(new Command("/Command", Target.UNKNOWN));
 		ca.push(new CArray(Target.UNKNOWN, new CInt(1, Target.UNKNOWN)));
 		StaticTest.assertCEquals(ca, Construct.json_decode("[1, 2.2, \"string\", \"\\\"Quote\\\"\", true, false, null, \"\", \"\\/Command\", [1]]", Target.UNKNOWN));
 	}

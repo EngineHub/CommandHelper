@@ -15,17 +15,8 @@ public class CDouble extends Construct implements Cloneable{
     public static final long serialVersionUID = 1L;
     final double val;
 
-    public CDouble(String value, Target t){
-        super(value, ConstructType.INT, t);
-        try{
-            val = Double.parseDouble(value);
-        } catch(NumberFormatException e){
-            throw new ConfigRuntimeException("Could not cast " + value + " to double", ExceptionType.FormatException, t);
-        }
-    }
-
     public CDouble(double value, Target t){
-        super(Double.toString(value), ConstructType.DOUBLE, t);
+        super(Double.toString(value), t);
         val = value;
     }
 
@@ -42,4 +33,8 @@ public class CDouble extends Construct implements Cloneable{
     public boolean isDynamic() {
         return true;
     }
+
+	public String typeName() {
+		return "double";
+	}
 }

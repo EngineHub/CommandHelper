@@ -2,8 +2,6 @@
 
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.constructs.Construct.ConstructType;
-
 /**
  *
  * @author Layton
@@ -11,7 +9,7 @@ import com.laytonsmith.core.constructs.Construct.ConstructType;
 public class CLabel extends Construct{
     Construct label;
     public CLabel(Construct value){
-        super(value.val(), ConstructType.LABEL, value.getTarget()); 
+        super(value.val(), value.getTarget()); 
         label = value;
     }
     
@@ -27,6 +25,10 @@ public class CLabel extends Construct{
 	@Override
 	public String toString() {
 		return label.toString() + ":";
+	}
+
+	public String typeName() {
+		return "$label";
 	}
 		
 }

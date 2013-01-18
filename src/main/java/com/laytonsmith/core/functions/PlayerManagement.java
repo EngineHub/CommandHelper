@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.compiler.Optimizable;
+import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -54,7 +56,7 @@ public class PlayerManagement {
 			} else if (p != null && p instanceof MCConsoleCommandSender) {
 				return new CString("~console", t);
 			} else {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			}
 		}
 
@@ -596,7 +598,7 @@ public class PlayerManagement {
 				//MCPlayer cursor
 				MCBlock b = p.getTargetBlock(null, 200);
 				if (b == null) {
-					retVals.add(new CNull(t));
+					retVals.add(Construct.GetNullConstruct(t));
 				} else {
 					retVals.add(new CArray(t, new CInt(b.getX(), t), new CInt(b.getY(), t), new CInt(b.getZ(), t)));
 				}
@@ -2244,9 +2246,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment e, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_flight is deprecated, change it to set_pflight before the next release", t);
-			return super.optimizeDynamic(t, children);
+			return null;
 		}
 
 	}
@@ -2336,9 +2338,9 @@ public class PlayerManagement {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment e, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Use of pset_time is deprecated, change it to set_ptime before the next release", t);
-			return super.optimizeDynamic(t, children);
+			return null;
 		}
 
 	}
@@ -3000,7 +3002,7 @@ public class PlayerManagement {
 			try {
 				w = loc.getWorld();
 			} catch (Exception e) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			}
 //			if (loc == null) {
 //				return new CNull(t);
@@ -3167,7 +3169,7 @@ public class PlayerManagement {
 			}
 
 			if (p.isInsideVehicle() == false) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			}
 
 			return new CString(p.getVehicle().getType().name(), t);

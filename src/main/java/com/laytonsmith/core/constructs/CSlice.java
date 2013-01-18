@@ -72,7 +72,7 @@ public class CSlice extends CArray {
     }
 
 	@Override
-	public String val() {
+	public String toString() {
 		return start + ".." + finish;
 	}
 
@@ -122,6 +122,11 @@ public class CSlice extends CArray {
 		} catch(NumberFormatException e){
 			return false;
 		}
+	}
+
+	@Override
+	public String typeName() {
+		return "slice";
 	}
 	
 }

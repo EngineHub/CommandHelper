@@ -18,11 +18,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -774,7 +771,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull();
+			return Construct.GetNullConstruct(t);
 		}
 		
 		@Override
@@ -821,7 +818,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CNull();
+			return Construct.GetNullConstruct(t);
 		}
 
 		public String getName() {
@@ -1381,7 +1378,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(args[0] instanceof CNull, t);
+			return new CBoolean(args[0].isNull(), t);
 		}
 
 		@Override
@@ -1582,7 +1579,7 @@ public class DataHandling {
 					tree = nodes[i];
 				} else {
 					if (nodes[i].getData() instanceof CFunction) {
-						if (((CFunction) nodes[i].getData()).getValue().equals("assign")) {
+						if (((CFunction) nodes[i].getData()).val().equals("assign")) {
 							if (nodes[i].getChildAt(1).getData().isDynamic()) {
 								usesAssign = true;
 							}

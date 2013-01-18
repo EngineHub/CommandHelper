@@ -591,7 +591,7 @@ public class Meta {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (environment.getEnv(CommandHelperEnvironment.class).GetCommand() == null) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else {
 				return new CString(environment.getEnv(CommandHelperEnvironment.class).GetCommand(), t);
 			}

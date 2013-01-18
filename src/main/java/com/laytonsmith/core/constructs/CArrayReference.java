@@ -14,7 +14,7 @@ public class CArrayReference extends Construct{
     public Construct index;
     public IVariable name = null;
     public CArrayReference(Construct array, Construct index, Environment env){
-        super("", ConstructType.ARRAY, Target.UNKNOWN);
+        super("", Target.UNKNOWN);
         this.array = array;
         if(array instanceof CArrayReference){
             this.name = ((CArrayReference)array).name;
@@ -63,4 +63,8 @@ public class CArrayReference extends Construct{
     public boolean isDynamic() {
         return false;
     }
+
+	public String typeName() {
+		return "$array_reference";
+	}
 }

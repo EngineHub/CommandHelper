@@ -95,7 +95,7 @@ public class Debug {
 //                throw new ConfigRuntimeException("allow-debug-logging is currently set to false. To use " + this.getName() + ", enable it in your preferences.", ExceptionType.SecurityException, t);
 //            }
 //            StringBuilder b = new StringBuilder("\n");
-//            if (args.length >= 1 && args[0] instanceof CNull) {
+//            if (args.length >= 1 && args[0].isNull()) {
 //                b.append("You can sort the listeners further by specifying one of the options:\n");
 //                for (Event.Type t : Event.Type.values()) {
 //                    b.append(t.name()).append("\n");

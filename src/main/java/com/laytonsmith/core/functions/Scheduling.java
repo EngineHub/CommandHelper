@@ -401,7 +401,7 @@ public class Scheduling {
 
 		public Construct exec(Target t, Environment env, Construct... args) {
 			Date now = new Date();
-			if (args.length >= 2 && !(args[1] instanceof CNull)) {
+			if (args.length >= 2 && !(args[1].isNull())) {
 				now = new Date(Static.getInt(args[1], t));
 			}
 			TimeZone timezone = TimeZone.getDefault();

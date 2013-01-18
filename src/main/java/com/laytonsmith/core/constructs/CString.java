@@ -13,7 +13,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
 public class CString extends Construct implements Cloneable, ArrayAccess{
 	
     public CString(String value, Target t){
-        super(value==null?"":value, ConstructType.STRING, t);
+        super(value==null?"":value, t);
     }
     
     public CString(char value, Target t){
@@ -67,5 +67,9 @@ public class CString extends Construct implements Cloneable, ArrayAccess{
 	 */
 	public String getQuote(){
 		return "'" + val().replace("\\", "\\\\").replace("'", "\\'") + "'";
+	}
+
+	public String typeName() {
+		return "string";
 	}
 }

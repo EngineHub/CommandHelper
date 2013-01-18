@@ -388,7 +388,7 @@ public class Exceptions {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			try {
 				ExceptionType c = null;
-				if (!(args[0] instanceof CNull)) {
+				if (!(args[0].isNull())) {
 					c = ExceptionType.valueOf(args[0].val());
 				}
 				throw new ConfigRuntimeException(args[1].val(), c, t);

@@ -11,11 +11,16 @@ import com.laytonsmith.core.constructs.Target;
 public class ProcedureUsage extends Construct{
 	ProcedureDefinition definition;
 	public ProcedureUsage(String name, Target t){
-		super(name, ConstructType.FUNCTION, t);
+		super(name, t);
 	}
 
 	@Override
 	public boolean isDynamic() {
 		return definition.isDynamic();
 	}
+
+	public String typeName() {
+		return "$procusage";
+	}
+	
 }

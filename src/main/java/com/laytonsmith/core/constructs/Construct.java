@@ -2,10 +2,8 @@
 
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.io.File;
 import java.math.BigInteger;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -19,102 +17,65 @@ import org.json.simple.JSONValue;
  */
 public abstract class Construct implements Cloneable, Comparable<Construct>, Mixed{
 
-
-
-    public enum ConstructType {
-
-        TOKEN, COMMAND, FUNCTION, VARIABLE, LITERAL, ARRAY, MAP, ENTRY, INT, 
-        DOUBLE, BOOLEAN, NULL, STRING, VOID, IVARIABLE, CLOSURE, LABEL, SLICE,
-        SYMBOL, IDENTIFIER, BRACE, BRACKET, BYTE_ARRAY;
-    }
-//    protected ConstructType ctype;
-    private final String value;
-
-    private Target target;
-	private transient boolean wasIdentifier = false;
-
-//    public ConstructType getCType() {
-//        return ctype;
-//    }
-    
-    /**
-     * This method should only be used by Script when setting the children's target, if it's an ivariable.
-     * @param target 
-     */
-    void setTarget(Target target) {
-        this.target = target;
-    }
-    
-    public final String getValue() {
-        return val();
-    }
-
-    public int getLineNum() {
-        return target.line();
-    }
-
-    public File getFile() {
-        return target.file();
-    }
-    
-    public int getColumn(){
-        return target.col();
-    }
+    private final Object value;
+    private final Target target;
     
     public Target getTarget(){
         return target;
     }
-
-    public Construct(String value, ConstructType ctype, int line_num, File file, int column) {
+	
+    public Construct(Object value, Target t){
         this.value = value;
-		Static.AssertNonNull(value, "The string value may not be null.");
-        this.target = new Target(line_num, file, column);
-    }
-    
-    public Construct(String value, ConstructType ctype, Target t){
-        this.value = value;
-		Static.AssertNonNull(value, "The string value may not be null.");
         this.target = t;
     }
+	
+	public boolean isNull(){
+		return value == null;
+	}
 
     /**
      * Returns the standard string representation of this Construct.
 	 * This will never return null.
      * @return 
      */
-    public String val() {
+    public final String val() {
+        return toString()==null?"null":toString();
+    }
+	
+	/**
+	 * Returns the standard string representation of this Construct,
+	 * or a Java null if it is null.
+	 * @return 
+	 */
+	public final String nval(){
+		return toString()==null?null:toString();
+	}
+	
+    public final Object value() {
         return value;
-    }
-	
-	public void setWasIdentifier(boolean b) {
-		wasIdentifier = b;
-	}
-	
-	public boolean wasIdentifier(){
-		return wasIdentifier;
-	}
+    }    
     
-    
-    /**
-     * Returns the standard string representation of this Construct, except
-     * in the case that the construct is a CNull, in which case it returns
-     * java null.
-     * @return 
-     */
-    public String nval(){
-        return val();
-    }
-    
-
     @Override
     public String toString() {
-        return value;
+        return value==null?"null":value.toString();
     }
 
     @Override
     public Construct clone() throws CloneNotSupportedException {
         return (Construct) super.clone();
     }
+	
+		
+	public CString asString(){
+		return new CString(toString(), target);
+	}
+    
+    /**
+     * If this type of construct is dynamic, that is to say, if it isn't a constant.
+     * If the underlying value is mutable, it is dynamic.
+     * @return 
+     */
+    public abstract boolean isDynamic();
 	
 	/**
 	 * Subclasses are free to implement this as needed. This is called
@@ -161,7 +122,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     }
     
     private static Object json_encode0(Construct c, Target t) throws MarshalException{
-        if (c instanceof CString || c instanceof Command) {
+        if (c instanceof CString) {
             return c.val();
         } else if (c instanceof CVoid) {
             return "";
@@ -171,7 +132,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             return ((CDouble) c).getDouble();
         } else if (c instanceof CBoolean) {
             return ((CBoolean) c).getBoolean();
-        } else if (c instanceof CNull) {
+        } else if (c.isNull()) {
             return null;
         } else if (c instanceof CArray) {
             CArray ca = (CArray) c;
@@ -199,7 +160,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      */
     public static Construct json_decode(String s, Target t) throws MarshalException {
 		if(s == null){
-			return new CNull(t);
+			return GetNullConstruct(t);
 		}
         if (s.startsWith("{")) {
             //Object
@@ -249,7 +210,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             }
             return ca;
         } else if (o == null) {
-            return new CNull();
+            return GetNullConstruct(t);
         } else if(o instanceof java.util.Map){
             CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : ((java.util.Map)o).keySet()){
@@ -263,18 +224,32 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
     }
 
     public int compareTo(Construct c) {
-        if(this.value.contains(" ") || this.value.contains("\t") 
-                || c.value.contains(" ") || c.value.contains("\t")){
-            return this.value.compareTo(c.value);
+        if(this.toString().contains(" ") || this.toString().contains("\t") 
+                || c.toString().contains(" ") || c.toString().contains("\t")){
+            return this.toString().compareTo(c.toString());
         }
         try {
-            Double d1 = Double.valueOf(this.value);
-            Double d2 = Double.valueOf(c.value);
+            Double d1 = Double.valueOf(this.toString());
+            Double d2 = Double.valueOf(c.toString());
             return d1.compareTo(d2);
         } catch (NumberFormatException e) {
-            return this.value.compareTo(c.value);
+            return this.toString().compareTo(c.toString());
         }
     }
+	
+	public static Construct GetNullConstruct(Target t){
+		return new Construct(null, t) {
+
+			@Override
+			public boolean isDynamic() {
+				return false;
+			}
+
+			public String typeName() {
+				return "null";
+			}
+		};
+	}
     
     /**
      * Converts a POJO to a Construct, if the type is convertable. This accepts many types of
@@ -285,7 +260,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      */
     public static Construct GetConstruct(Object o) throws ClassCastException{
         if(o == null){
-            return new CNull();
+            return GetNullConstruct(Target.UNKNOWN);
         } else if(o instanceof CharSequence){
             return new CString((CharSequence)o, Target.UNKNOWN);
         } else if(o instanceof Number){
@@ -336,7 +311,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @throws ClassCastException 
      */
     public static Object GetPOJO(Construct c) throws ClassCastException{
-        if(c instanceof CNull){
+        if(c.isNull()){
             return null;
         } else if(c instanceof CString){
             return c.val();
@@ -367,15 +342,4 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
         }
     }
-	
-	public CString asString(){
-		return new CString(val(), target);
-	}
-    
-    /**
-     * If this type of construct is dynamic, that is to say, if it isn't a constant.
-     * Things like 9, and 's' are constant. Things like {@code @value} are dynamic.
-     * @return 
-     */
-    public abstract boolean isDynamic();
 }

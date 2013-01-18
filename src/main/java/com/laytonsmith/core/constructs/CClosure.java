@@ -26,7 +26,7 @@ public class CClosure extends Construct {
     Construct[] defaults;
 
     public CClosure(ParseTree node, Environment env, String[] names, Construct[] defaults, Target t) {
-        super(node != null ? node.toString() : "", ConstructType.CLOSURE, t);
+        super(node != null ? node.toString() : "", t);
         this.node = node;
         try {
             this.env = env.clone();
@@ -39,7 +39,7 @@ public class CClosure extends Construct {
     }
 
     @Override
-    public String val() {
+    public String toString() {
         StringBuilder b = new StringBuilder();
         condense(getNode(), b);
         return b.toString();
@@ -151,4 +151,8 @@ public class CClosure extends Construct {
     public boolean isDynamic() {
         return false;
     }
+
+	public String typeName() {
+		return "closure";
+	}
 }

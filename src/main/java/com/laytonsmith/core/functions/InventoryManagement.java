@@ -74,7 +74,7 @@ public class InventoryManagement {
                 all = true;
                 m = Static.GetPlayer(args[0], t);
             } else if (args.length == 2) {
-                if (args[1] instanceof CNull) {
+                if (args[1].isNull()) {
                     index = null;
                 } else {
                     index = Static.getInt32(args[1], t);

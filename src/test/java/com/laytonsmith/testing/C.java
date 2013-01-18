@@ -16,7 +16,6 @@ public class C {
     public static Class Boolean = CBoolean.class;
     public static Class Double = CDouble.class;
     public static Class Int = CInt.class;
-    public static Class Null = CNull.class;
     public static Class String = CString.class;
     public static Class Void = CVoid.class;
     public static Class IVariable = IVariable.class;
@@ -35,8 +34,8 @@ public class C {
     public static CInt Int(long val){
         return new CInt(val, Target.UNKNOWN);
     }
-    public static CNull Null(){
-        return new CNull(Target.UNKNOWN);
+    public static Construct Null(){
+        return Construct.GetNullConstruct(Target.UNKNOWN);
     }
     public static CString String(String s){
         return new CString(s, Target.UNKNOWN);

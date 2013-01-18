@@ -41,7 +41,7 @@ public class EntityManagement {
 			int id = Static.getInt32(args[0], t);
 			MCEntity ent = Static.getEntity(id, t);
 			if (ent == null) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				return new CInt(mob.getAge(), t);
@@ -94,7 +94,7 @@ public class EntityManagement {
 			}
 			MCEntity ent = Static.getEntity(id, t);
 			if (ent == null) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			} else if (ent instanceof MCAgeable) {
 				MCAgeable mob = ((MCAgeable) ent);
 				mob.setAge(age);

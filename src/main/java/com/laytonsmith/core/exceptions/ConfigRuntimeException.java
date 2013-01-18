@@ -13,7 +13,6 @@ import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CClosure;
-import com.laytonsmith.core.constructs.CNull;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
@@ -116,13 +115,13 @@ public class ConfigRuntimeException extends RuntimeException {
 		if(env.getEnv(GlobalEnv.class).GetExceptionHandler() != null){
 			CClosure c = env.getEnv(GlobalEnv.class).GetExceptionHandler();
 			CArray ex = ObjectGenerator.GetGenerator().exception(e, Target.UNKNOWN);
-			Construct ret = new CNull();
+			Construct ret = Construct.GetNullConstruct(Target.UNKNOWN);
 			try{
 				c.execute(new Construct[]{ex});
 			} catch(FunctionReturnException retException){
 				ret = retException.getReturn();
 			}
-			if(ret instanceof CNull){
+			if(ret.isNull()){
 				reaction = Reaction.REPORT;
 			} else {
 				if(Static.getBoolean(ret)){

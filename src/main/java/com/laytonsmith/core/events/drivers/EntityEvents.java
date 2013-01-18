@@ -2,14 +2,10 @@
 
 package com.laytonsmith.core.events.drivers;
 
-import com.laytonsmith.abstraction.MCAnimalTamer;
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCHumanEntity;
 import com.laytonsmith.abstraction.MCItemStack;
-import com.laytonsmith.abstraction.MCOfflinePlayer;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
-import com.laytonsmith.abstraction.MCTameable;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
@@ -410,7 +406,7 @@ public class EntityEvents {
         		MCEntityTargetEvent ete = (MCEntityTargetEvent)event;
             
         		if (key.equals("player")) {
-        			if (value instanceof CNull) {
+        			if (value.isNull()) {
         				ete.setTarget(null);
         				return true;
         			} else if (value instanceof CString) {

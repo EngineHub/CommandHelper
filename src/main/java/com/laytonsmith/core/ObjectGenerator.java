@@ -146,7 +146,7 @@ public class ObjectGenerator {
      */
     public Construct item(MCItemStack is, Target t) {
         if (is == null || is.getAmount() == 0) {
-            return new CNull(t);
+            return Construct.GetNullConstruct(t);
         }
         int type = is.getTypeId();
         
@@ -184,7 +184,7 @@ public class ObjectGenerator {
      * @return
      */
     public MCItemStack item(Construct i, Target t) {
-        if (i instanceof CNull) {
+        if (i.isNull()) {
             return EmptyItem();
         }
         if (!(i instanceof CArray)) {

@@ -15,12 +15,12 @@ public class CBoolean extends Construct implements Cloneable{
     public static final long serialVersionUID = 1L;
     private final boolean val;
     public CBoolean(boolean value, Target t){
-        super(Boolean.toString(value), ConstructType.BOOLEAN, t);
+        super(Boolean.toString(value), t);
         val = value;
     }
 
     public CBoolean(String value, Target t){
-        super(value, ConstructType.BOOLEAN, t);
+        super(value, t);
         boolean tempVal;
         try{
             int i = Integer.parseInt(value);
@@ -53,7 +53,7 @@ public class CBoolean extends Construct implements Cloneable{
     }
 
     @Override
-    public String val() {
+    public String toString() {
         if(val){
             return "true";
         } else{
@@ -70,5 +70,9 @@ public class CBoolean extends Construct implements Cloneable{
     public boolean isDynamic() {
         return false;
     }
+
+	public String typeName() {
+		return "boolean";
+	}
 
 }

@@ -292,7 +292,7 @@ public class Sandbox {
                 offset = 0;
             }
             MCItemStack is = null;
-            if (args[1 - offset] instanceof CNull) {
+            if (args[1 - offset].isNull()) {
                 is = m.getItemInHand();
             } else {
                 int slot = Static.getInt32(args[1 - offset], t);

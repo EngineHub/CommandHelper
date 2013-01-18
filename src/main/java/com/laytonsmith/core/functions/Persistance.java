@@ -151,7 +151,7 @@ public class Persistance {
 					throw new ConfigRuntimeException(e.getMessage(), ExceptionType.FormatException, t);
 				}
 				if (obj == null) {
-					return new CNull(t);
+					return Construct.GetNullConstruct(t);
 				}
 				o = Construct.json_decode(obj.toString(), t);
 			} catch (MarshalException ex) {
@@ -160,7 +160,7 @@ public class Persistance {
 			try {
 				return (Construct) o;
 			} catch (ClassCastException e) {
-				return new CNull(t);
+				return Construct.GetNullConstruct(t);
 			}
 		}
 

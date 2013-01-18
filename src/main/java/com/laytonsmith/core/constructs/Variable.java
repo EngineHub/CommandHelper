@@ -14,7 +14,7 @@ public class Variable extends Construct {
     private CString var_value;
 
     public Variable(String name, String def, boolean optional, boolean final_var, Target t) {
-        super(name, ConstructType.VARIABLE, t);
+        super(name, t);
         this.name = name;
         setDefault(def);
         this.final_var = final_var;
@@ -24,11 +24,6 @@ public class Variable extends Construct {
 
     public Variable(String name, String def, Target t) {
         this(name, def, false, false, t);
-    }
-
-    @Override
-    public String toString() {
-        return "var:" + name;
     }
 
     public String getName() {
@@ -63,7 +58,7 @@ public class Variable extends Construct {
     }
 
     @Override
-    public String val() {
+    public String toString() {
         return var_value.toString();
     }
 
@@ -88,4 +83,8 @@ public class Variable extends Construct {
     public boolean isDynamic() {
         return true;
     }
+
+	public String typeName() {
+		return "$var";
+	}
 }

@@ -76,7 +76,7 @@ public final class Static {
      */
     public static double getNumber(Construct c, Target t) {
         double d;
-        if (c == null || c instanceof CNull) {
+        if (c == null || c.isNull()) {
             return 0.0;
         }
         if (c instanceof CInt) {
@@ -134,7 +134,7 @@ public final class Static {
      */
     public static long getInt(Construct c, Target t) {
         long i;
-        if (c == null || c instanceof CNull) {
+        if (c == null || c.isNull()) {
             return 0;
         }
         if (c instanceof CInt) {
@@ -236,10 +236,10 @@ public final class Static {
 	public static CByteArray getByteArray(Construct c, Target t){
 		if(c instanceof CByteArray){
 			return (CByteArray)c;
-		} else if(c instanceof CNull){
+		} else if(c.isNull()){
 			return new CByteArray(t, 0);
 		} else {
-			throw new Exceptions.CastException("Expecting byte array, but found " + c.getCType() + " instead.", t);
+			throw new Exceptions.CastException("Expecting byte array, but found " + c.getClass().getSimpleName() + " instead.", t);
 		}
 	}
 
@@ -434,7 +434,7 @@ public final class Static {
             return new CString("", t);
         }
         if (val.equalsIgnoreCase("null")) {
-            return new CNull(t);
+            return Construct.GetNullConstruct(t);
         } else if (val.equalsIgnoreCase("true")) {
             return new CBoolean(true, t);
         } else if (val.equalsIgnoreCase("false")) {
@@ -462,7 +462,7 @@ public final class Static {
 
     public static Construct resolveDollarVar(Construct variable, List<Variable> vars) {
         if(variable == null){
-            return new CNull();
+            return Construct.GetNullConstruct(Target.UNKNOWN);
         }
         if (variable instanceof Variable){//== Construct.ConstructType.VARIABLE) {
             for (Variable var : vars) {
@@ -642,8 +642,13 @@ public final class Static {
         return GetPlayer(player.val(), t);
     }
 
+	/**
+	 * @deprecated Use Construct.isNull directly.
+	 * @param construct
+	 * @return 
+	 */
     public static boolean isNull(Construct construct) {
-        return construct instanceof CNull;
+        return construct.isNull();
     }
 
     public static int Normalize(int i, int min, int max) {
@@ -986,7 +991,7 @@ public final class Static {
 	 */
 	public static void AssertNonCNull(Target t, Construct ... args) throws ConfigRuntimeException {
 		for(Construct arg : args){
-			if(arg instanceof CNull){
+			if(arg.isNull()){
 				throw new ConfigRuntimeException("Argument was null, and nulls are not allowed.", ExceptionType.NullPointerException, t);
 			}
 		}

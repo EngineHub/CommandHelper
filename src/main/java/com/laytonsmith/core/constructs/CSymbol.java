@@ -10,7 +10,7 @@ public class CSymbol extends Construct {
     Token.TType symbolType;
 
     public CSymbol(String symbol, Token.TType type, Target target) {
-        super(symbol, ConstructType.SYMBOL, target);
+        super(symbol, target);
         symbolType = type;
         switch (symbolType) {
             case CONCAT:
@@ -166,5 +166,9 @@ public class CSymbol extends Construct {
 			default:
 				return null;
 		}
+	}
+
+	public String typeName() {
+		return "$symbol";
 	}
 }

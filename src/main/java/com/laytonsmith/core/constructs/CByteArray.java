@@ -40,7 +40,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public CByteArray(Target t, int capacity){
-		super("", ConstructType.BYTE_ARRAY, t);
+		super("", t);
 		data = ByteBuffer.allocate(capacity);
 	}
 
@@ -63,7 +63,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 
 	@Override
-	public String val() {
+	public String toString() {
 		if(value == null){
 			int position = data.position();
 			data.rewind();
@@ -296,6 +296,10 @@ public class CByteArray extends Construct implements Sizable {
 		System.arraycopy(src, 0, dest, 0, maxValue);
 		return dest;
 	}
+
+	public String typeName() {
+		return "byte_array";
+	}
 	
 	private static class CArrayByteBacking extends CArray {
 		private byte[] backing;
@@ -336,7 +340,7 @@ public class CByteArray extends Construct implements Sizable {
 		}
 
 		@Override
-		public String val() {
+		public String toString() {
 			if(value == null){
 				try {
 					value = new String(backing, "UTF-8");
