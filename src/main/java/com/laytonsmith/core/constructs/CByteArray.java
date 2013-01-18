@@ -28,6 +28,7 @@ public class CByteArray extends Construct implements Sizable {
 	public static CByteArray wrap(byte[] b, Target t){
 		CByteArray ba = new CByteArray(t, 0);
 		ba.data = ByteBuffer.wrap(b);
+		ba.maxValue = b.length;
 		return ba;
 	}
 	

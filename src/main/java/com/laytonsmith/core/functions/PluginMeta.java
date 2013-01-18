@@ -90,7 +90,7 @@ public class PluginMeta {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
+
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3){
