@@ -3,6 +3,10 @@ package com.laytonsmith.core.natives.interfaces;
 import com.laytonsmith.annotations.nofield;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CDouble;
+import com.laytonsmith.core.constructs.CInt;
+import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -10,6 +14,8 @@ import com.laytonsmith.core.functions.Exceptions;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * An MObject is a definition of an array with a certain configuration. While an MObject can be constructed
@@ -189,6 +195,64 @@ public class MObject {
 		//the parameter
 		if(alias(field) != null){
 			field = alias(field);
+		}
+		for(Field f : this.getClass().getFields()){
+			if(f.getName().equals(field)){
+				Object val;
+				try {
+					val = f.get(this);
+				} catch (IllegalArgumentException ex) {
+					throw new Error(ex);
+				} catch (IllegalAccessException ex) {
+					throw new Error(ex);
+				}
+				if(val == null){
+					return Construct.GetNullConstruct(Target.UNKNOWN);
+				} else {
+					Class fType = val.getClass();
+					if(fType == byte.class){
+						val = new CInt((Byte)val, Target.UNKNOWN);
+					} else if(fType == short.class){
+						val = new CInt((Short)val, Target.UNKNOWN);
+					} else if(fType == int.class){
+						val = new CInt((Integer)val, Target.UNKNOWN);
+					} else if(fType == long.class){
+						val = new CInt((Long)val, Target.UNKNOWN);
+					} else if(fType == char.class){
+						val = new CString((Character)val, Target.UNKNOWN);
+					} else if(fType == boolean.class){
+						val = new CBoolean((Boolean)val, Target.UNKNOWN);
+					} else if(fType == float.class){
+						val = new CDouble((Float)val, Target.UNKNOWN);
+					} else if(fType == double.class){
+						val = new CDouble((Double)val, Target.UNKNOWN);
+					} else if(fType == MMap.class){
+						CArray ca = CArray.GetAssociativeArray(Target.UNKNOWN);
+						MMap m = (MMap)val;
+						for(String key : m.keySet()){
+							ca.set(key, (Construct)m.get(key), Target.UNKNOWN);
+						}
+						val = m;
+					} else if(fType == MList.class){
+						CArray ca = new CArray(Target.UNKNOWN);
+						MList m = (MList)val;
+						for(int i = 0; i < m.size(); i++){
+							ca.push(ca.get(i));
+						}
+						val = m;
+					} else if(Construct.class.isAssignableFrom(fType)){
+						//Done.
+					} else if(MObject.class.isAssignableFrom(fType)){
+						//TODO
+					} else {
+						//Programming error.
+						throw new Error(this.getClass().getName() + " contained the public field " 
+								+ f.getName() + " of type " + fType.getName() + ", which is an unsupported field type.");
+					}
+				}
+				//At this point, it has been cast to a Construct of some form.
+				return (Construct)val;
+			}
 		}
 		if(fields.containsKey(field)){
 			return fields.get(field);
