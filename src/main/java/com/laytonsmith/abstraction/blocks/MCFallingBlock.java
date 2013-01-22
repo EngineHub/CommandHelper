@@ -2,13 +2,12 @@
 package com.laytonsmith.abstraction.blocks;
 
 import com.laytonsmith.abstraction.MCEntity;
-import com.laytonsmith.abstraction.MCMetadatable;
 
 /**
  *
  * @author import
  */
-public interface MCFallingBlock extends MCEntity, MCMetadatable {
+public interface MCFallingBlock extends MCEntity {
 	public byte getBlockData();
 	public int getBlockId();
 	public boolean getDropItem();

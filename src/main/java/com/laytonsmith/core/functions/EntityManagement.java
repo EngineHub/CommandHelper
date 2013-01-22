@@ -18,8 +18,99 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
  */
 public class EntityManagement {
 	public static String docs(){
-        return "Provides methods for managing inventory related tasks.";
+        return "This class of functions allow entities to be managed.";
     }
+	
+	@api
+	public static class entity_remove extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity((int) Static.getInt(args[0], t), t);
+			if (ent == null) {
+				return new CVoid(t);
+			} else if (ent instanceof MCHumanEntity) {
+				throw new ConfigRuntimeException("Cannot remove human entity (" + ent.getEntityId() + ")!", ExceptionType.BadEntityException, t);
+			} else {
+				ent.remove();
+				return new CVoid(t);
+			}
+		}
+
+		public String getName() {
+			return "entity_remove";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "void {entityID} Removes the specified entity from the world, without any drops or animations. "
+				+ "Note: you can't remove players. As a safety measure for working with NPC plugins, it will "
+				+ "not work on anything human, even if it is not a player.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class entity_type extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity ent = Static.getEntity((int) Static.getInt(args[0], t), t);
+			if (ent == null) {
+				return new CNull(t);
+			} else {
+				return new CString(ent.getType().name(), t);
+			}
+		}
+
+		public String getName() {
+			return "entity_type";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "string {entityID} Returns the EntityType of the entity with the specified ID.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 	
 	@api
 	public static class get_mob_age extends AbstractFunction {
@@ -173,8 +264,8 @@ public class EntityManagement {
 			}
 			ent = Static.getEntity(id, t);
 			if (ent instanceof MCLivingEntity) {
-				((MCLivingEntity) ent).launchProjectile(toShoot);
-				return new CVoid(t);
+				MCProjectile shot = ((MCLivingEntity) ent).launchProjectile(toShoot);
+				return new CInt(shot.getEntityId(), t);
 			} else {
 				throw new ConfigRuntimeException("Entity (" + id + ") is not living", ExceptionType.BadEntityException, t);
 			}
@@ -189,9 +280,10 @@ public class EntityManagement {
 		} 
 
 		public String docs() {
-			return "void {[player[, projectile]] | [entityID[, projectile]]} shoots a fireball from the entity or player "
-					+ "specified, or the current player if no arguments are passed. Additionally, the type of projectile "
-					+ "can be overridden. Valid projectiles: " + StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
+			return "int {[player[, projectile]] | [entityID[, projectile]]} shoots a projectile from the entity or player "
+					+ "specified, or the current player if no arguments are passed. If no projectile is specified, "
+					+ "it defaults to a fireball. Returns the EntityID of the projectile. Valid projectiles: " 
+					+ StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
 		}
 
 		public CHVersion since() {

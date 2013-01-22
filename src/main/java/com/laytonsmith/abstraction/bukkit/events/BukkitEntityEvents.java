@@ -12,6 +12,8 @@ import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
+
+import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
@@ -112,10 +114,14 @@ public class BukkitEntityEvents {
 
 		public void setItem(MCItemStack stack) {
 			BukkitMCItemStack s = (BukkitMCItemStack)stack;
-			if(s.getTypeId() == 0) {
+				e.setCancelled(true);
 				e.getItem().remove();
+			if(s.getTypeId() == 0) {
+				return;
 			} else {
-				e.getItem().setItemStack(s.__ItemStack());
+				e.getPlayer().getInventory().addItem(s.asItemStack());
+				//and for added realism :)
+				e.getPlayer().playSound(e.getItem().getLocation(), Sound.ITEM_PICKUP, 1, 2);
 			}
 		}
 
