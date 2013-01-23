@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
 import com.laytonsmith.abstraction.bukkit.entities.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
@@ -163,6 +164,11 @@ public class BukkitConvertor extends AbstractConvertor {
     		return null;
     	}
     	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
+		//truth.
+		if(be instanceof FallingBlock){
+			return new BukkitMCFallingBlock((FallingBlock) be);
+		}
+		
 		if(be instanceof Item){
 			return new BukkitMCItem((Item)be);
 		}
