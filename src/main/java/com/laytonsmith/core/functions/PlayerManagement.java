@@ -3145,7 +3145,7 @@ public class PlayerManagement {
 			}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
@@ -3190,7 +3190,7 @@ public class PlayerManagement {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
 	}
 
 		public boolean isRestricted() {

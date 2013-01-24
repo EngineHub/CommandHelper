@@ -1893,6 +1893,11 @@ public class DataHandling {
 			}
 			return super.exec(t, environment, args2);
 		}
+		
+		@Override
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidProcedureException, ExceptionType.CastException};
+		}
 
 		@Override
 		public String getName() {

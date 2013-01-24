@@ -25,7 +25,7 @@ public class EntityManagement {
 	public static class entity_remove extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException};
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {
@@ -73,7 +73,7 @@ public class EntityManagement {
 	public static class entity_type extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException};
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {
@@ -219,7 +219,7 @@ public class EntityManagement {
 	public static class shoot_projectile extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
