@@ -38,6 +38,10 @@ public class Environment {
 	private void addEnv(EnvironmentImpl mixin){
 		environments.put(mixin.getClass(), mixin);
 	}
+	
+	public boolean hasEnv(Class<? extends EnvironmentImpl> clazz) {
+		return environments.containsKey(clazz);
+	}
 
 	@Override
 	public Environment clone() throws CloneNotSupportedException {

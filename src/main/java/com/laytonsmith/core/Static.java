@@ -516,8 +516,12 @@ public final class Static {
                     }
                     p.sendMessage(line);
                 } else {
-                    if (m != null) {
-                        m.sendMessage(line);
+                    if (m != null && m instanceof MCConsoleCommandSender) {
+                        if(msg.matches("(?m).*\033.*")){
+							//We have terminal colors, we need to reset them at the end
+							msg += TermColors.reset();
+						}
+						com.laytonsmith.core.Static.getLogger().log(Level.INFO, msg);
                     } else {
                         System.out.println(line);
                     }

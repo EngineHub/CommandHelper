@@ -1805,7 +1805,7 @@ public class DataHandling {
 	}
 
 	@api
-	public static class call_proc extends AbstractFunction {
+	public static class call_proc extends AbstractFunction implements Optimizable {
 
 		public String getName() {
 			return "call_proc";
@@ -1817,8 +1817,10 @@ public class DataHandling {
 
 		public String docs() {
 			return "mixed {proc_name, [var1...]} Dynamically calls a user defined procedure. call_proc(_myProc, 'var1') is the equivalent of"
-					+ " _myProc('var1'), except you could dynamically build the procedure name if need be. This is useful for having callbacks"
-					+ " in procedures. Throws an InvalidProcedureException if the procedure isn't defined.";
+					+ " _myProc('var1'), except you could dynamically build the procedure name if need be. This is useful for dynamic coding,"
+					+ " however, closures work best for callbacks. Throws an InvalidProcedureException if the procedure isn't defined. If you are"
+					+ " hardcoding the first parameter, a warning will be issued, because it is much more efficient and safe to directly use"
+					+ " a procedure if you know what its name is beforehand.";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1838,19 +1840,9 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CVoid(t);
-		}
-
-		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
-			if (nodes.length < 1) {
-				throw new ConfigRuntimeException("Expecting at least one argument to call_proc", ExceptionType.InsufficientArgumentsException, t);
+			if (args.length < 1) {
+				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
-			Construct[] args = new Construct[nodes.length];
-			for (int i = 0; i < nodes.length; i++) {
-				args[i] = parent.seval(nodes[i], env);
-			}
-
 			Procedure proc = env.getEnv(GlobalEnv.class).GetProcs().get(args[0].val());
 			if (proc != null) {
 				List<Construct> vars = new ArrayList<Construct>(Arrays.asList(args));
@@ -1867,10 +1859,69 @@ public class DataHandling {
 					ExceptionType.InvalidProcedureException, t);
 		}
 
-		@Override
-		public boolean useSpecialExec() {
-			return true;
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			if(children.size() < 1){
+				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
+			}
+			if(children.get(0).isConst()){
+				CHLog.GetLogger().Log(CHLog.Tags.COMPILER, LogLevel.WARNING, "Hardcoding procedure name in " + getName() + ", which is inefficient."
+						+ " Consider calling the procedure directly if the procedure name is known at compile time.", t);
+			}
+			return null;
+		}
+		
+	}
+	
+	@api
+	public static class call_proc_array extends call_proc {
+
+		@Override
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			CArray ca = Static.getArray(args[1], t);
+			if(ca.inAssociativeMode()){
+				throw new Exceptions.CastException("Expected the array passed to " + getName() + " to be non-associative.", t);
+			}
+			Construct [] args2 = new Construct[(int)ca.size() + 1];
+			args2[0] = args[0];
+			for(int i = 1; i < args2.length; i++){
+				args2[i] = ca.get(i - 1);
+			}
+			return super.exec(t, environment, args2);
+		}
+
+		@Override
+		public String getName() {
+			return "call_proc_array";
+		}
+
+		@Override
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		@Override
+		public String docs() {
+			return "mixed {proc_name, array} Works like call_proc, but allows for variable or unknown number of arguments to be passed to"
+					+ " a proc. The array parameter is \"flattened\", and call_proc is essentially called. If the array is associative, an"
+					+ " exception is thrown.";
+		}
+
+		@Override
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			//If they hardcode the name, that's fine, because the variables may just be the only thing that's variable.
+			return null;
+		}
+		
 	}
 
 	@api(environments=CommandHelperEnvironment.class)

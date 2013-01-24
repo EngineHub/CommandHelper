@@ -87,7 +87,9 @@ public class Echoes {
 		}				
     }
     
-    @api(environments={CommandHelperEnvironment.class})
+	//Technically it needs CommandHelperEnvironment, but we have special exception handling in case we're running
+	//in cmdline mode.
+    @api(environments={})
 	@noboilerplate 
 	public static class msg extends AbstractFunction{
 
@@ -100,19 +102,16 @@ public class Echoes {
         }
 
         public Construct exec(final Target t, Environment env, final Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			final MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
 			StringBuilder b = new StringBuilder();
 			for(int i = 0; i < args.length; i++){
 				b.append(args[i].val());
 			}
-			Static.SendMessage(p, b.toString(), t);					
-//            int start = 0;
-//            String s = b.toString();
-//            while(true){
-//                if(start >= s.length()) break;
-//                p.sendMessage(s.substring(start, start + 100 >= s.length()?s.length():start + 100));
-//                start += 100;
-//            }
+			if(env.hasEnv(CommandHelperEnvironment.class)){
+				final MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+				Static.SendMessage(p, b.toString(), t);
+			} else {
+				System.out.println(Static.MCToANSIColors(b.toString()));
+			}
             return new CVoid(t);
         }
         

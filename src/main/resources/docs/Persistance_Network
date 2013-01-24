@@ -48,9 +48,14 @@ A note on file based URIs: The file path is specified after two forward slashes,
 path on unix looks like this: yml:///path/to/file, and an absolute path on windows looks like 
 this: yml://C:/path/to/file (alternatively yml://C:\path\to\file will also work). On all 
 platforms, a relative path would look like this: yml://path/to/file. Additionally, file based
-connections are '''always''' going to be much slower, and much less reliable than SQL based
+connections are '''usually''' going to be much faster, but less reliable than SQL based
 connections, so it is HIGHLY recommended that you use SQL connections, if nothing else, using
-the zero config SQLite (which is the default).
+the zero config SQLite (which is the default). The only case for a file based connection type is
+when using frequently read/written data, in which case a subset of your keys may be written
+out to a file based protocol. The <code>ser</code> protocol is the fastest and most compact,
+but as it stores the data in a lump binary form, it is not (easily) editable by hand, and
+is prone to total data corruption in the event of any section of the file being corrupted.
+For a full rundown of the speed comparisons, see the chart below.
 
 There are special implementation considerations you must take into account if you are writing 
 an external system that integrates with the persistance network, (including if you edit the 
@@ -237,4 +242,14 @@ ser    |   16 ms   |    23 ms   |    83 ms    |    114 ms   |          164 K
 yml    |   33 ms   |    14 ms   |  2.105 sec  |  46.640 sec |          112 K 
 -------+---------------------------------------------------------------------------------
 </pre>
+
+An important observation that could be made based on this data is that SQLite is 
+considerably slower than any of the other protocols. This is because SQLite
+is less prone to data corruption, and is multiprocess safe. SQLite manages its own
+locking and journaling systems, so it is unlikely to corrupt if a bad write
+occurs, or if multiple processes are accessing it at once. Due to this, it is the
+default storage mechanism, despite its slower runtime. The tradeoff of data protection
+vs. script speed vs. interoperability is not something that can be generically decided
+in all cases though, so feel free to change defaults as you see fit. Each protocol
+has pros and cons, so you must decide which one to use.
 {{LearningTrail}}
