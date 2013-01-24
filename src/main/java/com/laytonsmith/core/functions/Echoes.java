@@ -3,7 +3,6 @@
 
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.PureUtilities.LineCallback;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.MCCommandSender;
@@ -357,16 +356,7 @@ public class Echoes {
         }
 
         public Construct exec(final Target t, final Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-            Static.SendMessage(new LineCallback() {
-
-                public void run(String line) {
-                    if(!(env.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer)){
-                        throw new ConfigRuntimeException("The current player is not online, or this is being run from the console", ExceptionType.PlayerOfflineException, t);
-                    }
-                    (env.getEnv(CommandHelperEnvironment.class).GetPlayer()).chat(line);
-                }
-            }, args[0].val());
-
+			env.getEnv(CommandHelperEnvironment.class).GetPlayer().chat(args[0].val());
             return new CVoid(t);
         }
 
@@ -421,15 +411,8 @@ public class Echoes {
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             final MCPlayer player = Static.GetPlayer(args[0], t);
-            Static.SendMessage(new LineCallback() {
-
-                public void run(String line) {
-                    if(player != null){
-                        player.chat(line);
-                    }
-                }
-            }, args[1].val());
-            
+            Static.AssertPlayerNonNull(player, t);
+			player.chat(args[1].val());
             return new CVoid(t);
         }
         public Boolean runAsync(){
@@ -453,7 +436,7 @@ public class Echoes {
         }
         
         public ExceptionType[] thrown(){
-            return new ExceptionType[]{ExceptionType.CastException};
+            return new ExceptionType[]{ExceptionType.NullPointerException};
         }
 
         public boolean isRestricted() {
@@ -467,15 +450,10 @@ public class Echoes {
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             if(args[0] instanceof CNull){
-                throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.CastException, t);
+                throw new ConfigRuntimeException("Trying to broadcast null won't work", ExceptionType.NullPointerException, t);
             }
             final MCServer server = Static.getServer();
-            Static.SendMessage(new LineCallback() {
-
-                public void run(String line) {
-                    server.broadcastMessage(line);
-                }
-            }, args[0].val());
+			server.broadcastMessage(args[0].val());
             return new CVoid(t);
         }
         public Boolean runAsync(){
