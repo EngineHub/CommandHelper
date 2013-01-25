@@ -33,6 +33,8 @@ import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.World;
 import org.bukkit.block.Biome;
+import org.bukkit.block.Block;
+import org.bukkit.block.BlockFace;
 import org.bukkit.entity.*;
 import org.bukkit.material.MaterialData;
 
@@ -155,7 +157,13 @@ public class BukkitMCWorld implements MCWorld {
     }
 
     public MCBlock getHighestBlockAt(int x, int z) {
-        return new BukkitMCBlock(w.getHighestBlockAt(x, z));
+		//Workaround for getHighestBlockAt, since it doesn't like transparent
+		//blocks.
+		Block b = w.getBlockAt(x, w.getMaxHeight(), z);
+		while(b.getType() == Material.AIR){
+			b = b.getRelative(BlockFace.DOWN);
+		}
+        return new BukkitMCBlock(b);
      }
 
     public void explosion(double x, double y, double z, float size, boolean safe) {
