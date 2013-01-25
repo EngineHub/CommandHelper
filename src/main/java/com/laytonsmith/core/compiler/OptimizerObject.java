@@ -99,7 +99,8 @@ class OptimizerObject {
 	/**
 	 * This pass optimizes all turing functions. That is, branch functions like
 	 * if, and for. It also checks for unreachable code, and removes it, along
-	 * with issuing a warning.
+	 * with issuing a warning. Boolean simplification also happens during this step,
+	 * so things like {@code if(@i == 4 && @i == 5)} can be removed.
 	 *
 	 * @param tree
 	 * @param compilerEnvironment
@@ -208,6 +209,8 @@ class OptimizerObject {
 						tree.setChildren(tempNode.getChildren());
 					}
 				}
+				
+				//TODO: Check for boolean optimizations here
 			}
 		} while (tempNode != null && tempNode.numberOfChildren() != numChildren); //Keep optimizing until we made no code branch changes
 		//Now optimize the children
@@ -326,13 +329,15 @@ class OptimizerObject {
 	/**
 	 * This optimization level adds all known instances of procs to the
 	 * environment. After this pass, all procs, if not obtainable, are a compile
-	 * error.
+	 * error. Additionally during this stage, tail call recursion is optimized.
+	 * An overview of tail call recursion can be found here: http://en.wikipedia.org/wiki/Tail_call
 	 *
 	 * @param tree
 	 * @param compilerEnvironment
 	 * @throws ConfigCompileException
 	 */
 	private void optimize05(ParseTree tree, Environment compilerEnvironment) throws ConfigCompileException {
+		
 	}
 	
 	/**
