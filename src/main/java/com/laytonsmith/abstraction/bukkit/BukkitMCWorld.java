@@ -82,6 +82,17 @@ public class BukkitMCWorld implements MCWorld {
         return w;
     }
 
+	public List<MCEntity> getEntities() {
+		if (w.getEntities() == null) {
+			return null;
+		}
+		List<MCEntity> list = new ArrayList<MCEntity>();
+		for (Entity e : w.getEntities()) {
+			list.add(new BukkitMCEntity(e));
+		}
+		return list;
+	}
+
     public List<MCLivingEntity> getLivingEntities() {
         if (w.getLivingEntities() == null) {
             return null;
