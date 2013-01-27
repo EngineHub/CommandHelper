@@ -3,6 +3,9 @@ package com.laytonsmith.PureUtilities;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.URL;
 import java.net.URLDecoder;
@@ -46,6 +49,9 @@ public final class ClassDiscovery {
 		} else {
 			classCache.remove(url);
 		}
+		classAnnotationCache.clear();
+		fieldAnnotationCache.clear();
+		methodAnnotationCache.clear();
 	}
 
 	/**
@@ -63,6 +69,13 @@ public final class ClassDiscovery {
 	private static Map<String, Class[]> classCache = new HashMap<String, Class[]>();
 	private static Map<String, Class> fuzzyClassCache = new HashMap<String, Class>();
 	private static Set<String> additionalURLs = new HashSet<String>();
+	
+	private static Map<Class<? extends Annotation>, Set<Class>> classAnnotationCache = new HashMap<Class<? extends Annotation>, Set<Class>>();
+	private static Map<Class<? extends Annotation>, Set<Field>> fieldAnnotationCache = new HashMap<Class<? extends Annotation>, Set<Field>>();
+	private static Map<Class<? extends Annotation>, Set<Method>> methodAnnotationCache = new HashMap<Class<? extends Annotation>, Set<Method>>();
+	
+	private static final Set<ClassLoader> defaultClassLoaders = new HashSet<ClassLoader>();
+	static{ defaultClassLoaders.add(ClassDiscovery.class.getClassLoader()); }
 
 	public static Class[] GetClassesWithinPackageHierarchy() {
 		List<Class> classes = new ArrayList<Class>();
@@ -72,6 +85,10 @@ public final class ClassDiscovery {
 		}
 		return classes.toArray(new Class[classes.size()]);
 	}
+	
+	public static void InstallClassLoader(ClassLoader cl){
+		defaultClassLoaders.add(cl);
+	}
 
 	/**
 	 * Gets all the classes in the specified location. The url can point to a
@@ -79,7 +96,8 @@ public final class ClassDiscovery {
 	 * this particular class file is located is used.
 	 *
 	 * @param url The url to the jar/folder
-	 * @param loader The classloader to use to load the classes. If null, this particular class's class loader is used.
+	 * @param loader The classloader to use to load the classes. If null, the default classloader list is used, which
+	 * can be added to with InstallClassLoader().
 	 * @return
 	 */
 	public static Class[] GetClassesWithinPackageHierarchy(String url, Set<ClassLoader> loaders) {
@@ -87,8 +105,7 @@ public final class ClassDiscovery {
 			return classCache.get(url);
 		}
 		if(loaders == null){
-			loaders = new HashSet();
-			loaders.add(ClassDiscovery.class.getClassLoader());
+			loaders = defaultClassLoaders;
 		}
 		String originalURL = url;
 		if (url == null) {
@@ -166,14 +183,61 @@ public final class ClassDiscovery {
 		return ret;
 	}
 
-	public static Class[] GetClassesWithAnnotation(Class annotation) {
-		List<Class> classes = new ArrayList<Class>();
+	public static Class[] GetClassesWithAnnotation(Class<? extends Annotation> annotation) {
+		if(classAnnotationCache.containsKey(annotation)){
+			return new HashSet<Class>(classAnnotationCache.get(annotation))
+					.toArray(new Class[classAnnotationCache.get(annotation).size()]);
+		}
+		Set<Class> classes = new HashSet<Class>();
 		for (Class c : GetClassesWithinPackageHierarchy()) {
 			if (c.getAnnotation(annotation) != null) {
 				classes.add(c);
 			}
 		}
+		classAnnotationCache.put(annotation, classes);
 		return classes.toArray(new Class[classes.size()]);
+	}
+	
+	public static Field[] GetFieldsWithAnnotation(Class<? extends Annotation> annotation){
+		if(fieldAnnotationCache.containsKey(annotation)){
+			return new HashSet<Field>(fieldAnnotationCache.get(annotation))
+					.toArray(new Field[fieldAnnotationCache.get(annotation).size()]);
+		}
+		Set<Field> fields = new HashSet<Field>();
+		for (Class c : GetClassesWithinPackageHierarchy()) {
+			try{
+				for(Field f : c.getDeclaredFields()){
+					if (f.getAnnotation(annotation) != null) {
+						fields.add(f);
+					}
+				}
+			} catch(Throwable t){
+				//This can happen in any number of cases, but we don't care, we just want to skip the class.
+			}
+		}
+		fieldAnnotationCache.put(annotation, fields);
+		return fields.toArray(new Field[fields.size()]);
+	}
+	
+	public static Method[] GetMethodsWithAnnotation(Class<? extends Annotation> annotation){
+		if(methodAnnotationCache.containsKey(annotation)){
+			return new HashSet<Method>(methodAnnotationCache.get(annotation))
+					.toArray(new Method[methodAnnotationCache.get(annotation).size()]);
+		}
+		Set<Method> methods = new HashSet<Method>();
+		for (Class c : GetClassesWithinPackageHierarchy()) {
+			try{
+				for(Method m : c.getDeclaredMethods()){
+					if (m.getAnnotation(annotation) != null) {
+						methods.add(m);
+					}
+				}
+			} catch(Throwable t){
+				//This can happen in any number of cases, but we don't care, we just want to skip the class.
+			}
+		}
+		methodAnnotationCache.put(annotation, methods);
+		return methods.toArray(new Method[methods.size()]);
 	}
 	
 	/**

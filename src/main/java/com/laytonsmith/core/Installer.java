@@ -25,6 +25,8 @@ public final class Installer {
 		root.mkdirs();
 		//Create the includes folder
         new File(root, "includes").mkdirs();
+		//Extensions folder
+		new File(root, "extensions").mkdirs();
         //Check to see if the auto_include file exists. If not, include it now
         File auto_include = new File(root, "auto_include.ms");
         if(!auto_include.exists()){

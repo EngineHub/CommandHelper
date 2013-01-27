@@ -22,6 +22,7 @@ public enum Driver {
     PLAYER_KICK,
     WORLD_CHANGED,
     SIGN_CHANGED,
+	SERVER_COMMAND,
     BLOCK_BREAK,
     BLOCK_PLACE,
     TARGET_ENTITY, 

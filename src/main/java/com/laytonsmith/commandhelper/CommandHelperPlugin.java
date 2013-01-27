@@ -97,6 +97,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 	public void onLoad() {
 		Implementation.setServerType(Implementation.Type.BUKKIT);
 		Installer.Install(chDirectory);
+		ExtensionManager.Initialize(new File(chDirectory, "extensions"));
 	}
 
 	/**
