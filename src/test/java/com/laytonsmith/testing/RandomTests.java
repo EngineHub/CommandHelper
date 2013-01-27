@@ -119,6 +119,7 @@ public class RandomTests {
 				}
 			} catch (Throwable t) {
 				uhohs.put(f.getClass().getName(), t);
+				t.printStackTrace();
 			}
 		}
 		if (!StaticTest.brokenJunk.isEmpty()) {

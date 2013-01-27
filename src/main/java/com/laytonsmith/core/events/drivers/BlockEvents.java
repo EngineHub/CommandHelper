@@ -42,10 +42,10 @@ public class BlockEvents {
                     + "{player: The player's name | block: An array with "
                     + "keys 'type' (int), 'data' (int), 'X' (int), 'Y' (int), 'Z' (int) "
                     + "and 'world' (string) for the physical location of the block | "
-                    + "location: the locationArray of this block | "
-                    + "drops: an array of arrays (with keys 'type' (string), "
-                    + "'qty' (int), 'data' (int), 'enchants' (array)) of items the block will drop} | "
-                    + "xp: the xp that this block will drop, if any"
+                    + "location: the locationArray of this block | drops | xp} "
+                    + "{drops: an array of arrays (with keys 'type' (string), "
+                    + "'qty' (int), 'data' (int), 'enchants' (array)) of items the block will drop | "
+                    + "xp: the xp that this block will drop, if any} "
                     + "{drops|xp} "
                     + "{player|block|drops}";
         }
@@ -355,8 +355,8 @@ public class BlockEvents {
                     + "3: <macro> | 4: <macro> } "
                     + "This event is called when a player changes a sign. "
                     + "Cancelling the event cancels any edits completely."
-                    + "{player: The player's name | location: An array with keys 'X', 'Y', 'Z' and 'world' "
-                    + "for the physical location of the sign | text: An array with keys 0 thru 3 defining "
+                    + "{player: The player's name | location: an array usable as a locationArray while also "
+                    + "compatible with X,Y,Z,world indices | text: An array with keys 0 thru 3 defining "
                     + "every line on the sign}"
                     + "{1|2|3|4|text: An array with keys 0 thru 3 defining every line on the sign}"
                     + "{player|location|text}";

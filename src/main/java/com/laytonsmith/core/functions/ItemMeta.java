@@ -35,7 +35,7 @@ public class ItemMeta {
 	public static class get_armor_color extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
@@ -87,7 +87,7 @@ public class ItemMeta {
 	public static class set_armor_color extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
@@ -146,7 +146,7 @@ public class ItemMeta {
 	public static class is_leather_armor extends AbstractFunction{
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {

@@ -475,78 +475,41 @@ public final class Static {
     }
 
     /**
-     * This function breaks a string into chunks based on Minecraft line length,
-     * and newlines, then calls the LineCallback with each line.
-     * @param c
-     * @param msg 
-     */
-    public static void SendMessage(LineCallback c, String msg) {
-        String[] newlines = msg.split("\n");
-        for (String line : newlines) {
-            String[] arr = rParser.wordWrap(line);
-            for (String toMsg : arr) {                
-                //Trim just the right
-                for(int i = toMsg.length() - 1; i >= 0; i--){
-                    if(!Character.isWhitespace(toMsg.charAt(i))){
-                        toMsg = toMsg.substring(0, i + 1);
-                        break;
-                    }
-                }
-                c.run(toMsg);
-            }
-        }
+	 * This function sends a message to the player. If the player is not
+	 * online, a CRE is thrown.
+	 * @param p
+	 * @param msg
+	 */
+	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
+		String line = msg;
+		if (m instanceof MCPlayer) {
+			MCPlayer p = (MCPlayer) m;
+			if (p == null) {
+				throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, t);
+			}
+			p.sendMessage(line);
+		} else {
+			if (msg.matches("(?m).*\033.*")) {
+				//We have terminal colors, we need to reset them at the end
+				msg += TermColors.reset();
+			}
+			getLogger().log(Level.INFO, msg);
+		}
+	}
 
-    }
-
-    /**
-     * This function sends a message to the player. It is useful to use this function because:
-     * It handles newlines and wordwrapping for you.
-     * @param p
-     * @param msg 
-     */
-    public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
-//        SendMessage(new LineCallback() {
-//
-//            public void run(String line) {
-				String line = msg;
-                if (m instanceof MCPlayer) {
-                    MCPlayer p = (MCPlayer) m;
-                    if (p == null) {
-                        throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, t);
-                    }
-                    p.sendMessage(line);
-                } else {
-                    if (m != null) {
-                        m.sendMessage(line);
-                    } else {
-                        System.out.println(line);
-                    }
-                }
-//            }
-//        }, msg);
-    }
-
-    public static void SendMessage(final MCCommandSender m, String msg) {
-//        SendMessage(new LineCallback() {
-//
-//            public void run(String line) {
-				String line = msg;
-                MCPlayer p;
-                if (m instanceof MCPlayer) {
-                    p = (MCPlayer) m;
-                    if (p != null && p.isOnline()) {
-                        p.sendMessage(line);
-                    }
-                } else {
-                    if (m != null) {
-                        m.sendMessage(line);
-                    } else {
-                        System.out.println(line);
-                    }
-                }
-//            }
-//        }, msg);
-    }
+	/**
+	 * Works like {@link #SendMessage(com.laytonsmith.abstraction.MCCommandSender, java.lang.String, com.laytonsmith.core.constructs.Target)}
+	 * except it doesn't require a target, and ignores the message if the command sender is offline.
+	 * @param m
+	 * @param msg 
+	 */
+	public static void SendMessage(final MCCommandSender m, String msg) {
+		try{
+			SendMessage(m, msg, Target.UNKNOWN);
+		} catch(ConfigRuntimeException e){
+			//Ignored
+		}
+	}
 
     
 
