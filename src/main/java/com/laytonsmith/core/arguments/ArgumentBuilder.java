@@ -2,9 +2,15 @@ package com.laytonsmith.core.arguments;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * An argument builder returns a signature matcher, which allows for the
@@ -24,10 +30,12 @@ import java.util.List;
  */
 public class ArgumentBuilder {
 
-	private List<Signature> signatures;
+	private final List<Signature> signatures;
+	private final String originalSignature;
 
-	private ArgumentBuilder(List<Signature> signatures) {
+	private ArgumentBuilder(List<Signature> signatures, String originalSignature) {
 		this.signatures = signatures;
+		this.originalSignature = originalSignature;
 	}
 
 	public int signatureCount() {
@@ -45,7 +53,7 @@ public class ArgumentBuilder {
 	public static ArgumentBuilder Build(Signature signature) {
 		//Expand optional Arguments, so that no arguments that get put in this list have optional
 		//arguments. This simplifies processing down the line.
-		return new ArgumentBuilder(permutations(signature));
+		return new ArgumentBuilder(permutations(signature), signature.toString());
 	}
 
 	private static List<Signature> permutations(Signature s) {
@@ -80,12 +88,16 @@ public class ArgumentBuilder {
 		// shifts happen in the appropriate order.
 		outer: for (int i = 0; i < Math.pow(2, optionalCount); i++) {
 			List<Argument> args = new ArrayList<Argument>();
+			List<Argument> optionals = new ArrayList<Argument>();
 			int optIndex = 0;
 			for (int j = 0; j < s.getArguments().size(); j++) {
 				if (s.getArguments().get(j).isOptional()) {
 					if (((int) Math.pow(2, optIndex) & i) > 0) {
 						//Included in this permutation
 						args.add(s.getArguments().get(j));
+					} else {
+						//Otherwise, we still need to add it to the optionals list
+						optionals.add(s.getArguments().get(j));
 					}
 					optIndex++;
 				} else {
@@ -94,6 +106,7 @@ public class ArgumentBuilder {
 				}
 			}
 			Signature toAdd = new Signature(args.toArray(new Argument[args.size()]));
+			toAdd.addOptionals(optionals);
 			//Check to see if it's already added. If this EXACT one is added, that's fine,
 			//we can just skip it, otherwise we need to see if it's "fuzzy" equals, we
 			//need to throw an error.
@@ -110,9 +123,38 @@ public class ArgumentBuilder {
 		return new ArrayList<Signature>(list);
 	}
 	
-	public ArgList parse(Construct [] args){
-		//TODO: Finish this
-		return null;
+	public ArgList parse(Construct [] args, Target t){
+		signature: for(Signature s : signatures){
+			if(s.getArguments().size() == args.length){
+				for(int i = 0; i < args.length; i++){
+					Class<? extends Mixed> c1 = args[i].getClass();
+					Class<? extends Mixed> c2 = s.getArguments().get(i).getType();
+					if(!c2.isAssignableFrom(c1)){
+						//Not a match, moving on
+						continue signature;
+					}
+				}
+				//If we made it this far, it's a match, so carry on from here
+				Map<String, Mixed> ret = new HashMap<String, Mixed>();
+				//Fill in the optionals
+				for(Argument a : s.getDefaults()){
+					ret.put(a.getName(), a.getDefault());
+				}
+				//Now fill in the actual values
+				for(int i = 0; i < args.length; i++){
+					ret.put(s.getArguments().get(i).getName(), args[i]);
+				}
+				return new ArgList(ret);
+			}
+		}
+		//No matches were found. Throw an exception.
+		List<String> sent = new ArrayList<String>();
+		for(Construct arg : args){
+			sent.add(arg.typeName());
+		}
+		throw new ConfigRuntimeException("The arguments provided: " + StringUtils.Join(sent, ", ")
+				 + " did not match the function signature: " + originalSignature + ". (Check your arguments, and try again)", 
+				Exceptions.ExceptionType.CastException, t);
 	}
 
 	@Override

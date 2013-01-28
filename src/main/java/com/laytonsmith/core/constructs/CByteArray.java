@@ -1,6 +1,7 @@
 package com.laytonsmith.core.constructs;
 
 import com.laytonsmith.PureUtilities.Sizes;
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -14,6 +15,7 @@ import java.util.SortedMap;
  *
  * @author lsmith
  */
+@typename("byte_array")
 public class CByteArray extends Construct implements Sizable {
 	
 	/**

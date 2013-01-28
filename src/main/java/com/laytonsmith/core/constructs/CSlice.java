@@ -1,5 +1,6 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -9,6 +10,7 @@ import com.laytonsmith.core.functions.Exceptions;
  *
  * @author layton
  */
+@typename("slice")
 public class CSlice extends CArray {
     private long start;
     private long finish;

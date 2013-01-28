@@ -2,10 +2,13 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typename;
+
 /**
  *
  * @author Layton
  */
+@typename("void")
 public class CVoid extends Construct implements Cloneable{
     
     public CVoid(Target t){

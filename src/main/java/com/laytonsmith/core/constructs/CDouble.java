@@ -1,15 +1,12 @@
-
-
-
 package com.laytonsmith.core.constructs;
 
-import com.laytonsmith.core.exceptions.ConfigRuntimeException;
-import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.annotations.typename;
 
 /**
  *
  * @author layton
  */
+@typename("double")
 public class CDouble extends Construct implements Cloneable{
     
     public static final long serialVersionUID = 1L;

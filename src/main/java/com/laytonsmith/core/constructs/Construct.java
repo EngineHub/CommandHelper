@@ -29,6 +29,10 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         this.target = t;
     }
 	
+	/**
+	 * Returns true if the underlying value is null.
+	 * @return 
+	 */
 	public boolean isNull(){
 		return value == null;
 	}

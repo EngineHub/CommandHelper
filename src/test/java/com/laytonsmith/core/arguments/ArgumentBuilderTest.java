@@ -1,14 +1,16 @@
 package com.laytonsmith.core.arguments;
 
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
-import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import org.junit.After;
 import org.junit.AfterClass;
+import static org.junit.Assert.*;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import static org.junit.Assert.*;
 
 /**
  *
@@ -61,7 +63,7 @@ public class ArgumentBuilderTest {
 					new Argument("", CArray.class, "b")
 				));
 		//Meh. Not super reliable long term, but this will work.
-		assertEquals("CArray b\n[CString a], CArray b", a.toString());
+		assertEquals("array b\n[string a], array b", a.toString());
 	}
 	
 	@Test
@@ -70,12 +72,28 @@ public class ArgumentBuilderTest {
 					new Argument("", CString.class, "a").setOptional(),
 					new Argument("", CString.class, "b").setOptional()
 				);
-		assertEquals("\n[CString a]\n[CString a], [CString b]", a.toString());
+		assertEquals("\n[string a]\n[string a], [string b]", a.toString());
 		assertEquals(3, a.signatureCount());
 	}
 	
 	@Test
 	public void testParseArgs(){
+		CString a = new CString("a", Target.UNKNOWN);
+		ArgumentBuilder builder = ArgumentBuilder.Build(
+					new Argument("", CString.class, "a").setOptionalDefault(a),
+					new Argument("", CInt.class, "b"),
+					new Argument("", CArray.class, "c")
+				);
 		
+		CInt b = new CInt(1, Target.UNKNOWN);
+		CArray c = new CArray(Target.UNKNOWN, new CString("c", Target.UNKNOWN));
+		ArgList list1 = builder.parse(new Construct[]{a, b, c}, Target.UNKNOWN);
+		assertEquals(list1.get("a"), a);
+		assertEquals(list1.get("b"), b);
+		assertEquals(list1.get("c"), c);
+		ArgList list2 = builder.parse(new Construct[]{b, c}, Target.UNKNOWN);
+		assertEquals(list2.get("a"), a);
+		assertEquals(list2.get("b"), b);
+		assertEquals(list2.get("c"), c);
 	}
 }

@@ -1,5 +1,6 @@
 package com.laytonsmith.core.arguments;
 
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.constructs.CDouble;
@@ -14,7 +15,7 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  */
 public class Argument implements Documentation {
 	private final String docs;
-	private final Class clazz;
+	private final Class<?> clazz;
 	private final String name;
 	private boolean optional;
 	private boolean varargs;
@@ -181,7 +182,17 @@ public class Argument implements Documentation {
 
 	@Override
 	public String toString() {
-		return (optional?"[":"") + clazz.getSimpleName() + " " + name + (optional?"]":"");
+		String type = clazz.getSimpleName();
+		if(clazz.getAnnotation(typename.class) != null){
+			typename t = clazz.getAnnotation(typename.class);
+			String tt = t.value();
+			if(!"".equals(tt)){
+				type = tt;
+			}
+			//Otherwise, it's dynamic, and we can't get that anyways right now, because
+			//we don't have an instance.
+		}
+		return (optional?"[":"") + type + " " + name + (optional?"]":"");
 	}	
 
 	public String getName() {

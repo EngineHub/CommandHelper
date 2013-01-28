@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
@@ -10,6 +11,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
  *
  * @author Layton
  */
+@typename("string")
 public class CString extends Construct implements Cloneable, ArrayAccess{
 	
     public CString(String value, Target t){

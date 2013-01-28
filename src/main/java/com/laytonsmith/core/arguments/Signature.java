@@ -1,6 +1,7 @@
 package com.laytonsmith.core.arguments;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -17,6 +18,8 @@ import java.util.List;
 public class Signature implements Comparable<Signature> {
 	private List<Argument> args;
 	private boolean containsOptional = false;
+	private List<Argument> optionals = null;
+	
 	public Signature(Argument ... args){
 		this.args = Arrays.asList(args);
 		for(int i = 0; i < args.length; i++){
@@ -30,6 +33,10 @@ public class Signature implements Comparable<Signature> {
 			}
 		}
 	}
+	
+	/*package*/ void addOptionals(List<Argument> optionals){
+		this.optionals = optionals;
+	}
 
 	public boolean containsOptional() {
 		return containsOptional;
@@ -37,6 +44,18 @@ public class Signature implements Comparable<Signature> {
 	
 	public List<Argument> getArguments(){
 		return new ArrayList<Argument>(args);
+	}
+	
+	/**
+	 * Returns the optionals list.
+	 * @return 
+	 */
+	/*package*/ List<Argument> getDefaults(){
+		if(optionals == null){
+			return new ArrayList<Argument>();
+		} else {
+			return new ArrayList<Argument>(optionals);
+		}
 	}
 
 
