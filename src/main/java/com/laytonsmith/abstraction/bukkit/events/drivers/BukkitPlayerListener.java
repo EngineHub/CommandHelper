@@ -110,6 +110,7 @@ public class BukkitPlayerListener implements Listener {
 					fireChat(event);
 				} else {
 					final AsyncPlayerChatEvent copy = new AsyncPlayerChatEvent(false, event.getPlayer(), event.getMessage(), event.getRecipients());
+					copy.setFormat(event.getFormat());
 					//event.setCancelled(true);
 					Future f = Bukkit.getServer().getScheduler().callSyncMethod(CommandHelperPlugin.self, new Callable() {
 						public Object call() throws Exception {
@@ -130,6 +131,7 @@ public class BukkitPlayerListener implements Listener {
 					}
 					event.setCancelled(copy.isCancelled());
 					event.setMessage(copy.getMessage());
+					event.setFormat(copy.getFormat());
 				}
 
 			} else {
