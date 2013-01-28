@@ -51,6 +51,10 @@ public class BukkitMCItemMeta implements MCItemMeta {
 	public Object getHandle() {
 		return im;
 	}
+	
+	public ItemMeta asItemMeta() {
+		return im;
+	}
 
 	@Override
 	public boolean equals(Object obj) {

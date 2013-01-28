@@ -55,7 +55,11 @@ public class ItemMeta {
 			} else {
 				slot = Static.getInt32(args[0], t);
 			}
-			MCItemMeta im = p.getItemAt(slot).getItemMeta();
+			MCItemStack is = p.getItemAt(slot);
+			if (is == null) {
+				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+			}
+			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta){
 				return ObjectGenerator.GetGenerator().color(((MCLeatherArmorMeta)im).getColor(), t);
 			} else {
@@ -105,18 +109,29 @@ public class ItemMeta {
 			if(args.length == 3){
 				p = Static.GetPlayer(args[0], t);
 				slot = Static.getInt32(args[1], t);
-				color = (CArray)args[2];
+				if (args[2] instanceof CArray) {
+					color = (CArray)args[2];
+				} else {
+					throw new Exceptions.FormatException("Expected an array but recieved " + args[2] + " instead.", t);
+				}
 			} else {
 				slot = Static.getInt32(args[0], t);
-				color = (CArray)args[1];
+				if (args[1] instanceof CArray) {
+					color = (CArray)args[1];
+				} else {
+					throw new Exceptions.FormatException("Expected an array but recieved " + args[1] + " instead.", t);
+				}
 			}
 			MCItemStack is = p.getItemAt(slot);
+			if (is == null) {
+				throw new Exceptions.CastException("There is no item at slot " + slot, t);
+			}
 			MCItemMeta im = is.getItemMeta();
 			if(im instanceof MCLeatherArmorMeta){
 				((MCLeatherArmorMeta)im).setColor(ObjectGenerator.GetGenerator().color(color, t));
 				is.setItemMeta(im);
 			} else {
-				throw new Exceptions.CastException("The item at " + slot + " is not leather armor", t);
+				throw new Exceptions.CastException("The item at slot " + slot + " is not leather armor", t);
 			}
 			return new CVoid(t);
 		}

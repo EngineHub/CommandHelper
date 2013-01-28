@@ -130,7 +130,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
-			MCEntity ent = Static.getEntity(id, t);
+			MCEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
 				return new CNull(t);
 			} else if (ent instanceof MCAgeable) {
@@ -183,7 +183,7 @@ public class EntityManagement {
 			if (args.length == 3) {
 				lock = (boolean) Static.getBoolean(args[2]);
 			}
-			MCEntity ent = Static.getEntity(id, t);
+			MCEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
 				return new CNull(t);
 			} else if (ent instanceof MCAgeable) {
@@ -330,7 +330,7 @@ public class EntityManagement {
 					throw new ConfigRuntimeException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
 				}
 			}
-			ent = Static.getEntity(id, t);
+			ent = Static.getLivingEntity(id, t);
 			if (ent instanceof MCLivingEntity) {
 				MCProjectile shot = ((MCLivingEntity) ent).launchProjectile(toShoot);
 				return new CInt(shot.getEntityId(), t);
