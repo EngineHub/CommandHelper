@@ -43,7 +43,7 @@ public class ArgumentBuilderTest {
 	@Test
 	public void testBuild1() {
 		ArgumentBuilder b = ArgumentBuilder.Build(
-					new Signature(
+					new Signature(1,
 						new Argument("", CString.class, "a").setOptional(),
 						new Argument("", CArray.class, "b"),
 						new Argument("", CString.class, "c").setOptional(),
@@ -58,7 +58,7 @@ public class ArgumentBuilderTest {
 	 */
 	@Test
 	public void testBuild2(){
-		ArgumentBuilder a = ArgumentBuilder.Build(new Signature(
+		ArgumentBuilder a = ArgumentBuilder.Build(new Signature(1,
 					new Argument("", CString.class, "a").setOptional(),
 					new Argument("", CArray.class, "b")
 				));
@@ -95,5 +95,37 @@ public class ArgumentBuilderTest {
 		assertEquals(list2.get("a"), a);
 		assertEquals(list2.get("b"), b);
 		assertEquals(list2.get("c"), c);
+	}
+	
+	@Test
+	public void testVarArgsWithOutArray(){
+		ArgumentBuilder builder = ArgumentBuilder.Build(
+					new Argument("", CArray.class, "var").setVarargs()
+				);
+		ArgList list = builder.parse(new Construct[]{new CString("", Target.UNKNOWN), new CString("", Target.UNKNOWN)}, Target.UNKNOWN);
+		CArray ca = list.get("var");
+		assertEquals(2, ca.size());
+	}
+	
+	@Test public void testVarArgsWithArray(){
+		ArgumentBuilder builder = ArgumentBuilder.Build(
+					new Argument("", CArray.class, "var").setVarargs()
+				);
+		ArgList list = builder.parse(new Construct[]{
+			new CArray(Target.UNKNOWN, new CString("", Target.UNKNOWN), new CString("", Target.UNKNOWN))
+		}, Target.UNKNOWN);
+		CArray ca = list.get("var");
+		assertEquals(2, ca.size());
+	}
+	
+	@Test public void testMultipleSignatures(){
+		ArgumentBuilder builder = ArgumentBuilder.Build(
+					new Signature(1, new Argument("", CString.class, "a")),
+					new Signature(2, new Argument("", CInt.class, "a"))
+				);
+		ArgList list1 = builder.parse(new Construct[]{new CString("", Target.UNKNOWN)}, Target.UNKNOWN);
+		assertEquals(CString.class, list1.get("a").getClass());
+		ArgList list2 = builder.parse(new Construct[]{new CInt(1, Target.UNKNOWN)}, Target.UNKNOWN);
+		assertEquals(CInt.class, list2.get("a").getClass());
 	}
 }

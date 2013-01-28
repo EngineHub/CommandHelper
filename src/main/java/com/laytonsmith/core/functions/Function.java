@@ -4,9 +4,9 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
@@ -14,6 +14,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.List;
 
 /**
@@ -21,13 +22,29 @@ import java.util.List;
  * to it.
  * @author layton
  */
-public interface Function extends FunctionBase, Documentation {    
+public interface Function extends FunctionBase, Documentation {
+	
+	/**
+	 * Returns the expected return type of this function. This is
+	 * used for both compile time checking of data types, and documentation
+	 * purposes.
+	 * @return 
+	 */
+	Class<? extends Mixed> returnType();
+	
+	/**
+	 * Returns the ArgumentBuilder object for this function. This is used
+	 * during compile time to check types, where applicable, and to ease parsing
+	 * of the function's arguments, and for documentation purposes.
+	 * @return 
+	 */
+	ArgumentBuilder arguments();
 
     /**
      * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)
      * @return An array of the exception enums, or null, if the function throws no catchable exceptions.
      */
-    public ExceptionType[] thrown();
+    ExceptionType[] thrown();
 
     /**
      * Whether or not a function needs to be checked against the permissions file, if there are possible security concerns
@@ -36,7 +53,7 @@ public interface Function extends FunctionBase, Documentation {
      * usage in game. Note that the config script is never barred from compiling any function.
      * @return 
      */
-    public boolean isRestricted();
+    boolean isRestricted();
 
     /**
      * If a function doesn't want to have to deal with a variable as a variable, but instead wants to recieve it as
@@ -45,7 +62,7 @@ public interface Function extends FunctionBase, Documentation {
      * the exec function will receive an IVariable Construct.
      * @return 
      */
-    public boolean preResolveVariables();
+    boolean preResolveVariables();
 
     /**
      * Whether or not to run this function asynchronously from the main server thread. If you 
@@ -55,7 +72,7 @@ public interface Function extends FunctionBase, Documentation {
      * function in whatever context the script is currently running in.
      * @return 
      */
-    public Boolean runAsync();
+    Boolean runAsync();
 
     /**
      * This function is invoked when the script is run. The line number is provided so that if there is an error,
@@ -73,14 +90,14 @@ public interface Function extends FunctionBase, Documentation {
      * @return
      * @throws CancelCommandException 
      */
-    public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException;
+    Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException;
     
     /**
      * If a function needs a code tree instead of a resolved construct, it should return true here. Most
      * functions will return false for this value.
      * @return 
      */
-    public boolean useSpecialExec();
+    boolean useSpecialExec();
     
     /**
      * If useSpecialExec indicates it needs the code tree instead of the resolved constructs,
@@ -90,13 +107,13 @@ public interface Function extends FunctionBase, Documentation {
      * @param nodes
      * @return 
      */
-    public Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
+    Construct execs(Target t, Environment env, Script parent, ParseTree ... nodes);    
 	
 	/**
 	 * Returns an array of example scripts, which are used for documentation purposes.
 	 * @return 
 	 */
-	public ExampleScript[] examples() throws ConfigCompileException;
+	ExampleScript[] examples() throws ConfigCompileException;
 	
 	/**
 	 * Returns true if this function should be profilable. Only a very select few functions
@@ -104,20 +121,20 @@ public interface Function extends FunctionBase, Documentation {
 	 * annotation is present.
 	 * @return 
 	 */
-	public boolean shouldProfile();	
+	boolean shouldProfile();	
 	
 	/**
 	 * Returns the minimum level at which this function should be profiled at.
 	 * @return 
 	 */
-	public LogLevel profileAt();
+	LogLevel profileAt();
 	
 	/**
 	 * Returns the message to use when this function gets profiled, if
 	 * useSpecialExec returns false.
 	 * @return 
 	 */
-	public String profileMessage(Construct ... args);
+	String profileMessage(Construct ... args);
 	
 	/**
 	 * Returns the message to use when this function gets profiled, if
@@ -125,5 +142,5 @@ public interface Function extends FunctionBase, Documentation {
 	 * @param args
 	 * @return 
 	 */
-	public String profileMessageS(List<ParseTree> args);
+	String profileMessageS(List<ParseTree> args);
 }

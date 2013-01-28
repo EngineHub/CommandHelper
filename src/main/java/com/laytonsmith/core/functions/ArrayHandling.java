@@ -1,11 +1,14 @@
 package com.laytonsmith.core.functions;
 
-import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.PureUtilities.RunnableQueue;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -16,6 +19,7 @@ import com.laytonsmith.core.functions.BasicLogic.equals;
 import com.laytonsmith.core.functions.BasicLogic.equals_ic;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.LinkedHashSet;
@@ -46,10 +50,7 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				return new CInt(((CArray) args[0]).size(), t);
-			}
-			throw new ConfigRuntimeException("Argument 1 of array_size must be an array", ExceptionType.CastException, t);
+			return new CInt(((CArray)getBuilder().parse(args, this, t).get("array")).size(), t);
 		}
 
 		public ExceptionType[] thrown() {
@@ -57,7 +58,7 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "int {array} Returns the size of this array as an integer.";
+			return "Returns the size of this array as an integer.";
 		}
 
 		public boolean isRestricted() {
@@ -77,6 +78,14 @@ public class ArrayHandling {
 			return new ExampleScript[]{
 				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5))"),				
 			};
+		}
+
+		public Class<? extends Mixed> returnType() {
+			return CInt.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(new Argument("", CArray.class, "array"));
 		}
 				
 	}
@@ -230,13 +239,25 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "mixed {array, index, [default]} Returns the element specified at the index of the array. ---- If the element doesn't exist, an exception is thrown. "
+			return "Returns the element specified at the index of the array. ---- If the element doesn't exist, an exception is thrown. "
 					+ "array_get(array, index). Note also that as of 3.1.2, you can use a more traditional method to access elements in an array: "
 					+ "array[index] is the same as array_get(array, index), where array is a variable, or function that is an array. In fact, the compiler"
 					+ " does some magic under the covers, and literally converts array[index] into array_get(array, index), so if there is a problem "
 					+ "with your code, you will get an error message about a problem with the array_get function, even though you may not be using "
 					+ "that function directly. If using the plain function access, then if a default is provided, the function will always return that value if the"
 					+ " array otherwise doesn't have a value there. This is opposed to throwing an exception or returning null.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return Mixed.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to get the element from", CArray.class, "array"),
+						new Argument("The index of the array, either an int or string", Mixed.class, "index"),
+						new Argument("The default value to return, should this array not contain the specified key", Mixed.class, "default").setOptional()
+					);
 		}
 
 		public boolean isRestricted() {
@@ -283,6 +304,7 @@ public class ArrayHandling {
 				OptimizationOption.OPTIMIZE_CONSTANT
 			);
 		}
+
 	}
 
 	@api
@@ -297,15 +319,14 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				try {
-					((CArray) args[0]).set(args[1], args[2], t);
-				} catch (IndexOutOfBoundsException e) {
-					throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
-				}
-				return new CVoid(t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CArray array = list.get("array");
+			try {
+				array.set((Construct)list.get("index"), (Construct)list.get("value"), t);
+			} catch (IndexOutOfBoundsException e) {
+				throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
 			}
-			throw new ConfigRuntimeException("Argument 1 of array_set must be an array, and argument 2 must be an integer", ExceptionType.CastException, t);
+			return new CVoid(t);
 		}
 
 		public ExceptionType[] thrown() {
@@ -313,8 +334,20 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "void {array, index, value} Sets the value of the array at the specified index. array_set(array, index, value). Returns void. If"
-					+ " the element at the specified index isn't already set, throws an exception. Use array_push to avoid this.";
+			return "Sets the value of the array at the specified index. array_set(array, index, value). Returns void. If"
+					+ " the element at the specified index isn't already set, throws an exception, if this is a normal array. Use array_push to avoid this.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return CVoid.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to set", CArray.class, "array"),
+						new Argument("The index of the value which should be set", Mixed.class, "index"),
+						new Argument("The value to actually set in the array", Mixed.class, "value")
+					);
 		}
 
 		public boolean isRestricted() {
@@ -367,7 +400,19 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "void {array, value, [value2...]} Pushes the specified value(s) onto the end of the array";
+			return "Pushes the specified value(s) onto the end of the array";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return CVoid.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to push onto", CArray.class, "array"),
+						new Argument("The value to push", Mixed.class, "value"),
+						new Argument("More values, if pushing on more than one at once", Mixed.class, "value2").setVarargs()
+					);
 		}
 
 		public boolean isRestricted() {

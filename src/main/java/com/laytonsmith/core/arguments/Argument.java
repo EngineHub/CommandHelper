@@ -3,6 +3,7 @@ package com.laytonsmith.core.arguments;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
@@ -60,7 +61,7 @@ public class Argument implements Documentation {
 	 * @return 
 	 */
 	public Argument setVarargs(){
-		return setVarargs(true);
+		return setVarargs(true).setOptional(true);
 	}
 	
 	/**
@@ -121,11 +122,15 @@ public class Argument implements Documentation {
 	
 	/**
 	 * Sets the varargs flag as specified, then return
-	 * this, for chaining.
+	 * this, for chaining. If an argument is varargs, it is
+	 * also optional, by definition, and defaults to an empty array.
 	 * @param varargs
 	 * @return 
 	 */
 	public Argument setVarargs(boolean varargs){
+		if(clazz != CArray.class){
+			throw new Error("Vararg status can only be set on an Argument that is a CArray type.");
+		}
 		this.varargs = varargs;
 		return this;
 	}
@@ -192,7 +197,7 @@ public class Argument implements Documentation {
 			//Otherwise, it's dynamic, and we can't get that anyways right now, because
 			//we don't have an instance.
 		}
-		return (optional?"[":"") + type + " " + name + (optional?"]":"");
+		return (optional?"[":"") + type + (varargs?"...":"") + " " + name + (optional?"]":"");
 	}	
 
 	public String getName() {

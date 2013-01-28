@@ -5,6 +5,7 @@ import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -22,6 +23,8 @@ import java.util.Map;
 public abstract class AbstractFunction implements Function {
 
 	private boolean shouldProfile = true;
+	private Map<Class<? extends AbstractFunction>, ArgumentBuilder> cachedBuilders 
+			= new HashMap<Class<? extends AbstractFunction>, ArgumentBuilder>();
 
 	protected AbstractFunction() {
 		//If we have the noprofile annotation, cache that we don't want to profile.
@@ -112,6 +115,18 @@ public abstract class AbstractFunction implements Function {
 			}
 		}
 		return "Executing function: " + this.getName() + "(" + b.toString() + ")";
+	}
+	
+	/**
+	 * Returns the cached ArgumentBuilder returned by {@link #arguments()}. Since
+	 * building the arguments can be a decently time consuming task, this should be used instead.
+	 * @return 
+	 */
+	protected ArgumentBuilder getBuilder(){
+		if(!cachedBuilders.containsKey(this.getClass())){
+			cachedBuilders.put(this.getClass(), this.arguments());
+		}
+		return cachedBuilders.get(this.getClass());
 	}
 	
 	/**

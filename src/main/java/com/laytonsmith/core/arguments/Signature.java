@@ -19,8 +19,16 @@ public class Signature implements Comparable<Signature> {
 	private List<Argument> args;
 	private boolean containsOptional = false;
 	private List<Argument> optionals = null;
+	private int signatureId;
 	
-	public Signature(Argument ... args){
+	/**
+	 * Creates a new Signature. The signatureId is the id that is used
+	 * when multiple signatures are provided, to differentiate the various
+	 * signature types.
+	 * @param signatureId
+	 * @param args 
+	 */
+	public Signature(int signatureId, Argument ... args){
 		this.args = Arrays.asList(args);
 		for(int i = 0; i < args.length; i++){
 			Argument a = args[i];
@@ -32,6 +40,11 @@ public class Signature implements Comparable<Signature> {
 				throw new Error("Only the last argument in a signature may be varargs");
 			}
 		}
+		this.signatureId = signatureId;
+	}
+	
+	public int getSignatureId(){
+		return signatureId;
 	}
 	
 	/*package*/ void addOptionals(List<Argument> optionals){
@@ -115,6 +128,14 @@ public class Signature implements Comparable<Signature> {
 	@Override
 	public String toString() {
 		return StringUtils.Join(args, ", ");
+	}
+
+	boolean isVararg() {
+		if(args.isEmpty()){
+			return false;
+		} else {
+			return args.get(args.size() - 1).isVarargs();
+		}
 	}
 	
 }

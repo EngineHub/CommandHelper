@@ -1,10 +1,12 @@
 package com.laytonsmith.core.arguments;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,6 +34,15 @@ public class ArgumentBuilder {
 
 	private final List<Signature> signatures;
 	private final String originalSignature;
+	
+	/**
+	 * This can be used for functions that have no arguments, to cut down
+	 * on object creation.
+	 */
+	public static final ArgumentBuilder NONE;
+	static{
+		NONE = ArgumentBuilder.Build(new Argument[]{});
+	}
 
 	private ArgumentBuilder(List<Signature> signatures, String originalSignature) {
 		this.signatures = signatures;
@@ -43,17 +54,26 @@ public class ArgumentBuilder {
 	}
 	
 	/**
-	 * Convenience method, if you are building the signature inline.
+	 * Convenience method, if you are building the signature inline, and there
+	 * is only one signature. It will be assigned the id 1, however, this won't be necessary,
+	 * as there is no need to differentiate between signature types, since there can only
+	 * be one.
 	 */
 	public static ArgumentBuilder Build(Argument ... args){
-		Signature s = new Signature(args);
+		Signature s = new Signature(1, args);
 		return Build(s);
 	}
 
-	public static ArgumentBuilder Build(Signature signature) {
+	public static ArgumentBuilder Build(Signature ... signature) {
 		//Expand optional Arguments, so that no arguments that get put in this list have optional
 		//arguments. This simplifies processing down the line.
-		return new ArgumentBuilder(permutations(signature), signature.toString());
+		List<Signature> signatures = new ArrayList<Signature>();
+		List<String> originals = new ArrayList<String>();
+		for(Signature s : signature){
+			signatures.addAll(permutations(s));
+			originals.add(s.toString());
+		}
+		return new ArgumentBuilder(signatures, StringUtils.Join(originals, " | "));
 	}
 
 	private static List<Signature> permutations(Signature s) {
@@ -105,7 +125,7 @@ public class ArgumentBuilder {
 					args.add(s.getArguments().get(j));
 				}
 			}
-			Signature toAdd = new Signature(args.toArray(new Argument[args.size()]));
+			Signature toAdd = new Signature(s.getSignatureId(), args.toArray(new Argument[args.size()]));
 			toAdd.addOptionals(optionals);
 			//Check to see if it's already added. If this EXACT one is added, that's fine,
 			//we can just skip it, otherwise we need to see if it's "fuzzy" equals, we
@@ -123,10 +143,25 @@ public class ArgumentBuilder {
 		return new ArrayList<Signature>(list);
 	}
 	
-	public ArgList parse(Construct [] args, Target t){
+	/**
+	 * Parses the arguments out of the received parameters. If Function is
+	 * provided, the error message contains a more specific error message, though
+	 * the parameter may be null. This returns an ArgList object, which can then
+	 * be used to grab parameters from, based on parameter name.
+	 * @param args
+	 * @param f
+	 * @param t
+	 * @return 
+	 */
+	public ArgList parse(Construct [] args, Function f, Target t){
 		signature: for(Signature s : signatures){
-			if(s.getArguments().size() == args.length){
-				for(int i = 0; i < args.length; i++){
+			if(s.getArguments().size() == args.length 
+					|| (s.isVararg() && args.length >= s.getArguments().size())){
+				inner: for(int i = 0; i < s.getArguments().size(); i++){
+					if(i == s.getArguments().size() - 1 && s.isVararg()){
+						//Skip this, it does match, regardless of the type
+						break inner;
+					}
 					Class<? extends Mixed> c1 = args[i].getClass();
 					Class<? extends Mixed> c2 = s.getArguments().get(i).getType();
 					if(!c2.isAssignableFrom(c1)){
@@ -141,10 +176,25 @@ public class ArgumentBuilder {
 					ret.put(a.getName(), a.getDefault());
 				}
 				//Now fill in the actual values
-				for(int i = 0; i < args.length; i++){
-					ret.put(s.getArguments().get(i).getName(), args[i]);
+				for(int i = 0; i < s.getArguments().size(); i++){
+					if(i == s.getArguments().size() - 1 && s.getArguments().get(i).isVarargs()){
+						CArray ca;
+						//Finish up the arguments, putting them into a vararg array, unless this is
+						//itself an array, in which case, just use it as is
+						if(args.length == i + 1 && args[i] instanceof CArray){
+							ca = (CArray)args[i];
+						} else {
+							ca = new CArray(t);
+							for(int j = i; j < args.length; j++){
+								ca.push(args[j]);
+							}
+						}
+						ret.put(s.getArguments().get(i).getName(), ca);
+					} else {
+						ret.put(s.getArguments().get(i).getName(), args[i]);
+					}
 				}
-				return new ArgList(ret);
+				return new ArgList(s.getSignatureId(), ret);
 			}
 		}
 		//No matches were found. Throw an exception.
@@ -153,7 +203,8 @@ public class ArgumentBuilder {
 			sent.add(arg.typeName());
 		}
 		throw new ConfigRuntimeException("The arguments provided: " + StringUtils.Join(sent, ", ")
-				 + " did not match the function signature: " + originalSignature + ". (Check your arguments, and try again)", 
+				 + " did not match the function signature" + (f==null?"":" of " + f.getName()) 
+				+ ": " + originalSignature + ". (Check your arguments, and try again)", 
 				Exceptions.ExceptionType.CastException, t);
 	}
 

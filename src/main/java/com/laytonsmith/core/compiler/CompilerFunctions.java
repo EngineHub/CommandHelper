@@ -3,6 +3,9 @@ package com.laytonsmith.core.compiler;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -11,6 +14,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.DummyFunction;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
@@ -46,7 +50,7 @@ public class CompilerFunctions {
 
 		@Override
 		public String docs() {
-			return "mixed {c...} Used internally by the compiler. You shouldn't use it.";
+			return "Used internally by the compiler. You shouldn't use it.";
 		}
 
 		@Override
@@ -69,6 +73,14 @@ public class CompilerFunctions {
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			return new CVoid(t);
 		}
+
+		public Class<? extends Mixed> returnType() {
+			return CVoid.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(new Argument("", CArray.class, "c"));
+		}
 	}
 
 	@api
@@ -77,12 +89,21 @@ public class CompilerFunctions {
 
 		@Override
 		public String docs() {
-			return "CEntry {label, content} Dynamically creates a CEntry. This is used internally by the "
+			return "Dynamically creates a CEntry. This is used internally by the "
 					+ "compiler.";
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CEntry(args[0], args[1], t);
+			ArgList list = this.getBuilder().parse(args, t);
+			return new CEntry((Construct)list.get("label"), (Construct)list.get("content"), t);
+		}
+
+		public Class<? extends Mixed> returnType() {
+			return CEntry.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(new Argument("", CString.class, "label"), new Argument("", CString.class, "content"));
 		}
 	}
 
@@ -504,6 +525,14 @@ public class CompilerFunctions {
 				return tree;
 			}
 		}
+
+		public Class<? extends Mixed> returnType() {
+			return Mixed.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(new Argument("", CArray.class, "var").setVarargs());
+		}
 	}
 
 	@api
@@ -524,6 +553,14 @@ public class CompilerFunctions {
 			o.toString();
 			return new CVoid(t);
 		}
+
+		public Class<? extends Mixed> returnType() {
+			return Mixed.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
+		}
 	}
 
 	@api
@@ -532,7 +569,7 @@ public class CompilerFunctions {
 
 		@Override
 		public String docs() {
-			return "exception {[argument]} Registers as a dynamic component, for optimization testing; that is"
+			return "Registers as a dynamic component, for optimization testing; that is"
 					+ " to say, this will not be optimizable ever."
 					+ " It simply returns the argument provided, or void if none.";
 		}
@@ -543,38 +580,54 @@ public class CompilerFunctions {
 			}
 			return args[0];
 		}
-	}
 
-	@api
-	public static class __cbrace__ extends DummyFunction implements Optimizable {
-
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			throw new UnsupportedOperationException("Not supported yet.");
+		public Class<? extends Mixed> returnType() {
+			return Mixed.class;
 		}
 
-		@Override
-		public Set<OptimizationOption> optimizationOptions() {
-			return EnumSet.of(
-					OptimizationOption.OPTIMIZE_DYNAMIC);
-		}
-
-		@Override
-		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-			FileOptions options = new FileOptions(new EnumMap<FileOptions.Directive, String>(FileOptions.Directive.class), Target.UNKNOWN);
-			if (!children.isEmpty()) {
-				options = children.get(0).getFileOptions();
-			}
-			ParseTree node;
-			if (children.isEmpty()) {
-				node = new ParseTree(new CVoid(t), options);
-			} else if (children.size() == 1) {
-				node = children.get(0);
-			} else {
-				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
-				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
-						+ " report this error to the developer.", t);
-			}
-			return new ParseTree(new CBrace(node), options);
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(new Argument("", Mixed.class, "argument").setOptional());
 		}
 	}
+
+//	@api
+//	public static class __cbrace__ extends DummyFunction implements Optimizable {
+//
+//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+//			throw new UnsupportedOperationException("Not supported yet.");
+//		}
+//
+//		@Override
+//		public Set<OptimizationOption> optimizationOptions() {
+//			return EnumSet.of(
+//					OptimizationOption.OPTIMIZE_DYNAMIC);
+//		}
+//
+//		@Override
+//		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+//			FileOptions options = new FileOptions(new EnumMap<FileOptions.Directive, String>(FileOptions.Directive.class), Target.UNKNOWN);
+//			if (!children.isEmpty()) {
+//				options = children.get(0).getFileOptions();
+//			}
+//			ParseTree node;
+//			if (children.isEmpty()) {
+//				node = new ParseTree(new CVoid(t), options);
+//			} else if (children.size() == 1) {
+//				node = children.get(0);
+//			} else {
+//				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
+//				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
+//						+ " report this error to the developer.", t);
+//			}
+//			return new ParseTree(new CBrace(node), options);
+//		}
+//
+//		public Class<? extends Mixed> returnType() {
+//			throw new UnsupportedOperationException("Not supported yet.");
+//		}
+//
+//		public ArgumentBuilder arguments() {
+//			throw new UnsupportedOperationException("Not supported yet.");
+//		}
+//	}
 }
