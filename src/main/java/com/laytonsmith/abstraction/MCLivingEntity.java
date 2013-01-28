@@ -16,6 +16,7 @@ import java.util.Map;
 public interface MCLivingEntity extends MCEntity {
 
 	public void addEffect(int potionID, int strength, int seconds, Target t);
+	public boolean removeEffect(int potionID);
 	public List<MCEffect> getEffects();
     public void damage(int amount);
     public void damage(int amount, MCEntity source);
@@ -42,9 +43,9 @@ public interface MCLivingEntity extends MCEntity {
     public void setRemainingAir(int ticks);
     public Map<MCEquipmentSlot, MCItemStack> getEquipment();
     public void setEquipment(Map<MCEquipmentSlot, MCItemStack> emap);
-	
+
 	public static class MCEffect{
-		
+
 		private int potionID;
 		private int strength;
 		private int secondsRemaining;
@@ -65,6 +66,6 @@ public interface MCLivingEntity extends MCEntity {
 		public int getSecondsRemaining() {
 			return secondsRemaining;
 		}
-		
+
 	}
 }

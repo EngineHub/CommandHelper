@@ -13,14 +13,14 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
 /**
- * 
+ *
  * @author jb_aero
  */
 public class EntityManagement {
 	public static String docs(){
         return "This class of functions allow entities to be managed.";
     }
-	
+
 	@api
 	public static class entity_remove extends AbstractFunction {
 
@@ -66,9 +66,9 @@ public class EntityManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class entity_type extends AbstractFunction {
 
@@ -109,9 +109,9 @@ public class EntityManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class get_mob_age extends AbstractFunction {
 
@@ -130,7 +130,7 @@ public class EntityManagement {
 		public Construct exec(Target t, Environment environment,
 				Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
-			MCEntity ent = Static.getEntity(id, t);
+			MCEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
 				return new CNull(t);
 			} else if (ent instanceof MCAgeable) {
@@ -157,9 +157,9 @@ public class EntityManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 	@api
 	public static class set_mob_age extends AbstractFunction {
 
@@ -183,7 +183,7 @@ public class EntityManagement {
 			if (args.length == 3) {
 				lock = (boolean) Static.getBoolean(args[2]);
 			}
-			MCEntity ent = Static.getEntity(id, t);
+			MCEntity ent = Static.getLivingEntity(id, t);
 			if (ent == null) {
 				return new CNull(t);
 			} else if (ent instanceof MCAgeable) {
@@ -212,9 +212,77 @@ public class EntityManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class set_mob_effect extends AbstractFunction {
+
+		public String getName() {
+			return "set_mob_effect";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{3, 4};
+		}
+
+		public String docs() {
+			return "boolean {mobId, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30."
+					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
+					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects for a"
+					+ " complete list of potions that can be added. To remove an effect, set the strength (or duration) to 0."
+					+ " It returns true if the effect was added or removed as desired. It returns false if the effect was"
+					+ " not added or removed as desired (however, this currently only will happen if an effect is attempted"
+					+ " to be removed, yet isn't already on the mob).";
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.BadEntityException,
+                        ExceptionType.RangeException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+			int id = (int) Static.getInt(args[0], t);
+			MCEntity ent = Static.getEntity(id, t);
+
+			if (ent == null) {
+				return new CNull(t);
+			} else if (ent instanceof MCLivingEntity) {
+
+				MCLivingEntity mob = ((MCLivingEntity) ent);
+
+				int effect = Static.getInt32(args[1], t);
+
+				int strength = Static.getInt32(args[2], t);
+				int seconds = 30;
+				if (args.length == 4) {
+					seconds = Static.getInt32(args[3], t);
+				}
+
+				if (seconds == 0 || strength == 0) {
+					return new CBoolean(mob.removeEffect(effect), t);
+				} else {
+					mob.addEffect(effect, strength, seconds, t);
+					return new CBoolean(true, t);
+				}
+			} else {
+				throw new ConfigRuntimeException("Entity (" + id + ") is not living", ExceptionType.BadEntityException, t);
+			}
+		}
+	}
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class shoot_projectile extends AbstractFunction {
 
@@ -243,7 +311,7 @@ public class EntityManagement {
 					try {
 						id = Static.getInt32(args[0], t);
 					} catch (ConfigRuntimeException notEntIDEither) {
-						throw new ConfigRuntimeException("Could not find an entity matching " + args[0] + "!", 
+						throw new ConfigRuntimeException("Could not find an entity matching " + args[0] + "!",
 								ExceptionType.BadEntityException, t);
 					}
 				}
@@ -262,7 +330,7 @@ public class EntityManagement {
 					throw new ConfigRuntimeException(args[1] + " is not a valid Projectile", ExceptionType.FormatException, t);
 				}
 			}
-			ent = Static.getEntity(id, t);
+			ent = Static.getLivingEntity(id, t);
 			if (ent instanceof MCLivingEntity) {
 				MCProjectile shot = ((MCLivingEntity) ent).launchProjectile(toShoot);
 				return new CInt(shot.getEntityId(), t);
@@ -277,19 +345,19 @@ public class EntityManagement {
 
 		public Integer[] numArgs() {
 			return new Integer[]{0, 1, 2};
-		} 
+		}
 
 		public String docs() {
 			return "int {[player[, projectile]] | [entityID[, projectile]]} shoots a projectile from the entity or player "
 					+ "specified, or the current player if no arguments are passed. If no projectile is specified, "
-					+ "it defaults to a fireball. Returns the EntityID of the projectile. Valid projectiles: " 
+					+ "it defaults to a fireball. Returns the EntityID of the projectile. Valid projectiles: "
 					+ StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 	}
-	
+
 }

@@ -3,10 +3,15 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -166,11 +171,13 @@ public class ObjectGenerator {
             enchObj.set("elevel", new CInt(entry.getValue(), t), t);
             enchants.push(enchObj);
         }
+		Construct meta = itemMeta(is, t);
         CArray ret = CArray.GetAssociativeArray(t);
         ret.set("type", Integer.toString(type));
         ret.set("data", Integer.toString(data));
         ret.set("qty", Integer.toString(qty));
         ret.set("enchants", enchants, t);
+		ret.set("meta", meta, t);
         return ret;
     }
 
@@ -195,6 +202,7 @@ public class ObjectGenerator {
         int data = 0;
         int qty = 1;
         Map<MCEnchantment, Integer> enchants = new HashMap<MCEnchantment, Integer>();
+		MCItemMeta meta = null;
 
         if (item.containsKey("type")) {
             try {
@@ -272,12 +280,18 @@ public class ObjectGenerator {
                 }
             }
         }
+		if (item.containsKey("meta")) {
+			meta = itemMeta(item.get("meta"), type, t);
+		}
         MCItemStack ret = StaticLayer.GetItemStack(type, qty);
         ret.setData(data);
         ret.setDurability((short) data);
         for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
             ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
         }
+		if (meta != null) {
+			ret.setItemMeta(meta);
+		}
 
         //Giving them air crashes the client, so just clear the inventory slot
         if (ret.getTypeId() == 0) {
@@ -290,6 +304,87 @@ public class ObjectGenerator {
         return StaticLayer.GetItemStack(0, 1);
     }
     
+	public Construct itemMeta(MCItemStack is, Target t) {
+		Construct ret, display, lore, color;
+		if (!is.hasItemMeta()) {
+			ret = new CNull(t);
+		} else {
+			ret = CArray.GetAssociativeArray(t);
+			MCItemMeta meta = is.getItemMeta();
+			if (meta.hasDisplayName()) {
+				display = new CString(meta.getDisplayName(), t);
+			} else {
+				display = new CNull(t);
+			}
+			if (meta.hasLore()) {
+				lore = new CArray(t);
+				for (String l : meta.getLore()) {
+					((CArray) lore).push(new CString(l, t));
+				}
+			} else {
+				lore = new CNull(t);
+			}
+			((CArray) ret).set("display", display, t);
+			((CArray) ret).set("lore", lore, t);
+			if (meta instanceof MCLeatherArmorMeta) {
+				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
+				((CArray) ret).set("color", color, t);
+			}
+		}
+		return ret;
+	}
+	
+	public MCItemMeta itemMeta(Construct c, int i, Target t) {
+		if (c instanceof CNull) {
+			return null;
+		}
+		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(StaticLayer.GetConvertor().getMaterial(i));
+		CArray ma = null;
+		if (c instanceof CArray) {
+			ma = (CArray) c;
+			try {
+				if (ma.containsKey("display")) {
+					Construct dni = ma.get("display");
+					if (!(dni instanceof CNull)) {
+						meta.setDisplayName(dni.val());
+					}
+				}
+				if (ma.containsKey("lore")) {
+					Construct li = ma.get("lore");
+					if (li instanceof CNull) {
+						//do nothing
+					} else if (li instanceof CArray) {
+						CArray la = (CArray) li;
+						List<String> ll = new ArrayList<String>();
+						for (int j = 0; j < la.size(); j++) {
+							ll.add(la.get(j).val());
+						}
+						meta.setLore(ll);
+					} else {
+						throw new Exceptions.FormatException("Lore was expected to be an array.", t);
+					}
+				}
+				if (meta instanceof MCLeatherArmorMeta) {
+					if (ma.containsKey("color")) {
+						Construct ci = ma.get("color");
+						if (ci instanceof CNull) {
+							//nothing
+						} else if (ci instanceof CArray) {
+							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t));
+						} else {
+							throw new Exceptions.FormatException("Color was expected to be an array.", t);
+						}
+					}
+				}
+			} catch(Exception ex) {
+				throw new Exceptions.FormatException("Could not get ItemMeta from the given information.", t);
+			}
+		} else {
+			throw new Exceptions.FormatException("An array was expected but recieved " + c + " instead.", t);
+		}
+		return meta;
+	}
+
     public CArray exception(ConfigRuntimeException e, Target t) {
 		CArray ex = new CArray(t);
 		ex.push(new CString(e.getExceptionType().toString(), t));

@@ -96,9 +96,25 @@ public class BukkitMCServer implements MCServer{
         s.broadcastMessage(message);
     }
 
+	public MCItemFactory getItemFactory() {
+		return new BukkitMCItemFactory(s.getItemFactory());
+	}
+
     public MCOfflinePlayer getOfflinePlayer(String player) {
         return new BukkitMCOfflinePlayer(s.getOfflinePlayer(player));
     }
+
+	public MCOfflinePlayer[] getOfflinePlayers() {
+		if (s.getOfflinePlayers() == null) {
+			return null;
+		}
+		OfflinePlayer[] offp = s.getOfflinePlayers();
+		MCOfflinePlayer[] mcoff = new MCOfflinePlayer[offp.length];
+		for (int i = 0; i < offp.length; i++) {
+			mcoff[i] = new BukkitMCOfflinePlayer(offp[i]);
+		}
+		return mcoff;
+	}
 
     /* Boring information get methods -.- */
     public String getModVersion() {

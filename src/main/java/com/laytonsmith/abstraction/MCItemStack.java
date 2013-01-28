@@ -26,6 +26,7 @@ public interface MCItemStack extends AbstractionObject{
 
     public void setData(int data);
 	
+	public boolean hasItemMeta();
 	public MCItemMeta getItemMeta();
 	public void setItemMeta(MCItemMeta im);
 }

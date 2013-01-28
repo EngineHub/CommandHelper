@@ -16,6 +16,7 @@ import com.laytonsmith.abstraction.MCNote;
 import com.laytonsmith.abstraction.MCPluginMeta;
 import com.laytonsmith.abstraction.MCServer;
 import com.laytonsmith.abstraction.MCWorld;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.convert;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
@@ -426,6 +427,10 @@ public class Interpreter {
 		}
 
 		public MCPluginMeta GetPluginMeta() {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCMaterial getMaterial(int id) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 		

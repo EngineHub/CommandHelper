@@ -18,8 +18,10 @@ public interface MCServer extends AbstractionObject{
     public MCWorld getWorld(String name);
     public List<MCWorld> getWorlds();
     public void broadcastMessage(String message);
+	public MCItemFactory getItemFactory();
 
     public MCOfflinePlayer getOfflinePlayer(String player);
+	public MCOfflinePlayer[] getOfflinePlayers();
 
     /* Boring information get methods -.- */
     public String getServerName();
