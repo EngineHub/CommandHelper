@@ -150,7 +150,7 @@ public final class ClassDiscovery {
 				try {
 					zip.close();
 				} catch (IOException ex) {
-					Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
+					//Logger.getLogger(ClassDiscovery.class.getName()).log(Level.SEVERE, null, ex);
 				}
 			}
 		}
