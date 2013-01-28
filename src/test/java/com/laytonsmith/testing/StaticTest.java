@@ -4,6 +4,7 @@ package com.laytonsmith.testing;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
@@ -689,6 +690,10 @@ public class StaticTest {
 		}
 
 		public MCPluginMeta GetPluginMeta() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public MCMaterial getMaterial(int id) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
         

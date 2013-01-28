@@ -1,6 +1,7 @@
 
 package com.laytonsmith.abstraction;
 
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import java.util.concurrent.Callable;
@@ -40,6 +41,8 @@ public interface Convertor {
 
     public MCItemStack GetItemStack(int type, int data, int qty);
     
+	public MCMaterial getMaterial(int id);
+	
     /**
      * A future runnable is run on a server accessible thread at roughly the time specified in the future.
      * This is no guarantee however, as the particular server implementation may make this hard to do. The

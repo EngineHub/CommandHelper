@@ -3,7 +3,9 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
@@ -78,6 +80,10 @@ public class BukkitConvertor extends AbstractConvertor {
     public MCServer GetServer() {
         return BukkitMCServer.Get();
     }
+
+	public MCMaterial getMaterial(int id) {
+		return new BukkitMCMaterial(Material.getMaterial(id));
+	}
 
     public MCItemStack GetItemStack(int type, int qty) {
         return new BukkitMCItemStack(new ItemStack(type, qty));

@@ -390,7 +390,7 @@ public class Minecraft {
 				entityID = args[0];
 			}
 			int id = Static.getInt32(entityID, t);
-			MCEntity e = Static.getEntity(id, t);
+			MCEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
 				return new CVoid(t);
 			} else if (e instanceof MCTameable) {
@@ -441,7 +441,7 @@ public class Minecraft {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			int id = Static.getInt32(args[0], t);
-			MCEntity e = Static.getEntity(id, t);
+			MCEntity e = Static.getLivingEntity(id, t);
 			if (e == null) {
 				return new CNull(t);
 			} else if (e instanceof MCTameable) {
@@ -601,7 +601,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			if (e instanceof MCLivingEntity) {
 				int health = (int) ((double) Static.getInt(args[1], t) / 100.0 * (double) ((MCLivingEntity) e).getMaxHealth());
 				if (health != 0) {
@@ -647,7 +647,7 @@ public class Minecraft {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCEntity e = Static.getLivingEntity(Static.getInt32(args[0], t), t);
 			if (e instanceof MCLivingEntity) {
 				int h = (int) (((double) ((MCLivingEntity) e).getHealth() / (double) ((MCLivingEntity) e).getMaxHealth()) * 100);
 				return new CInt(h, t);

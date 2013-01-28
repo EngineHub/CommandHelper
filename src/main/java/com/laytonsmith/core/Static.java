@@ -611,13 +611,30 @@ public final class Static {
         return java.lang.Math.min(max, java.lang.Math.max(min, i));
     }
 
-    /**
-     * Returns the specified id. If it doesn't exist, a ConfigRuntimeException
-	 * is thrown.
-     * @param id
-     * @return 
-     */
-    public static MCEntity getEntity(int id, Target t) {
+	/**
+	 * Returns the entity with the specified id. If it doesn't exist,
+	 * a ConfigRuntimeException is thrown.
+	 * @param id
+	 * @return
+	 */
+	public static MCEntity getEntity(int id, Target t) {
+		for (MCWorld w : Static.getServer().getWorlds()) {
+			for (MCEntity e : w.getEntities()) {
+				if (e.getEntityId() == id) {
+					return StaticLayer.GetCorrectEntity(e);
+				}
+			}
+		}
+		throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
+	}
+	
+	/**
+	 * Returns the living entity with the specified id. If it doesn't exist or isn't living,
+	 * a ConfigRuntimeException is thrown.
+	 * @param id
+	 * @return 
+	 */
+	public static MCEntity getLivingEntity(int id, Target t) {
         for (MCWorld w : Static.getServer().getWorlds()) {
             for (MCLivingEntity e : w.getLivingEntities()) {
                 if (e.getEntityId() == id) {                    
@@ -625,7 +642,7 @@ public final class Static {
                 }
             }
         }
-        throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
+        throw new ConfigRuntimeException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
     }
 
     public static String strJoin(Collection c, String inner) {
