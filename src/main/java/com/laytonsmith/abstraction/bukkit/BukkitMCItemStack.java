@@ -158,6 +158,10 @@ public class BukkitMCItemStack implements MCItemStack {
 		return is.hashCode();
 	}
 
+	public boolean hasItemMeta() {
+		return is.hasItemMeta();
+	}
+	
 	public MCItemMeta getItemMeta() {
 		ItemMeta im = is.getItemMeta();
 		if(im instanceof LeatherArmorMeta){
