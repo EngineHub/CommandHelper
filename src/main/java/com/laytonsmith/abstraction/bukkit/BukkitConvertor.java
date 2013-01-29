@@ -30,6 +30,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.material.MaterialData;
 
 /**
@@ -241,6 +242,33 @@ public class BukkitConvertor extends AbstractConvertor {
         return BukkitConvertor.BukkitGetCorrectEntity(be);
     }
 
+	public MCItemMeta GetCorrectMeta(MCItemMeta im) {
+		ItemMeta bim = ((BukkitMCItemMeta) im).asItemMeta();
+		return BukkitConvertor.BukkitGetCorrectMeta(bim);
+	}
+
+	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
+		if (im instanceof BookMeta) {
+			return new BukkitMCBookMeta((BookMeta) im);
+		}
+		if (im instanceof EnchantmentStorageMeta) {
+			
+		}
+		if (im instanceof LeatherArmorMeta) {
+			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
+		}
+		if (im instanceof PotionMeta) {
+			
+		}
+		if (im instanceof Repairable) {
+			
+		}
+		if (im instanceof SkullMeta) {
+			return new BukkitMCSkullMeta((SkullMeta) im);
+		}
+		return new BukkitMCItemMeta(im);
+	}
+    
 	public MCInventory GetEntityInventory(int entityID) {
 		Entity entity = null;
 		outer: for(World w : Bukkit.getWorlds()){

@@ -4,8 +4,6 @@ import org.bukkit.Material;
 import org.bukkit.inventory.ItemFactory;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-
 import com.laytonsmith.abstraction.MCColor;
 import com.laytonsmith.abstraction.MCItemFactory;
 import com.laytonsmith.abstraction.MCItemMeta;
@@ -26,13 +24,13 @@ public class BukkitMCItemFactory implements MCItemFactory {
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCItemStack stack) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		ItemStack bstack = ((BukkitMCItemStack) stack).asItemStack();
-		return new BukkitMCItemMeta(f.asMetaFor(bmeta, bstack));
+		return BukkitConvertor.BukkitGetCorrectMeta(f.asMetaFor(bmeta, bstack));
 	}
 
 	public MCItemMeta asMetaFor(MCItemMeta meta, MCMaterial material) {
 		ItemMeta bmeta = ((BukkitMCItemMeta) meta).asItemMeta();
 		Material bmat = Material.getMaterial(material.getType());
-		return new BukkitMCItemMeta(f.asMetaFor(bmeta, bmat));
+		return BukkitConvertor.BukkitGetCorrectMeta(f.asMetaFor(bmeta, bmat));
 	}
 
 	public boolean equals(MCItemMeta meta1, MCItemMeta meta2) {
@@ -45,10 +43,7 @@ public class BukkitMCItemFactory implements MCItemFactory {
 
 	public MCItemMeta getItemMeta(MCMaterial material) {
 		ItemMeta im = f.getItemMeta(Material.getMaterial(material.getType()));
-		if (im instanceof LeatherArmorMeta) {
-			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
-		}
-		return new BukkitMCItemMeta(im);
+		return BukkitConvertor.BukkitGetCorrectMeta(im);
 	}
 
 	public boolean isApplicable(MCItemMeta meta, MCItemStack stack) {
