@@ -12,7 +12,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
  * @author Layton
  */
 @typename("string")
-public class CString extends Construct implements Cloneable, ArrayAccess{
+public class CString extends Construct implements Cloneable, ArrayAccess, CPrimitive {
 	
     public CString(String value, Target t){
         super(value==null?"":value, t);

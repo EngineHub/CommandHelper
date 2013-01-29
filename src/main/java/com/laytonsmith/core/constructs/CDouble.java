@@ -7,7 +7,7 @@ import com.laytonsmith.annotations.typename;
  * @author layton
  */
 @typename("double")
-public class CDouble extends Construct implements Cloneable{
+public class CDouble extends Construct implements Cloneable, CNumber {
     
     public static final long serialVersionUID = 1L;
     final double val;

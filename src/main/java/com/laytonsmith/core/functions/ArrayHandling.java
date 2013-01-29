@@ -467,7 +467,19 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "boolean {array, testValue} Checks to see if testValue is in array.";
+			return "Checks to see if testValue is in array. If the array contains non-string values,"
+					+ " the item's 'toString' value is compared.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return CBoolean.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to check in", CArray.class, "array"),
+						new Argument("The value to check for", CString.class, "testValue")
+					);
 		}
 
 		public boolean isRestricted() {
@@ -505,7 +517,19 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "boolean {array, testValue} Works like array_contains, except the comparison ignores case.";
+			return "boolean {array, testValue} Works like array_contains, except the comparison ignores case. If the array"
+					+ " contains non-string values, the item's 'toString' value is compared.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return CBoolean.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to check in", CArray.class, "array"),
+						new Argument("The value to check for", CString.class, "testValue")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -561,7 +585,18 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "boolean {array, index} Checks to see if the specified array has an element at index";
+			return "Checks to see if the specified array has an element at index";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return CBoolean.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to search in", CArray.class, "array"),
+						new Argument("The array index to search for", new Class[]{CString.class, CInt.class}, "index")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -623,10 +658,22 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "void {array, size, [fill]} Resizes the given array so that it is at least of size size, filling the blank spaces with"
+			return "Resizes the given array so that it is at least of size size, filling the blank spaces with"
 					+ " fill, or null by default. If the size of the array is already at least size, nothing happens; in other words this"
 					+ " function can only be used to increase the size of the array.";
 			//+ " If the array is an associative array, the non numeric values are simply copied over.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return CVoid.class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The array to fill", CArray.class, "array"),
+						new Argument("The desired size of the array", CInt.class, "size"),
+						new Argument("The fill value", Mixed.class, "fill").setOptionalDefaultNull()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -686,6 +733,17 @@ public class ArrayHandling {
 			return "array {start, finish, [increment] | finish} Returns an array of numbers from start to (finish - 1)"
 					+ " skipping increment integers per count. start defaults to 0, and increment defaults to 1. All inputs"
 					+ " must be integers. If the input doesn't make sense, it will reasonably degrade, and return an empty array.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -757,6 +815,17 @@ public class ArrayHandling {
 			return "array {array} Returns the keys in this array as a normal array. If the array passed in is already a normal array,"
 					+ " the keys will be 0 -> (array_size(array) - 1)";
 		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -810,6 +879,17 @@ public class ArrayHandling {
 		public String docs() {
 			return "array {array} Returns a new normal array, given an associative array. (If the array passed in is not associative, a copy of the "
 					+ " array is returned).";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -865,6 +945,17 @@ public class ArrayHandling {
 			return "array {array1, array2, [arrayN...]} Merges the specified arrays from left to right, and returns a new array. If the array"
 					+ " merged is associative, it will overwrite the keys from left to right, but if the arrays are normal, the keys are ignored,"
 					+ " and values are simply pushed.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -934,6 +1025,17 @@ public class ArrayHandling {
 					+ " the index is simply removed. If the index doesn't exist, the array remains"
 					+ " unchanged. The value removed is returned.";
 		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException, ExceptionType.PluginInternalException};
@@ -984,6 +1086,17 @@ public class ArrayHandling {
 			return "string {array, [glue]} Given an array and glue, to-strings all the elements"
 					+ " in the array (just the values, not the keys), and joins them with the glue, defaulting to a space. For instance"
 					+ " array_implode(array(1, 2, 3), '-') will return \"1-2-3\".";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1050,6 +1163,17 @@ public class ArrayHandling {
 					+ " (or the [bracket notation]) to get a range of elements. cslice(0, 5) is equivalent"
 					+ " to 0..5 directly in code, however with this function you can also do cslice(@var, @var),"
 					+ " or other more complex expressions, which are not possible in static code.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1139,6 +1263,17 @@ public class ArrayHandling {
 					+ " in place sort instead of explicitely cloning the array is because in most cases, you may not need"
 					+ " to actually clone the array, an expensive operation. Due to this, it has slightly different behavior"
 					+ " than array_normalize, which could have also been implemented in place.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -1237,6 +1372,17 @@ public class ArrayHandling {
 					+ " is large enough to actually \"stall\" the server when doing the sort. Sort type should be"
 					+ " one of " + StringUtils.Join(CArray.SortType.values(), ", ", " or ");
 		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1279,6 +1425,17 @@ public class ArrayHandling {
 					+ " For instance, array_remove_values(array(1, 2, 2, 3), 2) would produce the"
 					+ " array(1, 3). Note that it returns void however, so it will simply in place"
 					+ " modify the array passed in, much like array_remove.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -1328,6 +1485,17 @@ public class ArrayHandling {
 					+ " at which the specified value is equal. That is, for the array(1, 2, 2, 3), if"
 					+ " value were 2, would return array(1, 2). If the value cannot be found in the"
 					+ " array at all, an empty array will be returned.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -1380,6 +1548,17 @@ public class ArrayHandling {
 					+ " the value is not found, returns null. That is to say, if the value is contained in an"
 					+ " array (even multiple times) the index of the first element is returned.";
 		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1428,6 +1607,17 @@ public class ArrayHandling {
 		public String docs() {
 			return "void {array} Reverses an array in place. However, if the array is associative, throws a CastException, since associative"
 					+ " arrays are more like a map.";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -1506,6 +1696,17 @@ public class ArrayHandling {
 					+ " the size of the array, a RangeException is thrown. No value will be returned twice from the array however, one it"
 					+ " is \"drawn\" from the array, it is not placed back in. The order of the elements in the array will also be random,"
 					+ " if order is important, use array_sort().";
+		}
+		
+		public Class<? extends Mixed> returnType() {
+			return .class;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", .class, ""),
+						new Argument("", .class, "")
+					);
 		}
 
 		public CHVersion since() {

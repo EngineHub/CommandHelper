@@ -1,5 +1,6 @@
 package com.laytonsmith.core.arguments;
 
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
@@ -7,8 +8,12 @@ import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  *
@@ -16,16 +21,35 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  */
 public class Argument implements Documentation {
 	private final String docs;
-	private final Class<?> clazz;
+	private final List<Class<? extends Mixed>> clazz = new ArrayList<Class<? extends Mixed>>();
 	private final String name;
 	private boolean optional;
 	private boolean varargs;
 	private CHVersion since;
 	private Mixed def;
 	
-	public Argument(String docs, Class clazz, String name){
+	/**
+	 * Creates a new Argument that represents a singly typed
+	 * Argument.
+	 * @param docs
+	 * @param clazz
+	 * @param name 
+	 */
+	public Argument(String docs, Class<? extends Mixed> clazz, String name){
+		this(docs, new Class[]{clazz}, name);
+	}
+	
+	/**
+	 * Create a new Argument that has disjoint types. For instance,
+	 * if an argument can take either a string or an array, (denoted as
+	 * string|array in mscript) then this constructor is appropriate to use.
+	 * @param docs
+	 * @param disjointTypes
+	 * @param name 
+	 */
+	public Argument(String docs, Class<? extends Mixed>[] disjointTypes, String name){
 		this.docs = docs;
-		this.clazz = clazz;
+		this.clazz.addAll(Arrays.asList(disjointTypes));
 		this.name = name;
 	}
 	
@@ -111,6 +135,14 @@ public class Argument implements Documentation {
 		return this.setOptionalDefault(new CDouble(def, Target.UNKNOWN));
 	}
 	
+	/**
+	 * Overload to set the default to a null value.
+	 * @return 
+	 */
+	public Argument setOptionalDefaultNull(){
+		return this.setOptionalDefault(Construct.GetNullConstruct(Target.UNKNOWN));
+	}
+	
 	public <T extends Mixed> T getDefault(){
 		try{
 			return (T)def;
@@ -128,8 +160,8 @@ public class Argument implements Documentation {
 	 * @return 
 	 */
 	public Argument setVarargs(boolean varargs){
-		if(clazz != CArray.class){
-			throw new Error("Vararg status can only be set on an Argument that is a CArray type.");
+		if(clazz.size() != 1 || clazz.get(0) != CArray.class){
+			throw new Error("Vararg status can only be set on an Argument that is a non-disjoing CArray type.");
 		}
 		this.varargs = varargs;
 		return this;
@@ -178,26 +210,30 @@ public class Argument implements Documentation {
 	}
 
 	/**
-	 * Returns the underlying class type of this argument.
+	 * Returns the underlying class type(s) of this argument.
 	 * @return 
 	 */
-	public Class getType() {
-		return clazz;
+	public List<Class<? extends Mixed>> getType() {
+		return new ArrayList<Class<? extends Mixed>>(clazz);
 	}
 
 	@Override
 	public String toString() {
-		String type = clazz.getSimpleName();
-		if(clazz.getAnnotation(typename.class) != null){
-			typename t = clazz.getAnnotation(typename.class);
-			String tt = t.value();
-			if(!"".equals(tt)){
-				type = tt;
+		List<String> types = new ArrayList<String>();
+		for(Class<? extends Mixed> c : clazz){
+			String type = c.getSimpleName();
+			if(c.getAnnotation(typename.class) != null){
+				typename t = c.getAnnotation(typename.class);
+				String tt = t.value();
+				if(!"".equals(tt)){
+					type = tt;
+				}
+				//Otherwise, it's dynamic, and we can't get that anyways right now, because
+				//we don't have an instance.
 			}
-			//Otherwise, it's dynamic, and we can't get that anyways right now, because
-			//we don't have an instance.
+			types.add(type);
 		}
-		return (optional?"[":"") + type + (varargs?"...":"") + " " + name + (optional?"]":"");
+		return (optional?"[":"") + StringUtils.Join(types, "|") + (varargs?"...":"") + " " + name + (optional?"]":"");
 	}	
 
 	public String getName() {

@@ -102,20 +102,20 @@ public class Signature implements Comparable<Signature> {
 		return true;
 	}
 	
-	public boolean equalsErasure(Signature other){
-		if(other.args.size() != this.args.size()){
-			return false;
-		}
-		for(int i = 0; i < other.args.size(); i++){
-			Argument thiz = this.args.get(i);
-			Argument that = other.args.get(i);
-			//Check the erasure on these, not just if they are directly equal
-			if(!thiz.getType().isAssignableFrom(that.getType()) || !that.getType().isAssignableFrom(thiz.getType())){
-				return false;
-			}
-		}
-		return true;
-	}
+//	public boolean equalsErasure(Signature other){
+//		if(other.args.size() != this.args.size()){
+//			return false;
+//		}
+//		for(int i = 0; i < other.args.size(); i++){
+//			Argument thiz = this.args.get(i);
+//			Argument that = other.args.get(i);
+//			//Check the erasure on these, not just if they are directly equal
+//			if(!thiz.getType().isAssignableFrom(that.getType()) || !that.getType().isAssignableFrom(thiz.getType())){
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
 
 	public int compareTo(Signature o) {
 		if(this.equals(o)){

@@ -394,4 +394,92 @@ does an explicit cast first. So, as far as code that ''uses'' the variable, it w
 work as if it were defined as <code>A @var</code>, but with the guarantee that only
 a D or C type instance will have been assigned to it.
 
+=== <code>immutable</code> keyword ===
+
+A class can be marked as immutable, which allows for better optimizations, and
+better compile time guarantees. If a class is marked as immutable, all data
+members are implicitly marked as immutable, and it can be used as a data member
+in other classes that are immutable, or explicitly marked as an immutable data
+member.
+
+If a class is marked as immutable, it is guaranteed at compile time that the data
+members are not changed, except during construction. This guarantee applies recursively
+to all data members as well. For arrays (and therefore maps and Objects) this means
+that no more elements can be added or changed once construction is complete. Additionally,
+none of the data members in the class can be marked as static.
+
+Immutable objects work closely with various language features, from causing better
+compiler errors when unintentional programming occurs, to better optimization 
+potential, to more efficient serialization, to more efficient and accurate cross process
+object transfer. All primitives are implied immutable, except arrays are a special case, 
+which know to natively support immutability, only if they are marked
+as an immutable data member. All user data types must explicitly mark themselves as
+immutable if they intend to be used as an immutable data member in other classes.
+
+If the class is marked as immutable, all data members are marked as immutable, and
+it may be used in another composite class as a data member itself.
+<pre>
+	immutable class A {
+		members{
+			private int @a;
+			private int @b;
+			private array @c;
+		}
+		
+		public A(){
+			@a = 5;
+			@b = 2;
+			@c = array(1, 2, 3);
+		}
+
+		public setA(int @i){
+			#This causes a compile error
+			@a = @i;
+		}
+	}
+</pre>
+
+Additionally, individual data members can be marked as immutable, which confers
+no immutability on the object as a whole, but allows for a few of the advantages
+that marking the whole class as immutable provides. When marking data members that
+have an immutable type already, this makes them work like "final" data members in
+Java, that is the reference cannot change, and when marking arrays as immutable,
+makes their internal structure immutable, as well as preventing the reference
+from changing.
+<pre>
+class B {
+	members{
+		public int @i;
+		public immutable array @a;
+		public immutable int @b;
+	}
+
+	public B(){
+		@i = 2;
+		@a = array(1, 2, 3);
+		@b = 5;
+	}
+
+	public setI(int @val){
+		@i = @val; #Valid
+	}
+
+	public setArray(array @val){
+		#Compile error
+		@a = @val;
+	}
+
+	public pushArray(mixed @val){
+		#Compile error
+		array_push(@a, @val);
+	}
+
+	public setB(int @val){
+		#Compile error
+		@b = @val;
+	}
+}
+</pre>
+
+
 {{LearningTrail}}

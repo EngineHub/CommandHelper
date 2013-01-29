@@ -94,7 +94,7 @@ public class CompilerFunctions {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			ArgList list = this.getBuilder().parse(args, t);
+			ArgList list = this.getBuilder().parse(args, this, t);
 			return new CEntry((Construct)list.get("label"), (Construct)list.get("content"), t);
 		}
 

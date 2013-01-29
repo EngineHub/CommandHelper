@@ -9,7 +9,7 @@ import com.laytonsmith.annotations.typename;
  * @author layton
  */
 @typename("int")
-public class CInt extends Construct implements Cloneable{
+public class CInt extends Construct implements Cloneable, CNumber {
     
     public CInt(long value, Target t){
         super(Long.toString(value), t);

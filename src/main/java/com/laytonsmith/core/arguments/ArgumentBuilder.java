@@ -163,9 +163,17 @@ public class ArgumentBuilder {
 						break inner;
 					}
 					Class<? extends Mixed> c1 = args[i].getClass();
-					Class<? extends Mixed> c2 = s.getArguments().get(i).getType();
-					if(!c2.isAssignableFrom(c1)){
-						//Not a match, moving on
+					boolean matchesAny = false;
+					for(Class<? extends Mixed> cc : s.getArguments().get(i).getType()){
+						Class<? extends Mixed> c2 = cc;
+						if(c2.isAssignableFrom(c1)){
+							matchesAny = true;
+							break;
+						}
+						//else not a match, but it could match another disjoint type, so
+						//we have to check all of them first.
+					}
+					if(!matchesAny){
 						continue signature;
 					}
 				}
