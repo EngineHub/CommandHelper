@@ -13,8 +13,6 @@ import java.util.HashMap;
 import java.util.Map;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
 import org.bukkit.material.MaterialData;
 
 /**
@@ -163,12 +161,7 @@ public class BukkitMCItemStack implements MCItemStack {
 	}
 	
 	public MCItemMeta getItemMeta() {
-		ItemMeta im = is.getItemMeta();
-		if(im instanceof LeatherArmorMeta){
-			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta)im);
-		} else {
-			return new BukkitMCItemMeta(im);
-		}
+		return BukkitConvertor.BukkitGetCorrectMeta(is.getItemMeta());
 	}
 
 	public void setItemMeta(MCItemMeta im) {
