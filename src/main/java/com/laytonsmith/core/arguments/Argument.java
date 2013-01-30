@@ -4,10 +4,13 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
+import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.constructs.CArray;
+import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -27,6 +30,77 @@ public class Argument implements Documentation {
 	private boolean varargs;
 	private CHVersion since;
 	private Mixed def;
+	private List<Generic> generics = new ArrayList<Generic>();
+	
+	/**
+	 * Void return types don't need any documentation, so can
+	 * all use the same Argument object.
+	 */
+	public static final Argument VOID = new Argument("", CVoid.class){
+
+		@Override
+		public String toString() {
+			return "<void>";
+		}
+	};
+	
+	/**
+	 * Very few functions need this, but this is provided for functions that have
+	 * no return type, because they have abnormal exit conditions. Usually,
+	 * methods that return this have the {@link com.laytonsmith.core.compiler.Optimizable.OptimizationOption#TERMINAL}
+	 * optimization.
+	 */
+	public static final Argument NONE = new Argument("", new Class[]{}){
+
+		@Override
+		public String toString() {
+			return "<none>";
+		}
+		
+	};
+	
+	/**
+	 * This is the default value for many things' return type.
+	 */
+	public static final Argument AUTO = new Argument("", new Class[]{}){
+
+		@Override
+		public String toString() {
+			return "<auto>";
+		}
+		
+	};
+	
+	/**
+	 * Shorthand for creating a non-named argument, for use in
+	 * return types only.
+	 * @param docs
+	 * @param clazz 
+	 */
+	public Argument(String docs, Class<? extends Mixed> clazz){
+		this(docs, new Class[]{clazz}, null);
+	}
+	
+	/**
+	 * Shorthand for creating a non-named argument with exactly two
+	 * disjoint types, for use in return types only.
+	 * @param docs
+	 * @param clazz1
+	 * @param clazz2 
+	 */
+	public Argument(String docs, Class<? extends Mixed> clazz1, Class<? extends Mixed> clazz2){
+		this(docs, new Class[]{clazz1, clazz2}, null);
+	}
+	
+	/**
+	 * Shorthand for creating a non-named argument with disjoint
+	 * types, for use in return types only.
+	 * @param docs
+	 * @param classes 
+	 */
+	public Argument(String docs, Class<? extends Mixed>[] classes){
+		this(docs, classes, null);
+	}
 	
 	/**
 	 * Creates a new Argument that represents a singly typed
@@ -37,6 +111,29 @@ public class Argument implements Documentation {
 	 */
 	public Argument(String docs, Class<? extends Mixed> clazz, String name){
 		this(docs, new Class[]{clazz}, name);
+	}
+	
+	/**
+	 * Overload for easier syntax for a disjoint type with exactly two types.
+	 * @param docs
+	 * @param clazz1
+	 * @param clazz2
+	 * @param name 
+	 */
+	public Argument(String docs, Class<? extends Mixed> clazz1, Class<? extends Mixed> clazz2, String name){
+		this(docs, new Class[]{clazz1, clazz2}, name);
+	}
+	
+	/**
+	 * Overload for easier syntax for a disjoint type with exactly three types.
+	 * @param docs
+	 * @param clazz1
+	 * @param clazz2
+	 * @param clazz3
+	 * @param name 
+	 */
+	public Argument(String docs, Class<? extends Mixed> clazz1, Class<? extends Mixed> clazz2, Class<? extends Mixed> clazz3, String name){
+		this(docs, new Class[]{clazz1, clazz2, clazz3}, name);
 	}
 	
 	/**
@@ -89,6 +186,17 @@ public class Argument implements Documentation {
 	}
 	
 	/**
+	 * Adds generic parameters to this argument type. Multiple generic types
+	 * can be added if this is an argument attached to a declaration.
+	 * @param generics
+	 * @return 
+	 */
+	public Argument setGenerics(Generic...generics){
+		this.generics.addAll(Arrays.asList(generics));
+		return this;
+	}
+	
+	/**
 	 * Sets the default argument (which itself defaults to null),
 	 * which is returned by {@link #getDefault(Class)}.
 	 * @param def
@@ -133,6 +241,15 @@ public class Argument implements Documentation {
 	 */
 	public Argument setOptionalDefault(double def){
 		return this.setOptionalDefault(new CDouble(def, Target.UNKNOWN));
+	}
+	
+	/**
+	 * Overload for POJO boolean.
+	 * @param def
+	 * @return 
+	 */
+	public Argument setOptionalDefault(boolean def){
+		return this.setOptionalDefault(new CBoolean(def, Target.UNKNOWN));
 	}
 	
 	/**
@@ -233,7 +350,13 @@ public class Argument implements Documentation {
 			}
 			types.add(type);
 		}
-		return (optional?"[":"") + StringUtils.Join(types, "|") + (varargs?"...":"") + " " + name + (optional?"]":"");
+		String generic = "";
+		if(!generics.isEmpty()){
+			List<String> g = new ArrayList<String>();
+			
+			generic = "<" + StringUtils.Join(g, ", ") + ">";
+		}
+		return (optional?"[":"") + StringUtils.Join(types, "|") + generic + (varargs?"...":"") + " " + name + (optional?"]":"");
 	}	
 
 	public String getName() {

@@ -2,7 +2,6 @@
 
 package com.laytonsmith.core.natives.interfaces;
 
-import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 
@@ -17,7 +16,7 @@ public interface ArrayAccess extends Mixed, Sizable {
      * @param index
      * @return 
      */
-    public Construct get(String index, Target t) throws ConfigRuntimeException;
+    public Mixed get(String index, Target t) throws ConfigRuntimeException;
 	
     /**
      * Return the size of the array
@@ -41,5 +40,5 @@ public interface ArrayAccess extends Mixed, Sizable {
      * @param t
      * @return 
      */
-    public Construct slice(int begin, int end, Target t);
+    public Mixed slice(int begin, int end, Target t);
 }

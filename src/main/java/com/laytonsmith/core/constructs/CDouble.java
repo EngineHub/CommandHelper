@@ -7,18 +7,12 @@ import com.laytonsmith.annotations.typename;
  * @author layton
  */
 @typename("double")
-public class CDouble extends Construct implements Cloneable, CNumber {
+public class CDouble extends CNumber implements Cloneable {
     
     public static final long serialVersionUID = 1L;
-    final double val;
 
     public CDouble(double value, Target t){
-        super(Double.toString(value), t);
-        val = value;
-    }
-
-    public double getDouble(){
-        return val;
+        super(value, t);
     }
     
     @Override
@@ -33,5 +27,13 @@ public class CDouble extends Construct implements Cloneable, CNumber {
 
 	public String typeName() {
 		return "double";
+	}
+
+	@Override
+	public String castToString() {
+		String format = String.format("%f", number);
+		//Given that val is .5, format would be something like 0.500000. We will
+		//trim the excess zeros from the end
+		return format.replaceAll("(\\.(?:\\d*[1-9])?)0+$", "$1");
 	}
 }

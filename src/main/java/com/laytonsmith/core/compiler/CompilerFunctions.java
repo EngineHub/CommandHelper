@@ -74,8 +74,8 @@ public class CompilerFunctions {
 			return new CVoid(t);
 		}
 
-		public Class<? extends Mixed> returnType() {
-			return CVoid.class;
+		public Argument returnType() {
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
@@ -98,8 +98,8 @@ public class CompilerFunctions {
 			return new CEntry((Construct)list.get("label"), (Construct)list.get("content"), t);
 		}
 
-		public Class<? extends Mixed> returnType() {
-			return CEntry.class;
+		public Argument returnType() {
+			return new Argument("", CEntry.class);
 		}
 
 		public ArgumentBuilder arguments() {
@@ -526,8 +526,8 @@ public class CompilerFunctions {
 			}
 		}
 
-		public Class<? extends Mixed> returnType() {
-			return Mixed.class;
+		public Argument returnType() {
+			return new Argument("", Mixed.class);
 		}
 
 		public ArgumentBuilder arguments() {
@@ -554,8 +554,8 @@ public class CompilerFunctions {
 			return new CVoid(t);
 		}
 
-		public Class<? extends Mixed> returnType() {
-			return Mixed.class;
+		public Argument returnType() {
+			return Argument.NONE;
 		}
 
 		public ArgumentBuilder arguments() {
@@ -581,8 +581,8 @@ public class CompilerFunctions {
 			return args[0];
 		}
 
-		public Class<? extends Mixed> returnType() {
-			return Mixed.class;
+		public Argument returnType() {
+			return new Argument("", Mixed.class);
 		}
 
 		public ArgumentBuilder arguments() {

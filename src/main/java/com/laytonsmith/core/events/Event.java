@@ -6,6 +6,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.Construct;
+import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.events.BoundEvent.ActiveEvent;
 import com.laytonsmith.core.exceptions.EventException;
@@ -40,7 +41,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * This function should return true if the event code should be run, based
      * on this prefilter and triggering event's parameters.
      */
-    public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException;
+    public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException;
     
     /**
      * If an event is manually triggered, then it may be required for an event
@@ -91,7 +92,7 @@ public interface Event extends Comparable<Event>, Documentation{
 	 * The prefilters are also sent, in case the event can do some further optimization
 	 * based on them.
      */
-    public void bind(Map<String, Construct> prefilters);
+    public void bind(Map<String, Construct> prefilters, Target t);
     
     /**
      * This function is called once when the plugin starts up, to give this
@@ -129,7 +130,7 @@ public interface Event extends Comparable<Event>, Documentation{
      * takes a key, a construct, and the underlying event. It returns true if the underlying
      * event was successfully updated.
      */
-    public boolean modifyEvent(String key, Construct value, BindableEvent event);
+    public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t);
 
     /**
      * Returns if this event is cancelled. If the event is not cancellable, false should

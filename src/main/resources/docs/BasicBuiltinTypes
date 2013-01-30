@@ -5,7 +5,7 @@ since they form the basis of all objects.
 
 TODO: Add inheritance tree image
 
-=== mixed ===
+== mixed ==
 Mixed is the root of all possible types. It is an interface, which defines a very few methods, which are common
 to all objects, built in and user defined types.
 
@@ -29,6 +29,10 @@ A double is a floating point number.
 
 An int is a integral number.
 
+==== boolean ====
+
+A boolean is a true/false value.
+
 === array ===
 
 An array is a "collection" of other data types.
@@ -41,6 +45,12 @@ A map is a "dictionary" of string to mixed mappings.
 
 An Object is the superclass of all user defined types, and is the first
 type in the hierarchy that requires instantiation with the "new" keyword.
+
+== byte_array ==
+
+A byte array wraps a native byte array object, to allow for more efficient
+byte array manipulations, and to allow for translation to external processes
+that communicate at the lowest level.
 
 == auto ==
 

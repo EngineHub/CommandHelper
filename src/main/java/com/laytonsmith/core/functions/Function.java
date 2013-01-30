@@ -6,6 +6,7 @@ import com.laytonsmith.core.Documentation;
 import com.laytonsmith.core.LogLevel;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
+import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -30,7 +31,7 @@ public interface Function extends FunctionBase, Documentation {
 	 * purposes.
 	 * @return 
 	 */
-	Class<? extends Mixed> returnType();
+	Argument returnType();
 	
 	/**
 	 * Returns the ArgumentBuilder object for this function. This is used

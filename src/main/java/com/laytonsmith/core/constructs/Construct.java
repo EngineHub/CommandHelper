@@ -2,7 +2,9 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
+import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.math.BigInteger;
 import java.util.*;
@@ -131,11 +133,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         } else if (c instanceof CVoid) {
             return "";
         } else if (c instanceof CInt) {
-            return ((CInt) c).getInt();
+            return ((CInt) c).castToInt(t);
         } else if (c instanceof CDouble) {
-            return ((CDouble) c).getDouble();
+            return ((CDouble) c).castToCDouble(t);
         } else if (c instanceof CBoolean) {
-            return ((CBoolean) c).getBoolean();
+            return ((CBoolean) c).castToBoolean();
         } else if (c.isNull()) {
             return null;
         } else if (c instanceof CArray) {
@@ -171,7 +173,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             JSONObject obj = (JSONObject) JSONValue.parse(s);
             CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : obj.keySet()){
-                ca.set(convertJSON(key, t), 
+                ca.set(convertJSON(key, t).primitive(t), 
                         convertJSON(obj.get(key), t), t);
             }
             return ca;
@@ -218,7 +220,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         } else if(o instanceof java.util.Map){
             CArray ca = CArray.GetAssociativeArray(t);
             for(Object key : ((java.util.Map)o).keySet()){
-                ca.set(convertJSON(key, t), 
+                ca.set(convertJSON(key, t).primitive(t), 
                         convertJSON(((java.util.Map)o).get(key), t), t);
             }
             return ca;
@@ -320,11 +322,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         } else if(c instanceof CString){
             return c.val();
         } else if(c instanceof CBoolean){
-            return Boolean.valueOf(((CBoolean)c).getBoolean());
+            return Boolean.valueOf(((CBoolean)c).castToBoolean());
         } else if(c instanceof CInt){
-            return Long.valueOf(((CInt)c).getInt());
+            return Long.valueOf(((CInt)c).castToInt(Target.UNKNOWN));
         } else if(c instanceof CDouble){
-            return Double.valueOf(((CDouble)c).getDouble());
+            return Double.valueOf(((CDouble)c).castToDouble(Target.UNKNOWN));
         } else if(c instanceof CArray){
             CArray ca = (CArray)c;
             if(ca.inAssociativeMode()){
@@ -346,4 +348,9 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             throw new ClassCastException(c.getClass().getName() + " cannot be cast to a POJO");
         }
     }
+
+	public CPrimitive primitive(Target t) throws ConfigRuntimeException {
+		throw new Exceptions.CastException("Cannot cast " + typeName() + " to primitive", t);
+	}
+
 }

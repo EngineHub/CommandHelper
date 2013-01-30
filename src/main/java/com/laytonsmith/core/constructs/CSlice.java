@@ -84,13 +84,13 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public void set(Construct index, Construct c, Target t) {
+	public void set(CPrimitive index, Construct c, Target t) {
 		throw new ConfigRuntimeException("CSlices cannot set values", Exceptions.ExceptionType.CastException, t);
 	}
 
 	@Override
-	public Construct get(Construct index, Target t) {
-		long i = Static.getInt(index, t);
+	public Construct get(CPrimitive index, Target t) {
+		long i = index.castToInt(t);
 		if(i > max){
 			throw new ConfigRuntimeException("Index out of bounds. Index: " + i + " Size: " + max, Exceptions.ExceptionType.RangeException, t);
 		}
@@ -105,13 +105,13 @@ public class CSlice extends CArray {
 	@Override
 	public boolean contains(Construct c) {
 		try{
-			long i = Static.getInt(c, Target.UNKNOWN);
+			long i = ((CPrimitive)c).castToInt(Target.UNKNOWN);
 			if(start < finish){
 				return start <= i && i <= finish;
 			} else {
 				return start >= i && i <= finish;
 			}
-		} catch(ConfigRuntimeException e){
+		} catch(Exception e){
 			return false;
 		}
 	}

@@ -234,10 +234,10 @@ public class CArray extends Construct implements ArrayAccess{
      * @param index
      * @param c 
      */
-    public void set(Construct index, Construct c, Target t) {
+    public void set(CPrimitive index, Construct c, Target t) {
         if (!associative_mode) {
             try {
-                int indx = Static.getInt32(index, t);
+                int indx = index.castToInt32(t);
                 if (indx > next_index || indx < 0) {
                     throw new ConfigRuntimeException("", Target.UNKNOWN);
                 } else if(indx == next_index){
@@ -281,10 +281,10 @@ public class CArray extends Construct implements ArrayAccess{
         set(index, value, Target.UNKNOWN);
     }
 
-    public Construct get(Construct index, Target t) {
+    public Construct get(CPrimitive index, Target t) {
         if(!associative_mode){
             try {
-                return array.get(Static.getInt32(index, t));
+                return array.get(index.castToInt32(t));
             } catch (IndexOutOfBoundsException e) {
                 throw new ConfigRuntimeException("The element at index \"" + index.val() + "\" does not exist", ExceptionType.IndexOverflowException, t);
             }
@@ -446,7 +446,7 @@ public class CArray extends Construct implements ArrayAccess{
         } else if(c.isNull()){
             return "";
         } else if(c instanceof CBoolean){
-            if(((CBoolean)c).getBoolean()){
+            if(((CBoolean)c).castToBoolean()){
                 return "1";
             } else {
                 return "0";
@@ -555,6 +555,11 @@ public class CArray extends Construct implements ArrayAccess{
 	public String typeName() {
 		return "array";
 	}
+
+	@Override
+	public CPrimitive primitive(Target t) {
+		throw new ConfigRuntimeException("Cannot cast this array to a primitive value.", ExceptionType.CastException, t);
+	}
     
     public enum SortType{
         /**
@@ -576,7 +581,7 @@ public class CArray extends Construct implements ArrayAccess{
          */
         STRING_IC
     }
-    public void sort(final SortType sort){
+    public void sort(final SortType sort, final Target t){
         List<Construct> list = array;
         if(this.associative_mode){
             list = new ArrayList(associative_array.values());
@@ -614,12 +619,14 @@ public class CArray extends Construct implements ArrayAccess{
                         return o1.val().compareTo("");
                     }
                 }
-                if(o1 instanceof CBoolean || o2 instanceof CBoolean){
-                    if(Static.getBoolean(o1) == Static.getBoolean(o2)){
+                if(o1 instanceof CBoolean && o2 instanceof CPrimitive || o2 instanceof CBoolean && o1 instanceof CPrimitive){
+					CPrimitive p1 = (CPrimitive)o1;
+					CPrimitive p2 = (CPrimitive)o2;
+                    if(p1.castToBoolean() == p2.castToBoolean()){
                         return 0;
                     } else {
-                        int oo1 = Static.getBoolean(o1)==true?1:0;
-                        int oo2 = Static.getBoolean(o2)==true?1:0;
+                        int oo1 = p1.castToBoolean()==true?1:0;
+                        int oo2 = p2.castToBoolean()==true?1:0;
                         return (oo1 < oo2) ? -1 : 1;
                     }
                 }
@@ -634,16 +641,16 @@ public class CArray extends Construct implements ArrayAccess{
                     case STRING_IC:
                         return compareString(o1.val().toLowerCase(), o2.val().toLowerCase());  
                 }
-                throw new ConfigRuntimeException("Missing implementation for " + sort.name(), Target.UNKNOWN);
+                throw new Error("Missing implementation for " + sort.name());
             }
             public int compareRegular(Construct o1, Construct o2){
-                if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1))
-                        && Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2))){
+                if(new DataHandling.is_numeric().exec(t, null, o1).castToBoolean()
+                        && new DataHandling.is_numeric().exec(t, null, o2).castToBoolean()){
                     return compareNumeric(o1, o2);
-                } else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o1))){
+                } else if(new DataHandling.is_numeric().exec(t, null, o1).castToBoolean()){
                     //The first is a number, the second is a string
                     return -1;
-                } else if(Static.getBoolean(new DataHandling.is_numeric().exec(Target.UNKNOWN, null, o2))){
+                } else if(new DataHandling.is_numeric().exec(t, null, o2).castToBoolean()){
                     //The second is a number, the first is a string
                     return 1;
                 } else {
@@ -652,8 +659,8 @@ public class CArray extends Construct implements ArrayAccess{
                 }
             }
             public int compareNumeric(Construct o1, Construct o2){
-                double d1 = Static.getNumber(o1, o1.getTarget());
-                double d2 = Static.getNumber(o2, o2.getTarget());
+                double d1 = ((CPrimitive)o1).castToDouble(t);
+                double d2 = ((CPrimitive)o2).castToDouble(t);
                 return Double.compare(d1, d2);
             }
             public int compareString(String o1, String o2){

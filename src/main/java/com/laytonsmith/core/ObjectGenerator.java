@@ -77,53 +77,43 @@ public class ObjectGenerator {
         float yaw = 0;
         float pitch = 0;
         if (!array.inAssociativeMode()) {
-            if (array.size() == 3) {
-                //Just the xyz, with default yaw and pitch, and given world
-                x = Static.getNumber(array.get(0, t), t);
-                y = Static.getNumber(array.get(1, t), t);
-                z = Static.getNumber(array.get(2, t), t);
-            } else if (array.size() == 4) {
+			//Just the xyz, with default yaw and pitch, and given world
+			x = array.get(0, t).primitive(t).castToDouble(t);
+			y = array.get(1, t).primitive(t).castToDouble(t);
+			z = array.get(2, t).primitive(t).castToDouble(t);
+            if (array.size() == 4) {
                 //x, y, z, world
-                x = Static.getNumber(array.get(0, t), t);
-                y = Static.getNumber(array.get(1, t), t);
-                z = Static.getNumber(array.get(2, t), t);
                 world = Static.getServer().getWorld(array.get(3, t).val());
             } else if (array.size() == 5) {
                 //x, y, z, yaw, pitch, with given world
-                x = Static.getNumber(array.get(0, t), t);
-                y = Static.getNumber(array.get(1, t), t);
-                z = Static.getNumber(array.get(2, t), t);
-                yaw = (float) Static.getNumber(array.get(3, t), t);
-                pitch = (float) Static.getNumber(array.get(4, t), t);
+                yaw = array.get(3, t).primitive(t).castToDouble32(t);
+                pitch = array.get(4, t).primitive(t).castToDouble32(t);
             } else if (array.size() == 6) {
                 //All have been given
-                x = Static.getNumber(array.get(0, t), t);
-                y = Static.getNumber(array.get(1, t), t);
-                z = Static.getNumber(array.get(2, t), t);
                 world = Static.getServer().getWorld(array.get(3, t).val());
-                yaw = (float) Static.getNumber(array.get(4, t), t);
-                pitch = (float) Static.getNumber(array.get(5, t), t);
+                yaw = array.get(4, t).primitive(t).castToDouble32(t);
+                pitch = array.get(5, t).primitive(t).castToDouble32(t);
             } else {
                 throw new ConfigRuntimeException("Expecting a Location array, but the array did not meet the format specifications", ExceptionType.FormatException, t);
             }
         }
         if (array.containsKey("x")) {
-            x = Static.getNumber(array.get("x"), t);
+            x = array.get("x").primitive(t).castToDouble(t);
         }
         if (array.containsKey("y")) {
-            y = Static.getNumber(array.get("y"), t);
+            y = array.get("y").primitive(t).castToDouble(t);
         }
         if (array.containsKey("z")) {
-            z = Static.getNumber(array.get("z"), t);
+            z = array.get("z").primitive(t).castToDouble(t);
         }
         if (array.containsKey("world")) {
             world = Static.getServer().getWorld(array.get("world").val());
         }
         if (array.containsKey("yaw")) {
-            yaw = (float) Static.getDouble(array.get("yaw"), t);
+            yaw = array.get("yaw").primitive(t).castToDouble32(t);
         }
         if (array.containsKey("pitch")) {
-            pitch = (float) Static.getDouble(array.get("pitch"), t);
+            pitch = array.get("pitch").primitive(t).castToDouble32(t);
         }
 		//If world is still null at this point, it's an error
 		if (world == null) {
@@ -329,25 +319,25 @@ public class ObjectGenerator {
 		int green;
 		int blue;
 		if(color.containsKey("r")){
-			red = Static.getInt32(color.get("r"), t);
+			red = color.get("r").primitive(t).castToInt32(t);
 		} else if(color.containsKey("red")){
-			red = Static.getInt32(color.get("red"), t);
+			red = color.get("red").primitive(t).castToInt32(t);
 		} else {
-			red = Static.getInt32(color.get(0), t);
+			red = color.get(0).primitive(t).castToInt32(t);
 		}
 		if(color.containsKey("g")){
-			green = Static.getInt32(color.get("g"), t);
+			green = color.get("g").primitive(t).castToInt32(t);
 		} else if(color.containsKey("green")){
-			green = Static.getInt32(color.get("green"), t);
+			green = color.get("green").primitive(t).castToInt32(t);
 		} else {
-			green = Static.getInt32(color.get(1), t);
+			green = color.get(1).primitive(t).castToInt32(t);
 		}
 		if(color.containsKey("b")){
-			blue = Static.getInt32(color.get("b"), t);
+			blue = color.get("b").primitive(t).castToInt32(t);
 		} else if(color.containsKey("blue")){
-			blue = Static.getInt32(color.get("blue"), t);
+			blue = color.get("blue").primitive(t).castToInt32(t);
 		} else {
-			blue = Static.getInt32(color.get(2), t);
+			blue = color.get(2).primitive(t).castToInt32(t);
 		}
 		return StaticLayer.GetConvertor().GetColor(red, green, blue);
 	}

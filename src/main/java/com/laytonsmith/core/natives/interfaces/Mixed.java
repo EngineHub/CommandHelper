@@ -2,6 +2,10 @@
 
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.core.constructs.CPrimitive;
+import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+
 /**
  *
  * @author Layton
@@ -34,4 +38,13 @@ public interface Mixed {
 	 * @return 
 	 */
 	String typeName();
+	
+	/**
+	 * Casts this value to a primitive, if possible. This intended as a convenience
+	 * method for INTERNAL code, as opposed to user facing code. Only the CPrimitive
+	 * class should actually implement this, other implementations should throw a
+	 * ConfigRuntimeException.
+	 * @return 
+	 */
+	CPrimitive primitive(Target t) throws ConfigRuntimeException;
 }

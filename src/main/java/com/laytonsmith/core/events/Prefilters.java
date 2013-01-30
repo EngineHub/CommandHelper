@@ -76,6 +76,7 @@ public final class Prefilters {
      */
     public static void match(Map<String, Construct> map, String key,
             Construct actualValue, PrefilterType type) throws PrefilterNonMatchException{
+		Target t = actualValue.getTarget();
         if(map.containsKey(key)){
             switch(type){
                 case ITEM_MATCH:
@@ -85,16 +86,16 @@ public final class Prefilters {
                     StringMatch(map.get(key).val(), actualValue.val());
                     break;
                 case MATH_MATCH:
-                    MathMatch(map.get(key), actualValue);
+                    MathMatch(map.get(key).primitive(t).castToDouble(t), actualValue.primitive(t).castToDouble(t));
                     break;
                 case EXPRESSION:
-                    ExpressionMatch(MathReplace(key, map.get(key), actualValue), actualValue);
+                    ExpressionMatch(MathReplace(key, map.get(key), actualValue), actualValue.primitive(t).castToDouble(t));
                     break;
                 case REGEX:
                     RegexMatch(map.get(key), actualValue);
                     break;
                 case MACRO:
-                    MacroMatch(key, map.get(key), actualValue);
+                    MacroMatch(key, map.get(key), actualValue.primitive(t), t);
             }
         }
     }
@@ -121,10 +122,10 @@ public final class Prefilters {
         }
     }
     
-    private static void MathMatch(Construct one, Construct two) throws PrefilterNonMatchException{
+    private static void MathMatch(double one, double two) throws PrefilterNonMatchException{
         try{
-            double dOne = Static.getNumber(one, Target.UNKNOWN);
-            double dTwo = Static.getNumber(two, Target.UNKNOWN);
+            double dOne = one;
+            double dTwo = two;
             if(dOne != dTwo){
                 throw new PrefilterNonMatchException();
             }
@@ -133,7 +134,7 @@ public final class Prefilters {
         }
     }
     
-    private static void ExpressionMatch(Construct expression, Construct dvalue) throws PrefilterNonMatchException{
+    private static void ExpressionMatch(Construct expression, double dvalue) throws PrefilterNonMatchException{
         if(expression.val().matches("\\(.*\\)")){
             String exp = expression.val().substring(1, expression.val().length() - 1);
             boolean inequalityMode = false;
@@ -147,7 +148,7 @@ public final class Prefilters {
                         throw new PrefilterNonMatchException();
                     }
                 } else {
-                    if(val != Static.getDouble(dvalue, Target.UNKNOWN)){
+                    if(val != dvalue){
                         throw new PrefilterNonMatchException();
                     }
                 }
@@ -175,9 +176,9 @@ public final class Prefilters {
         }
     }
     
-    private static void MacroMatch(String key, Construct expression, Construct value) throws PrefilterNonMatchException{
+    private static void MacroMatch(String key, Construct expression, CPrimitive value, Target t) throws PrefilterNonMatchException{
         if(expression.val().matches("\\(.*\\)")){
-            ExpressionMatch(MathReplace(key, expression, value), value);
+            ExpressionMatch(MathReplace(key, expression, value), value.castToDouble(t));
         } else if(expression.val().matches("/.*/")){
             RegexMatch(expression, value);
         } else {

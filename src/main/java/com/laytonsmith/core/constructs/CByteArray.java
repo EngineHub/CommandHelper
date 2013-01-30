@@ -322,13 +322,13 @@ public class CByteArray extends Construct implements Sizable {
 		}
 
 		@Override
-		public void set(Construct index, Construct c, Target t) {
+		public void set(CPrimitive index, Construct c, Target t) {
 			throw new ROException();
 		}
 
 		@Override
-		public Construct get(Construct index, Target t) {
-			int i = Static.getInt32(index, t);
+		public Construct get(CPrimitive index, Target t) {
+			int i = index.castToInt32(t);
 			try{
 				return new CInt(backing[i], t);
 			} catch(ArrayIndexOutOfBoundsException e){

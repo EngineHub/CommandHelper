@@ -12,7 +12,7 @@ import com.laytonsmith.core.functions.Exceptions.ExceptionType;
  * @author layton
  */
 @typename("boolean")
-public class CBoolean extends Construct implements Cloneable{
+public class CBoolean extends CPrimitive implements Cloneable{
     
     public static final long serialVersionUID = 1L;
     private final boolean val;
@@ -50,10 +50,6 @@ public class CBoolean extends Construct implements Cloneable{
         val = tempVal;
     }
 
-    public boolean getBoolean(){
-        return val;
-    }
-
     @Override
     public String toString() {
         if(val){
@@ -75,6 +71,26 @@ public class CBoolean extends Construct implements Cloneable{
 
 	public String typeName() {
 		return "boolean";
+	}
+
+	@Override
+	public String castToString() {
+		return val ? "true" : "false";
+	}
+
+	@Override
+	public double castToDouble(Target t) {
+		return val ? 1.0 : 0.0;
+	}
+
+	@Override
+	public long castToInt(Target t) {
+		return val ? 1 : 0;
+	}
+
+	@Override
+	public boolean castToBoolean() {
+		return val;
 	}
 
 }

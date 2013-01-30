@@ -47,7 +47,7 @@ public class EntityEvents {
 				+ "{player|clicked|id|data}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerInteractEntityEvent){
 				return true;
@@ -86,7 +86,7 @@ public class EntityEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+				BindableEvent event, Target t) {
 			return false;
 		}
 
@@ -124,7 +124,7 @@ public class EntityEvents {
             return Driver.ITEM_DROP;
         }
         
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerDropItemEvent) {
                 MCPlayerDropItemEvent event = (MCPlayerDropItemEvent)e;
                 
@@ -150,7 +150,7 @@ public class EntityEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerDropItemEvent) {
                 MCPlayerDropItemEvent e = (MCPlayerDropItemEvent)event;
                 
@@ -183,7 +183,7 @@ public class EntityEvents {
 				+ "{player|item|remaining}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if (e instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent event = (MCPlayerPickupItemEvent)e;
 				
@@ -220,7 +220,7 @@ public class EntityEvents {
 			return Driver.ITEM_PICKUP;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
 			if (event instanceof MCPlayerPickupItemEvent) {
 				MCPlayerPickupItemEvent e = (MCPlayerPickupItemEvent)event;
 				
@@ -261,7 +261,7 @@ public class EntityEvents {
                     + "{player|amount|damager|cause|data|id}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if(e instanceof MCEntityDamageByEntityEvent){
 				MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent) e;
@@ -313,8 +313,7 @@ public class EntityEvents {
 			return Driver.ENTITY_DAMAGE_PLAYER;
 		}
 
-		public boolean modifyEvent(String key, Construct value,
-				BindableEvent e) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent e, Target t) {
 			MCEntityDamageByEntityEvent event = (MCEntityDamageByEntityEvent)e;
             
     		if (key.equals("amount")) {
@@ -357,7 +356,7 @@ public class EntityEvents {
             return Driver.TARGET_ENTITY;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
         	if(e instanceof MCEntityTargetEvent){
         		MCEntityTargetEvent ete = (MCEntityTargetEvent) e;
         		
@@ -401,7 +400,7 @@ public class EntityEvents {
             }
         }
         
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
         	if(event instanceof MCEntityTargetEvent){
         		MCEntityTargetEvent ete = (MCEntityTargetEvent)event;
             

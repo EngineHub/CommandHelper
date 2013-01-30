@@ -1426,7 +1426,7 @@ public class DataHandling {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
 				Static.getNumber(args[0], t);

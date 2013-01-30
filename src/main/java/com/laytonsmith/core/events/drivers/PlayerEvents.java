@@ -61,7 +61,7 @@ public class PlayerEvents {
                     + "{player|message|reason}";
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
                 throws PrefilterNonMatchException {
             if (e instanceof MCPlayerKickEvent) {
                 //I gather we do not what to intercept anything from players in interpreter mode
@@ -100,7 +100,7 @@ public class PlayerEvents {
         }
 
         public boolean modifyEvent(String key, Construct value,
-                BindableEvent event) {
+                BindableEvent event, Target t) {
             if(event instanceof MCPlayerKickEvent){
                 MCPlayerKickEvent e = (MCPlayerKickEvent) event;
                 if(key.equalsIgnoreCase("message")){
@@ -139,7 +139,7 @@ public class PlayerEvents {
 				+ "{}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerTeleportEvent){
 				MCPlayerTeleportEvent event = (MCPlayerTeleportEvent)e;
 
@@ -208,7 +208,7 @@ public class PlayerEvents {
 			return Driver.PLAYER_TELEPORT;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
 			if (event instanceof MCPlayerTeleportEvent) {
 				MCPlayerTeleportEvent e = (MCPlayerTeleportEvent)event;
 
@@ -249,7 +249,7 @@ public class PlayerEvents {
                     + "{player|kickmsg|ip|result}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerPreLoginEvent){
                 MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
@@ -289,7 +289,7 @@ public class PlayerEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent e) {
+				BindableEvent e, Target t) {
 			if(e instanceof MCPlayerPreLoginEvent){
                 MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
                 if (key.equals("result")) {
@@ -331,7 +331,7 @@ public class PlayerEvents {
                     + "{player|kickmsg|ip|result}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
 				throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerPreLoginEvent){
                 MCPlayerPreLoginEvent event = (MCPlayerPreLoginEvent)e;
@@ -372,7 +372,7 @@ public class PlayerEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent e) {
+				BindableEvent e, Target t) {
 			if(e instanceof MCPlayerLoginEvent){
                 MCPlayerLoginEvent event = (MCPlayerLoginEvent)e;
                 if (key.equals("result")) {
@@ -440,7 +440,7 @@ public class PlayerEvents {
             return Driver.PLAYER_JOIN;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent ple = (MCPlayerJoinEvent) e;
                 if(prefilter.containsKey("player")){
@@ -467,7 +467,7 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if(event instanceof MCPlayerJoinEvent){
                 MCPlayerJoinEvent pje = (MCPlayerJoinEvent)event;
                 if(key.equals("join_message") || key.equals("message")){
@@ -522,7 +522,7 @@ public class PlayerEvents {
             return Driver.PLAYER_INTERACT;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if(e instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)e;
                 if(((MCPlayerInteractEvent)e).getAction().equals(MCAction.PHYSICAL)){
@@ -587,7 +587,7 @@ public class PlayerEvents {
             return e;
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if(event instanceof MCPlayerInteractEvent){
                 MCPlayerInteractEvent pie = (MCPlayerInteractEvent)event;
 
@@ -626,7 +626,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_0;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerRespawnEvent) {
                 MCPlayerRespawnEvent event = (MCPlayerRespawnEvent) e;
                 Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
@@ -662,7 +662,7 @@ public class PlayerEvents {
             return e;
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerRespawnEvent) {
                 MCPlayerRespawnEvent e = (MCPlayerRespawnEvent) event;
                 if (key.equals("location")) {
@@ -722,7 +722,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_0;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent event = (MCPlayerDeathEvent) e;
                 Prefilters.match(prefilter, "player", ((MCPlayer)event.getEntity()).getName(), PrefilterType.MACRO);
@@ -775,17 +775,17 @@ public class PlayerEvents {
         }
 
         //Given the paramters, change the underlying event
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerDeathEvent) {
                 MCPlayerDeathEvent e = (MCPlayerDeathEvent) event;
                 if (key.equals("xp")) {
                     //Change this parameter in e to value
-                    e.setDroppedExp(Static.getInt32(value, Target.UNKNOWN));
+                    e.setDroppedExp(value.primitive(t).castToInt32(t));
                     return true;
                 }
                 if(key.equals("drops")){
                     if(value.isNull()){
-                        value = new CArray(Target.UNKNOWN);
+                        value = new CArray(t);
                     }
                     if(!(value instanceof CArray)){
                         throw new ConfigRuntimeException("drops must be an array, or null", Exceptions.ExceptionType.CastException, value.getTarget());
@@ -793,7 +793,7 @@ public class PlayerEvents {
                     e.clearDrops();
                     CArray drops = (CArray) value;
                     for(String dropID : drops.keySet()){
-                        e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID), Target.UNKNOWN));
+                        e.addDrop(ObjectGenerator.GetGenerator().item(drops.get(dropID), t));
                     }
                     return true;
                 }
@@ -829,7 +829,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_1;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerQuitEvent) {
                 //As a very special case, if this player is currently in interpreter mode, we do not want to
                 //intercept their chat event
@@ -865,7 +865,7 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerQuitEvent) {
                 MCPlayerQuitEvent e = (MCPlayerQuitEvent)event;
                 if("message".equals(key)){
@@ -924,7 +924,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_0;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerChatEvent) {
                 //As a very special case, if this player is currently in interpreter mode, we do not want to
                 //intercept their chat event
@@ -966,7 +966,7 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerChatEvent) {
                 MCPlayerChatEvent e = (MCPlayerChatEvent)event;
                 if("message".equals(key)){
@@ -1023,7 +1023,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_1;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
                 String command = event.getCommand();
@@ -1073,7 +1073,7 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if (event instanceof MCPlayerCommandEvent) {
                 MCPlayerCommandEvent e = (MCPlayerCommandEvent) event;
 
@@ -1117,7 +1117,7 @@ public class PlayerEvents {
             return CHVersion.V3_3_1;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCWorldChangedEvent) {
                 MCWorldChangedEvent event = (MCWorldChangedEvent) e;
                 Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
@@ -1150,7 +1150,7 @@ public class PlayerEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if (event instanceof MCWorldChangedEvent) {
                 MCWorldChangedEvent e = (MCWorldChangedEvent) event;
 
@@ -1181,9 +1181,9 @@ public class PlayerEvents {
 		private Map<Integer, Map<String, MCLocation>> thresholds = new HashMap<Integer, Map<String, MCLocation>>();
 
 		@Override
-		public void bind(Map<String, Construct> prefilters) {
+		public void bind(Map<String, Construct> prefilters, Target t) {
 			if(prefilters.containsKey("threshold")){
-				int i = Static.getInt32(prefilters.get("threshold"), Target.UNKNOWN);
+				int i = prefilters.get("threshold").primitive(t).castToInt32(t);
 				thresholdList.add(i);
 			}
 			if(!threadRunning){
@@ -1344,7 +1344,7 @@ public class PlayerEvents {
 
 
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
 			if(e instanceof MCPlayerMoveEvent){
 				MCPlayerMoveEvent event = (MCPlayerMoveEvent)e;
 				if(!event.getFrom().getWorld().getName().equals(event.getTo().getWorld().getName())){
@@ -1354,7 +1354,7 @@ public class PlayerEvents {
 					Point3D from = new Point3D(event.getFrom().getX(), event.getFrom().getY(), event.getFrom().getZ());
 					Point3D to = new Point3D(event.getTo().getX(), event.getTo().getY(), event.getTo().getZ());
 					double distance = from.distance(to);
-					double pDistance = Static.getNumber(prefilter.get("threshold"), Target.UNKNOWN);
+					double pDistance = prefilter.get("threshold").primitive(t).castToDouble(t);
 					if(pDistance > distance){
 						return false;
 					}
@@ -1405,7 +1405,7 @@ public class PlayerEvents {
 			return Driver.PLAYER_MOVE;
 		}
 
-		public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+		public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
 			//Nothing can be modified, so always return false
 			return false;
 		}

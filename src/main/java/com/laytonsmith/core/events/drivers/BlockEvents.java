@@ -58,7 +58,7 @@ public class BlockEvents {
             return Driver.BLOCK_BREAK;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
                 throws PrefilterNonMatchException {
             if (e instanceof MCBlockBreakEvent) {
                 MCBlockBreakEvent event = (MCBlockBreakEvent) e;
@@ -147,7 +147,7 @@ public class BlockEvents {
         }
 
         public boolean modifyEvent(String key, Construct value,
-                BindableEvent e) {
+                BindableEvent e, Target t) {
 
             MCBlockBreakEvent event = (MCBlockBreakEvent) e;
             MCBlock blk = event.getBlock();
@@ -160,7 +160,7 @@ public class BlockEvents {
 
                     for (int i = 0; i < arr.size(); i++) {
                         CArray item = (CArray) arr.get(i);
-                        MCItemStack stk = ObjectGenerator.GetGenerator().item(item, Target.UNKNOWN);
+                        MCItemStack stk = ObjectGenerator.GetGenerator().item(item, t);
                         
                         blk.getWorld().dropItemNaturally(
                             StaticLayer.GetLocation(
@@ -219,7 +219,7 @@ public class BlockEvents {
             return Driver.BLOCK_PLACE;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e)
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
                 throws PrefilterNonMatchException {
             if (e instanceof MCBlockPlaceEvent) {
                 MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
@@ -310,7 +310,7 @@ public class BlockEvents {
         }
 
         public boolean modifyEvent(String key, Construct value,
-                BindableEvent e) {
+                BindableEvent e, Target t) {
             MCBlockPlaceEvent event = (MCBlockPlaceEvent) e;
 
             if (key.equals("type")) {
@@ -370,7 +370,7 @@ public class BlockEvents {
             return Driver.SIGN_CHANGED;
         }
 
-        public boolean matches(Map<String, Construct> prefilter, BindableEvent e) throws PrefilterNonMatchException {
+        public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t) throws PrefilterNonMatchException {
             if (e instanceof MCSignChangeEvent) {
                 MCSignChangeEvent sce = (MCSignChangeEvent) e;
 
@@ -410,7 +410,7 @@ public class BlockEvents {
             }
         }
 
-        public boolean modifyEvent(String key, Construct value, BindableEvent event) {
+        public boolean modifyEvent(String key, Construct value, BindableEvent event, Target t) {
             if (event instanceof MCSignChangeEvent) {
                 MCSignChangeEvent sce = (MCSignChangeEvent) event;
 

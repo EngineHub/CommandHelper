@@ -12,7 +12,7 @@ import com.laytonsmith.core.natives.interfaces.ArrayAccess;
  * @author Layton
  */
 @typename("string")
-public class CString extends Construct implements Cloneable, ArrayAccess, CPrimitive {
+public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	
     public CString(String value, Target t){
         super(value==null?"":value, t);
@@ -73,5 +73,33 @@ public class CString extends Construct implements Cloneable, ArrayAccess, CPrimi
 
 	public String typeName() {
 		return "string";
+	}
+
+	@Override
+	public String castToString() {
+		return val();
+	}
+
+	@Override
+	public double castToDouble(Target t) {
+		try{
+			return Double.valueOf(val());
+		} catch(NumberFormatException e){
+			throw new ConfigRuntimeException("Could not convert " + val() + " to a double.", Exceptions.ExceptionType.CastException, t);
+		}
+	}
+
+	@Override
+	public long castToInt(Target t) {
+		try{
+			return Long.valueOf(val());
+		} catch(NumberFormatException e){
+			throw new ConfigRuntimeException("Could not convert " + val() + " to an int.", Exceptions.ExceptionType.CastException, t);
+		}
+	}
+
+	@Override
+	public boolean castToBoolean() {
+		return val().isEmpty() ? false : true;
 	}
 }
