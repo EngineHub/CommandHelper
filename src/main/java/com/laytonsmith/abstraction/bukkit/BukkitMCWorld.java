@@ -170,7 +170,9 @@ public class BukkitMCWorld implements MCWorld {
     public MCBlock getHighestBlockAt(int x, int z) {
 		//Workaround for getHighestBlockAt, since it doesn't like transparent
 		//blocks.
-		Block b = w.getBlockAt(x, w.getMaxHeight(), z);
+		//Hard Coded 255 because bukkits getMaxHeight() returns 256 which then is turned into 0 (not sure if this is bukkit or CH)
+//		Block b = w.getBlockAt(x, w.getMaxHeight(), z);
+		Block b = w.getBlockAt(x, 255, z);
 		while(b.getType() == Material.AIR){
 			b = b.getRelative(BlockFace.DOWN);
 		}
