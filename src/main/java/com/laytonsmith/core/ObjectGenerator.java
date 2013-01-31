@@ -3,7 +3,6 @@
 package com.laytonsmith.core;
 
 import com.laytonsmith.abstraction.*;
-import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -286,11 +285,11 @@ public class ObjectGenerator {
         MCItemStack ret = StaticLayer.GetItemStack(type, qty);
         ret.setData(data);
         ret.setDurability((short) data);
-        for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
-            ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
-        }
 		if (meta != null) {
 			ret.setItemMeta(meta);
+		}
+		for (Map.Entry<MCEnchantment, Integer> entry : enchants.entrySet()) {
+			ret.addUnsafeEnchantment(entry.getKey(), entry.getValue());
 		}
 
         //Giving them air crashes the client, so just clear the inventory slot
@@ -305,7 +304,7 @@ public class ObjectGenerator {
     }
     
 	public Construct itemMeta(MCItemStack is, Target t) {
-		Construct ret, display, lore, color;
+		Construct ret, display, lore, color, title, author, pages, owner;
 		if (!is.hasItemMeta()) {
 			ret = new CNull(t);
 		} else {
@@ -329,6 +328,37 @@ public class ObjectGenerator {
 			if (meta instanceof MCLeatherArmorMeta) {
 				color = color(((MCLeatherArmorMeta) meta).getColor(), t);
 				((CArray) ret).set("color", color, t);
+			}
+			if (meta instanceof MCBookMeta) {
+				if (((MCBookMeta) meta).hasTitle()) {
+					title = new CString(((MCBookMeta) meta).getTitle(), t);
+				} else {
+					title = new CNull(t);
+				}
+				if (((MCBookMeta) meta).hasAuthor()) {
+					author = new CString(((MCBookMeta) meta).getAuthor(), t);
+				} else {
+					author = new CNull(t);
+				}
+				if (((MCBookMeta) meta).hasPages()) {
+					pages = new CArray(t);
+					for (String p : ((MCBookMeta) meta).getPages()) {
+						((CArray) pages).push(new CString(p, t));
+					}
+				} else {
+					pages = new CNull(t);
+				}
+				((CArray) ret).set("title", title, t);
+				((CArray) ret).set("author", author, t);
+				((CArray) ret).set("pages", pages, t);
+			}
+			if (meta instanceof MCSkullMeta) {
+				if (((MCSkullMeta) meta).hasOwner()) {
+					owner = new CString(((MCSkullMeta) meta).getOwner(), t);
+				} else {
+					owner = new CNull(t);
+				}
+				((CArray) ret).set("owner", owner, t);
 			}
 		}
 		return ret;
@@ -373,6 +403,43 @@ public class ObjectGenerator {
 							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t));
 						} else {
 							throw new Exceptions.FormatException("Color was expected to be an array.", t);
+						}
+					}
+				}
+				if (meta instanceof MCBookMeta) {
+					if (ma.containsKey("title")) {
+						Construct title = ma.get("title");
+						if (!(title instanceof CNull)) {
+							((MCBookMeta) meta).setTitle(title.val());
+						}
+					}
+					if (ma.containsKey("author")) {
+						Construct author = ma.get("author");
+						if (!(author instanceof CNull)) {
+							((MCBookMeta) meta).setTitle(author.val());
+						}
+					}
+					if (ma.containsKey("pages")) {
+						Construct pages = ma.get("pages");
+						if (pages instanceof CNull) {
+							//nothing
+						} else if (pages instanceof CArray) {
+							CArray pa = (CArray) pages;
+							List<String> pl = new ArrayList<String>();
+							for (int j = 0; j < pa.size(); j++) {
+								pl.add(pa.get(j).val());
+							}
+							((MCBookMeta) meta).setPages(pl);
+						} else {
+							throw new Exceptions.FormatException("Pages field was expected to be an array.", t);
+						}
+					}
+				}
+				if (meta instanceof MCSkullMeta) {
+					if (ma.containsKey("owner")) {
+						Construct owner = ma.get("owner");
+						if (!(owner instanceof CNull)) {
+							((MCSkullMeta) meta).setOwner(owner.val());
 						}
 					}
 				}

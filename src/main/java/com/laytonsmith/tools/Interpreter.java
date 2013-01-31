@@ -10,6 +10,7 @@ import com.laytonsmith.abstraction.MCEnchantment;
 import com.laytonsmith.abstraction.MCEntity;
 import com.laytonsmith.abstraction.MCFirework;
 import com.laytonsmith.abstraction.MCInventory;
+import com.laytonsmith.abstraction.MCItemMeta;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCNote;
@@ -431,6 +432,10 @@ public class Interpreter {
 		}
 
 		public MCMaterial getMaterial(int id) {
+			throw new UnsupportedOperationException("This method is not supported from a shell.");
+		}
+
+		public MCItemMeta GetCorrectMeta(MCItemMeta im) {
 			throw new UnsupportedOperationException("This method is not supported from a shell.");
 		}
 		
