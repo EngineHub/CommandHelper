@@ -285,78 +285,42 @@ public final class Static {
     }
 
     /**
-     * This function breaks a string into chunks based on Minecraft line length,
-     * and newlines, then calls the LineCallback with each line.
-     * @param c
-     * @param msg 
-     */
-    public static void SendMessage(LineCallback c, String msg) {
-        String[] newlines = msg.split("\n");
-        for (String line : newlines) {
-            String[] arr = rParser.wordWrap(line);
-            for (String toMsg : arr) {                
-                //Trim just the right
-                for(int i = toMsg.length() - 1; i >= 0; i--){
-                    if(!Character.isWhitespace(toMsg.charAt(i))){
-                        toMsg = toMsg.substring(0, i + 1);
-                        break;
-                    }
-                }
-                c.run(toMsg);
-            }
-        }
+	 * This function sends a message to the player. If the player is not
+	 * online, a CRE is thrown.
+	 * @param p
+	 * @param msg
+	 */
+	public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
+		String line = msg;
+		if (m instanceof MCPlayer) {
+			MCPlayer p = (MCPlayer) m;
+			if (p == null) {
+				throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, t);
+			}
+			p.sendMessage(line);
+		} else {
+			msg = Static.MCToANSIColors(msg);
+			if (msg.matches("(?m).*\033.*")) {
+				//We have terminal colors, we need to reset them at the end
+				msg += TermColors.reset();
+			}
+			getLogger().log(Level.INFO, msg);
+		}
+	}
 
-    }
-
-    /**
-     * This function sends a message to the player. It is useful to use this function because:
-     * It handles newlines and wordwrapping for you.
-     * @param p
-     * @param msg 
-     */
-    public static void SendMessage(final MCCommandSender m, String msg, final Target t) {
-//        SendMessage(new LineCallback() {
-//
-//            public void run(String line) {
-				String line = msg;
-                if (m instanceof MCPlayer) {
-                    MCPlayer p = (MCPlayer) m;
-                    if (p == null) {
-                        throw new ConfigRuntimeException("The player " + p.getName() + " is not online", ExceptionType.PlayerOfflineException, t);
-                    }
-                    p.sendMessage(line);
-                } else {
-                    if (m != null) {
-                        m.sendMessage(line);
-                    } else {
-                        System.out.println(line);
-                    }
-                }
-//            }
-//        }, msg);
-    }
-
-    public static void SendMessage(final MCCommandSender m, String msg) {
-//        SendMessage(new LineCallback() {
-//
-//            public void run(String line) {
-				String line = msg;
-                MCPlayer p;
-                if (m instanceof MCPlayer) {
-                    p = (MCPlayer) m;
-                    if (p != null && p.isOnline()) {
-                        p.sendMessage(line);
-                    }
-                } else {
-                    if (m != null) {
-                        m.sendMessage(line);
-                    } else {
-                        System.out.println(line);
-                    }
-                }
-//            }
-//        }, msg);
-    }
+	/**
+	 * Works like {@link #SendMessage(com.laytonsmith.abstraction.MCCommandSender, java.lang.String, com.laytonsmith.core.constructs.Target)}
+	 * except it doesn't require a target, and ignores the message if the command sender is offline.
+	 * @param m
+	 * @param msg 
+	 */
+	public static void SendMessage(final MCCommandSender m, String msg) {
+		try{
+			SendMessage(m, msg, Target.UNKNOWN);
+		} catch(ConfigRuntimeException e){
+			//Ignored
+		}
+	}
 
     
 
@@ -467,13 +431,30 @@ public final class Static {
         return java.lang.Math.min(max, java.lang.Math.max(min, i));
     }
 
-    /**
-     * Returns the specified id. If it doesn't exist, a ConfigRuntimeException
-	 * is thrown.
-     * @param id
-     * @return 
-     */
-    public static MCEntity getEntity(int id, Target t) {
+	/**
+	 * Returns the entity with the specified id. If it doesn't exist,
+	 * a ConfigRuntimeException is thrown.
+	 * @param id
+	 * @return
+	 */
+	public static MCEntity getEntity(int id, Target t) {
+		for (MCWorld w : Static.getServer().getWorlds()) {
+			for (MCEntity e : w.getEntities()) {
+				if (e.getEntityId() == id) {
+					return StaticLayer.GetCorrectEntity(e);
+				}
+			}
+		}
+		throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
+	}
+	
+	/**
+	 * Returns the living entity with the specified id. If it doesn't exist or isn't living,
+	 * a ConfigRuntimeException is thrown.
+	 * @param id
+	 * @return 
+	 */
+	public static MCEntity getLivingEntity(int id, Target t) {
         for (MCWorld w : Static.getServer().getWorlds()) {
             for (MCLivingEntity e : w.getLivingEntities()) {
                 if (e.getEntityId() == id) {                    
@@ -481,7 +462,7 @@ public final class Static {
                 }
             }
         }
-        throw new ConfigRuntimeException("That entity (" + id + ") does not exist.", ExceptionType.BadEntityException, t);
+        throw new ConfigRuntimeException("That entity (" + id + ") does not exist or is not alive.", ExceptionType.BadEntityException, t);
     }
 
     public static String strJoin(Collection c, String inner) {

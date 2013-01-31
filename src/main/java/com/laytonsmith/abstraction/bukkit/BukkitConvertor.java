@@ -3,6 +3,9 @@
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCFallingBlock;
+import com.laytonsmith.abstraction.bukkit.blocks.BukkitMCMaterial;
 import com.laytonsmith.abstraction.bukkit.entities.*;
 import com.laytonsmith.abstraction.bukkit.events.BukkitAbstractEventMixin;
 import com.laytonsmith.abstraction.bukkit.events.drivers.*;
@@ -27,6 +30,7 @@ import org.bukkit.entity.*;
 import org.bukkit.event.Listener;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.material.MaterialData;
 
 /**
@@ -77,6 +81,10 @@ public class BukkitConvertor extends AbstractConvertor {
     public MCServer GetServer() {
         return BukkitMCServer.Get();
     }
+
+	public MCMaterial getMaterial(int id) {
+		return new BukkitMCMaterial(Material.getMaterial(id));
+	}
 
     public MCItemStack GetItemStack(int type, int qty) {
         return new BukkitMCItemStack(new ItemStack(type, qty));
@@ -163,6 +171,11 @@ public class BukkitConvertor extends AbstractConvertor {
     		return null;
     	}
     	//TODO: Change this to a reflection mechanism, this is getting tiresome to do.
+		//truth.
+		if(be instanceof FallingBlock){
+			return new BukkitMCFallingBlock((FallingBlock) be);
+		}
+		
 		if(be instanceof Item){
 			return new BukkitMCItem((Item)be);
 		}
@@ -229,6 +242,33 @@ public class BukkitConvertor extends AbstractConvertor {
         return BukkitConvertor.BukkitGetCorrectEntity(be);
     }
 
+	public MCItemMeta GetCorrectMeta(MCItemMeta im) {
+		ItemMeta bim = ((BukkitMCItemMeta) im).asItemMeta();
+		return BukkitConvertor.BukkitGetCorrectMeta(bim);
+	}
+
+	public static MCItemMeta BukkitGetCorrectMeta(ItemMeta im) {
+		if (im instanceof BookMeta) {
+			return new BukkitMCBookMeta((BookMeta) im);
+		}
+		if (im instanceof EnchantmentStorageMeta) {
+			
+		}
+		if (im instanceof LeatherArmorMeta) {
+			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
+		}
+		if (im instanceof PotionMeta) {
+			
+		}
+		if (im instanceof Repairable) {
+			
+		}
+		if (im instanceof SkullMeta) {
+			return new BukkitMCSkullMeta((SkullMeta) im);
+		}
+		return new BukkitMCItemMeta(im);
+	}
+    
 	public MCInventory GetEntityInventory(int entityID) {
 		Entity entity = null;
 		outer: for(World w : Bukkit.getWorlds()){

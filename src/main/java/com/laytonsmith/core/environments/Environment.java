@@ -88,6 +88,10 @@ public final class Environment implements Cloneable {
 	private void addEnv(EnvironmentImpl mixin){
 		environments.add(mixin);
 	}
+	
+	public boolean hasEnv(Class<? extends EnvironmentImpl> clazz) {
+		return environments.containsKey(clazz);
+	}
 
 	@Override
 	public Environment clone() throws CloneNotSupportedException {

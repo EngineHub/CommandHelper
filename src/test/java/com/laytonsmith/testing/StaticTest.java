@@ -5,6 +5,7 @@ package com.laytonsmith.testing;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
@@ -664,8 +665,25 @@ public class StaticTest {
 			return 0;
 		}
 
-		public MCColor GetColor(int red, int green, int blue) {
-			throw new UnsupportedOperationException("Not supported yet.");
+		public MCColor GetColor(final int red, final int green, final int blue) {
+			return new MCColor() {
+
+				public int getRed() {
+					return red;
+				}
+
+				public int getGreen() {
+					return green;
+				}
+
+				public int getBlue() {
+					return blue;
+				}
+
+				public MCColor build(int red, int green, int blue) {
+					return GetColor(red, green, blue);
+				}
+			};
 		}
 
 		public MCFirework GetFirework() {
@@ -673,6 +691,15 @@ public class StaticTest {
 		}
 
 		public MCPluginMeta GetPluginMeta() {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		public MCMaterial getMaterial(int id) {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public MCItemMeta GetCorrectMeta(MCItemMeta im) {
 			throw new UnsupportedOperationException("Not supported yet.");
 		}
         

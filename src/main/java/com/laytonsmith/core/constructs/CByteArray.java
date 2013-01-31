@@ -30,6 +30,7 @@ public class CByteArray extends Construct implements Sizable {
 	public static CByteArray wrap(byte[] b, Target t){
 		CByteArray ba = new CByteArray(t, 0);
 		ba.data = ByteBuffer.wrap(b);
+		ba.maxValue = b.length;
 		return ba;
 	}
 	
@@ -51,17 +52,25 @@ public class CByteArray extends Construct implements Sizable {
 		return true;
 	}
 	
-	private void checkSize(int need){
+	private void checkSize(int need, Integer pos){
 		//set our max position
-		maxValue = Math.max(maxValue, data.position() + need);
+		int spos = pos == null ? data.position() : pos;
+		maxValue = Math.max(maxValue, spos + need);
 		//Reallocate if needed
-		if(data.position() + need >= data.limit()){
-			ByteBuffer temp = ByteBuffer.allocate(data.limit() * scaleMultiplier);
+		if(spos + need >= data.limit()){
+			int newSize = data.limit() * scaleMultiplier;
+			if(newSize <= 0){
+				//Protect from this happening
+				newSize = 1;
+			}
+			ByteBuffer temp = ByteBuffer.allocate(newSize);
+			int position = data.position();
 			data.rewind();
 			temp.put(data);
 			data = temp;
-			value = null;
+			data.position(position);
 		}
+		value = null;
 	}
 
 	@Override
@@ -84,7 +93,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public void putByte(byte b, Integer pos){
-		checkSize(Sizes.sizeof(byte.class));
+		checkSize(Sizes.sizeof(byte.class), pos);
 		if(pos != null){
 			data.position(pos);
 		}
@@ -92,7 +101,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public void putChar(char c, Integer pos){
-		checkSize(Sizes.sizeof(char.class));
+		checkSize(Sizes.sizeof(char.class), pos);
 		if(pos == null){
 			data.putChar(c);
 		} else {
@@ -101,7 +110,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public void putDouble(double d, Integer pos){
-		checkSize(Sizes.sizeof(double.class));
+		checkSize(Sizes.sizeof(double.class), pos);
 		if(pos == null){
 			data.putDouble(d);
 		} else {
@@ -110,7 +119,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public void putFloat(float f, Integer pos){
-		checkSize(Sizes.sizeof(float.class));
+		checkSize(Sizes.sizeof(float.class), pos);
 		if(pos == null){
 			data.putFloat(f);
 		} else {
@@ -119,7 +128,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public void putInt(int i, Integer pos){
-		checkSize(Sizes.sizeof(int.class));
+		checkSize(Sizes.sizeof(int.class), pos);
 		if(pos == null){
 			data.putInt(i);
 		} else {
@@ -128,7 +137,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public void putLong(long l, Integer pos){
-		checkSize(Sizes.sizeof(long.class));
+		checkSize(Sizes.sizeof(long.class), pos);
 		if(pos == null){
 			data.putLong(l);
 		} else {
@@ -137,7 +146,7 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public void putShort(short s, Integer pos){
-		checkSize(Sizes.sizeof(short.class));
+		checkSize(Sizes.sizeof(short.class), pos);
 		if(pos == null){
 			data.putShort(s);
 		} else {
@@ -202,11 +211,12 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public void putBytes(CByteArray d, Integer pos){
-		checkSize((int)d.size());
-		if(pos == null){
+		checkSize((int)d.size(), pos);
+		if(pos != null){
 			data.position(pos);
 		}
-		data.put(d.data);
+
+		data.put(d.asByteArrayCopy());
 	}
 	
 	/**
@@ -228,7 +238,11 @@ public class CByteArray extends Construct implements Sizable {
 	}
 	
 	public long size(){
-		return data.limit();
+		return maxValue;
+	}
+	
+	public int capacity(){
+		return data.capacity();
 	}
 	
 	//Supplemental methods
@@ -245,7 +259,7 @@ public class CByteArray extends Construct implements Sizable {
 		} catch (UnsupportedEncodingException ex) {
 			throw new Error(ex);
 		}
-		checkSize(array.length);
+		checkSize(array.length + Sizes.sizeof(int.class), pos);
 		if(pos != null){
 			data.position(pos);
 		}
@@ -294,7 +308,7 @@ public class CByteArray extends Construct implements Sizable {
 	 */
 	public byte[] asByteArrayCopy(){
 		byte[] src = data.array();
-		byte[] dest = new byte[src.length];
+		byte[] dest = new byte[maxValue];
 		System.arraycopy(src, 0, dest, 0, maxValue);
 		return dest;
 	}

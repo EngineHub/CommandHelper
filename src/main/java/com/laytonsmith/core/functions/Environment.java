@@ -534,7 +534,7 @@ public class Environment {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.InvalidWorldException};
 		}
 
 		public boolean isRestricted() {

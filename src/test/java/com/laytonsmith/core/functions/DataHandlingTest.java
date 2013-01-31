@@ -276,6 +276,7 @@ public class DataHandlingTest {
         verify(fakePlayer).sendMessage("hello");
         //delete the test file
         test.delete();
+		test.deleteOnExit();
     }
 
     @Test(timeout = 10000)

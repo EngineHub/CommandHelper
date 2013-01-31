@@ -7,6 +7,7 @@ import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.MCProjectile;
 import com.laytonsmith.abstraction.events.MCEntityDamageByEntityEvent;
+import com.laytonsmith.abstraction.events.MCEntityDamageEvent;
 import com.laytonsmith.abstraction.events.MCEntityTargetEvent;
 import com.laytonsmith.abstraction.events.MCPlayerDropItemEvent;
 import com.laytonsmith.abstraction.events.MCPlayerInteractEntityEvent;
@@ -30,6 +31,93 @@ public class EntityEvents {
     public static String docs(){
         return "Contains events related to an entity";
     }
+	
+	@api
+	public static class entity_damage extends AbstractEvent {
+
+		public String getName() {
+			return "entity_damage";
+		}
+
+		public String docs() {
+			return "{type: <macro> The type of entity being damaged | cause: <macro>} "
+				+ "Fires when any loaded entity takes damage. Using prefilters is advised when possible, as "
+				+ "the event fires in rapid succession on occasion, such as when sunrise kills the undead. "
+				+ "{type: The type of entity the got damaged | id: The entityID of the victim | " 
+				+ "cause: The cause of damage | amount}" // | sourcetype: type of entity causing damage | "
+				//+ "sourceid: the ID of the source entity} "
+				+ "{amount: the amount of damage recieved (in half hearts)} "
+				+ "{}";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+				throws PrefilterNonMatchException {
+			if(event instanceof MCEntityDamageEvent){
+				MCEntityDamageEvent e = (MCEntityDamageEvent) event;
+				Prefilters.match(prefilter, "type", e.getEntity().getType().name(), Prefilters.PrefilterType.MACRO);
+				Prefilters.match(prefilter, "cause", e.getCause().name(), Prefilters.PrefilterType.MACRO);
+				
+				return true;
+			}
+			return false;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent e)
+				throws EventException {
+			if (e instanceof MCEntityDamageEvent) {
+				MCEntityDamageEvent event = (MCEntityDamageEvent) e;
+				Map<String, Construct> map = evaluate_helper(e);
+				
+				MCEntity victim = event.getEntity();
+				map.put("type", new CString(victim.getType().name(), Target.UNKNOWN));
+				map.put("id", new CInt(victim.getEntityId(), Target.UNKNOWN));
+				map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
+				map.put("amount", new CInt(event.getDamage(), Target.UNKNOWN));
+				
+				/*Construct sourcetype;
+				Construct sourceid;
+				if (event instanceof MCEntityDamageByEntityEvent) {
+					sourcetype = new CString(((MCEntityDamageByEntityEvent) event).getDamager().getType().name(), Target.UNKNOWN);
+					sourceid = new CInt(((MCEntityDamageByEntityEvent) event).getDamager().getEntityId(), Target.UNKNOWN);
+				} else {
+					sourcetype = new CNull(Target.UNKNOWN);
+					sourceid = new CNull(Target.UNKNOWN);
+				}
+				
+				map.put("sourcetype", sourcetype);
+				map.put("sourceid", sourceid);*/
+				
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCEntityDamageEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.ENTITY_DAMAGE;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			MCEntityDamageEvent e = (MCEntityDamageEvent) event;
+			if (key.equals("amount")) {
+				if (value instanceof CInt) {
+					e.setDamage((int) Static.getInt(value, Target.UNKNOWN));
+					return true;
+				}
+			}
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
 	
 	@api
 	public static class player_interact_entity extends AbstractEvent {
@@ -108,7 +196,7 @@ public class EntityEvents {
                     + "This event is called when a player drops an item. "
                     + "{player: The player | item: An item array representing " 
                     + "the item being dropped. } "
-                    + "{item} "
+                    + "{item: setting this to null removes the dropped item} "
                     + "{player|item}";
         }
         
@@ -179,7 +267,7 @@ public class EntityEvents {
 				+ "{player: The player | item: An item array representing " 
 				+ "the item being picked up | "
 				+ "remaining: Other items left on the ground. } "
-				+ "{item} "
+				+ "{item: setting this to null will remove the item from the world} "
 				+ "{player|item|remaining}";
 		}
 

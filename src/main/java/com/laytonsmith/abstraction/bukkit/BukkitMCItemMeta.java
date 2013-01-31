@@ -52,4 +52,24 @@ public class BukkitMCItemMeta implements MCItemMeta {
 		return im;
 	}
 	
+	public ItemMeta asItemMeta() {
+		return im;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		return im.equals(obj);
+	}
+
+	@Override
+	public int hashCode() {
+		return im.hashCode();
+	}
+
+	@Override
+	public String toString() {
+		return im.toString();
+	}
+	
+	
 }

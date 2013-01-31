@@ -133,9 +133,10 @@ public class PlayerEvents {
 				+ "| from: <custom> This should be a location array (x, y, z, world)."
 				+ " The location is matched via block matching, so if the array's x parameter were 1, if the player"
 				+ "moved from 1.3, that parameter would match."
-				+ "| to: <custom> The location the player is now in. This should be a location array as well."
-				+ "{player | from: The location the player is coming from | to: The location the player is now in}"
-				+ "{}"
+				+ "| to: <custom> The location the player is now in. This should be a location array as well. "
+				+ "{player | from: The location the player is coming from | to: The location the player is now in | "
+				+ "type: the type of teleport occuring}"
+				+ "{to}"
 				+ "{}";
 		}
 

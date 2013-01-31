@@ -25,8 +25,6 @@ import java.util.HashSet;
 import java.util.IllegalFormatException;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -1275,7 +1273,7 @@ public class StringHandling {
 	public static class string_get_bytes extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -1309,7 +1307,8 @@ public class StringHandling {
 
 		public String docs() {
 			return "byte_array {string, [encoding]} Returns this string as a byte_array, encoded using the specified encoding,"
-					+ " or UTF-8 if no encoding is specified. Valid encodings are the encoding types that java supports.";
+					+ " or UTF-8 if no encoding is specified. Valid encodings are the encoding types that java supports. If the"
+					+ " encoding is invalid, a FormatException is thrown.";
 		}
 
 		public CHVersion since() {
@@ -1322,7 +1321,7 @@ public class StringHandling {
 	public static class string_from_bytes extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
 		}
 
 		public boolean isRestricted() {
@@ -1356,7 +1355,7 @@ public class StringHandling {
 
 		public String docs() {
 			return "string {byte_array, [encoding]} Returns a new string, given the byte array encoding provided. The encoding defaults"
-					+ " to UTF-8, but may be specified.";
+					+ " to UTF-8, but may be specified. A FormatException is thrown if the encoding type is invalid.";
 		}
 
 		public CHVersion since() {

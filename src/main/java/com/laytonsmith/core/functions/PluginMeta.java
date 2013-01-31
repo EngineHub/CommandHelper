@@ -28,7 +28,7 @@ public class PluginMeta {
 	public static class fake_incoming_plugin_message extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
@@ -78,7 +78,7 @@ public class PluginMeta {
 	public static class send_plugin_message extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.CastException};
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
 		}
 
 		public boolean isRestricted() {
@@ -90,7 +90,7 @@ public class PluginMeta {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPluginMeta meta = StaticLayer.GetConvertor().GetPluginMeta();
+
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			int offset = 0;
 			if(args.length == 3){

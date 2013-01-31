@@ -168,14 +168,14 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 			}
 		} catch(NullPointerException e){
 			//
-			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE, 
+			Logger.getLogger(BukkitMCLivingEntity.class.getName()).log(Level.SEVERE,
 					"Bukkit appears to have derped. This is a problem with Bukkit, not CommandHelper. The effect should have still been applied.", e);
 		}
-//        EntityPlayer ep = ((CraftPlayer) p).getHandle();        
+//        EntityPlayer ep = ((CraftPlayer) p).getHandle();
 //        MobEffect me = new MobEffect(potionID, seconds * 20, strength);
 //        //ep.addEffect(me);
 //        //ep.b(me);
-//        
+//
 //        Class epc = EntityLiving.class;
 //        try {
 //            Method meth = epc.getDeclaredMethod("b", net.minecraft.server.MobEffect.class);
@@ -184,7 +184,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 //            meth.invoke(ep, me);
 //        } catch (Exception e) {
 //            try {
-//                //Look for the addEffect version                
+//                //Look for the addEffect version
 //                Method meth = epc.getDeclaredMethod("addEffect", MobEffect.class);
 //                //ep.addEffect(me);
 //                meth.invoke(ep, me);
@@ -193,7 +193,20 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 //            }
 //        }
 	}
-	
+
+    public boolean removeEffect(int potionID) {
+		PotionEffectType t = PotionEffectType.getById(potionID);
+		boolean hasIt = false;
+		for(PotionEffect pe : le.getActivePotionEffects()) {
+			if (pe.getType() == t) {
+				hasIt = true;
+				break;
+			}
+		}
+		le.removePotionEffect(t);
+		return hasIt;
+    }
+
 	public List<MCEffect> getEffects(){
 		List<MCEffect> effects = new ArrayList<MCEffect>();
 		for(PotionEffect pe : le.getActivePotionEffects()){
@@ -245,12 +258,12 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	public LivingEntity asLivingEntity() {
 		return le;
 	}
-	
+
 	public Map<MCEquipmentSlot, MCItemStack> getEquipment() {
 		BukkitMCEntityEquipment ee = new BukkitMCEntityEquipment(le.getEquipment());
 		return ee.getAllEquipment();
 	}
-	
+
 	public void setEquipment(Map<MCEquipmentSlot, MCItemStack> emap) {
 		BukkitMCEntityEquipment ee = new BukkitMCEntityEquipment(le.getEquipment());
 		ee.setAllEquipment(emap);

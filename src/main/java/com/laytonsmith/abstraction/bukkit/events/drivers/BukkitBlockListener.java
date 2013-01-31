@@ -20,7 +20,9 @@ import org.bukkit.event.block.SignChangeEvent;
 public class BukkitBlockListener implements Listener{
 	@EventHandler(priority=EventPriority.LOWEST)
     public void onSignChange(SignChangeEvent e){
-        EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", new BukkitBlockEvents.BukkitMCSignChangeEvent(e));
+		BukkitBlockEvents.BukkitMCSignChangeEvent mce = new BukkitBlockEvents.BukkitMCSignChangeEvent(e);
+		EventUtils.TriggerExternal(mce);
+        EventUtils.TriggerListener(Driver.SIGN_CHANGED, "sign_changed", mce);
     }
 	
 	@EventHandler(priority=EventPriority.LOWEST)

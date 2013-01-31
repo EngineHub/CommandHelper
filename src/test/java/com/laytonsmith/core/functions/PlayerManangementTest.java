@@ -68,10 +68,9 @@ public class PlayerManangementTest {
 
     @Test(timeout = 10000)
     public void testPlayer2() throws ConfigCompileException {
-        String script = "msg(player())";
+        String script = "player()";
         MCConsoleCommandSender c = GetFakeConsoleCommandSender();
-        Run(script, c);
-        verify(c).sendMessage("~console");
+        assertEquals("~console", SRun(script, c));
     }
 
     @Test(timeout = 10000)
@@ -157,8 +156,7 @@ public class PlayerManangementTest {
     @Test
     public void testPlayerFromConsole() throws ConfigCompileException{
         MCConsoleCommandSender fakeConsole = mock(MCConsoleCommandSender.class);
-        SRun("msg(player())", fakeConsole);
-        verify(fakeConsole).sendMessage("~console");
+        assertEquals("~console", SRun("player()", fakeConsole));
     }
     
 //    //@Test(timeout=10000)
