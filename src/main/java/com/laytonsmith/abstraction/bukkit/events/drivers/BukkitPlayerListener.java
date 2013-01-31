@@ -54,8 +54,13 @@ public class BukkitPlayerListener implements Listener {
 		EventUtils.TriggerListener(Driver.PLAYER_SPAWN, "player_spawn", new BukkitPlayerEvents.BukkitMCPlayerRespawnEvent(event));
 	}
 
-	@EventHandler(priority = EventPriority.LOWEST)
+	@EventHandler(priority = EventPriority.LOWEST, ignoreCancelled=true)
 	public void onPlayerChat(final AsyncPlayerChatEvent event) {
+		if(CommandHelperPlugin.self.interpreterListener
+                .isInInterpreterMode(new BukkitMCPlayer(event.getPlayer()))){
+            //They are in interpreter mode, so we want it to handle this, not everything else.
+            return;
+        }
 		if (EventUtils.GetEvents(Driver.PLAYER_CHAT) != null
 			&& !EventUtils.GetEvents(Driver.PLAYER_CHAT).isEmpty()) {
 			if (event.isAsynchronous()) {
