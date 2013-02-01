@@ -490,7 +490,7 @@ public final class Static {
 			p.sendMessage(line);
 		} else {
 			msg = Static.MCToANSIColors(msg);
-			if (msg.matches("(?m).*\033.*")) {
+			if (msg.matches("(?sm).*\033.*")) {
 				//We have terminal colors, we need to reset them at the end
 				msg += TermColors.reset();
 			}
