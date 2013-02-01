@@ -104,9 +104,18 @@ public class CompilerWarningTest {
 		verify(fakeLogger, Mockito.times(0)).CompilerWarning(eq(CompilerWarning.AmbiguousUnaryOperators), Mockito.anyString(), Mockito.any(Target.class), Mockito.any(FileOptions.class));
 	}
 	
-	@Test public void testMagicNumbers(){
+	@Test public void testMagicNumbers1(){
+		//3 is not allowed as a magic number...
 		compile("<! strict > @a = 1 if(@a < 3){ msg('') }");
 		doVerify(CompilerWarning.MagicNumber);
+	}
+	
+	@Test public void testMagicNumbers2() throws Exception {
+		//...but 1, 0, and -1 are
+		compile("<! strict > @a = 1 if(@a < 1 || @a < 0 || @a < -1){ msg('') }");
+		verify(fakeLogger, Mockito.never())
+				.CompilerWarning(Mockito.any(CompilerWarning.class), Mockito.anyString(), 
+				Mockito.any(Target.class), Mockito.any(FileOptions.class));
 	}
 	
 	@Test public void testBareStrings(){
