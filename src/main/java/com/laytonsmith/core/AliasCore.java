@@ -254,7 +254,6 @@ public class AliasCore {
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver,
 					parent.chDirectory);
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-			cEnv.SetCommandSender(player);
 			Environment env = Environment.createEnvironment(gEnv, cEnv);
 			Globals.clear();
 			Scheduling.ClearScheduledRunners();
