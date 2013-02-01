@@ -186,6 +186,10 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
     public boolean isOp() {
         return p.isOp();
     }
+	
+	public void setOp(boolean bln) {
+		p.setOp(bln);
+	}
 
     public boolean isSneaking() {
         return p.isSneaking();
