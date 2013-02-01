@@ -172,7 +172,7 @@ public class BukkitMCWorld implements MCWorld {
 		//blocks.
 		//Hard Coded 255 because bukkits getMaxHeight() returns 256 which then is turned into 0 (not sure if this is bukkit or CH)
 //		Block b = w.getBlockAt(x, w.getMaxHeight(), z);
-		Block b = w.getBlockAt(x, 255, z);
+		Block b = w.getBlockAt(x, w.getMaxHeight() - 1, z);
 		while(b.getType() == Material.AIR){
 			b = b.getRelative(BlockFace.DOWN);
 		}
