@@ -53,7 +53,11 @@ public class BukkitEntityListener implements Listener{
     
     @EventHandler(priority=EventPriority.LOWEST)
     public void onEntityDamage(EntityDamageEvent event) {
-    	EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", new BukkitEntityEvents.BukkitMCEntityDamageEvent(event));
+    	if (event instanceof EntityDamageByEntityEvent) {
+    		EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent((EntityDamageByEntityEvent) event));
+    	} else {
+    		EventUtils.TriggerListener(Driver.ENTITY_DAMAGE, "entity_damage", new BukkitEntityEvents.BukkitMCEntityDamageEvent(event));
+    	}
     }
     
     @EventHandler(priority=EventPriority.LOWEST)

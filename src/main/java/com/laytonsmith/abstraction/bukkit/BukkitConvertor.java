@@ -252,15 +252,12 @@ public class BukkitConvertor extends AbstractConvertor {
 			return new BukkitMCBookMeta((BookMeta) im);
 		}
 		if (im instanceof EnchantmentStorageMeta) {
-			
+			return new BukkitMCEnchantmentStorageMeta((EnchantmentStorageMeta) im);
 		}
 		if (im instanceof LeatherArmorMeta) {
 			return new BukkitMCLeatherArmorMeta((LeatherArmorMeta) im);
 		}
 		if (im instanceof PotionMeta) {
-			
-		}
-		if (im instanceof Repairable) {
 			
 		}
 		if (im instanceof SkullMeta) {
