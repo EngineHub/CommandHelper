@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -12,8 +13,10 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.events.EventUtils;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
+import com.laytonsmith.core.exceptions.ProgramFlowManipulationException;
 import com.laytonsmith.core.functions.Economy;
 import com.laytonsmith.core.functions.IncludeCache;
 import com.laytonsmith.core.functions.Scheduling;
@@ -95,6 +98,10 @@ public class AliasCore {
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(player);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
+		
+		if(player instanceof MCBlockCommandSender){
+			cEnv.SetBlockCommandSender((MCBlockCommandSender)player);
+		}
 
 		if (scripts == null) {
 			throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", Target.UNKNOWN);
@@ -254,7 +261,6 @@ public class AliasCore {
 			GlobalEnv gEnv = new GlobalEnv(parent.executionQueue, parent.profiler, parent.persistanceNetwork, parent.permissionsResolver,
 					parent.chDirectory);
 			CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
-			cEnv.SetCommandSender(player);
 			Environment env = Environment.createEnvironment(gEnv, cEnv);
 			Globals.clear();
 			Scheduling.ClearScheduledRunners();
@@ -531,6 +537,13 @@ public class AliasCore {
 				} catch (ConfigRuntimeException e) {
 					exception = true;
 					ConfigRuntimeException.React(e, env);
+				} catch(CancelCommandException e){
+					if(e.getMessage() != null && !"".equals(e.getMessage().trim())){
+						logger.log(Level.INFO, e.getMessage());
+					}
+				} catch(ProgramFlowManipulationException e){
+					exception = true;
+					ConfigRuntimeException.React(new ConfigRuntimeException("Cannot break program flow in main files.", e.getTarget()), env);
 				}
 				if (exception) {
 					if (Prefs.HaltOnFailure()) {

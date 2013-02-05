@@ -1,6 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
@@ -693,15 +695,15 @@ public class Meta {
 		}
 	}
 	
-	@api(environments = {CommandHelperEnvironment.class, GlobalEnv.class})
-	public static class psetop extends AbstractFunction {
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_command_block extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+			return null;
 		}
 
 		public boolean isRestricted() {
-			return true;
+			return false;
 		}
 
 		public Boolean runAsync() {
@@ -709,29 +711,25 @@ public class Meta {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			boolean state = false;
-			if(args.length == 2) {
-				p = Static.GetPlayer(args[0].val(), t);
-				state = Static.getBoolean(args[1]);
-			} else if(args.length == 1) {
-				state = Static.getBoolean(args[0]);
+			MCBlockCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetBlockCommandSender();
+			if(cs != null){
+				MCLocation l = (cs.getBlock().getLocation());
+				return ObjectGenerator.GetGenerator().location(l);
 			}
-			
-			p.setOp(state);
-			return new CVoid(t);
+			return new CNull(t);
 		}
 
 		public String getName() {
-			return "psetop";
+			return "get_command_block";
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{0};
 		}
 
 		public String docs() {
-			return "string {[player], status} Sets whether or not a player has operator status. If no player is specified the player running the command is given if no state is give it defaults to false.";
+			return "locationArray {} If this command was being run from a command block, this will return the location of"
+					+ " the block. If a player or console ran this command, (or any other command sender) this will return null.";
 		}
 
 		public CHVersion since() {

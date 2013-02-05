@@ -61,6 +61,11 @@ public class Procedure implements Cloneable {
     }
 
     private boolean checkPossiblyConstant(ParseTree tree) {
+		//TODO: This whole thing is a mess. Instead of doing it this way,
+		//individual procs need to be inlined as deemed appropriate.
+		if(true){
+			return false;
+		}
         if (!tree.getData().isDynamic()) {
             //If it isn't dynamic, it certainly could be constant
             return true;
@@ -180,6 +185,10 @@ public class Procedure implements Cloneable {
 		}
         return new CVoid(Target.UNKNOWN);
     }
+	
+	public Target getTarget(){
+		return definedAt;
+	}
 
     @Override
     public Procedure clone() throws CloneNotSupportedException {

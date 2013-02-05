@@ -19,8 +19,10 @@
 package com.laytonsmith.commandhelper;
 
 import com.laytonsmith.PureUtilities.ExecutionQueue;
+import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.PureUtilities.TermColors;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.bukkit.BukkitMCBlockCommandSender;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCChatColor;
 import com.laytonsmith.core.*;
@@ -44,6 +46,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadFactory;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.bukkit.command.BlockCommandSender;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.ConsoleCommandSender;
@@ -262,7 +265,7 @@ public class CommandHelperPlugin extends JavaPlugin {
 		} else if (cmd.getName().equals("runalias")) {
 			//Hardcoded alias rebroadcast
 			if (sender instanceof Player) {
-				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, Static.strJoin(args, " "));
+				PlayerCommandPreprocessEvent pcpe = new PlayerCommandPreprocessEvent((Player) sender, StringUtils.Join(args, " "));
 				playerListener.onPlayerCommandPreprocess(pcpe);
 			} else if (sender instanceof ConsoleCommandSender) {
 				String cmd2 = Static.strJoin(args, " ");
@@ -271,6 +274,10 @@ public class CommandHelperPlugin extends JavaPlugin {
 				}
 				ServerCommandEvent sce = new ServerCommandEvent((ConsoleCommandSender) sender, cmd2);
 				serverListener.onServerCommand(sce);
+			} else if(sender instanceof BlockCommandSender){
+				MCCommandSender s = new BukkitMCBlockCommandSender((BlockCommandSender)sender);
+				String cmd2 = StringUtils.Join(args, " ");
+				Static.getAliasCore().alias(cmd2, s, new ArrayList<Script>());
 			}
 			return true;
 		} else if (sender instanceof Player) {
