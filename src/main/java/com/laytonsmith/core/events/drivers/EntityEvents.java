@@ -78,18 +78,22 @@ public class EntityEvents {
 				map.put("cause", new CString(event.getCause().name(), Target.UNKNOWN));
 				map.put("amount", new CInt(event.getDamage(), Target.UNKNOWN));
 				
-				/*Construct sourcetype;
-				Construct sourceid;
 				if (event instanceof MCEntityDamageByEntityEvent) {
-					sourcetype = new CString(((MCEntityDamageByEntityEvent) event).getDamager().getType().name(), Target.UNKNOWN);
-					sourceid = new CInt(((MCEntityDamageByEntityEvent) event).getDamager().getEntityId(), Target.UNKNOWN);
-				} else {
-					sourcetype = new CNull(Target.UNKNOWN);
-					sourceid = new CNull(Target.UNKNOWN);
+					MCEntity damager = ((MCEntityDamageByEntityEvent) event).getDamager();
+					if (damager instanceof MCPlayer) {
+						map.put("damager", new CString(((MCPlayer) damager).getName(), Target.UNKNOWN));
+					} else {
+						map.put("damager", new CInt(damager.getEntityId(), Target.UNKNOWN));
+					}
+					if (damager instanceof MCProjectile) {
+						MCEntity shooter = ((MCProjectile) damager).getShooter();
+						if (shooter instanceof MCPlayer) {
+							map.put("shooter", new CString(((MCPlayer) shooter).getName(), Target.UNKNOWN));
+						} else if (shooter instanceof MCEntity) {
+							map.put("shooter", new CInt(shooter.getEntityId(), Target.UNKNOWN));
+						}
+					}
 				}
-				
-				map.put("sourcetype", sourcetype);
-				map.put("sourceid", sourceid);*/
 				
 				return map;
 			} else {

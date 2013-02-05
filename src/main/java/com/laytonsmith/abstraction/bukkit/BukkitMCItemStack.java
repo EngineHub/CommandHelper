@@ -165,6 +165,13 @@ public class BukkitMCItemStack implements MCItemStack {
 	}
 
 	public void setItemMeta(MCItemMeta im) {
-		is.setItemMeta(((BukkitMCItemMeta)im).im);
+		if (is == null) {
+			return;
+		}
+		if (im == null) {
+			is.setItemMeta(null);
+			return;
+		}
+		is.setItemMeta(((BukkitMCItemMeta)im).asItemMeta());
 	}
 }

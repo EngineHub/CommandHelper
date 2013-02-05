@@ -3,6 +3,7 @@
 package com.laytonsmith.abstraction.bukkit.blocks;
 
 import com.laytonsmith.abstraction.MCItemStack;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCWorld;
 import com.laytonsmith.abstraction.blocks.MCBlock;
 import com.laytonsmith.abstraction.blocks.MCBlockState;
@@ -10,6 +11,7 @@ import com.laytonsmith.abstraction.blocks.MCMaterial;
 import com.laytonsmith.abstraction.blocks.MCSign;
 import com.laytonsmith.abstraction.bukkit.BukkitMCCreatureSpawner;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -136,6 +138,10 @@ public class BukkitMCBlock implements MCBlock{
 
 	public boolean isBurnable() {
 		return b.getType().isBurnable();
+	}
+
+	public MCLocation getLocation() {
+		return new BukkitMCLocation(b.getLocation());
 	}
     
 	

@@ -762,6 +762,7 @@ public class Environment {
 			int instrumentOffset = 0;
 			int noteOffset = 0;
 			if (args.length == 2) {
+				Static.AssertPlayerNonNull(p, t);
 				instrumentOffset = 0;
 				noteOffset = 1;
 				l = p.getLocation();
@@ -806,7 +807,11 @@ public class Environment {
 				if (ttone.trim().endsWith("#")) {
 					sharped = true;
 				}
-				n = StaticLayer.GetConvertor().GetNote(octave, tone, sharped);
+				try{
+					n = StaticLayer.GetConvertor().GetNote(octave, tone, sharped);
+				} catch(IllegalArgumentException e){
+					throw new Exceptions.FormatException(e.getMessage(), t);
+				}
 			} else {
 				throw new Exceptions.CastException("Expected an array for note parameter, but " + args[noteOffset] + " found instead", t);
 			}

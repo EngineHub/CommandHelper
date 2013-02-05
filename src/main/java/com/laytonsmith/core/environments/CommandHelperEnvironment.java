@@ -1,5 +1,6 @@
 package com.laytonsmith.core.environments;
 
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.core.events.BoundEvent;
@@ -85,4 +86,16 @@ public class CommandHelperEnvironment implements Environment.EnvironmentImpl, Cl
     public String GetCommand(){
         return this.command;
     }
+
+	public void SetBlockCommandSender(MCBlockCommandSender bcs) {
+		this.commandSender = bcs;
+	}
+	
+	public MCBlockCommandSender GetBlockCommandSender(){
+		if(this.commandSender instanceof MCBlockCommandSender){
+			return (MCBlockCommandSender)commandSender;
+		} else {
+			return null;
+		}
+	}
 }

@@ -2,6 +2,7 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
 import com.laytonsmith.PureUtilities.TermColors;
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.abstraction.StaticLayer;
@@ -97,6 +98,10 @@ public class AliasCore {
 		CommandHelperEnvironment cEnv = new CommandHelperEnvironment();
 		cEnv.SetCommandSender(player);
 		Environment env = Environment.createEnvironment(gEnv, cEnv);
+		
+		if(player instanceof MCBlockCommandSender){
+			cEnv.SetBlockCommandSender((MCBlockCommandSender)player);
+		}
 
 		if (scripts == null) {
 			throw new ConfigRuntimeException("Cannot run alias commands, no config file is loaded", Target.UNKNOWN);

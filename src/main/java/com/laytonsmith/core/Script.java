@@ -748,7 +748,7 @@ public class Script {
                 scripts.get(j).compilerError = true;
                 this.compilerError = true;
                 throw new ConfigCompileException("The command " + commandThis.trim() + " is ambiguous because it "
-                        + "matches the signature of " + commandThat.trim(), thisCommand.get(0).getTarget());
+                        + "matches the signature of " + commandThat.trim() + " defined at " + thatCommand.get(0).getTarget(), thisCommand.get(0).getTarget());
             }
         }
 
