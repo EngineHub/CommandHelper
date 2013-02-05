@@ -1,6 +1,8 @@
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.abstraction.MCBlockCommandSender;
 import com.laytonsmith.abstraction.MCCommandSender;
+import com.laytonsmith.abstraction.MCLocation;
 import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
@@ -691,5 +693,48 @@ public class Meta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_command_block extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return null;
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCBlockCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetBlockCommandSender();
+			if(cs != null){
+				MCLocation l = (cs.getBlock().getLocation());
+				return ObjectGenerator.GetGenerator().location(l);
+			}
+			return new CNull(t);
+		}
+
+		public String getName() {
+			return "get_command_block";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "locationArray {} If this command was being run from a command block, this will return the location of"
+					+ " the block. If a player or console ran this command, (or any other command sender) this will return null.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }
