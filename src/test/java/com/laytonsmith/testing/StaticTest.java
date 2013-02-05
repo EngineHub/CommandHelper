@@ -266,7 +266,7 @@ public class StaticTest {
     public static void assertCEquals(Construct expected, Construct actual) throws CancelCommandException {
         equals e = new equals();
         CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
-        if (ret.getBoolean() == false) {
+        if (ret.primitive(Target.UNKNOWN).castToBoolean() == false) {
             throw new AssertionError("Expected " + expected + " and " + actual + " to be equal to each other");
         }
     }
@@ -280,7 +280,7 @@ public class StaticTest {
     public static void assertCNotEquals(Construct expected, Construct actual) throws CancelCommandException {
         equals e = new equals();
         CBoolean ret = (CBoolean) e.exec(Target.UNKNOWN, null, expected, actual);
-        if (ret.getBoolean() == true) {
+        if (ret.castToBoolean() == true) {
             throw new AssertionError("Did not expect " + expected + " and " + actual + " to be equal to each other");
         }
     }
@@ -291,7 +291,7 @@ public class StaticTest {
      * @param actual 
      */
     public static void assertCTrue(Construct actual) {
-        if (!Static.getBoolean(actual)) {
+        if (!actual.primitive(Target.UNKNOWN).castToBoolean()) {
             fail("Expected '" + actual.val() + "' to resolve to true, but it did not");
         }
     }
@@ -302,7 +302,7 @@ public class StaticTest {
      * @param actual 
      */
     public static void assertCFalse(Construct actual) {
-        if (Static.getBoolean(actual)) {
+        if (actual.primitive(Target.UNKNOWN).castToBoolean()) {
             fail("Expected '" + actual.val() + "' to resolve to false, but it did not");
         }
     }

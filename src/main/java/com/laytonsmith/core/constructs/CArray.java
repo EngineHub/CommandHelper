@@ -413,7 +413,7 @@ public class CArray extends Construct implements ArrayAccess{
         return mutVal;
     }
 
-    public long size() {
+    public int size() {
         if(associative_mode){
             return associative_array.size();
         } else {

@@ -103,136 +103,144 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			Construct index = new CSlice(0, -1, t);
-			Construct defaultConstruct = null;
-			if (args.length >= 2) {
-				index = args[1];
-			}
-			if (args.length >= 3) {
-				defaultConstruct = args[2];
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			ArrayAccess array = list.get("array");
+			Construct index = list.get("index");
+			Construct defaultConstruct = list.get("default");
 
 			if (env.getEnv(GlobalEnv.class).HasFlag("array_get_alt_mode")) {
-				return new CArrayReference(args[0], args[1], env);
+				return new CArrayReference((Construct)array, index, env);
 			}
-
-			if (args[0] instanceof CArray) {
-				CArray ca = (CArray) args[0];
-				if (index instanceof CSlice) {
-					if (ca.inAssociativeMode()) {
-						if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
-							//Special exception, we want to clone the whole array
-							CArray na = CArray.GetAssociativeArray(t);
-							for (String key : ca.keySet()) {
-								try {
-									na.set(key, ca.get(key, t).clone(), t);
-								} catch (CloneNotSupportedException ex) {
-									na.set(key, ca.get(key, t), t);
-								}
-							}
-							return na;
-						}
-						throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, t);
-					}
-					//It's a range
-					long start = ((CSlice) index).getStart();
-					long finish = ((CSlice) index).getFinish();
-					try {
-						//Convert negative indexes 
-						if (start < 0) {
-							start = ca.size() + start;
-						}
-						if (finish < 0) {
-							finish = ca.size() + finish;
-						}
-						CArray na = new CArray(t);
-						if (finish < start) {
-							//return an empty array in cases where the indexes don't make sense
-							return na;
-						}
-						for (long i = start; i <= finish; i++) {
-							try {
-								na.push(ca.get((int) i, t).clone());
-							} catch (CloneNotSupportedException e) {
-								na.push(ca.get((int) i, t));
-							}
-						}
-						return na;
-					} catch (NumberFormatException e) {
-						throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
-					}
-				} else {
-					try {
-						if (!ca.inAssociativeMode()) {
-							long iindex = Static.getInt(args[1], t);
-							if (iindex < 0) {
-								//negative index, convert to positive index
-								iindex = ca.size() + iindex;
-							}
-							return ca.get(iindex, t);
-						} else {
-							return ca.get(args[1], t);
-						}
-					} catch (ConfigRuntimeException e) {
-						if (e.getExceptionType() == ExceptionType.IndexOverflowException) {
-							if(defaultConstruct != null){
-								return defaultConstruct;
-							}
-						}
-						throw e;
-					}
-				}
-			} else if (args[0] instanceof CString) {
-				if (index instanceof CSlice) {
-					ArrayAccess aa = (ArrayAccess) args[0];
-					//It's a range
-					long start = ((CSlice) index).getStart();
-					long finish = ((CSlice) index).getFinish();
-					try {
-						//Convert negative indexes 
-						if (start < 0) {
-							start = aa.toString().length() + start;
-						}
-						if (finish < 0) {
-							finish = aa.toString().length() + finish;
-						}
-						CArray na = new CArray(t);
-						if (finish < start) {
-							//return an empty array in cases where the indexes don't make sense
-							return new CString("", t);
-						}
-						StringBuilder b = new StringBuilder();
-						String val = aa.toString();
-						for (long i = start; i <= finish; i++) {
-							try{
-							b.append(val.charAt((int) i));
-							} catch(StringIndexOutOfBoundsException e){
-								throw new Exceptions.RangeException("String bounds out of range. Tried to get character at index " + i + ", but indicies only go up to " + (val.length() - 1), t);
-							}
-						}
-						return new CString(b.toString(), t);
-					} catch (NumberFormatException e) {
-						throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
-					}
-				} else {
-					try {
-						return new CString(args[0].val().charAt(Static.getInt32(index, t)), t);
-					} catch (ConfigRuntimeException e) {
-						if (e.getExceptionType() == ExceptionType.CastException) {
-							throw new ConfigRuntimeException("Expecting an integer index for the array, but found \"" + index
-									+ "\". (Array is not associative, and cannot accept string keys here.)", ExceptionType.CastException, t);
-						} else {
-							throw e;
-						}
-					} catch (StringIndexOutOfBoundsException e) {
-						throw new ConfigRuntimeException("No index at " + index, ExceptionType.RangeException, t);
-					}
-				}
-			} else if (args[0] instanceof ArrayAccess) {
-				throw new ConfigRuntimeException("Wat. How'd you get here? This isn't supposed to be implemented yet.", t);
+			
+			if(index instanceof CSlice){
+				CSlice slice = ((CSlice)index);
+				return array.slice(slice.getStart(), slice.getFinish(), t);
 			} else {
-				throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
+				if(array.contains(index.val())){
+					return array.get(index.val(), t);
+				} else {
+					return defaultConstruct;
+				}
 			}
+			
+
+//			if (array instanceof CArray) {
+//				CArray ca = (CArray) args[0];
+//				if (index instanceof CSlice) {
+//					if (ca.inAssociativeMode()) {
+//						if (((CSlice) index).getStart() == 0 && ((CSlice) index).getFinish() == -1) {
+//							//Special exception, we want to clone the whole array
+//							CArray na = CArray.GetAssociativeArray(t);
+//							for (String key : ca.keySet()) {
+//								try {
+//									na.set(key, ca.get(key, t).clone(), t);
+//								} catch (CloneNotSupportedException ex) {
+//									na.set(key, ca.get(key, t), t);
+//								}
+//							}
+//							return na;
+//						}
+//						throw new ConfigRuntimeException("Array slices are not allowed with an associative array", ExceptionType.CastException, t);
+//					}
+//					//It's a range
+//					long start = ((CSlice) index).getStart();
+//					long finish = ((CSlice) index).getFinish();
+//					try {
+//						//Convert negative indexes 
+//						if (start < 0) {
+//							start = ca.size() + start;
+//						}
+//						if (finish < 0) {
+//							finish = ca.size() + finish;
+//						}
+//						CArray na = new CArray(t);
+//						if (finish < start) {
+//							//return an empty array in cases where the indexes don't make sense
+//							return na;
+//						}
+//						for (long i = start; i <= finish; i++) {
+//							try {
+//								na.push(ca.get((int) i, t).clone());
+//							} catch (CloneNotSupportedException e) {
+//								na.push(ca.get((int) i, t));
+//							}
+//						}
+//						return na;
+//					} catch (NumberFormatException e) {
+//						throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
+//					}
+//				} else {
+//					try {
+//						if (!ca.inAssociativeMode()) {
+//							long iindex = Static.getInt(args[1], t);
+//							if (iindex < 0) {
+//								//negative index, convert to positive index
+//								iindex = ca.size() + iindex;
+//							}
+//							return ca.get(iindex, t);
+//						} else {
+//							return ca.get(args[1], t);
+//						}
+//					} catch (ConfigRuntimeException e) {
+//						if (e.getExceptionType() == ExceptionType.IndexOverflowException) {
+//							if(defaultConstruct != null){
+//								return defaultConstruct;
+//							}
+//						}
+//						throw e;
+//					}
+//				}
+//			} else if (args[0] instanceof CString) {
+//				if (index instanceof CSlice) {
+//					ArrayAccess aa = (ArrayAccess) args[0];
+//					//It's a range
+//					long start = ((CSlice) index).getStart();
+//					long finish = ((CSlice) index).getFinish();
+//					try {
+//						//Convert negative indexes 
+//						if (start < 0) {
+//							start = aa.toString().length() + start;
+//						}
+//						if (finish < 0) {
+//							finish = aa.toString().length() + finish;
+//						}
+//						CArray na = new CArray(t);
+//						if (finish < start) {
+//							//return an empty array in cases where the indexes don't make sense
+//							return new CString("", t);
+//						}
+//						StringBuilder b = new StringBuilder();
+//						String val = aa.toString();
+//						for (long i = start; i <= finish; i++) {
+//							try{
+//							b.append(val.charAt((int) i));
+//							} catch(StringIndexOutOfBoundsException e){
+//								throw new Exceptions.RangeException("String bounds out of range. Tried to get character at index " + i + ", but indicies only go up to " + (val.length() - 1), t);
+//							}
+//						}
+//						return new CString(b.toString(), t);
+//					} catch (NumberFormatException e) {
+//						throw new ConfigRuntimeException("Ranges must be integer numbers, i.e., [0..5]", ExceptionType.CastException, t);
+//					}
+//				} else {
+//					try {
+//						return new CString(args[0].val().charAt(Static.getInt32(index, t)), t);
+//					} catch (ConfigRuntimeException e) {
+//						if (e.getExceptionType() == ExceptionType.CastException) {
+//							throw new ConfigRuntimeException("Expecting an integer index for the array, but found \"" + index
+//									+ "\". (Array is not associative, and cannot accept string keys here.)", ExceptionType.CastException, t);
+//						} else {
+//							throw e;
+//						}
+//					} catch (StringIndexOutOfBoundsException e) {
+//						throw new ConfigRuntimeException("No index at " + index, ExceptionType.RangeException, t);
+//					}
+//				}
+//			} else if (args[0] instanceof ArrayAccess) {
+//				throw new ConfigRuntimeException("Wat. How'd you get here? This isn't supposed to be implemented yet.", t);
+//			} else {
+//				throw new ConfigRuntimeException("Argument 1 of array_get must be an array", ExceptionType.CastException, t);
+//			}
 		}
 
 		public ExceptionType[] thrown() {
@@ -255,7 +263,7 @@ public class ArrayHandling {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to get the element from", CArray.class, "array"),
+						new Argument("The array to get the element from", ArrayAccess.class, "array"),
 						new Argument("The index of the array", CString.class, CInt.class, "index").setOptionalDefault(new CSlice(0, -1, Target.UNKNOWN)),
 						new Argument("The default value to return, should this array not contain the specified key", Mixed.class, "default").setOptional()
 					);
@@ -323,7 +331,7 @@ public class ArrayHandling {
 			ArgList list = getBuilder().parse(args, this, t);
 			CArray array = list.get("array");
 			try {
-				array.set((Construct)list.get("index"), (Construct)list.get("value"), t);
+				array.set(list.get("index").val(), (Construct)list.get("value"), t);
 			} catch (IndexOutOfBoundsException e) {
 				throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
 			}
@@ -453,7 +461,7 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				for (int i = 0; i < ca.size(); i++) {
-					if (((CBoolean) e.exec(t, env, ca.get(i, t), args[1])).getBoolean()) {
+					if (((CBoolean) e.exec(t, env, ca.get(i, t), args[1])).castToBoolean()) {
 						return new CBoolean(true, t);
 					}
 				}
@@ -554,7 +562,7 @@ public class ArrayHandling {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
 				for (int i = 0; i < ca.size(); i++) {
-					if (((CBoolean) e.exec(t, environment, ca.get(i, t), args[1])).getBoolean()) {
+					if (((CBoolean) e.exec(t, environment, ca.get(i, t), args[1])).castToBoolean()) {
 						return new CBoolean(true, t);
 					}
 				}
@@ -595,7 +603,7 @@ public class ArrayHandling {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to search in", CArray.class, "array"),
+						new Argument("The array to search in", ArrayAccess.class, "array"),
 						new Argument("The array index to search for", CString.class, CInt.class, "index")
 					);
 		}
@@ -617,23 +625,27 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CArray) {
-				if (!((CArray) args[0]).inAssociativeMode()) {
-					try {
-						int index = Static.getInt32(args[1], t);
-						CArray ca = (CArray) args[0];
-						return new CBoolean(index <= ca.size() - 1, t);
-					} catch (ConfigRuntimeException e) {
-						//They sent a key that is a string. Obviously it doesn't exist.
-						return new CBoolean(false, t);
-					}
-				} else {
-					CArray ca = (CArray) args[0];
-					return new CBoolean(ca.containsKey(args[1].val()), t);
-				}
-			} else {
-				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			ArrayAccess array = list.get("array");
+			Mixed index = list.get("index");
+			return new CBoolean(array.contains(index.val()), t);
+//			if (args[0] instanceof CArray) {
+//				if (!((CArray) args[0]).inAssociativeMode()) {
+//					try {
+//						int index = Static.getInt32(args[1], t);
+//						CArray ca = (CArray) args[0];
+//						return new CBoolean(index <= ca.size() - 1, t);
+//					} catch (ConfigRuntimeException e) {
+//						//They sent a key that is a string. Obviously it doesn't exist.
+//						return new CBoolean(false, t);
+//					}
+//				} else {
+//					CArray ca = (CArray) args[0];
+//					return new CBoolean(ca.containsKey(args[1].val()), t);
+//				}
+//			} else {
+//				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
+//			}
 		}
 		
 		@Override
@@ -699,7 +711,7 @@ public class ArrayHandling {
 			int size = list.getInt("size", t);
 			Mixed fill = list.get("fill");
 			for (long i = array.size(); i < size; i++) {
-				array.push(fill);
+				array.push((Construct)fill);
 			}
 			return new CVoid(t);
 		}
@@ -1175,7 +1187,8 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CSlice(Static.getInt(args[0], t), Static.getInt(args[1], t), t);
+			ArgList list = getBuilder().parse(args, this, t);
+			return new CSlice(list.getInt("from", t), list.getInt("to", t), t);
 		}
 
 		public CHVersion since() {
@@ -1220,7 +1233,7 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException("The sort type must be one of either: " + StringUtils.Join(CArray.SortType.values(), ", ", " or "),
 						ExceptionType.FormatException, t);
 			}
-			ca.sort(sortType);
+			ca.sort(sortType, t);
 			return ca;
 		}
 
@@ -1258,7 +1271,7 @@ public class ArrayHandling {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("The array to sort", CArray.class, "array"),
-						new Argument("The sort type", CString.class, "sortType").setOptionalDefault(CArray.SortType.REGULAR.name())
+						Argument.getEnumArgument("The sort type", CArray.SortType.class, "sortType").setEnumDefault(CArray.SortType.REGULAR)
 					);
 		}
 
@@ -1331,13 +1344,14 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			final CArray array = Static.getArray(args[0], t);
-			final CString sortType = new CString(args.length > 2?args[1].val():CArray.SortType.REGULAR.name(), t);
-			final CClosure callback = Static.getObject((args.length==2?args[1]:args[2]), t, "closure", CClosure.class);
+			ArgList list = getBuilder().parse(args, this, t);
+			final CArray array = list.get("array");
+			final CArray.SortType sortType = list.getEnum("sortType", t);
+			final CClosure callback = list.get("closure");
 			queue.invokeLater(new Runnable() {
 
 				public void run() {
-					Construct c = new array_sort().exec(Target.UNKNOWN, null, array, sortType);
+					Construct c = new array_sort().exec(Target.UNKNOWN, null, array, new CString(sortType.name(), Target.UNKNOWN));
 					callback.execute(new Construct[]{c});
 				}
 			});
@@ -1366,7 +1380,7 @@ public class ArrayHandling {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
 						new Argument("The array to be sorted", CArray.class, "array").setGenerics(Generic.ANY),
-						new Argument("The sort type", CString.class, "sortType").setOptionalDefault(CArray.SortType.REGULAR.name()),
+						Argument.getEnumArgument("The sort type", CArray.SortType.class, "sortType").setEnumDefault(CArray.SortType.REGULAR),
 						new Argument("The closure that recieves the sorted array once finished", CClosure.class, "closure").setGenerics(new Generic("?", CArray.class))
 					);
 		}
@@ -1636,21 +1650,10 @@ public class ArrayHandling {
 
 		Random r = new Random(System.currentTimeMillis());
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			long number = 1;
-			boolean getKeys = true;
-			CArray array = Static.getArray(args[0], t);
-			if(args.length > 1){
-				number = Static.getInt(args[1], t);
-			}
-			if(number < 1){
-				throw new ConfigRuntimeException("number may not be less than 1.", ExceptionType.RangeException, t);
-			}
-			if(number > Integer.MAX_VALUE){
-				throw new ConfigRuntimeException("Overflow detected. Number cannot be larger than " + Integer.MAX_VALUE, ExceptionType.RangeException, t);
-			}
-			if(args.length > 2){
-				getKeys = Static.getBoolean(args[2]);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			ArrayAccess array = list.get("array");
+			long number = list.getLong("number", t);
+			boolean getKeys = list.getBoolean("getKeys", t);
 			
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<Integer>();
 			while(randoms.size() < number){
@@ -1677,7 +1680,7 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "array {array, [number, [getKeys]]} Returns a random selection of keys or values from an array. The array may be"
+			return "Returns a random selection of keys or values from an array. The array may be"
 					+ " either normal or associative. Number defaults to 1, and getKey defaults to true. If number is greater than"
 					+ " the size of the array, a RangeException is thrown. No value will be returned twice from the array however, one it"
 					+ " is \"drawn\" from the array, it is not placed back in. The order of the elements in the array will also be random,"
@@ -1690,8 +1693,8 @@ public class ArrayHandling {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to select from", CArray.class, "array").setGenerics(Generic.ANY),
-						new Argument("The number of items to select from the array", CInt.class, "number").setOptionalDefault(1),
+						new Argument("The array to select from", ArrayAccess.class, "array").setGenerics(Generic.ANY),
+						Argument.getRangedIntArgument("The number of items to select from the array", "number", 1, Integer.MAX_VALUE).setOptionalDefault(1),
 						new Argument("If true, it will select from the keys instead of the values", CBoolean.class, "getKeys").setOptionalDefault(true)
 					);
 		}

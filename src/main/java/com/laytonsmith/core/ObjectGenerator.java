@@ -296,14 +296,14 @@ public class ObjectGenerator {
 	public Construct itemMeta(MCItemStack is, Target t) {
 		Construct ret, display, lore, color, title, author, pages, owner;
 		if (!is.hasItemMeta()) {
-			ret = new CNull(t);
+			ret = Construct.GetNullConstruct(t);
 		} else {
 			ret = CArray.GetAssociativeArray(t);
 			MCItemMeta meta = is.getItemMeta();
 			if (meta.hasDisplayName()) {
 				display = new CString(meta.getDisplayName(), t);
 			} else {
-				display = new CNull(t);
+				display = Construct.GetNullConstruct(t);
 			}
 			if (meta.hasLore()) {
 				lore = new CArray(t);
@@ -311,7 +311,7 @@ public class ObjectGenerator {
 					((CArray) lore).push(new CString(l, t));
 				}
 			} else {
-				lore = new CNull(t);
+				lore = Construct.GetNullConstruct(t);
 			}
 			((CArray) ret).set("display", display, t);
 			((CArray) ret).set("lore", lore, t);
@@ -323,12 +323,12 @@ public class ObjectGenerator {
 				if (((MCBookMeta) meta).hasTitle()) {
 					title = new CString(((MCBookMeta) meta).getTitle(), t);
 				} else {
-					title = new CNull(t);
+					title = Construct.GetNullConstruct(t);
 				}
 				if (((MCBookMeta) meta).hasAuthor()) {
 					author = new CString(((MCBookMeta) meta).getAuthor(), t);
 				} else {
-					author = new CNull(t);
+					author = Construct.GetNullConstruct(t);
 				}
 				if (((MCBookMeta) meta).hasPages()) {
 					pages = new CArray(t);
@@ -336,7 +336,7 @@ public class ObjectGenerator {
 						((CArray) pages).push(new CString(p, t));
 					}
 				} else {
-					pages = new CNull(t);
+					pages = Construct.GetNullConstruct(t);
 				}
 				((CArray) ret).set("title", title, t);
 				((CArray) ret).set("author", author, t);
@@ -346,7 +346,7 @@ public class ObjectGenerator {
 				if (((MCSkullMeta) meta).hasOwner()) {
 					owner = new CString(((MCSkullMeta) meta).getOwner(), t);
 				} else {
-					owner = new CNull(t);
+					owner = Construct.GetNullConstruct(t);
 				}
 				((CArray) ret).set("owner", owner, t);
 			}
@@ -355,23 +355,23 @@ public class ObjectGenerator {
 	}
 	
 	public MCItemMeta itemMeta(Construct c, int i, Target t) {
-		if (c instanceof CNull) {
+		if (c == null || c.isNull()) {
 			return null;
 		}
 		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(StaticLayer.GetConvertor().getMaterial(i));
-		CArray ma = null;
+		CArray ma;
 		if (c instanceof CArray) {
 			ma = (CArray) c;
 			try {
 				if (ma.containsKey("display")) {
 					Construct dni = ma.get("display");
-					if (!(dni instanceof CNull)) {
+					if (!dni.isNull()) {
 						meta.setDisplayName(dni.val());
 					}
 				}
 				if (ma.containsKey("lore")) {
 					Construct li = ma.get("lore");
-					if (li instanceof CNull) {
+					if (li.isNull()) {
 						//do nothing
 					} else if (li instanceof CArray) {
 						CArray la = (CArray) li;
@@ -387,7 +387,7 @@ public class ObjectGenerator {
 				if (meta instanceof MCLeatherArmorMeta) {
 					if (ma.containsKey("color")) {
 						Construct ci = ma.get("color");
-						if (ci instanceof CNull) {
+						if (ci.isNull()) {
 							//nothing
 						} else if (ci instanceof CArray) {
 							((MCLeatherArmorMeta) meta).setColor(color((CArray) ci, t));
@@ -399,19 +399,19 @@ public class ObjectGenerator {
 				if (meta instanceof MCBookMeta) {
 					if (ma.containsKey("title")) {
 						Construct title = ma.get("title");
-						if (!(title instanceof CNull)) {
+						if (!title.isNull()) {
 							((MCBookMeta) meta).setTitle(title.val());
 						}
 					}
 					if (ma.containsKey("author")) {
 						Construct author = ma.get("author");
-						if (!(author instanceof CNull)) {
+						if (!author.isNull()) {
 							((MCBookMeta) meta).setTitle(author.val());
 						}
 					}
 					if (ma.containsKey("pages")) {
 						Construct pages = ma.get("pages");
-						if (pages instanceof CNull) {
+						if (pages.isNull()) {
 							//nothing
 						} else if (pages instanceof CArray) {
 							CArray pa = (CArray) pages;
@@ -428,7 +428,7 @@ public class ObjectGenerator {
 				if (meta instanceof MCSkullMeta) {
 					if (ma.containsKey("owner")) {
 						Construct owner = ma.get("owner");
-						if (!(owner instanceof CNull)) {
+						if (!owner.isNull()) {
 							((MCSkullMeta) meta).setOwner(owner.val());
 						}
 					}

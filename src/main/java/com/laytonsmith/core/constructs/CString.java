@@ -6,6 +6,10 @@ import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.ArrayAccess;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 /**
  *
@@ -45,7 +49,7 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
         }
     }
 
-    public long size() {
+    public int size() {
         return val().length();
     }
 
@@ -101,5 +105,22 @@ public class CString extends CPrimitive implements Cloneable, ArrayAccess {
 	@Override
 	public boolean castToBoolean() {
 		return val().isEmpty() ? false : true;
+	}
+
+	public boolean contains(String index) {
+		try{
+			int i = Integer.parseInt(index);
+			return i < size();
+		} catch(NumberFormatException e){
+			return false;
+		}
+	}
+
+	public Set<String> keySet() {
+		Set<String> list = new HashSet<String>();
+		for(int i = 0; i < size(); i++){
+			list.add(Integer.toString(i));
+		}
+		return list;
 	}
 }

@@ -120,13 +120,13 @@ public class MObject {
 					val = null;
 				} else {
 					if(fType == byte.class){
-						val = Static.getInt8(value, t);
+						val = value.primitive(t).castToInt8(t);
 					} else if(fType == short.class){
-						val = Static.getInt16(value, t);
+						val = value.primitive(t).castToInt16(t);
 					} else if(fType == int.class){
-						val = Static.getInt32(value, t);
+						val = value.primitive(t).castToInt32(t);
 					} else if(fType == long.class){
-						val = Static.getInt(value, t);
+						val = value.primitive(t).castToInt(t);
 					} else if(fType == char.class){
 						if(value.val().length() == 0){
 							val = null;
@@ -134,11 +134,11 @@ public class MObject {
 							val = value.val().charAt(0);
 						}
 					} else if(fType == boolean.class){
-						val = Static.getBoolean(value);
+						val = value.primitive(t).castToBoolean();
 					} else if(fType == float.class){
-						val = Static.getDouble32(value, t);
+						val = value.primitive(t).castToDouble32(t);
 					} else if(fType == double.class){
-						val = Static.getDouble(value, t);
+						val = value.primitive(t).castToDouble(t);
 					} else if(fType == MMap.class){
 						CArray ca = Static.getArray(value, t);
 						MMap m = new MMap();

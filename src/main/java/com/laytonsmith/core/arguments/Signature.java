@@ -60,6 +60,21 @@ public class Signature implements Comparable<Signature> {
 	}
 	
 	/**
+	 * Returns the Argument with the specified name, or
+	 * null if no such argument exists.
+	 * @param argName
+	 * @return 
+	 */
+	public Argument getArgument(String argName){
+		for(Argument a : args){
+			if(a.getName().equals(argName)){
+				return a;
+			}
+		}
+		return null;
+	}
+	
+	/**
 	 * Returns the optionals list.
 	 * @return 
 	 */

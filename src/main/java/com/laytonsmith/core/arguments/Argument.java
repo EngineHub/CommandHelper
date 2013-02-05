@@ -32,6 +32,15 @@ public class Argument implements Documentation {
 	private Mixed def;
 	private List<Generic> generics = new ArrayList<Generic>();
 	
+	//Enum support
+	private Class enumClass;
+	private Enum defaultEnum;
+	
+	//Range support
+	private double minInclusive;
+	private double maxExclusive;
+	private boolean isRanged = false;
+	
 	/**
 	 * Void return types don't need any documentation, so can
 	 * all use the same Argument object.
@@ -113,6 +122,7 @@ public class Argument implements Documentation {
 		this(docs, new Class[]{clazz}, name);
 	}
 	
+	
 	/**
 	 * Overload for easier syntax for a disjoint type with exactly two types.
 	 * @param docs
@@ -148,6 +158,57 @@ public class Argument implements Documentation {
 		this.docs = docs;
 		this.clazz.addAll(Arrays.asList(disjointTypes));
 		this.name = name;
+	}
+	
+	/**
+	 * Creates a new Argument, which is capable of validating enum types.
+	 * @param docs
+	 * @param clazz
+	 * @param name
+	 * @return 
+	 */
+	public static Argument getEnumArgument(String docs, Class<? extends Enum> clazz, String name){
+		Argument a = new Argument(docs, new Class[]{}, name);
+		a.enumClass = clazz;
+		return a;
+	}
+	
+	/**
+	 * Returns a ranged support int based Argument. This will validate the range on the value
+	 * for you, so you may safely assume in the function handling that the range is appropriate.
+	 * The min is inclusive, and the max is exclusive, so 0, 2 would include 2 numbers: {0, 1}
+	 * A CInt is always returned from this Argument.
+	 * @param docs
+	 * @param name
+	 * @param minInclusive
+	 * @param maxExclusive
+	 * @return 
+	 */
+	public static Argument getRangedIntArgument(String docs, String name, int minInclusive, int maxExclusive){
+		Argument a = new Argument(docs, CInt.class, name);
+		a.minInclusive = minInclusive;
+		a.maxExclusive = maxExclusive;
+		a.isRanged = true;
+		return a;
+	}
+	
+	/**
+	 * Returns a ranged support double based Argument. This will validate the range on the value
+	 * for you, so you may safely assume in the function handling that the range is appropriate.
+	 * The min is inclusive, and the max is exclusive, so 0, 2 would include 2 numbers: {0, 1}.
+	 * A CDouble is always returned from this Argument.
+	 * @param docs
+	 * @param name
+	 * @param minInclusive
+	 * @param maxExclusive
+	 * @return 
+	 */
+	public static Argument getRangedDoubleArgument(String docs, String name, double minInclusive, double maxExclusive){
+		Argument a = new Argument(docs, CDouble.class, name);
+		a.minInclusive = minInclusive;
+		a.maxExclusive = maxExclusive;
+		a.isRanged = true;
+		return a;
 	}
 	
 	/**
@@ -204,6 +265,18 @@ public class Argument implements Documentation {
 	 */
 	public Argument setDefault(Mixed def){
 		this.def = def;
+		return this;
+	}
+	
+	/**
+	 * Sets the default enum value for this argument. This also
+	 * automatically sets it to optional.
+	 * @param defaultEnum
+	 * @return 
+	 */
+	public Argument setEnumDefault(Enum<?> defaultEnum){
+		this.defaultEnum = defaultEnum;
+		this.setOptional();
 		return this;
 	}
 	
@@ -381,5 +454,38 @@ public class Argument implements Documentation {
 
 	public CHVersion since() {
 		return since;
+	}
+
+	/**
+	 * Returns the enum class associated with this argument, if it
+	 * was created with the enum methods.
+	 * @return 
+	 */
+	/*package*/ Class<? extends Enum<?>> getEnumClass() {
+		return enumClass;
+	}
+	
+	/**
+	 * Returns true if this is an argument with range support.
+	 * @return 
+	 */
+	/*package*/ boolean isRanged(){
+		return isRanged;
+	}
+	
+	/**
+	 * Returns the inclusive min value for arguments with range support
+	 * @return 
+	 */
+	/*package*/ double getMin(){
+		return minInclusive;
+	}
+	
+	/**
+	 * Returns the inclusive max value for arguments with range support.
+	 * @return 
+	 */
+	/*package*/ double getMax(){
+		return maxExclusive;
 	}
 }

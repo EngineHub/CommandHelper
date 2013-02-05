@@ -1,6 +1,7 @@
 package com.laytonsmith.PureUtilities;
 
 import java.io.PrintStream;
+import java.lang.reflect.Array;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationTargetException;
@@ -25,8 +26,8 @@ public class ReflectionUtils {
 		}
 
 		/**
-		 * Returns the underlying checked exception that was thrown by the
-		 * reflective operation.
+		 * Returns the underlying checked exception that was thrown by
+		 * the reflective operation.
 		 *
 		 * @return
 		 */
@@ -37,29 +38,33 @@ public class ReflectionUtils {
 	}
 
 	/**
-	 * Constructs a new instance of the specified object, assuming it has a no
-	 * arg constructor. It will bypass access restrictions if possible.
+	 * Constructs a new instance of the specified object, assuming it has a
+	 * no arg constructor. It will bypass access restrictions if possible.
 	 *
-	 * @param <T> The class type returned, specified by the class type requested
+	 * @param <T> The class type returned, specified by the class type
+	 * requested
 	 * @param clazz
 	 * @return
-	 * @throws com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
+	 * @throws
+	 * com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
 	 */
 	public static <T> T newInstance(Class<T> clazz) throws ReflectionException {
 		return newInstance(clazz, new Class[]{}, new Object[]{});
 	}
 
 	/**
-	 * Constructs a new instance of the specified object, using the constructor
-	 * that matches the argument types, and passes in the arguments specified.
-	 * It will bypass access restrictions if possible.
+	 * Constructs a new instance of the specified object, using the
+	 * constructor that matches the argument types, and passes in the
+	 * arguments specified. It will bypass access restrictions if possible.
 	 *
-	 * @param <T> The class type returned, specified by the class type requested
+	 * @param <T> The class type returned, specified by the class type
+	 * requested
 	 * @param clazz
 	 * @param argTypes
 	 * @param args
 	 * @return
-	 * @throws com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
+	 * @throws
+	 * com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
 	 */
 	public static <T> T newInstance(Class<T> clazz, Class[] argTypes, Object[] args) throws ReflectionException {
 		try {
@@ -95,15 +100,15 @@ public class ReflectionUtils {
 
 	/**
 	 * Gets a member from a class, disregarding the access restrictions. If
-	 * accessing a static variable, the instance may be null. If variableName
-	 * contains a dot, then it recursively digs down and grabs that value. So,
-	 * given the following class definitions:
+	 * accessing a static variable, the instance may be null. If
+	 * variableName contains a dot, then it recursively digs down and grabs
+	 * that value. So, given the following class definitions:
 	 * <pre>
 	 * class A { B bObj; }
 	 * class B { C cObj; }
 	 * class C { String obj; }
-	 * </pre> Then if clazz were A.class, and variableName were "bObj.cObj.obj",
-	 * then C's String obj would be returned.
+	 * </pre> Then if clazz were A.class, and variableName were
+	 * "bObj.cObj.obj", then C's String obj would be returned.
 	 *
 	 * @param clazz
 	 * @param instance
@@ -215,12 +220,13 @@ public class ReflectionUtils {
 
 	/**
 	 * Grabs the method from the instance object automatically. If multiple
-	 * methods match the given name, the most appropriate one is selected based
-	 * on the argument types. {@code instance} may not be null.
+	 * methods match the given name, the most appropriate one is selected
+	 * based on the argument types. {@code instance} may not be null.
 	 *
 	 * @param instance
 	 * @param methodName
-	 * @throws com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
+	 * @throws
+	 * com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
 	 */
 	public static Object invokeMethod(Object instance, String methodName, Object... params) throws ReflectionException {
 		Class c = instance.getClass();
@@ -269,12 +275,13 @@ public class ReflectionUtils {
 	}
 
 	/**
-	 * Grabs the method from the instance object automatically. {@code instance}
-	 * may not be null.
+	 * Grabs the method from the instance object automatically.
+	 * {@code instance} may not be null.
 	 *
 	 * @param instance
 	 * @param methodName
-	 * @throws com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
+	 * @throws
+	 * com.laytonsmith.PureUtilities.ReflectionUtils.ReflectionException
 	 */
 	public static Object invokeMethod(Object instance, String methodName) throws ReflectionException {
 		Class c = instance.getClass();
@@ -334,17 +341,17 @@ public class ReflectionUtils {
 	}
 
 	/**
-	 * Meant mostly as a debug tool, takes an object and prints out the object's
-	 * non-static field information at this current point in time, to the
-	 * specified PrintStream. This method will not throw any SecurityExceptions
-	 * if a value cannot be reflectively accessed, but instead will print an
-	 * error message for that single value.
+	 * Meant mostly as a debug tool, takes an object and prints out the
+	 * object's non-static field information at this current point in time,
+	 * to the specified PrintStream. This method will not throw any
+	 * SecurityExceptions if a value cannot be reflectively accessed, but
+	 * instead will print an error message for that single value.
 	 *
-	 * @param instance The object to explore. If this is null, "The object is
-	 * null" is printed, and the method exits.
+	 * @param instance The object to explore. If this is null, "The object
+	 * is null" is printed, and the method exits.
 	 * @param instanceOnly If true, only the object's class members will be
-	 * printed, otherwise, the method will recurse up the object's inheritance
-	 * hierarchy, and prints everything.
+	 * printed, otherwise, the method will recurse up the object's
+	 * inheritance hierarchy, and prints everything.
 	 * @param output The print stream to output to, or System.out if null.
 	 */
 	public static void PrintObjectTrace(Object instance, boolean instanceOnly, PrintStream output) {
@@ -375,5 +382,26 @@ public class ReflectionUtils {
 				output.println("(" + f.getType() + ") " + f.getName() + ": " + value);
 			}
 		} while (!instanceOnly && (iClass = iClass.getSuperclass()) != null);
+	}
+
+	/**
+	 * Returns the array of enums that SomeEnum.values() would return, but
+	 * accepts just the Class object for the Enum. This is useful for cases
+	 * where you are for instance dynamically or generically exploring an
+	 * enum object, and don't have an actual reference to the concrete class
+	 * type to call the static method on it.
+	 *
+	 * @param <T>
+	 * @param clazz
+	 * @return
+	 */
+	public static <T extends Enum> T[] values(Class<? extends Enum> clazz) {
+		Object v = invokeMethod(clazz, null, "values");
+		Enum[] enums = new Enum[Array.getLength(v)];
+		for (int i = 0; i < Array.getLength(v); i++) {
+			Object en = Array.get(v, i);
+			enums[i] = (Enum)en;
+		}
+		return (T[])enums;
 	}
 }

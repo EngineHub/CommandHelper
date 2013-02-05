@@ -1,11 +1,16 @@
 package com.laytonsmith.core.arguments;
 
-import com.laytonsmith.core.Static;
-import com.laytonsmith.core.constructs.CString;
+import com.laytonsmith.PureUtilities.ReflectionUtils;
+import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.core.Prefs;
+import com.laytonsmith.core.constructs.CNumber;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.functions.Exceptions;
+import com.laytonsmith.core.functions.Exceptions.CastException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -15,10 +20,10 @@ import java.util.Map;
 public class ArgList {
 
 	private Map<String, Mixed> values;
-	private int signatureId;
-	/*package*/ ArgList(int signatureId, Map<String, Mixed> values) {
-		this.signatureId = signatureId;
+	private Signature signature;
+	/*package*/ ArgList(Map<String, Mixed> values, Signature signature) {
 		this.values = values;
+		this.signature = signature;
 	}
 	
 	/**
@@ -30,13 +35,41 @@ public class ArgList {
 	public <T extends Mixed> T get(String varName){
 		if(values.containsKey(varName)){
 			try{
-				return (T)values.get(varName);
+				Mixed m = (T)values.get(varName);
+				return (T)m;
 			} catch(ClassCastException e){
 				//This is actually a programming error
 				throw new Error("Invalid cast", e);
 			}
 		} else {
 			throw new Error("Values list does not contain this variable name: " + varName);
+		}
+	}
+	
+	/**
+	 * Returns the underlying value, as a construct. The value will have been
+	 * type checked and verified that if numeric, is within the specified range.
+	 * @param <T>
+	 * @param varName
+	 * @param t
+	 * @return 
+	 */
+	public <T extends Mixed> T getRanged(String varName, Target t){
+		Mixed m = get(varName);
+		Argument a = signature.getArgument(varName);
+		if(!a.isRanged()){
+			throw new Error("Using getRanged on a non-ranged value");
+		}
+		if(m instanceof CNumber){
+			double actual = m.primitive(t).castToDouble(t);
+			if(actual >= a.getMin() && actual < a.getMax()){
+				return (T)m;
+			} else {
+				throw new Exceptions.RangeException("Expecting a value between (" + a.getMin() + ", " + a.getMax() + "], but " 
+						+ actual + " was found.", t);
+			}
+		} else {
+			throw new CastException("Expecting a numeric value, but " + m.typeName() + " was found instead.", t);
 		}
 	}
 	
@@ -107,12 +140,67 @@ public class ArgList {
 	}
 	
 	/**
+	 * Shorthand to getting a POJO boolean from a primitive.
+	 * @param varName
+	 * @param t
+	 * @return 
+	 */
+	public boolean getBoolean(String varName, Target t){
+		return getConstruct(varName).primitive(t).castToBoolean();
+	}
+	
+	/**
+	 * Returns an enum of the appropriate type. This is required for
+	 * use if returning an enum, the normal get() method will not work.
+	 * @param <T>
+	 * @param name
+	 * @param t
+	 * @return 
+	 */
+	public <T extends Enum<?>> T getEnum(String name, Target t){
+		String s = getConstruct(name).val();
+		Argument a = null;
+		for(Argument aa : signature.getArguments()){
+			if(aa.getName().equals(name)){
+				a = aa;
+				break;
+			}
+		}
+		if(a == null){
+			throw new Error("Should not have gotten here, please alert a developer with this stack trace.");
+		}
+		Class clazz = a.getEnumClass();
+		try{
+			return (T)Enum.valueOf(clazz, s.toUpperCase());
+		} catch(IllegalArgumentException e){
+			try{
+				return (T)Enum.valueOf(clazz, s); //Ok, try actual case.
+			} catch(IllegalArgumentException ex){
+				if(Prefs.DebugMode()){
+					//We have to use reflection to get these, since the "values"
+					//method is static. 
+					Object v = ReflectionUtils.invokeMethod(clazz, null, "values");
+					List<String> list = new ArrayList<String>();
+					for(Enum ee : ReflectionUtils.values(clazz)){
+						list.add(ee.name());
+					}
+					throw new CastException("Unexpected value \"" + name + "\" passed as \"" 
+							+ a.getName() + "\", but should be one of " + StringUtils.Join(list, ", ", " or ", " or "), t);
+				} else {
+					throw new CastException("Unexpected value \"" + name + "\" passed as \"" + a.getName() + "\". Enable debug mode for all possible values,"
+							+ " or check the documentation.", t);
+				}
+			}
+		}
+	}
+	
+	/**
 	 * Returns true if these arguments matched a particular signature id.
 	 * @param id
 	 * @return 
 	 */
 	public boolean isSignature(int id){
-		return id == signatureId;
+		return id == signature.getSignatureId();
 	}
 	
 	/**
@@ -120,6 +208,6 @@ public class ArgList {
 	 * @return 
 	 */
 	public int getSignatureId(){
-		return signatureId;
+		return signature.getSignatureId();
 	}
 }

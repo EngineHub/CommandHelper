@@ -12,11 +12,11 @@ import com.laytonsmith.core.functions.Exceptions;
  */
 @typename("slice")
 public class CSlice extends CArray {
-    private long start;
-    private long finish;
+    private int start;
+    private int finish;
 	private int direction;
-	private long max;
-	private long size;
+	private int max;
+	private int size;
     public CSlice(String slice, Target t) throws ConfigCompileException{
         super(t);
         String [] split = slice.split("\\.\\.");
@@ -39,15 +39,15 @@ public class CSlice extends CArray {
             }
         }
         try{
-            start = Long.parseLong(sstart.trim());
-            finish = Long.parseLong(sfinish.trim());
+            start = Integer.parseInt(sstart.trim());
+            finish = Integer.parseInt(sfinish.trim());
         } catch(NumberFormatException e){
             throw new ConfigRuntimeException("Expecting integer in a slice, but was given " + sstart + " and " + sfinish, t);
         }
 		calculateCaches();
     }
     
-    public CSlice(long from, long to, Target t){
+    public CSlice(int from, int to, Target t){
         super(t);
         this.start = from;
         this.finish = to;
@@ -60,11 +60,11 @@ public class CSlice extends CArray {
 		size = max + 1;
 	}
     
-    public long getStart(){
+    public int getStart(){
         return start;
     }
     
-    public long getFinish(){
+    public int getFinish(){
         return finish;
     }
 
@@ -98,7 +98,7 @@ public class CSlice extends CArray {
 	}
 
 	@Override
-	public long size() {
+	public int size() {
 		return size;
 	}
 

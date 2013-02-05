@@ -50,7 +50,7 @@ public class EntityEvents {
 				+ "{}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			if(event instanceof MCEntityDamageEvent){
 				MCEntityDamageEvent e = (MCEntityDamageEvent) event;
@@ -102,11 +102,11 @@ public class EntityEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+				BindableEvent event, Target t) {
 			MCEntityDamageEvent e = (MCEntityDamageEvent) event;
 			if (key.equals("amount")) {
 				if (value instanceof CInt) {
-					e.setDamage((int) Static.getInt(value, Target.UNKNOWN));
+					e.setDamage(value.primitive(t).castToInt32(t));
 					return true;
 				}
 			}

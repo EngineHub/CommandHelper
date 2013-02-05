@@ -51,6 +51,12 @@ public final class Static {
     
     private static Map<String, String> hostCache = new HashMap<String, String>();
 
+	public static CArray getArray(Construct c, Target t){
+		if(c instanceof CArray){
+			return (CArray)c;
+		}
+		throw new ConfigRuntimeException("Expecting an array, but " + c.typeName() + " found instead (" + c.toString() + ")", ExceptionType.CastException, t);
+	}
     /**
      * Returns true if any of the constructs are a CDouble, false otherwise.
      * @param c

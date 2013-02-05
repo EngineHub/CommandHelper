@@ -202,7 +202,7 @@ public class ArgumentBuilder {
 						ret.put(s.getArguments().get(i).getName(), args[i]);
 					}
 				}
-				return new ArgList(s.getSignatureId(), ret);
+				return new ArgList(ret, s);
 			}
 		}
 		//No matches were found. Throw an exception.

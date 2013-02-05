@@ -237,7 +237,7 @@ public class CByteArray extends Construct implements Sizable {
 		return ba;
 	}
 	
-	public long size(){
+	public int size(){
 		return maxValue;
 	}
 	
@@ -351,7 +351,7 @@ public class CByteArray extends Construct implements Sizable {
 		}
 
 		@Override
-		public long size() {
+		public int size() {
 			return backing.length;
 		}
 

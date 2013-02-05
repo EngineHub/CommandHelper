@@ -60,7 +60,7 @@ public final class EventUtils {
         SortedSet<BoundEvent> set = event_handles.get(event.driver());
         set.add(b);
         try {
-            event.bind(b.getPrefilter());
+            event.bind(b.getPrefilter(), b.getTarget());
         } catch (UnsupportedOperationException e) {
         }
     }
@@ -117,7 +117,7 @@ public final class EventUtils {
         return event_handles.get(type);
     }
 
-    public static void ManualTrigger(String eventName, CArray object, boolean serverWide) {
+    public static void ManualTrigger(String eventName, CArray object, boolean serverWide, Target t) {
         for (Driver type : event_handles.keySet()) {
             SortedSet<BoundEvent> toRun = new TreeSet<BoundEvent>();
             SortedSet<BoundEvent> bounded = GetEvents(type);
@@ -133,7 +133,7 @@ public final class EventUtils {
                                 ConfigRuntimeException.React(e, b.getEnvironment());
                                 continue;
                             }
-                            if (driver.matches(b.getPrefilter(), convertedEvent)) {
+                            if (driver.matches(b.getPrefilter(), convertedEvent, t)) {
                                 toRun.add(b);
                             }
                         } catch (PrefilterNonMatchException ex) {
@@ -173,7 +173,7 @@ public final class EventUtils {
         if (bounded != null) {
             for (BoundEvent b : bounded) {
                 try {
-                    if (driver.getName().equals(eventName) && driver.matches(b.getPrefilter(), e)) {
+                    if (driver.getName().equals(eventName) && driver.matches(b.getPrefilter(), e, b.getTarget())) {
                         toRun.add(b);
                     }
                 } catch (PrefilterNonMatchException ex) {

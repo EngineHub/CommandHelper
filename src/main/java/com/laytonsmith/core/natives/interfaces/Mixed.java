@@ -26,6 +26,14 @@ public interface Mixed {
 	String toString();
 	
 	/**
+	 * Returns a standardized string representation of the underlying Construct
+	 * represented by this object. This can be different than the toString method,
+	 * since the toString method is meant for debugging purposes.
+	 * @return 
+	 */
+	String val();
+	
+	/**
 	 * Returns true if the underlying object is null.
 	 * @return 
 	 */

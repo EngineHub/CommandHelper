@@ -10,5 +10,5 @@ public interface Sizable {
 	 * Returns the size of this object.
 	 * @return 
 	 */
-	long size();
+	int size();
 }

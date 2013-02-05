@@ -243,6 +243,14 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
         }
     }
 	
+	/**
+	 * Returns a null construct. The Construct object
+	 * returned is a special object that is of type Construct 
+	 * (that is, mixed in ms typing)
+	 * but returns true for isNull.
+	 * @param t
+	 * @return 
+	 */
 	public static Construct GetNullConstruct(Target t){
 		return new Construct(null, t) {
 
@@ -257,6 +265,16 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 		};
 	}
     
+	public static Construct GetConstruct(CharSequence c){return GetConstruct((Object)c);}
+	public static Construct GetConstruct(Integer c){return GetConstruct((Object)c);}
+	public static Construct GetConstruct(Long c){return GetConstruct((Object)c);}
+	public static Construct GetConstruct(Byte c){return GetConstruct((Object)c);}
+	public static Construct GetConstruct(BigInteger c){return GetConstruct((Object)c);}
+	public static Construct GetConstruct(AtomicInteger c){return GetConstruct((Object)c);}
+	public static Construct GetConstruct(Short c){return GetConstruct((Object)c);}
+	public static Construct GetConstruct(Boolean c){return GetConstruct((Object)c);}
+	public static Construct GetConstruct(Map c) throws ClassCastException {return GetConstruct((Object)c);}
+	public static Construct GetConstruct(Collection c){return GetConstruct((Object)c);}
     /**
      * Converts a POJO to a Construct, if the type is convertable. This accepts many types of
      * objects, and should be expanded if a type does fit into the overall type scheme.
@@ -264,7 +282,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
      * @return
      * @throws ClassCastException 
      */
-    public static Construct GetConstruct(Object o) throws ClassCastException{
+    private static Construct GetConstruct(Object o) throws ClassCastException{
         if(o == null){
             return GetNullConstruct(Target.UNKNOWN);
         } else if(o instanceof CharSequence){

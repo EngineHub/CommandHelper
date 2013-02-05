@@ -139,11 +139,11 @@ public class MathTest {
     public void testRand1() {
         Math.rand a = new Math.rand();
         for (int i = 0; i < 1000; i++) {
-            long j = Static.getInt(a.exec(Target.UNKNOWN, env, C.onstruct(10)), t);
+            long j = a.exec(Target.UNKNOWN, env, C.onstruct(10)).primitive(t).castToInt(t);
             if (!(j < 10 && j >= 0)) {
                 fail("Expected a number between 0 and 10, but got " + j);
             }
-            j = Static.getInt(a.exec(Target.UNKNOWN, env, C.onstruct(10), C.onstruct(20)), t);
+            j = a.exec(Target.UNKNOWN, env, C.onstruct(10), C.onstruct(20)).primitive(t).castToInt(t);
             if (!(j < 20 && j >= 10)) {
                 fail("Expected a number between 10 and 20, but got " + j);
             }

@@ -124,7 +124,7 @@ public class ConfigRuntimeException extends RuntimeException {
 			if(ret.isNull()){
 				reaction = Reaction.REPORT;
 			} else {
-				if(Static.getBoolean(ret)){
+				if(ret.primitive(Target.UNKNOWN).castToBoolean()){
 					reaction = Reaction.IGNORE;
 				} else {
 					reaction = Reaction.FATAL;
