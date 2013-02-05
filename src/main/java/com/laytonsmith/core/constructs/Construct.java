@@ -199,6 +199,11 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
             //Object
             JSONObject obj = (JSONObject) JSONValue.parse(s);
             CArray ca = CArray.GetAssociativeArray(t);
+			if(obj == null){
+				//From what I can tell, this happens when the json object is improperly formatted,
+				//so go ahead and throw an exception
+				throw new MarshalException();
+			}
             for(Object key : obj.keySet()){
                 ca.set(convertJSON(key, t), 
                         convertJSON(obj.get(key), t), t);

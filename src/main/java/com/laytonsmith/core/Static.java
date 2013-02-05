@@ -845,28 +845,31 @@ public final class Static {
         if(mes == null){
             return null;
         }
+		//We have to reset the color, then set it to the appropriate color, so that
+		//background and non-foreground color characters are also reset at that point.
+		//Hence the RESETs everywhere.
         return mes
-                .replaceAll("§0", TermColors.BLACK + TermColors.BG_WHITE)
-                .replaceAll("§1", TermColors.BLUE)
-                .replaceAll("§2", TermColors.GREEN)
-                .replaceAll("§3", TermColors.CYAN)
-                .replaceAll("§4", TermColors.RED)
-                .replaceAll("§5", TermColors.MAGENTA)
-                .replaceAll("§6", TermColors.YELLOW)
-                .replaceAll("§7", TermColors.WHITE)
-                .replaceAll("§8", TermColors.BRIGHT_BLACK + TermColors.BG_BRIGHT_WHITE)
-                .replaceAll("§9", TermColors.BRIGHT_BLUE)
-                .replaceAll("§a", TermColors.BRIGHT_GREEN)
-                .replaceAll("§b", TermColors.BRIGHT_CYAN)
-                .replaceAll("§c", TermColors.BRIGHT_RED)
-                .replaceAll("§d", TermColors.BRIGHT_MAGENTA)
-                .replaceAll("§e", TermColors.BRIGHT_YELLOW)
-                .replaceAll("§f", TermColors.BRIGHT_WHITE)
-                .replaceAll("§k", "") //Uh, no equivalent for "random"
-                .replaceAll("§l", TermColors.BOLD)
-                .replaceAll("§m", TermColors.STRIKE)
-                .replaceAll("§n", TermColors.UNDERLINE)
-                .replaceAll("§o", TermColors.ITALIC)
+                .replaceAll("§0", TermColors.RESET + TermColors.BLACK + TermColors.BG_WHITE)
+                .replaceAll("§1", TermColors.RESET + TermColors.BLUE)
+                .replaceAll("§2", TermColors.RESET + TermColors.GREEN)
+                .replaceAll("§3", TermColors.RESET + TermColors.CYAN)
+                .replaceAll("§4", TermColors.RESET + TermColors.RED)
+                .replaceAll("§5", TermColors.RESET + TermColors.MAGENTA)
+                .replaceAll("§6", TermColors.RESET + TermColors.YELLOW)
+                .replaceAll("§7", TermColors.RESET + TermColors.WHITE)
+                .replaceAll("§8", TermColors.RESET + TermColors.BRIGHT_BLACK + TermColors.BG_BRIGHT_WHITE)
+                .replaceAll("§9", TermColors.RESET + TermColors.BRIGHT_BLUE)
+                .replaceAll("§a", TermColors.RESET + TermColors.BRIGHT_GREEN)
+                .replaceAll("§b", TermColors.RESET + TermColors.BRIGHT_CYAN)
+                .replaceAll("§c", TermColors.RESET + TermColors.BRIGHT_RED)
+                .replaceAll("§d", TermColors.RESET + TermColors.BRIGHT_MAGENTA)
+                .replaceAll("§e", TermColors.RESET + TermColors.BRIGHT_YELLOW)
+                .replaceAll("§f", TermColors.RESET + TermColors.BRIGHT_WHITE)
+                .replaceAll("§k", TermColors.RESET + "") //Uh, no equivalent for "random"
+                .replaceAll("§l", TermColors.RESET + TermColors.BOLD)
+                .replaceAll("§m", TermColors.RESET + TermColors.STRIKE)
+                .replaceAll("§n", TermColors.RESET + TermColors.UNDERLINE)
+                .replaceAll("§o", TermColors.RESET + TermColors.ITALIC)
                 .replaceAll("§r", TermColors.reset());
                 
                 
