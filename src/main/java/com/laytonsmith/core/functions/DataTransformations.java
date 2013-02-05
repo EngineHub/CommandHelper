@@ -11,8 +11,6 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
@@ -87,7 +85,7 @@ public class DataTransformations {
 			try {
 				return Construct.json_decode(s, t);
 			} catch (MarshalException ex) {
-				throw new Exceptions.FormatException("The JSON string is improperly formatted.", t, ex);
+				throw new Exceptions.FormatException("The input JSON string is improperly formatted. Check your formatting and try again.", t, ex);
 			}
 		}
 
