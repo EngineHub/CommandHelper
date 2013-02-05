@@ -304,7 +304,7 @@ public class ObjectGenerator {
     }
     
 	public Construct itemMeta(MCItemStack is, Target t) {
-		Construct ret, display, lore, color, title, author, pages, owner;
+		Construct ret, display, lore, color, title, author, pages, owner, stored;
 		if (!is.hasItemMeta()) {
 			ret = new CNull(t);
 		} else {
@@ -360,15 +360,29 @@ public class ObjectGenerator {
 				}
 				((CArray) ret).set("owner", owner, t);
 			}
+			if (meta instanceof MCEnchantmentStorageMeta) {
+				if (((MCEnchantmentStorageMeta) meta).hasStoredEnchants()) {
+					stored = new CArray(t);
+					for (Map.Entry<MCEnchantment, Integer> entry : ((MCEnchantmentStorageMeta) meta).getStoredEnchants().entrySet()) {
+						CArray eObj = CArray.GetAssociativeArray(t);
+						eObj.set("etype", new CString(entry.getKey().getName(), t), t);
+						eObj.set("elevel", new CInt(entry.getValue(), t), t);
+						((CArray) stored).push(eObj);
+					}
+				} else {
+					stored = new CNull(t);
+				}
+				((CArray) ret).set("stored", stored, t);
+			}
 		}
 		return ret;
 	}
 	
 	public MCItemMeta itemMeta(Construct c, int i, Target t) {
-		if (c instanceof CNull) {
-			return null;
-		}
 		MCItemMeta meta = Static.getServer().getItemFactory().getItemMeta(StaticLayer.GetConvertor().getMaterial(i));
+		if (c instanceof CNull) {
+			return meta;
+		}
 		CArray ma = null;
 		if (c instanceof CArray) {
 			ma = (CArray) c;
@@ -440,6 +454,27 @@ public class ObjectGenerator {
 						Construct owner = ma.get("owner");
 						if (!(owner instanceof CNull)) {
 							((MCSkullMeta) meta).setOwner(owner.val());
+						}
+					}
+				}
+				if (meta instanceof MCEnchantmentStorageMeta) {
+					if (ma.containsKey("stored")) {
+						Construct stored = ma.get("stored");
+						if (stored instanceof CNull) {
+							//Still doing nothing
+						} else if (stored instanceof CArray) {
+							for (String index : ((CArray) stored).keySet()) {
+								try {
+									CArray earray = (CArray) ((CArray) stored).get(index);
+									MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(earray.get("etype").val());
+									int elevel = Static.getInt32(earray.get("elevel"), t);
+									((MCEnchantmentStorageMeta) meta).addStoredEnchant(etype, elevel, true);
+								} catch (Exception bade) {
+									throw new Exceptions.FormatException("Could not get enchantment data from index " + index, t);
+								}
+							}
+						} else {
+							throw new Exceptions.FormatException("Stored field was expected to be an array of Enchantment arrays", t);
 						}
 					}
 				}
