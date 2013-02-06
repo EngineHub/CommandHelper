@@ -314,8 +314,7 @@ public class WorldEdit {
                 ret.push(new CDouble(volume, t));
                 return ret;
 
-            }
-            catch (NoClassDefFoundError e) {
+            } catch (NoClassDefFoundError e) {
                 throw new ConfigRuntimeException("It does not appear as though the WorldEdit or WorldGuard plugin is loaded properly. Execution of " + this.getName() + " cannot continue.", ExceptionType.InvalidPluginException, t, e);
             }
         }
@@ -375,8 +374,7 @@ public class WorldEdit {
                 if (!region.getIntersectingRegions(checkRegions).isEmpty()) {
                     return new CBoolean(true, t);
                 }
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
             }
             return new CBoolean(false, t);
         }
@@ -722,8 +720,7 @@ public class WorldEdit {
 
 			try {
 				mgr.save();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while creating protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
@@ -851,14 +848,12 @@ public class WorldEdit {
 			newRegion.setPriority(oldRegion.getPriority());
 			try {
 				newRegion.setParent(oldRegion.getParent());
-			}
-			catch (Exception ignore) {
+			} catch (Exception ignore) {
 			}
 
 			try {
 				mgr.save();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while redefining protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
@@ -930,8 +925,7 @@ public class WorldEdit {
 
 			try {
 				mgr.save();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while removing protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
@@ -1097,8 +1091,7 @@ public class WorldEdit {
 
 			try {
 				mgr.save();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while adding owner(s) to protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
@@ -1200,8 +1193,7 @@ public class WorldEdit {
 
 			try {
 				mgr.save();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while deleting owner(s) from protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
@@ -1303,8 +1295,7 @@ public class WorldEdit {
 
 			try {
 				mgr.save();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while adding member(s) to protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
@@ -1406,8 +1397,7 @@ public class WorldEdit {
 
 			try {
 				mgr.save();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while deleting members(s) from protected region", ExceptionType.PluginInternalException, t, e);
 			}
 
