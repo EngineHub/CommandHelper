@@ -430,7 +430,7 @@ public class ObjectGenerator {
 					if (ma.containsKey("author")) {
 						Construct author = ma.get("author");
 						if (!(author instanceof CNull)) {
-							((MCBookMeta) meta).setTitle(author.val());
+							((MCBookMeta) meta).setAuthor(author.val());
 						}
 					}
 					if (ma.containsKey("pages")) {
