@@ -748,7 +748,7 @@ public class WorldEdit {
         }
 
         public String docs() {
-            return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Update position of a given region. Don't change anything else like owners, members, priority etc.";
+            return "void {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Updates the location of a given region to the new location. Other properties of the region, like owners, members, priority, etc are unaffected.";
         }
 
         public ExceptionType[] thrown() {
