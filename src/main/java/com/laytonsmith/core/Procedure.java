@@ -180,7 +180,7 @@ public class Procedure implements Cloneable {
     }
 	
 	public Target getTarget(){
-		return definedAt;
+		return t;
 	}
 
     @Override
@@ -197,9 +197,5 @@ public class Procedure implements Cloneable {
 
 	public void definitelyNotConstant() {
 		possiblyConstant = false;
-	}
-
-	public Target getTarget() {
-		throw new UnsupportedOperationException("Not yet implemented");
 	}
 }

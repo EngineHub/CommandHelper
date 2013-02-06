@@ -79,6 +79,10 @@ public abstract class AbstractFunction implements Function {
 		return true;
 	}	
 
+	public String argumentsManual() {
+		return null;
+	}
+
 	public ExampleScript[] examples() throws ConfigCompileException {
 		return null;
 	}
@@ -194,6 +198,15 @@ public abstract class AbstractFunction implements Function {
 	public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException{
 		return null;
 	}
-	
+
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * <p>By default, we return true.</p>
+	 * @return 
+	 */
+	public boolean doTypeCheck() {
+		return true;
+	}
 	
 }

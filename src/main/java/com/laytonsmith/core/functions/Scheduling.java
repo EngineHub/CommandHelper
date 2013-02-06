@@ -4,6 +4,9 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -51,8 +54,16 @@ public class Scheduling {
 		}
 
 		public String docs() {
-			return "int {} Returns the current unix time stamp, in milliseconds. The resolution of this is not guaranteed to be extremely accurate. If "
+			return "Returns the current unix time stamp, in milliseconds. The resolution of this is not guaranteed to be extremely accurate. If "
 					+ "you need extreme accuracy, use nano_time()";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The current unix time", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -88,8 +99,16 @@ public class Scheduling {
 		}
 
 		public String docs() {
-			return "int {} Returns an arbitrary number based on the most accurate clock available on this system. Only useful when compared to other calls"
+			return "Returns an arbitrary number based on the most accurate clock available on this system. Only useful when compared to other calls"
 					+ " to nano_time(). The return is in nano seconds. See the Java API on System.nanoTime() for more information on the usage of this function.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The current nano time value", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.NONE;
 		}
 
 		public ExceptionType[] thrown() {
@@ -124,9 +143,19 @@ public class Scheduling {
 		}
 
 		public String docs() {
-			return "void {seconds} Sleeps the script for the specified number of seconds, up to the maximum time limit defined in the preferences file."
+			return "Sleeps the script for the specified number of seconds, up to the maximum time limit defined in the preferences file."
 					+ " Seconds may be a double value, so 0.5 would be half a second."
 					+ " PLEASE NOTE: Sleep times are NOT very accurate, and should not be relied on for preciseness.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The time to sleep the script", CInt.class, "seconds")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -179,12 +208,24 @@ public class Scheduling {
 		}
 
 		public String docs() {
-			return "int {timeInMS, [initialDelayInMS,] closure} Sets a task to run every so often. This works similarly to set_timeout,"
+			return "Sets a task to run every so often. This works similarly to set_timeout,"
 					+ " except the task will automatically re-register itself to run again. Note that the resolution"
 					+ " of the time is in ms, however, the server will only have a resolution of up to 50 ms, meaning"
-					+ " that a time of 1-50ms is essentially the same as 50ms. The inital delay defaults to the same"
+					+ " that a time of 1-50ms is essentially the same as 50ms. If the inital delay is null, it defaults to the same"
 					+ " thing as timeInMS, that is, there will be a pause between registration and initial firing. However,"
 					+ " this can be set to 0 (or some other number) to adjust how long of a delay there is before it begins.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The id of the interval that was set", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The time to delay between runs of the interval, in ms", CInt.class, "timeInMS"),
+					new Argument("The initial delay before triggering the first time, in ms", CInt.class, "initialDelayInMS").setOptionalDefaultNull(),
+					new Argument("The closure to run on the interval", CClosure.class, "closure")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -200,25 +241,21 @@ public class Scheduling {
 		}
 
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
-			long time = Static.getInt(args[0], t);
-			int offset = 0;
-			long delay = time;
-			if (args.length == 3) {
-				offset = 1;
-				delay = Static.getInt(args[1], t);
+			ArgList list = getBuilder().parse(args, this, t);
+			long time = list.getLong("timeInMS", t);
+			Long delay = list.getLongWithNull("initialDelayInMS", t);
+			if(delay == null){
+				delay = time;
 			}
-			if (!(args[1 + offset] instanceof CClosure)) {
-				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
-			}
-			final CClosure c = (CClosure) args[1 + offset];
+			final CClosure closure = list.get("closure");
 			final AtomicInteger ret = new AtomicInteger(-1);
 
 			ret.set(StaticLayer.SetFutureRepeater(time, delay, new Runnable() {
 				public void run() {
-					c.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
+					closure.getEnv().getEnv(GlobalEnv.class).SetCustom("timeout-id", ret.get());
 					try {
 						ProfilePoint p = environment.getEnv(GlobalEnv.class).GetProfiler().start("Executing timeout with id " + ret.get() + " (defined at " + t.toString() + ")", LogLevel.ERROR);
-						c.execute(null);
+						closure.execute(null);
 						p.stop();
 					} catch (ConfigRuntimeException e) {
 						ConfigRuntimeException.React(e, environment);
@@ -249,10 +286,21 @@ public class Scheduling {
 		}
 
 		public String docs() {
-			return "int {timeInMS, closure} Sets a task to run in the specified number of ms in the future."
+			return "Sets a task to run in the specified number of ms in the future."
 					+ " The task will only run once. Note that the resolution"
 					+ " of the time is in ms, however, the server will only have a resolution of up to 50 ms, meaning"
 					+ " that a time of 1-50ms is essentially the same as 50ms.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The id of the timeout that is assigned", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The delay to wait, in ms", CInt.class, "timeInMS"),
+					new Argument("The closure to run after the delay", CClosure.class, "closure")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -268,11 +316,9 @@ public class Scheduling {
 		}
 
 		public Construct exec(final Target t, final Environment environment, Construct... args) throws ConfigRuntimeException {
-			long time = Static.getInt(args[0], t);
-			if (!(args[1] instanceof CClosure)) {
-				throw new ConfigRuntimeException(getName() + " expects a closure to be sent as the second argument", ExceptionType.CastException, t);
-			}
-			final CClosure c = (CClosure) args[1];
+			ArgList list = getBuilder().parse(args, this, t);
+			long time = list.getInt("timeInMS", t);
+			final CClosure c = list.get("closure");
 			final AtomicInteger ret = new AtomicInteger(-1);
 			ret.set(StaticLayer.SetFutureRunnable(time, new Runnable() {
 				public void run() {
@@ -310,12 +356,22 @@ public class Scheduling {
 		}
 
 		public String docs() {
-			return "void {[id]} Stops the interval or timeout that is specified. The id can be gotten by"
+			return "Stops the interval or timeout that is specified. The id can be gotten by"
 					+ " storing the integer returned from either set_timeout or set_interval."
 					+ " An invalid id is simply ignored. The clear_task function is more useful for set_timeout, where"
 					+ " you may queue up some task to happen in the far future, yet have some trigger to"
-					+ " prevent it from happening. ID is optional, but only if called from within a set_interval or set_timeout"
+					+ " prevent it from happening. ID is optional (and defaults to null), but only if called from within a set_interval or set_timeout"
 					+ " closure, in which case it defaults to the id of that particular task.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The id of the interval to stop", CInt.class, "id").setOptionalDefaultNull()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -331,13 +387,15 @@ public class Scheduling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args.length == 0 && environment.getEnv(GlobalEnv.class).GetCustom("timeout-id") != null) {
-				StaticLayer.ClearFutureRunnable((Integer) environment.getEnv(GlobalEnv.class).GetCustom("timeout-id"));
-			} else if (args.length == 1) {
-				StaticLayer.ClearFutureRunnable(Static.getInt32(args[0], t));
-			} else {
+			ArgList list = getBuilder().parse(args, this, t);
+			Integer id = list.getIntegerWithNull("id", t);
+			if(id == null){
+				id = (Integer)environment.getEnv(GlobalEnv.class).GetCustom("timeout-id");
+			}
+			if(id == null){
 				throw new ConfigRuntimeException("No id was passed to clear_task, and it's not running inside a task either.", ExceptionType.InsufficientArgumentsException, t);
 			}
+			StaticLayer.ClearFutureRunnable(id);
 			return new CVoid(t);
 		}
 
@@ -382,6 +440,18 @@ public class Scheduling {
 			});
 			return getBundledDocs(map);
 		}
+		
+		public Argument returnType() {
+			return new Argument("The formatted timestamp", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The format string", CString.class, "format"),
+					new Argument("The time, which defaults to the value returned by time() if null", CInt.class, "time").setOptionalDefaultNull(),
+					new Argument("The timezone, which defaults to the system time if null", CString.class, "timezone").setOptionalDefaultNull()
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -400,16 +470,22 @@ public class Scheduling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) {
-			Date now = new Date();
-			if (args.length >= 2 && !(args[1].isNull())) {
-				now = new Date(Static.getInt(args[1], t));
+			ArgList list = getBuilder().parse(args, this, t);
+			Date now;
+			String format = list.getString("format", t);
+			Long time = list.getLongWithNull("time", t);
+			String timezone = list.getStringWithNull("timezone", t);
+			if(time != null){
+				now = new Date(time);
+			} else {
+				now = new Date();
 			}
-			TimeZone timezone = TimeZone.getDefault();
-			if(args.length >= 3){
-				timezone = TimeZone.getTimeZone(args[2].val());
+			TimeZone tz = TimeZone.getDefault();
+			if(timezone != null){
+				tz = TimeZone.getTimeZone(timezone);
 			}
-			SimpleDateFormat dateFormat = new SimpleDateFormat(args[0].toString());
-			dateFormat.setTimeZone(timezone);
+			SimpleDateFormat dateFormat = new SimpleDateFormat(format);
+			dateFormat.setTimeZone(tz);
 			return new CString(dateFormat.format(now), t);
 		}
 

@@ -40,6 +40,28 @@ public interface Function extends FunctionBase, Documentation {
 	 * @return 
 	 */
 	ArgumentBuilder arguments();
+	
+	/**
+	 * If the function provides an actual argument builder which can be used
+	 * to automatically produce the documentation, but cannot be used to
+	 * do the actual type checking of variables, this should return false.
+	 * For most functions, true should be returned, but if a function is extra complex,
+	 * then it may return false. It is assumed that the function will provide the type
+	 * checking, optimally at compile time where possible, with the optimization functions.
+	 * <strong>If you return false from this method, you should seriously consider changing the
+	 * signature of the function to work with the built in type system.</strong>
+	 * @return 
+	 */
+	boolean doTypeCheck();
+	
+	/**
+	 * If the ArgumentBuilder returns {@link ArgumentBuilder#MANUAL}, then 
+	 * this function is called to get the signature of the method for documentation
+	 * purposes. No typechecking is performed on the function parameters, and the builder
+	 * will be unavailable.
+	 * @return 
+	 */
+	String argumentsManual();
 
     /**
      * Returns the types of catchable exceptions this function can throw. (Uncatchable exceptions need not be listed)

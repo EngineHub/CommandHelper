@@ -46,7 +46,7 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
@@ -96,7 +96,7 @@ public class InventoryEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+				BindableEvent event, Target t) {
 			if (event instanceof MCInventoryClickEvent) {
 				MCInventoryClickEvent e = (MCInventoryClickEvent) event;
 				

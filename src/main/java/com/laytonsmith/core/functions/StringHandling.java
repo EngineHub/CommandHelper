@@ -7,6 +7,11 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
@@ -14,6 +19,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import com.laytonsmith.core.natives.interfaces.Sizable;
 import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Array;
@@ -50,6 +56,16 @@ public class StringHandling {
 		public String docs() {
 			return "string {args...} The cousin to <strong>c</strong>on<strong>c</strong>at, this function does some magic under the covers"
 					+ " to remove the auto-concatenation effect in bare strings. Take the following example: cc(bare string) -> barestring";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The concatenated string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The elements to concatenate", CArray.class, "elements").setGenerics(new Generic(CString.class)).setVarargs()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -139,7 +155,17 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {var1, [var2...]} Concatenates any number of arguments together, and returns a string";
+			return "Concatenates any number of arguments together, and returns a string";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The concatenated string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The elements to concat", CArray.class, "elements").setGenerics(new Generic(CString.class)).setVarargs()
+					);
 		}
 
 		public boolean isRestricted() {
@@ -200,7 +226,17 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {var1, [var2...]} Concatenates any number of arguments together, but puts a space between elements";
+			return "Concatenates any number of arguments together, but puts a space between elements";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The concatenated string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The elements to concat", CArray.class, "elements").setGenerics(new Generic(CString.class)).setVarargs()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -263,7 +299,19 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {subject, search, replacement} Replaces all instances of 'search' with 'replacement' in 'subject'";
+			return "Replaces all instances of 'search' with 'replacement' in 'subject'";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The replacement string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The subject to search in", CString.class, "subject"),
+					new Argument("The search string", CString.class, "search"),
+					new Argument("The string to replace the instances of the found search string with", CString.class, "replacement")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -324,9 +372,19 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "array {string} Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
+			return "Parses string into an array, where string is a space seperated list of arguments. Handy for turning"
 					+ " $ into a usable array of items with which to script against. Extra spaces are ignored, so you would never get an empty"
 					+ " string as an input.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The new array", CArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to parse", CString.class, "string")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -375,6 +433,16 @@ public class StringHandling {
 		public String docs() {
 			return "string {s} Returns the string s with leading and trailing whitespace cut off";
 		}
+		
+		public Argument returnType() {
+			return new Argument("The trimmed string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to trim", CString.class, "s")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -422,7 +490,17 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {s} Returns the string s with trailing whitespace cut off";
+			return "Returns the string s with trailing whitespace cut off";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The trimmed string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to trim", CString.class, "s")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -471,7 +549,17 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {s} Returns the string s with leading whitespace cut off";
+			return "Returns the string s with leading whitespace cut off";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The trimmed string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to trim", CString.class, "s")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -520,7 +608,17 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "int {str | array} Returns the character length of str, if the value is castable to a string, or the length of the array, if an array is given";
+			return "Returns the character length of str, if the value is castable to a string, or the length of the array, if an array is given";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The size of the object", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check the size of", Sizable.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -540,11 +638,9 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args[0] instanceof Sizable) {
-				return new CInt(((Sizable) args[0]).size(), t);
-			} else {
-				return new CInt(args[0].val().length(), t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			Sizable item = list.get("item");
+			return new CInt(item.size(), t);
 		}
 
 		@Override
@@ -574,7 +670,17 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {str} Returns an all caps version of str";
+			return "Returns an all caps version of str";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The uppercased string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to uppercase", CString.class, "str")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -625,7 +731,17 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {str} Returns an all lower case version of str";
+			return "Returns an all lower case version of str";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The lowercased string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to lowercase", CString.class, "str")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -676,10 +792,22 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {str, begin, [end]} Returns a substring of the given string str, starting from index begin, to index end, or the"
+			return "Returns a substring of the given string str, starting from index begin, to index end, or the"
 					+ " end of the string, if no index is given. If either begin or end are out of bounds of the string, an exception is thrown."
 					+ " substr('hamburger', 4, 8) returns \"urge\", substr('smiles', 1, 5) returns \"mile\", and substr('lightning', 5) returns \"ning\"."
 					+ " See also length().";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The substring", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to pull the substring from", CString.class, "str"),
+					new Argument("The beginning index", CInt.class, "begin"),
+					new Argument("The ending index, if null, the end of the string is used", CInt.class, "end").setOptionalDefaultNull()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -699,13 +827,12 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			ArgList list = getBuilder().parse(args, this, t);
 			try {
-				String s = args[0].val();
-				int begin = Static.getInt32(args[1], t);
-				int end;
-				if (args.length == 3) {
-					end = Static.getInt32(args[2], t);
-				} else {
+				String s = list.getString("str", t);
+				int begin = list.getInt("begin", t);
+				Integer end = list.getIntegerWithNull("end", t);
+				if (end == null) {
 					end = s.length();
 				}
 				return new CString(s.substring(begin, end), t);
@@ -747,6 +874,17 @@ public class StringHandling {
 			return "int {haystack, needle} Finds the numeric position of the first occurence of needle in haystack. haystack is the string"
 					+ " to search in, and needle is the string to search with. Returns the position of the needle (starting with 0) or -1 if"
 					+ " the string is not found at all.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The numeric position of the searched item", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to search in", CString.class, "haystack"),
+					new Argument("The string to search for", CString.class, "needle")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -799,10 +937,21 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "array {split, string} Splits a string into parts, using the split as the index. Though it can be used in every single case"
+			return "Splits a string into parts, using the split as the index. Though it can be used in every single case"
 					+ " you would use reg_split, this does not use regex,"
 					+ " and therefore can take a literal split expression instead of needing an escaped regex, and *may* perform better than the"
 					+ " regex versions, as it uses an optimized tokenizer split, instead of Java regex.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The new array", CArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The split point to use", CString.class, "split"),
+					new Argument("The string to split", CString.class, "string")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -924,7 +1073,7 @@ public class StringHandling {
 			if (Conversion.isValid(c)) {
 				if (c == 't' || c == 'T') {
 					//Datetime, parse as long
-					o = Static.getInt(arg, t);
+					o = arg.primitive(t).castToInt(t);
 				} else if (Conversion.isCharacter(c)) {
 					//Character, parse as string, and verify it's of length 1
 					String s = arg.val();
@@ -935,15 +1084,15 @@ public class StringHandling {
 					o = s.charAt(0);
 				} else if (Conversion.isFloat(c)) {
 					//Float, parse as double
-					o = Static.getDouble(arg, t);
+					o = arg.primitive(t).castToDouble(t);
 				} else if (Conversion.isInteger(c)) {
 					//Integer, parse as long
-					o = Static.getInt(arg, t);
+					o = arg.primitive(t).castToInt(t);
 				} else {
 					//Further processing is needed
 					if (c == Conversion.BOOLEAN || c == Conversion.BOOLEAN_UPPER) {
 						//Boolean, parse as such
-						o = Static.getBoolean(arg);
+						o = arg.primitive(t).castToBoolean();
 					} else {
 						//Else it's either a string or a hash code, in which case
 						//we will treat it as a string anyways
@@ -1229,12 +1378,23 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {formatString, parameters... | formatString, array(parameters...)} Returns a string formatted to the"
+			return "Returns a string formatted to the"
 					+ " given formatString specification, using the parameters passed in. The formatString should be formatted"
 					+ " according to [http://docs.oracle.com/javase/6/docs/api/java/util/Formatter.html#syntax this standard],"
 					+ " with the caveat that the parameter types are automatically cast to the appropriate type, if possible."
 					+ " Calendar/time specifiers, (t and T) expect an integer which represents unix time, but are otherwise"
 					+ " valid. All format specifiers in the documentation are valid.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The formatted string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The format string to use", CString.class, "formatString"),
+						new Argument("The parameters sent", CArray.class, "parameters").setGenerics(new Generic(Mixed.class)).setVarargs()
+					);
 		}
 
 		public CHVersion since() {
@@ -1285,13 +1445,11 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			String val = args[0].val();
-			String encoding = "UTF-8";
-			if(args.length == 2){
-				encoding = args[1].val();
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			String string = list.getString("string", t);
+			String encoding = list.getString("encoding", t);
 			try {
-				return CByteArray.wrap(val.getBytes(encoding), t);
+				return CByteArray.wrap(string.getBytes(encoding), t);
 			} catch (UnsupportedEncodingException ex) {
 				throw new Exceptions.FormatException("Unknown encoding type \"" + encoding + "\"", t);
 			}
@@ -1306,9 +1464,20 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "byte_array {string, [encoding]} Returns this string as a byte_array, encoded using the specified encoding,"
+			return "Returns this string as a byte_array, encoded using the specified encoding,"
 					+ " or UTF-8 if no encoding is specified. Valid encodings are the encoding types that java supports. If the"
 					+ " encoding is invalid, a FormatException is thrown.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The new byte_array", CByteArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to encode", CString.class, "string"),
+					new Argument("The encoding to use", CString.class, "encoding").setOptionalDefault("UTF-8")
+					);
 		}
 
 		public CHVersion since() {
@@ -1333,11 +1502,9 @@ public class StringHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = Static.getByteArray(args[0], t);
-			String encoding = "UTF-8";
-			if(args.length == 2){
-				encoding = args[1].val();
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("byte_array");
+			String encoding = list.getString("encoding", t);
 			try {
 				return new CString(new String(ba.asByteArrayCopy(), encoding), t);
 			} catch (UnsupportedEncodingException ex) {
@@ -1354,8 +1521,19 @@ public class StringHandling {
 		}
 
 		public String docs() {
-			return "string {byte_array, [encoding]} Returns a new string, given the byte array encoding provided. The encoding defaults"
+			return "Returns a new string, given the byte array encoding provided. The encoding defaults"
 					+ " to UTF-8, but may be specified. A FormatException is thrown if the encoding type is invalid.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The new string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The byte array", CByteArray.class, "byte_array"),
+					new Argument("The encoding", CString.class, "encoding").setOptionalDefault("UTF-8")
+					);
 		}
 
 		public CHVersion since() {

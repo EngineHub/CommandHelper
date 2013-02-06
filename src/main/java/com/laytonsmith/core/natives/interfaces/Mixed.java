@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.natives.interfaces;
 
+import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.Target;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -10,6 +11,7 @@ import com.laytonsmith.core.exceptions.ConfigRuntimeException;
  *
  * @author Layton
  */
+@typename("mixed")
 public interface Mixed {
 	/**
 	 * Returns the underlying POJO represented by this object

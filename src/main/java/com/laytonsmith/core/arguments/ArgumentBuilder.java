@@ -9,6 +9,7 @@ import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -33,6 +34,7 @@ import java.util.Map;
 public class ArgumentBuilder {
 
 	private final List<Signature> signatures;
+	private final List<Signature> originalRawSignatures;
 	private final String originalSignature;
 	
 	/**
@@ -40,13 +42,21 @@ public class ArgumentBuilder {
 	 * on object creation.
 	 */
 	public static final ArgumentBuilder NONE;
+	/**
+	 * Some functions have very complex signatures. If this argument is returned,
+	 * then argumentsManual is called to get the arguments signature for documentation
+	 * purposes, and no type checking is done automatically.
+	 */
+	public static final ArgumentBuilder MANUAL;
 	static{
-		NONE = ArgumentBuilder.Build(new Argument[]{});
+		NONE = ArgumentBuilder.Build(new Argument[0]);
+		MANUAL = ArgumentBuilder.Build(new Argument[0]);
 	}
 
-	private ArgumentBuilder(List<Signature> signatures, String originalSignature) {
+	private ArgumentBuilder(List<Signature> signatures, String originalSignature, List<Signature> originalRawSignatures) {
 		this.signatures = signatures;
 		this.originalSignature = originalSignature;
+		this.originalRawSignatures = originalRawSignatures;
 	}
 
 	public int signatureCount() {
@@ -73,7 +83,7 @@ public class ArgumentBuilder {
 			signatures.addAll(permutations(s));
 			originals.add(s.toString());
 		}
-		return new ArgumentBuilder(signatures, StringUtils.Join(originals, " | "));
+		return new ArgumentBuilder(signatures, StringUtils.Join(originals, " | "), Arrays.asList(signature));
 	}
 
 	private static List<Signature> permutations(Signature s) {
@@ -214,6 +224,14 @@ public class ArgumentBuilder {
 				 + " did not match the function signature" + (f==null?"":" of " + f.getName()) 
 				+ ": " + originalSignature + ". (Check your arguments, and try again)", 
 				Exceptions.ExceptionType.CastException, t);
+	}
+	
+	public List<Signature> getSignatures(){
+		return new ArrayList<Signature>(signatures);
+	}
+	
+	public List<Signature> getOriginalSignatures(){
+		return new ArrayList<Signature>(originalRawSignatures);
 	}
 
 	@Override

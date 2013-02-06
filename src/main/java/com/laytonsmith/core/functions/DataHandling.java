@@ -5,6 +5,10 @@ import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
+import com.laytonsmith.core.arguments.Signature;
 import com.laytonsmith.core.compiler.CompilerWarning;
 import com.laytonsmith.core.compiler.FileOptions;
 import com.laytonsmith.core.constructs.*;
@@ -13,6 +17,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.*;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +56,18 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "array {[var1, [var2...]]} Creates an array of values.";
+			return "Creates an array of values.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The newly created array", CArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("Any number of values. If no values are"
+					+ " provided, an empty array is created.", CArray.class, "varX").setGenerics(new Generic(Mixed.class)).setVarargs()
+					);
 		}
 
 		public boolean isRestricted() {
@@ -120,6 +136,17 @@ public class DataHandling {
 					+ " using the normal array() function, or in the case where you assign sequential keys anyways, and the same"
 					+ " array could have been created using array().";
 		}
+		
+		public Argument returnType() {
+			return new Argument("The newly created array", CArray.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("Any number of values. If no values are provided,"
+					+ " an empty associative array is produced.", CArray.class, "args").setGenerics(new Generic(Mixed.class)).setVarargs()
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -157,19 +184,19 @@ public class DataHandling {
 			throw new ConfigRuntimeException("assign only accepts an ivariable or array reference as the first argument", ExceptionType.CastException, t);
 		}
 
-		private static class Chain {
-
-			ArrayList<Construct> indexChain = new ArrayList<Construct>();
-		}
-
-		private void prepare(CArrayReference container, Chain c) {
-			if (container.array instanceof CArrayReference) {
-				prepare((CArrayReference) container.array, c);
-				c.indexChain.add(container.index);
-			} else {
-				c.indexChain.add(container.index);
-			}
-		}
+//		private static class Chain {
+//
+//			ArrayList<Construct> indexChain = new ArrayList<Construct>();
+//		}
+//
+//		private void prepare(CArrayReference container, Chain c) {
+//			if (container.array instanceof CArrayReference) {
+//				prepare((CArrayReference) container.array, c);
+//				c.indexChain.add(container.index);
+//			} else {
+//				c.indexChain.add(container.index);
+//			}
+//		}
 
 //		public Construct array_assign(Target t, Environment env, Construct arrayAndIndex, Construct toSet) {
 //			Construct ival = toSet;
@@ -213,7 +240,18 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "ivariable {ivar, mixed} Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it. Returns the variable that was assigned.";
+			return "Accepts an ivariable ivar as a parameter, and puts the specified value mixed in it. Returns the variable that was assigned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The ivar meta object that was assigned", IVariable.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The variable to assign", IVariable.class, "ivar"),
+					new Argument("The value to assign the variable to", Mixed.class, "mixed")
+					);
 		}
 
 		public boolean isRestricted() {
@@ -304,10 +342,24 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {assign, condition, expression1, expression2} Acts as a typical for loop. The assignment is first run. Then, a"
+			return "Acts as a typical for loop. The assignment is first run. Then, a"
 					+ " condition is checked. If that condition is checked and returns true, expression2 is run. After that, expression1 is run. In java"
 					+ " syntax, this would be: for(assign; condition; expression1){expression2}. assign must be an ivariable, either a "
 					+ "pre defined one, or the results of the assign() function. condition must be a boolean.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The variable that is assigned", IVariable.class, "assign"),
+					new Argument("The condition that is checked before running", CBoolean.class, "condition"),
+					new Argument("The expression that is run at the end of each loop"
+					+ " iteration. Typically used for incrementing/decrementing the counter", CCode.class, "expression1"),
+					new Argument("The code to run several iterations of", CCode.class, "expression2")
+					);
 		}
 
 		public boolean isRestricted() {
@@ -431,7 +483,7 @@ public class DataHandling {
 			}
 			int _continue = 0;
 			while (true) {
-				boolean cond = Static.getBoolean(parent.seval(condition, env));
+				boolean cond = parent.seval(condition, env).primitive(t).castToBoolean();
 				if (cond == false) {
 					break;
 				}
@@ -472,9 +524,24 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {assign, condition, expression1, expression2, else} Works like a normal for, but if upon checking the condition the first time,"
+			return "Works like a normal for, but if upon checking the condition the first time,"
 					+ " it is determined that it is false (that is, NO code loops are going to be run) the else code is run instead. If the loop runs,"
 					+ " even once, it will NOT run the else branch.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The variable that is assigned", IVariable.class, "assign"),
+					new Argument("The condition that is checked before running", CBoolean.class, "condition"),
+					new Argument("The expression that is run at the end of each loop"
+					+ " iteration. Typically used for incrementing/decrementing the counter", CCode.class, "expression1"),
+					new Argument("The code to run several iterations of", CCode.class, "expression2"),
+					new Argument("The code to run should there be 0 iterations of the main loop code", CCode.class, "else")
+					);
 		}
 
 		public CHVersion since() {
@@ -588,10 +655,23 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {array, [key], ivar, code} Walks through array, setting ivar equal to each element in the array, then running code."
+			return "Walks through array, setting ivar equal to each element in the array, then running code."
 					+ " In addition, foreach(1..4, @i, code()) is also valid, setting @i to 1, 2, 3, 4 each time. The same syntax is valid as"
 					+ " in an array slice. If key is set (it must be an ivariable) then the index of each iteration will be set to that."
 					+ " See the examples for a demonstration.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The array to walk through", CArray.class, "array").setGenerics(new Generic(Mixed.class)),
+					new Argument("The ivar that will have the current item's key value assigned to", IVariable.class, "key").setOptional(),
+					new Argument("The ivar that will have the current item's value assigned to", IVariable.class, "value"),
+					new Argument("The code to run for each item in the array", CCode.class, "code")
+					);
 		}
 
 		public boolean isRestricted() {
@@ -681,8 +761,24 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "void {array, ivar, code, else} Works like a foreach, except if the array is empty, the else code runs instead. That is, if the code"
+			return "Works like a foreach, except if the array is empty, the else code runs instead. That is, if the code"
 					+ " would not run at all, the else condition would.";
+		}
+		
+		@Override
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		@Override
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The array to walk through", CArray.class, "array").setGenerics(new Generic(Mixed.class)),
+					new Argument("The ivar that will have the current item's key value assigned to", IVariable.class, "key").setOptional(),
+					new Argument("The ivar that will have the current item's value assigned to", IVariable.class, "value"),
+					new Argument("The code to run for each item in the array", CCode.class, "code"),
+					new Argument("The code to run should there be no items in the array", CCode.class, "else")
+					);
 		}
 
 		@Override
@@ -722,9 +818,20 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {condition, code} While the condition is true, the code is executed. break and continue work"
+			return "While the condition is true, the code is executed. break and continue work"
 					+ " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
 					+ " keeping track of any counters anyways. Breaking multiple times still works however.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The condition to check", CBoolean.class, "condition"),
+					new Argument("The code to run, while condition remains true", CCode.class, "code")
+					);
 		}
 
 		public CHVersion since() {
@@ -750,7 +857,7 @@ public class DataHandling {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			try {
-				while (Static.getBoolean(parent.seval(nodes[0], env))) {
+				while (parent.seval(nodes[0], env).primitive(t).castToBoolean()) {
 					try {
 						parent.seval(nodes[1], env);
 					} catch (LoopContinueException e) {
@@ -830,10 +937,21 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {code, condition} Like while, but always runs the code at least once. The condition is checked"
+			return "Like while, but always runs the code at least once. The condition is checked"
 					+ " after each run of the code, and if it is true, the code is run again. break and continue work"
 					+ " inside a dowhile, but continuing more than once is pointless, since the loop isn't inherently"
 					+ " keeping track of any counters anyways. Breaking multiple times still works however.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The code to run, once always, the continually while condition remains true", CCode.class, "code"),
+					new Argument("The condition to check", CBoolean.class, "condition")
+					);
 		}
 
 		public CHVersion since() {
@@ -854,7 +972,7 @@ public class DataHandling {
 					} catch (LoopContinueException e) {
 						//ok. No matter how many times it tells us to continue, we're only going to continue once.
 					}
-				} while (Static.getBoolean(parent.seval(nodes[1], env)));
+				} while (parent.seval(nodes[1], env).primitive(t).castToBoolean());
 			} catch (LoopBreakException e) {
 				if (e.getTimes() > 1) {
 					throw new LoopBreakException(e.getTimes() - 1, t);
@@ -897,10 +1015,20 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "nothing {[int]} Stops the current loop. If int is specified, and is greater than 1, the break travels that many loops up. So, if you had"
+			return "Stops the current loop. If int is specified, and is greater than 1, the break travels that many loops up. So, if you had"
 					+ " a loop embedded in a loop, and you wanted to break in both loops, you would call break(2). If this function is called outside a loop"
 					+ " (or the number specified would cause the break to travel up further than any loops are defined), the function will fail. If no"
 					+ " argument is specified, it is the same as calling break(1).";
+		}
+		
+		public Argument returnType() {
+			return Argument.NONE;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The number of loops to break out of", CInt.class, "times").setOptionalDefault(1)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -922,7 +1050,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
-				num = Static.getInt32(args[0], t);
+				num = args[0].primitive(t).castToInt32(t);
 			}
 			throw new LoopBreakException(num, t);
 		}
@@ -982,9 +1110,19 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {[int]} Skips the rest of the code in this loop, and starts the loop over, with it continuing at the next index. If this function"
+			return "Skips the rest of the code in this loop, and starts the loop over, with it continuing at the next index. If this function"
 					+ " is called outside of a loop, the command will fail. If int is set, it will skip 'int' repetitions. If no argument is specified,"
 					+ " 1 is used.";
+		}
+		
+		public Argument returnType() {
+			return Argument.NONE;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The number of loop iterations to skip", CInt.class, "times").setOptionalDefault(1)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1006,7 +1144,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			int num = 1;
 			if (args.length == 1) {
-				num = Static.getInt32(args[0], t);
+				num = args[0].primitive(t).castToInt32(t);
 			}
 			throw new LoopContinueException(num, t);
 		}
@@ -1038,7 +1176,17 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns whether or not the item is convertable to a string. Everything but arrays can be used as strings.";
+			return "Returns whether or not the item is convertable to a string. Everything but arrays can be used as strings.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true if this value is automatically castable to a string", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1058,7 +1206,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(!(args[0] instanceof CArray), t);
+			return new CBoolean(args[0] instanceof CPrimitive, t);
 		}
 
 		@Override
@@ -1091,8 +1239,18 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns whether or not the item is actually a string datatype. If you just care if some data can be used as a string,"
+			return "Returns whether or not the item is actually a string datatype. If you just care if some data can be used as a string,"
 					+ " use is_stringable().";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true iff the item is an instance of string", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1144,7 +1302,17 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns whether or not the item is an array";
+			return "Returns whether or not the item is an array";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true iff the item is an instance of an array", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1197,9 +1365,19 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns whether or not the given item is a double. Note that numeric strings and integers"
+			return "Returns whether or not the given item is a double. Note that numeric strings and integers"
 					+ " can usually be used as a double, however this function checks the actual datatype of the item. If"
 					+ " you just want to see if an item can be used as a number, use is_numeric() instead.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true iff this is an instance of a double", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1255,6 +1433,16 @@ public class DataHandling {
 					+ " however this function checks the actual datatype of the item. If you just want to see if an item can be used as a number,"
 					+ " use is_integral() or is_numeric() instead.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("true iff this is an instance of int", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return null;
@@ -1305,8 +1493,18 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns whether the given item is of the boolean datatype. Note that all datatypes can be used as booleans, however"
+			return "boolean {item} Returns whether the given item is of the boolean datatype. Note that all primitive datatypes can be used as booleans, however"
 					+ " this function checks the specific datatype of the given item.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true iff this is an instance of a boolean", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1358,7 +1556,18 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns whether or not the given item is null.";
+			return "Returns whether or not the given item is null. You can also simply check to see if a value is strictly"
+					+ " equal to null";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true iff this is null", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1410,8 +1619,18 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns false if the item would fail if it were used as a numeric value."
+			return "Returns false if the item would fail if it were used as a numeric value."
 					+ " If it can be parsed or otherwise converted into a numeric value, true is returned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true if this is automatically castable to a numeric type", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1429,7 +1648,7 @@ public class DataHandling {
 		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			boolean b = true;
 			try {
-				Static.getNumber(args[0], t);
+				args[0].primitive(t).castToDouble(t);
 			} catch (ConfigRuntimeException e) {
 				b = false;
 			}
@@ -1471,12 +1690,22 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {item} Returns true if the numeric value represented by "
+			return "Returns true if the numeric value represented by "
 					+ " a given double or numeric string could be cast to an integer"
 					+ " without losing data (or if it's an integer). For instance,"
 					+ " is_numeric(4.5) would return true, and integer(4.5) would work,"
 					+ " however, equals(4.5, integer(4.5)) returns false, because the"
 					+ " value was narrowed to 4.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true if this is automatically castable to an integer type", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1494,7 +1723,7 @@ public class DataHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			double d;
 			try {
-				d = Static.getDouble(args[0], t);
+				d = args[0].primitive(t).castToDouble(t);
 			} catch (ConfigRuntimeException e) {
 				return new CBoolean(false, t);
 			}
@@ -1537,8 +1766,21 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {[name], [ivar...], procCode} Creates a new user defined procedure (also known as \"function\") that can be called later in code. Please see the more detailed"
+			return "Creates a new user defined procedure (also known as \"function\") that can be called later in code. Please see the more detailed"
 					+ " documentation on procedures for more information.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.MANUAL;
+		}
+
+		@Override
+		public String argumentsManual() {
+			return "[string name], [ivar ivar...], code procCode";
 		}
 
 		public ExceptionType[] thrown() {
@@ -1689,7 +1931,17 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "nothing {mixed} Returns the specified value from this procedure. It cannot be called outside a procedure.";
+			return "Returns the specified value from this procedure. It cannot be called outside a procedure.";
+		}
+		
+		public Argument returnType() {
+			return Argument.NONE;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to return from the procedure", Mixed.class, "return")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1733,7 +1985,17 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {path} Includes external code at the specified path.";
+			return "Includes external code at the specified path.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The path to the file, relative to the file this code is running from", CString.class, "path")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1800,11 +2062,22 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "mixed {proc_name, [var1...]} Dynamically calls a user defined procedure. call_proc(_myProc, 'var1') is the equivalent of"
+			return "Dynamically calls a user defined procedure. call_proc(_myProc, 'var1') is the equivalent of"
 					+ " _myProc('var1'), except you could dynamically build the procedure name if need be. This is useful for dynamic coding,"
 					+ " however, closures work best for callbacks. Throws an InvalidProcedureException if the procedure isn't defined. If you are"
 					+ " hardcoding the first parameter, a warning will be issued, because it is much more efficient and safe to directly use"
 					+ " a procedure if you know what its name is beforehand.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The value returned from the procedure", Mixed.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the procedure to call", CString.class, "proc_name"),
+					new Argument("The parameters to send to the procedure", CArray.class, "params").setGenerics(new Generic(Mixed.class)).setVarargs()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1848,7 +2121,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			if(children.size() < 1){
 				throw new ConfigRuntimeException("Expecting at least one argument to " + getName(), ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -1895,9 +2168,22 @@ public class DataHandling {
 
 		@Override
 		public String docs() {
-			return "mixed {proc_name, array} Works like call_proc, but allows for variable or unknown number of arguments to be passed to"
+			return "Works like call_proc, but allows for variable or unknown number of arguments to be passed to"
 					+ " a proc. The array parameter is \"flattened\", and call_proc is essentially called. If the array is associative, an"
 					+ " exception is thrown.";
+		}
+		
+		@Override
+		public Argument returnType() {
+			return new Argument("The value returned from the procedure", Mixed.class);
+		}
+
+		@Override
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the procedure", CString.class, "proc_name"),
+					new Argument("The parameters to send to the procedure", CArray.class, "array")
+					);
 		}
 
 		@Override
@@ -1906,7 +2192,7 @@ public class DataHandling {
 		}
 
 		@Override
-		public ParseTree optimizeDynamic(Target t, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
 			//If they hardcode the name, that's fine, because the variables may just be the only thing that's variable.
 			return null;
 		}
@@ -1925,8 +2211,18 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {procName} Returns whether or not the given procName is currently defined, i.e. if calling this proc wouldn't"
+			return "Returns whether or not the given procName is currently defined, i.e. if calling this proc wouldn't"
 					+ " throw an exception.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true if the procedure name is defined", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the procedure to check for", CString.class, "proc_name")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1962,7 +2258,17 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {array} Returns whether or not the array is associative. If the parameter is not an array, throws a CastException.";
+			return "Returns whether or not the array is associative. If the parameter is not an array, throws a CastException.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true if the array is associative", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The array to check", CArray.class, "array").setGenerics(new Generic(Mixed.class))
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2018,8 +2324,18 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "boolean {arg} Returns true if the argument is a closure (could be executed)"
+			return "Returns true if the argument is a closure (could be executed)"
 					+ " or false otherwise";
+		}
+		
+		public Argument returnType() {
+			return new Argument("true if the argument is a closure", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to check", Mixed.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2063,7 +2379,7 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "mixed {ivar | key[, namespace, ...,]} This function imports a value from the global value"
+			return "This function imports a value from the global value"
 					+ " register. In the first mode, it looks for an ivariable with the specified"
 					+ " name, and stores the value in the variable, and returns void. In the"
 					+ " second mode, it looks for a value stored with the specified key, and"
@@ -2072,6 +2388,21 @@ public class DataHandling {
 					+ " string, and if the specified string key doesn't exist, null is returned."
 					+ " See the documentation on [[CommandHelper/import-export|imports/exports]]"
 					+ " for more information.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The stored value", Mixed.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Signature(1,
+						new Argument("The variable to import", IVariable.class, "ivar")
+					), new Signature(2, 
+						new Argument("The key to import", CString.class, "key"),
+						new Argument("Optional namespaces", CArray.class, "namespace").setGenerics(new Generic(CString.class)).setVarargs()
+					)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2127,12 +2458,33 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {ivar | key[, namespace, ...,], value} Stores a value in the global storage register."
+			return "Stores a value in the global storage register."
 					+ " When using the first mode, the ivariable is stored so it can be imported"
 					+ " later, and when using the second mode, an arbitrary value is stored with"
 					+ " the give key, and can be retreived using the secode mode of import. If"
 					+ " the value is already stored, it is overwritten. See import() and"
 					+ " [[CommandHelper/import-export|importing/exporting]]";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.MANUAL;
+//			return ArgumentBuilder.Build(
+//					new Signature(1, 
+//						new Argument("The variable to export, using the value currently assigned to it. This usage is deprecated.", IVariable.class, "ivar")
+//					), new Signature(2,
+//						new Argument("", C.class, ""),
+//						new Argument("", C.class, "")
+//					)
+//					);
+		}
+
+		@Override
+		public String argumentsManual() {
+			return "ivar | key[, namespace, ...,], value";
 		}
 
 		public ExceptionType[] thrown() {
@@ -2194,7 +2546,7 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "closure {[varNames...,] code} Returns a closure on the provided code. A closure is"
+			return "Returns a closure on the provided code. A closure is"
 					+ " a datatype that represents some code as code, not the results of some"
 					+ " code after it is run. Code placed in a closure can be used as"
 					+ " a string, or executed by other functions using the eval() function."
@@ -2206,6 +2558,19 @@ public class DataHandling {
 					+ " an array of all the arguments passed to the closure, much like procedures."
 					+ " See the wiki article on [[CommandHelper/Closures|closures]] for more details"
 					+ " and examples.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The new closure", CClosure.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.MANUAL;
+		}
+
+		@Override
+		public String argumentsManual() {
+			return "[varNames...,] code";
 		}
 
 		public ExceptionType[] thrown() {
@@ -2273,9 +2638,22 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "void {[values...,] closure} Executes the given closure. You can also send arguments"
+			return "Executes the given closure. You can also send arguments"
 					+ " to the closure, which it may or may not use, depending on the particular closure's"
 					+ " definition.";
+		}
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.MANUAL;
+		}
+
+		@Override
+		public String argumentsManual() {
+			return "[values...,] closure";
 		}
 
 		public ExceptionType[] thrown() {
@@ -2320,8 +2698,18 @@ public class DataHandling {
 
 		public String docs() {
 			return "boolean {item} Returns a new construct that has been cast to a boolean. The item is cast according to"
-					+ " the boolean conversion rules. Since all data types can be cast to a"
+					+ " the boolean conversion rules. Since all primitive data types can be cast to a"
 					+ " a boolean, this function will never throw an exception.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The item, cast to a boolean", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to cast", CPrimitive.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2337,7 +2725,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(Static.getBoolean(args[0]), t);
+			return new CBoolean(args[0].primitive(t).castToBoolean(), t);
 		}
 
 		public CHVersion since() {
@@ -2378,12 +2766,22 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "integer {item} Returns a new construct that has been cast to an integer."
+			return "Returns a new construct that has been cast to an integer."
 					+ " This function will throw a CastException if is_numeric would return"
 					+ " false for this item, but otherwise, it will be cast properly. Data"
 					+ " may be lost in this conversion. For instance, 4.5 will be converted"
 					+ " to 4, by using integer truncation. You can use is_integral to see"
 					+ " if this data loss would occur.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The item, cast to an integer", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to cast", CPrimitive.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2399,7 +2797,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt((long) Static.getDouble(args[0], t), t);
+			return new CInt(args[0].primitive(t).castToInt(t), t);
 		}
 
 		public CHVersion since() {
@@ -2436,9 +2834,19 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "double {item} Returns a new construct that has been cast to an double."
+			return "Returns a new construct that has been cast to an double."
 					+ " This function will throw a CastException if is_numeric would return"
 					+ " false for this item, but otherwise, it will be cast properly.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The item, cast to a double", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to cast", CPrimitive.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2454,7 +2862,7 @@ public class DataHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(Static.getDouble(args[0], t), t);
+			return new CDouble(args[0].primitive(t).castToDouble(t), t);
 		}
 
 		public CHVersion since() {
@@ -2490,10 +2898,20 @@ public class DataHandling {
 		}
 
 		public String docs() {
-			return "string {item} Creates a new construct that is the \"toString\" of an item."
-					+ " For arrays, an human readable version is returned; this should not be"
-					+ " used directly, as the format is not guaranteed to remain consistent. Booleans return \"true\""
-					+ " or \"false\" and null returns \"null\".";
+			return "Creates a new construct that is the \"toString\" of an item."
+					+ " Booleans return \"true\""
+					+ " or \"false\" and null returns \"null\". Numeric values return their numeric"
+					+ " values represented as a string.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The item, cast to a string", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The item to cast", CPrimitive.class, "item")
+					);
 		}
 
 		public ExceptionType[] thrown() {

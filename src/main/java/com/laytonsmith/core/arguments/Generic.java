@@ -31,6 +31,11 @@ public class Generic {
 	private boolean bounded = false;
 	
 	/**
+	 * Generics can have nested generic types too.
+	 */
+	private List<Generic> subtypes = new ArrayList<Generic>();
+	
+	/**
 	 * The identifier used in this generic, matching [a-zA-Z_][a-zA-Z_0-9]+ or a
 	 * literal question mark. This may be null if this is not being used as a class
 	 * definition generic.
@@ -105,6 +110,29 @@ public class Generic {
 		if(!identifier.matches("[a-zA-Z_][a-zA-Z_0-9]+|\\?")){
 			throw new IllegalArgumentException(identifier + " is incorrectly formatted");
 		}
+	}
+	
+	/**
+	 * Adds a subtype to this generic's generic list, for nested
+	 * types. Returns {@code this} for easy chaining.
+	 * @param g
+	 * @return 
+	 */
+	public Generic addSubtype(Generic g){
+		this.subtypes.add(g);
+		return this;
+	}
+	
+	/**
+	 * Returns the subtype list
+	 * @return 
+	 */
+	public List<Generic> getSubtypes(){
+		return new ArrayList<Generic>(subtypes);
+	}
+	
+	public List<Class<? extends Mixed>> getType(){
+		return new ArrayList<Class<? extends Mixed>>(type);
 	}
 
 	@Override

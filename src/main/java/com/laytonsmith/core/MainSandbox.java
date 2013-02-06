@@ -2,8 +2,6 @@ package com.laytonsmith.core;
 
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Target;
-import com.laytonsmith.core.functions.Regex;
-import com.laytonsmith.core.functions.StringHandling;
 
 /**
  * This class is for testing concepts
@@ -73,32 +71,32 @@ public class MainSandbox {
 //		p.stop(ProfilerTop);
 		
 		//Profiling reg_split vs split
-		String toSplit = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z";
-		Regex.reg_split regSplitFunction = new Regex.reg_split();
-		StringHandling.split splitFunction = new StringHandling.split();
-		Target t = Target.UNKNOWN;
-		int times = 1000000;
-		
-		CString subject = new CString(toSplit, t);
-		CString pattern = new CString(",", t);
-		
-		long startRegSplit = System.currentTimeMillis();
-		{
-			for(int i = 0; i < times; i++){
-				regSplitFunction.exec(t, null, pattern, subject);
-			}
-		}
-		long stopRegSplit = System.currentTimeMillis();
-		long startSplit = System.currentTimeMillis();
-		{
-			for(int i = 0; i < times; i++){
-				splitFunction.exec(t, null, subject, pattern);
-			}
-		}
-		long stopSplit = System.currentTimeMillis();
-		
-		System.out.println("reg_split took " + (stopRegSplit - startRegSplit) + "ms under " + times + " iterations.");
-		System.out.println("split took " + (stopSplit - startSplit) + "ms under " + times + " iterations.");
+//		String toSplit = "a,b,c,d,e,f,g,h,i,j,k,l,m,n,o,p,q,r,s,t,u,v,w,x,y,z";
+//		Regex.reg_split regSplitFunction = new Regex.reg_split();
+//		StringHandling.split splitFunction = new StringHandling.split();
+//		Target t = Target.UNKNOWN;
+//		int times = 1000000;
+//		
+//		CString subject = new CString(toSplit, t);
+//		CString pattern = new CString(",", t);
+//		
+//		long startRegSplit = System.currentTimeMillis();
+//		{
+//			for(int i = 0; i < times; i++){
+//				regSplitFunction.exec(t, null, pattern, subject);
+//			}
+//		}
+//		long stopRegSplit = System.currentTimeMillis();
+//		long startSplit = System.currentTimeMillis();
+//		{
+//			for(int i = 0; i < times; i++){
+//				splitFunction.exec(t, null, subject, pattern);
+//			}
+//		}
+//		long stopSplit = System.currentTimeMillis();
+//		
+//		System.out.println("reg_split took " + (stopRegSplit - startRegSplit) + "ms under " + times + " iterations.");
+//		System.out.println("split took " + (stopSplit - startSplit) + "ms under " + times + " iterations.");
 	}
 	
 	

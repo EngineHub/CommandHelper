@@ -360,7 +360,7 @@ public class ObjectGenerator {
 						((CArray) stored).push(eObj);
 					}
 				} else {
-					stored = new CNull(t);
+					stored = Construct.GetNullConstruct(t);
 				}
 				((CArray) ret).set("stored", stored, t);
 			}
@@ -450,14 +450,14 @@ public class ObjectGenerator {
 				if (meta instanceof MCEnchantmentStorageMeta) {
 					if (ma.containsKey("stored")) {
 						Construct stored = ma.get("stored");
-						if (stored instanceof CNull) {
+						if (stored == null || stored.isNull()) {
 							//Still doing nothing
 						} else if (stored instanceof CArray) {
 							for (String index : ((CArray) stored).keySet()) {
 								try {
 									CArray earray = (CArray) ((CArray) stored).get(index);
 									MCEnchantment etype = StaticLayer.GetConvertor().GetEnchantmentByName(earray.get("etype").val());
-									int elevel = Static.getInt32(earray.get("elevel"), t);
+									int elevel = earray.get("elevel").primitive(t).castToInt32(t);
 									((MCEnchantmentStorageMeta) meta).addStoredEnchant(etype, elevel, true);
 								} catch (Exception bade) {
 									throw new Exceptions.FormatException("Could not get enchantment data from index " + index, t);

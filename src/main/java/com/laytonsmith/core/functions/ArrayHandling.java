@@ -420,7 +420,7 @@ public class ArrayHandling {
 			return ArgumentBuilder.Build(
 						new Argument("The array to push onto", CArray.class, "array"),
 						new Argument("The value to push", Mixed.class, "value"),
-						new Argument("More values, if pushing on more than one at once", Mixed.class, "value2").setVarargs()
+						new Argument("More values, if pushing on more than one at once", CArray.class, "value2").setGenerics(new Generic(Mixed.class)).setVarargs()
 					);
 		}
 
@@ -952,7 +952,7 @@ public class ArrayHandling {
 			return ArgumentBuilder.Build(
 						new Argument("The first array", CArray.class, "array1"),
 						new Argument("The second array", CArray.class, "array2"),
-						new Argument("Additonal arrays", CArray.class, "arrayN").setVarargs()
+						new Argument("Additonal arrays", CArray.class, "arrayN").setGenerics(Generic.ANY).setVarargs()
 					);
 		}
 
@@ -1314,21 +1314,33 @@ public class ArrayHandling {
 	
 	@api public static class array_sort_async extends AbstractFunction{
 		
-		RunnableQueue queue = new RunnableQueue("MethodScript-arraySortAsync");
+		static RunnableQueue queue;
+		static boolean initialized = false;
 		
 		public array_sort_async(){
-			queue.invokeLater(new Runnable() {
+			if(!initialized){
+				queue = new RunnableQueue("MethodScript-arraySortAsync");
+				queue.invokeLater(new Runnable() {
 
-				public void run() {
-					//This warms up the queue. Apparently.
-				}
-			});
-			StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
+					public void run() {
+						//This warms up the queue. Apparently.
+					}
+				});
+				if(StaticLayer.GetConvertor() != null){
+					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
 
-				public void run() {
-					queue.shutdown();
+						public void run() {
+							synchronized(array_sort_async.this){
+								initialized = false;
+							}
+							queue.shutdown();
+						}
+					});
+					synchronized(this){
+						initialized = true;
+					}
 				}
-			});
+			}
 		}
 
 		public ExceptionType[] thrown() {
@@ -1606,7 +1618,7 @@ public class ArrayHandling {
 		}
 
 		public String docs() {
-			return "void {array} Reverses an array in place. However, if the array is associative, throws a CastException, since associative"
+			return "Reverses an array in place. However, if the array is associative, throws a CastException, since associative"
 					+ " arrays are more like a map.";
 		}
 		
@@ -1616,7 +1628,7 @@ public class ArrayHandling {
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to reverse, in place", CArray.class).setGenerics(Generic.ANY)
+						new Argument("The array to reverse, in place", CArray.class, "array").setGenerics(Generic.ANY)
 					);
 		}
 

@@ -135,6 +135,9 @@ public final class StaticLayer {
     }
 	
 	public static Convertor GetConvertor(){
+		if(convertor == null){
+			InitConvertor();
+		}
 		return convertor;
 	}
     

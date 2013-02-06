@@ -1,9 +1,12 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.typename;
+
 /**
  *
  * @author lsmith
  */
+@typename("ivar")
 public class IVariable extends Construct implements Cloneable {
 	private final String name;
 	public IVariable(String name, Target t){
@@ -52,7 +55,7 @@ public class IVariable extends Construct implements Cloneable {
 	}
 
 	public String typeName() {
-		return "$ival";
+		return "ivar";
 	}
 
 	

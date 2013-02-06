@@ -4,8 +4,10 @@ import com.laytonsmith.PureUtilities.ReflectionUtils;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.constructs.CNumber;
+import com.laytonsmith.core.constructs.CPrimitive;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.functions.Exceptions.CastException;
 import com.laytonsmith.core.natives.interfaces.Mixed;
@@ -38,8 +40,17 @@ public class ArgList {
 				Mixed m = (T)values.get(varName);
 				return (T)m;
 			} catch(ClassCastException e){
-				//This is actually a programming error
-				throw new Error("Invalid cast", e);
+				//This is actually a programming error, despite first glance.
+				//When the ArgList is returned, the parameters have already
+				//been parsed to ensure they are the correct type. If they were
+				//an incorrect type, they would have already caused a CRE
+				//to be thrown, so this cast failing is because the ArgumentBuilder
+				//specified some type, and the programmer is attempting to cast
+				//it to something else. This just means that the programmer needs
+				//to check their assignment vs builder types
+				throw new Error("Invalid cast. Check to make sure that the assignment"
+						+ " you made is valid, compared to the arguments passed to the"
+						+ " argument builder.", e);
 			}
 		} else {
 			throw new Error("Values list does not contain this variable name: " + varName);
@@ -54,7 +65,7 @@ public class ArgList {
 	 * @param t
 	 * @return 
 	 */
-	public <T extends Mixed> T getRanged(String varName, Target t){
+	public <T extends CNumber> T getRanged(String varName, Target t){
 		Mixed m = get(varName);
 		Argument a = signature.getArgument(varName);
 		if(!a.isRanged()){
@@ -79,6 +90,66 @@ public class ArgList {
 			return (Construct)m;
 		} catch(ClassCastException e){
 			throw new Error(e);
+		}
+	}
+	
+	/**
+	 * Returns a Long, or null if the underlying value is null.
+	 * @param varName
+	 * @param t
+	 * @return 
+	 */
+	public Long getLongWithNull(String varName, Target t){
+		CPrimitive p = getConstruct(varName).primitive(t);
+		if(p.isNull()){
+			return null;
+		} else {
+			return p.castToInt(t);
+		}
+	}
+	
+	/**
+	 * Returns an Integer, or null if the underlying value is null.
+	 * @param varName
+	 * @param t
+	 * @return 
+	 */
+	public Integer getIntegerWithNull(String varName, Target t){
+		CPrimitive p = getConstruct(varName).primitive(t);
+		if(p.isNull()){
+			return null;
+		} else {
+			return p.castToInt32(t);
+		}
+	}
+	
+	/**
+	 * Returns a Double, or null if the underlying value is null.
+	 * @param varName
+	 * @param t
+	 * @return 
+	 */
+	public Double getDoubleWithNull(String varName, Target t){
+		CPrimitive p = getConstruct(varName).primitive(t);
+		if(p.isNull()){
+			return null;
+		} else {
+			return p.castToDouble(t);
+		}
+	}
+	
+	/**
+	 * Returns a Float, or null if the underlying value is null.
+	 * @param varName
+	 * @param t
+	 * @return 
+	 */
+	public Float getFloatWithNull(String varName, Target t){
+		CPrimitive p = getConstruct(varName).primitive(t);
+		if(p.isNull()){
+			return null;
+		} else {
+			return p.castToDouble32(t);
 		}
 	}
 	
@@ -147,6 +218,37 @@ public class ArgList {
 	 */
 	public boolean getBoolean(String varName, Target t){
 		return getConstruct(varName).primitive(t).castToBoolean();
+	}
+	
+	/**
+	 * Returns the toString'd value. A null check is done first,
+	 * and will throw an exception if the underlying value is null.
+	 * @param varName
+	 * @param t
+	 * @return 
+	 */
+	public String getString(String varName, Target t){
+		CPrimitive p = getConstruct(varName).primitive(t);
+		if(p.isNull()){
+			throw new ConfigRuntimeException("Unexpected null value for " + varName, Exceptions.ExceptionType.NullPointerException, t);
+		} else {
+			return p.castToString();
+		}
+	}
+	
+	/**
+	 * Returns the toString'd value, but will return a POJO null.
+	 * @param varName
+	 * @param t
+	 * @return 
+	 */
+	public String getStringWithNull(String varName, Target t){
+		CPrimitive p = getConstruct(varName).primitive(t);
+		if(p.isNull()){
+			return null;
+		} else {
+			return p.castToString();
+		}
 	}
 	
 	/**

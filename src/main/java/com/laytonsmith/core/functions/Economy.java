@@ -5,6 +5,9 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.ArgList;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
@@ -161,8 +164,18 @@ public class Economy {
         }
 
         public String docs() {
-            return "double {account_name} Returns the balance of the given account name.";
+            return "Returns the balance of the given account name.";
         }
+		
+		public Argument returnType() {
+			return new Argument("The account balance", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name on the account", CString.class, "account_name")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException};
@@ -196,8 +209,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {account_name, value} Sets the account's balance to the given amount";
+            return "Sets the account's balance to the given amount";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name on the account", CString.class, "account_name"),
+					new Argument("The value to set", CDouble.class, "value")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -217,7 +241,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetAccount(this.getName(), t, args).set(Static.getNumber(args[1], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetAccount(this.getName(), t, args).set(list.getDouble("value", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to set the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
@@ -238,6 +263,17 @@ public class Economy {
         public String docs() {
             return "void {account_name, to_add} Adds an amount to the specified account";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name on the account", CString.class, "account_name"),
+					new Argument("The amount to add to the balance", CDouble.class, "to_add")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -257,7 +293,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetAccount(this.getName(), t, args).add(Static.getNumber(args[1], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetAccount(this.getName(), t, args).add(list.getDouble("to_add", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to add to the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
@@ -276,8 +313,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {account_name, to_subtract} Subtracts the given amount from the specified account";
+            return "Subtracts the given amount from the specified account";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name on the account", CString.class, "account_name"),
+					new Argument("The amount to subtract from the balance", CDouble.class, "to_subtract")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -297,7 +345,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetAccount(this.getName(), t, args).subtract(Static.getNumber(args[1], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetAccount(this.getName(), t, args).subtract(list.getDouble("to_subtract", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to subtract from the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
@@ -316,8 +365,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {account_name, to_multiply} Multiplies the account balance by the given amount";
+            return "Multiplies the account balance by the given amount";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name on the account", CString.class, "account_name"),
+					new Argument("The amount to multiply by", CDouble.class, "to_multiply")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -337,7 +397,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetAccount(this.getName(), t, args).multiply(Static.getNumber(args[1], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetAccount(this.getName(), t, args).multiply(list.getDouble("to_multiply", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to multiply the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
@@ -356,8 +417,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {account_name, to_divide} Divides the account by the given amount";
+            return "Divides the account by the given amount";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name on the account", CString.class, "account_name"),
+					new Argument("The amount to divide by", CDouble.class, "to_divide")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -377,7 +449,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetAccount(this.getName(), t, args).divide(Static.getNumber(args[1], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetAccount(this.getName(), t, args).divide(list.getDouble("to_divide", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to divide the balance on account " + args[0].val(), ExceptionType.PluginInternalException, t);
@@ -396,9 +469,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {account_name} Removes the specified account from the game - Currently unimplemented, due to lack of support in Vault. Calling"
+            return "Removes the specified account from the game - Currently unimplemented, due to lack of support in Vault. Calling"
                     + " this function will currently always throw an exception.";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name on the account", CString.class, "account_name")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException};
@@ -440,8 +523,18 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name} Gets the specified bank account's balance";
+            return "Gets the specified bank account's balance";
         }
+		
+		public Argument returnType() {
+			return new Argument("The bank's balance", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the bank", CString.class, "bank_name")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException};
@@ -476,8 +569,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, value} Sets the bank account's balance to the given amount";
+            return "Sets the bank account's balance to the given amount";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the bank", CString.class, "bank_name"),
+					new Argument("The amount to set the bank's balance to", CDouble.class, "value")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -497,7 +601,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetBankAccount(this.getName(), t, args).set(Static.getNumber(args[2], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetBankAccount(this.getName(), t, args).set(list.getDouble("value", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to set the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
@@ -516,8 +621,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, value} Adds the specified amount to the bank account's balance";
+            return "Adds the specified amount to the bank account's balance";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the bank", CString.class, "bank_name"),
+					new Argument("The value to add", CDouble.class, "value")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -537,7 +653,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetBankAccount(this.getName(), t, args).add(Static.getNumber(args[2], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetBankAccount(this.getName(), t, args).add(list.getDouble("value", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to add to the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
@@ -556,8 +673,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, value} Subtracts the specified amount from the bank account's balance";
+            return "Subtracts the specified amount from the bank account's balance";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the bank", CString.class, "bank_name"),
+					new Argument("The value to subtract", CDouble.class, "value")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -577,7 +705,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetBankAccount(this.getName(), t, args).subtract(Static.getNumber(args[2], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetBankAccount(this.getName(), t, args).subtract(list.getDouble("value", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to subtract from the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
@@ -596,8 +725,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, value} Multiplies the given bank account's balance by the given value";
+            return "Multiplies the given bank account's balance by the given value";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the bank", CString.class, "bank_name"),
+					new Argument("The value to multiply by", CDouble.class, "value")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -617,7 +757,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetBankAccount(this.getName(), t, args).multiply(Static.getNumber(args[2], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetBankAccount(this.getName(), t, args).multiply(list.getDouble("value", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to multiply the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
@@ -636,8 +777,19 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name, value} Divides the bank account's balance by the given value";
+            return "Divides the bank account's balance by the given value";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the bank", CString.class, "bank_name"),
+					new Argument("The value to divide by", CDouble.class, "value")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException, ExceptionType.CastException};
@@ -657,7 +809,8 @@ public class Economy {
         }
 
         public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-            if(GetBankAccount(this.getName(), t, args).divide(Static.getNumber(args[2], t))){
+			ArgList list = getBuilder().parse(args, this, t);
+            if(GetBankAccount(this.getName(), t, args).divide(list.getDouble("value", t))){
                 return new CVoid(t);
             } else {
                 throw new ConfigRuntimeException("An error occured when trying to divide the balance on bank account " + args[0].val() + ":" + args[1].val(), ExceptionType.PluginInternalException, t);
@@ -676,8 +829,18 @@ public class Economy {
         }
 
         public String docs() {
-            return "void {bank_name} Removes the given bank account from the game";
+            return "Removes the given bank account from the game";
         }
+		
+		public Argument returnType() {
+			return Argument.VOID;
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The name of the bank", CString.class, "bank_name")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException, ExceptionType.InvalidPluginException};

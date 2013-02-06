@@ -351,7 +351,7 @@ public class Argument implements Documentation {
 	 */
 	public Argument setVarargs(boolean varargs){
 		if(clazz.size() != 1 || clazz.get(0) != CArray.class){
-			throw new Error("Vararg status can only be set on an Argument that is a non-disjoing CArray type.");
+			throw new Error("Vararg status can only be set on an Argument that is a non-disjoint CArray type.");
 		}
 		this.varargs = varargs;
 		return this;
@@ -487,5 +487,14 @@ public class Argument implements Documentation {
 	 */
 	/*package*/ double getMax(){
 		return maxExclusive;
+	}
+	
+	/**
+	 * Returns the generics associated with this argument. An empty
+	 * list is returned if no generics were registered.
+	 * @return 
+	 */
+	public List<Generic> getGenerics(){
+		return new ArrayList<Generic>(generics);
 	}
 }

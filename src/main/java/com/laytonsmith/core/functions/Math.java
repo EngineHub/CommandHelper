@@ -7,6 +7,10 @@ import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.ParseTree;
 import com.laytonsmith.core.Script;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.ArgList;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.compiler.OptimizationUtilities;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
@@ -49,9 +53,9 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = Static.getNumber(args[0], t);
+			double tally = args[0].primitive(t).castToDouble(t);
 			for (int i = 1; i < args.length; i++) {
-				tally += Static.getNumber(args[i], t);
+				tally += args[i].primitive(t).castToDouble(t);
 			}
 			if (Static.anyDoubles(args)) {
 				return new CDouble(tally, t);
@@ -65,7 +69,19 @@ public class Math {
 		}
 
 		public String docs() {
-			return "mixed {var1, [var2...]} Adds all the arguments together, and returns either a double or an integer";
+			return "Adds all the arguments together, and returns either a double or an integer";
+		}
+
+		public Argument returnType() {
+			return new Argument("", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CNumber.class, "var1"),
+					new Argument("", CNumber.class, "var2"),
+					new Argument("", CArray.class, "varN").setGenerics(new Generic(CNumber.class)).setVarargs()
+					);
 		}
 
 		public boolean isRestricted() {
@@ -117,9 +133,9 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = Static.getNumber(args[0], t);
+			double tally = args[0].primitive(t).castToDouble(t);
 			for (int i = 1; i < args.length; i++) {
-				tally -= Static.getNumber(args[i], t);
+				tally -= args[i].primitive(t).castToDouble(t);
 			}
 			if (Static.anyDoubles(args)) {
 				return new CDouble(tally, t);
@@ -133,7 +149,19 @@ public class Math {
 		}
 
 		public String docs() {
-			return "mixed {var1, [var2...]} Subtracts the arguments from left to right, and returns either a double or an integer";
+			return "Subtracts the arguments from left to right, and returns either a double or an integer";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CNumber.class, "var1"),
+					new Argument("", CNumber.class, "var2"),
+					new Argument("", CArray.class, "varN").setGenerics(new Generic(CNumber.class)).setVarargs()
+					);
 		}
 
 		public boolean isRestricted() {
@@ -182,9 +210,9 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = Static.getNumber(args[0], t);
+			double tally = args[0].primitive(t).castToDouble(t);
 			for (int i = 1; i < args.length; i++) {
-				tally *= Static.getNumber(args[i], t);
+				tally *= args[i].primitive(t).castToDouble(t);
 			}
 			if (Static.anyDoubles(args)) {
 				return new CDouble(tally, t);
@@ -198,7 +226,19 @@ public class Math {
 		}
 
 		public String docs() {
-			return "mixed {var1, [var2...]} Multiplies the arguments together, and returns either a double or an integer";
+			return "Multiplies the arguments together, and returns either a double or an integer";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CNumber.class, "var1"),
+					new Argument("", CNumber.class, "var2"),
+					new Argument("", CArray.class, "varN").setGenerics(new Generic(CNumber.class)).setVarargs()
+					);
 		}
 
 		public boolean isRestricted() {
@@ -247,9 +287,9 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double tally = Static.getNumber(args[0], t);
+			double tally = args[0].primitive(t).castToDouble(t);
 			for (int i = 1; i < args.length; i++) {
-				double next = Static.getNumber(args[i], t);
+				double next = args[i].primitive(t).castToDouble(t);
 				if (next == 0) {
 					throw new ConfigRuntimeException("Division by 0!", ExceptionType.RangeException, t);
 				}
@@ -267,8 +307,20 @@ public class Math {
 		}
 
 		public String docs() {
-			return "mixed {var1, [var2...]} Divides the arguments from left to right, and returns either a double or an integer."
+			return "Divides the arguments from left to right, and returns either a double or an integer."
 					+ " If you divide by zero, a RangeException is thrown.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CNumber.class, "var1"),
+					new Argument("", CNumber.class, "var2"),
+					new Argument("", CArray.class, "varN").setGenerics(new Generic(CNumber.class)).setVarargs()
+					);
 		}
 
 		public boolean isRestricted() {
@@ -319,8 +371,8 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			long arg1 = Static.getInt(args[0], t);
-			long arg2 = Static.getInt(args[1], t);
+			long arg1 = args[0].primitive(t).castToInt(t);
+			long arg2 = args[1].primitive(t).castToInt(t);
 			return new CInt(arg1 % arg2, t);
 		}
 
@@ -329,7 +381,18 @@ public class Math {
 		}
 
 		public String docs() {
-			return "int {x, n} Returns x modulo n";
+			return "Returns x modulo n";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CInt.class, "x"),
+					new Argument("", CInt.class, "n")
+					);
 		}
 
 		public boolean isRestricted() {
@@ -372,13 +435,24 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = args[0].primitive(t).castToDouble(t);
+			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CDouble(java.lang.Math.pow(arg1, arg2), t);
 		}
 
 		public String docs() {
-			return "double {x, n} Returns x to the power of n";
+			return "Returns x to the power of n";
+		}
+		
+		public Argument returnType() {
+			return new Argument("x to the power of n", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("", CNumber.class, "x"),
+					new Argument("", CNumber.class, "n")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -432,12 +506,12 @@ public class Math {
 					//skip the whole array_get execution.
 					ParseTree eval = nodes[0];
 					Construct array = parent.seval(eval.getChildAt(0), env);
-					Construct index = parent.seval(eval.getChildAt(1), env);
+					CString index = parent.seval(eval.getChildAt(1), env).primitive(t).castToCString();
 					Construct cdelta = new CInt(1, t);
 					if(nodes.length == 2){
 						cdelta = parent.seval(nodes[1], env);
 					}
-					long delta = Static.getInt(cdelta, t);
+					long delta = cdelta.primitive(t).castToInt(t);
 					//First, error check, then get the old value, and store it in temp.
 					if(!(array instanceof CArray) && !(array instanceof ArrayAccess)){
 						//Let's just evaluate this like normal with array_get, so it will
@@ -454,7 +528,7 @@ public class Math {
 						CArray myArray = ((CArray)array);
 						Construct value = myArray.get(index, t);
 						if(value instanceof CInt || value instanceof CDouble){
-							temp = Static.getInt(value, t);
+							temp = value.primitive(t).castToInt(t);
 							//Alright, now let's actually perform the increment, and store that in the array.
 							
 							if(inc){
@@ -511,32 +585,43 @@ public class Math {
 					IVariable cur2 = (IVariable) args[1];
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2, cur2.getTarget());
 				}
-				value = Static.getInt(args[1], t);
+				value = args[1].primitive(t).castToInt(t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v)) {
-					newVal = new CDouble(Static.getDouble(v, t) + value, t);
+					newVal = new CDouble(v.primitive(t).castToDouble(t) + value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v, t) + value, t);
+					newVal = new CInt(v.primitive(t).castToInt(t) + value, t);
 				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(cur, newVal);
 				return newVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {
-					return new CDouble(Static.getNumber(args[0], t) + value, t);
+					return new CDouble(args[0].primitive(t).castToDouble(t) + value, t);
 				} else {
-					return new CInt(Static.getInt(args[0], t) + value, t);
+					return new CInt(args[0].primitive(t).castToInt(t) + value, t);
 				}
 			}
 
 		}
 
 		public String docs() {
-			return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
+			return "Adds x to var, and stores the new value. Equivalent to ++var in other languages. Expects ivar to be a variable, then"
 					+ " returns the ivar, or, if var is a constant number, simply adds x to it, and returns the new number.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The ivar meta object, or just the number, if it was hardcoded.", IVariable.class, CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The numeric value", IVariable.class, CNumber.class, "var"),
+					new Argument("The amount to increment", CInt.class, "x").setOptionalDefault(1)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -611,16 +696,16 @@ public class Math {
 					IVariable cur2 = (IVariable) args[1];
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2, cur2.getTarget());
 				}
-				value = Static.getInt(args[1], t);
+				value = args[1].primitive(t).castToInt(t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v)) {
-					newVal = new CDouble(Static.getDouble(v, t) + value, t);
+					newVal = new CDouble(v.primitive(t).castToDouble(t) + value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v, t) + value, t);
+					newVal = new CInt(v.primitive(t).castToInt(t) + value, t);
 				}
 				Construct oldVal = null;
 				try {
@@ -632,17 +717,28 @@ public class Math {
 				return oldVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {
-					return new CDouble(Static.getNumber(args[0], t) + value, t);
+					return new CDouble(args[0].primitive(t).castToDouble(t) + value, t);
 				} else {
-					return new CInt(Static.getInt(args[0], t) + value, t);
+					return new CInt(args[0].primitive(t).castToInt(t) + value, t);
 				}
 			}
 		}
 
 
 		public String docs() {
-			return "ivar {var, [x]} Adds x to var, and stores the new value. Equivalent to var++ in other languages. Expects ivar to be a variable, then"
+			return "Adds x to var, and stores the new value. Equivalent to var++ in other languages. Expects ivar to be a variable, then"
 					+ " returns a copy of the old ivar, or, if var is a constant number, simply adds x to it, and returns the new number.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The ivar meta object, or just the number, if it was hardcoded.", IVariable.class, CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The numeric value", IVariable.class, CNumber.class, "var"),
+					new Argument("The amount to increment", CInt.class, "x").setOptionalDefault(1)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -711,31 +807,42 @@ public class Math {
 					IVariable cur2 = (IVariable) args[1];
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2, cur2.getTarget());
 				}
-				value = Static.getInt(args[1], t);
+				value = args[1].primitive(t).castToInt(t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v)) {
-					newVal = new CDouble(Static.getDouble(v, t) - value, t);
+					newVal = new CDouble(v.primitive(t).castToDouble(t) - value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v, t) - value, t);
+					newVal = new CInt(v.primitive(t).castToInt(t) - value, t);
 				}
 				env.getEnv(GlobalEnv.class).GetVarList().set(cur, v);
 				return v;
 			} else {
 				if (Static.anyDoubles(args[0])) {
-					return new CDouble(Static.getNumber(args[0], t) + value, t);
+					return new CDouble(args[0].primitive(t).castToDouble(t) + value, t);
 				} else {
-					return new CInt(Static.getInt(args[0], t) + value, t);
+					return new CInt(args[0].primitive(t).castToInt(t) + value, t);
 				}
 			}
 		}
 
 		public String docs() {
-			return "ivar {var, [value]} Subtracts value from var, and stores the new value. Value defaults to 1. Equivalent to --var (or var -= value) in other languages. Expects ivar to be a variable, then"
-					+ " returns the ivar, , or, if var is a constant number, simply adds x to it, and returns the new number.";
+			return "Subtracts value from var, and stores the new value. Value defaults to 1. Equivalent to --var (or var -= value) in other languages. Expects ivar to be a variable, then"
+					+ " returns the ivar, , or, if var is a constant number, simply subtracts x from it, and returns the new number.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The ivar meta object, or just the number, if it was hardcoded.", IVariable.class, CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The numeric value", IVariable.class, CNumber.class, "var"),
+					new Argument("The amount to decrement", CInt.class, "x").setOptionalDefault(1)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -804,16 +911,16 @@ public class Math {
 					IVariable cur2 = (IVariable) args[1];
 					args[1] = env.getEnv(GlobalEnv.class).GetVarList().get(cur2, cur2.getTarget());
 				}
-				value = Static.getInt(args[1], t);
+				value = args[1].primitive(t).castToInt(t);
 			}
 			if (args[0] instanceof IVariable) {
 				IVariable cur = (IVariable) args[0];
 				Construct v = env.getEnv(GlobalEnv.class).GetVarList().get(cur, cur.getTarget());
 				Construct newVal;
 				if (Static.anyDoubles(v)) {
-					newVal = new CDouble(Static.getDouble(v, t) - value, t);
+					newVal = new CDouble(v.primitive(t).castToDouble(t) - value, t);
 				} else {
-					newVal = new CInt(Static.getInt(v, t) - value, t);
+					newVal = new CInt(v.primitive(t).castToInt(t) - value, t);
 				}
 				Construct oldVal = null;
 				try {
@@ -825,16 +932,27 @@ public class Math {
 				return oldVal;
 			} else {
 				if (Static.anyDoubles(args[0])) {
-					return new CDouble(Static.getNumber(args[0], t) + value, t);
+					return new CDouble(args[0].primitive(t).castToDouble(t) + value, t);
 				} else {
-					return new CInt(Static.getInt(args[0], t) + value, t);
+					return new CInt(args[0].primitive(t).castToInt(t) + value, t);
 				}
 			}
 		}
 
 		public String docs() {
-			return "ivar {var, [x]} Subtracts x from var, and stores the new value. Equivalent to var-- in other languages. Expects ivar to be a variable, then"
-					+ " returns a copy of the old ivar, , or, if var is a constant number, simply adds x to it, and returns the new number.";
+			return "Subtracts x from var, and stores the new value. Equivalent to var-- in other languages. Expects ivar to be a variable, then"
+					+ " returns a copy of the old ivar, , or, if var is a constant number, simply subtracts x from it, and returns the new number.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The ivar meta object, or just the number, if it was hardcoded.", IVariable.class, CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The numeric value", IVariable.class, CNumber.class, "var"),
+					new Argument("The amount to decrement", CInt.class, "x").setOptionalDefault(1)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -889,9 +1007,20 @@ public class Math {
 		}
 
 		public String docs() {
-			return "mixed {[] | min/max, [max]} Returns a random number from 0 to max, or min to max, depending on usage. Max is exclusive. Min must"
+			return "Returns a random number from 0 to max, or min to max, depending on usage. Max is exclusive. Min must"
 					+ " be less than max, and both numbers must be >= 0. This will return an integer. Alternatively, you can pass no arguments, and a random"
 					+ " double, from 0 to 1 will be returned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The randomly generated value", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("If both arguments are provided, this is the min, otherwise, it is the max", CInt.class, "min_max").setOptional(),
+					new Argument("The max value, exclusive", CInt.class, "max").setOptional()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -913,10 +1042,10 @@ public class Math {
 				long min = 0;
 				long max = 0;
 				if (args.length == 1) {
-					max = Static.getInt(args[0], t);
+					max = args[0].primitive(t).castToInt(t);
 				} else {
-					min = Static.getInt(args[0], t);
-					max = Static.getInt(args[1], t);
+					min = args[0].primitive(t).castToInt(t);
+					max = args[1].primitive(t).castToInt(t);
 				}
 				if (max > Integer.MAX_VALUE || min > Integer.MAX_VALUE) {
 					throw new ConfigRuntimeException("max and min must be below int max, defined as " + Integer.MAX_VALUE,
@@ -963,7 +1092,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "double {arg} Returns the absolute value of the argument.";
+			return "Returns the absolute value of the argument.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The absolute value of arg", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to find the absolute value of", CNumber.class, "arg")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -983,7 +1122,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			double d = Static.getDouble(args[0], t);
+			double d = getBuilder().parse(args, this, t).getDouble("arg", t);
 			return new CDouble(java.lang.Math.abs(d), t);
 		}
 
@@ -1016,7 +1155,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "int {number} Returns the floor of any given number. For example, floor(3.8) returns 3, and floor(-1.1) returns 2";
+			return "Returns the floor of any given number. For example, floor(3.8) returns 3, and floor(-1.1) returns 2";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The floor of the number given", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to find the floor of", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1036,7 +1185,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CInt((long) java.lang.Math.floor(Static.getNumber(args[0], t)), t);
+			return new CInt((long) java.lang.Math.floor(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1060,7 +1209,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "int {number} Returns the ceiling of any given number. For example, ceil(3.2) returns 4, and ceil(-1.1) returns -1";
+			return "Returns the ceiling of any given number. For example, ceil(3.2) returns 4, and ceil(-1.1) returns -1";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The ceiling of the given number", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to find the ceiling of", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1080,7 +1239,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CInt((long) java.lang.Math.ceil(Static.getNumber(args[0], t)), t);
+			return new CInt((long) java.lang.Math.ceil(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1104,8 +1263,18 @@ public class Math {
 		}
 
 		public String docs() {
-			return "number {number} Returns the square root of a number. Note that this is mathematically equivalent to pow(number, .5)."
+			return "Returns the square root of a number. Note that this is mathematically equivalent to pow(number, .5)."
 					+ " Imaginary numbers are not supported, so number must be positive.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The square root", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					Argument.getRangedDoubleArgument("The number to find the square root of", "number", 0, Double.MAX_VALUE)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1125,10 +1294,8 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			double d = Static.getNumber(args[0], t);
-			if (d < 0) {
-				throw new ConfigRuntimeException("sqrt expects a number >= 0", ExceptionType.RangeException, t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			double d = list.getDouble("number", t);
 			double m = java.lang.Math.sqrt(d);
 			if (m == (int) m) {
 				return new CInt((long) m, t);
@@ -1158,8 +1325,19 @@ public class Math {
 		}
 
 		public String docs() {
-			return "number {num1, [num2...]} Returns the lowest number in a given list of numbers. If any of the arguments"
+			return "Returns the lowest number in a given list of numbers. If any of the arguments"
 					+ " are arrays, they are expanded into individual numbers, and also compared.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The lowest value in the given set of numbers", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CNumber.class, "num1"),
+					new Argument("Extra values to consider", CArray.class, "numX").setGenerics(new Generic(CNumber.class)).setVarargs()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1187,7 +1365,7 @@ public class Math {
 			List<Construct> list = new ArrayList<Construct>();
 			recList(list, args);
 			for (Construct c : list) {
-				double d = Static.getNumber(c, t);
+				double d = c.primitive(t).castToDouble(t);
 				if (d < lowest) {
 					lowest = d;
 				}
@@ -1233,8 +1411,19 @@ public class Math {
 		}
 
 		public String docs() {
-			return "number {num1, [num2...]} Returns the highest number in a given list of numbers. If any of the arguments"
+			return "Returns the highest number in a given list of numbers. If any of the arguments"
 					+ " are arrays, they are expanded into individual numbers, and also compared.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The largest value in the given set", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CNumber.class, "num1"),
+					new Argument("Extra values to consider", CArray.class, "numX").setGenerics(new Generic(CNumber.class)).setVarargs()
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1262,7 +1451,7 @@ public class Math {
 			List<Construct> list = new ArrayList<Construct>();
 			recList(list, args);
 			for (Construct c : list) {
-				double d = Static.getNumber(c, t);
+				double d = c.primitive(t).castToDouble(t);
 				if (d > highest) {
 					highest = d;
 				}
@@ -1308,7 +1497,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "double {number} Returns the sin of the number";
+			return "Returns the sin of the number";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The sine of the number", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to find the sine of", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1328,7 +1527,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.sin(Static.getNumber(args[0], t)), t);
+			return new CDouble(java.lang.Math.sin(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1352,7 +1551,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "double {number} Returns the cos of the number";
+			return "Returns the cos of the number";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The cosine of the number", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to find the cosine of", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1372,7 +1581,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.cos(Static.getNumber(args[0], t)), t);
+			return new CDouble(java.lang.Math.cos(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1396,7 +1605,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "double {number} Returns the tan of the number";
+			return "Returns the tan of the number";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The tangent of the number", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to find the tangent of", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1416,7 +1635,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.tan(Static.getNumber(args[0], t)), t);
+			return new CDouble(java.lang.Math.tan(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1440,7 +1659,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "double {number} Returns the arc sin of the number";
+			return "Returns the arc sin of the number";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The arc sine of the number", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The number to find the arc sine of", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1460,7 +1689,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.asin(Static.getNumber(args[0], t)), t);
+			return new CDouble(java.lang.Math.asin(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1484,7 +1713,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "double {number} Returns the arc cos of the number";
+			return "Returns the arc cos of the number";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The arc cosine of the number", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to find the arc cosine of", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1504,7 +1743,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.acos(Static.getNumber(args[0], t)), t);
+			return new CDouble(java.lang.Math.acos(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1528,7 +1767,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "double {number} Returns the arc tan of the number";
+			return "Returns the arc tan of the number";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The arc tangent of number", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The number to find the arc tangent of", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1548,7 +1797,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.atan(Static.getNumber(args[0], t)), t);
+			return new CDouble(java.lang.Math.atan(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1572,7 +1821,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "double {number} Converts the number to radians (which is assumed to have been in degrees)";
+			return "Converts the number to radians (which is assumed to have been in degrees)";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The convered number, in radians", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to convert, in degrees", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1592,7 +1851,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.toRadians(Static.getNumber(args[0], t)), t);
+			return new CDouble(java.lang.Math.toRadians(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1618,6 +1877,16 @@ public class Math {
 		public String docs() {
 			return "double {number} Converts the number to degrees (which is assumed to have been in radians)";
 		}
+		
+		public Argument returnType() {
+			return new Argument("The converted number, now in degrees", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The number to convert, in radians", CNumber.class, "number")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1636,7 +1905,7 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.toDegrees(Static.getNumber(args[0], t)), t);
+			return new CDouble(java.lang.Math.toDegrees(getBuilder().parse(args, this, t).getDouble("number", t)), t);
 		}
 
 		@Override
@@ -1661,10 +1930,21 @@ public class Math {
 
 		public String docs() {
 			//lolcopypaste
-			return "double {number} Returns the angle theta from the conversion"
+			return "Returns the angle theta from the conversion"
 					+ " of rectangular coordinates (x, y) to polar coordinates"
 					+ " (r, theta). This method computes the phase theta by"
 					+ " computing an arc tangent of y/x in the range of -pi to pi.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The converted angle", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value", CNumber.class, "y"),
+					new Argument("The second value", CNumber.class, "x")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1684,7 +1964,10 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			return new CDouble(java.lang.Math.atan2(Static.getNumber(args[0], t), Static.getNumber(args[1], t)), t);
+			ArgList list = getBuilder().parse(args, this, t);
+			double y = list.getDouble("y", t);
+			double x = list.getDouble("x", t);
+			return new CDouble(java.lang.Math.atan2(y, x), t);
 		}
 
 		@Override
@@ -1708,9 +1991,20 @@ public class Math {
 		}
 
 		public String docs() {
-			return "mixed {number, [precision]} Unlike floor and ceil, rounds the number to the nearest integer. Precision defaults to 0, but if set to 1 or more, rounds decimal places."
+			return "Unlike floor and ceil, rounds the number to the nearest integer. Precision defaults to 0, but if set to 1 or more, rounds decimal places."
 					+ " For instance, round(2.29, 1) would return 2.3. If precision is < 0, a RangeException is thrown. If precision is set to 0, an integer is always"
 					+ " returned, and if precision is > 0, a double is always returned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The rounded number", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The number to round", CNumber.class, "number"),
+					Argument.getRangedIntArgument("The precision", "precision", 0, Integer.MAX_VALUE).setOptionalDefault(0)
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1730,14 +2024,9 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			double number = Static.getNumber(args[0], t);
-			int precision = 0;
-			if(args.length > 1){
-				precision = Static.getInt32(args[1], t);
-			}
-			if(precision < 0){
-				throw new Exceptions.RangeException("precision cannot be less than 0, was " + precision, t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			double number = list.getDouble("number", t);
+			int precision = list.getInt("precision", t);
 			number = number * java.lang.Math.pow(10, precision);
 			number = java.lang.Math.round(number);
 			number = number / java.lang.Math.pow(10, precision);
@@ -1786,6 +2075,17 @@ public class Math {
 					+ " also be included, and their values given as an associative array. expr('(x + y) * z',"
 					+ " array(x: 2, y: 3, z: 4)) would be the same thing as the above example.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("The evaluated expression", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The expression to evaluate", CString.class, "expression"),
+					new Argument("The array of values to fill in", CArray.class, "valueArray").setOptional()
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException};
@@ -1822,7 +2122,7 @@ public class Math {
 				varNames = new String[(int)vars.size()];
 				for (String key : vars.keySet()) {
 					varNames[i] = key;
-					da[i] = Static.getDouble(vars.get(key, t), t);
+					da[i] = vars.get(key, t).primitive(t).castToDouble(t);
 					i++;
 				}
 			} else {
@@ -1858,7 +2158,17 @@ public class Math {
 		}
 
 		public String docs() {
-			return "number {number} Negates a number, essentially multiplying the number by -1";
+			return "Negates a number, essentially multiplying the number by -1";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The inverted number", CNumber.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The number to invert", CNumber.class, "number")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1874,10 +2184,11 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if (args[0] instanceof CInt) {
-				return new CInt(-(Static.getInt(args[0], t)), t);
+			CNumber number = getBuilder().parse(args, this, t).get("number");
+			if (number instanceof CInt) {
+				return new CInt(-(number.castToInt(t)), t);
 			} else {
-				return new CDouble(-(Static.getDouble(args[0], t)), t);
+				return new CDouble(-(number.castToDouble(t)), t);
 			}
 		}
 
@@ -1910,16 +2221,10 @@ public class Math {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			double val = Static.getDouble(args[0], t);
-			if(val <= 0){
-				throw new Exceptions.RangeException("val was <= 0", t);
-			}
-			double r;
-			if(args.length == 1){
-				r = java.lang.Math.log(val);
-			} else {// if(args.length == 2){
-				r = java.lang.Math.log(val) / java.lang.Math.log(Static.getDouble(args[1], t));
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			double val = list.getDouble("val", t);
+			double base = list.getDouble("base", t);
+			double r = java.lang.Math.log(val) / java.lang.Math.log(base);
 			return new CDouble(r, t);
 		}
 
@@ -1933,10 +2238,22 @@ public class Math {
 
 		public String docs() {
 			return "double {val, [base]} Return the log of a number to the specified base, or the mathematical"
-					+ " constant e if no base is provided (or ln). If val is less than or equal to zero, a RangeException is thrown."
+					+ " constant e if no base is provided (that is, the natural log, or \"ln\")."
+					+ " If val is less than or equal to zero, a RangeException is thrown."
 					+ " Mathematically speaking, if val is 0, then the result would be negative infinity, and if it"
 					+ " is less than 0 it is undefined (NaN), but since MethodScript has no way of representing either"
 					+ " of these, a RangeException is thrown instead.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The log value", CDouble.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					Argument.getRangedDoubleArgument("", "val", 0.00000000000001, Double.MAX_VALUE),
+					new Argument("", CDouble.class, "base").setOptionalDefault(java.lang.Math.E)
+					);
 		}
 
 		public CHVersion since() {

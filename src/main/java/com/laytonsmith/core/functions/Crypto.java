@@ -6,7 +6,11 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.ArgList;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CBoolean;
+import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -42,8 +46,18 @@ public class Crypto {
         }
 
         public String docs() {
-            return "string {val} Returns the rot13 version of val. Note that rot13(rot13(val)) returns val";
+            return "Returns the rot13 version of val. Note that rot13(rot13(val)) returns val";
         }
+		
+		public Argument returnType() {
+			return new Argument("Returns the rot13 value", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to rot13", CString.class, "val")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{};
@@ -110,10 +124,20 @@ public class Crypto {
         }
 
         public String docs() {
-            return "string {val} Returns the md5 hash of the specified string. The md5 hash is no longer considered secure, so you should"
+            return "Returns the md5 hash of the specified string. The md5 hash is no longer considered secure, so you should"
                     + " not use it for storage of sensitive data, however for general hashing, it is a quick and easy solution. md5 is"
                     + " a one way hashing algorithm.";
         }
+		
+		public Argument returnType() {
+			return new Argument("The hashed value", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to hash", CString.class, "val")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
@@ -170,9 +194,19 @@ public class Crypto {
         }
 
         public String docs() {
-            return "string {val} Returns the sha1 hash of the specified string. Note that sha1 is considered more secure than md5, and is"
+            return "Returns the sha1 hash of the specified string. Note that sha1 is considered more secure than md5, and is"
                     + " typically used when storing sensitive data. It is a one way hashing algorithm.";
         }
+		
+		public Argument returnType() {
+			return new Argument("The hashed value", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to hash", CString.class, "val")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
@@ -228,9 +262,19 @@ public class Crypto {
         }
 
         public String docs() {
-            return "string {val} Returns the sha256 hash of the specified string. Note that sha256 is considered more secure than sha1 and md5, and is"
+            return "Returns the sha256 hash of the specified string. Note that sha256 is considered more secure than sha1 and md5, and is"
                     + " typically used when storing sensitive data. It is a one way hashing algorithm.";
         }
+		
+		public Argument returnType() {
+			return new Argument("The hashed value", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to hash", CString.class, "val")
+				);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
@@ -291,11 +335,10 @@ public class Crypto {
         }
 
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-            int log_rounds = 5;
-            if(args.length == 2){
-                log_rounds = Static.getInt32(args[1], t);
-            }
-            String hash = BCrypt.hashpw(args[0].val(), BCrypt.gensalt(log_rounds));
+			ArgList list = getBuilder().parse(args, this, t);
+			String val = list.get("val");
+			int workloadFactor = list.getInt("workloadFactor", t);
+            String hash = BCrypt.hashpw(val, BCrypt.gensalt(workloadFactor));
             return new CString(hash, t);
         }
 
@@ -308,11 +351,22 @@ public class Crypto {
         }
 
         public String docs() {
-            return "string {val, [workload]} Encrypts a value using bcrypt, using the specified workload, or 5 if none provided. BCrypt is supposedly more secure than SHA1, and"
+            return "Encrypts a value using bcrypt, using the specified workload, or 5 if none provided. BCrypt is supposedly more secure than SHA1, and"
                     + " certainly more secure than md5. Note that using bcrypt is slower, which is one of its security advantages, however, setting the workload to higher numbers"
                     + " will take exponentially more time. A workload of 5 is a moderate operation, which should complete in under a second, however, setting it to 10 will take"
                     + " many seconds, and setting it to 15 will take a few minutes. See the documentation for check_bcrypt for full usage.";
         }
+		
+		public Argument returnType() {
+			return new Argument("The hashed value", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The string to hash", CString.class, "val"),
+					Argument.getRangedIntArgument("The workload factor", "workloadFactor", 1, Integer.MAX_VALUE).setOptionalDefault(5)
+				);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -356,9 +410,20 @@ public class Crypto {
         }
 
         public String docs() {
-            return "boolean {plaintext, hash} Checks to see if this plaintext password does in fact hash to the hash specified. Unlike md5 or sha1, simply comparing hashes won't work. Consider the following usage:"
+            return "Checks to see if this plaintext password does in fact hash to the hash specified. Unlike md5 or sha1, simply comparing hashes won't work. Consider the following usage:"
                     + " assign(@plain, 'plaintext') assign(@hash, bcrypt(@plain)) msg(if(check_bcrypt(@plain, @hash), 'They match!', 'They do not match!'))";
         }
+		
+		public Argument returnType() {
+			return new Argument("true if this plaintext does hash to the given value.", CString.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The plaintext to check", CString.class, "plaintext"),
+					new Argument("The hash to compare with", CString.class, "hash")
+				);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;

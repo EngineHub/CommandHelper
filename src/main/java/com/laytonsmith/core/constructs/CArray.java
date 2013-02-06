@@ -5,7 +5,6 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHLog;
 import com.laytonsmith.core.LogLevel;
-import com.laytonsmith.core.Static;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.ArrayHandling;
 import com.laytonsmith.core.functions.BasicLogic;

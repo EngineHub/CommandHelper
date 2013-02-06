@@ -2,6 +2,9 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
 import com.laytonsmith.core.compiler.Braceable;
 import com.laytonsmith.core.compiler.CodeBranch;
 import com.laytonsmith.core.compiler.Optimizable;
@@ -13,6 +16,7 @@ import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -54,7 +58,7 @@ public class BasicLogic {
 				__else = nodes[2];
 			}
 
-			if (Static.getBoolean(parent.seval(condition, env))) {
+			if (parent.seval(condition, env).primitive(t).castToBoolean()) {
 				return parent.seval(__if, env);
 			} else {
 				if (__else == null) {
@@ -73,8 +77,20 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "mixed {cond, trueRet, [falseRet]} If the first argument evaluates to a true value, the second argument is returned, otherwise the third argument is returned."
+			return "If the first argument evaluates to a true value, the second argument is returned, otherwise the third argument is returned."
 					+ " If there is no third argument, it returns void.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The value resolved in whichever branch is true", Mixed.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The condition to check for. If true, trueRet is resolved and returned, otherwise, falseRet is resolved and returned (if present)", CBoolean.class, "cond"),
+					new Argument("The code to run if the condition is true", CCode.class, "trueRet"),
+					new Argument("The code to run if the condition if false", CCode.class, "falseRet").setOptional()
+				);
 		}
 
 		public boolean isRestricted() {
@@ -237,6 +253,19 @@ public class BasicLogic {
 					+ " In addition, slices may be used to indicate ranges of integers that should trigger the specified"
 					+ " case. Slices embedded in an array are fine as well.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("The value resolved by the switch case that is matched", Mixed.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.MANUAL;
+		}
+
+		@Override
+		public String argumentsManual() {
+			return "mixed value, [mixed case, code code]..., [code defaultCode]";
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InsufficientArgumentsException};
@@ -275,7 +304,7 @@ public class BasicLogic {
 					long rangeLeft = ((CSlice) evalStatement).getStart();
 					long rangeRight = ((CSlice) evalStatement).getFinish();
 					if (value instanceof CInt) {
-						long v = Static.getInt(value, t);
+						long v = value.primitive(t).castToInt(t);
 						if ((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 								|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 								|| (rangeLeft == rangeRight && v == rangeLeft)) {
@@ -291,7 +320,7 @@ public class BasicLogic {
 							long rangeLeft = ((CSlice) inner).getStart();
 							long rangeRight = ((CSlice) inner).getFinish();
 							if (value instanceof CInt) {
-								long v = Static.getInt(value, t);
+								long v = value.primitive(t).castToInt(t);
 								if ((rangeLeft < rangeRight && v >= rangeLeft && v <= rangeRight)
 										|| (rangeLeft > rangeRight && v >= rangeRight && v <= rangeLeft)
 										|| (rangeLeft == rangeRight && v == rangeLeft)) {
@@ -301,13 +330,13 @@ public class BasicLogic {
 								throw new ConfigRuntimeException("When using slice notation in a switch case, the value being switched on must be an integer, but instead, " + value.val() + " was found.", ExceptionType.CastException, t);
 							}
 						} else {
-							if (((CBoolean) equals.exec(t, env, value, inner)).getBoolean()) {
+							if (equals.exec(t, env, value, inner).castToBoolean()) {
 								return parent.seval(code, env);
 							}
 						}
 					}
 				} else {
-					if (((CBoolean) equals.exec(t, env, value, evalStatement)).getBoolean()) {
+					if (equals.exec(t, env, value, evalStatement).castToBoolean()) {
 						return parent.seval(code, env);
 					}
 				}
@@ -385,9 +414,22 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "mixed {[boolean1, code]..., [elseCode]} Provides a more convenient method"
+			return "Provides a more convenient method"
 					+ " for running if/else chains. If none of the conditions are true, and"
 					+ " there is no 'else' condition, void is returned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The value resolved in the branch of the condition that is true", Mixed.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.MANUAL;
+		}
+
+		@Override
+		public String argumentsManual() {
+			return "[boolean bool, code code]..., [code elseCode]";
 		}
 
 		public ExceptionType[] thrown() {
@@ -427,7 +469,7 @@ public class BasicLogic {
 				if (evalStatement instanceof CIdentifier) {
 					evalStatement = parent.seval(((CIdentifier) evalStatement).contained(), env);
 				}
-				if (Static.getBoolean(evalStatement)) {
+				if (evalStatement.primitive(t).castToBoolean()) {
 					Construct ret = env.getEnv(GlobalEnv.class).GetScript().eval(code, env);
 					return ret;
 				}
@@ -475,7 +517,7 @@ public class BasicLogic {
 						evalStatement = ((CIdentifier) evalStatement).contained().getData();
 					}
 					//If it's hardcoded true, we found it.
-					if (Static.getBoolean(evalStatement)) {
+					if (evalStatement.primitive(t).castToBoolean()) {
 						if (toReturn == null) {
 							toReturn = code;
 						}
@@ -602,7 +644,7 @@ public class BasicLogic {
 		 */
 		public static boolean doEquals(Construct one, Construct two) {
 			CBoolean ret = (CBoolean) self.exec(Target.UNKNOWN, null, one, two);
-			return ret.getBoolean();
+			return ret.castToBoolean();
 		}
 
 		public String getName() {
@@ -613,7 +655,7 @@ public class BasicLogic {
 			return new Integer[]{Integer.MAX_VALUE};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			if (args.length <= 1) {
 				throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, t);
 			}
@@ -630,8 +672,8 @@ public class BasicLogic {
 			if (Static.anyBooleans(args)) {
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
-					boolean arg1 = Static.getBoolean(args[i - 1]);
-					boolean arg2 = Static.getBoolean(args[i]);
+					boolean arg1 = args[i - 1].primitive(t).castToBoolean();
+					boolean arg2 = args[i].primitive(t).castToBoolean();
 					if (arg1 != arg2) {
 						equals = false;
 						break;
@@ -655,8 +697,8 @@ public class BasicLogic {
 			try {
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
-					double arg1 = Static.getNumber(args[i - 1], t);
-					double arg2 = Static.getNumber(args[i], t);
+					double arg1 = args[i - 1].primitive(t).castToDouble(t);
+					double arg2 = args[i].primitive(t).castToDouble(t);
 					if (arg1 != arg2) {
 						equals = false;
 						break;
@@ -673,7 +715,19 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {var1, var2[, varX...]} Returns true or false if all the arguments are equal";
+			return "Returns true or false if all the arguments are equal";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Iff ALL the arguments are equal, this returns true.", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first variable to compare", Mixed.class, "var1"),
+					new Argument("The second variable to compare", Mixed.class, "var2"),
+					new Argument("If additional variables should be compared, they can also be provided.", Mixed.class, "varX")
+				);
 		}
 
 		public boolean isRestricted() {
@@ -716,11 +770,22 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, val2} Uses a strict equals check, which determines if"
+			return "Uses a strict equals check, which determines if"
 					+ " two values are not only equal, but also the same type. So, while"
 					+ " equals('1', 1) returns true, sequals('1', 1) returns false, because"
 					+ " the first one is a string, and the second one is an int. More often"
 					+ " than not, you want to use plain equals().";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Iff both arguments are both the same type and equal, returns true", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", Mixed.class, "val1"),
+					new Argument("The second value to consider", Mixed.class, "val2")
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -739,10 +804,10 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			equals equals = new equals();
 			if (args[1].getClass().equals(args[0].getClass())
-					&& ((CBoolean) equals.exec(t, environment, args)).getBoolean()) {
+					&& equals.exec(t, environment, args).castToBoolean()) {
 				return new CBoolean(true, t);
 			} else {
 				return new CBoolean(false, t);
@@ -777,7 +842,18 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, val2} Equivalent to not(sequals(val1, val2))";
+			return "Equivalent to not(sequals(val1, val2))";
+		}
+		
+		public Argument returnType() {
+			return new Argument("If the values are not strictly equal, returns true", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", Mixed.class, "val1"),
+					new Argument("The second value to consider", Mixed.class, "val2")
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -793,7 +869,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CBoolean(!((CBoolean) new sequals().exec(t, environment, args)).getBoolean(), t);
+			return new CBoolean(!new sequals().exec(t, environment, args).castToBoolean(), t);
 		}
 
 		public CHVersion since() {
@@ -827,8 +903,19 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, val2} Returns true if the two values are NOT equal, or false"
+			return "Returns true if the two values are NOT equal, or false"
 					+ " otherwise. Equivalent to not(equals(val1, val2))";
+		}
+		
+		public Argument returnType() {
+			return new Argument("If the two values are not equals, return true", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", Mixed.class, "val1"),
+					new Argument("The second value to consider", Mixed.class, "val2")
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -848,9 +935,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
-			equals e = new equals();
-			CBoolean b = (CBoolean) e.exec(t, env, args);
-			return new CBoolean(!b.getBoolean(), t);
+			return new CBoolean(!new equals().exec(t, env, args).castToBoolean(), t);
 		}
 
 		@Override
@@ -880,8 +965,20 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, val2[, valX...]} Returns true if all the values are equal to each other, while"
+			return "Returns true if all the values are equal to each other, while"
 					+ " ignoring case.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Iff all values are equal, ignoring case for strings, returns true", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", Mixed.class, "val1"),
+					new Argument("The second value to consider", Mixed.class, "val2"),
+					new Argument("Additional values to consider", CArray.class, "valX").setGenerics(new Generic(Mixed.class)).setVarargs()
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -900,15 +997,15 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			if (args.length <= 1) {
 				throw new ConfigRuntimeException("At least two arguments must be passed to equals_ic", ExceptionType.InsufficientArgumentsException, t);
 			}
 			if (Static.anyBooleans(args)) {
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
-					boolean arg1 = Static.getBoolean(args[i - 1]);
-					boolean arg2 = Static.getBoolean(args[i]);
+					boolean arg1 = args[i - 1].primitive(t).castToBoolean();
+					boolean arg2 = args[i].primitive(t).castToBoolean();
 					if (arg1 != arg2) {
 						equals = false;
 						break;
@@ -932,8 +1029,8 @@ public class BasicLogic {
 			try {
 				boolean equals = true;
 				for (int i = 1; i < args.length; i++) {
-					double arg1 = Static.getNumber(args[i - 1], t);
-					double arg2 = Static.getNumber(args[i], t);
+					double arg1 = args[i - 1].primitive(t).castToDouble(t);
+					double arg2 = args[i].primitive(t).castToDouble(t);
 					if (arg1 != arg2) {
 						equals = false;
 						break;
@@ -975,6 +1072,17 @@ public class BasicLogic {
 			return "boolean {val1, val2} Returns true if the two values are NOT equal to each other, while"
 					+ " ignoring case.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("Returns true if the two values are not equal to each other.", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", Mixed.class, "val1"),
+					new Argument("The second value to consider", Mixed.class, "val2")
+				);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -993,8 +1101,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			equals_ic e = new equals_ic();
-			return new CBoolean(!((CBoolean) e.exec(t, environment, args)).getBoolean(), t);
+			return new CBoolean(!new equals_ic().exec(t, environment, args).castToBoolean(), t);
 		}
 
 		@Override
@@ -1027,7 +1134,7 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray && args[1] instanceof CArray) {
 				return new CBoolean(args[0] == args[1], t);
 			} else {
@@ -1044,9 +1151,20 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, val2} Returns true if and only if the two values are actually the same reference."
+			return "Returns true if and only if the two values are actually the same reference."
 					+ " Primitives that are equal will always be the same reference, this method is only useful for"
 					+ " object/array comparisons.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns true if the two values are the exact same reference", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", Mixed.class, "val1"),
+					new Argument("The second value to consider", Mixed.class, "val2")
+				);
 		}
 
 		public CHVersion since() {
@@ -1082,8 +1200,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = args[0].primitive(t).castToDouble(t);
+			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CBoolean(arg1 < arg2, t);
 		}
 
@@ -1092,7 +1210,18 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {var1, var2} Returns the results of a less than operation";
+			return "Returns the results of a less than operation";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns true if var1 is less than var2", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2")
+				);
 		}
 
 		public boolean isRestricted() {
@@ -1135,8 +1264,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = args[0].primitive(t).castToDouble(t);
+			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CBoolean(arg1 > arg2, t);
 		}
 
@@ -1145,7 +1274,18 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {var1, var2} Returns the result of a greater than operation";
+			return "Returns the result of a greater than operation";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns true if var1 is greater than var2", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2")
+				);
 		}
 
 		public boolean isRestricted() {
@@ -1188,8 +1328,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = args[0].primitive(t).castToDouble(t);
+			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CBoolean(arg1 <= arg2, t);
 		}
 
@@ -1198,7 +1338,18 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {var1, var2} Returns the result of a less than or equal to operation";
+			return "Returns the result of a less than or equal to operation";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns true if var1 is less than  or equal to var2", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2")
+				);
 		}
 
 		public boolean isRestricted() {
@@ -1242,8 +1393,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			double arg1 = Static.getNumber(args[0], t);
-			double arg2 = Static.getNumber(args[1], t);
+			double arg1 = args[0].primitive(t).castToDouble(t);
+			double arg2 = args[1].primitive(t).castToDouble(t);
 			return new CBoolean(arg1 >= arg2, t);
 		}
 
@@ -1252,7 +1403,18 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {var1, var2} Returns the result of a greater than or equal to operation";
+			return "Returns the result of a greater than or equal to operation";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns true if var1 is greater than or equal to var2", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2")
+				);
 		}
 
 		public boolean isRestricted() {
@@ -1298,7 +1460,7 @@ public class BasicLogic {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handleBraces it appropriately.
 			for (Construct c : args) {
-				if (!Static.getBoolean(c)) {
+				if (!c.primitive(t).castToBoolean()) {
 					return new CBoolean(false, t);
 				}
 			}
@@ -1306,10 +1468,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().seval(tree, env);
-				boolean b = Static.getBoolean(c);
+				boolean b = c.primitive(t).castToBoolean();
 				if (b == false) {
 					return new CBoolean(false, t);
 				}
@@ -1322,8 +1484,20 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {var1, [var2...]} Returns the boolean value of a logical AND across all arguments. Uses lazy determination, so once "
+			return "Returns the boolean value of a logical AND across all arguments. Uses lazy determination, so once "
 					+ "an argument returns false, the function returns.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the logical AND value", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2"),
+					new Argument("Additional values to consider", CArray.class, "varX").setGenerics(new Generic(CPrimitive.class)).setVarargs()
+				);
 		}
 
 		public boolean isRestricted() {
@@ -1350,7 +1524,7 @@ public class BasicLogic {
 			while (it.hasNext()) {
 				//Remove hard coded true values, they won't affect the calculation at all
 				ParseTree child = it.next();
-				if (child.isConst() && Static.getBoolean(child.getData()) == true) {
+				if (child.isConst() && child.getData().primitive(t).castToBoolean() == true) {
 					it.remove();
 				}
 			}
@@ -1390,7 +1564,7 @@ public class BasicLogic {
 			//This will only happen if they hardcode true/false in, but we still
 			//need to handleBraces it appropriately.
 			for (Construct c : args) {
-				if (Static.getBoolean(c)) {
+				if (c.primitive(t).castToBoolean()) {
 					return new CBoolean(true, t);
 				}
 			}
@@ -1398,10 +1572,10 @@ public class BasicLogic {
 		}
 
 		@Override
-		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
+		public CBoolean execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			for (ParseTree tree : nodes) {
 				Construct c = env.getEnv(GlobalEnv.class).GetScript().eval(tree, env);
-				if (Static.getBoolean(c)) {
+				if (c.primitive(t).castToBoolean()) {
 					return new CBoolean(true, t);
 				}
 			}
@@ -1413,8 +1587,20 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {var1, [var2...]} Returns the boolean value of a logical OR across all arguments. Uses lazy determination, so once an "
+			return "Returns the boolean value of a logical OR across all arguments. Uses lazy determination, so once an "
 					+ "argument resolves to true, the function returns.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the logical OR value", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2"),
+					new Argument("Additional values to consider", CArray.class, "varX").setGenerics(new Generic(CPrimitive.class)).setVarargs()
+				);
 		}
 
 		public boolean isRestricted() {
@@ -1441,7 +1627,7 @@ public class BasicLogic {
 			while (it.hasNext()) {
 				//Remove hard coded false values, they won't affect the calculation at all
 				ParseTree child = it.next();
-				if (child.isConst() && Static.getBoolean(child.getData()) == false) {
+				if (child.isConst() && child.getData().primitive(t).castToBoolean() == false) {
 					it.remove();
 				}
 			}
@@ -1478,7 +1664,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CBoolean(!Static.getBoolean(args[0]), t);
+			return new CBoolean(!args[0].primitive(t).castToBoolean(), t);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1486,7 +1672,17 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {var1} Returns the boolean value of a logical NOT for this argument";
+			return "Returns the boolean value of a logical NOT for this argument";
+		}
+		
+		public Argument returnType() {
+			return new Argument("The boolean NOT of the value", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to consider", CPrimitive.class, "var1")
+				);
 		}
 
 		public boolean isRestricted() {
@@ -1529,7 +1725,18 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, val2} Returns the xor of the two values.";
+			return "Returns the xor of the two values.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the logical XOR value", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2")
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1548,9 +1755,9 @@ public class BasicLogic {
 			return null;
 		}
 
-		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			boolean val1 = Static.getBoolean(args[0]);
-			boolean val2 = Static.getBoolean(args[1]);
+		public CBoolean exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			boolean val1 = args[0].primitive(t).castToBoolean();
+			boolean val2 = args[1].primitive(t).castToBoolean();
 			return new CBoolean(val1 ^ val2, t);
 		}
 
@@ -1580,7 +1787,19 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, [val2...]} Return the equivalent of not(and())";
+			return "Return the equivalent of not(and())";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the logical NAND value", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2"),
+					new Argument("Additional values to consider", CArray.class, "varX").setGenerics(new Generic(CPrimitive.class)).setVarargs()
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1606,7 +1825,7 @@ public class BasicLogic {
 		@Override
 		public Construct execs(Target t, Environment env, Script parent, ParseTree... nodes) {
 			and and = new and();
-			boolean val = ((CBoolean) and.execs(t, env, parent, nodes)).getBoolean();
+			boolean val = and.execs(t, env, parent, nodes).castToBoolean();
 			return new CBoolean(!val, t);
 		}
 
@@ -1634,7 +1853,19 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, [val2...]} Returns the equivalent of not(or())";
+			return "Returns the equivalent of not(or())";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the logical NOR value", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2"),
+					new Argument("Additional values to consider", CArray.class, "varX").setGenerics(new Generic(CPrimitive.class)).setVarargs()
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1660,7 +1891,7 @@ public class BasicLogic {
 		@Override
 		public Construct execs(Target t, Environment environment, Script parent, ParseTree... args) throws ConfigRuntimeException {
 			or or = new or();
-			boolean val = ((CBoolean) or.execs(t, environment, parent, args)).getBoolean();
+			boolean val = or.execs(t, environment, parent, args).castToBoolean();
 			return new CBoolean(!val, t);
 		}
 
@@ -1688,7 +1919,18 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "boolean {val1, val2} Returns the xnor of the two values";
+			return "Returns the xnor of the two values";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the logical XNOR value", CBoolean.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CPrimitive.class, "var1"),
+					new Argument("The second value to consider", CPrimitive.class, "var2")
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1709,7 +1951,7 @@ public class BasicLogic {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			xor xor = new xor();
-			boolean val = ((CBoolean) xor.exec(t, environment, args)).getBoolean();
+			boolean val = xor.exec(t, environment, args).castToBoolean();
 			return new CBoolean(!val, t);
 		}
 
@@ -1739,7 +1981,19 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "int {int1, [int2...]} Returns the bitwise AND of the values";
+			return "Returns the bitwise AND of the values";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the bitwise AND value", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CInt.class, "var1"),
+					new Argument("The second value to consider", CInt.class, "var2"),
+					new Argument("Additional values to consider", CArray.class, "varX").setGenerics(new Generic(CInt.class)).setVarargs()
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1762,9 +2016,9 @@ public class BasicLogic {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_and requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
 			}
-			long val = Static.getInt(args[0], t);
+			long val = args[0].primitive(t).castToInt(t);
 			for (int i = 1; i < args.length; i++) {
-				val = val & Static.getInt(args[i], t);
+				val = val & args[i].primitive(t).castToInt(t);
 			}
 			return new CInt(val, t);
 		}
@@ -1797,7 +2051,19 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "int {int1, [int2...]} Returns the bitwise OR of the specified values";
+			return "Returns the bitwise OR of the specified values";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the bitwise OR value", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CInt.class, "var1"),
+					new Argument("The second value to consider", CInt.class, "var2"),
+					new Argument("Additional values to consider", CArray.class, "varX").setGenerics(new Generic(CInt.class)).setVarargs()
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1820,9 +2086,9 @@ public class BasicLogic {
 			if (args.length < 1) {
 				throw new ConfigRuntimeException("bit_or requires at least one argument", ExceptionType.InsufficientArgumentsException, t);
 			}
-			long val = Static.getInt(args[0], t);
+			long val = args[0].primitive(t).castToInt(t);
 			for (int i = 1; i < args.length; i++) {
-				val = val | Static.getInt(args[i], t);
+				val = val | args[i].primitive(t).castToInt(t);
 			}
 			return new CInt(val, t);
 		}
@@ -1859,6 +2125,16 @@ public class BasicLogic {
 		public String docs() {
 			return "int {int1} Returns the bitwise NOT of the given value";
 		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the bitwise NOT value", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The value to consider", CInt.class, "var1")
+				);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1877,7 +2153,7 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			return new CInt(~Static.getInt(args[0], t), t);
+			return new CInt(~args[0].primitive(t).castToInt(t), t);
 		}
 
 		@Override
@@ -1906,7 +2182,18 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "int {value, bitsToShift} Left shifts the value bitsToShift times";
+			return "Left shifts the value bitsToShift times";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the shifted value", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CInt.class, "value"),
+					new Argument("The second value to consider", CInt.class, "bitsToShift")
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1926,8 +2213,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			long value = Static.getInt(args[0], t);
-			long toShift = Static.getInt(args[1], t);
+			long value = args[0].primitive(t).castToInt(t);
+			long toShift = args[1].primitive(t).castToInt(t);
 			return new CInt(value << toShift, t);
 		}
 
@@ -1959,6 +2246,17 @@ public class BasicLogic {
 		public String docs() {
 			return "int {value, bitsToShift} Right shifts the value bitsToShift times";
 		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the shifted value", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CInt.class, "value"),
+					new Argument("The second value to consider", CInt.class, "bitsToShift")
+				);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1977,8 +2275,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			long value = Static.getInt(args[0], t);
-			long toShift = Static.getInt(args[1], t);
+			long value = args[0].primitive(t).castToInt(t);
+			long toShift = args[1].primitive(t).castToInt(t);
 			return new CInt(value >> toShift, t);
 		}
 
@@ -2009,8 +2307,19 @@ public class BasicLogic {
 		}
 
 		public String docs() {
-			return "int {value, bitsToShift} Right shifts value bitsToShift times, pushing a 0, making"
+			return "Right shifts value bitsToShift times, pushing a 0, making"
 					+ " this an unsigned right shift.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("Returns the shifted value", CInt.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+					new Argument("The first value to consider", CInt.class, "value"),
+					new Argument("The second value to consider", CInt.class, "bitsToShift")
+				);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2030,8 +2339,8 @@ public class BasicLogic {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			long value = Static.getInt(args[0], t);
-			long toShift = Static.getInt(args[1], t);
+			long value = args[0].primitive(t).castToInt(t);
+			long toShift = args[1].primitive(t).castToInt(t);
 			return new CInt(value >>> toShift, t);
 		}
 
