@@ -735,6 +735,52 @@ public class Meta {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
+	}
 		
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class psetop extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			Static.AssertPlayerNonNull(p, t);
+			boolean state = false;
+			if(args.length == 2) {
+				p = Static.GetPlayer(args[0].val(), t);
+				state = Static.getBoolean(args[1]);
+			} else if(args.length == 1) {
+				state = Static.getBoolean(args[0]);
+			}
+			
+			p.setOp(state);
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "psetop";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2};
+		}
+
+		public String docs() {
+			return "string {[player], status} Sets whether or not a player has operator status. If no player is specified the player running the script is given.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
 	}
 }
