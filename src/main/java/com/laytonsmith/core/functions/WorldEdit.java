@@ -1545,8 +1545,7 @@ public class WorldEdit {
 
 			try {
 				mgr.save();
-			}
-			catch (Exception e) {
+			} catch (Exception e) {
 				throw new ConfigRuntimeException("Error while defining flags", ExceptionType.PluginInternalException, t, e);
 			}
 
