@@ -1448,10 +1448,10 @@ public class WorldEdit {
 
         public String docs() {
             return "void {world, region, flagName, flagValue, [group]} Add/change/remove flag for selected region. FlagName should be any"
-					+ " supported flag from this list http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags. For flagValue use types which"
+					+ " supported flag from [http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags this list]. For the flagValue, use types which"
 					+ " are supported by WorldGuard. Add group argument if you want to add WorldGuard group flag (read more about group"
-					+ " flag type here: http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags#Group). Set flagValue as null (and don't set"
-					+ " group) if you want to delete flag from region.";
+					+ " flag types [http://wiki.sk89q.com/wiki/WorldGuard/Regions/Flags#Group here]). Set flagValue as null (and don't set"
+					+ " group) to delete the flag from the region.";
         }
 
         public ExceptionType[] thrown() {
@@ -1481,7 +1481,7 @@ public class WorldEdit {
             ProtectedRegion region = mgr.getRegion(regionName);
 
 			if (region == null) {
-				if (regionName.equalsIgnoreCase("__global__")) {
+				if ("__global__".equalsIgnoreCase(regionName)) {
 					region = new GlobalProtectedRegion(regionName);
 					mgr.addRegion(region);
 				} else {
