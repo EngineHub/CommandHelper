@@ -581,53 +581,42 @@ public class CompilerFunctions {
 			return args[0];
 		}
 
-		public Argument returnType() {
-			return new Argument("", Mixed.class);
-		}
-
+		@Override
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(new Argument("", Mixed.class, "argument").setOptional());
 		}
 	}
 
-//	@api
-//	public static class __cbrace__ extends DummyFunction implements Optimizable {
-//
-//		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-//			throw new UnsupportedOperationException("Not supported yet.");
-//		}
-//
-//		@Override
-//		public Set<OptimizationOption> optimizationOptions() {
-//			return EnumSet.of(
-//					OptimizationOption.OPTIMIZE_DYNAMIC);
-//		}
-//
-//		@Override
-//		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
-//			FileOptions options = new FileOptions(new EnumMap<FileOptions.Directive, String>(FileOptions.Directive.class), Target.UNKNOWN);
-//			if (!children.isEmpty()) {
-//				options = children.get(0).getFileOptions();
-//			}
-//			ParseTree node;
-//			if (children.isEmpty()) {
-//				node = new ParseTree(new CVoid(t), options);
-//			} else if (children.size() == 1) {
-//				node = children.get(0);
-//			} else {
-//				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
-//				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
-//						+ " report this error to the developer.", t);
-//			}
-//			return new ParseTree(new CBrace(node), options);
-//		}
-//
-//		public Class<? extends Mixed> returnType() {
-//			throw new UnsupportedOperationException("Not supported yet.");
-//		}
-//
-//		public ArgumentBuilder arguments() {
-//			throw new UnsupportedOperationException("Not supported yet.");
-//		}
-//	}
+	@api
+	public static class __cbrace__ extends DummyFunction implements Optimizable {
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			throw new UnsupportedOperationException("Not supported yet.");
+		}
+
+		@Override
+		public Set<OptimizationOption> optimizationOptions() {
+			return EnumSet.of(
+					OptimizationOption.OPTIMIZE_DYNAMIC);
+		}
+
+		@Override
+		public ParseTree optimizeDynamic(Target t, Environment env, List<ParseTree> children) throws ConfigCompileException, ConfigRuntimeException {
+			FileOptions options = new FileOptions(new EnumMap<FileOptions.Directive, String>(FileOptions.Directive.class), Target.UNKNOWN);
+			if (!children.isEmpty()) {
+				options = children.get(0).getFileOptions();
+			}
+			ParseTree node;
+			if (children.isEmpty()) {
+				node = new ParseTree(new CVoid(t), options);
+			} else if (children.size() == 1) {
+				node = children.get(0);
+			} else {
+				//This shouldn't happen. If it does, it means that the autoconcat didn't already run.
+				throw new ConfigCompileException("Unexpected children. This appears to be an error, as __autoconcat__ should have already been processed. Please"
+						+ " report this error to the developer.", t);
+			}
+			return new ParseTree(new CBrace(node), options);
+		}
+	}
 }

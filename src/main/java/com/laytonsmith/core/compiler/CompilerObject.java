@@ -18,6 +18,7 @@ import com.laytonsmith.core.constructs.Token.TType;
 import com.laytonsmith.core.constructs.Variable;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
+import com.laytonsmith.core.functions.ArrayHandling;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EmptyStackException;
@@ -41,6 +42,10 @@ class CompilerObject {
 	ParseTree pointer;
 	ParseTree root;
 	CompilerEnvironment env;
+	
+	private static final String __autoconcat__ = new CompilerFunctions.__autoconcat__().getName();
+	private static final String array_get = new ArrayHandling.array_get().getName();
+	private static final String __cbrace__ = new CompilerFunctions.__cbrace__().getName();
 
 	CompilerObject(TokenStream stream) {
 		this.stream = stream;
@@ -108,7 +113,7 @@ class CompilerObject {
 		
 		if(t.type == TType.FUNC_START){
 			//It's a loose parenthetical. Push an autoconcat onto the stack.
-			CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
+			CFunction f = new CFunction(__autoconcat__, Target.UNKNOWN);
 			functionLines.add(peek().getTarget());
 			pushNode(f);
 			autoConcatCounter++;
@@ -154,9 +159,9 @@ class CompilerObject {
 			if(pointer.hasChildren()){
 				ParseTree lhs = pointer.getChildAt(pointer.numberOfChildren() - 1);
 				pointer.removeChildAt(pointer.numberOfChildren() - 1);
-				pushNode(new CFunction("array_get", Target.UNKNOWN));
+				pushNode(new CFunction(array_get, Target.UNKNOWN));
 				pointer.addChild(lhs);
-				pushNode(new CFunction("__autoconcat__", Target.UNKNOWN));
+				pushNode(new CFunction(__autoconcat__, Target.UNKNOWN));
 			} else {
 				//For now, a compile error
 				throw new ConfigCompileException("Unexpected left square bracket", t.getTarget());
@@ -179,7 +184,7 @@ class CompilerObject {
 			return;
 		}
 		if (t.type == TType.LCURLY_BRACKET) {
-			CFunction f = new CFunction("__cbrace__", t.getTarget());
+			CFunction f = new CFunction(__cbrace__, t.getTarget());
 			pushNode(f);
 			braceCounter++;
 			braceLines.push(t.getTarget());
@@ -191,7 +196,7 @@ class CompilerObject {
 			}
 			//If our pointer has multiple children, we need to throw them all in an autoconcat
 			if(pointer.numberOfChildren() > 1){
-				ParseTree ac = new ParseTree(new CFunction("__autoconcat__", Target.UNKNOWN), stream.getFileOptions());
+				ParseTree ac = new ParseTree(new CFunction(__autoconcat__, Target.UNKNOWN), stream.getFileOptions());
 				ac.setChildren(new ArrayList<ParseTree>(pointer.getChildren()));
 				pointer.removeChildren();
 				pointer.addChild(ac);
@@ -207,8 +212,8 @@ class CompilerObject {
 				&& peek().type != TType.RSQUARE_BRACKET
 				&& peek().type != TType.LCURLY_BRACKET) {
 			//... unless we're already in an autoconcat
-			if (!(pointer.getData() instanceof CFunction && ((CFunction) pointer.getData()).val().equals("__autoconcat__"))) {
-				CFunction f = new CFunction("__autoconcat__", Target.UNKNOWN);
+			if (!(pointer.getData() instanceof CFunction && ((CFunction) pointer.getData()).val().equals(__autoconcat__))) {
+				CFunction f = new CFunction(__autoconcat__, Target.UNKNOWN);
 				pushNode(f);
 				autoConcatCounter++;
 			}

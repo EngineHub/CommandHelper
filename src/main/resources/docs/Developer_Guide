@@ -1,0 +1,92 @@
+This page is intended for developers of the backend MethodScript engine, not
+for assistance with writing scripts in MethodScript. Before beginning development
+with MethodScript, you should have a firm grasp of Java, including concepts
+like inheritance, abstraction, reflection, annotations, generics, etc. Additionally,
+you should have a firm grasp of how the language itself works, from the scripting
+perspective.
+
+== Abstraction ==
+
+In general, the compiler works under the assumption that the end runtime is unknown. When compilation
+is initialized, only a few key functions are strictly required to be "core" functions. That is,
+they MUST have the same implementation in all implementations. Once the Abstract Syntax
+Tree (AST) is created in memory, it is then linked to a particular platform, which can then
+be either used as an in-memory binary, or can be cross compiled to something else.
+
+The commonality between all implementations of MethodScript is limited to the
+core functions including procedure related functions, exception related functions,
+control flow related functions, basic logic and operator functions, object creation
+related functions, and data handling functions. All implementations must accept
+that the compiler will use the default implementation of all these functions during
+compilation, for static code analysis. Most of these functions are deeply integrated
+with the compiler anyways, and cannot be generically separated from the compilation
+process regardless. 
+
+== Compilation ==
+There are 3 distinct stages during compilation. Lexing, Compiling, and Optimizing/Linking.
+
+=== Lexing ===
+Lexing is a standard process that converts the source code into a token stream. This
+process follows fairly standard algorithms, and uses a generic mechanism to add new
+tokens easily. This mechanism could potentially be dynamically expanded per platform,
+should the need arise.
+
+=== Compiling ===
+Compilation converts the token stream into a Abstract Syntax Tree (AST). This step
+can emit only a few errors, (mostly mismatched parenthesis/braces) because the 
+lexer will have already halted if the syntax is wrong, and the optimizer is what 
+actually causes linking errors. The compiler is a typical recursive decent parser,
+only it offloads the complexity of the infix notation parsing to the __autoconcat__
+function, which runs separately later, during optimization.
+
+=== Optimizing/Linking === 
+
+Once initial code compilation has occurred, linking happens. Since
+the linking process happens after control structures have been analysed, this allows
+for "meta programming" using existing control structures familiar to the coder.
+In addition to the ${} compiler directive statements, this allows for meta programming
+to be accomplished much in the same way C++ provides #define, #ifdef, and other
+preprocessor directives, but there is no way for the user to go beyond the intended
+cases of simple function substitution, for instance, conditionally #ifdefing out
+a closing bracket. This is because this substitution occurs AFTER the lexer runs, not
+before it, as happens in C++.
+
+Optimization of the core functions occurs before linking, so actually this step
+can be thought of as optimization/linking/optimization. By optimizing the core
+functions however, we generally only ''remove'' code from the AST. Some data
+transformations do occur, but most of the core functions do not "run" at that time.
+Once the initial optimization happens, we link to the actual runtime requested,
+by passing control to the individual functions that are linked to that particular
+runtime. In combination with the environment, the platform is able to perform whatever
+actions it needs to complete the process with the generic compiler, while still
+custom tailoring the output to suit that particular platform.
+
+Individual functions have the opportunity to optimize themselves, either by running during
+compile time (should they have the ability to) and therefore completely removing themselves
+from the AST, or by simply emitting warnings/errors for whatever conditions they can
+check for.
+
+== Adding a function ==
+Adding a function is simple. Create a new class that implements 
+%%GET_SIMPLE_CLASS|.*|Function%%, (or more probably extends %%GET_SIMPLE_CLASS|.*|AbstractFunction%%
+and tag it with @api. It is important to read and be very familiar with the methods
+in %%GET_SIMPLE_CLASS|.*|Function%%, so you know which methods that are optional should
+be overridden.
+
+== Adding an event ==
+Adding an event is only slightly more complicated than adding a function, though
+the addition of platform specific abstraction layers may complicate the process
+some, both for events and functions. In general, adding an event only requires
+two steps, though in practice it may require additions in several places. The first
+step is to provide the event object via implementing %%GET_SIMPLE_CLASS|.*|Event%%
+(or extending %%GET_SIMPLE_CLASS|.*|AbstractEvent%%) and tagging it with @api. The
+second step is to actually hook into whatever system there is for actually triggering
+the events, and calling %%GET_SIMPLE_CLASS|.*|EventUtils%% TriggerListener method, with
+the event name and event driver, and the actual event object that it will process.
+This method will then find all the user bound events, and decide if they actually
+need to be triggered, then call the appropriate methods in the Event object.
+
+The factors that can further complicate this are the fact that you will likely be using
+abstract event handlers for all of the actual event objects, and that some events
+are not as straightforward to modify. These pain points will hopefully be corrected
+in the future.

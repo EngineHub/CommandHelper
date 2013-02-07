@@ -13,6 +13,7 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Function;
 import com.laytonsmith.core.functions.FunctionList;
+import com.laytonsmith.core.functions.StringHandling;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -28,6 +29,9 @@ class OptimizerObject {
 	private final static EnumSet<Optimizable.OptimizationOption> NO_OPTIMIZATIONS = EnumSet.noneOf(Optimizable.OptimizationOption.class);
 	private ParseTree root;
 	private Environment env;
+	
+	private final static String __autoconcat__ = new CompilerFunctions.__autoconcat__().getName();
+	private final static String cc = new StringHandling.cc().getName();
 
 	public OptimizerObject(ParseTree root, Environment compilerEnvironment) {
 		this.root = root;
@@ -72,10 +76,10 @@ class OptimizerObject {
 	 */
 	private void optimize01(ParseTree tree, Environment compilerEnvironment) throws ConfigCompileException {
 		com.laytonsmith.core.compiler.CompilerFunctions.__autoconcat__ autoconcat = (com.laytonsmith.core.compiler.CompilerFunctions.__autoconcat__) FunctionList.getFunction("__autoconcat__");
-		if (tree.getData() instanceof CFunction && tree.getData().val().equals("cc")) {
+		if (tree.getData() instanceof CFunction && tree.getData().val().equals(cc)) {
 			for (int i = 0; i < tree.getChildren().size(); i++) {
 				ParseTree node = tree.getChildAt(i);
-				if (node.getData().val().equals("__autoconcat__")) {
+				if (node.getData().val().equals(__autoconcat__)) {
 					ParseTree tempNode = autoconcat.optimizeSpecial(node.getChildren(), false);
 					tree.setData(tempNode.getData());
 					tree.setChildren(tempNode.getChildren());
@@ -84,7 +88,7 @@ class OptimizerObject {
 				}
 			}
 		} else {
-			if (tree.getData() instanceof CFunction && tree.getData().val().equals("__autoconcat__")) {
+			if (tree.getData() instanceof CFunction && tree.getData().val().equals(__autoconcat__)) {
 				ParseTree tempNode = autoconcat.optimizeSpecial(tree.getChildren(), true);
 				tree.setData(tempNode.getData());
 				tree.setChildren(tempNode.getChildren());
@@ -158,7 +162,7 @@ class OptimizerObject {
 				for (int i = 0; i < children.size(); i++) {
 					ParseTree t = children.get(i);
 					if (t.getData() instanceof CFunction) {
-						if (t.getData().val().startsWith("_") || (func != null && func.useSpecialExec())) {
+						if (((CFunction)t.getData()).isProcedure() || (func != null && func.useSpecialExec())) {
 							continue outer;
 						}
 						Function f = (Function) FunctionList.getFunction(t.getData());
