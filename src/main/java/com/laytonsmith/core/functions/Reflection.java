@@ -4,6 +4,8 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.ParseTree;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -63,6 +65,17 @@ public class Reflection {
 					+ "<tr><td>datasources</td><td></td><td>An array of data source protocols available</td></tr>"
 					+ "</table>";
 			//+ "<tr><td></td><td></td><td></td></tr>"
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -256,6 +269,17 @@ public class Reflection {
 					+ " what you are reading right now. User defined variables and procs may not have any documentation, in which case null"
 					+ " is returned. If the specified argument cannot be found, a FormatException is thrown. If no arguments are passed in,"
 					+ " it returns the documentation for " + getName() + ", that is, what you're reading right now.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

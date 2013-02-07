@@ -5,6 +5,8 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigCompileException;
@@ -47,6 +49,17 @@ public class Regex {
                     + " follow typical regex fashion; the 0th element is the whole match, and 1-n are the captures specified in"
                     + " the regex.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
@@ -117,6 +130,17 @@ public class Regex {
             return "array {pattern, subject} Searches subject for all matches to the regular expression given in pattern, unlike reg_match,"
                     + " which just returns the first match.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
@@ -185,6 +209,17 @@ public class Regex {
             return "string {pattern, replacement, subject} Replaces any occurances of pattern with the replacement in subject."
                     + " Back references are allowed.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
@@ -268,6 +303,17 @@ public class Regex {
             return "array {pattern, subject} Splits a string on the given regex, and returns an array of the parts. If"
                     + " nothing matched, an array with one element, namely the original subject, is returned.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
@@ -338,6 +384,17 @@ public class Regex {
         public String docs() {
             return "int {pattern, subject} Counts the number of occurances in the subject.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.FormatException};
@@ -418,6 +475,17 @@ public class Regex {
                     + " it will have special meaning; that is, it escapes all special characters. Use this if you need"
                     + " to use user input or similar as a literal search index.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;

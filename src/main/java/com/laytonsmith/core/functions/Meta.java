@@ -7,6 +7,8 @@ import com.laytonsmith.abstraction.MCPlayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noprofile;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -103,6 +105,17 @@ public class Meta {
 					+ " Commands cannot be run as an offline player. If the first argument is an array of usernames, the command"
 					+ " will be run in the context of each user in the array.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public boolean isRestricted() {
 			return true;
@@ -173,6 +186,17 @@ public class Meta {
 		public String docs() {
 			return "void {command} Runs a single command for this user, as op. Works like runas(~op, '/command') used to work,"
 					+ " before it was deprecated.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -254,6 +278,17 @@ public class Meta {
 			return "void {var1} Runs a command as the current player. Useful for running commands in a loop. Note that this accepts commands like from the "
 					+ "chat; with a forward slash in front.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
@@ -294,6 +329,17 @@ public class Meta {
 		public String docs() {
 			return "string {func1, [func2...]} Groups any number of functions together, and returns void. ";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -326,6 +372,17 @@ public class Meta {
 		public String docs() {
 			return "string {script_string} Executes arbitrary MethodScript. Note that this function is very experimental, and is subject to changing or "
 					+ "removal.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -432,6 +489,17 @@ public class Meta {
 		public String docs() {
 			return "boolean {cmd} Returns true if using call_alias with this cmd would trigger an alias.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -458,6 +526,17 @@ public class Meta {
 					+ " with already; if this happens, this function will still return true, because essentially the return value"
 					+ " simply indicates if the command matches an alias. Also, it is worth noting that this will trigger a player's"
 					+ " personal alias possibly.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -508,6 +587,17 @@ public class Meta {
 					+ " A script that runs player() for instance, would return the specified player's name,"
 					+ " not the player running the command. Setting the label allows you to dynamically set the label"
 					+ " this script is run under as well (in regards to permission checking)";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -577,6 +667,17 @@ public class Meta {
 			return "mixed {} Gets the command (as a string) that ended up triggering this script, exactly"
 					+ " how it was entered by the player. This could be null, if for instance"
 					+ " it is called from within an event.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -689,6 +790,17 @@ public class Meta {
 					+ " for plugins to get around in such a way that this function will not work, this is NOT a bug in CommandHelper, nor is it necessarily"
 					+ " a problem in the other plugin either, but the other plugin will have to make changes for it to work properly.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -730,6 +842,17 @@ public class Meta {
 		public String docs() {
 			return "locationArray {} If this command was being run from a command block, this will return the location of"
 					+ " the block. If a player or console ran this command, (or any other command sender) this will return null.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

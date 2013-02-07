@@ -4,6 +4,8 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
@@ -199,6 +201,17 @@ public class Debug {
         public String docs() {
             return "void {message} Manually logs a timestamped message to the debug log and the console, if debug-mode is set to true in the preferences";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.IOException};
@@ -450,6 +463,17 @@ public class Debug {
 		public String docs() {
 			return "array {} Returns an array of all thread names that are currently running in the JVM."
 					+ " This is a debugging tool for your server, and less of a CommandHelper specific thing.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

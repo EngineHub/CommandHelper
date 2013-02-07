@@ -12,6 +12,8 @@ import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Security;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.Threader;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CClosure;
 import com.laytonsmith.core.constructs.CInt;
 import com.laytonsmith.core.constructs.CString;
@@ -78,6 +80,17 @@ public class FileHandling {
 				+ " the file that is being run, not CommandHelper. If the file is not found, or otherwise can't be read in, an IOException is thrown."
 				+ " If the file specified is not within base-dir (as specified in the preferences file), a SecurityException is thrown."
 				+ " The line endings for the string returned will always be \\n, even if they originally were \\r\\n.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public Exceptions.ExceptionType[] thrown() {
@@ -195,6 +208,17 @@ public class FileHandling {
 				+ " to use in two cases, either you need a remote file via SCP, or a local file is big enough that you notice a delay when"
 				+ " simply using the read() function.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -236,6 +260,17 @@ public class FileHandling {
 
 		public String docs() {
 			return "int {path} Returns the size of a file on the file system.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

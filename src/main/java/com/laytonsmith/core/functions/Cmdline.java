@@ -7,6 +7,8 @@ import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.Prefs;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CString;
@@ -76,6 +78,17 @@ public class Cmdline {
                     + " sys_out(color(RED) . 'This is red') will not cause the next line to also be red, so if you need to print multiple lines out, you should"
                     + " manually add \\n to create your linebreaks, and only make one call to sys_out.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -131,6 +144,17 @@ public class Cmdline {
                     + " sys_err(color(RED) . 'This is red') will not cause the next line to also be red, so if you need to print multiple lines out, you should"
                     + " manually add \\n to create your linebreaks, and only make one call to sys_err.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -184,6 +208,17 @@ public class Cmdline {
             return "void {[int]} Exits the program. If this is being run from the command line, works by exiting the interpreter, with "
                     + " the specified exit code (defaulting to 0). If this is being run from in-game, works just like die().";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -249,6 +284,17 @@ public class Cmdline {
                     + " that. System properties are more reliable than environmental variables, and so are preferred in cases where they exist. For more information about system"
                     + " properties, see http://docs.oracle.com/javase/tutorial/essential/environment/sysprop.html";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -302,6 +348,17 @@ public class Cmdline {
             return "mixed {[variableName]} Returns the environment variable specified, if variableName is set. Otherwise, returns an associative array"
                     + " of all the environment variables.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;
@@ -386,6 +443,17 @@ public class Cmdline {
                     + " always work with get_env, however, so you can rely on that mechanism. The value will always be interpreted as a string, so if you are expecting"
                     + " a particular data type on a call to get_env, you will need to manually cast the variable. Arrays will be toString'd as well, but will be accepted.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public CHVersion since() {
             return CHVersion.V3_3_1;

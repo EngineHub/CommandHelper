@@ -14,6 +14,8 @@ import com.laytonsmith.abstraction.enums.MCWorldEnvironment;
 import com.laytonsmith.abstraction.enums.MCWorldType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -53,6 +55,17 @@ public class World {
 
 		public String docs() {
 			return "array {[world]} Returns a location array for the specified world, or the current player's world, if not specified.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -143,6 +156,17 @@ public class World {
 					+ " may set the spawn differently, and this method will do nothing. In that case, you should use"
 					+ " the plugin's commands to set the spawn.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -163,6 +187,17 @@ public class World {
 		public String docs() {
 			return "void {[world], x, z | [world], locationArray} Resends the chunk data to all clients, using the specified world, or the current"
 					+ " players world if not provided.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -232,6 +267,17 @@ public class World {
 		public String docs() {
 			return "void {x, z, [world]| locationArray, [world]} Regenerate the chunk, using the specified world, or the current"
 					+ " players world if not provided. Beware that this is destructive! Any data in this chunk will be lost!";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -334,6 +380,17 @@ public class World {
 			}
 			return doc.toString();
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
@@ -420,6 +477,17 @@ public class World {
 		public String docs() {
 			return "int {[world]} Returns the time of the specified world, as an integer from"
 					+ " 0 to 24000-1";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -510,6 +578,17 @@ public class World {
 					+ StringUtils.Join(MCWorldType.values(), ", ") + ", environment is one of "
 					+ StringUtils.Join(MCWorldEnvironment.values(), ", ") + ", and seed is an integer.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -550,6 +629,17 @@ public class World {
 
 		public String docs() {
 			return "array {} Returns a list of all currently loaded worlds.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -606,6 +696,17 @@ public class World {
 			return "array {[location array]} Returns an array of x, z, world "
 					+ "coords of the chunk of either the location specified or the location of "
 					+ "the player running the command.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -687,6 +788,17 @@ public class World {
 				+ " falling block of the specified id and type at the specified location, applying"
 				+ " vector array as a velocity if given. Values for the vector array are doubles, and 1.0"
 				+ " seems to imply about 3 times walking speed. Gravity applies for y.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

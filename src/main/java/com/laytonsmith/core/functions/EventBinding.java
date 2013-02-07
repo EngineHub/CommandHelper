@@ -2,6 +2,8 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -42,6 +44,17 @@ public class EventBinding {
 			return "string {event_name, options, prefilter, event_obj, [custom_params], &lt;code&gt;} Binds some functionality to an event, so that"
 					+ " when said event occurs, the event handler will fire. Returns the id of this event, so it can be unregistered"
 					+ " later, if need be.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -145,6 +158,17 @@ public class EventBinding {
 			return "array {} Returns an array of all the events currently registered on the server. Mostly meant for debugging,"
 					+ " however it would be possible to parse this response to cherry pick events to unregister.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -181,6 +205,17 @@ public class EventBinding {
 		public String docs() {
 			return "void {[eventID]} Unbinds an event, which causes it to not run anymore. If called from within an event handler, eventID is"
 					+ " optional, and defaults to the current event id.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -232,6 +267,17 @@ public class EventBinding {
 					+ " If called from outside an event handler, a BindException is thrown. By default, state is true, but you can"
 					+ " uncancel an event (if possible) by calling cancel(false).";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
@@ -281,6 +327,17 @@ public class EventBinding {
 			return "boolean {} Returns whether or not the underlying event is cancelled or not. If the event is not cancellable in the first place,"
 					+ " false is returned. If called from outside an event, a BindException is thrown";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
@@ -329,6 +386,17 @@ public class EventBinding {
 					+ " If serverWide is true, the event is triggered directly in the server, unless it is a CommandHelper specific"
 					+ " event, in which case, serverWide is irrelevant. Defaults to false, which means that only CommandHelper code"
 					+ " will receive the event.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -388,6 +456,17 @@ public class EventBinding {
 					+ " event failed. If throwOnFailure is true, instead of returning false, it will throw"
 					+ " a BindException. The default for throwOnFailure is false. If a monitor level handler"
 					+ " even attempts to modify an event, an exception will be thrown.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -456,6 +535,17 @@ public class EventBinding {
 			return "void {<none> | parameterArray | parameter, [parameter...]} Locks the specified event parameter(s), or all of them,"
 					+ " if specified with no arguments. Locked parameters become read only for lower priority event handlers.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
@@ -519,6 +609,17 @@ public class EventBinding {
 					+ " is still not a guarantee that the event would be successfully modified, just that"
 					+ " it isn't locked.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.BindException};
@@ -560,6 +661,17 @@ public class EventBinding {
 			return "void {} Consumes an event, so that lower priority handlers don't even"
 					+ " recieve the event. Monitor level handlers will still recieve it, however,"
 					+ " and they can check to see if the event was consumed.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -603,6 +715,17 @@ public class EventBinding {
 					+ " for Monitor level handlers, it could also be used for highly robust code,"
 					+ " as an equal priority handler could have consumed the event, but this handler"
 					+ " would still recieve it.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -649,6 +772,17 @@ public class EventBinding {
 		public String docs() {
 			return "array {} Returns meta information about the activity in regards to this event. This"
 					+ " is meant as a debug tool.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {

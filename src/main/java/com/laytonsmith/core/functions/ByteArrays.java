@@ -3,6 +3,8 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -51,6 +53,17 @@ public class ByteArrays {
 			return "byte_array {} Returns a new byte array primitive, which can be operated on with the ba_ series of functions.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -73,6 +86,17 @@ public class ByteArrays {
 					+ " inefficient for dealing with low level bit data.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -92,6 +116,17 @@ public class ByteArrays {
 			return "void {byte_array} Rewinds the byte array marker to 0.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -106,6 +141,17 @@ public class ByteArrays {
 		public String docs() {
 			return "int {byte_array, [pos]} Returns an int, read in as an 8 bit byte, from the given position, or wherever the"
 					+ " marker is currently at by default.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 		
 	}
@@ -124,6 +170,17 @@ public class ByteArrays {
 					+ " marker is currently at by default.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -138,6 +195,17 @@ public class ByteArrays {
 		public String docs() {
 			return "int {byte_array, [pos]} Returns an int, read in as a 16 bit short, from the given position, or wherever the"
 					+ " marker is currently at by default.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 			
 	}
@@ -156,6 +224,17 @@ public class ByteArrays {
 					+ " marker is currently at by default.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -170,6 +249,17 @@ public class ByteArrays {
 		public String docs() {
 			return "int {byte_array, [pos]} Returns an int, read in as a 64 bit long, from the given position, or wherever the"
 					+ " marker is currently at by default.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 		
 	}
@@ -188,6 +278,17 @@ public class ByteArrays {
 					+ " marker is currently at by default.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -202,6 +303,17 @@ public class ByteArrays {
 		public String docs() {
 			return "double {byte_array, [pos]} Returns a double, read in as a 64 bit double, from the given position, or wherever the"
 					+ " marker is currently at by default.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 		
 	}
@@ -229,6 +341,17 @@ public class ByteArrays {
 					+ " by default) to length.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -247,6 +370,17 @@ public class ByteArrays {
 					+ " with ba_set_string.)";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -263,6 +397,17 @@ public class ByteArrays {
 		public String docs() {
 			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 8 bit byte, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 		
 	}
@@ -287,6 +432,17 @@ public class ByteArrays {
 					+ " marker is currently at by default. If the string is empty, a \\0 is written instead.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -303,6 +459,17 @@ public class ByteArrays {
 		public String docs() {
 			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 16 bit short, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 		
 	}
@@ -323,6 +490,17 @@ public class ByteArrays {
 					+ " marker is currently at by default.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -339,6 +517,17 @@ public class ByteArrays {
 		public String docs() {
 			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 64 bit, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 		
 	}
@@ -359,6 +548,17 @@ public class ByteArrays {
 					+ " marker is currently at by default.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -375,6 +575,17 @@ public class ByteArrays {
 		public String docs() {
 			return "void {byte_array, double, [pos]} Writes a double, interpreted as a 64 bit double, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 		
 	}
@@ -395,6 +606,17 @@ public class ByteArrays {
 					+ " starting at pos, or wherever the marker is currently at by default.";
 		}
 		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
+		
 	}
 	
 	@api
@@ -413,6 +635,17 @@ public class ByteArrays {
 					+ " then writes the UTF-8 string itself. If an external application requires the string to be serialized"
 					+ " in a different manner, then use the string-byte_array conversion methods in StringHandling, however"
 					+ " strings written in this manner are compatible with ba_get_string.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 		
 	}

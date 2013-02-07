@@ -6,6 +6,8 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.PermissionsResolver;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
@@ -43,6 +45,17 @@ public class Permissions {
 					+ " it works with offline players, but that means that names must be an exact match. If you notice, this function isn't"
 					+ " restricted. However, it IS restricted if the player attempts to check another player's permissions. If run from"
 					+ " the console, will always return true.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public Exceptions.ExceptionType[] thrown() {

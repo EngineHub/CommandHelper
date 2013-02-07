@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -62,6 +64,17 @@ public class EntityManagement {
 				+ "Note: you can't remove players. As a safety measure for working with NPC plugins, it will "
 				+ "not work on anything human, even if it is not a player.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -104,6 +117,17 @@ public class EntityManagement {
 
 		public String docs() {
 			return "string {entityID} Returns the EntityType of the entity with the specified ID.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -152,6 +176,17 @@ public class EntityManagement {
 		public String docs() {
 			return "int {entityID} Returns the mob's age as an integer. Zero represents the point of adulthood. Throws an"
 					+ " UnageableMobException if the mob is not a type that ages";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -208,6 +243,17 @@ public class EntityManagement {
 			return "void {entityID, int[, lockAge]} sets the age of the mob to the specified int, and locks it at that age"
 					+ " if lockAge is true, but by default it will not. Throws a UnageableMobException if the mob does not age naturally.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -234,6 +280,17 @@ public class EntityManagement {
 					+ " It returns true if the effect was added or removed as desired. It returns false if the effect was"
 					+ " not added or removed as desired (however, this currently only will happen if an effect is attempted"
 					+ " to be removed, yet isn't already on the mob).";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -352,6 +409,17 @@ public class EntityManagement {
 					+ "specified, or the current player if no arguments are passed. If no projectile is specified, "
 					+ "it defaults to a fireball. Returns the EntityID of the projectile. Valid projectiles: "
 					+ StringUtils.Join(MCProjectileType.values(), ", ", ", or ", " or ");
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

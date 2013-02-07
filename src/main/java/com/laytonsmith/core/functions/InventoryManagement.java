@@ -5,6 +5,8 @@ import com.laytonsmith.abstraction.*;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -44,6 +46,17 @@ public class InventoryManagement {
                     + " of enchant objects, with 0 or more associative arrays which look like:"
                     + " array(etype: The type of enchantment, elevel: The strength of the enchantment))";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.RangeException};
@@ -158,8 +171,18 @@ public class InventoryManagement {
                     + " enchantment mechanism to add enchantments, so any enchantment value will work. If"
                     + " type uses the old format (for instance, \"35:11\"), then the second number is taken"
                     + " to be the data, making this backwards compatible (and sometimes more convenient).";
-
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException};
@@ -255,6 +278,17 @@ public class InventoryManagement {
                     + " the item. itemId can be either a plain number, or a 0:0 number,"
                     + " indicating a data value.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.PlayerOfflineException, Exceptions.ExceptionType.FormatException,
@@ -324,6 +358,17 @@ public class InventoryManagement {
             return "array {[player], itemID} Given an item id, returns the slot numbers"
                     + " that the matching item has at least one item in.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
@@ -402,6 +447,17 @@ public class InventoryManagement {
 					+ " If the player's inv is full, 0 is returned in this case instead of the amount"
 					+ " given.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.FormatException,
@@ -515,6 +571,17 @@ public class InventoryManagement {
                     + " returns the number of items actually taken, which will be"
                     + " from 0 to qty.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public Exceptions.ExceptionType[] thrown() {
             return new Exceptions.ExceptionType[]{Exceptions.ExceptionType.CastException, Exceptions.ExceptionType.PlayerOfflineException,
@@ -618,6 +685,17 @@ public class InventoryManagement {
 					+ " otherwise, the item at that location is returned as an item array, or null, if no item is there. You can determine the inventory type"
 					+ " (and thus the max index count) with get_inventory_type(). An itemArray, like the one used by pinv/set_pinv is returned.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -670,6 +748,17 @@ public class InventoryManagement {
 			return "void {entityID, index, itemArray | locationArray, index, itemArray} Sets the specified item in the specified slot given either an entityID or a location array of a container"
 					+ " object. See get_inventory_type for more information. The itemArray is an array in the same format as pinv/set_pinv takes.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -717,6 +806,17 @@ public class InventoryManagement {
 					+ " ---- Note that not all valid inventory types are actually returnable at this time, due to lack of support in the server, but"
 					+ " the valid return types are: " + StringUtils.Join(MCInventoryType.values(), ", ");
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -759,6 +859,17 @@ public class InventoryManagement {
 		public String docs() {
 			return "int {entityID | locationArray} Returns the max size of the inventory specified. If the block or entity can't have an inventory,"
 					+ " a FormatException is thrown.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -822,6 +933,17 @@ public class InventoryManagement {
 
 		public String docs() {
 			return "void {[playerToShow,] playerInventory} Opens a player's inventory, shown to the player specified's screen.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

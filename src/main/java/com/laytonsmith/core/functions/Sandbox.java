@@ -3,6 +3,8 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.abstraction.*;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -124,6 +126,17 @@ public class Sandbox {
                     + " like the vanilla /give command. player defaults to the current player, and qty defaults to 1. item follows the"
                     + " same type[:data] format used elsewhere.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
@@ -220,6 +233,17 @@ public class Sandbox {
                     + " event handlers for plugins that don't respect the cancelled flag. This function hooks into the play-dirty"
                     + " framework that injects custom event handlers into bukkit.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.BindException};
@@ -268,6 +292,17 @@ public class Sandbox {
                     + " may include nausia, dry mouth, insomnia, or server crashes. (Seriously, this might"
                     + " crash your server, be careful with it.)";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.EnchantmentException, ExceptionType.PlayerOfflineException};
@@ -342,6 +377,17 @@ public class Sandbox {
                     + " This is the raw access function, you probably shouldn't use this, as"
                     + " the CommandHelper vanish api functions will probably be easier to use.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -394,6 +440,17 @@ public class Sandbox {
                     + " see this player or not. This is the raw access function, you probably shouldn't use this, as"
                     + " the CommandHelper vanish api functions will probably be easier to use.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -482,6 +539,17 @@ public class Sandbox {
 
 		public String docs() {
 			return "void {horse, rider} Sets the rider of an entity. horse and rider are entity ids.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

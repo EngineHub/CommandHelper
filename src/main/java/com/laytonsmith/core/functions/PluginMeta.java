@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.StaticLayer;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
@@ -67,6 +69,17 @@ public class PluginMeta {
 					+ " channel name) and message should be a byte_array primitive. Depending on the plugin, these parameters"
 					+ " will vary. If message is null an empty byte_array is sent.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -116,6 +129,17 @@ public class PluginMeta {
 			return "void {[player,] channel, message} Sends a plugin message to the player. Channel should be a string (the"
 					+ " channel name) and message should be a byte_array primitive. Depending on the plugin, these parameters"
 					+ " will vary. If message is null an empty byte_array is sent.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

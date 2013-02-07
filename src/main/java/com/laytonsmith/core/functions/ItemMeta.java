@@ -12,6 +12,8 @@ import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -76,6 +78,17 @@ public class ItemMeta {
 					+ "or null if there isn't any. All items can have a display(name) and/or lore, and more info will "
 					+ "be available for the items that have it. For example, leather armor will have a color field.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -138,6 +151,17 @@ public class ItemMeta {
 					+ "array('Look at my sword', 'my sword is amazing!')). Items with other meta can have additional "
 					+ "fields, for example leather armor could have \"'color': array(r: 64, b: 106, g: 160)\" as a field.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -193,6 +217,17 @@ public class ItemMeta {
 			return "colorArray {[player], inventorySlot} Returns a color array for the color of the leather armor at"
 					+ " the given slot. A CastException is thrown if this is not leather armor at that slot. The color"
 					+ " array returned will look like: array(r: 0, g: 0, b: 0)";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -264,6 +299,17 @@ public class ItemMeta {
 					+ " array(red: 0, green: 0, blue: 0)"
 					+ " array(0, 0, 0)";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -310,6 +356,17 @@ public class ItemMeta {
 		public String docs() {
 			return "boolean {[player], itemSlot} Returns true if the item at the given slot is a piece of leather"
 					+ " armor, that is, if dying it is allowed.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

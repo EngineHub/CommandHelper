@@ -3,6 +3,8 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.Construct;
@@ -58,6 +60,17 @@ public class DataTransformations {
 		public String docs() {
 			return "string {array} Converts an array into a JSON encoded string. Both normal and associative arrays are supported.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -101,6 +114,17 @@ public class DataTransformations {
 			return "array {string} Takes a JSON encoded string, and returns an array, either normal or associative,"
 					+ " depending on the contents of the JSON string. If the JSON string is improperly formatted,"
 					+ " a FormatException is thrown.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

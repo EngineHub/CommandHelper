@@ -6,6 +6,8 @@ import com.laytonsmith.abstraction.enums.MCGameMode;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.commandhelper.CommandHelperPlugin;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.compiler.Optimizable.OptimizationOption;
 import com.laytonsmith.core.constructs.*;
@@ -66,6 +68,17 @@ public class PlayerManagement {
 					+ " Note that most functions won't support the user '~console' (they'll throw a PlayerOfflineException), but you can use this to determine"
 					+ " where a command is being run from.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -106,6 +119,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "array {} Returns an array of all the player names of all the online players on the server";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -196,6 +220,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "array {[location array], distance} Returns an array of all the player names of all the online players within the given radius";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException, ExceptionType.PlayerOfflineException};
@@ -248,6 +283,17 @@ public class PlayerManagement {
 			return "array {[playerName]} Returns an array of x, y, z coords of the player specified, or the player running the command otherwise. Note that the y coordinate is"
 					+ " in relation to the block the player is standing on. The array returned will also include the player's world in index 3 of the array.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -282,6 +328,17 @@ public class PlayerManagement {
 					+ " are not valid, or the player was otherwise prevented from moving, false is returned, otherwise true. If player is omitted, "
 					+ " the current player is used. Note that 1 is automatically added to the y component, which means that sending a player to"
 					+ " x, y, z coordinates shown with F3 will work as expected, instead of getting them stuck inside the floor. ";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -377,6 +434,17 @@ public class PlayerManagement {
 					+ " in their crosshairs. If player is omitted, the current player is used. If the block is too far, a"
 					+ " RangeException is thrown.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException};
@@ -446,6 +514,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[playerName]} Kills the specified player, or the current player if it is omitted";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -500,6 +579,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "array {[playerName]} Returns an array of the groups a player is in. If playerName is omitted, the current player is used.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -543,6 +633,17 @@ public class PlayerManagement {
 					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
 					+ " <li>13 - Player's current entity id</li><li>14 - Is player is in vehicle? Returns true or false.</li></ul>";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -707,6 +808,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "string {[playerName]} Gets the world of the player specified, or the current player, if playerName isn't specified.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -753,6 +865,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[playerName], [message]} Kicks the specified player, with an optional message. If no message is specified, "
 					+ "\"You have been kicked\" is used. If no player is specified, the current player is used, with the default message.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -809,6 +932,17 @@ public class PlayerManagement {
 					+ " it sets the display name of the player running the command. See reset_display_name also. playerName, as well"
 					+ " as all CommandHelper commands expect the player's real name, not their display name.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -859,6 +993,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[playerName]} Resets a player's display name to their real name. If playerName isn't specified, defaults to the"
 					+ " player running the command.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -915,6 +1060,17 @@ public class PlayerManagement {
 					+ " as such: pitch will always be a number between 90 and -90, with -90 being the player looking up, and 90 being the player looking down. Yaw will"
 					+ " always be a number between 0 and 359.9~. When using it as a setter, pitch must be a number between -90 and 90, and yaw may be any number."
 					+ " If the number given is not between 0 and 359.9~, it will be normalized first. 0 is dead west, 90 is north, etc.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1034,6 +1190,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "string {[player]} Returns the player's game mode. It will be one of \"CREATIVE\" or \"SURVIVAL\".";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -1081,6 +1248,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[player], mode} Sets the player's game mode. mode must be either \"CREATIVE\" or \"SURVIVAL\""
 					+ " (case doesn't matter)";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1140,6 +1318,17 @@ public class PlayerManagement {
 			return "int {[player]} Gets the experience of a player within this level, as a percentage, from 0 to 99. (100 would be next level,"
 					+ " therefore, 0.)";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
@@ -1184,6 +1373,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player], xp} Sets the experience of a player within the current level, as a percentage, from 0 to 100.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1234,6 +1434,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player], exp} Gives the player the specified amount of xp.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1286,6 +1497,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "int {[player]} Gets the player's level.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
@@ -1330,6 +1552,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player], level} Sets the level of a player.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1381,6 +1614,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "int {[player]} Gets the total experience of a player.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PlayerOfflineException};
@@ -1425,6 +1669,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player], xp} Sets the total experience of a player.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1480,6 +1735,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "int {[player]} Returns the player's current food level.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -1524,6 +1790,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player], level} Sets the player's food level. This is an integer from 0-?";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1580,6 +1857,17 @@ public class PlayerManagement {
 					+ " It returns true if the effect was added or removed as desired. It returns false if the effect was"
 					+ " not added or removed as desired (however, this currently only will happen if an effect is attempted"
 					+ " to be removed, yet isn't already on the player).";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1663,6 +1951,17 @@ public class PlayerManagement {
 					+ " The array will be full of playerEffect objects, which contain three fields, \"potionID\","
 					+ " \"strength\", and \"seconds\" remaining.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -1682,6 +1981,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player], health} Sets the player's health. health should be an integer from 0-20.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1737,6 +2047,17 @@ public class PlayerManagement {
 			return "boolean {player} Returns whether or not the specified player is online. Note"
 					+ " that the name must match exactly, but it will not throw a PlayerOfflineException"
 					+ " if the player is not online, or if the player doesn't even exist.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -1795,6 +2116,17 @@ public class PlayerManagement {
 			return "boolean {player} Returns whether or not this player is whitelisted. Note that"
 					+ " this will work with offline players, but the name must be exact.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -1839,6 +2171,17 @@ public class PlayerManagement {
 			return "void {player, isWhitelisted} Sets the whitelist flag of the specified player. Note that"
 					+ " this will work with offline players, but the name must be exact.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -1882,6 +2225,17 @@ public class PlayerManagement {
 					+ " a third party ban system, you should instead run the command for that"
 					+ " plugin instead.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -1923,6 +2277,17 @@ public class PlayerManagement {
 					+ " a third party ban system, you should instead run the command for that"
 					+ " plugin instead.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -1962,6 +2327,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "boolean {[player]} Returns whether or not the specified player (or the current"
 					+ " player if not specified) is op";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2003,6 +2379,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "array {[player], locationArray} Sets the player's compass target, and returns the old location.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2054,6 +2441,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "array {[player]} Gets the compass target of the specified player";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -2097,6 +2495,17 @@ public class PlayerManagement {
 					+ " be on fire for. If the player is not on fire, 0 is returned, which incidentally"
 					+ " is false.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -2139,6 +2548,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[player], ticks} Sets the player on fire for the specified number of"
 					+ " ticks. If a boolean is given for ticks, false is 0, and true is 20.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2195,6 +2615,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "boolean {[player]} Returns whether or not the player has the ability to fly";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -2240,6 +2671,17 @@ public class PlayerManagement {
 		public String docs() {
 			return super.docs() + " DEPRECATED(use set_pflight instead)";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(OptimizationOption.OPTIMIZE_DYNAMIC);
@@ -2266,6 +2708,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player], flight} Sets whether or not this player is allowed to fly";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2332,6 +2785,17 @@ public class PlayerManagement {
 		public String docs() {
 			return super.docs() + " DEPRECATED(use set_ptime instead)";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public Set<Optimizable.OptimizationOption> optimizationOptions() {
 			return EnumSet.of(Optimizable.OptimizationOption.OPTIMIZE_DYNAMIC);
@@ -2367,6 +2831,17 @@ public class PlayerManagement {
 			}
 			doc.append("</ul>");
 			return doc.toString();
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2453,6 +2928,17 @@ public class PlayerManagement {
 			return "int {[player]} Returns the time of the specified player, as an integer from"
 					+ " 0 to 24000-1";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -2496,6 +2982,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player]} Resets the time of the player to the time of the world.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2577,6 +3074,17 @@ public class PlayerManagement {
 					+ " a FormatException is thrown, and if the length of the name is greater than 16"
 					+ " characters, a LengthException is thrown.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2617,6 +3125,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "string {[player]} Returns the list name of the specified player, or the current player if none specified.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2639,6 +3158,17 @@ public class PlayerManagement {
 					+ " The array contains the following items: magnitude, x, y, z. These represent a"
 					+ " 3 dimensional Vector. The important part is x, y, z, however, the magnitude is provided"
 					+ " for you as a convenience. (It should equal sqrt(x ** 2 + y ** 2 + z ** 2))";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -2757,6 +3287,17 @@ public class PlayerManagement {
 					+ " is returned if this"
 					+ " happens, otherwise, true is returned.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2803,6 +3344,17 @@ public class PlayerManagement {
 			return "void {[player], locationArray, itemID} Changes a block, but only temporarily, and only for the specified player."
 					+ " This can be used to \"fake\" blocks for a player. ItemID is in the 1[:1] data format.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2842,6 +3394,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "int {[player]} Returns the player's hunger level";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -2887,6 +3450,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "void {[player], hunger} Sets a player's hunger level";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -2927,6 +3501,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "double {[player]} Returns the player's saturation level";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -2972,6 +3557,17 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "void {[player], saturation} ";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -3019,6 +3615,17 @@ public class PlayerManagement {
 			return "array {[playerName]} Returns an array of x, y, z, coords of the bed of the player specified, or the player running the command otherwise."
 					+ "The array returned will also include the bed's world in index 3 of the array. This is set when a player sleeps or by set_pbed_location.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -3051,6 +3658,17 @@ public class PlayerManagement {
 		public String docs() {
 			return "boolean {[player], locationArray | [player], x, y, z} Sets the location of the bed of the player to the specified coordinates."
 					+ " If player is omitted, the current player is used.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -3144,7 +3762,18 @@ public class PlayerManagement {
 
 		public String docs() {
 			return "mixed {[player]} Returns name of vehicle which player is in or null if player is outside the vehicle";
-			}
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
@@ -3190,10 +3819,21 @@ public class PlayerManagement {
 		public String docs() {
 			return "boolean {[player]} Leave vehicle by player or return false if player is outside the vehicle";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.PlayerOfflineException};
-	}
+		}
 
 		public boolean isRestricted() {
 			return true;

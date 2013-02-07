@@ -1,15 +1,20 @@
-
 package com.laytonsmith.core.functions;
 
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.arguments.Generic;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Mixed;
 
 /**
  * Only should be used for test functions, or other typically unreleased or
  * temporary functions.
+ *
  * @author Layton
  */
-public abstract class DummyFunction extends AbstractFunction{
+public abstract class DummyFunction extends AbstractFunction {
 
 	public ExceptionType[] thrown() {
 		return ExceptionType.values();
@@ -28,7 +33,17 @@ public abstract class DummyFunction extends AbstractFunction{
 	}
 
 	public String docs() {
-		return "mixed {...} A dummy function. This should not show up in the documentation.";
+		return "A dummy function. This should not show up in the documentation.";
+	}
+
+	public Argument returnType() {
+		return new Argument("...", Mixed.class);
+	}
+
+	public ArgumentBuilder arguments() {
+		return ArgumentBuilder.Build(
+				new Argument("...", CArray.class, "args").setGenerics(Generic.ANY).setVarargs()
+				);
 	}
 
 	public CHVersion since() {
@@ -42,8 +57,5 @@ public abstract class DummyFunction extends AbstractFunction{
 
 	public String getName() {
 		return this.getClass().getSimpleName();
-	}		
-	
-	
-	
+	}
 }

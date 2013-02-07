@@ -10,6 +10,8 @@ import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.bukkit.BukkitMCWorld;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -65,6 +67,17 @@ public class WorldEdit {
             return "mixed {[player], locationArray | [player]} Sets the player's point 1, or returns it if the array to set isn't specified. If"
                     + " the location is returned, it is returned as a 4 index array:(x, y, z, world)";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
             MCPlayer m = null;
@@ -127,6 +140,17 @@ public class WorldEdit {
         public String docs() {
             return "mixed {[player], array | [player]} Sets the player's point 2, or returns it if the array to set isn't specified";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.CastException};
@@ -227,6 +251,17 @@ public class WorldEdit {
                     + "</ul>"
                     + "If the region cannot be found, a PluginInternalException is thrown.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
@@ -328,6 +363,17 @@ public class WorldEdit {
         public String docs() {
             return "boolean {world, region1, array(region2, [regionN...])} Returns true or false whether or not the specified regions overlap.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
@@ -389,6 +435,17 @@ public class WorldEdit {
         public String docs() {
             return "array {[world]} Returns all the regions in all worlds, or just the one world, if specified.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{};
@@ -433,6 +490,17 @@ public class WorldEdit {
             return "mixed {[player]} Returns the list regions that player is in. If no player specified, then the current player is used."
                     + " If region is found, an array of region names are returned, else an empty is returned";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.PluginInternalException};
@@ -506,6 +574,17 @@ public class WorldEdit {
             return "mixed {Locationarray} Returns a list of regions at the specified location. "
                     + "If regions are found, an array of region names are returned, otherwise, an empty array is returned.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.CastException, ExceptionType.PluginInternalException, ExceptionType.InsufficientArgumentsException};
@@ -581,6 +660,17 @@ public class WorldEdit {
         public String docs() {
             return "int {region, world} Returns the volume of the given region in the given world.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.PluginInternalException};
@@ -618,6 +708,17 @@ public class WorldEdit {
         public String docs() {
             return "boolean {[world], name, array(locationArrayPos1, locationArrayPos2, [[locationArrayPosN]...])} Create region of the given name in the given world.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
@@ -748,6 +849,17 @@ public class WorldEdit {
         public String docs() {
             return "boolean {[world], name} Check if given region exists.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
@@ -821,6 +933,17 @@ public class WorldEdit {
         public String docs() {
             return "boolean {[world], name} Check if a given region exists.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException};
@@ -885,6 +1008,17 @@ public class WorldEdit {
         public String docs() {
             return "boolean {region, [world], [owner1] | region, [world], [array(owner1, ownerN, ...)]} Add owner(s) to given region.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
@@ -988,6 +1122,17 @@ public class WorldEdit {
         public String docs() {
             return "boolean {region, [world], [owner1] | region, [world], [array(owner1, ownerN, ...)]} Remove owner(s) from given region.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
@@ -1091,6 +1236,17 @@ public class WorldEdit {
         public String docs() {
             return "boolean {region, [world], [member1] | region, [world], [array(member1, memberN, ...)]} Add member(s) to given region.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};
@@ -1194,6 +1350,17 @@ public class WorldEdit {
         public String docs() {
             return "boolean {region, [world], [member1] | region, [world], [array(member1, memberN, ...)]} Remove member(s) from given region.";
         }
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
         public ExceptionType[] thrown() {
             return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.PluginInternalException};

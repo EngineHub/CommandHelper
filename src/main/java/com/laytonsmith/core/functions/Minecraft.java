@@ -16,6 +16,8 @@ import com.laytonsmith.abstraction.enums.MCWolfType;
 import com.laytonsmith.abstraction.enums.MCZombieType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
@@ -111,6 +113,17 @@ public class Minecraft {
 			return "int {var1} Does a lookup to return the data value of a name. For instance, returns 1 for 'stone'. If an integer is given,"
 					+ " simply returns that number. If the data value cannot be found, null is returned.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -145,6 +158,17 @@ public class Minecraft {
 					+ " given in bukkit's Material class is what is returned as a fallback, if the id doesn't match a value in the internally maintained list."
 					+ " If a completely invalid argument is passed"
 					+ " in, null is returned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -220,6 +244,17 @@ public class Minecraft {
 					+ " the old item notation (i.e. '35:11'), though for the purposes of this"
 					+ " function, the data is unneccesary.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.FormatException};
@@ -285,6 +320,17 @@ public class Minecraft {
 					+ " for Endermen, they will hold that material, otherwise they will hold nothing. Creepers can be set to " 
 					+ StringUtils.Join(MCCreeperType.values(), ", ", ", or ", " or ") + ", wolves can be " + StringUtils.Join(MCWolfType.values(), ", ", ", or ", " or ") 
 					+ ", and pigs can be " + StringUtils.Join(MCPigType.values(), ", ", ", or ", " or ") + ". An array of the entity IDs spawned is returned.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -359,6 +405,17 @@ public class Minecraft {
 					+ " are supported, but this means that partial matches are NOT supported. You must type the players name exactly. Setting"
 					+ " the player to null will untame the mob. If the entity doesn't exist, nothing happens.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
@@ -422,6 +479,17 @@ public class Minecraft {
 			return "string {entityID} Returns the owner's name, or null if the mob is unowned. An UntameableMobException is thrown if"
 					+ " mob isn't tameable to begin with.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.UntameableMobException, ExceptionType.CastException, ExceptionType.BadEntityException};
@@ -470,6 +538,17 @@ public class Minecraft {
 
 		public String docs() {
 			return "boolean {entityID} Returns true or false if the specified entity is tameable";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -520,6 +599,17 @@ public class Minecraft {
 					+ StringUtils.Join(MCEffect.values(), ", ", ", or ", " or ")
 					+ ". Additional data can be supplied with the syntax EFFECT:DATA. The RECORD_PLAY effect takes the item"
 					+ " id of a disc as data, STEP_SOUND takes a blockID and SMOKE takes a direction bit (4 is upwards).";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -583,6 +673,17 @@ public class Minecraft {
 			return "void {entityID, healthPercent} Sets the specified entity's health (0 kills it), or ignores this call if the entityID doesn't exist or isn't"
 					+ "a LivingEntity.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
@@ -628,6 +729,17 @@ public class Minecraft {
 		public String docs() {
 			return "int {entityID} Returns the entity's health, as a percentage. If the specified entity doesn't exist, or is not"
 					+ " a LivingEntity, a format exception is thrown.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -681,6 +793,17 @@ public class Minecraft {
 					+ "Max player limit; returns the player limit.</li><li>8 - Operators; An array of operators on the server.</li>"
 					+ "<li>9 - Plugins; An array of plugins loaded by the server.</li>"
 					+ "<li>10 - Online Mode; If true, users are authenticated with Mojang before login</li></ul>";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -811,6 +934,17 @@ public class Minecraft {
 		public String docs() {
 			return "Array {} An array of players banned on the server.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{};
@@ -857,6 +991,17 @@ public class Minecraft {
 
 		public String docs() {
 			return "Array {} An array of players whitelisted on the server.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -934,6 +1079,17 @@ public class Minecraft {
 			return "string {locationArray} Gets the spawner type of the specified mob spawner. ----"
 					+ " Valid types will be one of the mob types.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -983,6 +1139,17 @@ public class Minecraft {
 		public String docs() {
 			return "void {locationArray, type} Sets the mob spawner type at the location specified. If the location is not a mob spawner,"
 					+ " or if the type is invalid, a FormatException is thrown.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {
@@ -1148,6 +1315,17 @@ public class Minecraft {
 					+ " || " + MCFireworkType.BALL.name() + "\n"
 					+ "|}\n"
 					+ "The \"named colors\" can be one of: " + StringUtils.Join(MCColor.STANDARD_COLORS.keySet(), ", ", " or ");
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

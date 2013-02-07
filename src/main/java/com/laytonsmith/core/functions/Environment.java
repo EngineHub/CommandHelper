@@ -15,6 +15,8 @@ import com.laytonsmith.abstraction.enums.MCTone;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.annotations.noboilerplate;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.exceptions.CancelCommandException;
@@ -50,6 +52,17 @@ public class Environment {
 					+ " y is the meta data for the block. All blocks will return in this format, but blocks"
 					+ " that don't have meta data normally will return 0 in y. If world isn't specified, the current"
 					+ " player's world is used.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -130,6 +143,17 @@ public class Environment {
 					+ " be a blocktype identifier similar to the type returned from get_block_at, except if the meta"
 					+ " value is not specified, 0 is used. If world isn't specified, the current player's world"
 					+ " is used.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -242,6 +266,17 @@ public class Environment {
 					+ " a RangeException is thrown. If the text on a line overflows 15 characters, it is simply"
 					+ " truncated.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.FormatException};
@@ -327,6 +362,17 @@ public class Environment {
 			return "array {xyzLocation} Given a location array, returns an array of 4 strings of the text in the sign at that"
 					+ " location. If the location given isn't a sign, then a RangeException is thrown.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.FormatException};
@@ -378,6 +424,17 @@ public class Environment {
 		public String docs() {
 			return "boolean {xyzLocation} Returns true if the block at this location is a sign.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException};
@@ -420,6 +477,17 @@ public class Environment {
 		public String docs() {
 			return "void {locationArray} Mostly simulates a block break at a location. Does not trigger an event. Only works with"
 					+ " craftbukkit.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -464,6 +532,17 @@ public class Environment {
 			return "void {x, z, [world], biome | locationArray, biome} Sets the biome of the specified block column."
 					+ " The location array's y value is ignored. ----"
 					+ " Biome may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -532,6 +611,17 @@ public class Environment {
 					+ " y value is ignored. ---- The value returned"
 					+ " may be one of the following: " + StringUtil.joinString(MCBiomeType.values(), ", ", 0);
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException, ExceptionType.InvalidWorldException};
@@ -592,6 +682,17 @@ public class Environment {
 			return "array {x, z, [world] | xyzArray, [world]} Gets the xyz of the highest block at a x and a z."
 					+ "It works the same as get_block_at, except that it doesn't matter now what the Y is."
 					+ "You can set it to -1000 or to 92374 it will just be ignored.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -672,6 +773,17 @@ public class Environment {
 					+ " the explosion"
 					+ " won't hurt the surrounding blocks. If size is 0, and safe is true, you will still see the animation"
 					+ " and hear the sound, but players won't be hurt, and neither will the blocks.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -835,6 +947,17 @@ public class Environment {
 					+ StringUtils.Join(MCTone.values(), ", ", ", or ") + ", optionally suffixed with a pound symbol, which denotes a sharp."
 					+ " (Not all notes can be sharped.)";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
@@ -886,6 +1009,17 @@ public class Environment {
 					+ " <li>occluding: indicates If the block fully blocks vision</li>"
 					+ " <li>burnable: Indicates if the block can burn away</li>"
 					+ "</ul>";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public CHVersion since() {

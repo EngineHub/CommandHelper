@@ -3,6 +3,8 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.Argument;
+import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
@@ -50,6 +52,17 @@ public class Persistance {
 			return "void {[namespace, ...,] key, value} Allows you to store a value, which can then be retrieved later. key must be a string containing"
 					+ " only letters, numbers, underscores. Periods may also be used, but they form a namespace, and have special meaning."
 					+ " (See get_values())";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
@@ -124,6 +137,17 @@ public class Persistance {
 					+ " is returned. On a more detailed note: If the value stored in the persistance database is not actually a construct,"
 					+ " then null is also returned.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
@@ -195,6 +219,17 @@ public class Persistance {
 					+ " a key is also considered a namespace, so 'users.data.username.hi' would return"
 					+ " a single value (in this case).";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
@@ -261,6 +296,17 @@ public class Persistance {
 		public String docs() {
 			return "boolean {[namespace, ...,] key} Returns whether or not there is data stored at the specified key in the Persistance database.";
 		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
+		}
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.IOException, ExceptionType.FormatException};
@@ -307,6 +353,17 @@ public class Persistance {
 
 		public String docs() {
 			return "void {[namespace, ...,] key} Completely removes a value from storage. Calling has_value(key) after this call will return false.";
+		}
+		
+		public Argument returnType() {
+			return new Argument("", C.class);
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("", C.class, ""),
+						new Argument("", C.class, "")
+					);
 		}
 
 		public ExceptionType[] thrown() {
