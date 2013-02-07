@@ -54,6 +54,7 @@ public class ItemMeta {
 			} else {
 				slot = args[0];
 			}
+			Static.AssertPlayerNonNull(p, t);
 			if (slot instanceof CNull) {
 				is = p.getItemInHand();
 			} else {
@@ -123,6 +124,7 @@ public class ItemMeta {
 				slot = args[0];
 				meta = args[1];
 			}
+			Static.AssertPlayerNonNull(p, t);
 			if (slot instanceof CNull) {
 				is = p.getItemInHand();
 			} else {
@@ -193,6 +195,7 @@ public class ItemMeta {
 			} else {
 				slot = Static.getInt32(args[0], t);
 			}
+			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
 			if (is == null) {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
@@ -271,6 +274,7 @@ public class ItemMeta {
 					throw new Exceptions.FormatException("Expected an array but recieved " + args[1] + " instead.", t);
 				}
 			}
+			Static.AssertPlayerNonNull(p, t);
 			MCItemStack is = p.getItemAt(slot);
 			if (is == null) {
 				throw new Exceptions.CastException("There is no item at slot " + slot, t);
@@ -341,6 +345,7 @@ public class ItemMeta {
 			} else {
 				slot = Static.getInt32(args[0], t);
 			}
+			Static.AssertPlayerNonNull(p, t);
 			MCItemMeta im = p.getItemAt(slot).getItemMeta();
 			return new CBoolean(im instanceof MCLeatherArmorMeta, t);
 		}

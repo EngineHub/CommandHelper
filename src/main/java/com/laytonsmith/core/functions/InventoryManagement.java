@@ -95,7 +95,7 @@ public class InventoryManagement {
                 all = false;
                 m = Static.GetPlayer(args[0], t);
             }
-
+			Static.AssertPlayerNonNull(m, t);
             if(all){
                 CArray ret = CArray.GetAssociativeArray(t);
                 for(int i = 0; i < 36; i++){
@@ -218,6 +218,7 @@ public class InventoryManagement {
                 throw new ConfigRuntimeException("Expecting an array as argument " + (args.length==1?"1":"2"), Exceptions.ExceptionType.CastException, t);
             }
             CArray array = (CArray)arg;
+			Static.AssertPlayerNonNull(m, t);
             for(String key : array.keySet()){
                 try{
                     int index = -2;
@@ -311,6 +312,7 @@ public class InventoryManagement {
                 p = Static.GetPlayer(args[0], t);
                 item = args[1].val();
             }
+			Static.AssertPlayerNonNull(p, t);
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
             MCPlayerInventory inv = p.getInventory();
             int total = 0;
@@ -391,6 +393,7 @@ public class InventoryManagement {
                 p = Static.GetPlayer(args[0], t);
                 item = args[1].val();
             }
+			Static.AssertPlayerNonNull(p, t);
             MCItemStack is = Static.ParseItemNotation(this.getName(), item, 0, t);
             MCPlayerInventory inv = p.getInventory();
             CArray ca = new CArray(t);
@@ -481,7 +484,8 @@ public class InventoryManagement {
                 p = Static.GetPlayer(args[0], t);
                 is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
             }
-			
+
+			Static.AssertPlayerNonNull(p, t);
             int total = is.getAmount();
             MCPlayerInventory inv = p.getInventory();
 					
@@ -606,6 +610,7 @@ public class InventoryManagement {
             }
             int total = is.getAmount();
             int remaining = is.getAmount();
+			Static.AssertPlayerNonNull(p, t);
             MCPlayerInventory inv = p.getInventory();
             for(int i = 35; i >= 0; i--){
                 MCItemStack iis = inv.getItem(i);
@@ -918,7 +923,8 @@ public class InventoryManagement {
 			} else {
 				p2 = Static.GetPlayer(args[0], t);
 			}
-			
+
+			Static.AssertPlayerNonNull(p1, t);
 			p1.openInventory(p2.getInventory());
 			return new CVoid(t);
 		}
