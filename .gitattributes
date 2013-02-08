@@ -1,3 +1,6 @@
+# Set default behavior, in case users don't have core.autocrlf set.
+* text=auto
+
 #Make the textual files have the text setting, so things never have the wrong line endings.
 *.java text
 *.xml text
