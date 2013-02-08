@@ -106,4 +106,6 @@ public interface MCPlayer extends MCCommandSender, MCHumanEntity,
 	public boolean isOp();
 	
 	public void setOp(boolean bln);
+
+	public boolean isFlying();
 }
