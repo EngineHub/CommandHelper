@@ -265,6 +265,11 @@ public class ConfigRuntimeException extends RuntimeException {
             p = e.getEnv().getEnv(CommandHelperEnvironment.class).GetPlayer();
         }
         DoReport(e.getMessage(), e.getExceptionType()!=null?e.getExceptionType().toString():"FatalRuntimeException", e.stackTraceTrail, p);
+		if(e.getCause() != null && Prefs.DebugMode()){
+			//This is more of a system level exception, so if debug mode is on, we also want to print this stack trace
+			System.err.println("The previous MethodScript error had an attached cause:");
+			e.getCause().printStackTrace(System.err);
+		}
     }
     
     private static void DoReport(ConfigCompileException e, MCPlayer player){
