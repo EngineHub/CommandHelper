@@ -31,5 +31,8 @@ By submitting code, you agree to dual license your code under the
 the MIT License, barring the special restriction regarding code submissions,
 explained in the SPECIAL_LICENSE.txt file, which is attached.
 
+For details about code formatting standards, and other basic information for
+contributors, please see the CONTRIBUTING.txt file.
+
 Portions of CommandHelper are copyright: wraithguard01, sk89q, Deaygo, 
 t3hk0d3, zml2008, EntityReborn, and albatrossen

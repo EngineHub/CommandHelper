@@ -1,0 +1,52 @@
+To help standardize the code formatting, please follow these guidelines for code
+formatting.
+
+For the most part, the standard Java code conventions should be followed. They can be found at
+http://www.oracle.com/technetwork/java/javase/documentation/codeconvtoc-136057.html
+There are a few exceptions and clarifications however:
+
+* Line Length
+Avoid lines longer than 80 characters. When wrapping lines, follow these conventions:
+
+	* Break after a comma
+	* Break before an operator
+	* Indent to the current level + 2 tabs on the following lines, if the code
+	  directly beneath it is on a different indention level
+	* If breaking in the middle of a  long string, the space should start the newline. 
+		String s = "This is a long string, which has a"
+					+ " break in the middle";
+
+* Indentions
+Use tabs for indentions, NOT spaces. This allows for tab length to be set by the client,
+and also allows for quicker backspacing if deleting indentation.
+
+* Brace style
+Braces should be on the same line as the statement.
+	if(condition) {
+		...
+	}
+	NOT
+	if(condition)
+	{
+		...
+	}
+
+This condenses the file size, and makes more code fit onscreen at once. Since the
+code inside of the block should be indented anyways, there is no readability issue
+as far as determining what code is actually inside the block or not.
+
+All braceable statements MUST use braces, and newlines.
+	if(condition) {
+		code;
+	}
+	NOT
+	if(condition) code;
+	USUALLY NOT
+	if(condition){ code; }
+
+if you have a series of several if statements that only have one statement, and
+it makes sense to have them all lined up, the third example may be used, but is
+still discouraged. Regardless, the statements must ALWAYS have braces.
+
+* Commits
+If you have more than 2 commits, please rebase.
