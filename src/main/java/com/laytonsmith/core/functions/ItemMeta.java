@@ -15,6 +15,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 
@@ -26,6 +27,14 @@ public class ItemMeta {
 	public static String docs(){
 		return "These functions manipulate an item's meta data. The items are modified in a player's inventory.";
 	}
+	
+	private static final String applicableItemMeta = "<ul>"
+			+ "<li>All items - display (string), lore (array of strings)</li>"
+			+ "<li>Books - title (string), author (string), pages (array of strings)</li>"
+			+ "<li>EnchantedBooks - stored (array of enchantment arrays (see Example))</li>"
+			+ "<li>Leather Armor - color (color array (see Example))</li>"
+			+ "<li>Skulls - owner (string) NOTE: the visual change only applies to player skulls</li>"
+			+ "</ul>";
 	
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_itemmeta extends AbstractFunction {
@@ -73,13 +82,31 @@ public class ItemMeta {
 		}
 
 		public String docs() {
-			return "mixed {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given, "
-					+ "or null if there isn't any. All items can have a display(name) and/or lore, and more info will "
-					+ "be available for the items that have it. For example, leather armor will have a color field.";
+			return "mixed {[player,] inventorySlot} Returns an associative array of known ItemMeta for the slot given,"
+					+ " or null if there isn't any. All items can have a display(name) and/or lore, and more info will"
+					+ " be available for the items that have it. ---- Returned keys: " + applicableItemMeta;
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Demonstrates a generic item without meta", "msg(get_itemmeta(null))", 
+							"null"),
+					new ExampleScript("Demonstrates a generic item with meta", "msg(get_itemmeta(null))", 
+							"{display: AmazingSword, lore: {Look at my sword, my sword is amazing}}"),
+					new ExampleScript("Demonstrates a written book", "msg(get_itemmeta(null))", 
+							"{author: Notch, display: null, lore: null, pages: {This is page 1, This is page 2}, title: Example Book}"),
+					new ExampleScript("Demonstrates an EnchantedBook", "msg(get_itemmeta(null))", 
+							"{display: null, lore: null, stored: {{elevel: 1, etype: ARROW_FIRE}}}"),
+					new ExampleScript("Demonstrates a piece of leather armor", "msg(get_itemmeta(null))", 
+							"{color: {b: 106, g: 160, r: 64}, display: null, lore: null}"),
+					new ExampleScript("Demonstrates a skull", "msg(get_itemmeta(null))", 
+							"{display: null, lore: null, owner: Herobrine}")
+			};
 		}
 		
 	}
@@ -133,16 +160,36 @@ public class ItemMeta {
 		}
 
 		public String docs() {
-			return "void {[player,] inventorySlot, ItemMetaArray} Applies the data from the given array to the item at the "
-					+ "specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if none of "
-					+ "the given fields are applicable, the item will become default, as this function overwrites any "
-					+ "existing data. The array should be in the form array('display': 'Sword of Pointy-ness', 'lore': "
-					+ "array('Look at my sword', 'my sword is amazing!')). Items with other meta can have additional "
-					+ "fields, for example leather armor could have \"'color': array(r: 64, b: 106, g: 160)\" as a field.";
+			return "void {[player,] inventorySlot, ItemMetaArray} Applies the data from the given array to the item at the"
+					+ " specified slot. Unused fields will be ignored. If null or an empty array is supplied, or if none of"
+					+ " the given fields are applicable, the item will become default, as this function overwrites any"
+					+ " existing data. ---- Available fields: " + applicableItemMeta;
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Demonstrates removing all meta", "set_itemmeta(null, null)", 
+							"This will make the item in your hand completely ordinary"),
+					new ExampleScript("Demonstrates a generic item with meta", 
+							"set_itemmeta(null, array('display': 'Amazing Sword', 'lore': array('Look at my sword', 'my sword is amazing')))", 
+							"The item in your hands is now amazing"),
+					new ExampleScript("Demonstrates a written book", 
+							"set_itemmeta(null, array('author': 'Writer', 'pages': array('Once upon a time', 'The end.'), 'title': 'Epic Story'})", 
+							"This will write a very short story"),
+					new ExampleScript("Demonstrates an EnchantedBook", 
+							"set_itemmeta(null, array('stored': array(array('elevel': 25, 'etype': DAMAGE_ALL), array('etype': DURABILITY, 'elevel': 3))))", 
+							"This book now contains Unbreaking 3 and Sharpness 25"),
+					new ExampleScript("Demonstrates coloring leather armor", 
+							"set_itemmeta(102, array('color': array(r: 50 b: 150, g: 100)))", 
+							"This will make your chestplate blue-ish"),
+					new ExampleScript("Demonstrates a skull", "set_itemmeta(103, array('owner': 'Notch'))", 
+							"This puts Notch's skin on the skull you are wearing")
+			};
 		}
 		
 	}

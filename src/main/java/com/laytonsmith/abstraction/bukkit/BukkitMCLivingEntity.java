@@ -124,10 +124,29 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 	}
 
 	public MCBlock getTargetBlock(HashSet<Byte> b, int i) {
+		return new BukkitMCBlock(le.getTargetBlock(b, i));
+	}
+
+	public MCBlock getTargetBlock(HashSet<Short> b, int i, boolean castToByte) {
+		if (castToByte) {
+			if (b == null) {
+				return getTargetBlock(null, i);
+			}
+			HashSet<Byte> bb = new HashSet<Byte>();
+			for (int id : b) {
+				bb.add((byte) id);
+			}
+			return getTargetBlock(bb, i);
+		}
 		return new BukkitMCBlock(getFirstTargetBlock(b, i));
 	}
 
-	private List<Block> getLineOfSight(HashSet<Byte> transparent, int maxDistance, int maxLength) {
+	private Block getFirstTargetBlock(HashSet<Short> transparent, int maxDistance) {
+		List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);
+		return blocks.get(0);
+	}
+
+	private List<Block> getLineOfSight(HashSet<Short> transparent, int maxDistance, int maxLength) {
 		if (maxDistance > 512) {
 			maxDistance = 512;
 		}
@@ -146,7 +165,7 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 					break;
 				}
 			} else {
-				if (!transparent.contains((byte) id)) {
+				if (!transparent.contains((short) id)) {
 					break;
 				}
 			}
@@ -214,11 +233,6 @@ public class BukkitMCLivingEntity extends BukkitMCEntity implements MCLivingEnti
 			effects.add(e);
 		}
 		return effects;
-	}
-
-	private Block getFirstTargetBlock(HashSet<Byte> transparent, int maxDistance) {
-		List<Block> blocks = getLineOfSight(transparent, maxDistance, 1);
-		return blocks.get(0);
 	}
 
 	public MCProjectile launchProjectile(MCProjectileType projectile) {

@@ -26,6 +26,8 @@ public interface MCLivingEntity extends MCEntity {
     public int getHealth();
     public MCPlayer getKiller();
     public int getLastDamage();
+	public MCBlock getTargetBlock(HashSet<Short> transparent, int maxDistance, boolean castToByte);
+	public MCBlock getTargetBlock(HashSet<Byte> transparent, int maxDistance);
     public List<MCBlock> getLastTwoTargetBlocks(HashSet<Byte> transparent, int maxDistance);
     public List<MCBlock> getLineOfSight(HashSet<Byte> transparent, int maxDistance);
     public int getMaxHealth();
@@ -33,7 +35,6 @@ public interface MCLivingEntity extends MCEntity {
     public int getMaximumNoDamageTicks();
     public int getNoDamageTicks();
     public int getRemainingAir();
-    public MCBlock getTargetBlock(HashSet<Byte> transparent, int maxDistance);
     public MCProjectile launchProjectile(MCProjectileType projectile);
     public void setHealth(int health);
     public void setLastDamage(int damage);
