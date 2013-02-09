@@ -203,7 +203,7 @@ public final class Static {
 		long l = getInt(c, t);
 		byte b = (byte)l;
 		if(b != l){
-			throw new Exceptions.RangeException("Expecting a 16 bit integer, but a larger value was found: " + l, t);
+			throw new Exceptions.RangeException("Expecting an 8 bit integer, but a larger value was found: " + l, t);
 		}
 		return b;
 	}
