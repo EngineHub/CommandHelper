@@ -19,6 +19,7 @@ import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
 import org.bukkit.entity.Tameable;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.player.PlayerTeleportEvent.TeleportCause;
 import org.bukkit.util.Vector;
@@ -66,6 +67,9 @@ public class BukkitMCEntity extends BukkitMCMetadatable implements MCEntity {
     }
 
     public MCEntityDamageEvent getLastDamageCause() {
+    	if (e.getLastDamageCause() instanceof EntityDamageByEntityEvent) {
+    		return new BukkitEntityEvents.BukkitMCEntityDamageByEntityEvent((EntityDamageByEntityEvent) e.getLastDamageCause());
+    	}
         return new BukkitEntityEvents.BukkitMCEntityDamageEvent(e.getLastDamageCause());
     }
 
