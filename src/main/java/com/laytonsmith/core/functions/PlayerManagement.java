@@ -379,7 +379,7 @@ public class PlayerManagement {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, 
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException,
 					ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
@@ -431,16 +431,16 @@ public class PlayerManagement {
 		public Boolean runAsync() {
 			return false;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 					new ExampleScript("Demonstrates finding a non-air block", "msg(pcursor())", "{-127, 75, 798, world}"),
 					new ExampleScript("Demonstrates looking above the skyline", "msg(pcursor())",
 							"(Throws RangeException: No block in sight, or block too far)"),
-					new ExampleScript("Demonstrates getting your target while ignoring torches and bedrock", 
+					new ExampleScript("Demonstrates getting your target while ignoring torches and bedrock",
 							"msg(pcursor(array(50, 7)))", "{-127, 75, 798, world}"),
-					new ExampleScript("Demonstrates getting Notch's target while ignoring air, water, and lava", 
+					new ExampleScript("Demonstrates getting Notch's target while ignoring air, water, and lava",
 							"msg(pcursor('Notch', array(0, 8, 9, 10, 11)))", "{-127, 75, 798, world}")
 			};
 		}
@@ -572,8 +572,8 @@ public class PlayerManagement {
 					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
 					+ " <li>13 - Player's current entity id</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
-					+ " <li>15 - The slot number of the player's current hand.</li>" 
-					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li>" 
+					+ " <li>15 - The slot number of the player's current hand.</li>"
+					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li>"
 					+ " </ul>";
 		}
 
@@ -1662,15 +1662,15 @@ public class PlayerManagement {
 				return new CBoolean(true, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Give player Notch nausea for 30 seconds", "set_peffect('Notch', 9, 0)", 
+				new ExampleScript("Give player Notch nausea for 30 seconds", "set_peffect('Notch', 9, 0)",
 						"The player will experience a wobbly screen."),
-				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes", "set_peffect('ArenaPlayer', 8, -16, 600)", 
+				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes", "set_peffect('ArenaPlayer', 8, -16, 600)",
 						"From the player's perspective, they will not even leave the ground."),
-				new ExampleScript("Remove poison from yourself", "set_peffect(player(), 19, 1, 0)", 
+				new ExampleScript("Remove poison from yourself", "set_peffect(player(), 19, 1, 0)",
 						"You are now unpoisoned. Note, it does not matter what you set strength to here.")
 			};
 		}
@@ -2278,7 +2278,7 @@ public class PlayerManagement {
 			return CHVersion.V3_3_1;
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	@Deprecated
 	public static class pset_flight extends set_pflight implements Optimizable {
@@ -2370,7 +2370,7 @@ public class PlayerManagement {
 			Logger.getLogger(World.class.getName()).log(Level.SEVERE, null, ex);
 		}
 	}
-	
+
 	@api(environments = {CommandHelperEnvironment.class})
 	@Deprecated
 	public static class pset_time extends set_ptime implements Optimizable {
@@ -3274,7 +3274,7 @@ public class PlayerManagement {
 			return new CBoolean(p.leaveVehicle(), t);
 		}
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class get_offline_players extends AbstractFunction {
 
@@ -3315,16 +3315,16 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
 					new ExampleScript("Simple usage", "get_offline_players()", "{Bill, Bob, Joe, Fred}")
 			};
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class phas_played extends AbstractFunction {
 
@@ -3363,7 +3363,7 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -3371,9 +3371,9 @@ public class PlayerManagement {
 					new ExampleScript("Demonstrates a player that has not played", "phas_played('Herobrine')", ":false")
 			};
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class pfirst_played extends AbstractFunction {
 
@@ -3417,7 +3417,7 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -3425,9 +3425,9 @@ public class PlayerManagement {
 					new ExampleScript("Demonstrates a player that has not played", "pfirst_played('Herobrine')", ":0")
 			};
 		}
-		
+
 	}
-	
+
 	@api(environments={CommandHelperEnvironment.class})
 	public static class plast_played extends AbstractFunction {
 
@@ -3471,7 +3471,7 @@ public class PlayerManagement {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
@@ -3479,6 +3479,6 @@ public class PlayerManagement {
 					new ExampleScript("Demonstrates a player that has not played", "plast_played('Herobrine')", ":0")
 			};
 		}
-		
+
 	}
 }

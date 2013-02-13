@@ -2,15 +2,20 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.enums.MCEntityType;
 import com.laytonsmith.abstraction.enums.MCProjectileType;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
+import com.laytonsmith.core.ObjectGenerator;
 import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
+import com.laytonsmith.core.exceptions.CancelCommandException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -358,6 +363,124 @@ public class EntityManagement {
 			return CHVersion.V3_3_1;
 		}
 
+	}
+
+	@api(environments = {CommandHelperEnvironment.class})
+	public static class entities_in_radius extends AbstractFunction {
+
+		public String getName() {
+			return "entities_in_radius";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2, 3};
+		}
+
+		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+
+			MCLocation loc;
+			int dist;
+			List<String> types = new ArrayList<String>();
+
+			if (!(args[0] instanceof CArray)) {
+				throw new ConfigRuntimeException("Expecting an array at parameter 1 of entities_in_radius",
+						ExceptionType.CastException, t);
+			}
+
+			loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
+			dist = Static.getInt32(args[1], t);
+
+			if (args.length == 3) {
+				if (args[2] instanceof CArray) {
+					CArray ta = (CArray) args[2];
+					for (int i = 0; i < ta.size(); i++) {
+						types.add(ta.get(i, t).val());
+					}
+				} else {
+					types.add(args[2].toString());
+				}
+
+				types = prepareTypes(t, types);
+			}
+
+			// The idea and code comes from skore87 (http://forums.bukkit.org/members/skore87.105075/)
+			// http://forums.bukkit.org/threads/getnearbyentities-of-a-location.101499/#post-1341141
+			int chunkRadius = dist < 16 ? 1 : (dist - (dist % 16)) / 16;
+
+			CArray entities = new CArray(t);
+
+			for (int chX = 0 - chunkRadius; chX <= chunkRadius; chX++) {
+				for (int chZ = 0 - chunkRadius; chZ <= chunkRadius; chZ++) {
+					int x = (int) loc.getX();
+					int y = (int) loc.getY();
+					int z = (int) loc.getZ();
+					for (MCEntity e : ObjectGenerator.GetGenerator()
+							.location(
+								new CArray(t,
+										new CInt(x + (chX * 16), t),
+										new CInt(y, t),
+										new CInt(z + (chZ * 16), t),
+										new CString(loc.getWorld().getName(), t)
+								), loc.getWorld(), t
+							).getChunk().getEntities()) {
+
+						if (e.getLocation().distance(loc) <= dist && e.getLocation().getBlock() != loc.getBlock()) {
+							if (types.isEmpty() || types.contains(e.getType().toString())) {
+								entities.push(new CInt(e.getEntityId(), t));
+							}
+						}
+					}
+				}
+			}
+
+			return entities;
+		}
+
+		private List<String> prepareTypes(Target t, List<String> types) {
+
+			List<String> newTypes = new ArrayList<String>();
+			MCEntityType entityType = null;
+			String uc;
+
+			for (int i = 0; i < types.size(); i++) {
+
+				uc = types.get(i).toString().toUpperCase();
+
+				try {
+					entityType = MCEntityType.valueOf(uc);
+				} catch (IllegalArgumentException e) {
+					throw new ConfigRuntimeException(String.format("Wrong entity type: %s", uc), ExceptionType.BadEntityException, t);
+				}
+
+				newTypes.add(uc);
+			}
+
+			return newTypes;
+		}
+
+		public String docs() {
+			return "array {location array, distance, [type] | location array, distance, [arrayTypes]} Returns an array of all entities"
+					+ " within the given radius. Set type argument to filter entities to a specific type. You can pass an array of types."
+					+ " Valid types (case doesn't matter): "
+					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ", " or ");
+		}
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.CastException, ExceptionType.BadEntityException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
 	}
 
 }
