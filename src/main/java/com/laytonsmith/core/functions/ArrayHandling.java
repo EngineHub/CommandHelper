@@ -1417,6 +1417,10 @@ public class ArrayHandling {
 			long number = 1;
 			boolean getKeys = true;
 			CArray array = Static.getArray(args[0], t);
+			CArray newArray = new CArray(t);
+			if(array.isEmpty()){
+				return newArray;
+			}
 			if(args.length > 1){
 				number = Static.getInt(args[1], t);
 			}
@@ -1434,7 +1438,6 @@ public class ArrayHandling {
 			while(randoms.size() < number){
 				randoms.add(java.lang.Math.abs(r.nextInt() % (int)array.size()));
 			}
-			CArray newArray = new CArray(t);
 			List<String> keySet = new ArrayList<String>(array.keySet());
 			for(Integer i : randoms){
 				if(getKeys){
