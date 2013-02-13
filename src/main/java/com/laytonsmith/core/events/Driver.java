@@ -31,5 +31,9 @@ public enum Driver {
 	PLAYER_MOVE,  
 	ITEM_PICKUP,
 	ITEM_DROP,
-	INVENTORY_CLICK
+	INVENTORY_CLICK,
+	/**
+	 * Used by events fired from the extension system.
+	 */
+	EXTENSION
 }

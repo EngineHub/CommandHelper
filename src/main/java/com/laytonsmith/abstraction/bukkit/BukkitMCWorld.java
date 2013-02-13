@@ -289,9 +289,7 @@ public class BukkitMCWorld implements MCWorld {
             MCEntity e = l.getWorld().spawn(l, mobType);
             String[] subTypes = subClass.toUpperCase().split("-");
             if (name == MCMobs.SPIDERJOCKEY) {
-                Spider s = (Spider) e;
-                Skeleton sk = (Skeleton) l.getWorld().spawn(l, Skeleton.class);
-                s.setPassenger(sk);
+                e.setPassenger(l.getWorld().spawn(l, Skeleton.class));
             }
 			if (!subClass.equals("")) { //if subClass is blank, none of this needs to run at all 
 				if (((BukkitMCEntity)e).asEntity() instanceof Sheep) {
