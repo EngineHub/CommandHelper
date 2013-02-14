@@ -415,4 +415,8 @@ public class BukkitMCPlayer extends BukkitMCHumanEntity implements MCPlayer, MCC
 		StaticLayer.GetConvertor().GetPluginMeta().openOutgoingChannel(channel);
 		p.sendPluginMessage(CommandHelperPlugin.self, channel, message);
 	}
+
+	public boolean isFlying() {
+		return p.isFlying();
+	}
 }

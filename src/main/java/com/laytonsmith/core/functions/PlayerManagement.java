@@ -426,13 +426,15 @@ public class PlayerManagement {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{0, 1};
+			return new Integer[]{0, 1, 2};
 		}
 
 		public String docs() {
-			return "array {[player]} Returns an array with the (x, y, z, world) coordinates of the block the player has highlighted"
+			return "array {[player], [array]} Returns an array with the (x, y, z, world) coordinates of the block the player has highlighted"
 					+ " in their crosshairs. If player is omitted, the current player is used. If the block is too far, a"
-					+ " RangeException is thrown.";
+					+ " RangeException is thrown. An array of ids to be considered transparent can be supplied, otherwise"
+					+ " only air will be considered transparent. Providing an empty array will cause air to be considered"
+					+ " a potential target, allowing a way to get the block containing the player's head.";
 		}
 		
 		public Argument returnType() {
@@ -447,7 +449,8 @@ public class PlayerManagement {
 		}
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException};
+			return new ExceptionType[]{ExceptionType.PlayerOfflineException, ExceptionType.RangeException, 
+					ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {
@@ -459,17 +462,32 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			MCPlayer m = null;
-			if (args.length == 0) {
-				if (p instanceof MCPlayer) {
-					m = (MCPlayer) p;
+			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			HashSet<Short> trans = null;
+			if (args.length == 1) {
+				if(args[0] instanceof CArray) {
+					CArray ta = (CArray) args[0];
+					trans = new HashSet<Short>();
+					for (int i=0; i < ta.size(); i++) {
+						trans.add(Static.getInt16(ta.get(i), t));
+					}
+				} else {
+					p = Static.GetPlayer(args[0], t);
 				}
-			} else {
-				m = Static.GetPlayer(args[0], t);
+			} else if (args.length == 2) {
+				p = Static.GetPlayer(args[0], t);
+				if(args[1] instanceof CArray) {
+					CArray ta = (CArray) args[1];
+					trans = new HashSet<Short>();
+					for (int i=0; i < ta.size(); i++) {
+						trans.add(Static.getInt16(ta.get(i), t));
+					}
+				} else {
+					throw new Exceptions.FormatException("An array was expected for argument 2 but received " + args[1], t);
+				}
 			}
-			Static.AssertPlayerNonNull(m, t);
-			MCBlock b = m.getTargetBlock(null, 10000);
+			Static.AssertPlayerNonNull(p, t);
+			MCBlock b = p.getTargetBlock(trans, 10000, false);
 			if (b == null) {
 				throw new ConfigRuntimeException("No block in sight, or block too far",
 						ExceptionType.RangeException, t);
@@ -482,6 +500,19 @@ public class PlayerManagement {
 
 		public Boolean runAsync() {
 			return false;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Demonstrates finding a non-air block", "msg(pcursor())", "{-127, 75, 798, world}"),
+					new ExampleScript("Demonstrates looking above the skyline", "msg(pcursor())",
+							"(Throws RangeException: No block in sight, or block too far)"),
+					new ExampleScript("Demonstrates getting your target while ignoring torches and bedrock", 
+							"msg(pcursor(array(50, 7)))", "{-127, 75, 798, world}"),
+					new ExampleScript("Demonstrates getting Notch's target while ignoring air, water, and lava", 
+							"msg(pcursor('Notch', array(0, 8, 9, 10, 11)))", "{-127, 75, 798, world}")
+			};
 		}
 	}
 
@@ -632,7 +663,10 @@ public class PlayerManagement {
 					+ "World name; Gets the name of the world this player is in.</li><li>8 - Is Op; true or false if this player is an op.</li><li>9 - player groups;"
 					+ " An array of the permissions groups the player is in.</li><li>10 - The player's hostname (or IP if a hostname can't be found)</li>"
 					+ " <li>11 - Is sneaking?</li><li>12 - Host; The host the player connected to.</li>"
-					+ " <li>13 - Player's current entity id</li><li>14 - Is player is in vehicle? Returns true or false.</li></ul>";
+					+ " <li>13 - Player's current entity id</li><li>14 - Is player in a vehicle? Returns true or false.</li>"
+					+ " <li>15 - The slot number of the player's current hand.</li>" 
+					+ " <li>16 - Is sleeping?</li><li>17 - Is blocking?</li><li>18 - Is flying?</li>" 
+					+ " </ul>";
 		}
 		
 		public Argument returnType() {
@@ -680,7 +714,7 @@ public class PlayerManagement {
 			MCPlayer p = Static.GetPlayer(player, t);
 
 			Static.AssertPlayerNonNull(p, t);
-			int maxIndex = 14;
+			int maxIndex = 18;
 			if (index < -1 || index > maxIndex) {
 				throw new ConfigRuntimeException("pinfo expects the index to be between -1 and " + maxIndex,
 						ExceptionType.RangeException, t);
@@ -781,6 +815,18 @@ public class PlayerManagement {
 			}
 			if (index == 14 || index == -1) {
 				retVals.add(new CBoolean(p.isInsideVehicle(), t));
+			}
+			if (index == 15 || index == -1) {
+				retVals.add(new CInt(p.getInventory().getHeldItemSlot(), t));
+			}
+			if (index == 16 || index == -1) {
+				retVals.add(new CBoolean(p.isSleeping(), t));
+			}
+			if (index == 17 || index == -1) {
+				retVals.add(new CBoolean(p.isBlocking(), t));
+			}
+			if (index == 18 || index == -1) {
+				retVals.add(new CBoolean(p.isFlying(), t));
 			}
 			if (retVals.size() == 1) {
 				return retVals.get(0);
@@ -1853,7 +1899,8 @@ public class PlayerManagement {
 			return "boolean {player, potionID, strength, [seconds]} Not all potions work of course, but effect is 1-19. Seconds defaults to 30."
 					+ " If the potionID is out of range, a RangeException is thrown, because out of range potion effects"
 					+ " cause the client to crash, fairly hardcore. See http://www.minecraftwiki.net/wiki/Potion_effects for a"
-					+ " complete list of potions that can be added. To remove an effect, set the strength (or duration) to 0."
+					+ " complete list of potions that can be added. To remove an effect, set the duration to 0 seconds."
+					+ " Strength is the number of levels to add to the base power (effect level 1)."
 					+ " It returns true if the effect was added or removed as desired. It returns false if the effect was"
 					+ " not added or removed as desired (however, this currently only will happen if an effect is attempted"
 					+ " to be removed, yet isn't already on the player).";
@@ -1898,12 +1945,24 @@ public class PlayerManagement {
 				seconds = Static.getInt32(args[3], t);
 			}
 			Static.AssertPlayerNonNull(m, t);
-			if (seconds == 0 || strength == 0) {
+			if (seconds == 0) {
 				return new CBoolean(m.removeEffect(effect), t);
 			} else {
 				m.addEffect(effect, strength, seconds, t);
 				return new CBoolean(true, t);
 			}
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Give player Notch nausea for 30 seconds", "set_peffect('Notch', 9, 0)", 
+						"The player will experience a wobbly screen."),
+				new ExampleScript("Make player ArenaPlayer unable to jump for 10 minutes", "set_peffect('ArenaPlayer', 8, -16, 600)", 
+						"From the player's perspective, they will not even leave the ground."),
+				new ExampleScript("Remove poison from yourself", "set_peffect(player(), 19, 1, 0)", 
+						"You are now unpoisoned. Note, it does not matter what you set strength to here.")
+			};
 		}
 	}
 
@@ -3588,7 +3647,6 @@ public class PlayerManagement {
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			MCOfflinePlayer player = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 			if (args.length == 1) {
 				player = Static.getServer().getOfflinePlayer(args[0].val());
@@ -3689,7 +3747,7 @@ public class PlayerManagement {
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
 			MCCommandSender p = env.getEnv(CommandHelperEnvironment.class).GetCommandSender();
-			String MCPlayer = null;
+			String pname = null;
 			double x;
 			double y;
 			double z;
@@ -3713,8 +3771,8 @@ public class PlayerManagement {
 			} else if (args.length == 2) {
 				if (args[1] instanceof CArray) {
 					CArray ca = (CArray) args[1];
-					MCPlayer = args[0].val();
-					l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(MCPlayer, t).getWorld(), t);
+					pname = args[0].val();
+					l = ObjectGenerator.GetGenerator().location(ca, Static.GetPlayer(pname, t).getWorld(), t);
 					x = l.getX();
 					y = l.getY();
 					z = l.getZ();
@@ -3731,14 +3789,14 @@ public class PlayerManagement {
 				z = Static.getNumber(args[2], t);
 				l = m.getLocation();
 			} else {
-				MCPlayer = args[0].val();
+				m = Static.GetPlayer(args[0], t);
 				x = Static.getNumber(args[1], t);
 				y = Static.getNumber(args[2], t);
 				z = Static.getNumber(args[3], t);
 				l = m.getLocation();
 			}
-			if (m == null && MCPlayer != null) {
-				m = Static.GetPlayer(MCPlayer, t);
+			if (m == null && pname != null) {
+				m = Static.GetPlayer(pname, t);
 			}
 			Static.AssertPlayerNonNull(m, t);
 			if (!l.getWorld().exists()) {
@@ -3793,15 +3851,16 @@ public class PlayerManagement {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
-			if (args.length == 1) {;
+			if (args.length == 1) {
 				p = Static.GetPlayer(args[0].val(), t);
 			}
 
+			Static.AssertPlayerNonNull(p, t);
 			if (p.isInsideVehicle() == false) {
 				return Construct.GetNullConstruct(t);
 			}
 
-			return new CString(p.getVehicle().getType().name(), t);
+			return new CInt(p.getVehicle().getEntityId(), t);
 		}
 	}
 
@@ -3852,8 +3911,216 @@ public class PlayerManagement {
 			if (args.length == 1) {;
 				p = Static.GetPlayer(args[0].val(), t);
 			}
+			Static.AssertPlayerNonNull(p, t);
 
 			return new CBoolean(p.leaveVehicle(), t);
 		}
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class get_offline_players extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
+			CArray ret = new CArray(t);
+			for (MCOfflinePlayer offp : s.getOfflinePlayers()) {
+				ret.push(new CString(offp.getName(), t));
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "get_offline_players";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "array {} Returns an array of every player who has played on this server.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Simple usage", "get_offline_players()", "{Bill, Bob, Joe, Fred}")
+			};
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class phas_played extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCServer s = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender().getServer();
+			MCOfflinePlayer offp = s.getOfflinePlayer(args[0].val());
+			return new CBoolean(offp.hasPlayedBefore(), t);
+		}
+
+		public String getName() {
+			return "phas_played";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "boolean {player} Returns whether the given player has ever been on this server."
+					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Demonstrates a player that has played", "phas_played('Notch')", ":true"),
+					new ExampleScript("Demonstrates a player that has not played", "phas_played('Herobrine')", ":false")
+			};
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class pfirst_played extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCOfflinePlayer op = null;
+			if (args.length == 1) {
+				op = cs.getServer().getOfflinePlayer(args[0].val());
+			} else {
+				op = cs.getServer().getOfflinePlayer(cs.getName());
+			}
+			return new CInt(op.getFirstPlayed(), t);
+		}
+
+		public String getName() {
+			return "pfirst_played";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0,1};
+		}
+
+		public String docs() {
+			return "int {[player]} Returns the time this player first logged onto this server, or 0 if they never have."
+					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Demonstrates a player that has played", "pfirst_played('Notch')", ":13558362167593"),
+					new ExampleScript("Demonstrates a player that has not played", "pfirst_played('Herobrine')", ":0")
+			};
+		}
+		
+	}
+	
+	@api(environments={CommandHelperEnvironment.class})
+	public static class plast_played extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCCommandSender cs = environment.getEnv(CommandHelperEnvironment.class).GetCommandSender();
+			MCOfflinePlayer op = null;
+			if (args.length == 1) {
+				op = cs.getServer().getOfflinePlayer(args[0].val());
+			} else {
+				op = cs.getServer().getOfflinePlayer(cs.getName());
+			}
+			return new CInt(op.getLastPlayed(), t);
+		}
+
+		public String getName() {
+			return "plast_played";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0,1};
+		}
+
+		public String docs() {
+			return "int {[player]} Returns the time this player was last seen on this server, or 0 if they never were."
+					+ " This will not throw a PlayerOfflineException, so the name must be exact.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Demonstrates a player that has played", "plast_played('Notch')", ":13558362167593"),
+					new ExampleScript("Demonstrates a player that has not played", "plast_played('Herobrine')", ":0")
+			};
+		}
+		
 	}
 }

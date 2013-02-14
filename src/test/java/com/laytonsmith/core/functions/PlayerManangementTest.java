@@ -127,12 +127,12 @@ public class PlayerManangementTest {
         MCBlock b = mock(MCBlock.class);
         CommandHelperPlugin.myServer = fakeServer;
         when(fakeServer.getPlayer(fakePlayer.getName())).thenReturn(fakePlayer);
-        when(fakePlayer.getTargetBlock((HashSet) eq(null), anyInt())).thenReturn(b);
+        when(fakePlayer.getTargetBlock((HashSet) eq(null), anyInt(), eq(false))).thenReturn(b);
         MCWorld w = mock(MCWorld.class);
         when(b.getWorld()).thenReturn(w);
         Run("pcursor()", fakePlayer);
         Run("pcursor('" + fakePlayer.getName() + "')", fakePlayer);
-        verify(fakePlayer, times(2)).getTargetBlock((HashSet) eq(null), anyInt());
+        verify(fakePlayer, times(2)).getTargetBlock((HashSet) eq(null), anyInt(), eq(false));
     }
 
     @Test(timeout = 10000)

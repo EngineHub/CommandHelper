@@ -51,7 +51,7 @@ public class ArrayHandling {
 		}
 
 		public CInt exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			return new CInt(((CArray)getBuilder().parse(args, this, t).get("array")).size(), t);
+			return new CInt(((CArray) getBuilder().parse(args, this, t).get("array")).size(), t);
 		}
 
 		public ExceptionType[] thrown() {
@@ -77,8 +77,7 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5))"),				
-			};
+						new ExampleScript("Demonstrates usage", "array_size(array(1, 2, 3, 4, 5))"),};
 		}
 
 		public Argument returnType() {
@@ -88,10 +87,9 @@ public class ArrayHandling {
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(new Argument("", CArray.class, "array"));
 		}
-				
 	}
 
-	@api(environments={GlobalEnv.class})
+	@api(environments = {GlobalEnv.class})
 	public static class array_get extends AbstractFunction implements Optimizable {
 
 		public String getName() {
@@ -109,20 +107,20 @@ public class ArrayHandling {
 			Construct defaultConstruct = list.get("default");
 
 			if (env.getEnv(GlobalEnv.class).HasFlag("array_get_alt_mode")) {
-				return new CArrayReference((Construct)array, index, env);
+				return new CArrayReference((Construct) array, index, env);
 			}
-			
-			if(index instanceof CSlice){
-				CSlice slice = ((CSlice)index);
+
+			if (index instanceof CSlice) {
+				CSlice slice = ((CSlice) index);
 				return array.slice(slice.getStart(), slice.getFinish(), t);
 			} else {
-				if(array.contains(index.val())){
+				if (array.contains(index.val())) {
 					return array.get(index.val(), t);
 				} else {
 					return defaultConstruct;
 				}
 			}
-			
+
 
 //			if (array instanceof CArray) {
 //				CArray ca = (CArray) args[0];
@@ -256,17 +254,16 @@ public class ArrayHandling {
 					+ "that function directly. If using the plain function access, then if a default is provided, the function will always return that value if the"
 					+ " array otherwise doesn't have a value there. This is opposed to throwing an exception or returning null.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("The element at the specified index", Mixed.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to get the element from", ArrayAccess.class, "array"),
-						new Argument("The index of the array", CString.class, CInt.class, "index").setOptionalDefault(new CSlice(0, -1, Target.UNKNOWN)),
-						new Argument("The default value to return, should this array not contain the specified key", Mixed.class, "default").setOptional()
-					);
+					new Argument("The array to get the element from", ArrayAccess.class, "array"),
+					new Argument("The index of the array", CString.class, CInt.class, "index").setOptionalDefault(new CSlice(0, -1, Target.UNKNOWN)),
+					new Argument("The default value to return, should this array not contain the specified key", Mixed.class, "default").setOptional());
 		}
 
 		public boolean isRestricted() {
@@ -296,24 +293,21 @@ public class ArrayHandling {
 			}
 
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates basic usage", "array_get(array(1, 2, 3), 2)"),
-				new ExampleScript("Demonstrates exception", "array_get(array(), 1)"),
-				new ExampleScript("Demonstrates default", "array_get(array(), 1, 'default')"),
-				new ExampleScript("Demonstrates bracket notation", "array(0, 1, 2)[2]"),
-			};
+						new ExampleScript("Demonstrates basic usage", "array_get(array(1, 2, 3), 2)"),
+						new ExampleScript("Demonstrates exception", "array_get(array(), 1)"),
+						new ExampleScript("Demonstrates default", "array_get(array(), 1, 'default')"),
+						new ExampleScript("Demonstrates bracket notation", "array(0, 1, 2)[2]"),};
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-				OptimizationOption.OPTIMIZE_CONSTANT
-			);
+					OptimizationOption.OPTIMIZE_CONSTANT);
 		}
-
 	}
 
 	@api
@@ -331,7 +325,7 @@ public class ArrayHandling {
 			ArgList list = getBuilder().parse(args, this, t);
 			CArray array = list.get("array");
 			try {
-				array.set(list.get("index").val(), (Construct)list.get("value"), t);
+				array.set(list.get("index").val(), (Construct) list.get("value"), t);
 			} catch (IndexOutOfBoundsException e) {
 				throw new ConfigRuntimeException("The index " + args[1].val() + " is out of bounds", ExceptionType.IndexOverflowException, t);
 			}
@@ -346,17 +340,16 @@ public class ArrayHandling {
 			return "Sets the value of the array at the specified index. array_set(array, index, value). Returns void. If"
 					+ " the element at the specified index isn't already set, throws an exception, if this is a normal array. Use array_push to avoid this.";
 		}
-		
+
 		public Argument returnType() {
 			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to set", CArray.class, "array"),
-						new Argument("The index of the value which should be set", Mixed.class, "index"),
-						new Argument("The value to actually set in the array", Mixed.class, "value")
-					);
+					new Argument("The array to set", CArray.class, "array"),
+					new Argument("The index of the value which should be set", Mixed.class, "index"),
+					new Argument("The value to actually set in the array", Mixed.class, "value"));
 		}
 
 		public boolean isRestricted() {
@@ -370,13 +363,12 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates usage", "assign(@array, array(null))\nmsg(@array)\narray_set(@array, 0, 'value0')\nmsg(@array)"),
-				new ExampleScript("Demonstrates using assign", "assign(@array, array(null))\nmsg(@array)\nassign(@array[0], 'value0')\nmsg(@array)"),
-			};
+						new ExampleScript("Demonstrates usage", "assign(@array, array(null))\nmsg(@array)\narray_set(@array, 0, 'value0')\nmsg(@array)"),
+						new ExampleScript("Demonstrates using assign", "assign(@array, array(null))\nmsg(@array)\nassign(@array[0], 'value0')\nmsg(@array)"),};
 		}
 	}
 
@@ -411,17 +403,16 @@ public class ArrayHandling {
 		public String docs() {
 			return "Pushes the specified value(s) onto the end of the array";
 		}
-		
+
 		public Argument returnType() {
 			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to push onto", CArray.class, "array"),
-						new Argument("The value to push", Mixed.class, "value"),
-						new Argument("More values, if pushing on more than one at once", CArray.class, "value2").setGenerics(new Generic(Mixed.class)).setVarargs()
-					);
+					new Argument("The array to push onto", CArray.class, "array"),
+					new Argument("The value to push", Mixed.class, "value"),
+					new Argument("More values, if pushing on more than one at once", CArray.class, "value2").setGenerics(new Generic(Mixed.class)).setVarargs());
 		}
 
 		public boolean isRestricted() {
@@ -435,13 +426,12 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates usage", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0)\nmsg(@array)"),
-				new ExampleScript("Demonstrates pushing multiple values", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0, 1, 2)\nmsg(@array)"),
-			};
+						new ExampleScript("Demonstrates usage", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0)\nmsg(@array)"),
+						new ExampleScript("Demonstrates pushing multiple values", "assign(@array, array())\nmsg(@array)\narray_push(@array, 0, 1, 2)\nmsg(@array)"),};
 		}
 	}
 
@@ -479,16 +469,15 @@ public class ArrayHandling {
 			return "Checks to see if testValue is in array. If the array contains non-string values,"
 					+ " the item's 'toString' value is compared.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("true if the array contains the test value, false otherwise", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to check in", CArray.class, "array"),
-						new Argument("The value to check for", CString.class, "testValue")
-					);
+					new Argument("The array to check in", CArray.class, "array"),
+					new Argument("The value to check for", CString.class, "testValue"));
 		}
 
 		public boolean isRestricted() {
@@ -502,15 +491,14 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates finding a value", "array_contains(array(0, 1, 2), 2)"),
-				new ExampleScript("Demonstrates not finding a value", "array_contains(array(0, 1, 2), 5)"),
-				new ExampleScript("Demonstrates finding a value listed multiple times", "array_contains(array(1, 1, 1), 1)"),
-				new ExampleScript("Demonstrates finding a string", "array_contains(array('a', 'b', 'c'), 'b')"),
-			};
+						new ExampleScript("Demonstrates finding a value", "array_contains(array(0, 1, 2), 2)"),
+						new ExampleScript("Demonstrates not finding a value", "array_contains(array(0, 1, 2), 5)"),
+						new ExampleScript("Demonstrates finding a value listed multiple times", "array_contains(array(1, 1, 1), 1)"),
+						new ExampleScript("Demonstrates finding a string", "array_contains(array('a', 'b', 'c'), 'b')"),};
 		}
 	}
 
@@ -529,16 +517,15 @@ public class ArrayHandling {
 			return "Works like array_contains, except the comparison ignores case. If the array"
 					+ " contains non-string values, the item's 'toString' value is compared.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("true if the array contains the test value (case-insensitive), false otherwise", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to check in", CArray.class, "array"),
-						new Argument("The value to check for", CString.class, "testValue")
-					);
+					new Argument("The array to check in", CArray.class, "array"),
+					new Argument("The value to check for", CString.class, "testValue"));
 		}
 
 		public ExceptionType[] thrown() {
@@ -571,14 +558,13 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException("Argument 1 of array_contains_ic must be an array", ExceptionType.CastException, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'A')"),
-				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'a')"),
-				new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')"),
-			};
+						new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'A')"),
+						new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'a')"),
+						new ExampleScript("Demonstrates usage", "array_contains_ic(array('A', 'B', 'C'), 'd')"),};
 		}
 	}
 
@@ -596,16 +582,15 @@ public class ArrayHandling {
 		public String docs() {
 			return "Checks to see if the specified array has an element at index";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("true if the array has the specified index", CBoolean.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to search in", ArrayAccess.class, "array"),
-						new Argument("The array index to search for", CString.class, CInt.class, "index")
-					);
+					new Argument("The array to search in", ArrayAccess.class, "array"),
+					new Argument("The array index to search for", CString.class, CInt.class, "index"));
 		}
 
 		public ExceptionType[] thrown() {
@@ -647,15 +632,14 @@ public class ArrayHandling {
 //				throw new ConfigRuntimeException("Expecting argument 1 to be an array", ExceptionType.CastException, t);
 //			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates a true condition", "array_index_exists(array(0, 1, 2), 0)"),
-				new ExampleScript("Demonstrates a false condition", "array_index_exists(array(0, 1, 2), 3)"),
-				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'a')"),
-				new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'c')"),
-			};
+						new ExampleScript("Demonstrates a true condition", "array_index_exists(array(0, 1, 2), 0)"),
+						new ExampleScript("Demonstrates a false condition", "array_index_exists(array(0, 1, 2), 3)"),
+						new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'a')"),
+						new ExampleScript("Demonstrates an associative array", "array_index_exists(array(a: 'A', b: 'B'), 'c')"),};
 		}
 	}
 
@@ -676,17 +660,16 @@ public class ArrayHandling {
 					+ " function can only be used to increase the size of the array.";
 			//+ " If the array is an associative array, the non numeric values are simply copied over.";
 		}
-		
+
 		public Argument returnType() {
 			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to fill", CArray.class, "array"),
-						new Argument("The desired size of the array", CInt.class, "size"),
-						new Argument("The fill value", Mixed.class, "fill").setOptionalDefaultNull()
-					);
+					new Argument("The array to fill", CArray.class, "array"),
+					new Argument("The desired size of the array", CInt.class, "size"),
+					new Argument("The fill value", Mixed.class, "fill").setOptionalDefaultNull());
 		}
 
 		public ExceptionType[] thrown() {
@@ -711,17 +694,16 @@ public class ArrayHandling {
 			int size = list.getInt("size", t);
 			Mixed fill = list.get("fill");
 			for (long i = array.size(); i < size; i++) {
-				array.push((Construct)fill);
+				array.push((Construct) fill);
 			}
 			return new CVoid(t);
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Demonstrates basic usage", "assign(@array, array())\nmsg(@array)\narray_resize(@array, 2)\nmsg(@array)"),
-				new ExampleScript("Demonstrates custom fill", "assign(@array, array())\nmsg(@array)\narray_resize(@array, 2, 'a')\nmsg(@array)"),
-			};
+						new ExampleScript("Demonstrates basic usage", "assign(@array, array())\nmsg(@array)\narray_resize(@array, 2)\nmsg(@array)"),
+						new ExampleScript("Demonstrates custom fill", "assign(@array, array())\nmsg(@array)\narray_resize(@array, 2, 'a')\nmsg(@array)"),};
 		}
 	}
 
@@ -741,17 +723,16 @@ public class ArrayHandling {
 					+ " skipping increment integers per count. start defaults to 0, and increment defaults to 1. All inputs"
 					+ " must be integers. If the input doesn't make sense, it will reasonably degrade, and return an empty array.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("An array populated with the ranged values.", CArray.class).setGenerics(Generic.ANY);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The starting value, inclusive (this number will be included in the results)", CInt.class, "start").setOptionalDefault(0),
-						new Argument("The upper range, exclusive (this number will not be included in the results)", CInt.class, "finish"),
-						new Argument("The amount to increment each step", CInt.class, "increment").setOptionalDefault(1)
-					);
+					new Argument("The starting value, inclusive (this number will be included in the results)", CInt.class, "start").setOptionalDefault(0),
+					new Argument("The upper range, exclusive (this number will not be included in the results)", CInt.class, "finish"),
+					new Argument("The amount to increment each step", CInt.class, "increment").setOptionalDefault(1));
 		}
 
 		public ExceptionType[] thrown() {
@@ -788,15 +769,12 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "range(10)"),
-				new ExampleScript("Complex usage", "range(0, 10)"),
-				new ExampleScript("With skips", "range(0, 10, 2)"),
-				new ExampleScript("Invalid input", "range(0, 10, -1)"),
-				new ExampleScript("In reverse", "range(10, 0, -1)"),
-			};
+						new ExampleScript("Basic usage", "range(10)"),
+						new ExampleScript("Complex usage", "range(0, 10)"),
+						new ExampleScript("With skips", "range(0, 10, 2)"),
+						new ExampleScript("Invalid input", "range(0, 10, -1)"),
+						new ExampleScript("In reverse", "range(10, 0, -1)"),};
 		}
-		
-		
 	}
 
 	@api
@@ -814,15 +792,14 @@ public class ArrayHandling {
 			return "Returns the keys in this array as a normal array. If the array passed in is already a normal array,"
 					+ " the keys will be 0 -> (array_size(array) - 1)";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("An array of the keys", CArray.class).setGenerics(new Generic(CString.class, CInt.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to pull the keys from", CArray.class, "array")
-					);
+					new Argument("The array to pull the keys from", CArray.class, "array"));
 		}
 
 		public ExceptionType[] thrown() {
@@ -853,13 +830,12 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "array_keys(array('a', 'b', 'c'))"),
-				new ExampleScript("With associative array", "array_keys(array(one: 'a', two: 'b', three: 'c'))"),
-			};
+						new ExampleScript("Basic usage", "array_keys(array('a', 'b', 'c'))"),
+						new ExampleScript("With associative array", "array_keys(array(one: 'a', two: 'b', three: 'c'))"),};
 		}
 	}
 
@@ -878,15 +854,14 @@ public class ArrayHandling {
 			return "Returns a new normal array, given an associative array. (If the array passed in is not associative, a copy of the "
 					+ " array is returned).";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("A new, normalized array", CArray.class).setGenerics(Generic.ANY);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to use for normalization", CArray.class, "array")
-					);
+					new Argument("The array to use for normalization", CArray.class, "array"));
 		}
 
 		public ExceptionType[] thrown() {
@@ -917,13 +892,12 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException(this.getName() + " expects arg 1 to be an array", ExceptionType.CastException, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "array_normalize(array(one: 'a', two: 'b', three: 'c'))"),
-				new ExampleScript("Usage with normal array", "array_normalize(array(1, 2, 3))"),
-			};
+						new ExampleScript("Basic usage", "array_normalize(array(one: 'a', two: 'b', three: 'c'))"),
+						new ExampleScript("Usage with normal array", "array_normalize(array(1, 2, 3))"),};
 		}
 	}
 
@@ -943,17 +917,16 @@ public class ArrayHandling {
 					+ " merged is associative, it will overwrite the keys from left to right, but if the arrays are normal, the keys are ignored,"
 					+ " and values are simply pushed.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("", CArray.class).setGenerics(new Generic("?", Mixed.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The first array", CArray.class, "array1"),
-						new Argument("The second array", CArray.class, "array2"),
-						new Argument("Additonal arrays", CArray.class, "arrayN").setGenerics(Generic.ANY).setVarargs()
-					);
+					new Argument("The first array", CArray.class, "array1"),
+					new Argument("The second array", CArray.class, "array2"),
+					new Argument("Additonal arrays", CArray.class, "arrayN").setGenerics(Generic.ANY).setVarargs());
 		}
 
 		public ExceptionType[] thrown() {
@@ -995,14 +968,13 @@ public class ArrayHandling {
 			}
 			return newArray;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),				
-				new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),				
-				new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))"),				
-			};
+						new ExampleScript("Basic usage", "array_merge(array(1), array(2), array(3))"),
+						new ExampleScript("With associative arrays", "array_merge(array(one: 1), array(two: 2), array(three: 3))"),
+						new ExampleScript("With overwrites", "array_merge(array(one: 1), array(one: 2), array(one: 3))"),};
 		}
 	}
 
@@ -1023,16 +995,15 @@ public class ArrayHandling {
 					+ " the index is simply removed. If the index doesn't exist, the array remains"
 					+ " unchanged. The value removed is returned.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("The value removed", Mixed.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", CArray.class, ""),
-						new Argument("", CInt.class, CString.class, "")
-					);
+					new Argument("", CArray.class, ""),
+					new Argument("", CInt.class, CString.class, ""));
 		}
 
 		public ExceptionType[] thrown() {
@@ -1059,13 +1030,12 @@ public class ArrayHandling {
 				throw new ConfigRuntimeException("Argument 1 of array_remove should be an array", ExceptionType.CastException, t);
 			}
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(array_remove(@array, 2))\nmsg(@array)"),
-				new ExampleScript("With associative array", "assign(@array, array(one: 'a', two: 'b', three: 'c'))\nmsg(array_remove(@array, 'two'))\nmsg(@array)"),
-			};
+						new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(array_remove(@array, 2))\nmsg(@array)"),
+						new ExampleScript("With associative array", "assign(@array, array(one: 'a', two: 'b', three: 'c'))\nmsg(array_remove(@array, 'two'))\nmsg(@array)"),};
 		}
 	}
 
@@ -1085,16 +1055,15 @@ public class ArrayHandling {
 					+ " in the array (just the values, not the keys), and joins them with the glue, defaulting to a space. For instance"
 					+ " array_implode(array(1, 2, 3), '-') will return \"1-2-3\".";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("The glued together array", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array of elements to glue together", CArray.class, "array"),
-						new Argument("The glue to use to glue the elements together with", CString.class, "glue").setOptionalDefault(" ")
-					);
+					new Argument("The array of elements to glue together", CArray.class, "array"),
+					new Argument("The glue to use to glue the elements together with", CString.class, "glue").setOptionalDefault(" "));
 		}
 
 		public ExceptionType[] thrown() {
@@ -1135,13 +1104,12 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_0;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "array_implode(array(1, 2, 3), '-')"),
-				new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')"),
-			};
+						new ExampleScript("Basic usage", "array_implode(array(1, 2, 3), '-')"),
+						new ExampleScript("With associative array", "array_implode(array(one: 'a', two: 'b', three: 'c'), '-')"),};
 		}
 	}
 
@@ -1162,16 +1130,15 @@ public class ArrayHandling {
 					+ " to 0..5 directly in code, however with this function you can also do cslice(@var, @var),"
 					+ " or other more complex expressions, which are not possible in static code.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("The dynamically created slice", CSlice.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The value to start with, inclusive (it will include this index)", CInt.class, "from"),
-						new Argument("The value to end with, inclusive (it will include this index)", CInt.class, "to")
-					);
+					new Argument("The value to start with, inclusive (it will include this index)", CInt.class, "from"),
+					new Argument("The value to end with, inclusive (it will include this index)", CInt.class, "to"));
 		}
 
 		public ExceptionType[] thrown() {
@@ -1194,14 +1161,12 @@ public class ArrayHandling {
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]"),
-			};
+						new ExampleScript("Basic usage", "array(1, 2, 3)[cslice(0, 1)]"),};
 		}
-		
 	}
 
 	@api
@@ -1263,27 +1228,25 @@ public class ArrayHandling {
 					+ " to actually clone the array, an expensive operation. Due to this, it has slightly different behavior"
 					+ " than array_normalize, which could have also been implemented in place.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("A reference to the array passed in", CArray.class).setGenerics(Generic.ANY);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to sort", CArray.class, "array"),
-						Argument.getEnumArgument("The sort type", CArray.SortType.class, "sortType").setEnumDefault(CArray.SortType.REGULAR)
-					);
+					new Argument("The array to sort", CArray.class, "array"),
+					Argument.getEnumArgument("The sort type", CArray.SortType.class, "sortType").setEnumDefault(CArray.SortType.REGULAR));
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public Set<OptimizationOption> optimizationOptions() {
 			return EnumSet.of(
-				OptimizationOption.OPTIMIZE_DYNAMIC
-			);
+					OptimizationOption.OPTIMIZE_DYNAMIC);
 		}
 
 		@Override
@@ -1299,44 +1262,42 @@ public class ArrayHandling {
 			}
 			return null;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Regular sort", "assign(@array, array('a', 2, 4, 'string'))\narray_sort(@array, 'REGULAR')\nmsg(@array)"),				
-				new ExampleScript("Numeric sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'NUMERIC')\nmsg(@array)"),				
-				new ExampleScript("String sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'STRING')\nmsg(@array)"),				
-				new ExampleScript("String sort (with words)", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING')\nmsg(@array)"),				
-				new ExampleScript("Ignore case sort", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING_IC')\nmsg(@array)"),				
-			};
+						new ExampleScript("Regular sort", "assign(@array, array('a', 2, 4, 'string'))\narray_sort(@array, 'REGULAR')\nmsg(@array)"),
+						new ExampleScript("Numeric sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'NUMERIC')\nmsg(@array)"),
+						new ExampleScript("String sort", "assign(@array, array('03', '02', '4', '1'))\narray_sort(@array, 'STRING')\nmsg(@array)"),
+						new ExampleScript("String sort (with words)", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING')\nmsg(@array)"),
+						new ExampleScript("Ignore case sort", "assign(@array, array('Zeta', 'zebra', 'Minecraft', 'mojang', 'Appliance', 'apple'))\narray_sort(@array, 'STRING_IC')\nmsg(@array)"),};
 		}
 	}
-	
-	@api public static class array_sort_async extends AbstractFunction{
-		
+
+	@api
+	public static class array_sort_async extends AbstractFunction {
+
 		static RunnableQueue queue;
 		static boolean initialized = false;
-		
-		public array_sort_async(){
-			if(!initialized){
+
+		public array_sort_async() {
+			if (!initialized) {
 				queue = new RunnableQueue("MethodScript-arraySortAsync");
 				queue.invokeLater(new Runnable() {
-
 					public void run() {
 						//This warms up the queue. Apparently.
 					}
 				});
-				if(StaticLayer.GetConvertor() != null){
+				if (StaticLayer.GetConvertor() != null) {
 					StaticLayer.GetConvertor().addShutdownHook(new Runnable() {
-
 						public void run() {
-							synchronized(array_sort_async.this){
+							synchronized (array_sort_async.this) {
 								initialized = false;
 							}
 							queue.shutdown();
 						}
 					});
-					synchronized(this){
+					synchronized (this) {
 						initialized = true;
 					}
 				}
@@ -1361,7 +1322,6 @@ public class ArrayHandling {
 			final CArray.SortType sortType = list.getEnum("sortType", t);
 			final CClosure callback = list.get("closure");
 			queue.invokeLater(new Runnable() {
-
 				public void run() {
 					Construct c = new array_sort().exec(Target.UNKNOWN, null, array, new CString(sortType.name(), Target.UNKNOWN));
 					callback.execute(new Construct[]{c});
@@ -1384,26 +1344,25 @@ public class ArrayHandling {
 					+ " is large enough to actually \"stall\" the server when doing the sort. Sort type should be"
 					+ " one of " + StringUtils.Join(CArray.SortType.values(), ", ", " or ");
 		}
-		
+
 		public Argument returnType() {
 			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to be sorted", CArray.class, "array").setGenerics(Generic.ANY),
-						Argument.getEnumArgument("The sort type", CArray.SortType.class, "sortType").setEnumDefault(CArray.SortType.REGULAR),
-						new Argument("The closure that recieves the sorted array once finished", CClosure.class, "closure").setGenerics(new Generic("?", CArray.class))
-					);
+					new Argument("The array to be sorted", CArray.class, "array").setGenerics(Generic.ANY),
+					Argument.getEnumArgument("The sort type", CArray.SortType.class, "sortType").setEnumDefault(CArray.SortType.REGULAR),
+					new Argument("The closure that recieves the sorted array once finished", CClosure.class, "closure").setGenerics(new Generic("?", CArray.class)));
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
 	}
-	
-	@api public static class array_remove_values extends AbstractFunction{
+
+	@api
+	public static class array_remove_values extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1418,10 +1377,10 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!(args[0] instanceof CArray)){
+			if (!(args[0] instanceof CArray)) {
 				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
 			}
-			((CArray)args[0]).removeValues(args[1]);
+			((CArray) args[0]).removeValues(args[1]);
 			return new CVoid(t);
 		}
 
@@ -1439,32 +1398,30 @@ public class ArrayHandling {
 					+ " array(1, 3). Note that it returns void however, so it will simply in place"
 					+ " modify the array passed in, much like array_remove.";
 		}
-		
+
 		public Argument returnType() {
 			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array that will have values removed from", CArray.class, "array").setGenerics(Generic.ANY),
-						new Argument("The value to remove", Mixed.class, "value")
-					);
+					new Argument("The array that will have values removed from", CArray.class, "array").setGenerics(Generic.ANY),
+					new Argument("The value to remove", Mixed.class, "value"));
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)"),				
-			};
+						new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(@array)\narray_remove_values(@array, 2)\nmsg(@array)"),};
 		}
-		
 	}
-	
-	@api public static class array_indexes extends AbstractFunction{
+
+	@api
+	public static class array_indexes extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1479,10 +1436,10 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(!(args[0] instanceof CArray)){
+			if (!(args[0] instanceof CArray)) {
 				throw new ConfigRuntimeException("Expected parameter 1 to be an array, but was " + args[0].val(), ExceptionType.CastException, t);
 			}
-			return ((CArray)args[0]).indexesOf(args[1]);
+			return ((CArray) args[0]).indexesOf(args[1]);
 		}
 
 		public String getName() {
@@ -1499,33 +1456,31 @@ public class ArrayHandling {
 					+ " value were 2, would return array(1, 2). If the value cannot be found in the"
 					+ " array at all, an empty array will be returned.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("The list of keys", CArray.class).setGenerics(new Generic(CString.class, CInt.class));
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to check in", CArray.class, "array").setGenerics(Generic.ANY),
-						new Argument("The value to check for", Mixed.class, "value")
-					);
+					new Argument("The array to check in", CArray.class, "array").setGenerics(Generic.ANY),
+					new Argument("The value to check for", Mixed.class, "value"));
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 2))"),				
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))"),				
-			};
+						new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 2))"),
+						new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_indexes(@array, 5))"),};
 		}
-		
 	}
-	
-	@api public static class array_index extends AbstractFunction{
+
+	@api
+	public static class array_index extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1540,8 +1495,8 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CArray ca = (CArray)new array_indexes().exec(t, environment, args);
-			if(ca.isEmpty()){
+			CArray ca = (CArray) new array_indexes().exec(t, environment, args);
+			if (ca.isEmpty()) {
 				return Construct.GetNullConstruct(t);
 			} else {
 				return ca.get(0);
@@ -1561,34 +1516,31 @@ public class ArrayHandling {
 					+ " the value is not found, returns null. That is to say, if the value is contained in an"
 					+ " array (even multiple times) the index of the first element is returned.";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("The index of the array, or null if the value is not found", CString.class, CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to search in", CArray.class, "array"),
-						new Argument("The value to search for", Mixed.class, "value")
-					);
+					new Argument("The array to search in", CArray.class, "array"),
+					new Argument("The value to search for", Mixed.class, "value"));
 		}
 
 		public CHVersion since() {
 			return CHVersion.V3_3_1;
 		}
-		
+
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 2))"),				
-				new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))"),				
-			};
+						new ExampleScript("Basic usage", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 2))"),
+						new ExampleScript("Not found", "assign(@array, array(1, 2, 2, 3))\nmsg(array_index(@array, 5))"),};
 		}
-		
 	}
-	
+
 	@api
-	public static class array_reverse extends AbstractFunction{
+	public static class array_reverse extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.CastException};
@@ -1603,8 +1555,8 @@ public class ArrayHandling {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			if(args[0] instanceof CArray){
-				((CArray)args[0]).reverse();
+			if (args[0] instanceof CArray) {
+				((CArray) args[0]).reverse();
 			}
 			return new CVoid(t);
 		}
@@ -1621,15 +1573,14 @@ public class ArrayHandling {
 			return "Reverses an array in place. However, if the array is associative, throws a CastException, since associative"
 					+ " arrays are more like a map.";
 		}
-		
+
 		public Argument returnType() {
 			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to reverse, in place", CArray.class, "array").setGenerics(Generic.ANY)
-					);
+					new Argument("The array to reverse, in place", CArray.class, "array").setGenerics(Generic.ANY));
 		}
 
 		public CHVersion since() {
@@ -1639,14 +1590,14 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)\narray_reverse(@array)\nmsg(@array)"),
-				new ExampleScript("Failure", "assign(@array, array(one: 1, two: 2))\narray_reverse(@array)")
-			};
-		}				
-		
+						new ExampleScript("Basic usage", "assign(@array, array(1, 2, 3))\nmsg(@array)\narray_reverse(@array)\nmsg(@array)"),
+						new ExampleScript("Failure", "assign(@array, array(one: 1, two: 2))\narray_reverse(@array)")
+					};
+		}
 	}
-	
-	@api public static class array_rand extends AbstractFunction{
+
+	@api
+	public static class array_rand extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
 			return new ExceptionType[]{ExceptionType.RangeException, ExceptionType.CastException};
@@ -1659,22 +1610,21 @@ public class ArrayHandling {
 		public Boolean runAsync() {
 			return null;
 		}
-
 		Random r = new Random(System.currentTimeMillis());
+
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			ArgList list = getBuilder().parse(args, this, t);
 			ArrayAccess array = list.get("array");
 			long number = list.getLong("number", t);
 			boolean getKeys = list.getBoolean("getKeys", t);
-			
+
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<Integer>();
-			while(randoms.size() < number){
-				randoms.add(java.lang.Math.abs(r.nextInt() % (int)array.size()));
+			while (randoms.size() < number) {
+				randoms.add(java.lang.Math.abs(r.nextInt() % (int) array.size()));
 			}
-			CArray newArray = new CArray(t);
 			List<String> keySet = new ArrayList<String>(array.keySet());
-			for(Integer i : randoms){
-				if(getKeys){
+			for (Integer i : randoms) {
+				if (getKeys) {
 					newArray.push(new CString(keySet.get(i), t));
 				} else {
 					newArray.push(array.get(keySet.get(i), t));
@@ -1698,17 +1648,16 @@ public class ArrayHandling {
 					+ " is \"drawn\" from the array, it is not placed back in. The order of the elements in the array will also be random,"
 					+ " if order is important, use array_sort().";
 		}
-		
+
 		public Argument returnType() {
 			return new Argument("A new array with the selected random values", CArray.class).setGenerics(Generic.ANY);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("The array to select from", ArrayAccess.class, "array").setGenerics(Generic.ANY),
-						Argument.getRangedIntArgument("The number of items to select from the array", "number", 1, Integer.MAX_VALUE).setOptionalDefault(1),
-						new Argument("If true, it will select from the keys instead of the values", CBoolean.class, "getKeys").setOptionalDefault(true)
-					);
+					new Argument("The array to select from", ArrayAccess.class, "array").setGenerics(Generic.ANY),
+					Argument.getRangedIntArgument("The number of items to select from the array", "number", 1, Integer.MAX_VALUE).setOptionalDefault(1),
+					new Argument("If true, it will select from the keys instead of the values", CBoolean.class, "getKeys").setOptionalDefault(true));
 		}
 
 		public CHVersion since() {
@@ -1718,18 +1667,13 @@ public class ArrayHandling {
 		@Override
 		public ExampleScript[] examples() throws ConfigCompileException {
 			return new ExampleScript[]{
-				new ExampleScript("Usage with a normal array", "assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))"),
-				new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results", 
-					"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))"),
-				new ExampleScript("Usage with an associative array", 
-					"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))"),
-			};
+						new ExampleScript("Usage with a normal array", "assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array))"),
+						new ExampleScript("Usage with a normal array, using getKeys false, and returning 2 results",
+						"assign(@array, array('a', 'b', 'c', 'd', 'e'))\nmsg(array_rand(@array, 2, false))"),
+						new ExampleScript("Usage with an associative array",
+						"assign(@array, array(one: 'a', two: 'b', three: 'c', four: 'd', five: 'e'))\nmsg(array_rand(@array))"),};
 		}
-		
-		
-		
 	}
-	
 //	@api
 //	public static class array_unique extends AbstractFunction{
 //

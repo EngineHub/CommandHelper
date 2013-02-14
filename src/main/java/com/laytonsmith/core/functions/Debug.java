@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.functions;
 
+import com.laytonsmith.PureUtilities.HeapDumper;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
 import com.laytonsmith.core.arguments.Argument;
@@ -15,6 +16,7 @@ import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.environments.GlobalEnv;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.io.File;
 import java.io.IOException;
 import java.util.Set;
 
@@ -474,6 +476,52 @@ public class Debug {
 						new Argument("", C.class, ""),
 						new Argument("", C.class, "")
 					);
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class heap_dump extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.PluginInternalException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return null;
+		}
+
+		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+			File file = new File("dump.bin");
+			try{
+				HeapDumper.dumpHeap(file.getAbsolutePath(), true);
+			} catch(Throwable tt){
+				throw new ConfigRuntimeException("Could not create a heap dump: " + tt.getMessage(), ExceptionType.PluginInternalException, t, tt);
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "heap_dump";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0};
+		}
+
+		public String docs() {
+			return "void {} Creates a heap dump file, and places it in the working directory, as \"dump.bin\". This might"
+					+ " throw a PluginInternalException if the heap dump tools aren't available in your JVM. Once dumped,"
+					+ " the heap dump can be analyzed using tools such as jhat. More information about jhat can be found"
+					+ " [http://docs.oracle.com/javase/6/docs/technotes/tools/share/jhat.html here].";
 		}
 
 		public CHVersion since() {

@@ -14,5 +14,5 @@ public interface MCPlayerInventory extends MCInventory {
     public MCItemStack getChestplate();
     public MCItemStack getLeggings();
     public MCItemStack getBoots();
-    
+	public int getHeldItemSlot();
 }
