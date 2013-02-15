@@ -1,0 +1,162 @@
+Cross casting is a feature of MethodScript that allows for rapid scripting, while
+maintaining strong type safety elsewhere. Cross casting is less stringent than a
+fully strongly typed system though, so it should be used sparingly, and only if
+there is a strong case for automatic casting. Generally it should only be used to
+cross cast from primitives, instead of other objects. The cross casting system goes hand
+in hand with multiple inheritance, but is not to be confused with it. Cross casting
+may be taken advantage of by using the auto keyword.
+
+== Cross Casting ==
+
+As a simple example, we can consider the conversion of string to enum. Assume
+we have the following declared:
+
+<pre>
+enum Compass {
+	enums {
+		NORTH, SOUTH, EAST, WEST
+	}
+}
+</pre>
+
+If the procedure _func accepts a single Compass argument, it is acceptable to
+do <code>_func('NORTH')</code>, but it is not acceptable to first define a string,
+then attempt to cross cast:
+
+<pre>
+string @val = 'NORTH';
+_func(@val); # Compile error, expecting Compass type, but found string
+
+auto @val2 = 'NORTH';
+_func(@val2); # Not a compile error, because cross casting occurs
+
+Compass @val3 = 'NORTH';
+_func(@val3);   # Also not a compile error, because cross casting occurs during 
+				# the declaration of @val3
+</pre>
+
+This is because while string constants are declared as auto, variables declared
+as string are not. This is because when hardcoding the string in, it is quite
+obvious what the intention is; you are intending for the string to take on the 
+enum constant value. However, when you declare it in a variable first, it is assumed
+that the input is programmer specified, and therefore is not intended to be cross
+cast. If cross casting were generally allowed, then obvious bugs like this:
+
+<pre>
+string @val = 'NOT A REAL ENUM';
+_func(@val); # Should be a compile error
+</pre>
+
+would necessarily have to be runtime errors. In this case, since the type is programmer
+specified, it is reasonable to assume that it is meant to be used as a generic string,
+not the enum type. Additionally, when hard coding strings or numbers, the compiler
+can check to ensure that the type is a valid cross cast type, at compile time.
+
+== Cross Casting User Classes ==
+
+You can also take advantage of the cross compiling system, should it suit your classes
+needs. You declare your class to be cross compilable from various types, by annotating
+it with the @{CrossCast} annotation. If this annotation is declared, you must override
+the cast() method, (which should be protected) and return a new instance of the
+object, given the type to convert. Say you have a class, Label, which you want to
+be cross castable from a string.
+
+<pre>
+@{CrossCast(string | number)}
+public class Label {
+	/**
+	 * The type of @value must be the type of the disjoint of the values, or a superclass of that,
+	 * and the function must return the type of the class it is defined in.
+	 */
+	protected static Label cast(primitive @value){
+		if(@value instanceof number){
+			# You might do something different here
+			return(new Label(@value->toString());
+		} else if(@value instanceof string){
+			return new Label(@value->toString());
+		} else {
+			# This is a programmer error, because it is guaranteed that if the type is
+			# determined not to be one of the types string or number, this method will
+			# not have been called, and we don't normally have to consider those cases.
+			die('Programmer error! You forgot to handle the case of '.typeof(@value))
+		}
+	}
+}
+<pre>
+
+The compiler will attempt to check the validity of the cross casting at compile
+time, if the cast method is determined to be a constant expression, so you
+should keep the logic to a minimum to allow for the compile time error checking
+to work. Once this occurs, the following code is now valid:
+
+<pre>
+# Valid
+Label @l = 'This is a label';
+
+# Valid
+auto @s = 'This is a label';
+Label @l = @s;
+
+# Not valid
+string @s = 'This is a label';
+Label @l = @s; # Compile error, expected Label, but found string
+</pre>
+
+There is a caveat to this process. An object cannot cross cast an object of the
+same type, or a supertype or subtype. Otherwise, this would make reference vs copy
+ambiguous. Consider the following:
+
+<pre>
+@{CrossCast(array(Label, string))} # Actually a compile error
+class Label {
+	protected Label cast(mixed @l){
+		if(@l instanceof Label){
+			return(new Label(@l->getLabel()))
+		} else {
+			return(new Label(@l))
+		}
+	}
+	
+	public Label(string @l){
+		# ...
+	}
+}
+</pre>
+
+If this were allowed, this would make the following code ambiguous:
+
+<pre>
+Label @l = new Label('The label');
+Label @l2 = @l; # Are we meaning to create a new Label, or just point to the same reference?
+				# We simply declare that this is a pointer to the same object, since that is
+				# clearer.
+</pre>
+
+Because this code is at a glance unclear on whether or not we are actually trying to allocate space
+for a new Label object, or simply point to the existing object, this is not allowed.
+Supertypes are also restricted, because then both of these would be allowed:
+
+<pre>
+# Assume AbstractLabel is the superclass of Label, and 
+# AbstractLabelFactory::instance returns a new AbstractLabel of unknown type
+AbstractLabel @al = AbstractLabelFactory::instance('Label');
+
+Label @l1 = @al; # If you meant the second one, but did this instead, you get totally
+				 # different results. Therefore, this is not allowed
+Label @l2 = (Label)@al; # This is allowed though, because we are obviously just
+						# trying to cast to the Label type, from AbstractLabel
+</pre>
+
+== Cross Casting vs. Multiple Inheritance ==
+
+In multiple inheritance, an object actually IS multiple other objects, there is no
+conversion required. For instance, assume Label extended both class One and class Two.
+Then the following code is not a cast of any sort, it's just a simple assignment.
+
+<pre>
+Label @l = new Label('');
+One @one = @l;
+Two @two = @l;
+</pre>
+
+This further demonstrates why cross casting to a super type isn't allowed.

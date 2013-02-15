@@ -1,0 +1,78 @@
+Annotations allow for meta data to be added to elements, and are used by the system
+in various places, and can also be defined and used by your code as well.
+
+== Usage ==
+The basic syntax for an annotation uses the <code>@{}</code> syntax. If the annotation
+were named Annotation, and you were tagging a variable declaration, it might look like this:
+
+<pre>
+@{Annotation}
+string @s = 'The string';
+</pre>
+
+Annotations may also have annotation parameters. The parameters must be immutable,
+and fully defined at compile time, which means that you can either hardcode the values
+in, or use an immutable variable. If the parameter takes an array, and you only
+have one value in the array, you may simply provide the single element. Additionally,
+if the annotation is defined with only one parameter, and that parameter's name is 
+'value', you may leave off the parameter name and it will be assigned to value, 
+otherwise you must label the parameters the same as you would when creating an array. 
+Here are some valid examples:
+
+<pre>
+# Assuming no parameters
+@{Annotation}
+# Also valid, for no parameters
+@{Annotation()}
+
+# Assuming the one parameter is to be assigned to 'value'
+@{Annotation('the value')}
+# The same thing, only explicit
+@{Annotation(value: 'the value')}
+
+# With multiple parameters
+@{Annotation(value: 'the value', number: 3)}
+
+# Assuming 'numbers' is an array
+@{Annotation(numbers: 3)}
+# Now with an actual array
+@{Annotation(numbers: array(1, 2, 3))}
+
+# With external, but constant variables
+immutable int @a = 4;
+@{Annotation(numbers: array(1, 2, 3, @a)}
+</pre>
+
+To define your own annotation, define the public values in an <code>annotations</code>
+block in a class-like structure, and
+include default values if you like. Methods may also be defined in the annotation,
+but constructors are not allowed, therefore preventing direct instantiations of
+an annotation.
+
+<pre>
+annotation Annotation {
+	annotations {
+		string @value = 'default',
+		int @number = 5,
+		array<number> @numbers = array(1, 2, 3),
+	}
+}
+</pre>
+
+To use the annotation on an element, you must use the reflection methods. Since multiple
+annotations may be present on an element, you must select the annotations specifically
+(or you can iterate through all of them dynamically). Annotation parameters are immutable,
+though they do not work exactly the same as immutable class types, because the default value
+is not used if the value is provided by the user.
+
+<pre>
+@{Annotation(number: 10)}
+string @var = 'the string';
+
+Annotation @a = reflect_annotation(Annotation, @var);
+msg(@a->number) # msg's 10
+
+foreach(reflect_annotations(@var), @annotation){
+	msg(typeof(@annotation)) # In this case, "Annotation"
+}
+</pre>

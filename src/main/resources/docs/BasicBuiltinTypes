@@ -58,4 +58,6 @@ The auto type isn't a type per se, it works as a bridge between scripting langua
 and compiled language. If a type is marked as auto, casting is not required, and
 it will attempt to cast to the correct data type at runtime, and only throw
 an exception then. This is discouraged from normal use, except in the case
-of receiving user input, or very small one time scripts.
+of receiving user input, or very small one time scripts. Additionally, string
+constants and numeric constants work as if they are declared as auto. Variables
+declared as auto are eligible to use the cross-casting system.

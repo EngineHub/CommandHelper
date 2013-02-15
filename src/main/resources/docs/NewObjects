@@ -12,7 +12,7 @@ blueprint, but multiple houses that are actually built, and in each house, some
 things are different, like, the paint color.
 
 === Example ===
-Before getting into the details about objects, lets look at an example:
+Before getting into the details about objects, lets look at an average example:
 
 <pre>
 class A {
@@ -105,6 +105,7 @@ class B extends A {
     public B(){
         super()
     }
+	@{Override}
     public method2(int @b){
         return(@b + 3)
     }
@@ -113,7 +114,8 @@ class B extends A {
 
 In this case, we are extending A, and '''overriding''' method2. In order to 
 override a method, you simply name it the same as the method in the parent 
-class. However, it is important to note that the method signatures must be 
+class, and tag the method with the @{Override} annotation. 
+However, it is important to note that the method signatures must be 
 '''type compatible''', that is, it cannot completely redefine the types of the 
 variables that are passed in, but it can use ''more specificity''. For instance, 
 if class A defined the method <code>public f(Object @o)</code> it would be 
@@ -163,11 +165,126 @@ The reason for this is so that the object is never in an ''inconsistent state''
 which could occur if a subclass manipulates members of the parent before it is 
 allowed to run its initialization. Had we left off the call to super, it would 
 have been automatically placed at the top of the constructor, and this would not 
-have been a compile error.
+have been a compile error. Should a call to super() be inapplicable, because
+the superclass does not define a constructor with no arguments, it is a compile
+error unless each constructor in the subclass calls at least one of the superclass's
+constructors with super().
 
-==== Default Constructors ====
+==== <code>final</code> keyword ====
+The final keyword has three uses, preventing a method from being overridden,
+making it impossible to subclass this class, and preventing reassignment of
+a variable.
 
-If no constructors are provided, a default constructor is always provided, with 
+===== Preventing subclasses =====
+
+TODO
+
+===== Preventing overriding a method =====
+
+TODO
+
+===== Preventing reassignment of a variable =====
+Technically this can be used outside of classes, so the following is applicable
+anywhere in code:
+
+<pre>
+final string @s = '';
+@s = 'new string'; # Compiler error
+</pre>
+
+When a member variable is tagged as final though, it has slightly different
+usage. When object construction is complete, all final variables must have
+had some value assigned to them. That is, all code branches must lead to
+the value being assigned. During construction ONLY, the value may be changed
+multiple times however, and in fact, this allows for final variables to be assigned
+a default, and still be changed. (If it's meant to be an actual constant, you should
+make the variable static anyways, so it doesn't incur extra overhead per instance.)
+
+==== Constructors ====
+
+Constructors look sort of like methods but they are special, because you may define
+multiple constructors in each class. As long as each constructor has a completely
+different ''type erasure'' it is allowed. For instance, the following is allowable:
+
+<pre>
+class A {
+	
+	public A(){
+
+	}
+
+	public A(string @v){
+
+	}
+}
+
+A @a1 = new A(); # Uses the first constructor
+A @a2 = new A(''); # Uses the second constructor
+</pre>
+
+Inside of a constructor, you may make calls to <code>super()</code>, which calls
+the applicable super class's constructor. It is required for each constructor to call
+at least one of the super class's constructors (though if a no-arg constructor is available,
+it will automatically be called). Additionally, a call to this() will
+call this class's applicable constructor, and may be called at any point in the
+constructor, since final variables are still manipulable at this point. As an advanced
+example:
+
+<pre>
+class A {
+	members {
+		public final @var = 1
+	}
+
+	public A(){
+		@var = 2;
+	}
+
+	public B(){
+		this();
+		@var = 3;
+	}
+}
+</pre>
+
+Unlike instance methods, super class constructors are not exposed by default. If
+a class does not have any final variables though, it can easily expose them individually,
+using the <code>inherit</code> keyword.
+
+<pre>
+class A {
+	public A(string @var){
+		# ...
+	}
+}
+
+class B {
+	inherit A(string @var); # The signature must be the exact same as the superclass's
+}
+</pre>
+
+If you declare the constructor this way, it is exactly the same as if we did this:
+
+<pre>
+class B {
+	public B(string @var) {
+		super(@var);
+	}
+}
+</pre>
+
+That is, usage of both would be the same:
+
+<pre>
+B @b = new B('');
+</pre>
+
+Abstract constructors are also allowed in abstract classes. The section on abstract
+classes covers this.
+
+===== Default Constructors =====
+
+If zero constructors are provided, a default constructor is always provided, with 
 the definition <code>public A(){ }</code> (assuming the class name is A).
 
 ==== Destructors ====
@@ -221,8 +338,83 @@ it is not possible to call a static method by dereferencing an instance. If you 
 a pure utility class, that only has methods (no members), then consider using
 a namespace instead.
 
-==== <code>self</code> keyword ====
-The <code>self</code> keyword is 
+==== <code>Class</code> objects, and <code>self</code> keyword ====
+The <code>Class</code> class is a meta object, which represents a class. The class
+object is actually what you use when you call a static method: <code>A::staticMethod()</code>
+Because the Class object is first class, and a special object however, you can assign
+it to a Class object variable, and use it dynamically. The Class object relies heavily
+on Generics though, so you should be familiar with them first. Consider the following two classes.
+
+<pre>
+class A {
+	public static int value(){
+		return(2);
+	}
+}
+
+class B extends A {
+	@{Override}
+	public static int value(){
+		return(3);
+	}
+}
+
+# The obvious usage:
+msg(A::value()) # 2
+msg(B::value()) # 3
+</pre>
+
+
+<pre>
+Class<? extends A> @class = A;
+# Now we can do this, because we know that @class is at least
+# A or a subclass
+msg(@class::value()); # returns 2
+
+@class = B;
+msg(@class::value()); # returns 3
+</pre>
+
+Often times though, when making factory classes, you end up having to instantiate
+an object, just to call the subclass's methods that were defined as instance
+variables, just so you can enforce a particular method on a subclass. The 
+<code>self</code> keyword is of type Class<? extends CurrentClass>, and is a reference
+to the runtime Class type of the variable. So, the following
+allows for variable static methods to be called, from within the superclass:
+
+<pre>
+class A {
+	public static void test(){
+		msg(A::value());	# Will always say "Called from A" 
+		msg(self::value()); # Unknown at this time, see below for results
+	}
+
+	public static string value(){
+		return('Called from A');
+	}
+}
+
+class B {
+	@{Override}
+	public static string value(){
+		return('Called from B');
+	}
+}
+
+A::test(); # This messages "Called from A" twice
+B::test(); # This messages "Called from A", then "Called from B"
+
+Class<? extends A> @class = A;
+@class::test(); # "Called from A" twice
+@class = B;
+@class::test(); # "Called from A", then "Called from B"
+</pre>
+
+As you can see, the currently scoped Class object is what <code>self</code>
+refers to, which is not necessarily the class it is defined in. It is worth
+noting that if a static method is called without a classifier, it is assumed
+to be prefixed with <code>self</code>. Static methods can therefore be abstract
+or final, which allows them to be used like instance methods of the Class object.
 
 === Access Modifiers ===
 '''public''', '''private''', and '''protected''' are the three modifiers that 
@@ -296,9 +488,10 @@ We can change existing variables (or add new ones) with:
 
 If a variable is added with reflection, it will obviously only be 
 accessible through reflection, and it only becomes part of that instance. 
-Changes to static variables or methods are not possible, because static variables
-are not actually a part of that instance. You must use the class reflection methods
-to manipulate those. The array 
+Changes to static variables or methods and constructors are not possible, 
+because static variables are not actually a part of that instance,
+and constructors do not behave like normal methods. 
+You must use the class reflection methods to manipulate those. The array 
 notation is merely a convenience, using this notation simply hides the 
 complexity of getting and setting static and instance variables reflectively. 
 You can iterate through the variables using foreach, and array_keys will work 
@@ -310,15 +503,38 @@ the array, even though calling the method non-reflectively would work.
 
 This mechanism of reflection is useful for setting and getting variables in an 
 ''instance'', but if you are interested in information about the Class itself 
-(not an instance of it, or you are interested in static variables) 
+(not an instance of it, or you are interested in static variables), or you wish
+to manipulate the constructors,
 you can use the functions that are provided in the reflection namespace.
 
 
 === Interfaces ===
 
+TODO
+
 === Abstract Classes ===
 
+TODO
+
+=== <code>@{Override}</code> annotation ===
+
+The <code>@{Override}</code> annotation is required on all methods that override
+either a superclass or interface's methods. This prevents an interface or super
+class from changing without the subclass being explicitly aware of the change.
+This property allows for better code maintenance, and encourages use of the
+[http://en.wikipedia.org/wiki/Open/closed_principle open/closed principle].
+If a method overrides a superclass or implements an interface method, it must
+have this annotation, or it is a compile error.
+
+If this compile error appears in other classes later in your development, you
+will be immediately aware of all places where other code is affected, and you can
+properly account for those changes, or remove dead code, if a method is removed.
+This allows you to quickly determine how much of an impact (and what can be impacted)
+by the given code changes.
+
 === Multiple Inheritance ===
+
+TODO
 
 ==== <code>inherit</code> keyword ====
 
@@ -365,7 +581,7 @@ method individually.
 
 === Type Unions ===
 
-A type union can be used any time disjoint types are required. Assume the following
+A type union (or disjoint types) can be used any time disjoint types are required. Assume the following
 hierarchy:
 
 <pre>
@@ -393,6 +609,23 @@ case, the code using the variable @var must assume that it is of type A, unless 
 does an explicit cast first. So, as far as code that ''uses'' the variable, it will
 work as if it were defined as <code>A @var</code>, but with the guarantee that only
 a D or C type instance will have been assigned to it.
+
+When using disjoint types, variable Class objects may also be used, and it is as if
+the class is highest superclass defined for it.
+
+<pre>
+Class<? extends B> @class1 = D;
+Class<? extends A> @disjoinClass = A | @class1; 
+</pre>
+
+In the second line, it is actually irrelevant that D is stored in @class1, B is
+assumed, so that is the same as <code>A | B</code>. 
+
+When using disjoint types, a value of Class<?> is required, so if @class1 were typed as 
+auto, then @class1 would be assumed to be typed as Class<Mixed>, thereby making
+that a pointless operation. Therefore, if using auto types in combination with
+disjoint types, this will be a compiler error. The pipe operator is shorthand
+for the {{function|disjoint_type}} function.
 
 === <code>immutable</code> keyword ===
 
