@@ -20,6 +20,7 @@ public interface MCWorld extends AbstractionObject{
     public List<MCLivingEntity> getLivingEntities();
     public String getName();
     public MCBlock getBlockAt(int x, int y, int z);
+	public MCChunk getChunkAt(int x, int z);
 	
 	public boolean regenerateChunk(int x, int y);
 
@@ -36,6 +37,11 @@ public interface MCWorld extends AbstractionObject{
     public void strikeLightningEffect(MCLocation GetLocation);
 
     public void setStorm(boolean b);
+	public void setThundering(boolean b);
+	public void setWeatherDuration(int time);
+	public void setThunderDuration(int time);
+	public boolean isStorming();
+	public boolean isThundering();
 
     public MCLocation getSpawnLocation();
     public void setSpawnLocation(int x, int y, int z);

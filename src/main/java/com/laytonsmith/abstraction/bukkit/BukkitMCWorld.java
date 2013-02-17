@@ -484,4 +484,28 @@ public class BukkitMCWorld implements MCWorld {
 	public boolean regenerateChunk(int x, int z) {
 		return w.regenerateChunk(x, z);
 	}
+
+	public MCChunk getChunkAt(int x, int z) {
+		return new BukkitMCChunk(w.getChunkAt(x, z));
+	}
+
+	public void setThundering(boolean b) {
+		w.setThundering(b);
+	}
+	
+	public void setWeatherDuration(int time) {
+		w.setWeatherDuration(time);
+	}
+
+	public void setThunderDuration(int time) {
+		w.setThunderDuration(time);
+	}
+	
+	public boolean isStorming() {
+		return w.hasStorm();
+	}
+	
+	public boolean isThundering() {
+		return w.isThundering();
+	}
 }
