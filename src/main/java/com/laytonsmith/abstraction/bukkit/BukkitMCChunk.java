@@ -16,6 +16,7 @@ public class BukkitMCChunk implements MCChunk {
 	public BukkitMCChunk(Chunk c) {
 		this.c = c;
 	}
+	
 	public int getX() {
 		return c.getX();
 	}
@@ -36,6 +37,14 @@ public class BukkitMCChunk implements MCChunk {
 		return new BukkitMCWorld(c.getWorld());
 	}
 
+	public MCEntity[] getEntities() {
+		MCEntity[] ret = new MCEntity[c.getEntities().length];
+		for (int i=0; i < c.getEntities().length; i++) {
+			ret[i] = new BukkitMCEntity(c.getEntities()[i]);
+		}
+		return ret;
+	}
+	
 	public Object getHandle() {
 		return c;
 	}

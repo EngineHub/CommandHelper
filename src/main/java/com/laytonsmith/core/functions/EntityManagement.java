@@ -11,7 +11,7 @@ import com.laytonsmith.core.Static;
 import com.laytonsmith.core.constructs.*;
 import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
-import com.laytonsmith.core.exceptions.CancelCommandException;
+import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import java.util.ArrayList;
@@ -25,6 +25,293 @@ public class EntityManagement {
 	public static String docs(){
         return "This class of functions allow entities to be managed.";
     }
+
+	@api
+	public static class all_entities extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			CArray ret = new CArray(t);
+			if (args.length == 0) {
+				for (MCWorld w : Static.getServer().getWorlds()) {
+					for (MCEntity e : w.getEntities()) {
+						ret.push(new CInt(e.getEntityId(), t));
+					}
+				}
+			} else {
+				MCWorld w = Static.getServer().getWorld(args[0].val());
+				if (args.length == 3) {
+					int x = Static.getInt32(args[1], t);
+					int z = Static.getInt32(args[2], t);
+					for (MCEntity e : w.getChunkAt(x, z).getEntities()) {
+						ret.push(new CInt(e.getEntityId(), t));
+					}
+				} else {
+					for (MCEntity e : w.getEntities()) {
+						ret.push(new CInt(e.getEntityId(), t));
+					}
+				}
+			}
+			return ret;
+		}
+
+		public String getName() {
+			return "all_entities";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1, 3};
+		}
+
+		public String docs() {
+			return "array {[world, [x, z]]} Returns an array of IDs for all entities in the given scope. With no args,"
+					+ " this will return all entities loaded on the entire server. If the first argument is given, only"
+					+ " entities in that world will be returned, and if all 3 arguments are given, only entities in the"
+					+ " chunk with those coords will be returned.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Basic use", "msg(all_entities(pworld()))",
+							"Sends you an array of all entities in your world."),
+					new ExampleScript("Basic use", "msg(all_entities(pworld(), ploc()[0], ploc()[2]))",
+							"Sends you an array of all entities in the same chunk as you.")
+			};
+		}
+
+	}
+
+	@api
+	public static class entity_loc extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			return ObjectGenerator.GetGenerator().location(e.getLocation());
+		}
+
+		public String getName() {
+			return "entity_loc";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "locationArray {entityID} Returns the location array for this entity, if it exists."
+					+ " This array will be compatible with any function that expects a location.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Sample output", "entity_loc(5048)",
+							"{0: -3451.96, 1: 65.0, 2: 718.521, 3: world, 4: -170.9, 5: 35.5, pitch: 35.5,"
+							+ " world: world, x: -3451.96, y: 65.0, yaw: -170.9, z: 718.521}")
+			};
+		}
+
+	}
+
+	@api
+	public static class set_entity_loc extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.FormatException,
+					ExceptionType.CastException, ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			MCLocation l;
+			if (args[1] instanceof CArray) {
+				l = ObjectGenerator.GetGenerator().location((CArray) args[1], e.getWorld(), t);
+			} else {
+				throw new Exceptions.FormatException("An array was expected but recieved " + args[1], t);
+			}
+			return new CBoolean(e.teleport(l), t);
+		}
+
+		public String getName() {
+			return "set_entity_loc";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "boolean {entityID, locationArray} Teleports the entity to the given location and returns whether"
+					+ " the action was successful. Note this can set both location and direction.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+				new ExampleScript("Teleporting an entity to you", "set_entity_loc(386, ploc())",
+						"The entity will teleport to the block you are standing on."),
+				new ExampleScript("Teleporting an entity to another", "set_entity_loc(201, entity_location(10653))",
+						"The entity will teleport to the other and face the same direction, if they both exist."),
+				new ExampleScript("Setting location with a normal array",
+						"set_entity_loc(465, array(214, 64, 1812, 'world', -170, 10))", "This set location and direction."),
+				new ExampleScript("Setting location with an associative array",
+						"set_entity_loc(852, array(x: 214, y: 64, z: 1812, world: 'world', yaw: -170, pitch: 10))",
+						"This also sets location and direction")
+			};
+		}
+
+	}
+
+	@api
+	public static class entity_velocity extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.BadEntityException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			CArray va = ObjectGenerator.GetGenerator().velocity(e.getVelocity(), t);
+			return va;
+		}
+
+		public String getName() {
+			return "entity_velocity";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1};
+		}
+
+		public String docs() {
+			return "array {entityID} Returns an associative array indicating the x/y/z components of this entity's velocity."
+					+ " As a convenience, the magnitude is also included.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("A stationary entity", "msg(entity_velocity(235))",
+							"{magnitude: 0.0, x: 0.0, y: 0.0, z: 0.0}")
+			};
+		}
+
+	}
+
+	@api
+	public static class set_entity_velocity extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.FormatException, ExceptionType.CastException,
+					ExceptionType.BadEntityException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+
+			MCEntity e = Static.getEntity(Static.getInt32(args[0], t), t);
+			e.setVelocity(ObjectGenerator.GetGenerator().velocity(args[1], t));
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_entity_velocity";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{2};
+		}
+
+		public String docs() {
+			return "void {entityID, array} Sets the velocity of this entity according to the supplied xyz array. All 3"
+					+ " values default to 0, so an empty array will simply stop the entity's motion. Both normal and"
+					+ " associative arrays are accepted.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+
+		@Override
+		public ExampleScript[] examples() throws ConfigCompileException {
+			return new ExampleScript[]{
+					new ExampleScript("Setting a bounce with a normal array", "set_entity_velocity(235, array(0, 0.5, 0))",
+							"The entity just hopped, unless it was an item frame or painting."),
+					new ExampleScript("Setting a bounce with an associative array", "set_entity_velocity(235, array(y: 0.5))",
+							"The entity just hopped, unless it was an item frame or painting.")
+			};
+		}
+
+	}
 
 	@api
 	public static class entity_remove extends AbstractFunction {
@@ -376,7 +663,7 @@ public class EntityManagement {
 			return new Integer[]{2, 3};
 		}
 
-		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
+		public Construct exec(Target t, Environment env, Construct... args) throws ConfigRuntimeException {
 			MCPlayer p = env.getEnv(CommandHelperEnvironment.class).GetPlayer();
 
 			MCLocation loc;
@@ -385,7 +672,7 @@ public class EntityManagement {
 
 			if (!(args[0] instanceof CArray)) {
 				throw new ConfigRuntimeException("Expecting an array at parameter 1 of entities_in_radius",
-						ExceptionType.CastException, t);
+						ExceptionType.BadEntityException, t);
 			}
 
 			loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
