@@ -1,8 +1,7 @@
-
-
 package com.laytonsmith.abstraction.bukkit;
 
 import com.laytonsmith.abstraction.*;
+import com.laytonsmith.abstraction.enums.MCInventoryType;
 import java.util.ArrayList;
 import java.util.List;
 import net.milkbowl.vault.economy.Economy;
@@ -11,13 +10,15 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.Server;
 import org.bukkit.World;
 import org.bukkit.entity.Player;
+import org.bukkit.event.inventory.InventoryType;
+import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.plugin.RegisteredServiceProvider;
 
 /**
  *
  * @author layton
  */
-public class BukkitMCServer implements MCServer{
+public class BukkitMCServer implements MCServer {
     
     Server s;
     public BukkitMCServer(){
@@ -217,6 +218,48 @@ public class BukkitMCServer implements MCServer{
 	@Override
 	public int hashCode() {
 		return s.hashCode();
+	}
+
+	public MCInventory createInventory(MCInventoryHolder holder, MCInventoryType type) {
+		InventoryHolder ih = null;
+		
+		if (holder instanceof MCPlayer) {
+			ih = ((BukkitMCPlayer)holder)._Player();
+		} else if (holder instanceof MCHumanEntity) {
+			ih = ((BukkitMCHumanEntity)holder).asHumanEntity();
+		} else if (holder.getHandle() instanceof InventoryHolder) {
+			ih = (InventoryHolder)holder.getHandle();
+		}
+		
+		return new BukkitMCInventory(Bukkit.createInventory(ih, InventoryType.valueOf(type.name())));
+	}
+	
+	public MCInventory createInventory(MCInventoryHolder holder, int size) {
+		InventoryHolder ih = null;
+		
+		if (holder instanceof MCPlayer) {
+			ih = ((BukkitMCPlayer)holder)._Player();
+		} else if (holder instanceof MCHumanEntity) {
+			ih = ((BukkitMCHumanEntity)holder).asHumanEntity();
+		} else if (holder.getHandle() instanceof InventoryHolder) {
+			ih = (InventoryHolder)holder.getHandle();
+		}
+		
+		return new BukkitMCInventory(Bukkit.createInventory(ih, size));
+	}
+	
+	public MCInventory createInventory(MCInventoryHolder holder, int size, String title) {
+		InventoryHolder ih = null;
+		
+		if (holder instanceof MCPlayer) {
+			ih = ((BukkitMCPlayer)holder)._Player();
+		} else if (holder instanceof MCHumanEntity) {
+			ih = ((BukkitMCHumanEntity)holder).asHumanEntity();
+		} else if (holder.getHandle() instanceof InventoryHolder) {
+			ih = (InventoryHolder)holder.getHandle();
+		}
+		
+		return new BukkitMCInventory(Bukkit.createInventory(ih, size, title));
 	}
 
 }
