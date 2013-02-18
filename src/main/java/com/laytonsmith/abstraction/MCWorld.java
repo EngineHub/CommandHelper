@@ -21,6 +21,8 @@ public interface MCWorld extends AbstractionObject{
     public String getName();
     public MCBlock getBlockAt(int x, int y, int z);
 	public MCChunk getChunkAt(int x, int z);
+	public MCChunk getChunkAt(MCBlock b);
+	public MCChunk getChunkAt(MCLocation l);
 	
 	public boolean regenerateChunk(int x, int y);
 
