@@ -32,6 +32,8 @@ public enum Driver {
 	ITEM_PICKUP,
 	ITEM_DROP,
 	INVENTORY_CLICK,
+	INVENTORY_OPEN,
+	INVENTORY_CLOSE,
 	/**
 	 * Used by events fired from the extension system.
 	 */
