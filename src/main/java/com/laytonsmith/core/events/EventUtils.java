@@ -1,9 +1,6 @@
-
-
 package com.laytonsmith.core.events;
 
 import com.laytonsmith.PureUtilities.ClassDiscovery;
-import com.laytonsmith.abstraction.bukkit.events.BukkitBlockEvents.BukkitMCSignChangeEvent;
 import com.laytonsmith.annotations.event;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CString;
@@ -173,7 +170,7 @@ public final class EventUtils {
         if (bounded != null) {
             for (BoundEvent b : bounded) {
                 try {
-                    if (driver.getName().equals(eventName) && driver.matches(b.getPrefilter(), e)) {
+                    if (b.getEventName().equals(eventName) && driver.matches(b.getPrefilter(), e)) {
                         toRun.add(b);
                     }
                 } catch (PrefilterNonMatchException ex) {
@@ -271,7 +268,10 @@ public final class EventUtils {
 				} catch (IllegalAccessException ex) {
 					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (IllegalArgumentException ex) {
-					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
+					// If we do this, console gets spammed for hooks that don't apply for
+					// the event being fired. Need to check if mce is instance of params[0].
+					
+					//Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
 				} catch (InvocationTargetException ex) {
 					Logger.getLogger(EventUtils.class.getName()).log(Level.SEVERE, null, ex);
 				}
