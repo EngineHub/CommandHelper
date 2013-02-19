@@ -138,7 +138,7 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			return true;
 		}
@@ -178,7 +178,7 @@ public class InventoryEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+				BindableEvent event, Target t) {
 			return false;
 		}
 
@@ -205,7 +205,7 @@ public class InventoryEvents {
 					+ "{} ";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			return true;
 		}
@@ -245,7 +245,7 @@ public class InventoryEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+				BindableEvent event, Target t) {
 			return false;
 		}
 

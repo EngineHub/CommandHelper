@@ -563,27 +563,27 @@ public class ObjectGenerator {
 		if (c instanceof CArray) {
 			va = (CArray) c;
 			if (va.containsKey("x")) {
-				x = Static.getDouble(va.get("x"), t);
+				x = va.get("x").primitive(t).castToDouble(t);
 			}
 			if (va.containsKey("y")) {
-				y = Static.getDouble(va.get("y"), t);
+				y = va.get("y").primitive(t).castToDouble(t);
 			}
 			if (va.containsKey("z")) {
-				z = Static.getDouble(va.get("z"), t);
+				z = va.get("z").primitive(t).castToDouble(t);
 			}
 			if (!va.containsKey("x") && !va.containsKey("y") && !va.containsKey("z")) {
 				switch ((int) va.size()) {
 				case 4:
-					z = Static.getDouble(va.get(3), t);
-					y = Static.getDouble(va.get(2), t);
-					x = Static.getDouble(va.get(1), t);
+					z = va.get(3).primitive(t).castToDouble(t);
+					y = va.get(2).primitive(t).castToDouble(t);
+					x = va.get(1).primitive(t).castToDouble(t);
 					break;
 				case 3:
-					z = Static.getDouble(va.get(2), t);
+					z = va.get(2).primitive(t).castToDouble(t);
 				case 2:
-					y = Static.getDouble(va.get(1), t);
+					y = va.get(1).primitive(t).castToDouble(t);
 				case 1:
-					x = Static.getDouble(va.get(0), t);
+					x = va.get(0).primitive(t).castToDouble(t);
 				}
 			}
 			return new MCEntity.Velocity(mag, x, y, z);
