@@ -20,7 +20,8 @@ public class MClass implements Mixed {
 	}
 
 	public boolean isNull() {
-		throw new UnsupportedOperationException("Not supported yet.");
+		//Since we have a concrete type, it's obviously not null.
+		return false;
 	}
 
 	public String typeName() {
@@ -28,6 +29,10 @@ public class MClass implements Mixed {
 	}
 
 	public CPrimitive primitive(Target t) throws ConfigRuntimeException {
+		throw new ConfigRuntimeException("Cannot cast " + typeName() + " to a primitive", t);
+	}
+
+	public boolean isImmutable() {
 		throw new UnsupportedOperationException("Not supported yet.");
 	}
 	

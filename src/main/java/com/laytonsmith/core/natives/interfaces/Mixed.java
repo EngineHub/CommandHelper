@@ -57,4 +57,10 @@ public interface Mixed {
 	 * @return 
 	 */
 	CPrimitive primitive(Target t) throws ConfigRuntimeException;
+	
+	/**
+	 * Returns true if the class definition is defined as immutable.
+	 * @return 
+	 */
+	boolean isImmutable();
 }

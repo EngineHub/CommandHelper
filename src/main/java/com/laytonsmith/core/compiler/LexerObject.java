@@ -317,6 +317,10 @@ class LexerObject {
 							buffer("\t");
 							i++;
 							break;
+						case '0':
+							buffer('\0');
+							i++;
+							break;
 						case 'u':
 							StringBuilder unicode = new StringBuilder();
 							for (int m = 0; m < 4; m++) {

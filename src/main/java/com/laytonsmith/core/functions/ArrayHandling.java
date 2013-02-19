@@ -1025,7 +1025,7 @@ public class ArrayHandling {
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
 			if (args[0] instanceof CArray) {
 				CArray ca = (CArray) args[0];
-				return ca.remove(args[1]);
+				return ca.remove(args[1].val(), t);
 			} else {
 				throw new ConfigRuntimeException("Argument 1 of array_remove should be an array", ExceptionType.CastException, t);
 			}
@@ -1618,6 +1618,7 @@ public class ArrayHandling {
 			long number = list.getLong("number", t);
 			boolean getKeys = list.getBoolean("getKeys", t);
 
+			CArray newArray = new CArray(t);
 			LinkedHashSet<Integer> randoms = new LinkedHashSet<Integer>();
 			while (randoms.size() < number) {
 				randoms.add(java.lang.Math.abs(r.nextInt() % (int) array.size()));

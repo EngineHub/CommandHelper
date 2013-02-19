@@ -6,13 +6,14 @@ package com.laytonsmith.core.constructs;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import com.laytonsmith.core.natives.interfaces.Operators;
 
 /**
  *
  * @author layton
  */
 @typename("boolean")
-public class CBoolean extends CPrimitive implements Cloneable{
+public class CBoolean extends CPrimitive implements Cloneable {
     
     public static final long serialVersionUID = 1L;
     private final boolean val;

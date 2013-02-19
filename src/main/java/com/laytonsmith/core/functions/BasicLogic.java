@@ -2,6 +2,7 @@ package com.laytonsmith.core.functions;
 
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.*;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
 import com.laytonsmith.core.arguments.Generic;
@@ -17,6 +18,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Operators;
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -656,58 +659,85 @@ public class BasicLogic {
 		}
 
 		public CBoolean exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
-			if (args.length <= 1) {
-				throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			List<Construct> argList = new ArrayList<Construct>();
+			argList.add((Construct)list.get("var1"));
+			argList.add((Construct)list.get("var2"));
+			for(Construct c : ((CArray)list.get("varX"))){
+				argList.add(c);
 			}
-			boolean referenceMatch = true;
-			for (int i = 0; i < args.length - 1; i++) {
-				if (args[i] != args[i + 1]) {
-					referenceMatch = false;
-					break;
-				}
-			}
-			if (referenceMatch) {
-				return new CBoolean(true, t);
-			}
-			if (Static.anyBooleans(args)) {
-				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					boolean arg1 = args[i - 1].primitive(t).castToBoolean();
-					boolean arg2 = args[i].primitive(t).castToBoolean();
-					if (arg1 != arg2) {
-						equals = false;
-						break;
+			boolean equals = true;
+			for(int i = 0; i < argList.size() - 1; i++){
+				Construct lhs = argList.get(i);
+				Construct rhs = argList.get(i + 1);
+				if(lhs instanceof Operators.Equality){
+					//Test first
+					Operators.Equality elhs = (Operators.Equality)lhs;
+					if(elhs.operatorTestEquals(rhs.getClass())){
+						if(!elhs.operatorEquals(rhs)){
+							equals = false;
+							break;
+						}
+					} else {
+						throw new Exceptions.CastException(lhs.typeName() + " does not support equals comparisons with " + rhs.typeName(), t);
 					}
-				}
-				return new CBoolean(equals, t);
-			}
-
-			{
-				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					if (!args[i - 1].val().equals(args[i].val())) {
-						equals = false;
-						break;
-					}
-				}
-				if (equals) {
-					return new CBoolean(true, t);
+				} else {
+					throw new Exceptions.CastException(lhs.typeName() + " does not support equals comparisons", t);
 				}
 			}
-			try {
-				boolean equals = true;
-				for (int i = 1; i < args.length; i++) {
-					double arg1 = args[i - 1].primitive(t).castToDouble(t);
-					double arg2 = args[i].primitive(t).castToDouble(t);
-					if (arg1 != arg2) {
-						equals = false;
-						break;
-					}
-				}
-				return new CBoolean(equals, t);
-			} catch (ConfigRuntimeException e) {
-				return new CBoolean(false, t);
-			}
+			return new CBoolean(equals, t);
+//			if (args.length <= 1) {
+//				throw new ConfigRuntimeException("At least two arguments must be passed to equals", ExceptionType.InsufficientArgumentsException, t);
+//			}
+//			boolean referenceMatch = true;
+//			for (int i = 0; i < args.length - 1; i++) {
+//				if (args[i] != args[i + 1]) {
+//					referenceMatch = false;
+//					break;
+//				}
+//			}
+//			if (referenceMatch) {
+//				return new CBoolean(true, t);
+//			}
+//			if (Static.anyBooleans(args)) {
+//				boolean equals = true;
+//				for (int i = 1; i < args.length; i++) {
+//					boolean arg1 = args[i - 1].primitive(t).castToBoolean();
+//					boolean arg2 = args[i].primitive(t).castToBoolean();
+//					if (arg1 != arg2) {
+//						equals = false;
+//						break;
+//					}
+//				}
+//				return new CBoolean(equals, t);
+//			}
+//
+//			{
+//				boolean equals = true;
+//				for (int i = 1; i < args.length; i++) {
+//					if (!args[i - 1].val().equals(args[i].val())) {
+//						equals = false;
+//						break;
+//					}
+//				}
+//				if (equals) {
+//					return new CBoolean(true, t);
+//				}
+//			}
+//			try {
+//				boolean equals = true;
+//				for (int i = 1; i < args.length; i++) {
+//					double arg1 = args[i - 1].primitive(t).castToDouble(t);
+//					double arg2 = args[i].primitive(t).castToDouble(t);
+//					if (arg1 != arg2) {
+//						equals = false;
+//						break;
+//					}
+//				}
+//				return new CBoolean(equals, t);
+//			} catch (ConfigRuntimeException e) {
+//				return new CBoolean(false, t);
+//			}
 		}
 
 		public ExceptionType[] thrown() {
@@ -726,7 +756,7 @@ public class BasicLogic {
 			return ArgumentBuilder.Build(
 					new Argument("The first variable to compare", Mixed.class, "var1"),
 					new Argument("The second variable to compare", Mixed.class, "var2"),
-					new Argument("If additional variables should be compared, they can also be provided.", Mixed.class, "varX")
+					new Argument("If additional variables should be compared, they can also be provided.", CArray.class, "varX").setVarargs()
 				);
 		}
 

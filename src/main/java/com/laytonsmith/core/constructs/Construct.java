@@ -2,6 +2,7 @@
 
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.immutable;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.exceptions.MarshalException;
 import com.laytonsmith.core.functions.Exceptions;
@@ -256,7 +257,7 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 	 * @param t
 	 * @return 
 	 */
-	public static Construct GetNullConstruct(Target t){
+	public static Construct GetNullConstruct(final Target t){
 		return new Construct(null, t) {
 
 			@Override
@@ -267,7 +268,24 @@ public abstract class Construct implements Cloneable, Comparable<Construct>, Mix
 			public String typeName() {
 				return "null";
 			}
+
+			@Override
+			public boolean isImmutable() {
+				throw new ConfigRuntimeException("Cannot dereference a null object", Exceptions.ExceptionType.NullPointerException, t);
+			}
+			
 		};
+	}
+
+	public boolean isImmutable() {
+		Class<?> c = this.getClass();
+		do {
+			if(c.getAnnotation(immutable.class) != null){
+				return true;
+			}
+			c = c.getSuperclass();
+		} while(c != null);
+		return false;
 	}
     
 	public static Construct GetConstruct(CharSequence c){return GetConstruct((Object)c);}

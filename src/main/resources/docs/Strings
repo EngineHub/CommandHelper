@@ -1,0 +1,229 @@
+MethodScript supports two forms of strings, normal string literals, and smart strings.
+Normal strings are quoted with the single quote character, and smart strings are quoted
+with the double quote character.
+
+== Normal Strings ==
+
+Normal strings are denoted with single quotes:
+
+<pre>
+'Hello World!'
+</pre>
+
+Technically bare strings are allowed as well, when not in strict mode.
+
+<pre>
+# Don't do this normally:
+Hello World
+# This is the same as
+'Hello World'
+</pre>
+
+Since bare strings are considered as individual strings, (and therefore automatically {{function|sconcat}}'d together), 
+this is also equivalent:
+
+<pre>
+# This...
+Hello World
+# ... is the same as ...
+'Hello' 'World'
+# ... or even more accurately
+sconcat('Hello', 'World')
+</pre>
+
+'''ALL SPECIAL CHARACTERS MUST BE QUOTED, EVEN IF STRICT MODE IS OFF'''. It is important to note
+that ALL special characters are reserved for future use, and are therefore required to be
+quoted, even if they have no special meaning right now. Bare strings only support
+letters and numbers.
+
+All other special characters not described below are treated as literal characters inside
+a string, instead of using their meta meaning, so the following is acceptable:
+
+<pre>
+/* This is a comment */
+'/* This is not a comment */'
+</pre>
+
+=== Escape sequences ===
+
+If you need to have a literal single quote character, you must ''escape'' the quote
+inside of the string, with the escape character <code>\</code>
+
+<pre>
+'Don\'t forget to quote apostrophes in your strings, or you\'ll have a compile error'
+</pre>
+
+Since <code>\</code> itself is a special character inside of a string, you also need
+to escape it, if you needed a literal backslash:
+
+<pre>
+'\\o/' # This produces \o/
+</pre>
+
+Other escape sequences are also supported as well. Newlines can be added with \n,
+tabs can be added with \t, a null character can be added with \0, 
+and unicode characters can be added with \uXXXX, where XXXX
+is the unicode id of the character to insert. In smart strings, a double quote
+character also needs to be escaped, but in normal strings it is a compile error
+to escape it, because there is no need to escape it.
+
+<pre>
+'Line 1\nLine 2' # Newline
+'->\t<-'		 # Tab character
+'\0'			 # Produces a null character
+'\u2665'		 # Produces the ♥ character
+'♥'				 # Also produces the ♥ character
+'"'				 # No need to escape this
+</pre>
+
+=== Newlines in a string in source ===
+Actual newlines in source are no longer allowed within a string, because this leads
+to hard to catch compile errors, if you forget to quote an apostrophe, for instance.
+
+<pre>
+    # Begin string                                              # Oops, end string      # Begin string
+msg('If you have an apostrophe that you forget to quote, you can't easily find the error')
+    # End string                                                       # Begin string
+msg('Because the error actually occurs on this line, not the line above')
+#Compile error on this line, because the last string technically started just above here
+</pre>
+
+To avoid these hard-to-find errors, strings may no longer have actual newlines in them,
+but you can easily add a newline by using the \n character, and if you just want to break
+a long string into multiple lines, you can do so as such:
+
+<pre>
+'This is a really long string, which\n'
+	. 'should be broken into two lines'
+</pre>
+
+We are using the concatenation character between the two strings to make them one, and
+additionally including the \n character at the end of our first line, to insert an
+actual newline into our string.
+
+=== Strings are character arrays ===
+
+Strings implement read-only array access, and so behave like a character array. This makes
+both individual character selection and substring selection trivial:
+
+<pre>
+'abcdefg'[0]    # a
+'abcdefg'[0..2] # abc
+</pre>
+
+Since strings are immutable though, you cannot set them with assignments.
+
+<pre>
+'abcdefg'[0] = 'z' # Compile error
+</pre>
+
+== Smart Strings ==
+
+Smart strings allow for ''variable interpolation'' directly inside of the string, according
+to the following rules. In general though, for simple strings, they follow the same rules
+as normal strings:
+
+<pre>
+"Hello World!"
+</pre>
+
+The same escape characters are supported, with the exception of escaping single quotes,
+which is unnecessary, and and the requirement that literal double quotes do need
+escaping.
+
+<pre>
+"'"  # Don't escape this
+"\"" # Must escape this
+</pre>
+
+Additionally, <code>$</code> and <code>@</code> need escaping, and <code>[</code>
+needs escaping only in some situations, which are described below.
+
+=== Variable interpolation ===
+
+Both <code>$</code> and <code>@</code> variables are supported, though <code>$</code>
+variables do not support array notation, even though outside of a smart string you
+can dereference a <code>$</code> variable as a character array, since it is a string.
+
+<pre>
+# Assume that $var contains 'test1'
+@var = 'test2'
+msg("$var @var") # Outputs: 'test1 test2'
+</pre>
+
+In a smart string, if you wish for a literal <code>$</code> or <code>@</code> character,
+you must escape those, since they are the variable delimiters.
+
+<pre>
+msg("\$var \@var") # Outputs: '$var @var'
+</pre>
+
+==== Array access ====
+
+Arrays can also be accessed from within the smart string, just like normal, and it supports
+normal array, associative array, and array slice notations. Keys may be quoted with single
+quotes, or not, though it is preferred that you do quote them always, in case you need to
+take them out of the string, you do not have to make changes to the keys.
+
+<pre>
+@array1 = array(1, 2, 3);
+@array2 = array(a: 'a', b: 'b', c: 'c');
+msg("@array1[0]"); # Outputs 1
+msg("@array2['a']"); # Outputs a
+
+# Multi dimensional arrays are also supported
+@array3 = array(array(1, 2, 3), array(4, 5, 6));
+msg("@array3[0][1]"); # Outputs 3
+</pre>
+
+The left bracket may be escaped in cases where the bracket is meant to be literal,
+but would normally be parsed as an array access. This will ONLY be true if there are
+exactly zero spaces between it and the proceeding array index, or variable name.
+
+<pre>
+msg("@array1\[0]") # Outputs '{1, 2, 3}[0]'
+msg("@array3[0]\[1]") # Outputs '{1, 2, 3}[1]'
+</pre>
+
+It is important to note that smart strings are a compiler trick, so the string is simply
+manipulated at compile time, and converted to a normal string with the appropriate actions
+taken to make the desired string, so the following are exactly equivalent:
+
+<pre>
+# This compiles down to...
+msg("This is a @string");
+
+# ... this
+msg('This is a ' . @string);
+</pre>
+
+This should help you understand that the string is not "bound" until use, so a smart
+string in a loop, for instance will continue to change until it is used, at which point
+it is bound.
+
+<pre>
+foreach(1..10, @i){
+	msg("Counter: @i"); # Outputs a different string each time
+}
+</pre>
+
+You can also use this for user input, by using the {{function|smart_string}} function, which
+accepts variable input, and converts it at runtime, as if it were hardcoded with double quotes
+
+<pre>
+@test = 'TEST';
+@str = 'Output: @test';
+msg(@str); # Outputs: Output: @test
+msg(smart_string(@str)); # Outputs: Output: TEST
+</pre>
+
+When using the smart_string function with user input, you should be VERY careful however, as users
+could potentially use this to discover the value of variables that should not normally be leaked.
+
+<pre>
+@mySecretPassword = 'password';
+msg('Echo: ' . smart_string($));
+</pre>
+
+Assuming the user inputs '@mySecretPassword' for the input, it will now msg them
+<code>Echo: password</code>.

@@ -1,9 +1,11 @@
 package com.laytonsmith.core.constructs;
 
+import com.laytonsmith.annotations.immutable;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions;
 import com.laytonsmith.core.natives.interfaces.Mixed;
+import com.laytonsmith.core.natives.interfaces.Operators;
 
 /**
  * The superclass of all primitives in methodscript. Primitives all must
@@ -13,7 +15,9 @@ import com.laytonsmith.core.natives.interfaces.Mixed;
  * @author lsmith
  */
 @typename("primitive")
-public abstract class CPrimitive extends Construct implements Mixed {
+@immutable
+public abstract class CPrimitive extends Construct implements Mixed, 
+		Operators.Concatenation, Operators.Equality, Operators.Mathematical, Operators.Relational{
 	
 	protected CPrimitive(Object value, Target t){
 		super(value, t);
@@ -155,6 +159,102 @@ public abstract class CPrimitive extends Construct implements Mixed {
 	@Override
 	public CPrimitive primitive(Target t) throws ConfigRuntimeException {
 		return this;
+	}
+
+	public Mixed operatorAddition(Mixed m) {
+		double lhs = this.castToDouble(getTarget());
+		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
+		double result = lhs + rhs;
+		if((long)result == result){
+			return new CInt((long)result, getTarget());
+		} else {
+			return new CDouble(result, getTarget());
+		}
+	}
+
+	public boolean operatorTestAddition(Class<? extends Mixed> clazz) {
+		return CPrimitive.class.isAssignableFrom(clazz);
+	}
+
+	public Mixed operatorConcatenation(Mixed m) {
+		throw new UnsupportedOperationException("Not supported yet.");
+	}
+
+	public boolean operatorTestConcatenation(Class<? extends Mixed> clazz) {
+		return CPrimitive.class.isAssignableFrom(clazz);
+	}
+
+	public Mixed operatorDivision(Mixed m) {
+		double lhs = this.castToDouble(getTarget());
+		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
+		double result = lhs / rhs;
+		if((long)result == result){
+			return new CInt((long)result, getTarget());
+		} else {
+			return new CDouble(result, getTarget());
+		}
+	}
+
+	public boolean operatorTestDivision(Class<? extends Mixed> clazz) {
+		return CPrimitive.class.isAssignableFrom(clazz);
+	}
+
+	public boolean operatorEquals(Mixed m) {
+		return this.val().equals(m.val());
+	}
+
+	public boolean operatorTestEquals(Class<? extends Mixed> clazz) {
+		return CPrimitive.class.isAssignableFrom(clazz);
+	}
+
+	public boolean operatorGreaterThan(Mixed m) {
+		double lhs = this.castToDouble(getTarget());
+		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
+		return lhs > rhs;
+	}
+
+	public boolean operatorTestGreaterThan(Class<? extends Mixed> clazz) {
+		return CPrimitive.class.isAssignableFrom(clazz);
+	}
+
+	public boolean operatorLessThan(Mixed m) {
+		double lhs = this.castToDouble(getTarget());
+		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
+		return lhs < rhs;
+	}
+
+	public boolean operatorTestLessThan(Class<? extends Mixed> clazz) {
+		return CPrimitive.class.isAssignableFrom(clazz);
+	}
+
+	public Mixed operatorMultiplication(Mixed m) {
+		double lhs = this.castToDouble(getTarget());
+		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
+		double result = lhs * rhs;
+		if((long)result == result){
+			return new CInt((long)result, getTarget());
+		} else {
+			return new CDouble(result, getTarget());
+		}
+	}
+
+	public boolean operatorTestMultiplication(Class<? extends Mixed> clazz) {
+		return CPrimitive.class.isAssignableFrom(clazz);
+	}
+
+	public Mixed operatorSubtraction(Mixed m) {
+		double lhs = this.castToDouble(getTarget());
+		double rhs = m.primitive(Target.UNKNOWN).castToDouble(Target.UNKNOWN);
+		double result = lhs - rhs;
+		if((long)result == result){
+			return new CInt((long)result, getTarget());
+		} else {
+			return new CDouble(result, getTarget());
+		}
+	}
+
+	public boolean operatorTestSubtraction(Class<? extends Mixed> clazz) {
+		return CPrimitive.class.isAssignableFrom(clazz);
 	}
 	
 }

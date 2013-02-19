@@ -23,7 +23,7 @@ import java.util.*;
  * @author layton
  */
 @typename("array")
-public class CArray extends Construct implements ArrayAccess{
+public class CArray extends Construct implements ArrayAccess, Iterable<Construct> {
 
     private boolean associative_mode = false;
     private long next_index = 0;
@@ -457,17 +457,31 @@ public class CArray extends Construct implements ArrayAccess{
         }
     }
 
-    public Construct remove(Construct construct) {
-        String c = normalizeConstruct(construct);
+	/**
+	 * Removes a value from this array, given the specified key.
+	 * @param key
+	 * @return The value removed
+	 */
+	public Construct remove(int key, Target t){
+		return remove(Integer.toString(key), t);
+	}
+	
+	/**
+	 * Removes a value from this array, given the specified key.
+	 * @param key
+	 * @return The value removed
+	 */
+    public Construct remove(String key, Target t) {
+        String c = key;
         Construct ret;
         if(!associative_mode){
             try{
                 ret = array.remove(Integer.parseInt(c));
 				next_index--;
             } catch(NumberFormatException e){ 
-                throw new ConfigRuntimeException("Expecting an integer, but received " + c + " (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, construct.getTarget());
+                throw new ConfigRuntimeException("Expecting an integer, but received " + c + " (were you expecting an associative array? This array is a normal array.)", ExceptionType.CastException, t);
             } catch(IndexOutOfBoundsException e){
-                throw new ConfigRuntimeException("Cannot remove the value at '" + c + "', as no such index exists in the array", ExceptionType.RangeException, construct.getTarget());
+                throw new ConfigRuntimeException("Cannot remove the value at '" + c + "', as no such index exists in the array", ExceptionType.RangeException, t);
             }
         } else {
             ret = associative_array.remove(c);
@@ -558,6 +572,27 @@ public class CArray extends Construct implements ArrayAccess{
 	@Override
 	public CPrimitive primitive(Target t) {
 		throw new ConfigRuntimeException("Cannot cast this array to a primitive value.", ExceptionType.CastException, t);
+	}
+
+	public Iterator<Construct> iterator() {
+		return new Iterator<Construct>() {
+			
+			//Freeze the iteration order now
+			private List<String> keySet = new ArrayList<String>(keySet());
+			private int index = 0;
+
+			public boolean hasNext() {
+				return index < keySet.size() - 1;
+			}
+
+			public Construct next() {
+				return get(keySet.get(++index));
+			}
+
+			public void remove() {
+				CArray.this.remove(keySet.get(index), Target.UNKNOWN);
+			}
+		};
 	}
     
     public enum SortType{

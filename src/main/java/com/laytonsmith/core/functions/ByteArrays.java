@@ -3,8 +3,10 @@ package com.laytonsmith.core.functions;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Static;
+import com.laytonsmith.core.arguments.ArgList;
 import com.laytonsmith.core.arguments.Argument;
 import com.laytonsmith.core.arguments.ArgumentBuilder;
+import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CByteArray;
 import com.laytonsmith.core.constructs.CDouble;
 import com.laytonsmith.core.constructs.CInt;
@@ -50,18 +52,15 @@ public class ByteArrays {
 		}
 
 		public String docs() {
-			return "byte_array {} Returns a new byte array primitive, which can be operated on with the ba_ series of functions.";
+			return "Returns a new byte array primitive, which can be operated on with the ba_ series of functions.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The newly created byte_array", CByteArray.class);
 		}
 
 		public ArgumentBuilder arguments() {
-			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
-					);
+			return ArgumentBuilder.NONE;
 		}
 		
 	}
@@ -70,7 +69,8 @@ public class ByteArrays {
 	public static class ba_as_array extends ba {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = Static.getByteArray(args[0], t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
 			return ba.asArray(t);
 		}
 
@@ -79,7 +79,7 @@ public class ByteArrays {
 		}
 
 		public String docs() {
-			return "array {byte_array} Returns a new read only copy of the underlying byte array. This array is much more efficient"
+			return "Returns a new read only copy of the underlying byte array. This array is much more efficient"
 					+ " than if the array were made manually, however, it is read only. If you need to manipulate the array's"
 					+ " contents, then you can clone the array, however, the returned array (and any clones) cannot be automatically"
 					+ " interfaced with the byte array primitives. This operation is discouraged, because normal arrays are very"
@@ -87,13 +87,12 @@ public class ByteArrays {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The new read-only array, based on the underlying byte_array at the current point in time", CArray.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to convert", CByteArray.class, "ba")
 					);
 		}
 		
@@ -103,7 +102,8 @@ public class ByteArrays {
 	public static class ba_rewind extends ba {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
 			ba.rewind();
 			return new CVoid(t);
 		}
@@ -113,17 +113,16 @@ public class ByteArrays {
 		}
 
 		public String docs() {
-			return "void {byte_array} Rewinds the byte array marker to 0.";
+			return "Rewinds the byte array marker to 0.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The target byte array", CByteArray.class, "ba")
 					);
 		}
 		
@@ -133,24 +132,25 @@ public class ByteArrays {
 	public static class ba_get_byte extends ba_get {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return new CInt(ba.getByte(pos), t);
 		}
 
 		public String docs() {
-			return "int {byte_array, [pos]} Returns an int, read in as an 8 bit byte, from the given position, or wherever the"
-					+ " marker is currently at by default.";
+			return "Returns an int, read in as an 8 bit byte, from the given position, or wherever the"
+					+ " marker is currently at by default, and advances the marker 8 bits.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The 8 bit byte (as an int) read in", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -160,8 +160,9 @@ public class ByteArrays {
 	public static class ba_get_char extends ba_get {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return new CString(ba.getChar(pos), t);
 		}
 
@@ -171,13 +172,13 @@ public class ByteArrays {
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The 32 bit (one character) string value", CString.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -187,24 +188,25 @@ public class ByteArrays {
 	public static class ba_get_short extends ba_get {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return new CInt(ba.getShort(pos), t);
 		}
 
 		public String docs() {
-			return "int {byte_array, [pos]} Returns an int, read in as a 16 bit short, from the given position, or wherever the"
+			return "Returns an int, read in as a 16 bit short, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The 16 bit short (as an int) read in", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 			
@@ -214,24 +216,25 @@ public class ByteArrays {
 	public static class ba_get_int extends ba_get {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return new CInt(ba.getInt(pos), t);
 		}
 
 		public String docs() {
-			return "int {byte_array, [pos]} Returns an int, read in as a 32 bit int, from the given position, or wherever the"
+			return "Returns an int, read in as a 32 bit int, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The 32 bit int (as an int) read in", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -241,24 +244,25 @@ public class ByteArrays {
 	public static class ba_get_long extends ba_get {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return new CInt(ba.getLong(pos), t);
 		}
 
 		public String docs() {
-			return "int {byte_array, [pos]} Returns an int, read in as a 64 bit long, from the given position, or wherever the"
+			return "Returns an int, read in as a 64 bit long, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The 64 bit long (as an int) read in", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -268,24 +272,25 @@ public class ByteArrays {
 	public static class ba_get_float extends ba_get {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return new CDouble(ba.getFloat(pos), t);
 		}
 
 		public String docs() {
-			return "double {byte_array, [pos]} Returns a double, read in as a 32 bit float, from the given position, or wherever the"
+			return "Returns a double, read in as a 32 bit float, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The 32 bit float (as a double) read in", CDouble.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -295,24 +300,25 @@ public class ByteArrays {
 	public static class ba_get_double extends ba_get {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return new CDouble(ba.getDouble(pos), t);
 		}
 
 		public String docs() {
-			return "double {byte_array, [pos]} Returns a double, read in as a 64 bit double, from the given position, or wherever the"
+			return "Returns a double, read in as a 64 bit double, from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The 64 bit double (as a double) read in", CDouble.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -327,28 +333,27 @@ public class ByteArrays {
 		}
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			int size = Static.getInt32(args[1], t);
-			Integer pos = null;
-			if(args.length == 3){
-				pos = Static.getInt32(args[2], t);
-			}
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			int size = list.getInt("length", t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return ba.getBytes(size, pos);
 		}
 
 		public String docs() {
-			return "byte_array {byte_array, length, [pos]} Returns a new byte_array primitive, starting from pos (or wherever the marker is"
+			return "Returns a new byte_array primitive, starting from pos (or wherever the marker is"
 					+ " by default) to length.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The variable length byte_array read in", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The length of the byte array to read in", CByteArray.class, "length"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -358,26 +363,27 @@ public class ByteArrays {
 	public static class ba_get_string extends ba_get {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			Integer pos = get_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			return new CString(ba.readUTF8String(pos), t);
 		}
 
 		public String docs() {
-			return "string {byte_array, [pos]} Returns a UTF-8 encoded string, from the given position, or wherever the"
+			return "Returns a UTF-8 encoded string, from the given position, or wherever the"
 					+ " marker is currently at by default. The string is assumed to have encoded the length of the string"
 					+ " with a 32 bit integer, then the string bytes. (This will be the case is the byte_array was encoded"
 					+ " with ba_set_string.)";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return new Argument("The variable length string read in", CInt.class);
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -387,26 +393,28 @@ public class ByteArrays {
 	public static class ba_put_byte extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			byte b = Static.getInt8(args[1], t);
-			Integer pos = set_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			byte b = list.getByte("val", t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			ba.putByte(b, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 8 bit byte, starting from the given position, or wherever the"
+			return "Writes an int, interpreted as an 8 bit byte, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The byte value to push on to this byte array The top 56 bits of the int are ignored", CInt.class, "val"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -416,30 +424,32 @@ public class ByteArrays {
 	public static class ba_put_char extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			String b = args[1].val();
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			String b = list.getString("val", t);
 			char c = '\0';
 			if(b.length() > 0){
 				c = b.charAt(0);
 			}
-			Integer pos = set_getPos(args, t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			ba.putChar(c, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, string, [pos]} Writes the first character of the string, interpreted as an 32 bit char, starting from the given position, or wherever the"
+			return "Writes the first character of the string, interpreted as an 32 bit char, starting from the given position, or wherever the"
 					+ " marker is currently at by default. If the string is empty, a \\0 is written instead.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The char value to push on to this byte array. Only the first character is considered, and the rest of the string is ignored", CString.class, "val"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -449,26 +459,28 @@ public class ByteArrays {
 	public static class ba_put_short extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			short b = Static.getInt16(args[1], t);
-			Integer pos = set_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			short b = list.getShort("val", t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			ba.putShort(b, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, int, [pos]} Writes an int, interpreted as an 16 bit short, starting from the given position, or wherever the"
+			return "Writes an int, interpreted as an 16 bit short, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The short value to push on to this byte array. The top 48 bits of the int are ignored", CInt.class, "val"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -478,26 +490,28 @@ public class ByteArrays {
 	public static class ba_put_int extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			int b = Static.getInt32(args[1], t);
-			Integer pos = set_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			int b = list.getInt("val", t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			ba.putInt(b, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 32 bit int, starting from the given position, or wherever the"
+			return "Writes an int, interpreted as a 32 bit int, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The int value to push on to this byte array. Thet op 32 bits of the int are ignored", CInt.class, "val"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -507,26 +521,28 @@ public class ByteArrays {
 	public static class ba_put_long extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			long b = Static.getInt(args[1], t);
-			Integer pos = set_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			long b = list.getLong("val", t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			ba.putLong(b, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, int, [pos]} Writes an int, interpreted as a 64 bit, starting from the given position, or wherever the"
+			return "Writes an int, interpreted as a 64 bit, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The long value to push on to this byte array", CInt.class, "val"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -536,26 +552,28 @@ public class ByteArrays {
 	public static class ba_put_float extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			float b = Static.getDouble32(args[1], t);
-			Integer pos = set_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			float b = list.getFloat("val", t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			ba.putFloat(b, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, double, [pos]} Writes a double, interpreted as a 32 bit float, starting from the given position, or wherever the"
+			return "Writes a double, interpreted as a 32 bit float, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The float value to push on to this byte array. The top 32 bits of the double are ignored", CDouble.class, "val"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -565,26 +583,28 @@ public class ByteArrays {
 	public static class ba_put_double extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			double b = Static.getDouble(args[1], t);
-			Integer pos = set_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			double b = list.getDouble("val", t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			ba.putDouble(b, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, double, [pos]} Writes a double, interpreted as a 64 bit double, starting from the given position, or wherever the"
+			return "Writes a double, interpreted as a 64 bit double, starting from the given position, or wherever the"
 					+ " marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The double value to push on to this byte array", CDouble.class, "val"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -594,26 +614,28 @@ public class ByteArrays {
 	public static class ba_put_bytes extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray dest = getBA(args, t);
-			CByteArray src = Static.getByteArray(args[1], t);
-			Integer pos = set_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray dest = list.get("destination");
+			CByteArray src = list.get("source");
+			Integer pos = list.getIntegerWithNull("pos", t);
 			dest.putBytes(src, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {destination_byte_array, source_byte_array, [pos]} Writes the contents of the source_byte_array into this byte array,"
+			return "Writes the contents of the source_byte_array into this byte array,"
 					+ " starting at pos, or wherever the marker is currently at by default.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "destination"),
+						new Argument("The byte_array value to push on to this byte array", CByteArray.class, "source"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
@@ -623,52 +645,51 @@ public class ByteArrays {
 	public static class ba_put_string extends ba_put {
 
 		public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
-			CByteArray ba = getBA(args, t);
-			String s = args[1].val();
-			Integer pos = set_getPos(args, t);
+			ArgList list = getBuilder().parse(args, this, t);
+			CByteArray ba = list.get("ba");
+			String s = list.getString("val", t);
+			Integer pos = list.getIntegerWithNull("pos", t);
 			ba.writeUTF8String(s, pos);
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {byte_array, string, [pos]} Writes the length of the string to the byte array, (interpreted as UTF-8),"
+			return "Writes the length of the string to the byte array, (interpreted as UTF-8),"
 					+ " then writes the UTF-8 string itself. If an external application requires the string to be serialized"
 					+ " in a different manner, then use the string-byte_array conversion methods in StringHandling, however"
 					+ " strings written in this manner are compatible with ba_get_string.";
 		}
 		
 		public Argument returnType() {
-			return new Argument("", C.class);
+			return Argument.VOID;
 		}
 
 		public ArgumentBuilder arguments() {
 			return ArgumentBuilder.Build(
-						new Argument("", C.class, ""),
-						new Argument("", C.class, "")
+						new Argument("The byte array to operate on", CByteArray.class, "ba"),
+						new Argument("The string value to push on to this byte array", CString.class, "val"),
+						new Argument("The position to read from, or the current position if null", CInt.class, "pos").setOptionalDefaultNull()
 					);
 		}
 		
 	}
 	
-	private static CByteArray getBA(Construct [] args, Target t){
-		return Static.getByteArray(args[0], t);
-	}
 	
-	private static Integer get_getPos(Construct [] args, Target t){
-		if(args.length == 2){
-			return Static.getInt32(args[1], t);
-		} else {
-			return null;
-		}
-	}
-	
-	private static Integer set_getPos(Construct [] args, Target t){
-		if(args.length == 3){
-			return Static.getInt32(args[2], t);
-		} else {
-			return null;
-		}
-	}
+//	private static Integer get_getPos(Construct [] args, Target t){
+//		if(args.length == 2){
+//			return Static.getInt32(args[1], t);
+//		} else {
+//			return null;
+//		}
+//	}
+//	
+//	private static Integer set_getPos(Construct [] args, Target t){
+//		if(args.length == 3){
+//			return Static.getInt32(args[2], t);
+//		} else {
+//			return null;
+//		}
+//	}
 	
 	private static abstract class ba extends AbstractFunction {
 
