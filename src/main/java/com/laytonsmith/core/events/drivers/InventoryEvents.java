@@ -3,8 +3,11 @@ package com.laytonsmith.core.events.drivers;
 import java.util.Map;
 
 import com.laytonsmith.PureUtilities.StringUtils;
+import com.laytonsmith.abstraction.MCInventory;
 import com.laytonsmith.abstraction.enums.MCSlotType;
 import com.laytonsmith.abstraction.events.MCInventoryClickEvent;
+import com.laytonsmith.abstraction.events.MCInventoryCloseEvent;
+import com.laytonsmith.abstraction.events.MCInventoryOpenEvent;
 import com.laytonsmith.annotations.api;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.ObjectGenerator;
@@ -109,6 +112,140 @@ public class InventoryEvents {
 					return true;
 				}
 			}
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class inventory_open extends AbstractEvent {
+
+		public String getName() {
+			return "inventory_open";
+		}
+
+		public String docs() {
+			return "{} "
+					+ "Fired when a player opens an inventory. "
+					+ "{player: The player | " /*"{player: The player who clicked | viewers: everyone looking in this inventory | "*/
+					+ "inventory: the inventory items in this inventory | "
+					+ "inventorytype: type of inventory} "
+					+ "{} "
+					+ "{} ";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+				throws PrefilterNonMatchException {
+			return true;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event)
+				throws EventException {
+			if (event instanceof MCInventoryOpenEvent) {
+				MCInventoryOpenEvent e = (MCInventoryOpenEvent) event;
+				Map<String, Construct> map = evaluate_helper(event);
+				
+				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				
+				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
+				MCInventory inv = e.getInventory();
+				
+				for (int i = 0; i < inv.getSize(); i++) {
+					Construct c = ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN);
+					items.set(i, c, Target.UNKNOWN);
+				}
+				
+				map.put("inventory", items);
+				
+				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
+				
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCInventoryOpenEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.INVENTORY_OPEN;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
+			return false;
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api
+	public static class inventory_close extends AbstractEvent {
+
+		public String getName() {
+			return "inventory_close";
+		}
+
+		public String docs() {
+			return "{} "
+					+ "Fired when a player closes an inventory. "
+					+ "{player: The player | " /*"{player: The player who clicked | viewers: everyone looking in this inventory | "*/
+					+ "inventory: the inventory items in this inventory | "
+					+ "inventorytype: type of inventory} "
+					+ "{} "
+					+ "{} ";
+		}
+
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+				throws PrefilterNonMatchException {
+			return true;
+		}
+
+		public BindableEvent convert(CArray manualObject) {
+			return null;
+		}
+
+		public Map<String, Construct> evaluate(BindableEvent event)
+				throws EventException {
+			if (event instanceof MCInventoryCloseEvent) {
+				MCInventoryCloseEvent e = (MCInventoryCloseEvent) event;
+				Map<String, Construct> map = evaluate_helper(event);
+				
+				map.put("player", new CString(e.getPlayer().getName(), Target.UNKNOWN));
+				
+				CArray items = CArray.GetAssociativeArray(Target.UNKNOWN);
+				MCInventory inv = e.getInventory();
+				
+				for (int i = 0; i < inv.getSize(); i++) {
+					Construct c = ObjectGenerator.GetGenerator().item(inv.getItem(i), Target.UNKNOWN);
+					items.set(i, c, Target.UNKNOWN);
+				}
+				
+				map.put("inventory", items);
+				
+				map.put("inventorytype", new CString(e.getInventory().getType().name(), Target.UNKNOWN));
+				
+				return map;
+			} else {
+				throw new EventException("Cannot convert e to MCInventoryCloseEvent");
+			}
+		}
+
+		public Driver driver() {
+			return Driver.INVENTORY_CLOSE;
+		}
+
+		public boolean modifyEvent(String key, Construct value,
+				BindableEvent event) {
 			return false;
 		}
 

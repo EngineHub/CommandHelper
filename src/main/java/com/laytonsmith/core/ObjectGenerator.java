@@ -538,4 +538,57 @@ public class ObjectGenerator {
 		}
 		return StaticLayer.GetConvertor().GetColor(red, green, blue);
 	}
+	
+	public CArray velocity(MCEntity.Velocity v, Target t) {
+		double x,y,z,mag;
+		x = y = z = mag = 0;
+		if (v != null) {
+			x = v.x;
+			y = v.y;
+			z = v.z;
+			mag = v.magnitude;
+		}
+		CArray ret = CArray.GetAssociativeArray(t);
+		ret.set("magnitude", new CDouble(mag, t), t);
+		ret.set("x", new CDouble(x, t), t);
+		ret.set("y", new CDouble(y, t), t);
+		ret.set("z", new CDouble(z, t), t);
+		return ret;
+	}
+
+	public MCEntity.Velocity velocity(Construct c, Target t) {
+		CArray va;
+		double x, y, z, mag;
+		x = y = z = mag = 0;
+		if (c instanceof CArray) {
+			va = (CArray) c;
+			if (va.containsKey("x")) {
+				x = Static.getDouble(va.get("x"), t);
+			}
+			if (va.containsKey("y")) {
+				y = Static.getDouble(va.get("y"), t);
+			}
+			if (va.containsKey("z")) {
+				z = Static.getDouble(va.get("z"), t);
+			}
+			if (!va.containsKey("x") && !va.containsKey("y") && !va.containsKey("z")) {
+				switch ((int) va.size()) {
+				case 4:
+					z = Static.getDouble(va.get(3), t);
+					y = Static.getDouble(va.get(2), t);
+					x = Static.getDouble(va.get(1), t);
+					break;
+				case 3:
+					z = Static.getDouble(va.get(2), t);
+				case 2:
+					y = Static.getDouble(va.get(1), t);
+				case 1:
+					x = Static.getDouble(va.get(0), t);
+				}
+			}
+			return new MCEntity.Velocity(mag, x, y, z);
+		} else {
+			throw new Exceptions.FormatException("Expected an array but recieved " + c, t);
+		}
+	}
 }

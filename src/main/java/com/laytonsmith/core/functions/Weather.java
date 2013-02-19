@@ -77,7 +77,7 @@ public class Weather {
 		}
 
 		public String docs() {
-			return "void {strikeLocArray, [safe] | x, y, z, [safe]} Makes lightning strike at the x y z coordinates specified in the array(x, y, z). safe"
+			return "void {strikeLocArray, [safe] | x, y, z, [safe]} Makes lightning strike at the x y z coordinates specified in the array(x, y, z). Safe"
 					+ " defaults to false, but if true, lightning striking a player will not hurt them.";
 		}
 		
@@ -113,7 +113,7 @@ public class Weather {
 		}
 
 		public Integer[] numArgs() {
-			return new Integer[]{1, 2};
+			return new Integer[]{1, 2, 3};
 		}
 
 		public Construct exec(Target t, Environment env, Construct... args) throws CancelCommandException, ConfigRuntimeException {
@@ -130,11 +130,15 @@ public class Weather {
 			} else {
 				throw new ConfigRuntimeException("World was not specified", ExceptionType.InvalidWorldException, t);
 			}
+			if (args.length == 3) {
+				w.setWeatherDuration(Static.getInt32(args[2], t));
+			}
 			return new CVoid(t);
 		}
 
 		public String docs() {
-			return "void {isStorming, [world]} Creates a storm if isStorming is true, stops a storm if isStorming is false";
+			return "void {isStorming, [world], [int]} Creates a (rain) storm if isStorming is true, stops a storm if"
+					+ " isStorming is false. The third argument allows setting how long this weather setting will last.";
 		}
 		
 		public Argument returnType() {
@@ -163,5 +167,160 @@ public class Weather {
 		public Boolean runAsync() {
 			return false;
 		}
+	}
+	
+	@api(environments=CommandHelperEnvironment.class)
+	public static class set_thunder extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.CastException};
+		}
+
+		public boolean isRestricted() {
+			return true;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			if (args.length == 1) {
+				if (environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+				}
+			} else {
+				w = Static.getServer().getWorld(args[1].val());
+			}
+			if (w != null) {
+				w.setThundering(Static.getBoolean(args[0]));
+			} else {
+				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+			}
+			if (args.length == 3) {
+				w.setThunderDuration(Static.getInt32(args[2], t));
+			}
+			return new CVoid(t);
+		}
+
+		public String getName() {
+			return "set_thunder";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{1, 2, 3};
+		}
+
+		public String docs() {
+			return "void {boolean, [world], [int]} Sets whether or not the weather can have thunder. The third argument"
+					+ " can specify how long the thunder should last.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments=CommandHelperEnvironment.class)
+	public static class has_storm extends AbstractFunction {
+		
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			if (args.length == 1) {
+				w = Static.getServer().getWorld(args[0].val());
+			} else {
+				if (environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+				}
+			}
+			if (w != null) {
+				return new CBoolean(w.isStorming(), t);
+			} else {
+				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+			}
+		}
+
+		public String getName() {
+			return "has_storm";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "boolean {[world]} Returns whether the world (defaults to player's world) has a storm.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
+	}
+	
+	@api(environments=CommandHelperEnvironment.class)
+	public static class has_thunder extends AbstractFunction {
+
+		public ExceptionType[] thrown() {
+			return new ExceptionType[]{ExceptionType.InvalidWorldException};
+		}
+
+		public boolean isRestricted() {
+			return false;
+		}
+
+		public Boolean runAsync() {
+			return false;
+		}
+
+		public Construct exec(Target t, Environment environment,
+				Construct... args) throws ConfigRuntimeException {
+			MCWorld w = null;
+			if (args.length == 1) {
+				w = Static.getServer().getWorld(args[0].val());
+			} else {
+				if (environment.getEnv(CommandHelperEnvironment.class).GetCommandSender() instanceof MCPlayer) {
+					w = environment.getEnv(CommandHelperEnvironment.class).GetPlayer().getWorld();
+				}
+			}
+			if (w != null) {
+				return new CBoolean(w.isThundering(), t);
+			} else {
+				throw new ConfigRuntimeException("No existing world specified!", ExceptionType.InvalidWorldException, t);
+			}
+		}
+
+		public String getName() {
+			return "has_thunder";
+		}
+
+		public Integer[] numArgs() {
+			return new Integer[]{0, 1};
+		}
+
+		public String docs() {
+			return "boolean {[world]} Returns whether the world (defaults to player's world) has thunder.";
+		}
+
+		public CHVersion since() {
+			return CHVersion.V3_3_1;
+		}
+		
 	}
 }
