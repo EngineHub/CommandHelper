@@ -6,16 +6,22 @@ import com.laytonsmith.abstraction.bukkit.BukkitConvertor;
 import com.laytonsmith.abstraction.bukkit.BukkitMCEntity;
 import com.laytonsmith.abstraction.bukkit.BukkitMCItemStack;
 import com.laytonsmith.abstraction.bukkit.BukkitMCLivingEntity;
+import com.laytonsmith.abstraction.bukkit.BukkitMCLocation;
 import com.laytonsmith.abstraction.bukkit.BukkitMCPlayer;
 import com.laytonsmith.abstraction.enums.MCDamageCause;
 import com.laytonsmith.abstraction.enums.MCEntityType;
+import com.laytonsmith.abstraction.enums.MCMobs;
+import com.laytonsmith.abstraction.enums.MCSpawnReason;
 import com.laytonsmith.abstraction.enums.MCTargetReason;
+import com.laytonsmith.abstraction.enums.bukkit.BukkitMCSpawnReason;
 import com.laytonsmith.abstraction.events.*;
 import com.laytonsmith.annotations.abstraction;
 
 import org.bukkit.Sound;
 import org.bukkit.entity.Entity;
+import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LivingEntity;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityTargetEvent;
@@ -28,6 +34,37 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
  * @author EntityReborn
  */
 public class BukkitEntityEvents {
+	
+	@abstraction(type = Implementation.Type.BUKKIT)
+	public static class BukkitMCCreatureSpawnEvent implements MCCreatureSpawnEvent {
+
+		CreatureSpawnEvent e;
+		public BukkitMCCreatureSpawnEvent(CreatureSpawnEvent event) {
+			this.e = event;
+		}
+		
+		public Object _GetObject() {
+			return e;
+		}
+
+		public MCLivingEntity getEntity() {
+			return (MCLivingEntity) BukkitConvertor.BukkitGetCorrectEntity(e.getEntity());
+		}
+
+		public MCLocation getLocation() {
+			return new BukkitMCLocation(e.getLocation());
+		}
+
+		public MCSpawnReason getSpawnReason() {
+			return BukkitMCSpawnReason.getConvertor().getAbstractedEnum(e.getSpawnReason());
+		}
+		
+		public void setType(MCMobs type) {
+			e.setCancelled(true);
+			e.getLocation().getWorld().spawnEntity(e.getLocation(), EntityType.valueOf(type.name()));
+		}
+		
+	}
 	
 	@abstraction(type = Implementation.Type.BUKKIT)
 	public static class BukkitMCPlayerInteractEntityEvent implements MCPlayerInteractEntityEvent {
@@ -210,7 +247,11 @@ public class BukkitEntityEvents {
         }
 
         public void setTarget(MCEntity target) {
-            pie.setTarget(((BukkitMCEntity)target).asEntity());
+        	if (target == null) {
+        		pie.setTarget(null);
+        	} else {
+        		pie.setTarget(((BukkitMCEntity)target).asEntity());
+        	}
         }
 
         public MCEntity getEntity() {

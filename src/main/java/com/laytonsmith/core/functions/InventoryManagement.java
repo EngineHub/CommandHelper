@@ -136,7 +136,7 @@ public class InventoryManagement {
     public static class close_pinv extends AbstractFunction {
 
         public Exceptions.ExceptionType[] thrown() {
-            return null;
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
         }
 
         public boolean isRestricted() {
