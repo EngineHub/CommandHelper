@@ -27,7 +27,7 @@ public class EntityManagement {
 	public static class all_entities extends AbstractFunction {
 
 		public ExceptionType[] thrown() {
-			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException};
+			return new ExceptionType[]{ExceptionType.InvalidWorldException, ExceptionType.FormatException, ExceptionType.CastException};
 		}
 
 		public boolean isRestricted() {
