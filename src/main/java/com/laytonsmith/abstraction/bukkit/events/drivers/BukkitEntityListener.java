@@ -10,6 +10,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.entity.CreatureSpawnEvent;
 import org.bukkit.event.entity.EntityDamageByEntityEvent;
 import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.EntityDeathEvent;
@@ -24,6 +25,11 @@ import org.bukkit.event.player.PlayerPickupItemEvent;
  */
 public class BukkitEntityListener implements Listener{
 
+	@EventHandler(priority=EventPriority.LOWEST)
+	public void onSpawn(CreatureSpawnEvent event) {
+		EventUtils.TriggerListener(Driver.CREATURE_SPAWN, "creature_spawn", new BukkitEntityEvents.BukkitMCCreatureSpawnEvent(event));
+	}
+	
 	@EventHandler(priority=EventPriority.LOWEST)
 	public void onClickEnt(PlayerInteractEntityEvent event) {
 		EventUtils.TriggerListener(Driver.PLAYER_INTERACT_ENTITY, "player_interact_entity", new BukkitEntityEvents.BukkitMCPlayerInteractEntityEvent(event));
