@@ -6,10 +6,13 @@ import com.laytonsmith.abstraction.MCInventoryHolder;
 import com.laytonsmith.abstraction.MCItemStack;
 import com.laytonsmith.abstraction.enums.MCInventoryType;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import org.bukkit.entity.HumanEntity;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemStack;
 
 /**
  *
@@ -65,6 +68,18 @@ public class BukkitMCInventory implements MCInventory {
 	@Override
 	public int hashCode() {
 		return i.hashCode();
+	}
+	
+	public HashMap<Integer, MCItemStack> addItem(MCItemStack stack) {
+		HashMap<Integer, ItemStack> h = i.addItem(stack==null?null:((BukkitMCItemStack)stack).is);
+		HashMap<Integer, MCItemStack> m = new HashMap<Integer, MCItemStack>();
+		
+		for (Map.Entry<Integer, ItemStack> entry : h.entrySet()) {
+			Integer key = entry.getKey();
+			ItemStack value = entry.getValue();
+			m.put(key, new BukkitMCItemStack(value));
+		}
+		return m;
 	}
 
 	public List<MCHumanEntity> getViewers() {

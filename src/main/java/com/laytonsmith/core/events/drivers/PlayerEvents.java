@@ -1029,7 +1029,7 @@ public class PlayerEvents {
                 MCPlayerCommandEvent event = (MCPlayerCommandEvent) e;
                 String command = event.getCommand();
                 Prefilters.match(prefilter, "player", event.getPlayer().getName(), PrefilterType.MACRO);
-                if(prefilter.containsKey("command") && !command.equals(event.getCommand())){
+                if(prefilter.containsKey("command") && !command.equals(prefilter.get("command").val())){
                     return false;
                 }
                 if(prefilter.containsKey("prefix")){
