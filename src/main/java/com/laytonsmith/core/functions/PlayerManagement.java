@@ -49,18 +49,20 @@ public class PlayerManagement {
 				p = Static.GetPlayer(args[0], t);
 			}
 
-			if (p != null && p instanceof MCPlayer) {
-				return new CString(((MCPlayer) p).getName(), t);
-			} else if (p != null && p instanceof MCConsoleCommandSender) {
-				return new CString("~console", t);
-			} else {
+			// assuming p is not null, just return the name set by the CommandSender
+			// for player entities in CraftBukkit, this is the player's name, and
+			// for the console it's "CONSOLE".
+			if (p == null) {
 				return new CNull(t);
+			} else {
+				String name = p.getName();
+				return new CString(("CONSOLE".equals(name)) ? "~console" : name, t);
 			}
 		}
 
 		public String docs() {
 			return "string {[playerName]} Returns the full name of the partial Player name specified or the Player running the command otherwise. If the command is being run from"
-					+ " the console, then the string '~console' is returned. If the command is coming from elsewhere, null is returned, and the behavior is undefined."
+					+ " the console, then the string '~console' is returned. If the command is coming from elsewhere, returns a string chosen by the sender of this command (or null)."
 					+ " Note that most functions won't support the user '~console' (they'll throw a PlayerOfflineException), but you can use this to determine"
 					+ " where a command is being run from.";
 		}
