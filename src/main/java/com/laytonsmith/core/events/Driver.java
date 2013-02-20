@@ -28,10 +28,13 @@ public enum Driver {
     TARGET_ENTITY, 
     ENTITY_DAMAGE_PLAYER, 
 	ENTITY_DAMAGE,
+	CREATURE_SPAWN,
 	PLAYER_MOVE,  
 	ITEM_PICKUP,
 	ITEM_DROP,
 	INVENTORY_CLICK,
+	INVENTORY_OPEN,
+	INVENTORY_CLOSE,
 	/**
 	 * Used by events fired from the extension system.
 	 */

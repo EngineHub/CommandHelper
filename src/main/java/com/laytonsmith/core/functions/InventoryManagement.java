@@ -10,6 +10,7 @@ import com.laytonsmith.core.environments.CommandHelperEnvironment;
 import com.laytonsmith.core.environments.Environment;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
+import java.util.HashMap;
 
 /**
  *
@@ -129,6 +130,53 @@ public class InventoryManagement {
                 throw new ConfigRuntimeException("Slot index must be 0-35, or 100-103", Exceptions.ExceptionType.RangeException, t);
             }
             return ObjectGenerator.GetGenerator().item(is, t);
+        }
+    }
+	
+    @api(environments = {CommandHelperEnvironment.class})
+    public static class close_pinv extends AbstractFunction {
+
+        public Exceptions.ExceptionType[] thrown() {
+            return new ExceptionType[]{ExceptionType.PlayerOfflineException};
+        }
+
+        public boolean isRestricted() {
+            return true;
+        }
+
+        public Boolean runAsync() {
+            return false;
+        }
+
+        public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
+            MCPlayer p;
+			
+			if (args.length == 1) {
+				p = Static.GetPlayer(args[0], t);
+			} else {
+				p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
+			}
+			
+			p.closeInventory();
+            
+            return new CVoid(t);
+        }
+
+        public String getName() {
+            return "close_pinv";
+        }
+
+        public Integer[] numArgs() {
+            return new Integer[]{0, 1};
+        }
+
+        public String docs() {
+            return "void {[player]} Closes the inventory of the current player, "
+					+ "or of the specified player.";
+        }
+
+        public CHVersion since() {
+            return CHVersion.V3_3_1;
         }
     }
 
@@ -390,12 +438,12 @@ public class InventoryManagement {
         }
 
         public Integer[] numArgs() {
-            return new Integer[]{2, 3};
+            return new Integer[]{2, 3, 4};
         }
 
         public String docs() {
-            return "int {[player], itemID, qty} Gives a player the specified item * qty."
-                    + " Unlike set_pinv(), this does not specify a slot. The qty is distributed"
+            return "int {[player], itemID, qty, [meta]} Gives a player the specified item * qty. The meta argument uses the"
+                    + " same format as set_itemmeta. Unlike set_pinv(), this does not specify a slot. The qty is distributed"
                     + " in the player's inventory, first filling up slots that have the same item"
                     + " type, up to the max stack size, then fills up empty slots, until either"
                     + " the entire inventory is filled, or the entire amount has been given."
@@ -421,81 +469,40 @@ public class InventoryManagement {
         public Construct exec(Target t, Environment environment, Construct... args) throws ConfigRuntimeException {
             MCPlayer p = environment.getEnv(CommandHelperEnvironment.class).GetPlayer();
             MCItemStack is;
+			Construct m = null;
 			
             if(args.length == 2){
                 is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
-            } else {
-                p = Static.GetPlayer(args[0], t);
-                is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
-            }
-
-			Static.AssertPlayerNonNull(p, t);
-            int total = is.getAmount();
-            MCPlayerInventory inv = p.getInventory();
-					
-			if (total < 0) {
-				for(int i = 0; i < 36; i++){
-					MCItemStack iis = inv.getItem(i);
-					
-					if (iis.getTypeId() == 0) {
-						inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), total));
-						
-						return new CInt(total, t);
-					}
+            } else if(args.length == 3) {
+				if(args[0] instanceof CString) {
+					p = Static.GetPlayer(args[0], t);
+					is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+				} else {
+					is = Static.ParseItemNotation(this.getName(), args[0].val(), Static.getInt32(args[1], t), t);
+					m = args[2];
 				}
-				
+			} else {
+				p = Static.GetPlayer(args[0], t);
+				is = Static.ParseItemNotation(this.getName(), args[1].val(), Static.getInt32(args[2], t), t);
+				m = args[3];
+			}
+			Static.AssertPlayerNonNull(p, t);
+			
+			MCItemMeta meta;
+			if (m != null) {
+				meta = ObjectGenerator.GetGenerator().itemMeta(m, is.getTypeId(), t);
+			} else {
+				meta = ObjectGenerator.GetGenerator().itemMeta(new CNull(), is.getTypeId(), t);
+			}
+			is.setItemMeta(meta);
+			HashMap<Integer, MCItemStack> h = p.getInventory().addItem(is);
+			
+			if (h.isEmpty()) {
 				return new CInt(0, t);
 			} else {
-				int remaining = is.getAmount();
-				
-				for(int i = 0; i < 36; i++){
-					MCItemStack iis = inv.getItem(i);
-					
-					if(remaining <= 0){
-						break;
-					}
-
-					if(match(is, iis) || iis.getTypeId() == 0){
-						//It's either the same item stack, or air.
-						int currentQty = 0;
-						int max = is.maxStackSize();
-
-						if(iis.getTypeId() != 0){
-							currentQty = iis.getAmount();
-						}
-
-						if(currentQty < 0){
-							//Infinite stack. Assume max stack size.
-							currentQty = is.maxStackSize();
-						}
-
-						int left = max - currentQty;
-						int toGive;
-
-						if(left < remaining){
-							//We'll have to split this across more than this stack.
-							toGive = left;
-						} else {
-							//We can distribute the rest in this stack
-							toGive = remaining;
-						}
-
-						remaining -= toGive;
-
-						//The total we are going to set the stack size to is toGive + currentQty
-						int replace = toGive + currentQty;
-
-						inv.setItem(i, StaticLayer.GetItemStack(is.getTypeId(), is.getData().getData(), replace));
-					}
-				}
-				
-				return new CInt(total - remaining, t);
+				return new CInt(h.get(0).getAmount(), t);
 			}
-        }
-       
-        private boolean match(MCItemStack is, MCItemStack iis){
-            return (is.getTypeId() == iis.getTypeId() && is.getData().getData() == iis.getData().getData());
-        }
+		}
         
         public CHVersion since() {
             return CHVersion.V3_3_0;
@@ -573,7 +580,6 @@ public class InventoryManagement {
         public CHVersion since() {
             return CHVersion.V3_3_0;
         }
-        
     }
 	
 	@api(environments={CommandHelperEnvironment.class})
@@ -812,7 +818,6 @@ public class InventoryManagement {
 			} else {
 				p2 = Static.GetPlayer(args[0], t);
 			}
-
 			Static.AssertPlayerNonNull(p1, t);
 			p1.openInventory(p2.getInventory());
 			return new CVoid(t);

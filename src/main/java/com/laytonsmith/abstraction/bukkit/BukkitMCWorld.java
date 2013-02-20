@@ -488,6 +488,14 @@ public class BukkitMCWorld implements MCWorld {
 	public MCChunk getChunkAt(int x, int z) {
 		return new BukkitMCChunk(w.getChunkAt(x, z));
 	}
+	
+	public MCChunk getChunkAt(MCBlock b) {
+		return new BukkitMCChunk(w.getChunkAt(((BukkitMCBlock) b).__Block()));
+	}
+	
+	public MCChunk getChunkAt(MCLocation l) {
+		return new BukkitMCChunk(w.getChunkAt(((BukkitMCLocation) l).asLocation()));
+	}
 
 	public void setThundering(boolean b) {
 		w.setThundering(b);
