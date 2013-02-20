@@ -55,7 +55,7 @@ public class EntityEvents {
 				+ " {}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent event)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			if (event instanceof MCCreatureSpawnEvent) {
 				MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
@@ -92,14 +92,14 @@ public class EntityEvents {
 		}
 
 		public boolean modifyEvent(String key, Construct value,
-				BindableEvent event) {
+				BindableEvent event, Target t) {
 			MCCreatureSpawnEvent e = (MCCreatureSpawnEvent) event;
 			if (key.equals("type")) {
 				MCMobs type;
 				try {
 					type = MCMobs.valueOf(value.val());
 				} catch (IllegalArgumentException iae) {
-					throw new Exceptions.FormatException(value.val() + " is not a valid mob type.", Target.UNKNOWN);
+					throw new Exceptions.FormatException(value.val() + " is not a valid mob type.", t);
 				}
 				e.setType(type);
 			}
@@ -221,7 +221,7 @@ public class EntityEvents {
 				+ " {player|clicked|id|data}";
 		}
 
-		public boolean matches(Map<String, Construct> prefilter, BindableEvent e, Target t)
+		public boolean matches(Map<String, Construct> prefilter, BindableEvent event, Target t)
 				throws PrefilterNonMatchException {
 			if(event instanceof MCPlayerInteractEntityEvent){
 				MCPlayerInteractEntityEvent e = (MCPlayerInteractEntityEvent) event;

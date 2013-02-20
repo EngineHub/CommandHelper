@@ -4,7 +4,6 @@ import com.laytonsmith.PureUtilities.StringUtils;
 import com.laytonsmith.annotations.typename;
 import com.laytonsmith.core.CHVersion;
 import com.laytonsmith.core.Documentation;
-import com.laytonsmith.core.compiler.Optimizable;
 import com.laytonsmith.core.constructs.CArray;
 import com.laytonsmith.core.constructs.CBoolean;
 import com.laytonsmith.core.constructs.CDouble;
@@ -13,6 +12,7 @@ import com.laytonsmith.core.constructs.CString;
 import com.laytonsmith.core.constructs.CVoid;
 import com.laytonsmith.core.constructs.Construct;
 import com.laytonsmith.core.constructs.Target;
+import com.laytonsmith.core.natives.MEnum;
 import com.laytonsmith.core.natives.interfaces.Mixed;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -167,7 +167,7 @@ public class Argument implements Documentation {
 	 * @param name
 	 * @return 
 	 */
-	public static Argument getEnumArgument(String docs, Class<? extends Enum> clazz, String name){
+	public static Argument getEnumArgument(String docs, Class<? extends MEnum> clazz, String name){
 		Argument a = new Argument(docs, new Class[]{}, name);
 		a.enumClass = clazz;
 		return a;
@@ -274,7 +274,7 @@ public class Argument implements Documentation {
 	 * @param defaultEnum
 	 * @return 
 	 */
-	public Argument setEnumDefault(Enum<?> defaultEnum){
+	public Argument setEnumDefault(Enum<? extends MEnum> defaultEnum){
 		this.defaultEnum = defaultEnum;
 		this.setOptional();
 		return this;

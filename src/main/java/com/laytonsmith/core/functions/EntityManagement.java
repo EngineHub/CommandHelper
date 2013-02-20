@@ -19,6 +19,8 @@ import com.laytonsmith.core.exceptions.ConfigCompileException;
 import com.laytonsmith.core.exceptions.ConfigRuntimeException;
 import com.laytonsmith.core.functions.Exceptions.ExceptionType;
 import com.laytonsmith.core.natives.MLocation;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -827,7 +829,7 @@ public class EntityManagement {
 			}
 
 			loc = ObjectGenerator.GetGenerator().location(args[0], p != null ? p.getWorld() : null, t);
-			dist = Static.getInt32(args[1], t);
+			dist = args[1].primitive(t).castToInt32(t);
 
 			if (args.length == 3) {
 				if (args[2] instanceof CArray) {
@@ -902,6 +904,18 @@ public class EntityManagement {
 					+ " within the given radius. Set type argument to filter entities to a specific type. You can pass an array of types."
 					+ " Valid types (case doesn't matter): "
 					+ StringUtils.Join(MCEntityType.values(), ", ", ", or ", " or ");
+		}
+		
+		public Argument returnType() {
+			return new Argument("An array of all entities in the given radius", CArray.class).setGenerics(new Generic(CInt.class));
+		}
+
+		public ArgumentBuilder arguments() {
+			return ArgumentBuilder.Build(
+						new Argument("The center location", MLocation.class, "locationArray"),
+						new Argument("The radius around the location to search", CNumber.class, "radius"),
+						new Argument("The entity types", CArray.class, "type").setVarargs().setGenerics(new Generic(MCEntityType.class))
+					);
 		}
 
 		public ExceptionType[] thrown() {
